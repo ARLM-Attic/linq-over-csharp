@@ -1,0 +1,51 @@
+using System;
+using CSharpParser;
+using CSharpParser.ProjectModel;
+
+namespace CSharpParserTest
+{
+  public abstract class ParserTestBed
+  {
+    protected  const string WorkingFolder = @"C:\Work\LINQ-CSF\CSharpParser\CSharpParserTest\TestFiles";
+    protected  const string SoaFolder = @"C:\Work\GEF.NETv3.5\Trunk\Source\Grepton.Soa\Grepton.Soa";
+
+    public bool InvokeParser(string fileName)
+    {
+      ProjectParser parser = new ProjectParser(WorkingFolder);
+      parser.AddFile(fileName);
+      return InvokeParser(parser);
+    }
+
+    public bool InvokeParser(ProjectParser parser)
+    {
+      int errors = parser.Parse();
+      Console.WriteLine("{0} errors detected", errors);
+      foreach (ProjectFile file in parser.Files)
+      {
+        foreach (Namespace ns in file.Namespaces)
+        {
+          foreach (TypeDeclaration td in ns.TypeDeclarations)
+          {
+            DisplayTypeInfo(td, 0);
+          }
+        }
+      }
+      return errors == 0;
+    }
+
+    public void DisplayTypeInfo(TypeDeclaration td, int level)
+    {
+      Console.WriteLine("{0}{1}: ({2}, {3})", String.Empty.PadLeft(level * 2, ' '),
+        td.ParametrizedName, td.StartLine, td.StartColumn);
+      foreach (TypeReference bte in td.BaseTypes)
+      {
+        Console.WriteLine("{0}{1}: ({2}, {3})", String.Empty.PadLeft(level * 2 + 2, ' '),
+          bte.Name, bte.StartLine, bte.StartColumn);
+      }
+      foreach (TypeDeclaration subType in td.NestedTypes)
+      {
+        DisplayTypeInfo(subType, level + 1);
+      }
+    }
+  }
+}
