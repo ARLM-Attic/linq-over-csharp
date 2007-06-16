@@ -1,20 +1,17 @@
-using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a "try...catch...finally" statement.
+  /// This type represents a goto statement.
   /// </summary>
   // ==================================================================================
-  public sealed class TryStatement : Statement
+  public sealed class GotoStatement : Statement
   {
     #region Private fields
 
-    private BlockStatement _TryBlock;
-    private BlockStatement _FinallyBlock;
-    private List<CatchClause> _CatchClauses = new List<CatchClause>();
+    private Expression _LabelExpression;
 
     #endregion
 
@@ -22,59 +19,58 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new "try...catch...finally" statement declaration.
+    /// Creates a new empty statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public TryStatement(Token token)
+    public GotoStatement(Token token)
       : base(token)
     {
     }
 
-    #endregion
+    #endregion 
 
     #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the statements in the then branch.
+    /// Gets or sets the label expression belonging to the goto statement.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement TryBlock
+    public Expression LabelExpression
     {
-      get { return _TryBlock; }
-      set { _TryBlock = value; }
+      get { return _LabelExpression; }
+      set { _LabelExpression = value; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the statements in the else branch.
+    /// Gets the flag indicating if this is a simple label goto.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement FinallyBlock
+    public bool IsSimpleLabel
     {
-      get { return _FinallyBlock; }
-      set { _FinallyBlock = value; }
+      get { return _LabelExpression == null && Name != "default";  }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if "else" branch is presented or not.
+    /// Gets the flag indicating if this is "goto default".
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool HasFinally
+    public bool IsDefaultLabel
     {
-      get { return _FinallyBlock != null; }
+      get { return _LabelExpression == null && Name == "default"; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the list of catch clauses belonging to this statement.
+    /// Gets the flag indicating if this is a "goto case xxx".
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<CatchClause> CatchClauses
+    public bool IsCaseLabel
     {
-      get { return _CatchClauses; }
+      get { return _LabelExpression != null; }
     }
 
     #endregion

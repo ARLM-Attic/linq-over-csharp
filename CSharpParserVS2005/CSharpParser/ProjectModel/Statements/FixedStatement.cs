@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -9,6 +10,14 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class FixedStatement : BlockStatement
   {
+    #region Private fields
+
+    private List<ValueAssignmentStatement> _Assignments = new List<ValueAssignmentStatement>();
+
+    #endregion
+
+    #region Lifecycle methods
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new "fixed" statement declaration.
@@ -19,5 +28,21 @@ namespace CSharpParser.ProjectModel
       : base(token)
     {
     }
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of assignment statements belonging to this "fixed" statement.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<ValueAssignmentStatement> Assignments
+    {
+      get { return _Assignments; }
+    }
+
+    #endregion
   }
 }

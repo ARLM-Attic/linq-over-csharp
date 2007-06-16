@@ -1,20 +1,18 @@
-using System.Collections.Generic;
+using System;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a "try...catch...finally" statement.
+  /// This type represents a catch clause in a try..catch..finally statement.
   /// </summary>
   // ==================================================================================
-  public sealed class TryStatement : Statement
+  public sealed class CatchClause : BlockStatement
   {
     #region Private fields
 
-    private BlockStatement _TryBlock;
-    private BlockStatement _FinallyBlock;
-    private List<CatchClause> _CatchClauses = new List<CatchClause>();
+    private TypeReference _ExceptionType;
 
     #endregion
 
@@ -22,11 +20,11 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new "try...catch...finally" statement declaration.
+    /// Creates a new "fixed" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public TryStatement(Token token)
+    public CatchClause(Token token)
       : base(token)
     {
     }
@@ -37,44 +35,34 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the statements in the then branch.
+    /// Gets or sets the type of exception in this clause.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement TryBlock
+    public TypeReference ExceptionType
     {
-      get { return _TryBlock; }
-      set { _TryBlock = value; }
+      get { return _ExceptionType; }
+      set { _ExceptionType = value; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the statements in the else branch.
+    /// Gets or sets the flag indicating if this clause has an exception specified.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement FinallyBlock
+    public bool HasExceptionType
     {
-      get { return _FinallyBlock; }
-      set { _FinallyBlock = value; }
+      get { return _ExceptionType != null; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if "else" branch is presented or not.
+    /// Gets or sets the flag indicating if this clause has an exception instance name
+    /// specified.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool HasFinally
+    public bool HasName
     {
-      get { return _FinallyBlock != null; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the list of catch clauses belonging to this statement.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public List<CatchClause> CatchClauses
-    {
-      get { return _CatchClauses; }
+      get { return !String.IsNullOrEmpty(Name); }
     }
 
     #endregion

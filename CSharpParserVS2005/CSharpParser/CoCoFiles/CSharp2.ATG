@@ -2059,7 +2059,7 @@ EmbeddedStatement<IBlockOwner block> (. Expression _d_expr = null; .)
   | ForEachStatement<block>
   | BreakStatement<block>
   | ContinueStatement<block>
-  | "goto" ( ident | "case" Expression<out _d_expr> | "default" ) ";"
+  | GotoStatement<block>
   | ReturnStatement<block>
   | "throw" [ Expression<out _d_expr> ] ";"
   | TryFinallyBlock<block>
@@ -2240,6 +2240,24 @@ BreakStatement<IBlockOwner block>
 .    
 
 // ------------------------------------------------------------------------------------
+// Defines a "goto" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+GotoStatement<IBlockOwner block>
+=
+  "goto"                  (. GotoStatement gs = new GotoStatement(t); .)
+                          (. if (block != null) block.Add(gs); .)
+  ( 
+    ident                 (. gs.Name = t.val; .)
+  | 
+    "case"                (. Expression expr; .)
+    Expression<out expr>  (. gs.LabelExpression = expr; .)
+  | 
+    "default"             (. gs.Name = t.val; .)
+  ) ";"
+.
+
+// ------------------------------------------------------------------------------------
 // Defines a "continue" statement
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
@@ -2261,7 +2279,7 @@ TryFinallyBlock<IBlockOwner block>
                 .)
   Block<ts.TryBlock> 
   ( 
-    CatchClauses 
+    CatchClauses<ts>
     [ 
       "finally" (. ts.FinallyBlock = new BlockStatement(t); .) 
       Block<ts.FinallyBlock> 
@@ -2276,13 +2294,11 @@ TryFinallyBlock<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 LockStatement<IBlockOwner block>
-=   (. Expression _d_expr = null; .)
-  "lock"   (. 
-              LockStatement ls = new LockStatement(t);
-              if (block != null) block.Add(ls);
-           .)
-  "(" 
-    Expression<out _d_expr>
+=   
+  "lock"                  (. LockStatement ls = new LockStatement(t); .)
+                          (. if (block != null) block.Add(ls); .)
+  "("                     (. Expression expr; .)
+    Expression<out expr>  (. ls.Expression = expr; .)
   ")" 
   EmbeddedStatement<ls>
 .    
@@ -2298,7 +2314,12 @@ UsingStatement<IBlockOwner block>
               if (block != null) block.Add(us);
            .)
   "(" 
-    ResourceAcquisition 
+  (
+    IF (IsLocalVarDecl())       (. us.ResourceDeclarations = new BlockStatement(t); .)
+    LocalVariableDeclaration<us.ResourceDeclarations>  
+  |                             (. Expression expr; .)
+    Expression<out expr>        (. us.ResourceExpression = expr; .)
+  ) 
   ")" 
   EmbeddedStatement<us>
 .    
@@ -2317,6 +2338,17 @@ ReturnStatement<IBlockOwner block>
                            
 .
 
+// ------------------------------------------------------------------------------------
+// Defines a "throw" statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ThrowStatement<IBlockOwner block>
+=
+  "throw" 
+  [                       (. Expression expr; .)
+    Expression<out expr> 
+  ] ";"
+.
 
 // ------------------------------------------------------------------------------------
 // Defines a "yield return" statement.
@@ -2344,17 +2376,24 @@ YieldBreakStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 FixedStatement<IBlockOwner block>
-=   (. Expression _d_expr = null; .)
-  "fixed" (. 
-              FixedStatement fs = new FixedStatement(t);
-              if (block != null) block.Add(fs);
-          .)
-  "("     (. TypeReference typeRef; .)
-    Type<out typeRef, false>          (. if (typeRef.Kind != TypeKind.pointer) Error("can only fix pointer types"); .)
-    ident "=" Expression<out _d_expr>
+= 
+  "fixed"                     (. FixedStatement fs = new FixedStatement(t); .)
+                              (. if (block != null) block.Add(fs); .)
+  "("                         (. TypeReference typeRef; .)
+          
+    Type<out typeRef, false>          
+                              (. if (typeRef.Kind != TypeKind.pointer) Error("can only fix pointer types"); .)
+                              (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t); .)
+    ident                     (. vas.Name = t.val; .)
+    "="                       (. Expression expr; .)
+    Expression<out expr>      (. vas.Expression = expr; .)
+                              (. fs.Assignments.Add(vas); .)
     { 
-      "," ident 
-      "=" Expression<out _d_expr>
+      ","                     (. vas = new ValueAssignmentStatement(t); .)
+      ident                   (. vas.Name = t.val; .)
+      "=" 
+      Expression<out expr>    (. vas.Expression = expr; .)
+                              (. fs.Assignments.Add(vas); .)
     }
   ")" EmbeddedStatement<fs>
 .    
@@ -2368,6 +2407,10 @@ StatementExpression                              (. bool isAssignment = assnStar
   )
 .
 
+// ------------------------------------------------------------------------------------
+// Defines assignment operators.
+// +operateor: Assignement operator 
+// ------------------------------------------------------------------------------------
 AssignmentOperator<out AssignmentOperator op> (. op = null; .)
 =
     "="     (. op = new AssignmentOperator(t); .)
@@ -2408,26 +2451,26 @@ ForIterator
   StatementExpression { "," StatementExpression }
 .
 
-CatchClauses
-=                                                               (. TypeReference _d_name; .)
-  "catch"
-  ( Block<null>
-
-  | "(" ClassType<out _d_name> [ ident ] ")" Block<null> [ CatchClauses ]
+// ------------------------------------------------------------------------------------
+// Represents catch clauses in a try..catch..finally statement.
+// +try: Statement owning the catch clauses.
+// ------------------------------------------------------------------------------------
+CatchClauses<TryStatement tryStm>
+=                                                     
+  "catch"                   (. CatchClause cc = new CatchClause(t); .)      
+                            (. tryStm.CatchClauses.Add(cc); .)
+  (                         
+    Block<cc>
+  | 
+    "("                     (. TypeReference typeRef; .)
+    ClassType<out typeRef>  (. cc.ExceptionType = typeRef; .)
+    [ 
+      ident                 (. cc.Name = t.val; .)
+    ] 
+    ")" Block<cc> 
+    [ CatchClauses<tryStm> ]
   )
 .
-
-ResourceAcquisition
-=   (. Expression _d_expr = null; .)
-  (
-  IF (IsLocalVarDecl()) LocalVariableDeclaration<null>
-  | Expression<out _d_expr>
-  )
-.
-
-/*------------------------------------------------------------------------*
- *----------------------------- Expressions ------------------------------*
- *------------------------------------------------------------------------*/
 
 // ------------------------------------------------------------------------------------
 // Retrieves an expression.

@@ -4,13 +4,14 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a "lock" statement.
+  /// This abstract type represents a value assignemnt statement, e.g. a "const".
   /// </summary>
   // ==================================================================================
-  public sealed class LockStatement : BlockStatement
+  public class ValueAssignmentStatement : Statement
   {
     #region Private fields
 
+    private TypeReference _ResultingType;
     private Expression _Expression;
 
     #endregion
@@ -19,11 +20,11 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new "lock" statement declaration.
+    /// Creates a new "const" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public LockStatement(Token token)
+    public ValueAssignmentStatement(Token token)
       : base(token)
     {
     }
@@ -34,7 +35,18 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression belonging to the lock.
+    /// Gets or sets the type of the constant.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference ResultingType
+    {
+      get { return _ResultingType; }
+      set { _ResultingType = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the expression defining the assignment.
     /// </summary>
     // --------------------------------------------------------------------------------
     public Expression Expression

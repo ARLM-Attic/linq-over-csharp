@@ -2847,16 +2847,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 18) {
 			ContinueStatement(block);
 		} else if (la.kind == 35) {
-			Get();
-			if (la.kind == 1) {
-				Get();
-			} else if (la.kind == 12) {
-				Get();
-				Expression(out _d_expr);
-			} else if (la.kind == 20) {
-				Get();
-			} else SynErr(174);
-			Expect(114);
+			GotoStatement(block);
 		} else if (la.kind == 58) {
 			ReturnStatement(block);
 		} else if (la.kind == 69) {
@@ -2877,11 +2868,11 @@ TypeReference typeRef) {
 				YieldReturnStatement(block);
 			} else if (la.kind == 10) {
 				YieldBreakStatement(block);
-			} else SynErr(175);
+			} else SynErr(174);
 			Expect(114);
 		} else if (la.kind == 31) {
 			FixedStatement(block);
-		} else SynErr(176);
+		} else SynErr(175);
 	}
 
 	void EmptyStatement(IBlockOwner block) {
@@ -2923,7 +2914,7 @@ TypeReference typeRef) {
 			Expression(out _d_expr);
 		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
 			if (isAssignment) Error("error in assignment."); 
-		} else SynErr(177);
+		} else SynErr(176);
 	}
 
 	void IfStatement(IBlockOwner block) {
@@ -3029,6 +3020,25 @@ TypeReference typeRef) {
 		if (block != null) block.Add(new ContinueStatement(t)); 
 	}
 
+	void GotoStatement(IBlockOwner block) {
+		Expect(35);
+		GotoStatement gs = new GotoStatement(t); 
+		if (block != null) block.Add(gs); 
+		if (la.kind == 1) {
+			Get();
+			gs.Name = t.val; 
+		} else if (la.kind == 12) {
+			Get();
+			Expression expr; 
+			Expression(out expr);
+			gs.LabelExpression = expr; 
+		} else if (la.kind == 20) {
+			Get();
+			gs.Name = t.val; 
+		} else SynErr(177);
+		Expect(114);
+	}
+
 	void ReturnStatement(IBlockOwner block) {
 		Expect(58);
 		ReturnStatement yrs = new ReturnStatement(t); 
@@ -3049,7 +3059,7 @@ TypeReference typeRef) {
 		
 		Block(ts.TryBlock);
 		if (la.kind == 13) {
-			CatchClauses();
+			CatchClauses(ts);
 			if (la.kind == 30) {
 				Get();
 				ts.FinallyBlock = new BlockStatement(t); 
@@ -3063,13 +3073,13 @@ TypeReference typeRef) {
 	}
 
 	void LockStatement(IBlockOwner block) {
-		Expression _d_expr = null; 
 		Expect(43);
-		LockStatement ls = new LockStatement(t);
-		if (block != null) block.Add(ls);
-		
+		LockStatement ls = new LockStatement(t); 
+		if (block != null) block.Add(ls); 
 		Expect(98);
-		Expression(out _d_expr);
+		Expression expr; 
+		Expression(out expr);
+		ls.Expression = expr; 
 		Expect(113);
 		EmbeddedStatement(ls);
 	}
@@ -3080,7 +3090,14 @@ TypeReference typeRef) {
 		if (block != null) block.Add(us);
 		
 		Expect(98);
-		ResourceAcquisition();
+		if (IsLocalVarDecl()) {
+			us.ResourceDeclarations = new BlockStatement(t); 
+			LocalVariableDeclaration(us.ResourceDeclarations);
+		} else if (StartOf(20)) {
+			Expression expr; 
+			Expression(out expr);
+			us.ResourceExpression = expr; 
+		} else SynErr(179);
 		Expect(113);
 		EmbeddedStatement(us);
 	}
@@ -3100,23 +3117,30 @@ TypeReference typeRef) {
 	}
 
 	void FixedStatement(IBlockOwner block) {
-		Expression _d_expr = null; 
 		Expect(31);
-		FixedStatement fs = new FixedStatement(t);
-		if (block != null) block.Add(fs);
-		
+		FixedStatement fs = new FixedStatement(t); 
+		if (block != null) block.Add(fs); 
 		Expect(98);
 		TypeReference typeRef; 
 		Type(out typeRef, false);
 		if (typeRef.Kind != TypeKind.pointer) Error("can only fix pointer types"); 
+		ValueAssignmentStatement vas = new ValueAssignmentStatement(t); 
 		Expect(1);
+		vas.Name = t.val; 
 		Expect(85);
-		Expression(out _d_expr);
+		Expression expr; 
+		Expression(out expr);
+		vas.Expression = expr; 
+		fs.Assignments.Add(vas); 
 		while (la.kind == 87) {
 			Get();
+			vas = new ValueAssignmentStatement(t); 
 			Expect(1);
+			vas.Name = t.val; 
 			Expect(85);
-			Expression(out _d_expr);
+			Expression(out expr);
+			vas.Expression = expr; 
+			fs.Assignments.Add(vas); 
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
@@ -3131,7 +3155,7 @@ TypeReference typeRef) {
 				Get();
 				StatementExpression();
 			}
-		} else SynErr(179);
+		} else SynErr(180);
 	}
 
 	void ForIterator() {
@@ -3142,31 +3166,26 @@ TypeReference typeRef) {
 		}
 	}
 
-	void CatchClauses() {
-		TypeReference _d_name; 
+	void CatchClauses(TryStatement tryStm) {
 		Expect(13);
+		CatchClause cc = new CatchClause(t); 
+		tryStm.CatchClauses.Add(cc); 
 		if (la.kind == 96) {
-			Block(null);
+			Block(cc);
 		} else if (la.kind == 98) {
 			Get();
-			ClassType(out _d_name);
+			TypeReference typeRef; 
+			ClassType(out typeRef);
+			cc.ExceptionType = typeRef; 
 			if (la.kind == 1) {
 				Get();
+				cc.Name = t.val; 
 			}
 			Expect(113);
-			Block(null);
+			Block(cc);
 			if (la.kind == 13) {
-				CatchClauses();
+				CatchClauses(tryStm);
 			}
-		} else SynErr(180);
-	}
-
-	void ResourceAcquisition() {
-		Expression _d_expr = null; 
-		if (IsLocalVarDecl()) {
-			LocalVariableDeclaration(null);
-		} else if (StartOf(20)) {
-			Expression(out _d_expr);
 		} else SynErr(181);
 	}
 
@@ -4346,12 +4365,12 @@ public class Errors {
 			case 173: s = "invalid Statement"; break;
 			case 174: s = "invalid EmbeddedStatement"; break;
 			case 175: s = "invalid EmbeddedStatement"; break;
-			case 176: s = "invalid EmbeddedStatement"; break;
-			case 177: s = "invalid StatementExpression"; break;
+			case 176: s = "invalid StatementExpression"; break;
+			case 177: s = "invalid GotoStatement"; break;
 			case 178: s = "invalid TryFinallyBlock"; break;
-			case 179: s = "invalid ForInitializer"; break;
-			case 180: s = "invalid CatchClauses"; break;
-			case 181: s = "invalid ResourceAcquisition"; break;
+			case 179: s = "invalid UsingStatement"; break;
+			case 180: s = "invalid ForInitializer"; break;
+			case 181: s = "invalid CatchClauses"; break;
 			case 182: s = "invalid Unary"; break;
 			case 183: s = "invalid Unary"; break;
 			case 184: s = "invalid AssignmentOperator"; break;

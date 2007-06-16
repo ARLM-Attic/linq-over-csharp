@@ -145,6 +145,7 @@
     <Compile Include="ProjectModel\Members\OperatorDeclaration.cs" />
     <Compile Include="ProjectModel\Statements\BlockStatement.cs" />
     <Compile Include="ProjectModel\Statements\BreakStatement.cs" />
+    <Compile Include="ProjectModel\Statements\CatchClause.cs" />
     <Compile Include="ProjectModel\Statements\CheckedBlock.cs" />
     <Compile Include="ProjectModel\Statements\ConstStatement.cs" />
     <Compile Include="ProjectModel\Statements\ContinueStatement.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="ProjectModel\Statements\FixedStatement.cs" />
     <Compile Include="ProjectModel\Statements\ForEachStatement.cs" />
     <Compile Include="ProjectModel\Statements\ForStatement.cs" />
+    <Compile Include="ProjectModel\Statements\GotoStatement.cs" />
     <Compile Include="ProjectModel\Statements\IBlockOwner.cs" />
     <Compile Include="ProjectModel\Statements\IfStatement.cs" />
     <Compile Include="ProjectModel\Statements\LocalVariableDeclaration.cs" />
@@ -163,6 +165,7 @@
     <Compile Include="ProjectModel\Statements\UncheckedBlock.cs" />
     <Compile Include="ProjectModel\Statements\UnsafeBlock.cs" />
     <Compile Include="ProjectModel\Statements\UsingStatement.cs" />
+    <Compile Include="ProjectModel\Statements\ValueAssignmentStatement.cs" />
     <Compile Include="ProjectModel\Statements\WhileStatement.cs" />
     <Compile Include="ProjectModel\Statements\YieldBreakStatement.cs" />
     <Compile Include="ProjectModel\Statements\YieldReturnStatement.cs" />
