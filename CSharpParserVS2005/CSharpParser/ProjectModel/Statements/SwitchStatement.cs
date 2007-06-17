@@ -1,19 +1,19 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a "for" statement.
+  /// This type represents a "switch" statement.
   /// </summary>
   // ==================================================================================
-  public sealed class ForStatement : BlockStatement
+  public class SwitchStatement : Statement
   {
     #region Private fields
 
-    private BlockStatement _InitializerBlock;
-    private Expression _Condition;
-    private BlockStatement _IteratorBlock;
+    private Expression _Expression;
+    private List<SwitchSection> _Sections = new List<SwitchSection>();
 
     #endregion
 
@@ -21,11 +21,11 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new "for" statement declaration.
+    /// Creates a new "return" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public ForStatement(Token token)
+    public SwitchStatement(Token token)
       : base(token)
     {
     }
@@ -36,35 +36,23 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gest or sets the initializer block of the for statements.
+    /// Gets or sets the expression belonging to this switch statement.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement InitializerBlock
+    public Expression Expression
     {
-      get { return _InitializerBlock; }
-      set { _InitializerBlock = value; }
+      get { return _Expression; }
+      set { _Expression = value; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gest or sets the condition expression of the for statements.
+    /// Gets the sections belonging to this switch statement.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Expression Condition
+    public List<SwitchSection> Sections
     {
-      get { return _Condition; }
-      set { _Condition = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gest or sets the iterator block of the for statements.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public BlockStatement IteratorBlock
-    {
-      get { return _IteratorBlock; }
-      set { _IteratorBlock = value; }
+      get { return _Sections; }
     }
 
     #endregion

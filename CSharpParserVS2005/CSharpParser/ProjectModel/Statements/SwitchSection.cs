@@ -1,19 +1,19 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a "for" statement.
+  /// This type represents a switch section in a switch statement.
   /// </summary>
   // ==================================================================================
-  public sealed class ForStatement : BlockStatement
+  public sealed class SwitchSection : BlockStatement
   {
     #region Private fields
 
-    private BlockStatement _InitializerBlock;
-    private Expression _Condition;
-    private BlockStatement _IteratorBlock;
+    private List<Expression> _Labels = new List<Expression>();
+    private bool _IsDefault;
 
     #endregion
 
@@ -21,11 +21,11 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new "for" statement declaration.
+    /// Creates a new "fixed" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public ForStatement(Token token)
+    public SwitchSection(Token token)
       : base(token)
     {
     }
@@ -36,35 +36,23 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gest or sets the initializer block of the for statements.
+    /// Gets or sets the flag indicating if this section has the "default" label or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement InitializerBlock
+    public bool IsDefault
     {
-      get { return _InitializerBlock; }
-      set { _InitializerBlock = value; }
+      get { return _IsDefault; }
+      set { _IsDefault = value; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gest or sets the condition expression of the for statements.
+    /// Gets or sets the expressions indicating the label.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Expression Condition
+    public List<Expression> Labels
     {
-      get { return _Condition; }
-      set { _Condition = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gest or sets the iterator block of the for statements.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public BlockStatement IteratorBlock
-    {
-      get { return _IteratorBlock; }
-      set { _IteratorBlock = value; }
+      get { return _Labels; }
     }
 
     #endregion

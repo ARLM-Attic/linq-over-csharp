@@ -151,6 +151,7 @@
     <Compile Include="ProjectModel\Statements\ContinueStatement.cs" />
     <Compile Include="ProjectModel\Statements\DoWhileStatement.cs" />
     <Compile Include="ProjectModel\Statements\EmptyStatement.cs" />
+    <Compile Include="ProjectModel\Statements\ExpressionStatement.cs" />
     <Compile Include="ProjectModel\Statements\FixedStatement.cs" />
     <Compile Include="ProjectModel\Statements\ForEachStatement.cs" />
     <Compile Include="ProjectModel\Statements\ForStatement.cs" />
@@ -161,6 +162,9 @@
     <Compile Include="ProjectModel\Statements\LockStatement.cs" />
     <Compile Include="ProjectModel\Statements\ReturnStatement.cs" />
     <Compile Include="ProjectModel\Statements\Statement.cs" />
+    <Compile Include="ProjectModel\Statements\SwitchSection.cs" />
+    <Compile Include="ProjectModel\Statements\SwitchStatement.cs" />
+    <Compile Include="ProjectModel\Statements\ThrowStatement.cs" />
     <Compile Include="ProjectModel\Statements\TryStatement.cs" />
     <Compile Include="ProjectModel\Statements\UncheckedBlock.cs" />
     <Compile Include="ProjectModel\Statements\UnsafeBlock.cs" />

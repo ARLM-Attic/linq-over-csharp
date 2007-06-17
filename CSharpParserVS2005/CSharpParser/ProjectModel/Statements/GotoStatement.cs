@@ -19,7 +19,7 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new empty statement declaration.
+    /// Creates a new goto statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------

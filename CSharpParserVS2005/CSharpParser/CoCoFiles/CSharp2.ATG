@@ -2042,17 +2042,17 @@ Statement<IBlockOwner block>
 // Defines statements that can be nested in other statements.
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
-EmbeddedStatement<IBlockOwner block> (. Expression _d_expr = null; .)
+EmbeddedStatement<IBlockOwner block> 
 =   
-  // --- Block nested into a statement
-  Block<block>
+    // --- Block nested into a statement
+    Block<block>
   | EmptyStatement<block>
   | CheckedBlock<block>
   | UncheckedBlock<block>
   | UnsafeBlock<block>
-  | StatementExpression ";"
+  | StatementExpression<block> ";"
   | IfStatement<block>
-  | "switch" "(" Expression<out _d_expr> ")" "{" { SwitchSection } "}"
+  | SwitchStatement<block>
   | WhileStatement<block>
   | DoWhileStatement<block>
   | ForStatement<block>
@@ -2061,7 +2061,7 @@ EmbeddedStatement<IBlockOwner block> (. Expression _d_expr = null; .)
   | ContinueStatement<block>
   | GotoStatement<block>
   | ReturnStatement<block>
-  | "throw" [ Expression<out _d_expr> ] ";"
+  | ThrowStatement<block>
   | TryFinallyBlock<block>
   | LockStatement<block>
   | UsingStatement<block>
@@ -2076,6 +2076,23 @@ EmbeddedStatement<IBlockOwner block> (. Expression _d_expr = null; .)
 Block<IBlockOwner block>
 =
   "{" { Statement<block> } "}"
+.
+
+
+// ------------------------------------------------------------------------------------
+// Defines a switch statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+SwitchStatement<IBlockOwner block>
+=
+  "switch"                (. SwitchStatement sws = new SwitchStatement(t); .)
+  "("                     (. Expression expr; .)
+  Expression<out expr>    (. sws.Expression = expr; .)
+  ")" "{" 
+  { 
+    SwitchSection<sws> 
+  } 
+  "}"
 .
 
 // ------------------------------------------------------------------------------------
@@ -2203,12 +2220,14 @@ DoWhileStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ForStatement<IBlockOwner block>
-=   (. Expression _d_expr = null; .)
-  "for" (. ForStatement fs = new ForStatement(t); .)
-  "("   (. if (block != null) block.Add(fs); .)
-    [ ForInitializer ] ";" 
-    [ Expression<out _d_expr> ] ";" 
-    [ ForIterator ] 
+= 
+  "for"                       (. ForStatement fs = new ForStatement(t); .)
+  "("                         (. if (block != null) block.Add(fs); .)
+    [ ForInitializer<fs>] ";" 
+    [                         (. Expression expr; .)
+      Expression<out expr>    (. fs.Condition = expr; .)
+    ] ";" 
+    [ ForIterator<fs> ] 
   ")"
   EmbeddedStatement<fs>
 .    
@@ -2218,14 +2237,14 @@ ForStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ForEachStatement<IBlockOwner block>
-=   (. Expression _d_expr = null; .)
-  "foreach" (. ForEachStatement fes = new ForEachStatement(t); .)
-  "("       (. if (block != null) block.Add(fes); .)
-            (. TypeReference typeRef; .)
-    Type<out typeRef, false> 
-    ident 
-    "in" 
-    Expression<out _d_expr>
+=
+  "foreach"                   (. ForEachStatement fes = new ForEachStatement(t); .)
+  "("                         (. if (block != null) block.Add(fes); .)
+                              (. TypeReference typeRef; .)
+    Type<out typeRef, false>  (. fes.ItemType = typeRef; .)
+    ident                     (. fes.Name = t.val; .)
+    "in"                      (. Expression expr; .)
+    Expression<out expr>      (. fes.Expression = expr; .)
   ")"
   EmbeddedStatement<fes>
 .    
@@ -2344,10 +2363,10 @@ ReturnStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ThrowStatement<IBlockOwner block>
 =
-  "throw" 
+  "throw"                 (. ThrowStatement ts = new ThrowStatement(t); .)
   [                       (. Expression expr; .)
-    Expression<out expr> 
-  ] ";"
+    Expression<out expr>  (. ts.Expression = expr; .)
+  ] ";"                   (. if (block != null) block.Add(ts); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2398,13 +2417,21 @@ FixedStatement<IBlockOwner block>
   ")" EmbeddedStatement<fs>
 .    
 
-StatementExpression                              (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
-=   (. Expression _d_expr = null; .)
-  Unary<out _d_expr>
+// ------------------------------------------------------------------------------------
+// Defines a statement expression
+// +operateor: Assignement operator 
+// ------------------------------------------------------------------------------------
+StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
+=                                       (. Expression expr = null; .)
+  Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t); .)
+                                        (. es.Expression = expr; .)
   ( (. AssignmentOperator asgn; .)
-    AssignmentOperator<out asgn> Expression<out _d_expr>
-  |                                              (. if (isAssignment) Error("error in assignment."); .)
-  )
+    AssignmentOperator<out asgn>        (. es.Expression = asgn; .)
+                                        (. asgn.LeftOperand = expr; .)
+                                        (. Expression rightExpr; .)
+    Expression<out rightExpr>           (. asgn.RightOperand = rightExpr; .)
+  | (. if (isAssignment) Error("error in assignment."); .)
+  )                                     (. if (block != null) block.Add(es); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2428,27 +2455,60 @@ AssignmentOperator<out AssignmentOperator op> (. op = null; .)
             (. op = new RightShiftAssignmentOperator(t); .)
 .
 
-SwitchSection
-=
-  SwitchLabel { IF (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) SwitchLabel }
-  Statement<null> { IF (IsNoSwitchLabelOrRBrace()) Statement<null> }
+// ------------------------------------------------------------------------------------
+// Represents a section of a switch statement.
+// +expr: Label expression
+// ------------------------------------------------------------------------------------
+SwitchSection<SwitchStatement sws>
+=                         (. 
+                             SwitchSection section = new SwitchSection(t);
+                             Expression expr;
+                          .)
+  SwitchLabel<out expr>   (. 
+                            if (expr == null) section.IsDefault = true; 
+                             else section.Labels.Add(expr);
+                          .)
+  { 
+    IF (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) 
+    SwitchLabel<out expr> (. 
+                           if (expr == null) section.IsDefault = true; 
+                           else section.Labels.Add(expr);
+                          .)
+  }
+  Statement<section> 
+  { 
+    IF (IsNoSwitchLabelOrRBrace()) 
+    Statement<section> 
+  }
 .
 
-SwitchLabel
-=   (. Expression _d_expr = null; .)
-  "case" Expression<out _d_expr> ":"
-  | "default" ":"
+// ------------------------------------------------------------------------------------
+// Represents a label of a switch statement.
+// +expr: Label expression
+// ------------------------------------------------------------------------------------
+SwitchLabel<out Expression expr> (. expr = null; .)
+= 
+  "case" Expression<out expr> ":"
+  | "default" ":"                 
 .
 
-ForInitializer
+// ------------------------------------------------------------------------------------
+// Represents the initializer of a for statement.
+// +fs: For statement owning the initializator.
+// ------------------------------------------------------------------------------------
+ForInitializer<ForStatement fs>
 =
-  IF (IsLocalVarDecl()) LocalVariableDeclaration<null>
-  | StatementExpression { "," StatementExpression }
+  IF (IsLocalVarDecl()) LocalVariableDeclaration<fs.InitializerBlock>
+  | StatementExpression<fs.InitializerBlock> { "," StatementExpression<fs.InitializerBlock> }
 .
 
-ForIterator
+// ------------------------------------------------------------------------------------
+// Represents the iterator of a for statement.
+// +fs: For statement owning the iterator.
+// ------------------------------------------------------------------------------------
+ForIterator<ForStatement fs>
 =
-  StatementExpression { "," StatementExpression }
+  StatementExpression<fs.IteratorBlock> { "," StatementExpression<fs.IteratorBlock> }
 .
 
 // ------------------------------------------------------------------------------------
@@ -2830,7 +2890,6 @@ MulExpr<out BinaryOperator expr>
 // ------------------------------------------------------------------------------------
 Unary<out Expression expr>    
               (. 
-                 TypeReference dummy;  
                  UnaryOperator unOp = null;
                  expr = null;
               .)

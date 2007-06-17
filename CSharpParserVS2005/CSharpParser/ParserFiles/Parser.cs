@@ -2808,7 +2808,6 @@ TypeReference typeRef) {
 	}
 
 	void EmbeddedStatement(IBlockOwner block) {
-		Expression _d_expr = null; 
 		if (la.kind == 96) {
 			Block(block);
 		} else if (la.kind == 114) {
@@ -2820,20 +2819,12 @@ TypeReference typeRef) {
 		} else if (la.kind == 76) {
 			UnsafeBlock(block);
 		} else if (StartOf(20)) {
-			StatementExpression();
+			StatementExpression(block);
 			Expect(114);
 		} else if (la.kind == 36) {
 			IfStatement(block);
 		} else if (la.kind == 67) {
-			Get();
-			Expect(98);
-			Expression(out _d_expr);
-			Expect(113);
-			Expect(96);
-			while (la.kind == 12 || la.kind == 20) {
-				SwitchSection();
-			}
-			Expect(111);
+			SwitchStatement(block);
 		} else if (la.kind == 82) {
 			WhileStatement(block);
 		} else if (la.kind == 22) {
@@ -2851,11 +2842,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 58) {
 			ReturnStatement(block);
 		} else if (la.kind == 69) {
-			Get();
-			if (StartOf(20)) {
-				Expression(out _d_expr);
-			}
-			Expect(114);
+			ThrowStatement(block);
 		} else if (la.kind == 71) {
 			TryFinallyBlock(block);
 		} else if (la.kind == 43) {
@@ -2904,17 +2891,24 @@ TypeReference typeRef) {
 		Block(usb);
 	}
 
-	void StatementExpression() {
+	void StatementExpression(IBlockOwner block) {
 		bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); 
-		Expression _d_expr = null; 
-		Unary(out _d_expr);
+		Expression expr = null; 
+		Unary(out expr);
+		ExpressionStatement es = new ExpressionStatement(t); 
+		es.Expression = expr; 
 		if (StartOf(23)) {
 			AssignmentOperator asgn; 
 			AssignmentOperator(out asgn);
-			Expression(out _d_expr);
+			es.Expression = asgn; 
+			asgn.LeftOperand = expr; 
+			Expression rightExpr; 
+			Expression(out rightExpr);
+			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
 			if (isAssignment) Error("error in assignment."); 
 		} else SynErr(176);
+		if (block != null) block.Add(es); 
 	}
 
 	void IfStatement(IBlockOwner block) {
@@ -2935,15 +2929,19 @@ TypeReference typeRef) {
 		}
 	}
 
-	void SwitchSection() {
-		SwitchLabel();
-		while (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) {
-			SwitchLabel();
+	void SwitchStatement(IBlockOwner block) {
+		Expect(67);
+		SwitchStatement sws = new SwitchStatement(t); 
+		Expect(98);
+		Expression expr; 
+		Expression(out expr);
+		sws.Expression = expr; 
+		Expect(113);
+		Expect(96);
+		while (la.kind == 12 || la.kind == 20) {
+			SwitchSection(sws);
 		}
-		Statement(null);
-		while (IsNoSwitchLabelOrRBrace()) {
-			Statement(null);
-		}
+		Expect(111);
 	}
 
 	void WhileStatement(IBlockOwner block) {
@@ -2973,37 +2971,41 @@ TypeReference typeRef) {
 	}
 
 	void ForStatement(IBlockOwner block) {
-		Expression _d_expr = null; 
 		Expect(33);
 		ForStatement fs = new ForStatement(t); 
 		Expect(98);
 		if (block != null) block.Add(fs); 
 		if (StartOf(24)) {
-			ForInitializer();
+			ForInitializer(fs);
 		}
 		Expect(114);
 		if (StartOf(20)) {
-			Expression(out _d_expr);
+			Expression expr; 
+			Expression(out expr);
+			fs.Condition = expr; 
 		}
 		Expect(114);
 		if (StartOf(20)) {
-			ForIterator();
+			ForIterator(fs);
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
 	}
 
 	void ForEachStatement(IBlockOwner block) {
-		Expression _d_expr = null; 
 		Expect(34);
 		ForEachStatement fes = new ForEachStatement(t); 
 		Expect(98);
 		if (block != null) block.Add(fes); 
 		TypeReference typeRef; 
 		Type(out typeRef, false);
+		fes.ItemType = typeRef; 
 		Expect(1);
+		fes.Name = t.val; 
 		Expect(38);
-		Expression(out _d_expr);
+		Expression expr; 
+		Expression(out expr);
+		fes.Expression = expr; 
 		Expect(113);
 		EmbeddedStatement(fes);
 	}
@@ -3049,6 +3051,18 @@ TypeReference typeRef) {
 		}
 		Expect(114);
 		if (block != null) block.Add(yrs); 
+	}
+
+	void ThrowStatement(IBlockOwner block) {
+		Expect(69);
+		ThrowStatement ts = new ThrowStatement(t); 
+		if (StartOf(20)) {
+			Expression expr; 
+			Expression(out expr);
+			ts.Expression = expr; 
+		}
+		Expect(114);
+		if (block != null) block.Add(ts); 
 	}
 
 	void TryFinallyBlock(IBlockOwner block) {
@@ -3146,23 +3160,43 @@ TypeReference typeRef) {
 		EmbeddedStatement(fs);
 	}
 
-	void ForInitializer() {
+	void SwitchSection(SwitchStatement sws) {
+		SwitchSection section = new SwitchSection(t);
+		Expression expr;
+		
+		SwitchLabel(out expr);
+		if (expr == null) section.IsDefault = true; 
+		else section.Labels.Add(expr);
+		
+		while (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) {
+			SwitchLabel(out expr);
+			if (expr == null) section.IsDefault = true; 
+			else section.Labels.Add(expr);
+			
+		}
+		Statement(section);
+		while (IsNoSwitchLabelOrRBrace()) {
+			Statement(section);
+		}
+	}
+
+	void ForInitializer(ForStatement fs) {
 		if (IsLocalVarDecl()) {
-			LocalVariableDeclaration(null);
+			LocalVariableDeclaration(fs.InitializerBlock);
 		} else if (StartOf(20)) {
-			StatementExpression();
+			StatementExpression(fs.InitializerBlock);
 			while (la.kind == 87) {
 				Get();
-				StatementExpression();
+				StatementExpression(fs.InitializerBlock);
 			}
 		} else SynErr(180);
 	}
 
-	void ForIterator() {
-		StatementExpression();
+	void ForIterator(ForStatement fs) {
+		StatementExpression(fs.IteratorBlock);
 		while (la.kind == 87) {
 			Get();
-			StatementExpression();
+			StatementExpression(fs.IteratorBlock);
 		}
 	}
 
@@ -3190,7 +3224,6 @@ TypeReference typeRef) {
 	}
 
 	void Unary(out Expression expr) {
-		TypeReference dummy;  
 		UnaryOperator unOp = null;
 		expr = null;
 		
@@ -3327,11 +3360,11 @@ TypeReference typeRef) {
 		}
 	}
 
-	void SwitchLabel() {
+	void SwitchLabel(out Expression expr) {
+		expr = null; 
 		if (la.kind == 12) {
-			Expression _d_expr = null; 
 			Get();
-			Expression(out _d_expr);
+			Expression(out expr);
 			Expect(86);
 		} else if (la.kind == 20) {
 			Get();
