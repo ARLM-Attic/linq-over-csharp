@@ -20,13 +20,6 @@ namespace CSharpParserTest
     }
 
     [TestMethod]
-    public void LargeProjectIsOK()
-    {
-      ProjectParser parser = new ProjectParser(SoaFolder, true);
-      Assert.IsTrue(InvokeParser(parser));
-    }
-
-    [TestMethod]
     public void UsingsAndNameSpacesAreOK()
     {
       ProjectParser parser = new ProjectParser(WorkingFolder);

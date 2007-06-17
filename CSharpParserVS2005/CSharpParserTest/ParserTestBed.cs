@@ -7,7 +7,6 @@ namespace CSharpParserTest
   public abstract class ParserTestBed
   {
     protected  const string WorkingFolder = @"C:\Work\LINQ-CSF\CSharpParser\CSharpParserTest\TestFiles";
-    protected  const string SoaFolder = @"C:\Work\GEF.NETv3.5\Trunk\Source\Grepton.Soa\Grepton.Soa";
 
     public bool InvokeParser(string fileName)
     {
