@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using CSharpParser.Collections;
 
 namespace CSharpParser.ProjectModel
 {
@@ -14,7 +15,8 @@ namespace CSharpParser.ProjectModel
 
     private string _Name;
     private string _Folder;
-    private List<ExternalAlias> _ExternAliases = new List<ExternalAlias>();
+    private ProjectParser _ParentProject;
+    private ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private List<UsingClause> _Usings = new List<UsingClause>();
     private AttributeCollection _GlobalAttributes = new AttributeCollection();
     private List<Namespace> _Namespaces = new List<Namespace>();
@@ -29,9 +31,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new ProjectFile instance
     /// </summary>
     /// <param name="name">Full file name</param>
+    /// <param name="parent">Parent project of this file.</param>
     // --------------------------------------------------------------------------------
-    public ProjectFile(string name)
+    public ProjectFile(string name, ProjectParser parent)
     {
+      _ParentProject = parent;
       _Name = Path.GetFileName(name);
       _Folder = Path.GetDirectoryName(name);
     }
@@ -40,6 +44,16 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent project of this file.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ProjectParser ParentProject
+    {
+      get { return _ParentProject; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the name of the file
@@ -65,7 +79,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the external aliases of the file
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<ExternalAlias> ExternAliases
+    public ExternalAliasCollection ExternAliases
     {
       get { return _ExternAliases; }
     } 
@@ -118,6 +132,27 @@ namespace CSharpParser.ProjectModel
     public List<TypeDeclaration> TypeDeclarations
     {
       get { return _TypeDeclarations; }
+    }
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a collection of project files.
+  /// </summary>
+  // ==================================================================================
+  public class ProjectFileCollection : ImmutableList<ProjectFile>
+  {
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new empty collection of project files.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ProjectFileCollection()
+    {
     }
 
     #endregion

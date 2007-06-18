@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Properties;
 
 namespace CSharpParser.ProjectModel
 {
@@ -14,10 +17,10 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class Namespace: LanguageElement
   {
-    private string _FullName;
     private Namespace _ParentNamespace;
-    private List<ExternalAlias> _ExternAliases = new List<ExternalAlias>();
-    private List<Namespace> _NestedNamespaces = new List<Namespace>();
+    private ProjectFile _ParentFile; 
+    private ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
+    private NamespaceCollection _NestedNamespaces = new NamespaceCollection();
     private List<UsingClause> _Usings = new List<UsingClause>();
     private List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
 
@@ -26,9 +29,49 @@ namespace CSharpParser.ProjectModel
     /// Creates a new namespace belonging to a file.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="name">Name of the namespace (relative to the parent).</param>
+    /// <param name="parentNamespace">Parent namespace of this namespace.</param>
+    /// <param name="parentFile">Parent file defining this namespace.</param>
     // --------------------------------------------------------------------------------
-    public Namespace(Token token): base(token)
+    public Namespace(Token token, string name, Namespace parentNamespace, 
+      ProjectFile parentFile): base(token)
     {
+      Name = name;
+      _ParentNamespace = parentNamespace;
+
+      // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
+      if (_ParentNamespace != null)
+      {
+        _ParentNamespace.NestedNamespaces.Add(this);
+      }
+
+      // --- A namespace must belong to a file.
+      if (parentFile == null)
+      {
+        throw new InvalidOperationException(Resources.ParentFileNotDeclared);
+      }
+      _ParentFile = parentFile;
+
+      // --- If this is a root namespace in the file, we add it to the namespace list
+      // --- of the file.
+      if (parentNamespace == null) _ParentFile.Namespaces.Add(this);
+
+      // --- The namespace is added to the list of ProjectParser
+
+      NamespaceCollection fragments;
+      ProjectParser parser = _ParentFile.ParentProject;
+      if (parser.DeclaredNamespaces.TryGetValue(FullName, out fragments))
+      {
+        // --- This namespace has been declared, add the new fragment.
+        fragments.Add(this);
+      }
+      else
+      {
+        // --- This is the first declaration of this namespace.
+        NamespaceCollection newFragment = new NamespaceCollection();
+        newFragment.Add(this);
+        parser.DeclaredNamespaces.Add(FullName, newFragment);
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -38,7 +81,12 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public string FullName
     {
-      get { return _FullName; }
+      get
+      {
+        return _ParentNamespace == null 
+          ? Name 
+          : _ParentNamespace.FullName + "." + Name;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -49,19 +97,6 @@ namespace CSharpParser.ProjectModel
     public Namespace ParentNamespace
     {
       get { return _ParentNamespace; }
-      set
-      {
-        _ParentNamespace = value;
-        if (_ParentNamespace == null)
-        {
-          _FullName = Name;
-        }
-        else
-        {
-          _FullName = _ParentNamespace._FullName + "." + Name;
-          _ParentNamespace.NestedNamespaces.Add(this);
-        }
-      }
     }
 
     // --------------------------------------------------------------------------------
@@ -69,7 +104,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of nested namespaces.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<Namespace> NestedNamespaces
+    public NamespaceCollection NestedNamespaces
     {
       get { return _NestedNamespaces; }
     }
@@ -109,7 +144,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the external aliases used by the namespace
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<ExternalAlias> ExternAliases
+    public ExternalAliasCollection ExternAliases
     {
       get { return _ExternAliases; }
     }
@@ -123,5 +158,26 @@ namespace CSharpParser.ProjectModel
     {
       get { return _TypeDeclarations; }
     }
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a collection of namespaces.
+  /// </summary>
+  // ==================================================================================
+  public class NamespaceCollection : ImmutableList<Namespace>
+  {
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new empty collection of namespaces.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceCollection()
+    {
+    }
+
+    #endregion
   }
 }

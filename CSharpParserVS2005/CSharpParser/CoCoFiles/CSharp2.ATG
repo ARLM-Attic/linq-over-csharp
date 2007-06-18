@@ -34,6 +34,44 @@ COMPILER CS2
 
     #endregion
 
+    #region Error handling
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new error instance.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="file">File that caused the error.</param>
+    /// <param name="description">Detailed error description.</param>
+    // --------------------------------------------------------------------------------
+    public void Error(string code, Token errorPoint, ProjectFile file, string description)
+    {
+      Error error = new Error(code, errorPoint, file.Name, description);
+      _Project.Errors.Add(error);
+      Error(description);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new error instance.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="file">File that caused the error.</param>
+    /// <param name="description">Detailed error description.</param>
+    /// <param name="parameters">Error parameters.</param>
+    // --------------------------------------------------------------------------------
+    public void Error(string code, Token errorPoint, ProjectFile file, string description,
+      params object[] parameters)
+    {
+      Error error = new Error(code, errorPoint, file.Name, description, parameters);
+      _Project.Errors.Add(error);
+      Error(description);
+    }
+
+    #endregion
+
     #region Common parser methods
 
     /// <summary>List of conditional symbols</summary>
@@ -550,11 +588,10 @@ COMPILER CS2
       return la.kind == _lbrack && pt.kind == _ident && ("assembly".Equals(pt.val) || "module".Equals(pt.val));
     }
 
-    // "extern" "alias"
-    // where alias is an identifier, no keyword
+    // "extern"
     bool IsExternAliasDirective()
     {
-      return la.kind == _extern && "alias".Equals(Peek(1).val);
+      return la.kind == _extern;
     }
 
     // true: anyToken"<"
@@ -855,7 +892,10 @@ CS2
 ExternAliasDirective<Namespace parent>
 =
   "extern"   (. ExternalAlias externAlias = new ExternalAlias(t); .)
-  ident      (. if (t.val != "alias") Error("alias expected"); .)
+  ident      (. 
+                if (t.val != "alias") 
+                  Error("CS1003", t, _File, "Syntax error, 'alias' expected"); 
+             .)
   ident      (. 
                externAlias.Name = t.val;
                if (parent == null) _File.ExternAliases.Add(externAlias); 
@@ -920,25 +960,19 @@ GlobalAttributes
 // A member of a namespace can be a subnamespace or a type.
 // +parent: Parent namespace of the type declaration. If this parameter is null, 
 //   the type belongs to the file and not to the specified namespace.
-// +file: file that defines the namespace. If this parameter is null, this namespace
-//   member declaration belongs to a parent namespace and not to the file.
+// +file: file that defines the namespace.
 // ------------------------------------------------------------------------------------
 NamespaceMemberDeclaration<Namespace parent, ProjectFile file>  
 =
-  "namespace"                                    (. Namespace ns = new Namespace(t); .)
-  ident                                          (. StringBuilder sb = new StringBuilder(t.val); .)
+  "namespace"    (. Token startToken = t; .)
+  ident          (. StringBuilder sb = new StringBuilder(t.val); .)
   { 
-    "." ident                                    (. sb.Append("."); sb.Append(t.val); .)
-  }
-                                                 (. 
-                                                    ns.Name = sb.ToString();
-                                                    ns.ParentNamespace = parent;
-                                                    if (file != null) file.Namespaces.Add(ns);
-                                                 .)
+    "." ident    (. sb.Append("."); sb.Append(t.val); .)
+  }              (. Namespace ns = new Namespace(startToken, sb.ToString(), parent, file); .)
   "{" 
       { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
       { UsingDirective<ns> } 
-      { NamespaceMemberDeclaration<ns, null> } 
+      { NamespaceMemberDeclaration<ns, _File> } 
   "}" [ ";" ]
   |                                              (. 
                                                     Modifiers m = new Modifiers(this); 
@@ -948,9 +982,14 @@ NamespaceMemberDeclaration<Namespace parent, ProjectFile file>
       { Attributes<attrs> } 
       ModifierList<m> 
       TypeDeclaration<attrs, m, out td>          (.
-                                                    td.AssignAttributes(attrs);
-                                                    if (parent == null) _File.TypeDeclarations.Add(td);
-                                                    else parent.TypeDeclarations.Add(td);
+                                                    if (td != null)
+                                                    {
+                                                      td.AssignAttributes(attrs);
+                                                      if (parent == null) 
+                                                        _File.TypeDeclarations.Add(td);
+                                                      else 
+                                                        parent.TypeDeclarations.Add(td);
+                                                    }
                                                  .)
 .
 
@@ -974,8 +1013,11 @@ TypeDeclaration<AttributeCollection attrs, Modifiers m, out TypeDeclaration td>
     | EnumDeclaration<m, out td> 
     | DelegateDeclaration<m, out td>
   )                                                  (. 
-                                                        td.SetModifiers(m.Value); 
-                                                        td.AssignAttributes(attrs);
+                                                        if (td != null)
+                                                        {
+                                                          td.SetModifiers(m.Value); 
+                                                          td.AssignAttributes(attrs);
+                                                        }
                                                      .)                               
 .
 

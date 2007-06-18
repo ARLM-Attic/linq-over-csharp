@@ -181,6 +181,44 @@ public class Parser {
 
     #endregion
 
+    #region Error handling
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new error instance.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="file">File that caused the error.</param>
+    /// <param name="description">Detailed error description.</param>
+    // --------------------------------------------------------------------------------
+    public void Error(string code, Token errorPoint, ProjectFile file, string description)
+    {
+      Error error = new Error(code, errorPoint, file.Name, description);
+      _Project.Errors.Add(error);
+      Error(description);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new error instance.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="file">File that caused the error.</param>
+    /// <param name="description">Detailed error description.</param>
+    /// <param name="parameters">Error parameters.</param>
+    // --------------------------------------------------------------------------------
+    public void Error(string code, Token errorPoint, ProjectFile file, string description,
+      params object[] parameters)
+    {
+      Error error = new Error(code, errorPoint, file.Name, description, parameters);
+      _Project.Errors.Add(error);
+      Error(description);
+    }
+
+    #endregion
+
     #region Common parser methods
 
     /// <summary>List of conditional symbols</summary>
@@ -701,7 +739,8 @@ public class Parser {
     // where alias is an identifier, no keyword
     bool IsExternAliasDirective()
     {
-      return la.kind == _extern && "alias".Equals(Peek(1).val);
+      // return la.kind == _extern && "alias".Equals(Peek(1).val);
+      return la.kind == _extern;
     }
 
     // true: anyToken"<"
@@ -847,7 +886,9 @@ public class Parser {
 		Expect(28);
 		ExternalAlias externAlias = new ExternalAlias(t); 
 		Expect(1);
-		if (t.val != "alias") Error("alias expected"); 
+		if (t.val != "alias") 
+		 Error("CS1003", t, _File, "Syntax error, 'alias' expected"); 
+		
 		Expect(1);
 		externAlias.Name = t.val;
 		if (parent == null) _File.ExternAliases.Add(externAlias); 
@@ -905,7 +946,7 @@ public class Parser {
 	void NamespaceMemberDeclaration(Namespace parent, ProjectFile file) {
 		if (la.kind == 45) {
 			Get();
-			Namespace ns = new Namespace(t); 
+			Token startToken = t; 
 			Expect(1);
 			StringBuilder sb = new StringBuilder(t.val); 
 			while (la.kind == 90) {
@@ -913,10 +954,7 @@ public class Parser {
 				Expect(1);
 				sb.Append("."); sb.Append(t.val); 
 			}
-			ns.Name = sb.ToString();
-			ns.ParentNamespace = parent;
-			if (file != null) file.Namespaces.Add(ns);
-			
+			Namespace ns = new Namespace(startToken, sb.ToString(), parent, file); 
 			Expect(96);
 			while (IsExternAliasDirective()) {
 				ExternAliasDirective(ns);
@@ -925,7 +963,7 @@ public class Parser {
 				UsingDirective(ns);
 			}
 			while (StartOf(1)) {
-				NamespaceMemberDeclaration(ns, null);
+				NamespaceMemberDeclaration(ns, _File);
 			}
 			Expect(111);
 			if (la.kind == 114) {
@@ -941,9 +979,14 @@ public class Parser {
 			}
 			ModifierList(m);
 			TypeDeclaration(attrs, m, out td);
-			td.AssignAttributes(attrs);
-			if (parent == null) _File.TypeDeclarations.Add(td);
-			else parent.TypeDeclarations.Add(td);
+			if (td != null)
+			{
+			  td.AssignAttributes(attrs);
+			  if (parent == null) 
+			    _File.TypeDeclarations.Add(td);
+			  else 
+			    parent.TypeDeclarations.Add(td);
+			}
 			
 		} else SynErr(131);
 	}
@@ -1117,8 +1160,11 @@ public class Parser {
 		} else if (la.kind == 21) {
 			DelegateDeclaration(m, out td);
 		} else SynErr(134);
-		td.SetModifiers(m.Value); 
-		td.AssignAttributes(attrs);
+		if (td != null)
+		{
+		  td.SetModifiers(m.Value); 
+		  td.AssignAttributes(attrs);
+		}
 		
 	}
 

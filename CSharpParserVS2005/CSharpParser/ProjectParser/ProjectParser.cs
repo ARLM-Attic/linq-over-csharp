@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using CSharpParser.ParserFiles;
 using CSharpParser.ProjectModel;
@@ -15,7 +16,10 @@ namespace CSharpParser
     #region Private Fields
 
     private ProjectFileCollection _Files = new ProjectFileCollection();
+    private Dictionary<string, NamespaceCollection> _DeclaredNamespaces = 
+      new Dictionary<string, NamespaceCollection>();
     private string _WorkingFolder = string.Empty;
+    private List<Error> _Errors = new List<Error>();
 
     #endregion
 
@@ -55,12 +59,32 @@ namespace CSharpParser
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the list of errors
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<Error> Errors
+    {
+      get { return _Errors; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the collection of files included in the project.
     /// </summary>
     // --------------------------------------------------------------------------------
     public ProjectFileCollection Files
     {
       get { return _Files; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the dictionary of all namespaces declared in this project.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, NamespaceCollection> DeclaredNamespaces
+    {
+      get { return _DeclaredNamespaces; }
     }
 
     #endregion
@@ -76,16 +100,22 @@ namespace CSharpParser
     public void AddFile(string fileName)
     {
       // TODO: Check for duplication
-      _Files.Add(new ProjectFile(Path.Combine(_WorkingFolder, fileName)));
+      _Files.Add(new ProjectFile(Path.Combine(_WorkingFolder, fileName), this));
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds all .cs file in the specified folder and its subfolders to this project.
+    /// </summary>
+    /// <param name="path"></param>
+    // --------------------------------------------------------------------------------
     public void AddAllFilesFrom(string path)
     {
       DirectoryInfo dir = new DirectoryInfo(path);
       // --- Add files in this folder
       foreach (FileInfo file in dir.GetFiles("*.cs"))
       {
-        _Files.Add(new ProjectFile(file.FullName));
+        _Files.Add(new ProjectFile(file.FullName, this));
       }
       // --- Add files in subfolders
       foreach (DirectoryInfo subDir in dir.GetDirectories())
@@ -104,6 +134,8 @@ namespace CSharpParser
     // --------------------------------------------------------------------------------
     public int Parse()
     {
+      // --- Reset errors
+      _Errors.Clear();
       int errors = 0;
       foreach (ProjectFile file in _Files)
       {

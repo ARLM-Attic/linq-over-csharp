@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -20,5 +21,26 @@ namespace CSharpParser.ProjectModel
       : base(token)
     {
     }
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a collection of external aliases within a project file.
+  /// </summary>
+  // ==================================================================================
+  public class ExternalAliasCollection : ImmutableList<ExternalAlias>
+  {
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new empty collection of external aliases.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ExternalAliasCollection()
+    {
+    }
+
+    #endregion
   }
 }

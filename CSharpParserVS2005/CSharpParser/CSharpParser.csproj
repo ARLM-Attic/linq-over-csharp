@@ -46,6 +46,7 @@
     <Compile Include="ProjectModel\AttributeCollection.cs" />
     <Compile Include="ProjectModel\AttributeDeclaration.cs" />
     <Compile Include="ProjectModel\AttributedElement.cs" />
+    <Compile Include="ProjectModel\Error.cs" />
     <Compile Include="ProjectModel\Expressions\Argument.cs" />
     <Compile Include="ProjectModel\Expressions\ArgumentList.cs" />
     <Compile Include="ProjectModel\Expressions\Expression.cs" />
@@ -190,7 +191,6 @@
     <Compile Include="ProjectModel\LanguageElement.cs" />
     <Compile Include="ProjectModel\Namespace.cs" />
     <Compile Include="ProjectModel\ProjectFile.cs" />
-    <Compile Include="ProjectModel\ProjectFileCollection.cs" />
     <Compile Include="ProjectModel\Types\StructDeclaration.cs" />
     <Compile Include="ProjectModel\Types\TypeDeclaration.cs" />
     <Compile Include="ProjectModel\Types\TypeParameter.cs" />
@@ -198,6 +198,16 @@
     <Compile Include="ProjectModel\UsingClause.cs" />
     <Compile Include="ProjectParser\ProjectParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utility\ImmutableChangedException.cs" />
+    <Compile Include="Utility\ImmutableIndexedCollection.cs" />
+    <Compile Include="Utility\ImmutableList.cs" />
+    <Compile Include="Utility\IndexedCollection.cs" />
+    <Compile Include="Utility\IReadOnlySupport.cs" />
     <Compile Include="Utility\StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +218,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CoCoFiles\Coco.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

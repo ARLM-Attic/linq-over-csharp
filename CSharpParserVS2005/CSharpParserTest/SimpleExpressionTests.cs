@@ -1,6 +1,3 @@
-using System;
-using System.Text;
-using System.Collections.Generic;
 using CSharpParser;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
