@@ -735,11 +735,9 @@ public class Parser {
       return la.kind == _lbrack && pt.kind == _ident && ("assembly".Equals(pt.val) || "module".Equals(pt.val));
     }
 
-    // "extern" "alias"
-    // where alias is an identifier, no keyword
+    // "extern"
     bool IsExternAliasDirective()
     {
-      // return la.kind == _extern && "alias".Equals(Peek(1).val);
       return la.kind == _extern;
     }
 
@@ -891,8 +889,8 @@ public class Parser {
 		
 		Expect(1);
 		externAlias.Name = t.val;
-		if (parent == null) _File.ExternAliases.Add(externAlias); 
-		else parent.ExternAliases.Add(externAlias); 
+		if (parent == null) _File.AddExternAlias(externAlias); 
+		else parent.AddExternAlias(externAlias); 
 		
 		Expect(114);
 	}
@@ -912,8 +910,8 @@ public class Parser {
 		Expect(114);
 		uc.Name = name;
 		uc.TypeUsed = typeUsed;
-		if (parent == null) _File.Usings.Add(uc);
-		else parent.Usings.Add(uc); 
+		if (parent == null) _File.AddUsingClause(uc);
+		else parent.AddUsingClause(uc); 
 		
 	}
 
@@ -2966,11 +2964,11 @@ TypeReference typeRef) {
 		Expression(out expr);
 		ifs.Condition = expr; 
 		Expect(113);
-		ifs.ThenStatements = new BlockStatement(t); 
+		ifs.CreateThenBlock(t); 
 		EmbeddedStatement(ifs.ThenStatements);
 		if (la.kind == 24) {
 			Get();
-			ifs.ElseStatements = new BlockStatement(t); 
+			ifs.CreateElseBlock(t); 
 			EmbeddedStatement(ifs.ElseStatements);
 		}
 	}
@@ -3022,6 +3020,7 @@ TypeReference typeRef) {
 		Expect(98);
 		if (block != null) block.Add(fs); 
 		if (StartOf(24)) {
+			fs.CreateInitializerBlock(t); 
 			ForInitializer(fs);
 		}
 		Expect(114);
@@ -3033,6 +3032,7 @@ TypeReference typeRef) {
 		Expect(114);
 		if (StartOf(20)) {
 			ForIterator(fs);
+			fs.CreateIteratorBlock(t); 
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
@@ -3114,7 +3114,7 @@ TypeReference typeRef) {
 	void TryFinallyBlock(IBlockOwner block) {
 		Expect(71);
 		TryStatement ts = new TryStatement(t); 
-		ts.TryBlock = new BlockStatement(t);
+		ts.CreateTryBlock(t);
 		if (block != null) block.Add(ts);
 		
 		Block(ts.TryBlock);
@@ -3122,12 +3122,12 @@ TypeReference typeRef) {
 			CatchClauses(ts);
 			if (la.kind == 30) {
 				Get();
-				ts.FinallyBlock = new BlockStatement(t); 
+				ts.CreateFinallyBlock(t); 
 				Block(ts.FinallyBlock);
 			}
 		} else if (la.kind == 30) {
 			Get();
-			ts.FinallyBlock = new BlockStatement(t); 
+			ts.CreateFinallyBlock(t); 
 			Block(ts.FinallyBlock);
 		} else SynErr(178);
 	}
@@ -3151,7 +3151,7 @@ TypeReference typeRef) {
 		
 		Expect(98);
 		if (IsLocalVarDecl()) {
-			us.ResourceDeclarations = new BlockStatement(t); 
+			us.CreateResourceDeclarations(t); 
 			LocalVariableDeclaration(us.ResourceDeclarations);
 		} else if (StartOf(20)) {
 			Expression expr; 
@@ -3207,7 +3207,7 @@ TypeReference typeRef) {
 	}
 
 	void SwitchSection(SwitchStatement sws) {
-		SwitchSection section = new SwitchSection(t);
+		SwitchSection section = sws.CreateSwitchSection(t);
 		Expression expr;
 		
 		SwitchLabel(out expr);
@@ -3248,8 +3248,7 @@ TypeReference typeRef) {
 
 	void CatchClauses(TryStatement tryStm) {
 		Expect(13);
-		CatchClause cc = new CatchClause(t); 
-		tryStm.CatchClauses.Add(cc); 
+		CatchClause cc = tryStm.CreateCatchClause(t); 
 		if (la.kind == 96) {
 			Block(cc);
 		} else if (la.kind == 98) {

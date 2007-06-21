@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -42,7 +43,6 @@ namespace CSharpParser.ProjectModel
     public BlockStatement InitializerBlock
     {
       get { return _InitializerBlock; }
-      set { _InitializerBlock = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -64,9 +64,76 @@ namespace CSharpParser.ProjectModel
     public BlockStatement IteratorBlock
     {
       get { return _IteratorBlock; }
-      set { _IteratorBlock = value; }
     }
 
     #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty initializer block.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    // --------------------------------------------------------------------------------
+    public void CreateInitializerBlock(Token t)
+    {
+      _InitializerBlock = new BlockStatement(t);  
+      _InitializerBlock.SetParent(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty iterator block.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    // --------------------------------------------------------------------------------
+    public void CreateIteratorBlock(Token t)
+    {
+      _IteratorBlock = new BlockStatement(t);
+      _IteratorBlock.SetParent(this);
+    }
+
+    #endregion
+
+    #region Iterator methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating this and all nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns recursively all nested statements.</value>
+    /// <remarks>
+    /// First initialization, then block statements and last the iterator statements
+    /// are returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> AllStatements
+    {
+      get
+      {
+        if (_InitializerBlock != null)
+        {
+          foreach (Statement stmt in _InitializerBlock.Statements)
+          {
+            yield return stmt;
+          }
+        }
+        foreach (Statement stmt in NestedStatements)
+        {
+          yield return stmt;
+        }
+        if (_IteratorBlock != null)
+        {
+          foreach (Statement stmt in _IteratorBlock.Statements)
+          {
+            yield return stmt;
+          }
+        }
+      }
+    }
+
+    #endregion
+
   }
 }

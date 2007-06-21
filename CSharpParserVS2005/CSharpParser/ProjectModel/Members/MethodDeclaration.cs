@@ -16,7 +16,7 @@ namespace CSharpParser.ProjectModel
     private FormalParameterCollection _FormalParameters = new FormalParameterCollection();
     private List<TypeParameterConstraint> _ParameterConstraints
       = new List<TypeParameterConstraint>();
-    private List<Statement> _Statements = new List<Statement>();
+    private StatementCollection _Statements = new StatementCollection(null);
     private bool _HasBody;
 
     #endregion
@@ -73,7 +73,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of statements in the method body.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<Statement> Statements
+    public StatementCollection Statements
     {
       get { return _Statements; }
     }

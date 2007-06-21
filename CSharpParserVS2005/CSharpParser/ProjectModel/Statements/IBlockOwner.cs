@@ -15,7 +15,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the statement block belonging to the language element.
     /// </summary>
     // --------------------------------------------------------------------------------
-    List<Statement> Statements { get; }
+    StatementCollection Statements { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

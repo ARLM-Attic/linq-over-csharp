@@ -59,3 +59,20 @@ namespace OtherNameSpace
     }
   }
 }
+
+namespace CSharpParserTest.TestFiles
+{
+  using System;
+  using System.Collections;
+
+  namespace Level1
+  {
+    using System.Xml;
+
+    namespace Level2
+    {
+      using System.Data;
+      using SysData = System.Data.Sql;
+    }
+  }
+}

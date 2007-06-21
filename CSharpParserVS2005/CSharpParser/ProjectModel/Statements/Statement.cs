@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -11,8 +12,9 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
+    private int _Depth;
     private string _Label;
-    private BlockStatement _ParentBlock;
+    private Statement _Parent;
 
     #endregion
 
@@ -27,11 +29,22 @@ namespace CSharpParser.ProjectModel
     protected Statement(Token token)
       : base(token)
     {
+      _Depth = 0;
     }
 
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the depth of this statemenet in the statement hierarchy.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int Depth
+    {
+      get { return _Depth; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -49,9 +62,9 @@ namespace CSharpParser.ProjectModel
     /// Gets the parent block of this statement.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public BlockStatement ParentBlock
+    public Statement Parent
     {
-      get { return _ParentBlock; }
+      get { return _Parent; }
     }
 
     // --------------------------------------------------------------------------------
@@ -61,10 +74,12 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasParent
     {
-      get { return _ParentBlock != null; }
+      get { return _Parent != null; }
     }
 
     #endregion
+
+    #region Public methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -72,9 +87,93 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="parent">Parent block.</param>
     // --------------------------------------------------------------------------------
-    public void SetParentBlock(BlockStatement parent)
+    public void SetParent(Statement parent)
     {
-      _ParentBlock = parent;
+      _Parent = parent;
+      _Depth = _Parent.Depth + 1;
+    }
+
+    #endregion
+
+    #region Iterator methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns recursively all nested statements.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public virtual IEnumerable<Statement> NestedStatements
+    {
+      get { yield break; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all direclty nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns only the directly nested statements, does not do recursion.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public virtual IEnumerable<Statement> DirectNestedStatements
+    {
+      get { yield break; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating this and all nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns recursively all nested statements.</value>
+    /// <remarks>
+    /// First this statement is returned than the nested statements in the order of 
+    /// their declaration.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual IEnumerable<Statement> AllStatements
+    {
+      get
+      {
+        yield return this;
+        foreach (Statement stmt in NestedStatements)
+        {
+          yield return stmt;
+        }
+      }
+    }
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type represents a list of statements.
+  /// </summary>
+  // ==================================================================================
+  public class StatementCollection : List<Statement>
+  {
+    private Statement _Parent;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a list of statements indicating the parent of the collection.
+    /// </summary>
+    /// <param name="parent"></param>
+    // --------------------------------------------------------------------------------
+    public StatementCollection(Statement parent)
+    {
+      _Parent = parent;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent statement of the collection.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Statement Parent
+    {
+      get { return _Parent; }
     }
   }
 }

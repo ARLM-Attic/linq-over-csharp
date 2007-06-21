@@ -43,7 +43,6 @@ namespace CSharpParser.ProjectModel
     public BlockStatement TryBlock
     {
       get { return _TryBlock; }
-      set { _TryBlock = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -54,7 +53,6 @@ namespace CSharpParser.ProjectModel
     public BlockStatement FinallyBlock
     {
       get { return _FinallyBlock; }
-      set { _FinallyBlock = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -78,5 +76,105 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty try block.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    // --------------------------------------------------------------------------------
+    public void CreateTryBlock(Token t)
+    {
+      _TryBlock = new BlockStatement(t);
+      _TryBlock.SetParent(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty finally block.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    // --------------------------------------------------------------------------------
+    public void CreateFinallyBlock(Token t)
+    {
+      _FinallyBlock = new BlockStatement(t);
+      _FinallyBlock.SetParent(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new empty catch clause.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    /// <returns>The newly created catch clause.</returns>
+    // --------------------------------------------------------------------------------
+    public CatchClause CreateCatchClause(Token t)
+    {
+      CatchClause result = new CatchClause(t);  
+      result.SetParent(this);
+      _CatchClauses.Add(result);
+      return result;
+    }
+
+    #endregion
+
+    #region Iterator methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns recursively all nested statements.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> NestedStatements
+    {
+      get
+      {
+        if (_TryBlock != null)
+        {
+          foreach (Statement stmt in _TryBlock.NestedStatements)
+          {
+            yield return stmt;
+          }
+        }
+        foreach (CatchClause cc in _CatchClauses)
+        {
+          yield return cc;
+        }
+        if (_FinallyBlock != null)
+        {
+          foreach (Statement stmt in _FinallyBlock.NestedStatements)
+          {
+            yield return stmt;
+          }
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all direclty nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns only the directly nested statements, does not do recursion.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> DirectNestedStatements
+    {
+      get
+      {
+        if (_TryBlock != null) yield return _TryBlock;
+        foreach (CatchClause cc in _CatchClauses)
+        {
+          yield return cc;
+        }
+        if (_FinallyBlock != null) yield return _FinallyBlock;
+      }
+    }
+
+    #endregion
+
   }
 }

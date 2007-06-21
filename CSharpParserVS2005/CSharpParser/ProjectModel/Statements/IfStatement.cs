@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -42,7 +43,6 @@ namespace CSharpParser.ProjectModel
     public BlockStatement ThenStatements
     {
       get { return _ThenStatements; }
-      set { _ThenStatements = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -53,7 +53,6 @@ namespace CSharpParser.ProjectModel
     public BlockStatement ElseStatements
     {
       get { return _ElseStatements; }
-      set { _ElseStatements = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -78,5 +77,82 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty then block.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    // --------------------------------------------------------------------------------
+    public void CreateThenBlock(Token t)
+    {
+      _ThenStatements = new BlockStatement(t);
+      _ThenStatements.SetParent(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty else block.
+    /// </summary>
+    /// <param name="t">Token of the block.</param>
+    // --------------------------------------------------------------------------------
+    public void CreateElseBlock(Token t)
+    {
+      _ElseStatements = new BlockStatement(t);
+      _ElseStatements.SetParent(this);
+    }
+
+    #endregion
+
+    #region Iterator methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns recursively all nested statements.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> NestedStatements
+    {
+      get
+      {
+        if (_ThenStatements != null)
+        {
+          foreach (Statement stmt in _ThenStatements.Statements)
+          {
+            yield return stmt;
+          }
+        }
+        if (HasElse)
+        {
+          foreach (Statement stmt in _ElseStatements.Statements)
+          {
+            yield return stmt;
+          }
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all direclty nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns only the directly nested statements, does not do recursion.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> DirectNestedStatements
+    {
+      get
+      {
+        yield return _ThenStatements;
+        yield return _ElseStatements;
+      }
+    }
+
+    #endregion
+
   }
 }

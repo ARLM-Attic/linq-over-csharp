@@ -444,13 +444,13 @@ namespace CSharpParserTest
       Assert.IsTrue(md.Statements[0] is EmptyStatement);
       Assert.IsTrue(md.Statements[1] is CheckedBlock);
       Assert.IsTrue((md.Statements[1] as CheckedBlock).Statements[0] is EmptyStatement);
-      Assert.AreSame(md.Statements[1], (md.Statements[1] as CheckedBlock).Statements[0].ParentBlock);
+      Assert.AreSame(md.Statements[1], (md.Statements[1] as CheckedBlock).Statements[0].Parent);
       Assert.IsTrue(md.Statements[2] is UncheckedBlock);
       Assert.IsTrue((md.Statements[2] as UncheckedBlock).Statements[0] is EmptyStatement);
-      Assert.AreSame(md.Statements[2], (md.Statements[2] as UncheckedBlock).Statements[0].ParentBlock);
+      Assert.AreSame(md.Statements[2], (md.Statements[2] as UncheckedBlock).Statements[0].Parent);
       Assert.IsTrue(md.Statements[3] is UnsafeBlock);
       Assert.IsTrue((md.Statements[3] as UnsafeBlock).Statements[0] is EmptyStatement);
-      Assert.AreSame(md.Statements[3], (md.Statements[3] as UnsafeBlock).Statements[0].ParentBlock);
+      Assert.AreSame(md.Statements[3], (md.Statements[3] as UnsafeBlock).Statements[0].Parent);
     }
   }
 }

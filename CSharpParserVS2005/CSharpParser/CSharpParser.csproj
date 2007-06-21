@@ -208,6 +208,7 @@
     <Compile Include="Utility\ImmutableList.cs" />
     <Compile Include="Utility\IndexedCollection.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
+    <Compile Include="Utility\RestrictedList.cs" />
     <Compile Include="Utility\StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>

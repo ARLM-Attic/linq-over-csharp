@@ -1,6 +1,3 @@
-using System;
-using System.Text;
-using System.Collections.Generic;
 using CSharpParser;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,7 +31,7 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(file.Usings[4].TypeUsed.FullName, "Microsoft.Win32");
 
       // --- Check namespaces in the file
-      Assert.AreEqual(file.Namespaces.Count, 2);
+      Assert.AreEqual(file.Namespaces.Count, 3);
       Namespace ns1 = file.Namespaces[0];
       Assert.AreEqual(ns1.Name, "CSharpParserTest.TestFiles");
       Assert.AreEqual(ns1.Usings.Count, 3);
@@ -62,6 +59,18 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(ns2.Name, "OtherNameSpace");
       Assert.AreEqual(ns2.Usings.Count, 0);
       Assert.AreEqual(ns2.NestedNamespaces.Count, 1);
+
+      ns1 = file.Namespaces[2];
+      Assert.AreEqual(ns1.Name, "CSharpParserTest.TestFiles");
+      Assert.AreEqual(ns1.Usings.Count, 2);
+      Assert.AreEqual(ns1.NestedNamespaces.Count, 1);
+
+      // --- Check ProjectParser
+
+      Assert.AreEqual(parser.DeclaredNamespaces.Count, 9);
+      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles"].Count, 2);
+      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1"].Count, 3);
+      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1.Level2"].Count, 3);
     }
   }
 }

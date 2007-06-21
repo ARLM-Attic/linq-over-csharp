@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -10,7 +11,13 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class UsingClause: LanguageElement
   {
+    #region Private fields
+
     private TypeReference _TypeUsed;
+
+    #endregion
+
+    #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -21,6 +28,10 @@ namespace CSharpParser.ProjectModel
     public UsingClause(Token token): base (token)
     {
     }
+
+    #endregion
+
+    #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -42,5 +53,20 @@ namespace CSharpParser.ProjectModel
       get { return _TypeUsed; }
       set { _TypeUsed = value; }
     }
+
+    #endregion
+
+    #region Public methods
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a collection of using clauses.
+  /// </summary>
+  // ==================================================================================
+  public class UsingClauseCollection : RestrictedList<UsingClause>
+  {
   }
 }

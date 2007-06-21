@@ -17,7 +17,7 @@ namespace CSharpParser.ProjectModel
     private string _Folder;
     private ProjectParser _ParentProject;
     private ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
-    private List<UsingClause> _Usings = new List<UsingClause>();
+    private UsingClauseCollection _Usings = new UsingClauseCollection();
     private AttributeCollection _GlobalAttributes = new AttributeCollection();
     private List<Namespace> _Namespaces = new List<Namespace>();
     private List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
@@ -99,7 +99,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of using clauses in this project file
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<UsingClause> Usings
+    public UsingClauseCollection Usings
     {
       get { return _Usings; }
     }
@@ -135,6 +135,32 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new external alias to this namespace.
+    /// </summary>
+    /// <param name="item"></param>
+    // --------------------------------------------------------------------------------
+    public void AddExternAlias(ExternalAlias item)
+    {
+      (_ExternAliases as IRestrictedList<ExternalAlias>).Add(item);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new external alias to this namespace.
+    /// </summary>
+    /// <param name="item"></param>
+    // --------------------------------------------------------------------------------
+    public void AddUsingClause(UsingClause item)
+    {
+      (_Usings as IRestrictedList<UsingClause>).Add(item);
+    }
+
+    #endregion
   }
 
   // ==================================================================================
@@ -142,7 +168,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of project files.
   /// </summary>
   // ==================================================================================
-  public class ProjectFileCollection : ImmutableList<ProjectFile>
+  public class ProjectFileCollection : RestrictedList<ProjectFile>
   {
     #region Lifecycle methods
 

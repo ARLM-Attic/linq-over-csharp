@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -13,7 +12,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private bool _HasBody;
-    private List<Statement> _Statements = new List<Statement>();
+    private StatementCollection _Statements = new StatementCollection(null);
 
     #endregion
 
@@ -50,7 +49,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of statements in the accessor body.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<Statement> Statements
+    public StatementCollection Statements
     {
       get { return _Statements; }
     }

@@ -13,7 +13,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private FormalParameterCollection _FormalParameters = new FormalParameterCollection();
-    private List<Statement> _Statements = new List<Statement>();
+    private StatementCollection _Statements;
 
     #endregion
 
@@ -29,6 +29,7 @@ namespace CSharpParser.ProjectModel
       : base(token)
     {
       Name = string.Empty;
+      _Statements = new StatementCollection(null);
     }
 
     #endregion
@@ -50,7 +51,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of statements in the method body.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<Statement> Statements
+    public StatementCollection Statements
     {
       get { return _Statements; }
     }

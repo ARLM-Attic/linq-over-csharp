@@ -17,12 +17,18 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class Namespace: LanguageElement
   {
+    #region Private fields
+
     private Namespace _ParentNamespace;
     private ProjectFile _ParentFile; 
     private ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private NamespaceCollection _NestedNamespaces = new NamespaceCollection();
-    private List<UsingClause> _Usings = new List<UsingClause>();
+    private UsingClauseCollection _Usings = new UsingClauseCollection();
     private List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
+
+    #endregion
+
+    #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -42,7 +48,7 @@ namespace CSharpParser.ProjectModel
       // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
       if (_ParentNamespace != null)
       {
-        _ParentNamespace.NestedNamespaces.Add(this);
+        (_ParentNamespace.NestedNamespaces as IRestrictedList<Namespace>).Add(this);
       }
 
       // --- A namespace must belong to a file.
@@ -63,16 +69,20 @@ namespace CSharpParser.ProjectModel
       if (parser.DeclaredNamespaces.TryGetValue(FullName, out fragments))
       {
         // --- This namespace has been declared, add the new fragment.
-        fragments.Add(this);
+        (fragments as IRestrictedList<Namespace>).Add(this);
       }
       else
       {
         // --- This is the first declaration of this namespace.
         NamespaceCollection newFragment = new NamespaceCollection();
-        newFragment.Add(this);
+        (newFragment  as IRestrictedList<Namespace>).Add(this);
         parser.DeclaredNamespaces.Add(FullName, newFragment);
       }
     }
+
+    #endregion
+
+    #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -134,7 +144,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the using clauses within this namespace declaration
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<UsingClause> Usings
+    public UsingClauseCollection Usings
     {
       get { return _Usings; }
     }
@@ -158,6 +168,34 @@ namespace CSharpParser.ProjectModel
     {
       get { return _TypeDeclarations; }
     }
+
+    #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new external alias to this namespace.
+    /// </summary>
+    /// <param name="item"></param>
+    // --------------------------------------------------------------------------------
+    public void AddExternAlias(ExternalAlias item)
+    {
+      (_ExternAliases as IRestrictedList<ExternalAlias>).Add(item);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new external alias to this namespace.
+    /// </summary>
+    /// <param name="item"></param>
+    // --------------------------------------------------------------------------------
+    public void AddUsingClause(UsingClause item)
+    {
+      (_Usings as IRestrictedList<UsingClause>).Add(item);
+    }
+
+    #endregion
   }
 
   // ==================================================================================
@@ -165,19 +203,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of namespaces.
   /// </summary>
   // ==================================================================================
-  public class NamespaceCollection : ImmutableList<Namespace>
+  public class NamespaceCollection : RestrictedList<Namespace>
   {
-    #region Lifecycle methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a new empty collection of namespaces.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public NamespaceCollection()
-    {
-    }
-
-    #endregion
   }
 }

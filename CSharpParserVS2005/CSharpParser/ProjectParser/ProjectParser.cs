@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.ProjectModel;
 
@@ -100,7 +101,8 @@ namespace CSharpParser
     public void AddFile(string fileName)
     {
       // TODO: Check for duplication
-      _Files.Add(new ProjectFile(Path.Combine(_WorkingFolder, fileName), this));
+      (_Files as IRestrictedList<ProjectFile>).
+        Add(new ProjectFile(Path.Combine(_WorkingFolder, fileName), this));
     }
 
     // --------------------------------------------------------------------------------
@@ -115,7 +117,7 @@ namespace CSharpParser
       // --- Add files in this folder
       foreach (FileInfo file in dir.GetFiles("*.cs"))
       {
-        _Files.Add(new ProjectFile(file.FullName, this));
+        (_Files as IRestrictedList<ProjectFile>).Add(new ProjectFile(file.FullName, this));
       }
       // --- Add files in subfolders
       foreach (DirectoryInfo subDir in dir.GetDirectories())

@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private List<Statement> _Statements = new List<Statement>();
+    private StatementCollection _Statements;
 
     #endregion
 
@@ -27,6 +27,7 @@ namespace CSharpParser.ProjectModel
     public BlockStatement(Token token)
       : base(token)
     {
+      _Statements = new StatementCollection(this);
     }
 
     #endregion
@@ -38,7 +39,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of statements in this block.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<Statement> Statements
+    public StatementCollection Statements
     {
       get { return _Statements; }
     }
@@ -56,7 +57,56 @@ namespace CSharpParser.ProjectModel
     public void Add(Statement statement)
     {
       Statements.Add(statement);
-      statement.SetParentBlock(this);
+      statement.SetParent(this);
+    }
+
+    #endregion
+
+    #region Iterator methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns recursively all nested statements.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> NestedStatements
+    {
+      get
+      {
+        foreach (Statement stmt in _Statements)
+        {
+          BlockStatement block = stmt as BlockStatement;
+          if (block == null)
+          {
+            yield return stmt;
+          }
+          else
+          {
+            foreach (Statement nested in block.NestedStatements)
+            yield return nested;
+          }
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator enumerating all direclty nested statements belonging to this one.
+    /// </summary>
+    /// <value>Returns only the directly nested statements, does not do recursion.</value>
+    /// <remarks>Statements are returned in the order of their declaration.</remarks>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<Statement> DirectNestedStatements
+    {
+      get
+      {
+        foreach (Statement stmt in _Statements)
+        {
+          yield return stmt;
+        }
+      }
     }
 
     #endregion

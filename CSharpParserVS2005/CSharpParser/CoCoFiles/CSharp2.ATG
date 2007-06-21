@@ -898,8 +898,8 @@ ExternAliasDirective<Namespace parent>
              .)
   ident      (. 
                externAlias.Name = t.val;
-               if (parent == null) _File.ExternAliases.Add(externAlias); 
-               else parent.ExternAliases.Add(externAlias); 
+               if (parent == null) _File.AddExternAlias(externAlias); 
+               else parent.AddExternAlias(externAlias); 
              .)
   ";"
 .
@@ -923,8 +923,8 @@ UsingDirective<Namespace parent>
   ";"                      (. 
                               uc.Name = name;
                               uc.TypeUsed = typeUsed;
-                              if (parent == null) _File.Usings.Add(uc);
-                              else parent.Usings.Add(uc); 
+                              if (parent == null) _File.AddUsingClause(uc);
+                              else parent.AddUsingClause(uc); 
                            .)
 .
 
@@ -2222,9 +2222,9 @@ IfStatement<IBlockOwner block>
   "("                    (. if (block != null) block.Add(ifs); .)
                          (. Expression expr; .)
     Expression<out expr> (. ifs.Condition = expr; .)
-  ")"                    (. ifs.ThenStatements = new BlockStatement(t); .)
+  ")"                    (. ifs.CreateThenBlock(t); .)
   EmbeddedStatement<ifs.ThenStatements> 
-  [ "else"               (. ifs.ElseStatements = new BlockStatement(t); .)
+  [ "else"               (. ifs.CreateElseBlock(t); .)
     EmbeddedStatement<ifs.ElseStatements> 
   ]
 .
@@ -2265,11 +2265,15 @@ ForStatement<IBlockOwner block>
 = 
   "for"                       (. ForStatement fs = new ForStatement(t); .)
   "("                         (. if (block != null) block.Add(fs); .)
-    [ ForInitializer<fs>] ";" 
+    [                         (. fs.CreateInitializerBlock(t); .)
+      ForInitializer<fs>
+    ] ";" 
     [                         (. Expression expr; .)
       Expression<out expr>    (. fs.Condition = expr; .)
     ] ";" 
-    [ ForIterator<fs> ] 
+    [ 
+      ForIterator<fs>         (. fs.CreateIteratorBlock(t); .)
+    ] 
   ")"
   EmbeddedStatement<fs>
 .    
@@ -2335,17 +2339,17 @@ TryFinallyBlock<IBlockOwner block>
 =
   "try"         (. 
                    TryStatement ts = new TryStatement(t); 
-                   ts.TryBlock = new BlockStatement(t);
+                   ts.CreateTryBlock(t);
                    if (block != null) block.Add(ts);
                 .)
   Block<ts.TryBlock> 
   ( 
     CatchClauses<ts>
     [ 
-      "finally" (. ts.FinallyBlock = new BlockStatement(t); .) 
+      "finally" (. ts.CreateFinallyBlock(t); .) 
       Block<ts.FinallyBlock> 
     ] 
-  | "finally" (. ts.FinallyBlock = new BlockStatement(t); .) 
+  | "finally" (. ts.CreateFinallyBlock(t); .) 
     Block<ts.FinallyBlock> 
   )
 .    
@@ -2376,7 +2380,7 @@ UsingStatement<IBlockOwner block>
            .)
   "(" 
   (
-    IF (IsLocalVarDecl())       (. us.ResourceDeclarations = new BlockStatement(t); .)
+    IF (IsLocalVarDecl())       (. us.CreateResourceDeclarations(t); .)
     LocalVariableDeclaration<us.ResourceDeclarations>  
   |                             (. Expression expr; .)
     Expression<out expr>        (. us.ResourceExpression = expr; .)
@@ -2503,7 +2507,7 @@ AssignmentOperator<out AssignmentOperator op> (. op = null; .)
 // ------------------------------------------------------------------------------------
 SwitchSection<SwitchStatement sws>
 =                         (. 
-                             SwitchSection section = new SwitchSection(t);
+                             SwitchSection section = sws.CreateSwitchSection(t);
                              Expression expr;
                           .)
   SwitchLabel<out expr>   (. 
@@ -2559,8 +2563,7 @@ ForIterator<ForStatement fs>
 // ------------------------------------------------------------------------------------
 CatchClauses<TryStatement tryStm>
 =                                                     
-  "catch"                   (. CatchClause cc = new CatchClause(t); .)      
-                            (. tryStm.CatchClauses.Add(cc); .)
+  "catch"                   (. CatchClause cc = tryStm.CreateCatchClause(t); .)      
   (                         
     Block<cc>
   | 
