@@ -25,9 +25,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new class declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance</param>
     // --------------------------------------------------------------------------------
-    public ClassDeclaration(Token token)
-      : base(token)
+    public ClassDeclaration(Token token, Parser parser)
+      : base(token, parser)
     {
     }
 

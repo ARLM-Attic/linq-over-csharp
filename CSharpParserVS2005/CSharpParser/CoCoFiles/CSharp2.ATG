@@ -2,12 +2,13 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using CSharpParser.ProjectModel;
+using CSharpParser.Collections;
 
 COMPILER CS2
 
     #region Project Model extension
 
-    private ProjectParser _Project;
+    private CSharpProject _Project;
     private ProjectFile _File;
 
     // --------------------------------------------------------------------------------
@@ -15,7 +16,7 @@ COMPILER CS2
     /// Gets or sets the instance representing the project being parsed
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ProjectParser Project
+    public CSharpProject Project
     {
       get { return _Project; }
       set { _Project = value; }
@@ -42,13 +43,12 @@ COMPILER CS2
     /// </summary>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
-    /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     // --------------------------------------------------------------------------------
-    public void Error(string code, Token errorPoint, ProjectFile file, string description)
+    public void Error(string code, Token errorPoint, string description)
     {
-      Error error = new Error(code, errorPoint, file.Name, description);
-      _Project.Errors.Add(error);
+      Error error = new Error(code, errorPoint, _File.Name, description);
+      (_Project.Errors as IRestrictedList<Error>).Add(error);
       Error(description);
     }
 
@@ -58,15 +58,14 @@ COMPILER CS2
     /// </summary>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
-    /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    public void Error(string code, Token errorPoint, ProjectFile file, string description,
+    public void Error(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      Error error = new Error(code, errorPoint, file.Name, description, parameters);
-      _Project.Errors.Add(error);
+      Error error = new Error(code, errorPoint, _File.Name, description, parameters);
+      (_Project.Errors as IRestrictedList<Error>).Add(error);
       Error(description);
     }
 
@@ -889,15 +888,15 @@ CS2
 // +parent: Parent namespace of the "extern alias" directive. If this parameter is
 //   null, the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-ExternAliasDirective<Namespace parent>
+ExternAliasDirective<NamespaceFragment parent>
 =
-  "extern"   (. ExternalAlias externAlias = new ExternalAlias(t); .)
+  "extern"   (. Token token = t; .)
   ident      (. 
                 if (t.val != "alias") 
-                  Error("CS1003", t, _File, "Syntax error, 'alias' expected"); 
+                  Error("CS1003", t, "Syntax error, 'alias' expected"); 
              .)
   ident      (. 
-               externAlias.Name = t.val;
+               ExternalAlias externAlias = new ExternalAlias(token, t.val);
                if (parent == null) _File.AddExternAlias(externAlias); 
                else parent.AddExternAlias(externAlias); 
              .)
@@ -909,20 +908,19 @@ ExternAliasDirective<Namespace parent>
 // +parent: Parent namespace of the "using" directive. If this parameter is null, 
 //   the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-UsingDirective<Namespace parent>
+UsingDirective<NamespaceFragment parent>
 =                                                               
   "using"                  (. 
-                              UsingClause uc = new UsingClause(t);
+                              Token token = t;
                               string name = String.Empty; 
-                              TypeReference typeUsed;
+                              TypeReference typeUsed = null;
                            .)
   [ IF (IsAssignment()) 
     ident                  (. name = t.val; .)
     "=" ]
   TypeName<out typeUsed> 
   ";"                      (. 
-                              uc.Name = name;
-                              uc.TypeUsed = typeUsed;
+                              UsingClause uc = new UsingClause(token, name, typeUsed);
                               if (parent == null) _File.AddUsingClause(uc);
                               else parent.AddUsingClause(uc); 
                            .)
@@ -962,13 +960,13 @@ GlobalAttributes
 //   the type belongs to the file and not to the specified namespace.
 // +file: file that defines the namespace.
 // ------------------------------------------------------------------------------------
-NamespaceMemberDeclaration<Namespace parent, ProjectFile file>  
+NamespaceMemberDeclaration<NamespaceFragment parent, ProjectFile file>  
 =
   "namespace"    (. Token startToken = t; .)
   ident          (. StringBuilder sb = new StringBuilder(t.val); .)
   { 
     "." ident    (. sb.Append("."); sb.Append(t.val); .)
-  }              (. Namespace ns = new Namespace(startToken, sb.ToString(), parent, file); .)
+  }              (. NamespaceFragment ns = new NamespaceFragment(startToken, sb.ToString(), parent, file); .)
   "{" 
       { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
       { UsingDirective<ns> } 
@@ -986,9 +984,9 @@ NamespaceMemberDeclaration<Namespace parent, ProjectFile file>
                                                     {
                                                       td.AssignAttributes(attrs);
                                                       if (parent == null) 
-                                                        _File.TypeDeclarations.Add(td);
+                                                        _File.AddTypeDeclaration(td);
                                                       else 
-                                                        parent.TypeDeclarations.Add(td);
+                                                        parent.AddTypeDeclaration(td);
                                                     }
                                                  .)
 .
@@ -1031,13 +1029,13 @@ ClassDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 =
   "class"                                            (. 
                                                         m.Check(Modifier.classes); 
-                                                        ClassDeclaration cd = new ClassDeclaration(t);
+                                                        ClassDeclaration cd = new ClassDeclaration(t, this);
                                                         cd.IsPartial = isPartial;
                                                         td = cd;
                                                      .)
   ident                                              (. cd.Name = t.val; .)
   [                                                  (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<out typePars>                  (. cd.AssignTypeParameters(typePars); .)
+    TypeParameterList<cd>
   ] 
   [ ClassBase<cd> ]
   {                                                  (. TypeParameterConstraint constraint; .)
@@ -1083,14 +1081,14 @@ StructDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 =
   "struct"                                         (. 
                                                       m.Check(Modifier.nonClassTypes); 
-                                                      StructDeclaration sd = new StructDeclaration(t);
+                                                      StructDeclaration sd = new StructDeclaration(t, this);
                                                       td = sd;
                                                       sd.IsPartial = isPartial;
                                                       TypeReference typeRef;
                                                    .)
   ident                                            (. sd.Name = t.val; .)
   [                                                (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<out typePars>                (. sd.AssignTypeParameters(typePars); .)
+    TypeParameterList<sd>   
   ]
   [ ":"                                                     
   TypeName<out typeRef>                            (. sd.BaseTypes.Add(typeRef); .)
@@ -1123,7 +1121,7 @@ EnumDeclaration<Modifiers m, out TypeDeclaration td>
 =
   "enum"             (. 
                         m.Check(Modifier.nonClassTypes); 
-                        EnumDeclaration ed = new EnumDeclaration(t);
+                        EnumDeclaration ed = new EnumDeclaration(t, this);
                         td = ed;
                      .)
   ident              (. ed.Name = t.val; .)
@@ -1181,7 +1179,7 @@ DelegateDeclaration<Modifiers m, out TypeDeclaration td>
 =
   "delegate"                                       (. 
                                                       m.Check(Modifier.nonClassTypes); 
-                                                      DelegateDeclaration dd = new DelegateDeclaration(t);
+                                                      DelegateDeclaration dd = new DelegateDeclaration(t, this);
                                                       td = dd;
                                                       dd.SetModifiers(m.Value);
                                                       TypeReference returnType;
@@ -1189,7 +1187,7 @@ DelegateDeclaration<Modifiers m, out TypeDeclaration td>
   Type<out returnType, true>                       (. dd.ReturnType = returnType; .)
   ident                                            (. dd.Name = t.val; .)
   [                                                (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<out typePars>                (. dd.AssignTypeParameters(typePars); .)
+    TypeParameterList<dd>            
   ]
   "(" [ FormalParameterList<dd.FormalParameters> ] ")"
   {                                                (. TypeParameterConstraint constraint; .)
@@ -1418,7 +1416,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
                                                        TypeParameterCollection typePars = null; 
                                                     .)
   [                                                 
-    TypeParameterList<out typePars>                 (. md.AssignTypeParameters(typePars); .)
+    TypeParameterList<md>          
   ]
   "(" [ 
     FormalParameterList<md.FormalParameters>
@@ -1520,13 +1518,13 @@ InterfaceDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 =
   "interface"       (. 
                        m.Check(Modifier.nonClassTypes); 
-                       InterfaceDeclaration ifd = new InterfaceDeclaration(t);
+                       InterfaceDeclaration ifd = new InterfaceDeclaration(t, this);
                        td = ifd;
                        ifd.IsPartial = isPartial;
                     .)
   ident                                               (. ifd.Name = t.val; .)
   [                                                   (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<out typePars>                   (. ifd.AssignTypeParameters(typePars); .) 
+    TypeParameterList<ifd>            
   ]
   [ InterfaceBase<ifd> ]
   {                                                   (. TypeParameterConstraint constraint; .)
@@ -3353,12 +3351,12 @@ OverloadableOp<out Operator op> (. op = Operator.plus; .)
 // Type parameter declarations for generic types.
 // +typePars: resulting list of type parameters.
 // ------------------------------------------------------------------------------------
-TypeParameterList<out TypeParameterCollection typePars>
-=                            (. typePars = new TypeParameterCollection(); .)                                                              
+TypeParameterList<ITypeParameterOwner td>
+=                            
   "<"                        (. TypeParameter tp; .)
-  TypeParameter<out tp>      (. typePars.Add(tp); .)
+  TypeParameter<out tp>      (. td.AddTypeParameter(tp); .)
   { "," 
-    TypeParameter<out tp>    (. typePars.Add(tp); .)
+    TypeParameter<out tp>    (. td.AddTypeParameter(tp); .)
   } ">"
 .
 

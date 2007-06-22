@@ -10,18 +10,18 @@ namespace CSharpParserTest
 
     public bool InvokeParser(string fileName)
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile(fileName);
       return InvokeParser(parser);
     }
 
-    public bool InvokeParser(ProjectParser parser)
+    public bool InvokeParser(CSharpProject parser)
     {
       int errors = parser.Parse();
       Console.WriteLine("{0} errors detected", errors);
       foreach (ProjectFile file in parser.Files)
       {
-        foreach (Namespace ns in file.Namespaces)
+        foreach (NamespaceFragment ns in file.Namespaces)
         {
           foreach (TypeDeclaration td in ns.TypeDeclarations)
           {

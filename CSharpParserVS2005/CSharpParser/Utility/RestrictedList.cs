@@ -65,12 +65,19 @@ namespace CSharpParser.Collections
     /// </summary>
     // ----------------------------------------------------------------------------------
     int Count { get; }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Clears the content of the list.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    void Clear();
   }
 
   // ==================================================================================
   /// <summary>
   /// This type implements the IRestricted interface so that through the class only
-  /// read-operations are ellowed.
+  /// read-operations are allowed.
   /// </summary>
   // ==================================================================================
   public class RestrictedList<T> : IRestrictedList<T>
@@ -148,6 +155,11 @@ namespace CSharpParser.Collections
     public int Count
     {
       get { return _Items.Count; }
+    }
+
+    void IRestrictedList<T>.Clear()
+    {
+      _Items.Clear();
     }
 
     // ----------------------------------------------------------------------------------

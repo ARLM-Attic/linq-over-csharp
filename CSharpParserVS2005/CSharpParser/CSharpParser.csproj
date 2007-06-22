@@ -144,6 +144,7 @@
     <Compile Include="ProjectModel\Members\EventPropertyDeclaration.cs" />
     <Compile Include="ProjectModel\Members\IndexerDeclaration.cs" />
     <Compile Include="ProjectModel\Members\OperatorDeclaration.cs" />
+    <Compile Include="ProjectModel\Namespace.cs" />
     <Compile Include="ProjectModel\Statements\BlockStatement.cs" />
     <Compile Include="ProjectModel\Statements\BreakStatement.cs" />
     <Compile Include="ProjectModel\Statements\CatchClause.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="ProjectModel\Members\FormalParameterCollection.cs" />
     <Compile Include="ProjectModel\Members\MethodDeclaration.cs" />
     <Compile Include="ProjectModel\Members\PropertyDeclaration.cs" />
+    <Compile Include="ProjectModel\Types\ITypeParameterOwner.cs" />
     <Compile Include="ProjectModel\Types\TypeParameterConstraint.cs" />
     <Compile Include="ProjectModel\Types\TypeReference.cs" />
     <Compile Include="ProjectModel\Types\ClassDeclaration.cs" />
@@ -189,14 +191,13 @@
     <Compile Include="ProjectModel\ExternalAlias.cs" />
     <Compile Include="ProjectModel\Types\InterfaceDeclaration.cs" />
     <Compile Include="ProjectModel\LanguageElement.cs" />
-    <Compile Include="ProjectModel\Namespace.cs" />
+    <Compile Include="ProjectModel\NamespaceFragment.cs" />
     <Compile Include="ProjectModel\ProjectFile.cs" />
     <Compile Include="ProjectModel\Types\StructDeclaration.cs" />
     <Compile Include="ProjectModel\Types\TypeDeclaration.cs" />
     <Compile Include="ProjectModel\Types\TypeParameter.cs" />
-    <Compile Include="ProjectModel\Types\TypeParameterCollection.cs" />
     <Compile Include="ProjectModel\UsingClause.cs" />
-    <Compile Include="ProjectParser\ProjectParser.cs" />
+    <Compile Include="ProjectModel\CSharpProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -208,6 +209,7 @@
     <Compile Include="Utility\ImmutableList.cs" />
     <Compile Include="Utility\IndexedCollection.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
+    <Compile Include="Utility\RestrictedIndexedCollection.cs" />
     <Compile Include="Utility\RestrictedList.cs" />
     <Compile Include="Utility\StringHelper.cs" />
   </ItemGroup>

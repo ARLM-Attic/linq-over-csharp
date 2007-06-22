@@ -26,7 +26,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private ParameterConstraintType _ParameterType;
-    private List<TypeReference> _Constraints = new List<TypeReference>();
+    private readonly List<TypeReference> _Constraints = new List<TypeReference>();
     private bool _HasNew;
 
     #endregion

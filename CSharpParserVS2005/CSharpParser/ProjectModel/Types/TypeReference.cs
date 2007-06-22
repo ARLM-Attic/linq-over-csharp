@@ -15,7 +15,7 @@ namespace CSharpParser.ProjectModel
     private bool _IsGlobal;
     private TypeReference _SubType;
     private TypeKind _Kind;
-    private TypeArgumentCollection _TypeArguments = new TypeArgumentCollection();
+    private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
 
     #endregion
 
@@ -76,7 +76,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of type arguments.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeArgumentCollection Arguments
+    public TypeReferenceCollection Arguments
     {
       get { return _TypeArguments; }
     }
@@ -144,6 +144,6 @@ namespace CSharpParser.ProjectModel
   /// This type represents a collection of type references.
   /// </summary>
   // ==================================================================================
-  public sealed class TypeArgumentCollection : List<TypeReference>
+  public sealed class TypeReferenceCollection : List<TypeReference>
   {}
 }

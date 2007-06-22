@@ -1,30 +1,23 @@
-using System;
-using System.Collections.Generic;
 using CSharpParser.Collections;
-using CSharpParser.ParserFiles;
-using CSharpParser.Properties;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This class represents a namespace declared in a file.
+  /// This class stores information about a logical namespace.
   /// </summary>
   /// <remarks>
-  /// Namespaces can be nested and one file may contain zero, one or more namespace
-  /// declarations.
+  /// A logical namespace can contain one or more namespace fragments. Each namespace 
+  /// declaration in a file is a separate namespace fragment with types declared 
+  /// within.
   /// </remarks>
   // ==================================================================================
-  public sealed class Namespace: LanguageElement
+  public sealed class Namespace
   {
     #region Private fields
 
-    private Namespace _ParentNamespace;
-    private ProjectFile _ParentFile; 
-    private ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
-    private NamespaceCollection _NestedNamespaces = new NamespaceCollection();
-    private UsingClauseCollection _Usings = new UsingClauseCollection();
-    private List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
+    private readonly string _Name;
+    private readonly NamespaceFragmentCollection _Fragments = new NamespaceFragmentCollection();
 
     #endregion
 
@@ -32,52 +25,13 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new namespace belonging to a file.
+    /// Creates a new namespace instance with an empty list of fragments.
     /// </summary>
-    /// <param name="token">Token providing position information.</param>
-    /// <param name="name">Name of the namespace (relative to the parent).</param>
-    /// <param name="parentNamespace">Parent namespace of this namespace.</param>
-    /// <param name="parentFile">Parent file defining this namespace.</param>
+    /// <param name="name"></param>
     // --------------------------------------------------------------------------------
-    public Namespace(Token token, string name, Namespace parentNamespace, 
-      ProjectFile parentFile): base(token)
+    public Namespace(string name)
     {
-      Name = name;
-      _ParentNamespace = parentNamespace;
-
-      // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
-      if (_ParentNamespace != null)
-      {
-        (_ParentNamespace.NestedNamespaces as IRestrictedList<Namespace>).Add(this);
-      }
-
-      // --- A namespace must belong to a file.
-      if (parentFile == null)
-      {
-        throw new InvalidOperationException(Resources.ParentFileNotDeclared);
-      }
-      _ParentFile = parentFile;
-
-      // --- If this is a root namespace in the file, we add it to the namespace list
-      // --- of the file.
-      if (parentNamespace == null) _ParentFile.Namespaces.Add(this);
-
-      // --- The namespace is added to the list of ProjectParser
-
-      NamespaceCollection fragments;
-      ProjectParser parser = _ParentFile.ParentProject;
-      if (parser.DeclaredNamespaces.TryGetValue(FullName, out fragments))
-      {
-        // --- This namespace has been declared, add the new fragment.
-        (fragments as IRestrictedList<Namespace>).Add(this);
-      }
-      else
-      {
-        // --- This is the first declaration of this namespace.
-        NamespaceCollection newFragment = new NamespaceCollection();
-        (newFragment  as IRestrictedList<Namespace>).Add(this);
-        parser.DeclaredNamespaces.Add(FullName, newFragment);
-      }
+      _Name = name;
     }
 
     #endregion
@@ -86,113 +40,22 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the full name of this namespace.
+    /// Gets the name of the namespace. This is the full name of the namespace.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string FullName
+    public string Name
     {
-      get
-      {
-        return _ParentNamespace == null 
-          ? Name 
-          : _ParentNamespace.FullName + "." + Name;
-      }
+      get { return _Name; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the parent namespace.
+    /// Gets the list of physical fragments belonging to this namespace.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Namespace ParentNamespace
+    public NamespaceFragmentCollection Fragments
     {
-      get { return _ParentNamespace; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of nested namespaces.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public NamespaceCollection NestedNamespaces
-    {
-      get { return _NestedNamespaces; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this namespace has a parent or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool HasParentNamespace
-    {
-      get { return _ParentNamespace != null; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this namespace has nested namespaces or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool HasNestedNamespace
-    {
-      get { return _NestedNamespaces.Count > 0;  }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the using clauses within this namespace declaration
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public UsingClauseCollection Usings
-    {
-      get { return _Usings; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the external aliases used by the namespace
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ExternalAliasCollection ExternAliases
-    {
-      get { return _ExternAliases; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type declarations in this project file
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public List<TypeDeclaration> TypeDeclarations
-    {
-      get { return _TypeDeclarations; }
-    }
-
-    #endregion
-
-    #region Public methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Add a new external alias to this namespace.
-    /// </summary>
-    /// <param name="item"></param>
-    // --------------------------------------------------------------------------------
-    public void AddExternAlias(ExternalAlias item)
-    {
-      (_ExternAliases as IRestrictedList<ExternalAlias>).Add(item);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Add a new external alias to this namespace.
-    /// </summary>
-    /// <param name="item"></param>
-    // --------------------------------------------------------------------------------
-    public void AddUsingClause(UsingClause item)
-    {
-      (_Usings as IRestrictedList<UsingClause>).Add(item);
+      get { return _Fragments; }
     }
 
     #endregion
@@ -200,10 +63,24 @@ namespace CSharpParser.ProjectModel
 
   // ==================================================================================
   /// <summary>
-  /// This class represents a collection of namespaces.
+  /// This class represents a list of namespaces that can be indexed by the full name
+  /// of the namespace.
   /// </summary>
   // ==================================================================================
-  public class NamespaceCollection : RestrictedList<Namespace>
+  public sealed class NamespaceCollection : RestrictedIndexedCollection<Namespace>
   {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">Namespace item.</param>
+    /// <returns>
+    /// Full name of the namespace.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(Namespace item)
+    {
+      return item.Name;
+    }
   }
 }

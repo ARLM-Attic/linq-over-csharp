@@ -1,4 +1,5 @@
 using System;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -122,5 +123,14 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents list of errors.
+  /// </summary>
+  // ==================================================================================
+  public sealed class ErrorCollection : RestrictedList<Error>
+  {
   }
 }

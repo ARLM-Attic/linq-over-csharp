@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
@@ -13,7 +14,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private TypeReference _TypeUsed;
+    private readonly TypeReference _TypeUsed;
 
     #endregion
 
@@ -24,9 +25,12 @@ namespace CSharpParser.ProjectModel
     /// Creates a new using clause.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="name">Using alias name, if defined, otherwise null or empty.</param>
     // --------------------------------------------------------------------------------
-    public UsingClause(Token token): base (token)
+    public UsingClause(Token token, string name, TypeReference typeUsed): 
+      base (token, name)
     {
+      _TypeUsed = typeUsed;
     }
 
     #endregion
@@ -40,7 +44,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasAlias
     {
-      get { return Name.Length != 0; }
+      get { return !String.IsNullOrEmpty(Name); }
     }
 
     // --------------------------------------------------------------------------------
@@ -51,12 +55,7 @@ namespace CSharpParser.ProjectModel
     public TypeReference TypeUsed
     {
       get { return _TypeUsed; }
-      set { _TypeUsed = value; }
     }
-
-    #endregion
-
-    #region Public methods
 
     #endregion
   }

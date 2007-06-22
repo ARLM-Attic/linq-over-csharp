@@ -23,9 +23,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new delegate type declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance</param>
     // --------------------------------------------------------------------------------
-    public DelegateDeclaration(Token token)
-      : base(token)
+    public DelegateDeclaration(Token token, Parser parser)
+      : base(token, parser)
     {
     }
 

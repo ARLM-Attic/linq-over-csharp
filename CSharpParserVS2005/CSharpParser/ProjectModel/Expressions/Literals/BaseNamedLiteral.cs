@@ -11,7 +11,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private TypeArgumentCollection _TypeArguments = new TypeArgumentCollection();
+    private TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
     
     #endregion
 
@@ -37,7 +37,7 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the type arguments of the primitive method.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeArgumentCollection TypeArguments
+    public TypeReferenceCollection TypeArguments
     {
       get { return _TypeArguments; }
     }

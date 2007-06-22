@@ -13,7 +13,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void Expression1IsOk()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -36,7 +36,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void Expression2IsOk()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -64,7 +64,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void Expression3IsOk()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -95,7 +95,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void Expression4IsOk()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -126,7 +126,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void Expression5IsOk()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];

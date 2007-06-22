@@ -70,7 +70,7 @@ namespace CSharpParser.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Parent file must not be null for a Namespace instance..
+        ///   Looks up a localized string similar to Parent file must not be null for a NamespaceFragment instance..
         /// </summary>
         internal static string ParentFileNotDeclared {
             get {

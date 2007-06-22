@@ -10,7 +10,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void UsingsAndNameSpacesAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       Assert.IsTrue(InvokeParser(parser));
       ProjectFile file = parser.Files[0];
@@ -32,12 +32,12 @@ namespace CSharpParserTest.LanguageElements
 
       // --- Check namespaces in the file
       Assert.AreEqual(file.Namespaces.Count, 3);
-      Namespace ns1 = file.Namespaces[0];
+      NamespaceFragment ns1 = file.Namespaces[0];
       Assert.AreEqual(ns1.Name, "CSharpParserTest.TestFiles");
       Assert.AreEqual(ns1.Usings.Count, 3);
       Assert.AreEqual(ns1.NestedNamespaces.Count, 3);
 
-      Namespace ns1a = ns1.NestedNamespaces[0];
+      NamespaceFragment ns1a = ns1.NestedNamespaces[0];
       Assert.IsTrue(ns1a.HasParentNamespace);
       Assert.AreEqual(ns1a.ParentNamespace, ns1);
       Assert.AreEqual(ns1a.Name, "Level1");
@@ -47,7 +47,7 @@ namespace CSharpParserTest.LanguageElements
       Assert.IsTrue(ns1a.HasNestedNamespace);
       Assert.AreEqual(ns1a.NestedNamespaces.Count, 1);
 
-      Namespace ns1b = ns1.NestedNamespaces[1];
+      NamespaceFragment ns1b = ns1.NestedNamespaces[1];
       Assert.IsTrue(ns1b.HasParentNamespace);
       Assert.AreEqual(ns1b.ParentNamespace, ns1);
       Assert.AreEqual(ns1b.Name, "Level1.A");
@@ -55,7 +55,7 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(ns1b.NestedNamespaces.Count, 1);
       Assert.AreEqual(ns1b.NestedNamespaces[0].FullName, "CSharpParserTest.TestFiles.Level1.A.Level2.A");
 
-      Namespace ns2 = file.Namespaces[1];
+      NamespaceFragment ns2 = file.Namespaces[1];
       Assert.AreEqual(ns2.Name, "OtherNameSpace");
       Assert.AreEqual(ns2.Usings.Count, 0);
       Assert.AreEqual(ns2.NestedNamespaces.Count, 1);
@@ -68,9 +68,9 @@ namespace CSharpParserTest.LanguageElements
       // --- Check ProjectParser
 
       Assert.AreEqual(parser.DeclaredNamespaces.Count, 9);
-      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles"].Count, 2);
-      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1"].Count, 3);
-      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1.Level2"].Count, 3);
+      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles"].Fragments.Count, 2);
+      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1"].Fragments.Count, 3);
+      Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1.Level2"].Fragments.Count, 3);
     }
   }
 }

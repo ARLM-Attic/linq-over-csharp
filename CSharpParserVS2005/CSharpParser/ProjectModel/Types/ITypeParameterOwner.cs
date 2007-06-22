@@ -1,25 +1,19 @@
-using System.Collections.Generic;
-
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This class represents a collection of type parameters.
+  /// This interface defines the behaviour of a language element handling
+  /// type parameters.
   /// </summary>
   // ==================================================================================
-  public class TypeParameterCollection : List<TypeParameter>
+  public interface ITypeParameterOwner
   {
-    #region Lifecycle methods
-
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new empty collection of project files.
+    /// Adds a new type parameter to the language element.
     /// </summary>
+    /// <param name="parameter">Type parameter to add.</param>
     // --------------------------------------------------------------------------------
-    public TypeParameterCollection()
-    {
-    }
-
-    #endregion
+    void AddTypeParameter(TypeParameter parameter);
   }
 }

@@ -1,25 +1,28 @@
-using System.Collections.Generic;
-using System.IO;
+using System;
 using CSharpParser.Collections;
+using CSharpParser.ParserFiles;
+using CSharpParser.Properties;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This class represents a C# file in the project to compile.
+  /// This class represents a namespace declared in a file.
   /// </summary>
+  /// <remarks>
+  /// Namespaces can be nested and one file may contain zero, one or more namespace
+  /// declarations.
+  /// </remarks>
   // ==================================================================================
-  public sealed class ProjectFile
+  public sealed class NamespaceFragment: LanguageElement
   {
     #region Private fields
 
-    private readonly string _Name;
-    private readonly string _Folder;
-    private readonly CSharpProject _ParentProject;
+    private readonly NamespaceFragment _ParentNamespace;
+    private readonly ProjectFile _ParentFile; 
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
+    private readonly NamespaceFragmentCollection _NestedNamespaces = new NamespaceFragmentCollection();
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
-    private readonly AttributeCollection _GlobalAttributes = new AttributeCollection();
-    private readonly List<NamespaceFragment> _Namespaces = new List<NamespaceFragment>();
     private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
 
     #endregion
@@ -28,16 +31,52 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new ProjectFile instance
+    /// Creates a new namespace belonging to a file.
     /// </summary>
-    /// <param name="name">Full file name</param>
-    /// <param name="parent">Parent project of this file.</param>
+    /// <param name="token">Token providing position information.</param>
+    /// <param name="name">Name of the namespace (relative to the parent).</param>
+    /// <param name="parentNamespace">Parent namespace of this namespace.</param>
+    /// <param name="parentFile">Parent file defining this namespace.</param>
     // --------------------------------------------------------------------------------
-    public ProjectFile(string name, CSharpProject parent)
+    public NamespaceFragment(Token token, string name, NamespaceFragment parentNamespace, 
+      ProjectFile parentFile): base(token, name)
     {
-      _ParentProject = parent;
-      _Name = Path.GetFileName(name);
-      _Folder = Path.GetDirectoryName(name);
+      _ParentNamespace = parentNamespace;
+
+      // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
+      if (_ParentNamespace != null)
+      {
+        (_ParentNamespace.NestedNamespaces as IRestrictedList<NamespaceFragment>).Add(this);
+      }
+
+      // --- A namespace must belong to a file.
+      if (parentFile == null)
+      {
+        throw new InvalidOperationException(Resources.ParentFileNotDeclared);
+      }
+      _ParentFile = parentFile;
+
+      // --- If this is a root namespace in the file, we add it to the namespace list
+      // --- of the file.
+      if (parentNamespace == null) _ParentFile.Namespaces.Add(this);
+
+      // --- The namespace is added to the list of CSharpProject
+
+      Namespace nameSpace;
+      CSharpProject project = _ParentFile.ParentProject;
+      if (project.DeclaredNamespaces.TryGetValue(FullName, out nameSpace))
+      {
+        // --- This namespace has been declared, add the new fragment.
+        (nameSpace.Fragments as IRestrictedList<NamespaceFragment>).Add(this);
+      }
+      else
+      {
+        // --- This is the first declaration of this namespace.
+        Namespace newNamespace = new Namespace(FullName);
+        (newNamespace.Fragments as IRestrictedList<NamespaceFragment>).Add(this);
+        (project.DeclaredNamespaces as IRestrictedIndexedCollection<Namespace>).
+          Add(newNamespace);
+      }
     }
 
     #endregion
@@ -46,57 +85,62 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the parent project of this file.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public CSharpProject ParentProject
-    {
-      get { return _ParentProject; }
-    } 
-    
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the file
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public string Name
-    {
-      get { return _Name; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the folder of the file
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public string Folder
-    {
-      get { return _Folder; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the external aliases of the file
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ExternalAliasCollection ExternAliases
-    {
-      get { return _ExternAliases; }
-    } 
-    
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the full name of the project file
+    /// Gets the full name of this namespace.
     /// </summary>
     // --------------------------------------------------------------------------------
     public string FullName
     {
-      get { return Path.Combine(_Folder, _Name); }
+      get
+      {
+        return _ParentNamespace == null 
+          ? Name 
+          : _ParentNamespace.FullName + "." + Name;
+      }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of using clauses in this project file
+    /// Gets the parent namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragment ParentNamespace
+    {
+      get { return _ParentNamespace; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of nested namespaces.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragmentCollection NestedNamespaces
+    {
+      get { return _NestedNamespaces; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this namespace has a parent or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasParentNamespace
+    {
+      get { return _ParentNamespace != null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this namespace has nested namespaces or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasNestedNamespace
+    {
+      get { return _NestedNamespaces.Count > 0;  }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the using clauses within this namespace declaration
     /// </summary>
     // --------------------------------------------------------------------------------
     public UsingClauseCollection Usings
@@ -106,22 +150,12 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of global attribute declarations in this project file
+    /// Gets the external aliases used by the namespace
     /// </summary>
     // --------------------------------------------------------------------------------
-    public AttributeCollection GlobalAttributes
+    public ExternalAliasCollection ExternAliases
     {
-      get { return _GlobalAttributes; }
-    } 
-    
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of namespace declarations in this project file
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public List<NamespaceFragment> Namespaces
-    {
-      get { return _Namespaces; }
+      get { return _ExternAliases; }
     }
 
     // --------------------------------------------------------------------------------
@@ -160,7 +194,6 @@ namespace CSharpParser.ProjectModel
       (_Usings as IRestrictedList<UsingClause>).Add(item);
     }
 
-
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Adds a new type declaration to this namespace fragment.
@@ -169,11 +202,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddTypeDeclaration(TypeDeclaration item)
     {
+      item.Namespace = this;
       (_TypeDeclarations as IRestrictedIndexedCollection<TypeDeclaration>).
         Add(item);
-      (_ParentProject.DeclaredTypes
+      (_ParentFile.ParentProject.DeclaredTypes
         as IRestrictedIndexedCollection<TypeDeclaration>).Add(item);
-
     }
 
     #endregion
@@ -181,10 +214,10 @@ namespace CSharpParser.ProjectModel
 
   // ==================================================================================
   /// <summary>
-  /// This class represents a collection of project files.
+  /// This class represents a collection of namespaces.
   /// </summary>
   // ==================================================================================
-  public class ProjectFileCollection : RestrictedList<ProjectFile>
+  public class NamespaceFragmentCollection : RestrictedList<NamespaceFragment>
   {
   }
 }

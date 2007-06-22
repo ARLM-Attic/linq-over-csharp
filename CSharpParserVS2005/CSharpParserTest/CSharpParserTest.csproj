@@ -81,6 +81,7 @@
     <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestRunner.cs" />
     <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestSuiteResult.cs" />
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
+    <Compile Include="LanguageElements\TypeParameters.cs" />
     <Compile Include="LanguageElements\UsingsAndNamespaces.cs" />
     <Compile Include="LargeTestProjects.cs" />
     <None Include="LargeTestProjects\NUnit.Core\AbstractTestCaseDecoration.cs" />
@@ -238,7 +239,8 @@
     <None Include="TestFiles\ExternAliasDirective\ExternAliasDirectiveOK.cs" />
     <None Include="TestFiles\ExternAliasDirective\ExternAliasDirectiveFailed.cs" />
     <Compile Include="TestFiles\SimpleExpressions.cs" />
-    <None Include="TestFiles\TypeParamConstraintTest.cs" />
+    <None Include="TestFiles\TypeParameters\DuplicatedTypeParams.cs" />
+    <None Include="TestFiles\TypeParameters\TypeParamConstraintsAreOk.cs" />
     <None Include="TestFiles\EnumTest.cs" />
     <None Include="TestFiles\GlobalAttributes.cs" />
     <None Include="TestFiles\ExternAliasDirective\ExternAliasesChecked.cs" />

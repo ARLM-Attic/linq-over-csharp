@@ -24,6 +24,32 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Creates an attributed element descriptor according to the info provided by the
+    /// specified token and name.
+    /// </summary>
+    /// <param name="token">Token providing information about the element.</param>
+    /// <param name="name">Language element name</param>
+    // --------------------------------------------------------------------------------
+    protected AttributedElement(Token token, string name)
+      : base(token, name)
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an attributed element descriptor according to the info provided by the
+    /// specified token.
+    /// </summary>
+    /// <param name="token">Token providing information about the element.</param>
+    /// <param name="parser">Parser instance</param>
+    // --------------------------------------------------------------------------------
+    protected AttributedElement(Token token, Parser parser)
+      : base(token, parser)
+    {
+    } 
+    
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or the collection of attributes belonging to this type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------

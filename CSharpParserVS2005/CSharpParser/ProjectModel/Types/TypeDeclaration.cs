@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CSharpParser.ParserFiles;
+using CSharpParser.Collections;
 
 namespace CSharpParser.ProjectModel
 {
@@ -24,22 +25,22 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeDeclaration: AttributedElement
+  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner
   {
     #region Private fields
 
     private Visibility _Visibility;
     private bool _DefaultVisibility;
-    private Namespace _Namespace;
-    private TypeParameterCollection _TypeParameters = new TypeParameterCollection();
-    private List<TypeParameterConstraint> _ParameterConstraints =
+    private NamespaceFragment _Namespace;
+    private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
+    private readonly List<TypeParameterConstraint> _ParameterConstraints =
       new List<TypeParameterConstraint>();
-    private List<TypeReference> _BaseTypes = new List<TypeReference>();
+    private readonly List<TypeReference> _BaseTypes = new List<TypeReference>();
     private bool _IsNew;
     private bool _IsUnsafe;
     private TypeDeclaration _ParentType;
-    private List<TypeDeclaration> _NestedTypes = new List<TypeDeclaration>();
-    private List<MemberDeclaration> _Members = new List<MemberDeclaration>();
+    private readonly TypeDeclarationCollection _NestedTypes = new TypeDeclarationCollection();
+    private readonly List<MemberDeclaration> _Members = new List<MemberDeclaration>();
 
     #endregion
 
@@ -50,9 +51,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new type declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance</param>
     // --------------------------------------------------------------------------------
-    protected TypeDeclaration(Token token)
-      : base(token)
+    protected TypeDeclaration(Token token, Parser parser)
+      : base(token, parser)
     {
     }
 
@@ -76,7 +78,7 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the namespace of the type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Namespace Namespace
+    public NamespaceFragment Namespace
     {
       get { return _Namespace; }
       set { _Namespace = value; }
@@ -247,7 +249,8 @@ namespace CSharpParser.ProjectModel
       set
       {
         _ParentType = value;
-        _ParentType.NestedTypes.Add(this);
+        (_ParentType.NestedTypes as IRestrictedIndexedCollection<TypeDeclaration>).
+          Add(this);
       }
     }
 
@@ -256,7 +259,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of nested types belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<TypeDeclaration> NestedTypes
+    public TypeDeclarationCollection NestedTypes
     {
       get { return _NestedTypes; }
     }
@@ -284,24 +287,6 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region Public methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets or the collection of attributes belonging to this type declaration.
-    /// </summary>
-    /// <param name="pars">Expression parameters to assign.</param>
-    // --------------------------------------------------------------------------------
-    public void AssignTypeParameters(TypeParameterCollection pars)
-    {
-      if (pars == null)
-      {
-        _TypeParameters.Clear();
-      }
-      else
-      {
-        _TypeParameters = pars;
-      }
-    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -456,5 +441,52 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region ITypeParameterOwner members
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new type parameter to the method declaration
+    /// </summary>
+    /// <param name="parameter">Type parameter</param>
+    // --------------------------------------------------------------------------------
+    public void AddTypeParameter(TypeParameter parameter)
+    {
+      try
+      {
+        (_TypeParameters as IRestrictedIndexedCollection<TypeParameter>).
+          Add(parameter);
+      }
+      catch (Exception)
+      {
+        Parser.Error("CS0692", parameter.Token, 
+          String.Format("Duplicate type parameter '{0}'", parameter.Name));
+      }
+    }
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of type declarations that can be indexed by the
+  /// full name of the type.
+  /// </summary>
+  // ==================================================================================
+  public class TypeDeclarationCollection : RestrictedIndexedCollection<TypeDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">TypeDeclaration item.</param>
+    /// <returns>
+    /// Full name of the type declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(TypeDeclaration item)
+    {
+      return (item.Namespace == null ? String.Empty : item.Namespace.FullName) + item.FullName;
+    }
   }
 }

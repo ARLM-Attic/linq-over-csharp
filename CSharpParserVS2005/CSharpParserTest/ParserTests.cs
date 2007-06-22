@@ -22,7 +22,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void GlobalAttributesAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("GlobalAttributes.cs");
       Assert.IsTrue(InvokeParser(parser));
       ProjectFile file = parser.Files[0];
@@ -39,7 +39,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void EnumParsingIsOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("EnumTest.cs");
       Assert.IsTrue(InvokeParser(parser));
       ProjectFile file = parser.Files[0];
@@ -79,70 +79,9 @@ namespace CSharpParserTest
     }
 
     [TestMethod]
-    public void TypeParameterConstraintsAreOK()
-    {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
-      parser.AddFile("TypeParamConstraintTest.cs");
-      Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
-      List<TypeParameterConstraint> coList = td.ParameterConstraints;
-      Assert.AreEqual(coList.Count, 6);
-
-      TypeParameterConstraint con = coList[0];
-      Assert.AreEqual(con.Name, "A");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Class);
-      Assert.AreEqual(con.Constraints.Count, 1);
-      Assert.AreEqual(con.Constraints[0].Name, "class");
-      Assert.IsFalse(con.HasNew);
-
-      con = coList[1];
-      Assert.AreEqual(con.Name, "B");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Struct);
-      Assert.AreEqual(con.Constraints.Count, 1);
-      Assert.AreEqual(con.Constraints[0].Name, "struct");
-      Assert.IsFalse(con.HasNew);
-
-      con = coList[2];
-      Assert.AreEqual(con.Name, "C");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 0);
-      Assert.IsTrue(con.HasNew);
-
-      con = coList[3];
-      Assert.AreEqual(con.Name, "D");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 2);
-      Assert.AreEqual(con.Constraints[0].Name, "ArrayList");
-      Assert.AreEqual(con.Constraints[1].Name, "IEnumerable");
-      Assert.AreEqual(con.Constraints[1].Arguments.Count, 1);
-      Assert.AreEqual(con.Constraints[1].Arguments[0].Name, "A");
-      Assert.IsFalse(con.HasNew);
-
-      con = coList[4];
-      Assert.AreEqual(con.Name, "E");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 1);
-      Assert.AreEqual(con.Constraints[0].Name, "D");
-      Assert.IsTrue(con.HasNew);
-
-      con = coList[5];
-      Assert.AreEqual(con.Name, "F");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 3);
-      Assert.AreEqual(con.Constraints[0].Name, "ArrayList");
-      Assert.AreEqual(con.Constraints[1].Name, "IEnumerable");
-      Assert.AreEqual(con.Constraints[2].Name, "IEquatable");
-      Assert.AreEqual(con.Constraints[1].Arguments.Count, 1);
-      Assert.AreEqual(con.Constraints[1].Arguments[0].Name, "B");
-      Assert.AreEqual(con.Constraints[2].Arguments.Count, 1);
-      Assert.AreEqual(con.Constraints[2].Arguments[0].Name, "D");
-      Assert.IsTrue(con.HasNew);
-    }
-
-    [TestMethod]
     public void ConstDeclarationsAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("ConstDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -180,7 +119,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void DelegatesAndEventsAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("EventDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -262,7 +201,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void PropertiesAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("PropertyDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[1];
@@ -351,7 +290,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void MethodsAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("MethodDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -405,7 +344,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void CastOperatorsAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("CastOperatorDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -433,7 +372,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void SimpleStatementsAreOK()
     {
-      ProjectParser parser = new ProjectParser(WorkingFolder);
+      CSharpProject parser = new CSharpProject(WorkingFolder);
       parser.AddFile("SimpleStatements.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];

@@ -2,6 +2,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using CSharpParser.ProjectModel;
+using CSharpParser.Collections;
 
 using System;
 
@@ -154,7 +155,7 @@ public class Parser {
 
 #region Project Model extension
 
-    private ProjectParser _Project;
+    private CSharpProject _Project;
     private ProjectFile _File;
 
     // --------------------------------------------------------------------------------
@@ -162,7 +163,7 @@ public class Parser {
     /// Gets or sets the instance representing the project being parsed
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ProjectParser Project
+    public CSharpProject Project
     {
       get { return _Project; }
       set { _Project = value; }
@@ -189,13 +190,12 @@ public class Parser {
     /// </summary>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
-    /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     // --------------------------------------------------------------------------------
-    public void Error(string code, Token errorPoint, ProjectFile file, string description)
+    public void Error(string code, Token errorPoint, string description)
     {
-      Error error = new Error(code, errorPoint, file.Name, description);
-      _Project.Errors.Add(error);
+      Error error = new Error(code, errorPoint, _File.Name, description);
+      (_Project.Errors as IRestrictedList<Error>).Add(error);
       Error(description);
     }
 
@@ -205,15 +205,14 @@ public class Parser {
     /// </summary>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
-    /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    public void Error(string code, Token errorPoint, ProjectFile file, string description,
+    public void Error(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      Error error = new Error(code, errorPoint, file.Name, description, parameters);
-      _Project.Errors.Add(error);
+      Error error = new Error(code, errorPoint, _File.Name, description, parameters);
+      (_Project.Errors as IRestrictedList<Error>).Add(error);
       Error(description);
     }
 
@@ -880,26 +879,26 @@ public class Parser {
 		}
 	}
 
-	void ExternAliasDirective(Namespace parent) {
+	void ExternAliasDirective(NamespaceFragment parent) {
 		Expect(28);
-		ExternalAlias externAlias = new ExternalAlias(t); 
+		Token token = t; 
 		Expect(1);
 		if (t.val != "alias") 
-		 Error("CS1003", t, _File, "Syntax error, 'alias' expected"); 
+		 Error("CS1003", t, "Syntax error, 'alias' expected"); 
 		
 		Expect(1);
-		externAlias.Name = t.val;
+		ExternalAlias externAlias = new ExternalAlias(token, t.val);
 		if (parent == null) _File.AddExternAlias(externAlias); 
 		else parent.AddExternAlias(externAlias); 
 		
 		Expect(114);
 	}
 
-	void UsingDirective(Namespace parent) {
+	void UsingDirective(NamespaceFragment parent) {
 		Expect(78);
-		UsingClause uc = new UsingClause(t);
+		Token token = t;
 		string name = String.Empty; 
-		TypeReference typeUsed;
+		TypeReference typeUsed = null;
 		
 		if (IsAssignment()) {
 			Expect(1);
@@ -908,8 +907,7 @@ public class Parser {
 		}
 		TypeName(out typeUsed);
 		Expect(114);
-		uc.Name = name;
-		uc.TypeUsed = typeUsed;
+		UsingClause uc = new UsingClause(token, name, typeUsed);
 		if (parent == null) _File.AddUsingClause(uc);
 		else parent.AddUsingClause(uc); 
 		
@@ -941,7 +939,7 @@ public class Parser {
 		Expect(112);
 	}
 
-	void NamespaceMemberDeclaration(Namespace parent, ProjectFile file) {
+	void NamespaceMemberDeclaration(NamespaceFragment parent, ProjectFile file) {
 		if (la.kind == 45) {
 			Get();
 			Token startToken = t; 
@@ -952,7 +950,7 @@ public class Parser {
 				Expect(1);
 				sb.Append("."); sb.Append(t.val); 
 			}
-			Namespace ns = new Namespace(startToken, sb.ToString(), parent, file); 
+			NamespaceFragment ns = new NamespaceFragment(startToken, sb.ToString(), parent, file); 
 			Expect(96);
 			while (IsExternAliasDirective()) {
 				ExternAliasDirective(ns);
@@ -981,9 +979,9 @@ public class Parser {
 			{
 			  td.AssignAttributes(attrs);
 			  if (parent == null) 
-			    _File.TypeDeclarations.Add(td);
+			    _File.AddTypeDeclaration(td);
 			  else 
-			    parent.TypeDeclarations.Add(td);
+			    parent.AddTypeDeclaration(td);
 			}
 			
 		} else SynErr(131);
@@ -1169,7 +1167,7 @@ public class Parser {
 	void ClassDeclaration(Modifiers m, bool isPartial, out TypeDeclaration td) {
 		Expect(16);
 		m.Check(Modifier.classes); 
-		ClassDeclaration cd = new ClassDeclaration(t);
+		ClassDeclaration cd = new ClassDeclaration(t, this);
 		cd.IsPartial = isPartial;
 		td = cd;
 		
@@ -1177,8 +1175,7 @@ public class Parser {
 		cd.Name = t.val; 
 		if (la.kind == 100) {
 			TypeParameterCollection typePars = null; 
-			TypeParameterList(out typePars);
-			cd.AssignTypeParameters(typePars); 
+			TypeParameterList(cd);
 		}
 		if (la.kind == 86) {
 			ClassBase(cd);
@@ -1197,7 +1194,7 @@ public class Parser {
 	void StructDeclaration(Modifiers m, bool isPartial, out TypeDeclaration td) {
 		Expect(66);
 		m.Check(Modifier.nonClassTypes); 
-		StructDeclaration sd = new StructDeclaration(t);
+		StructDeclaration sd = new StructDeclaration(t, this);
 		td = sd;
 		sd.IsPartial = isPartial;
 		TypeReference typeRef;
@@ -1206,8 +1203,7 @@ public class Parser {
 		sd.Name = t.val; 
 		if (la.kind == 100) {
 			TypeParameterCollection typePars = null; 
-			TypeParameterList(out typePars);
-			sd.AssignTypeParameters(typePars); 
+			TypeParameterList(sd);
 		}
 		if (la.kind == 86) {
 			Get();
@@ -1233,7 +1229,7 @@ public class Parser {
 	void InterfaceDeclaration(Modifiers m, bool isPartial, out TypeDeclaration td) {
 		Expect(40);
 		m.Check(Modifier.nonClassTypes); 
-		InterfaceDeclaration ifd = new InterfaceDeclaration(t);
+		InterfaceDeclaration ifd = new InterfaceDeclaration(t, this);
 		td = ifd;
 		ifd.IsPartial = isPartial;
 		
@@ -1241,8 +1237,7 @@ public class Parser {
 		ifd.Name = t.val; 
 		if (la.kind == 100) {
 			TypeParameterCollection typePars = null; 
-			TypeParameterList(out typePars);
-			ifd.AssignTypeParameters(typePars); 
+			TypeParameterList(ifd);
 		}
 		if (la.kind == 86) {
 			InterfaceBase(ifd);
@@ -1265,7 +1260,7 @@ public class Parser {
 	void EnumDeclaration(Modifiers m, out TypeDeclaration td) {
 		Expect(25);
 		m.Check(Modifier.nonClassTypes); 
-		EnumDeclaration ed = new EnumDeclaration(t);
+		EnumDeclaration ed = new EnumDeclaration(t, this);
 		td = ed;
 		
 		Expect(1);
@@ -1287,7 +1282,7 @@ public class Parser {
 	void DelegateDeclaration(Modifiers m, out TypeDeclaration td) {
 		Expect(21);
 		m.Check(Modifier.nonClassTypes); 
-		DelegateDeclaration dd = new DelegateDeclaration(t);
+		DelegateDeclaration dd = new DelegateDeclaration(t, this);
 		td = dd;
 		dd.SetModifiers(m.Value);
 		TypeReference returnType;
@@ -1298,8 +1293,7 @@ public class Parser {
 		dd.Name = t.val; 
 		if (la.kind == 100) {
 			TypeParameterCollection typePars = null; 
-			TypeParameterList(out typePars);
-			dd.AssignTypeParameters(typePars); 
+			TypeParameterList(dd);
 		}
 		Expect(98);
 		if (StartOf(7)) {
@@ -1314,16 +1308,15 @@ public class Parser {
 		Expect(114);
 	}
 
-	void TypeParameterList(out TypeParameterCollection typePars) {
-		typePars = new TypeParameterCollection(); 
+	void TypeParameterList(ITypeParameterOwner td) {
 		Expect(100);
 		TypeParameter tp; 
 		TypeParameter(out tp);
-		typePars.Add(tp); 
+		td.AddTypeParameter(tp); 
 		while (la.kind == 87) {
 			Get();
 			TypeParameter(out tp);
-			typePars.Add(tp); 
+			td.AddTypeParameter(tp); 
 		}
 		Expect(93);
 	}
@@ -1898,8 +1891,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		TypeParameterCollection typePars = null; 
 		
 		if (la.kind == 100) {
-			TypeParameterList(out typePars);
-			md.AssignTypeParameters(typePars); 
+			TypeParameterList(md);
 		}
 		Expect(98);
 		if (StartOf(7)) {
@@ -2794,7 +2786,7 @@ TypeReference typeRef) {
 		}
 	}
 
-	void TypeArgumentList(TypeArgumentCollection args) {
+	void TypeArgumentList(TypeReferenceCollection args) {
 		TypeReference paramType; 
 		Expect(100);
 		if (StartOf(11)) {

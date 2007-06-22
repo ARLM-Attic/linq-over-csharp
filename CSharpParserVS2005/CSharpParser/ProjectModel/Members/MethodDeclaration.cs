@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -8,15 +10,15 @@ namespace CSharpParser.ProjectModel
   /// This type represents a method declaration.
   /// </summary>
   // ==================================================================================
-  public class MethodDeclaration : MemberDeclaration, IBlockOwner
+  public class MethodDeclaration : MemberDeclaration, IBlockOwner, ITypeParameterOwner
   {
     #region Private fields
 
-    private TypeParameterCollection _TypeParameters = new TypeParameterCollection();
-    private FormalParameterCollection _FormalParameters = new FormalParameterCollection();
-    private List<TypeParameterConstraint> _ParameterConstraints
+    private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
+    private readonly FormalParameterCollection _FormalParameters = new FormalParameterCollection();
+    private readonly List<TypeParameterConstraint> _ParameterConstraints
       = new List<TypeParameterConstraint>();
-    private StatementCollection _Statements = new StatementCollection(null);
+    private readonly StatementCollection _Statements = new StatementCollection(null);
     private bool _HasBody;
 
     #endregion
@@ -84,24 +86,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Sets or the collection of attributes belonging to this method declaration.
-    /// </summary>
-    /// <param name="pars">Expression parameters to assign.</param>
-    // --------------------------------------------------------------------------------
-    public void AssignTypeParameters(TypeParameterCollection pars)
-    {
-      if (pars == null)
-      {
-        _TypeParameters.Clear();
-      }
-      else
-      {
-        _TypeParameters = pars;
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets the flag indicating if this method has a body or not.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -124,6 +108,30 @@ namespace CSharpParser.ProjectModel
     public void Add(Statement statement)
     {
       Statements.Add(statement);
+    }
+
+    #endregion
+
+    #region ITypeParameterOwner members
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new type parameter to the method declaration
+    /// </summary>
+    /// <param name="parameter">Type parameter</param>
+    // --------------------------------------------------------------------------------
+    public void AddTypeParameter(TypeParameter parameter)
+    {
+      try
+      {
+        (_TypeParameters as IRestrictedIndexedCollection<TypeParameter>).
+          Add(parameter);
+      }
+      catch (Exception)
+      {
+        Parser.Error("CS0692", parameter.Token,
+          String.Format("Duplicate type parameter '{0}'", parameter.Name));
+      }
     }
 
     #endregion

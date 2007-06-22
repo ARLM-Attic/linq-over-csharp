@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -19,6 +20,28 @@ namespace CSharpParser.ProjectModel
     public TypeParameter(Token token)
       : base(token)
     {
+    }
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a collection of type parameters.
+  /// </summary>
+  // ==================================================================================
+  public class TypeParameterCollection : RestrictedIndexedCollection<TypeParameter>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used for indexing.
+    /// </summary>
+    /// <param name="item">TypeParameter item.</param>
+    /// <returns>
+    /// Name of the type parameter.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(TypeParameter item)
+    {
+      return item.Name;
     }
   }
 }

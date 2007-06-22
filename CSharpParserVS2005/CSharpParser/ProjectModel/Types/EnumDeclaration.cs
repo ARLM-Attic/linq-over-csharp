@@ -24,8 +24,8 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public EnumDeclaration(Token token)
-      : base(token)
+    public EnumDeclaration(Token token, Parser parser)
+      : base(token, parser)
     {
     }
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
@@ -12,15 +11,16 @@ namespace CSharpParser
   /// This class is responsible for parsing all files in a C# project.
   /// </summary>
   // ==================================================================================
-  public sealed class ProjectParser
+  public sealed class CSharpProject
   {
     #region Private Fields
 
-    private ProjectFileCollection _Files = new ProjectFileCollection();
-    private Dictionary<string, NamespaceCollection> _DeclaredNamespaces = 
-      new Dictionary<string, NamespaceCollection>();
-    private string _WorkingFolder = string.Empty;
-    private List<Error> _Errors = new List<Error>();
+    private readonly ProjectFileCollection _Files = new ProjectFileCollection();
+    private readonly NamespaceCollection _DeclaredNamespaces = new NamespaceCollection();
+    private readonly TypeDeclarationCollection _DeclaredTypes = new TypeDeclarationCollection();
+    private readonly string _WorkingFolder = string.Empty;
+    private readonly ErrorCollection _Errors = new ErrorCollection();
+    private Parser _Parser;
 
     #endregion
 
@@ -32,7 +32,7 @@ namespace CSharpParser
     /// </summary>
     /// <param name="workingFolder">Folder used as the working folder</param>
     // --------------------------------------------------------------------------------
-    public ProjectParser(string workingFolder): this(workingFolder, false)
+    public CSharpProject(string workingFolder): this(workingFolder, false)
     {
     }
 
@@ -45,7 +45,7 @@ namespace CSharpParser
     /// If true, all C# files are added to the project.
     /// </param>
     // --------------------------------------------------------------------------------
-    public ProjectParser(string workingFolder, bool addCSharpFiles)
+    public CSharpProject(string workingFolder, bool addCSharpFiles)
     {
       _WorkingFolder = workingFolder;
       if (addCSharpFiles)
@@ -60,10 +60,20 @@ namespace CSharpParser
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Parser Parser
+    {
+      get { return _Parser; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the list of errors
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<Error> Errors
+    public ErrorCollection Errors
     {
       get { return _Errors; }
     }
@@ -83,9 +93,19 @@ namespace CSharpParser
     /// Gets the dictionary of all namespaces declared in this project.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, NamespaceCollection> DeclaredNamespaces
+    public NamespaceCollection DeclaredNamespaces
     {
       get { return _DeclaredNamespaces; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the dictionary of all types declared in this project.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeDeclarationCollection DeclaredTypes
+    {
+      get { return _DeclaredTypes; }
     }
 
     #endregion
@@ -100,9 +120,8 @@ namespace CSharpParser
     // --------------------------------------------------------------------------------
     public void AddFile(string fileName)
     {
-      // TODO: Check for duplication
-      (_Files as IRestrictedList<ProjectFile>).
-        Add(new ProjectFile(Path.Combine(_WorkingFolder, fileName), this));
+      string fullName = Path.Combine(_WorkingFolder, fileName);
+        (_Files as IRestrictedList<ProjectFile>).Add(new ProjectFile(fullName, this));
     }
 
     // --------------------------------------------------------------------------------
@@ -137,17 +156,17 @@ namespace CSharpParser
     public int Parse()
     {
       // --- Reset errors
-      _Errors.Clear();
+      (_Errors as IRestrictedList<Error>).Clear();
       int errors = 0;
       foreach (ProjectFile file in _Files)
       {
         Console.WriteLine("Parsing file '{0}'", file.FullName);
         Scanner scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
-        Parser parser = new Parser(scanner);
-        parser.Project = this;
-        parser.File = file;
-        parser.Parse();
-        errors += parser.errors.count;
+        _Parser = new Parser(scanner);
+        _Parser.Project = this;
+        _Parser.File = file;
+        _Parser.Parse();
+        errors += _Parser.errors.count;
       }
       return errors;
     }

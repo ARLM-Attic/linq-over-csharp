@@ -9,10 +9,15 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public abstract class LanguageElement
   {
+    #region Private fields
+
+    private readonly Token _Token;
+    private readonly Parser _Parser;
     private string _Name;
-    private int _StartLine;
-    private int _StartColumn;
-    private int _StartPosition;
+
+    #endregion
+
+    #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -23,10 +28,42 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected LanguageElement(Token token)
     {
-      _StartLine = token.line;
-      _StartColumn = token.col;
-      _StartPosition = token.pos;
+      _Token = token;
+      _Name = token.val;
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a language element descriptor according to the info provided by the
+    /// specified token.
+    /// </summary>
+    /// <param name="token">Token providing information about the element.</param>
+    /// <param name="parser">Parser instance</param>
+    // --------------------------------------------------------------------------------
+    protected LanguageElement(Token token, Parser parser)
+    {
+      _Token = token;
+      _Name = token.val;
+      _Parser = parser;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a language element descriptor according to the info provided by the
+    /// specified token and name.
+    /// </summary>
+    /// <param name="token">Token providing information about the element.</param>
+    /// <param name="name">Language element name</param>
+    // --------------------------------------------------------------------------------
+    protected LanguageElement(Token token, string name)
+    {
+      _Token = token;
+      _Name = name;
+    }
+
+    #endregion
+
+    #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -46,7 +83,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int StartLine
     {
-      get { return _StartLine; }
+      get { return _Token.line; }
     }
 
     // --------------------------------------------------------------------------------
@@ -56,7 +93,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int StartColumn
     {
-      get { return _StartColumn; }
+      get { return _Token.col; }
     }
 
     // --------------------------------------------------------------------------------
@@ -66,7 +103,29 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int StartPosition
     {
-      get { return _StartPosition; }
+      get { return _Token.pos; }
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Parser Parser
+    {
+      get { return _Parser; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the starting token of this language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Token Token
+    {
+      get { return _Token; }
+    }
+
+    #endregion
   }
 }
