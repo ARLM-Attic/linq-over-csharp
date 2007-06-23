@@ -235,10 +235,11 @@
     <None Include="TestFiles\EventDeclarations.cs" />
     <Compile Include="SimpleExpressionTests.cs" />
     <Compile Include="StringHelperTest.cs" />
+    <None Include="TestFiles\TypeParameters\DuplicatedConstraints.cs" />
     <None Include="TestFiles\ConstDeclarations.cs" />
     <None Include="TestFiles\ExternAliasDirective\ExternAliasDirectiveOK.cs" />
     <None Include="TestFiles\ExternAliasDirective\ExternAliasDirectiveFailed.cs" />
-    <Compile Include="TestFiles\SimpleExpressions.cs" />
+    <None Include="TestFiles\SimpleExpressions.cs" />
     <None Include="TestFiles\TypeParameters\DuplicatedTypeParams.cs" />
     <None Include="TestFiles\TypeParameters\TypeParamConstraintsAreOk.cs" />
     <None Include="TestFiles\EnumTest.cs" />

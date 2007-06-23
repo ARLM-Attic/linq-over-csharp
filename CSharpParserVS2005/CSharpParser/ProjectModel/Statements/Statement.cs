@@ -153,7 +153,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public class StatementCollection : List<Statement>
   {
-    private Statement _Parent;
+    private readonly Statement _Parent;
 
     // --------------------------------------------------------------------------------
     /// <summary>

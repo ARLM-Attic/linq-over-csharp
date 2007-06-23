@@ -43,7 +43,6 @@
     <Compile Include="ParserFiles\Scanner.cs" />
     <Compile Include="ParserFiles\TypeKind.cs" />
     <Compile Include="ProjectModel\AttributeArgument.cs" />
-    <Compile Include="ProjectModel\AttributeCollection.cs" />
     <Compile Include="ProjectModel\AttributeDeclaration.cs" />
     <Compile Include="ProjectModel\AttributedElement.cs" />
     <Compile Include="ProjectModel\Error.cs" />
@@ -204,11 +203,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\ImmutableIndexedCollection.cs" />
     <Compile Include="Utility\ImmutableList.cs" />
     <Compile Include="Utility\IndexedCollection.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
+    <Compile Include="Utility\RestrictedCollection.cs" />
     <Compile Include="Utility\RestrictedIndexedCollection.cs" />
     <Compile Include="Utility\RestrictedList.cs" />
     <Compile Include="Utility\StringHelper.cs" />

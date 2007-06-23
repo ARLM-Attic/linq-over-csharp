@@ -71,7 +71,7 @@ namespace CSharpParser.ProjectModel
   {
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Defines the key to be used by the indexing.
+    /// Defines the key to be used for indexing.
     /// </summary>
     /// <param name="item">Namespace item.</param>
     /// <returns>

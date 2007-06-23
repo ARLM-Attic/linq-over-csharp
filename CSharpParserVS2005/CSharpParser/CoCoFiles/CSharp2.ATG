@@ -48,7 +48,7 @@ COMPILER CS2
     public void Error(string code, Token errorPoint, string description)
     {
       Error error = new Error(code, errorPoint, _File.Name, description);
-      (_Project.Errors as IRestrictedList<Error>).Add(error);
+      _Project.Errors.Add(error);
       Error(description);
     }
 
@@ -65,7 +65,7 @@ COMPILER CS2
       params object[] parameters)
     {
       Error error = new Error(code, errorPoint, _File.Name, description, parameters);
-      (_Project.Errors as IRestrictedList<Error>).Add(error);
+      _Project.Errors.Add(error);
       Error(description);
     }
 
@@ -1034,12 +1034,10 @@ ClassDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
                                                         td = cd;
                                                      .)
   ident                                              (. cd.Name = t.val; .)
-  [                                                  (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<cd>
-  ] 
+  [ TypeParameterList<cd> ] 
   [ ClassBase<cd> ]
   {                                                  (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>   (. td.ParameterConstraints.Add(constraint); .)
+    TypeParameterConstraintsClause<out constraint>   (. td.AddTypeParameterConstraint(constraint); .)
   } ClassBody<td> 
   [ ";" ]                                                       
 .
@@ -1087,16 +1085,14 @@ StructDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
                                                       TypeReference typeRef;
                                                    .)
   ident                                            (. sd.Name = t.val; .)
-  [                                                (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<sd>   
-  ]
+  [ TypeParameterList<sd> ]
   [ ":"                                                     
   TypeName<out typeRef>                            (. sd.BaseTypes.Add(typeRef); .)
   { "," 
     TypeName<out typeRef>                          (. sd.BaseTypes.Add(typeRef); .)
   } ]
   {                                                (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint> (. td.ParameterConstraints.Add(constraint); .)
+    TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
   } StructBody<td>
   [ ";" ]                                                       
 .
@@ -1186,12 +1182,10 @@ DelegateDeclaration<Modifiers m, out TypeDeclaration td>
                                                    .)
   Type<out returnType, true>                       (. dd.ReturnType = returnType; .)
   ident                                            (. dd.Name = t.val; .)
-  [                                                (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<dd>            
-  ]
+  [ TypeParameterList<dd> ]
   "(" [ FormalParameterList<dd.FormalParameters> ] ")"
   {                                                (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint> (. td.ParameterConstraints.Add(constraint); .)
+    TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
   } 
   ";"                                                         
 .
@@ -1247,7 +1241,7 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
     )
   | CastOperatorDeclaration<attrs, m, td>
   |                                              (. TypeDeclaration nestedType; .)
-    TypeDeclaration<attrs, m, out nestedType>    (. nestedType.ParentType = td; .)
+    TypeDeclaration<attrs, m, out nestedType>    (. nestedType.DeclaringType = td; .)
   )
 .
 
@@ -1408,21 +1402,17 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
 =                                                   (. 
                                                        m.Check(Modifier.propEvntMeths);
                                                        MethodDeclaration md = new MethodDeclaration(t);
-                                                       td.Members.Add(md);
                                                        md.SetModifiers(m.Value);
                                                        md.AssignAttributes(attrs);
                                                        md.ExplicitName = memberRef;
                                                        md.ResultingType = typeRef;
-                                                       TypeParameterCollection typePars = null; 
                                                     .)
-  [                                                 
-    TypeParameterList<md>          
-  ]
+  [ TypeParameterList<md> ]
   "(" [ 
     FormalParameterList<md.FormalParameters>
   ] ")"
   {                                                 (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>  (. md.ParameterConstraints.Add(constraint); .)
+    TypeParameterConstraintsClause<out constraint>  (. md.AddTypeParameterConstraint(constraint); .)
   } 
   ( 
     Block<md>                                       (. 
@@ -1430,7 +1420,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
                                                        md.HasBody = true;
                                                     .)
     | ";"                                           (. md.HasBody = false; .)
-  )
+  )                                                 (. td.Members.Add(md); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1444,10 +1434,8 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
                                            m.Check(Modifier.operators);
                                            m.CheckMust(Modifier.operatorsMust);
                                            CastOperatorDeclaration cod = new CastOperatorDeclaration(t);
-                                           cod.Name = "";
                                            cod.SetModifiers(m.Value);
                                            cod.AssignAttributes(attrs);
-                                           td.Members.Add(cod);
                                            TypeReference typeRef;
                                         .)
     ( 
@@ -1457,12 +1445,13 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
     Type<out typeRef, false>            (. 
                                            if (typeRef.Kind == TypeKind.@void) { Error("cast type must not be void"); } 
                                            cod.ResultingType = typeRef;
+                                           cod.Name = typeRef.RightmostName;
                                         .)
     "("                                 (. FormalParameter fp = new FormalParameter(t);.)
       Type<out typeRef, false>          (. fp.Type = typeRef; .)
       ident                             (. fp.Name = t.val; .)
     ")"                                 (. cod.FormalParameters.Add(fp); .)
-    ( Block<cod> | ";" )
+    ( Block<cod> | ";" )                (. td.Members.Add(cod); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1479,7 +1468,6 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                       m.CheckMust(Modifier.operatorsMust);
                                       if (typeRef.Kind == TypeKind.@void) { Error("operator not allowed on void"); } 
                                       OperatorDeclaration od = new OperatorDeclaration(t);
-                                      td.Members.Add(od);
                                       od.SetModifiers(m.Value);
                                       od.AssignAttributes(attrs);
                                       od.ResultingType = typeRef;
@@ -1488,6 +1476,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
   "operator" 
   OverloadableOp<out op>           (. od.Operator = op; .)
   "("                              (. 
+                                      od.Name = op.ToString(); 
                                       FormalParameter fp = new FormalParameter(t);
                                       TypeReference parType;
                                          .)
@@ -1505,7 +1494,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                    (. if ((op & Operator.binary) == 0) Error("too many operands for unary operator"); .)
   |                                (. if ((op & Operator.unary) == 0) Error("too few operands for binary operator"); .)
   ) ")"
-  ( Block<od> | ";" )    
+  ( Block<od> | ";" )              (. td.Members.Add(od); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1523,12 +1512,10 @@ InterfaceDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
                        ifd.IsPartial = isPartial;
                     .)
   ident                                               (. ifd.Name = t.val; .)
-  [                                                   (. TypeParameterCollection typePars = null; .)
-    TypeParameterList<ifd>            
-  ]
+  [ TypeParameterList<ifd> ]
   [ InterfaceBase<ifd> ]
   {                                                   (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>    (. td.ParameterConstraints.Add(constraint); .)
+    TypeParameterConstraintsClause<out constraint>    (. td.AddTypeParameterConstraint(constraint); .)
   }
   "{" { InterfaceMemberDeclaration<ifd> } "}" 
   [ ";" ]                                                       
@@ -1709,6 +1696,8 @@ FormalParameterList<FormalParameterCollection pars>
   | "params"                           (. fp.HasParams = true; .)
     Type<out typeRef, false>           (. if (typeRef.Kind != TypeKind.array) { Error("params argument must be an array"); } .)
     ident                              (. fp.Name = t.val; .)
+                                       (. fp.Type = typeRef; .)
+                                       (. pars.Add(fp); .)
   )
 .
 
@@ -2029,6 +2018,7 @@ MemberName<out TypeReference typeRef>
       "." ident                          (. 
                                             nextType.SubType = new TypeReference(t);
                                             nextType.SubType.Name = t.val;
+                                            nextType = nextType.SubType;
                                          .)
     [ 
       IF (la.kind == _lt && IsPartOfMemberName()) 
@@ -3349,7 +3339,7 @@ OverloadableOp<out Operator op> (. op = Operator.plus; .)
 
 // ------------------------------------------------------------------------------------
 // Type parameter declarations for generic types.
-// +typePars: resulting list of type parameters.
+// +td: Type parameter owner.
 // ------------------------------------------------------------------------------------
 TypeParameterList<ITypeParameterOwner td>
 =                            
@@ -3378,7 +3368,7 @@ TypeParameter<out TypeParameter tp>
 // Declaration of a type argument list.
 // +typeRef: Type that has the argument list defined here.
 // ------------------------------------------------------------------------------------
-TypeArgumentList<TypeArgumentCollection args>  (. TypeReference paramType; .)
+TypeArgumentList<TypeReferenceCollection args>  (. TypeReference paramType; .)
 =
   /*
      We are a bit sloppy here and allow the type arguments to be "empty"

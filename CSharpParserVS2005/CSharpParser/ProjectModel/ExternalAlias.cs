@@ -29,19 +29,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of external aliases within a project file.
   /// </summary>
   // ==================================================================================
-  public class ExternalAliasCollection : RestrictedList<ExternalAlias>
+  public class ExternalAliasCollection : RestrictedCollection<ExternalAlias>
   {
-    #region Lifecycle methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a new empty collection of external aliases.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ExternalAliasCollection()
-    {
-    }
-
-    #endregion
   }
 }

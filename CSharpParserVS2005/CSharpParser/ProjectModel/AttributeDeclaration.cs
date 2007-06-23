@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -14,7 +15,7 @@ namespace CSharpParser.ProjectModel
 
     private string _Scope;
     private TypeReference _TypeReference;
-    private List<AttributeArgument> _Arguments = new List<AttributeArgument>();
+    private readonly List<AttributeArgument> _Arguments = new List<AttributeArgument>();
 
     #endregion
 
@@ -71,5 +72,14 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a collection of attribute declarations.
+  /// </summary>
+  // ==================================================================================
+  public class AttributeCollection : RestrictedCollection<AttributeDeclaration>
+  {
   }
 }

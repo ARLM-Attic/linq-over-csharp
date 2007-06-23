@@ -130,7 +130,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents list of errors.
   /// </summary>
   // ==================================================================================
-  public sealed class ErrorCollection : RestrictedList<Error>
+  public sealed class ErrorCollection : RestrictedCollection<Error>
   {
   }
 }

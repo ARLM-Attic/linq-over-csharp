@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
@@ -97,6 +98,53 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the signature of this method.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string Signature
+    {
+      get
+      {
+        StringBuilder sb = new StringBuilder(100);
+        bool isFirst;
+        sb.Append(FullName);
+        if (_TypeParameters.Count != 0)
+        {
+          sb.Append('<');
+          isFirst = true;
+          foreach (TypeParameter par in _TypeParameters)
+          {
+            if (!isFirst)
+            {
+              sb.Append(", ");
+            }
+            sb.Append(par.Name);
+            isFirst = false;
+          }
+          sb.Append('>');
+        }
+        sb.Append('(');
+        isFirst = true;
+        foreach (FormalParameter par in _FormalParameters)
+        {
+          if (!isFirst)
+          {
+            sb.Append(", ");
+          }
+          sb.Append(par.Type.FullName);
+          isFirst = false;
+        }
+        sb.Append(')');
+        return sb.ToString();
+      }
+    }
+
+    #endregion
+
     #region IBlockOwner Members
 
     // --------------------------------------------------------------------------------
@@ -124,13 +172,33 @@ namespace CSharpParser.ProjectModel
     {
       try
       {
-        (_TypeParameters as IRestrictedIndexedCollection<TypeParameter>).
-          Add(parameter);
+        _TypeParameters.Add(parameter);
       }
-      catch (Exception)
+      catch (ArgumentException)
       {
         Parser.Error("CS0692", parameter.Token,
           String.Format("Duplicate type parameter '{0}'", parameter.Name));
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new type parameter constraint to the type declaration
+    /// </summary>
+    /// <param name="constraint">Type parameter constraint</param>
+    // --------------------------------------------------------------------------------
+    public void AddTypeParameterConstraint(TypeParameterConstraint constraint)
+    {
+      try
+      {
+        _ParameterConstraints.Add(constraint);
+      }
+      catch (ArgumentException)
+      {
+        Parser.Error("CS0409", constraint.Token,
+          String.Format("A constraint clause has already been specified for type " +
+          "parameter '{0}'. All of the constraints for a type parameter must be " +
+          "specified in a single where clause.", constraint.Name));
       }
     }
 

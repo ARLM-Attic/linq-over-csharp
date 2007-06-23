@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -102,13 +102,29 @@ namespace CSharpParser.ProjectModel
       {
         if (HasSubType)
         {
-          return string.Format("{0}{1}{2}", Name, IsGlobal ? "::" : ".", _SubType.FullName);
+          return string.Format("{0}{1}{2}", TypeName, IsGlobal ? "::" : ".", _SubType.FullName);
         }
         else
         {
-          return Name;
+          return TypeName;
         }
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets type name of this type reference (Name modified with the array or 
+    /// pointer modifier).
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string TypeName
+    {
+      get
+      {
+        if(_Kind == TypeKind.array) return Name + "[]";
+        else if (_Kind == TypeKind.pointer) return Name + "*";
+        else return Name;
+      }  
     }
 
     // --------------------------------------------------------------------------------
@@ -144,6 +160,6 @@ namespace CSharpParser.ProjectModel
   /// This type represents a collection of type references.
   /// </summary>
   // ==================================================================================
-  public sealed class TypeReferenceCollection : List<TypeReference>
+  public sealed class TypeReferenceCollection : RestrictedCollection<TypeReference>
   {}
 }

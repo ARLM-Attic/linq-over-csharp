@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Collections;
 
 namespace CSharpParser.ProjectModel
 {
@@ -82,5 +83,29 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a list of type parameter constraint that can be indexed 
+  /// by the constraint parameter name.
+  /// </summary>
+  // ==================================================================================
+  public class TypeParameterConstraintCollection : 
+    RestrictedIndexedCollection<TypeParameterConstraint>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used for indexing.
+    /// </summary>
+    /// <param name="item">Namespace item.</param>
+    /// <returns>
+    /// Full name of the namespace.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(TypeParameterConstraint item)
+    {
+      return item.Name;
+    }
   }
 }

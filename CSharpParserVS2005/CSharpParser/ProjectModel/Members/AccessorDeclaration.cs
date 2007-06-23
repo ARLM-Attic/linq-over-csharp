@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private bool _HasBody;
-    private StatementCollection _Statements = new StatementCollection(null);
+    private readonly StatementCollection _Statements = new StatementCollection(null);
 
     #endregion
 

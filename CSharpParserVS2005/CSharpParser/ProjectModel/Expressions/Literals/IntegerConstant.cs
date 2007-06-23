@@ -33,7 +33,6 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public static IntegerConstant Create(Token t)
     {
-      Console.WriteLine("{0}: {1}", t.val, t.line);
       string valueStr = t.val.ToLower();
       if (valueStr.StartsWith("0x"))
       {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -68,7 +69,7 @@ namespace CSharpParser.ProjectModel
     {
       if (attrs == null)
       {
-        _Attributes.Clear();
+        (_Attributes as IList<AttributeDeclaration>).Clear();
       }
       else
       {

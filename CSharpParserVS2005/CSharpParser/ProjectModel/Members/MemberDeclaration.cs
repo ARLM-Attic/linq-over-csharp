@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -93,6 +94,7 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "new" modifier or not.
     /// </summary>
@@ -102,6 +104,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsNew; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "unsafe" modifier or not.
     /// </summary>
@@ -111,6 +114,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsUnsafe; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "static" modifier or not.
     /// </summary>
@@ -120,6 +124,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsStatic; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "virtual" modifier or not.
     /// </summary>
@@ -129,6 +134,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsVirtual; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "sealed" modifier or not.
     /// </summary>
@@ -138,6 +144,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsSealed; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "override" modifier or not.
     /// </summary>
@@ -147,6 +154,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsOverride; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "abstract" modifier or not.
     /// </summary>
@@ -156,6 +164,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsAbstract; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this property has the "extern" modifier or not.
     /// </summary>
@@ -165,6 +174,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsExtern; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this field has the "readonly" modifier or not.
     /// </summary>
@@ -174,6 +184,7 @@ namespace CSharpParser.ProjectModel
       get { return _IsReadOnly; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this field has the "volatile" modifier or not.
     /// </summary>
@@ -181,6 +192,16 @@ namespace CSharpParser.ProjectModel
     public bool IsVolatile
     {
       get { return _IsVolatile; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of the member.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string FullName
+    {
+      get { return _ExplicitName == null ? Name : _ExplicitName.FullName;  }
     }
 
     #endregion
@@ -217,5 +238,44 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Virtual methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the signature of the member.
+    /// </summary>
+    /// <remarks>By default, it is the full name of the member.</remarks>
+    // --------------------------------------------------------------------------------
+    public virtual string Signature
+    {
+      get { return FullName; }
+    }
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of member declarations that can be indexed by the
+  /// signature of the type.
+  /// </summary>
+  // ==================================================================================
+  public sealed class MemberDeclarationCollection : 
+    RestrictedIndexedCollection<MemberDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used for indexing.
+    /// </summary>
+    /// <param name="item">TypeDeclaration item.</param>
+    /// <returns>
+    /// Signature of the member declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(MemberDeclaration item)
+    {
+      return item.Signature;
+    }
   }
 }

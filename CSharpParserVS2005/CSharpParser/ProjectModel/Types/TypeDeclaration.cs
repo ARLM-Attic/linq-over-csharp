@@ -32,15 +32,17 @@ namespace CSharpParser.ProjectModel
     private Visibility _Visibility;
     private bool _DefaultVisibility;
     private NamespaceFragment _Namespace;
-    private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
-    private readonly List<TypeParameterConstraint> _ParameterConstraints =
-      new List<TypeParameterConstraint>();
-    private readonly List<TypeReference> _BaseTypes = new List<TypeReference>();
+    private readonly TypeReferenceCollection _BaseTypes = new TypeReferenceCollection();
+    private TypeDeclaration _DeclaringType;
     private bool _IsNew;
     private bool _IsUnsafe;
-    private TypeDeclaration _ParentType;
+    private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
+    private readonly TypeParameterConstraintCollection _ParameterConstraints =
+      new TypeParameterConstraintCollection();
     private readonly TypeDeclarationCollection _NestedTypes = new TypeDeclarationCollection();
-    private readonly List<MemberDeclaration> _Members = new List<MemberDeclaration>();
+    private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
+
+    
 
     #endregion
 
@@ -99,7 +101,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type parameter constraints belonging to this type
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<TypeParameterConstraint> ParameterConstraints
+    public TypeParameterConstraintCollection ParameterConstraints
     {
       get { return _ParameterConstraints; }
     }
@@ -119,7 +121,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the base type elements belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<TypeReference> BaseTypes
+    public TypeReferenceCollection BaseTypes
     {
       get { return _BaseTypes; }
     }
@@ -144,7 +146,7 @@ namespace CSharpParser.ProjectModel
       get
       {
         string normalName = IsNestedType 
-          ? _ParentType.FullName + "+" + Name 
+          ? _DeclaringType.FullName + "+" + Name 
           : Name;
         if (IsGenericType)
         {
@@ -243,14 +245,13 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the parent of this type declaration
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeDeclaration ParentType
+    public TypeDeclaration DeclaringType
     {
-      get { return _ParentType; }
+      get { return _DeclaringType; }
       set
       {
-        _ParentType = value;
-        (_ParentType.NestedTypes as IRestrictedIndexedCollection<TypeDeclaration>).
-          Add(this);
+        _DeclaringType = value;
+        _DeclaringType.NestedTypes.Add(this);
       }
     }
 
@@ -271,7 +272,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedType
     {
-      get { return _ParentType != null; }
+      get { return _DeclaringType != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -350,7 +351,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the members belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<MemberDeclaration> Members
+    public MemberDeclarationCollection Members
     {
       get { return _Members; }
     }
@@ -454,13 +455,33 @@ namespace CSharpParser.ProjectModel
     {
       try
       {
-        (_TypeParameters as IRestrictedIndexedCollection<TypeParameter>).
-          Add(parameter);
+        _TypeParameters.Add(parameter);
       }
-      catch (Exception)
+      catch (ArgumentException)
       {
         Parser.Error("CS0692", parameter.Token, 
           String.Format("Duplicate type parameter '{0}'", parameter.Name));
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new type parameter constraint to the type declaration
+    /// </summary>
+    /// <param name="constraint">Type parameter constraint</param>
+    // --------------------------------------------------------------------------------
+    public void AddTypeParameterConstraint(TypeParameterConstraint constraint)
+    {
+      try
+      {
+        _ParameterConstraints.Add(constraint);
+      }
+      catch (ArgumentException)
+      {
+        Parser.Error("CS0409", constraint.Token,
+          String.Format("A constraint clause has already been specified for type " + 
+          "parameter '{0}'. All of the constraints for a type parameter must be " +
+          "specified in a single where clause.", constraint.Name));
       }
     }
 

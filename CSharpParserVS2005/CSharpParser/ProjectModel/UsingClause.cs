@@ -65,7 +65,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of using clauses.
   /// </summary>
   // ==================================================================================
-  public class UsingClauseCollection : RestrictedList<UsingClause>
+  public class UsingClauseCollection : RestrictedCollection<UsingClause>
   {
   }
 }

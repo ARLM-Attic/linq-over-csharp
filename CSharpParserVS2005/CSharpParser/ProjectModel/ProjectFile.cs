@@ -19,7 +19,7 @@ namespace CSharpParser.ProjectModel
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
     private readonly AttributeCollection _GlobalAttributes = new AttributeCollection();
-    private readonly List<NamespaceFragment> _Namespaces = new List<NamespaceFragment>();
+    private readonly NamespaceFragmentCollection _Namespaces = new NamespaceFragmentCollection();
     private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
 
     #endregion
@@ -119,7 +119,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of namespace declarations in this project file
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<NamespaceFragment> Namespaces
+    public NamespaceFragmentCollection Namespaces
     {
       get { return _Namespaces; }
     }
@@ -146,7 +146,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddExternAlias(ExternalAlias item)
     {
-      (_ExternAliases as IRestrictedList<ExternalAlias>).Add(item);
+      _ExternAliases.Add(item);
     }
 
     // --------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddUsingClause(UsingClause item)
     {
-      (_Usings as IRestrictedList<UsingClause>).Add(item);
+      _Usings.Add(item);
     }
 
 
@@ -169,11 +169,8 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddTypeDeclaration(TypeDeclaration item)
     {
-      (_TypeDeclarations as IRestrictedIndexedCollection<TypeDeclaration>).
-        Add(item);
-      (_ParentProject.DeclaredTypes
-        as IRestrictedIndexedCollection<TypeDeclaration>).Add(item);
-
+      _TypeDeclarations.Add(item);
+      _ParentProject.DeclaredTypes.Add(item);
     }
 
     #endregion
@@ -184,7 +181,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of project files.
   /// </summary>
   // ==================================================================================
-  public class ProjectFileCollection : RestrictedList<ProjectFile>
+  public class ProjectFileCollection : RestrictedCollection<ProjectFile>
   {
   }
 }

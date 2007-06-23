@@ -195,7 +195,7 @@ public class Parser {
     public void Error(string code, Token errorPoint, string description)
     {
       Error error = new Error(code, errorPoint, _File.Name, description);
-      (_Project.Errors as IRestrictedList<Error>).Add(error);
+      _Project.Errors.Add(error);
       Error(description);
     }
 
@@ -212,7 +212,7 @@ public class Parser {
       params object[] parameters)
     {
       Error error = new Error(code, errorPoint, _File.Name, description, parameters);
-      (_Project.Errors as IRestrictedList<Error>).Add(error);
+      _Project.Errors.Add(error);
       Error(description);
     }
 
@@ -1174,7 +1174,6 @@ public class Parser {
 		Expect(1);
 		cd.Name = t.val; 
 		if (la.kind == 100) {
-			TypeParameterCollection typePars = null; 
 			TypeParameterList(cd);
 		}
 		if (la.kind == 86) {
@@ -1183,7 +1182,7 @@ public class Parser {
 		while (la.kind == 1) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintsClause(out constraint);
-			td.ParameterConstraints.Add(constraint); 
+			td.AddTypeParameterConstraint(constraint); 
 		}
 		ClassBody(td);
 		if (la.kind == 114) {
@@ -1202,7 +1201,6 @@ public class Parser {
 		Expect(1);
 		sd.Name = t.val; 
 		if (la.kind == 100) {
-			TypeParameterCollection typePars = null; 
 			TypeParameterList(sd);
 		}
 		if (la.kind == 86) {
@@ -1218,7 +1216,7 @@ public class Parser {
 		while (la.kind == 1) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintsClause(out constraint);
-			td.ParameterConstraints.Add(constraint); 
+			td.AddTypeParameterConstraint(constraint); 
 		}
 		StructBody(td);
 		if (la.kind == 114) {
@@ -1236,7 +1234,6 @@ public class Parser {
 		Expect(1);
 		ifd.Name = t.val; 
 		if (la.kind == 100) {
-			TypeParameterCollection typePars = null; 
 			TypeParameterList(ifd);
 		}
 		if (la.kind == 86) {
@@ -1245,7 +1242,7 @@ public class Parser {
 		while (la.kind == 1) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintsClause(out constraint);
-			td.ParameterConstraints.Add(constraint); 
+			td.AddTypeParameterConstraint(constraint); 
 		}
 		Expect(96);
 		while (StartOf(6)) {
@@ -1292,7 +1289,6 @@ public class Parser {
 		Expect(1);
 		dd.Name = t.val; 
 		if (la.kind == 100) {
-			TypeParameterCollection typePars = null; 
 			TypeParameterList(dd);
 		}
 		Expect(98);
@@ -1303,7 +1299,7 @@ public class Parser {
 		while (la.kind == 1) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintsClause(out constraint);
-			td.ParameterConstraints.Add(constraint); 
+			td.AddTypeParameterConstraint(constraint); 
 		}
 		Expect(114);
 	}
@@ -1479,7 +1475,7 @@ public class Parser {
 		} else if (StartOf(12)) {
 			TypeDeclaration nestedType; 
 			TypeDeclaration(attrs, m, out nestedType);
-			nestedType.ParentType = td; 
+			nestedType.DeclaringType = td; 
 		} else SynErr(142);
 	}
 
@@ -1663,6 +1659,8 @@ public class Parser {
 			if (typeRef.Kind != TypeKind.array) { Error("params argument must be an array"); } 
 			Expect(1);
 			fp.Name = t.val; 
+			fp.Type = typeRef; 
+			pars.Add(fp); 
 		} else SynErr(146);
 	}
 
@@ -1753,7 +1751,6 @@ TypeDeclaration td) {
 		m.CheckMust(Modifier.operatorsMust);
 		if (typeRef.Kind == TypeKind.@void) { Error("operator not allowed on void"); } 
 		OperatorDeclaration od = new OperatorDeclaration(t);
-		td.Members.Add(od);
 		od.SetModifiers(m.Value);
 		od.AssignAttributes(attrs);
 		od.ResultingType = typeRef;
@@ -1763,6 +1760,7 @@ TypeDeclaration td) {
 		OverloadableOp(out op);
 		od.Operator = op; 
 		Expect(98);
+		od.Name = op.ToString(); 
 		FormalParameter fp = new FormalParameter(t);
 		TypeReference parType;
 		   
@@ -1791,6 +1789,7 @@ TypeDeclaration td) {
 		} else if (la.kind == 114) {
 			Get();
 		} else SynErr(151);
+		td.Members.Add(od); 
 	}
 
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
@@ -1828,6 +1827,7 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 			Expect(1);
 			nextType.SubType = new TypeReference(t);
 			nextType.SubType.Name = t.val;
+			nextType = nextType.SubType;
 			
 			if (la.kind == _lt && IsPartOfMemberName()) {
 				TypeArgumentList(typeRef.Arguments);
@@ -1883,12 +1883,10 @@ TypeReference memberRef, TypeDeclaration td) {
 TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		m.Check(Modifier.propEvntMeths);
 		MethodDeclaration md = new MethodDeclaration(t);
-		td.Members.Add(md);
 		md.SetModifiers(m.Value);
 		md.AssignAttributes(attrs);
 		md.ExplicitName = memberRef;
 		md.ResultingType = typeRef;
-		TypeParameterCollection typePars = null; 
 		
 		if (la.kind == 100) {
 			TypeParameterList(md);
@@ -1901,7 +1899,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		while (la.kind == 1) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintsClause(out constraint);
-			md.ParameterConstraints.Add(constraint); 
+			md.AddTypeParameterConstraint(constraint); 
 		}
 		if (la.kind == 96) {
 			Block(md);
@@ -1912,16 +1910,15 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			Get();
 			md.HasBody = false; 
 		} else SynErr(152);
+		td.Members.Add(md); 
 	}
 
 	void CastOperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
 		m.Check(Modifier.operators);
 		m.CheckMust(Modifier.operatorsMust);
 		CastOperatorDeclaration cod = new CastOperatorDeclaration(t);
-		cod.Name = "";
 		cod.SetModifiers(m.Value);
 		cod.AssignAttributes(attrs);
-		td.Members.Add(cod);
 		TypeReference typeRef;
 		
 		if (la.kind == 37) {
@@ -1934,6 +1931,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		Type(out typeRef, false);
 		if (typeRef.Kind == TypeKind.@void) { Error("cast type must not be void"); } 
 		cod.ResultingType = typeRef;
+		cod.Name = typeRef.RightmostName;
 		
 		Expect(98);
 		FormalParameter fp = new FormalParameter(t);
@@ -1948,6 +1946,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else if (la.kind == 114) {
 			Get();
 		} else SynErr(154);
+		td.Members.Add(cod); 
 	}
 
 	void SingleConstMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 

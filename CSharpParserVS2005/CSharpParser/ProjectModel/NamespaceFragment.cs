@@ -46,7 +46,7 @@ namespace CSharpParser.ProjectModel
       // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
       if (_ParentNamespace != null)
       {
-        (_ParentNamespace.NestedNamespaces as IRestrictedList<NamespaceFragment>).Add(this);
+        _ParentNamespace.NestedNamespaces.Add(this);
       }
 
       // --- A namespace must belong to a file.
@@ -67,15 +67,14 @@ namespace CSharpParser.ProjectModel
       if (project.DeclaredNamespaces.TryGetValue(FullName, out nameSpace))
       {
         // --- This namespace has been declared, add the new fragment.
-        (nameSpace.Fragments as IRestrictedList<NamespaceFragment>).Add(this);
+        nameSpace.Fragments.Add(this);
       }
       else
       {
         // --- This is the first declaration of this namespace.
         Namespace newNamespace = new Namespace(FullName);
-        (newNamespace.Fragments as IRestrictedList<NamespaceFragment>).Add(this);
-        (project.DeclaredNamespaces as IRestrictedIndexedCollection<Namespace>).
-          Add(newNamespace);
+        newNamespace.Fragments.Add(this);
+        project.DeclaredNamespaces.Add(newNamespace);
       }
     }
 
@@ -180,7 +179,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddExternAlias(ExternalAlias item)
     {
-      (_ExternAliases as IRestrictedList<ExternalAlias>).Add(item);
+      _ExternAliases.Add(item);
     }
 
     // --------------------------------------------------------------------------------
@@ -191,7 +190,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddUsingClause(UsingClause item)
     {
-      (_Usings as IRestrictedList<UsingClause>).Add(item);
+      _Usings.Add(item);
     }
 
     // --------------------------------------------------------------------------------
@@ -203,10 +202,8 @@ namespace CSharpParser.ProjectModel
     public void AddTypeDeclaration(TypeDeclaration item)
     {
       item.Namespace = this;
-      (_TypeDeclarations as IRestrictedIndexedCollection<TypeDeclaration>).
-        Add(item);
-      (_ParentFile.ParentProject.DeclaredTypes
-        as IRestrictedIndexedCollection<TypeDeclaration>).Add(item);
+      _TypeDeclarations.Add(item);
+      _ParentFile.ParentProject.DeclaredTypes.Add(item);
     }
 
     #endregion
@@ -217,7 +214,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of namespaces.
   /// </summary>
   // ==================================================================================
-  public class NamespaceFragmentCollection : RestrictedList<NamespaceFragment>
+  public class NamespaceFragmentCollection : RestrictedCollection<NamespaceFragment>
   {
   }
 }

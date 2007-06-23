@@ -15,7 +15,7 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"TypeParameters\TypeParamConstraintsAreOk.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
-      List<TypeParameterConstraint> coList = td.ParameterConstraints;
+      TypeParameterConstraintCollection coList = td.ParameterConstraints;
       Assert.AreEqual(coList.Count, 6);
 
       TypeParameterConstraint con = coList[0];
@@ -79,6 +79,17 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[0].Code, "CS0692");
       Assert.AreEqual(parser.Errors[1].Code, "CS0692");
       Assert.AreEqual(parser.Errors[2].Code, "CS0692");
+    }
+
+    [TestMethod]
+    public void DuplicatedParameterConstraintsFail()
+    {
+      CSharpProject parser = new CSharpProject(WorkingFolder);
+      parser.AddFile(@"TypeParameters\DuplicatedConstraints.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0409");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0409");
     }
   }
 }
