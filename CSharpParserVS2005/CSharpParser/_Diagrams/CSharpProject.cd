@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Segoe UI" Size="9" />
+  <Class Name="CSharpParser.CSharpProject" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\CSharpProject.cs</FileName>
+      <HashCode>ABQgAAAIAAAAEQIEAAAAAhAAAAEQEAAAAIAAAAAAAIE=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Files" />
+      <Property Name="DeclaredTypes" />
+      <Property Name="Errors" />
+      <Property Name="DeclaredNamespaces" />
+      <Property Name="References" />
+    </ShowAsCollectionAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <AssociationLine Name="DeclaredTypes" Type="CSharpParser.ProjectModel.TypeDeclaration" FixedFromPoint="true">
+      <Path>
+        <Point X="1.375" Y="1.062" />
+        <Point X="1.375" Y="2.423" />
+        <Point X="3.75" Y="2.423" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Errors" Type="CSharpParser.ProjectModel.Error" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.062" Y="1.062" />
+        <Point X="1.062" Y="3.531" />
+        <Point X="3.75" Y="3.531" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="DeclaredNamespaces" Type="CSharpParser.ProjectModel.Namespace" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.792" Y="1.062" />
+        <Point X="1.792" Y="1.531" />
+        <Point X="3.75" Y="1.531" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="References" Type="CSharpParser.ProjectModel.CompilationReference" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="0.688" Y="1.062" />
+        <Point X="0.688" Y="4.281" />
+        <Point X="3.75" Y="4.281" />
+      </Path>
+    </AssociationLine>
+  </Class>
+  <Class Name="CSharpParser.ProjectModel.ProjectFile" Collapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\ProjectFile.cs</FileName>
+      <HashCode>QAAAAAEACoQAQIAAAAAAIAQAAAAAEAgAgAAABEAEBgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CSharpParser.ProjectModel.TypeDeclaration" Collapsed="true">
+    <Position X="3.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\Types\TypeDeclaration.cs</FileName>
+      <HashCode>IEAAAMgQACRABIAEBAEgAhIABkAAIABIAkkUAUwCkKA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CSharpParser.ProjectModel.Error" Collapsed="true">
+    <Position X="3.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\Error.cs</FileName>
+      <HashCode>AAAAAAAAAAQgAAAgAABgAAAAAAAEEAgEAAAAAAABAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CSharpParser.ProjectModel.Namespace" Collapsed="true">
+    <Position X="3.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\Namespace.cs</FileName>
+      <HashCode>AAAAAAAAAQAAAAAAAgAAIAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Fragments" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="CSharpParser.ProjectModel.NamespaceFragment" Collapsed="true">
+    <Position X="6.25" Y="1.25" Width="2" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\NamespaceFragment.cs</FileName>
+      <HashCode>QAAAAAAAAIQAAIAgACBQAEAAAAACAAoAAAAABAAMAgE=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CSharpParser.ProjectModel.CompilationReference" Collapsed="true">
+    <Position X="3.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProjectModel\CompilationReference.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAIAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+</ClassDiagram>

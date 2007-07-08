@@ -2,14 +2,22 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using CSharpParser.ProjectModel;
-using CSharpParser.Collections;
 
 using System;
 
 namespace CSharpParser.ParserFiles {
 
 
-public class Parser {
+
+// ==================================================================================
+/// <summary>
+/// This class implements the C# syntax parser functionality.
+/// </summary>
+// ==================================================================================
+public class CSharpSyntaxParser 
+{
+  #region These constants represent the grammar elements of the C# syntax.
+  
 	const int _EOF = 0;
 	const int _ident = 1;
 	const int _intCon = 2;
@@ -142,47 +150,41 @@ public class Parser {
 	const int _ppRegion = 140;
 	const int _ppEndReg = 141;
 
-	const bool T = true;
-	const bool x = false;
-	const int minErrDist = 2;
+  #endregion
+
+  #region These constants are used within the parser independently of C# syntax.
+
+  /// <summary>Represents the "true" value in the token set table.</summary>
+  const bool T = true;
+
+  /// <summary>Represents the "false" value in the token set table.</summary>
+  const bool x = false;
 	
-	public Scanner scanner;
-	public Errors  errors;
+  /// <summary>
+  /// Represents the minimum distance (measured by tokens) between two error points 
+  /// that are taken into account as separate errors.
+  /// </summary>
+  const int MinimumDistanceOfSeparateErrors = 2;
 
-	public Token t;    // last recognized token
-	public Token la;   // lookahead token
-	int errDist = minErrDist;
+  #endregion
 
-#region Project Model extension
+  #region Fields used by the parser
 
-    private CSharpProject _Project;
-    private ProjectFile _File;
+  /// <summary>Scanner used by the parser to obtain tokens.</summary>
+  private Scanner _Scanner;
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the instance representing the project being parsed
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public CSharpProject Project
-    {
-      get { return _Project; }
-      set { _Project = value; }
-    }
+  /// <summary>Represents the last recognized token.</summary>
+  private Token t;
+  
+  /// <summary>Represents the lookahead token.</summary>
+  private Token la;
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the instance representing the file being parsed
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ProjectFile File
-    {
-      get { return _File; }
-      set { _File = value; }
-    }
+  /// <summary>Represents the current distance from the last error.</summary>
+  private int errDist = MinimumDistanceOfSeparateErrors;
 
-    #endregion
+  #endregion
 
-    #region Error handling
+#region Error handling
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -194,9 +196,7 @@ public class Parser {
     // --------------------------------------------------------------------------------
     public void Error(string code, Token errorPoint, string description)
     {
-      Error error = new Error(code, errorPoint, _File.Name, description);
-      _Project.Errors.Add(error);
-      Error(description);
+      _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, null);
     }
 
     // --------------------------------------------------------------------------------
@@ -211,9 +211,7 @@ public class Parser {
     public void Error(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      Error error = new Error(code, errorPoint, _File.Name, description, parameters);
-      _Project.Errors.Add(error);
-      Error(description);
+      _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
     }
 
     #endregion
@@ -354,7 +352,7 @@ public class Parser {
       if (!IsConditionalSymbol(symbol))
       {
         int state = 0;
-        Token cur = scanner.Scan();
+        Token cur = _Scanner.Scan();
 
         for (; ; )
         {
@@ -371,10 +369,10 @@ public class Parser {
             case _ppElse:
               if (state == 0) { return; }
               break;
-            case _EOF: Error("Incomplete file."); return;
+            case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
             default: break;
           }
-          cur = scanner.Scan();
+          cur = _Scanner.Scan();
         }
       }
     }
@@ -390,7 +388,7 @@ public class Parser {
     void ElifOrElsePragma()
     {
       int state = 0;
-      Token cur = scanner.Scan();
+      Token cur = _Scanner.Scan();
 
       for (; ; )
       {
@@ -403,7 +401,7 @@ public class Parser {
             break;
           default: break;
         }
-        cur = scanner.Scan();
+        cur = _Scanner.Scan();
       }
     }
 
@@ -411,11 +409,16 @@ public class Parser {
 
     #region Token sets
 
-    const int maxTerminals = 160;  // set size
-
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a BitArray with the specified values set.
+    /// </summary>
+    /// <param name="values">Values to set in the BitArray</param>
+    /// <returns></returns>
+    // --------------------------------------------------------------------------------
     static BitArray NewSet(params int[] values)
     {
-      BitArray a = new BitArray(maxTerminals);
+      BitArray a = new BitArray(maxT);
       foreach (int item in values) a[item] = true;
       return a;
     }
@@ -488,62 +491,89 @@ public class Parser {
 
     #endregion
 
-    /*---------------------------- auxiliary methods ------------------------*/
-
-    public void Error(string s)
-    {
-      if (errDist >= minErrDist) errors.SemErr(la.line, la.col, s);
-      errDist = 0;
-    }
-
-    // Return the n-th token after the current lookahead token
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Return the n-th token after the current lookahead token. 
+    /// </summary>
+    /// <param name="n">Number of tokens to skip.</param>
+    /// <returns>n-th token after the current lookahead token.</returns>
+    // --------------------------------------------------------------------------------
     Token Peek(int n)
     {
-      scanner.ResetPeek();
+      _Scanner.ResetPeek();
       Token x = la;
-      while (n > 0) { x = scanner.Peek(); n--; }
+      while (n > 0) { x = _Scanner.Peek(); n--; }
       return x;
     }
 
-    // ident "="
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token are: ident "="
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsAssignment()
     {
       return la.kind == _ident && Peek(1).kind == _assgn;
     }
 
-    /* True, if the comma is not a trailing one, *
-     * like the last one in: a, b, c,            */
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token is not a final comma in a list.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool NotFinalComma()
     {
       int peek = Peek(1).kind;
       return la.kind == _comma && peek != _rbrace && peek != _rbrack;
     }
 
-    /* Checks whether the next sequence of tokens is a qualident *
-     * and returns the qualident string                          *
-     * !!! Proceeds from current peek position !!!               */
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks whether the next sequence of tokens is a qualident and returns the 
+    /// qualident string.
+    /// </summary>
+    /// <param name="pt">Peek token</param>
+    /// <param name="qualident">Qualident string</param>
+    /// <returns>
+    /// True, if the lookahead indicates a qualident; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsQualident(ref Token pt, out string qualident)
     {
       qualident = "";
       if (pt.kind == _ident)
       {
         qualident = pt.val;
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
         while (pt.kind == _dot)
         {
-          pt = scanner.Peek();
+          pt = _Scanner.Peek();
           if (pt.kind != _ident) return false;
           qualident += "." + pt.val;
-          pt = scanner.Peek();
+          pt = _Scanner.Peek();
         }
         return true;
       }
       else return false;
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the current type represents a generic type.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsGeneric()
     {
-      scanner.ResetPeek();
+      _Scanner.ResetPeek();
       Token pt = la;
       if (!IsTypeArgumentList(ref pt))
       {
@@ -552,11 +582,20 @@ public class Parser {
       return typArgLstFol[pt.kind];
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type argument list.
+    /// </summary>
+    /// <param name="pt">Token following the type argument list.</param>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsTypeArgumentList(ref Token pt)
     {
       if (pt.kind == _lt)
       {
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
         while (true)
         {
           if (!IsType(ref pt))
@@ -566,13 +605,13 @@ public class Parser {
           if (pt.kind == _gt)
           {
             // list recognized
-            pt = scanner.Peek();
+            pt = _Scanner.Peek();
             break;
           }
           else if (pt.kind == _comma)
           {
             // another argument
-            pt = scanner.Peek();
+            pt = _Scanner.Peek();
           }
           else
           {
@@ -588,32 +627,40 @@ public class Parser {
       return true;
     }
 
-    // Type
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type.
+    /// </summary>
+    /// <param name="pt">Token following the type.</param>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsType(ref Token pt)
     {
       String dummyId;
 
       if (typeKW[pt.kind])
       {
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
       }
       else if (pt.kind == _void)
       {
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
         if (pt.kind != _times)
         {
           return false;
         }
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
       }
       else if (pt.kind == _ident)
       {
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
         if (pt.kind == _dblcolon || pt.kind == _dot)
         {
           // either namespace alias qualifier "::" or first
           // part of the qualident
-          pt = scanner.Peek();
+          pt = _Scanner.Peek();
           if (!IsQualident(ref pt, out dummyId))
           {
             return false;
@@ -630,17 +677,27 @@ public class Parser {
       }
       if (pt.kind == _question)
       {
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
       }
       return SkipPointerOrDims(ref pt);
     }
 
-    // Type ident
-    // (Type can be void*)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a local variable 
+    /// declaration: Type ident.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    /// <remarks>
+    /// Type can be void*
+    /// </remarks>
+    // --------------------------------------------------------------------------------
     bool IsLocalVarDecl()
     {
       Token pt = la;
-      scanner.ResetPeek();
+      _Scanner.ResetPeek();
       return IsType(ref pt) && pt.kind == _ident;
     }
 
@@ -665,12 +722,12 @@ public class Parser {
       {
         if (pt.kind == _lbrack)
         {
-          do pt = scanner.Peek();
+          do pt = _Scanner.Peek();
           while (pt.kind == _comma);
           if (pt.kind != _rbrack) return false;
         }
         else if (pt.kind != _times) break;
-        pt = scanner.Peek();
+        pt = _Scanner.Peek();
       }
       return true;
     }
@@ -701,20 +758,20 @@ public class Parser {
     bool IsSimpleTypeCast()
     {
       // assert: la.kind == _lpar
-      scanner.ResetPeek();
-      Token pt1 = scanner.Peek();
-      Token pt2 = scanner.Peek();
+      _Scanner.ResetPeek();
+      Token pt1 = _Scanner.Peek();
+      Token pt2 = _Scanner.Peek();
       return typeKW[pt1.kind] &&
               (pt2.kind == _rpar ||
-              (pt2.kind == _question && scanner.Peek().kind == _rpar));
+              (pt2.kind == _question && _Scanner.Peek().kind == _rpar));
     }
 
     // "(" Type ")" castFollower
     bool GuessTypeCast()
     {
       // assert: la.kind == _lpar
-      scanner.ResetPeek();
-      Token pt = scanner.Peek();
+      _Scanner.ResetPeek();
+      Token pt = _Scanner.Peek();
       if (!IsType(ref pt))
       {
         return false;
@@ -723,7 +780,7 @@ public class Parser {
       {
         return false;
       }
-      pt = scanner.Peek();
+      pt = _Scanner.Peek();
       return castFollower[pt.kind];
     }
 
@@ -767,7 +824,7 @@ public class Parser {
     // true: TypeArgumentList followed by anything but "("
     bool IsPartOfMemberName()
     {
-      scanner.ResetPeek();
+      _Scanner.ResetPeek();
       Token pt = la;
       if (!IsTypeArgumentList(ref pt))
       {
@@ -782,26 +839,83 @@ public class Parser {
 
 
 
-	public Parser(Scanner scanner) {
-		this.scanner = scanner;
-		errors = new Errors();
-	}
+    #region Project Model extension fields
 
-	void SynErr (int n) {
-		if (errDist >= minErrDist) errors.SynErr(la.line, la.col, n);
-		errDist = 0;
-	}
+    private CompilationUnit _CompilationUnit;
+    private SourceFile _File;
 
-	public void SemErr (string msg) {
-		if (errDist >= minErrDist) errors.SemErr(t.line, t.col, msg);
-		errDist = 0;
-	}
-	
-	void Get () {
-		for (;;) {
-			t = la;
-			la = scanner.Scan();
-			if (la.kind <= maxT) { ++errDist; break; }
+    #endregion 
+    
+    #region Lifecycle methods
+    
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance of this parser using the specified scanner, compilation
+    /// uint and file.
+    /// </summary>
+    /// <param name="scanner">The scanner used to scan tokens.</param>
+    /// <param name="unit">Compilation unit using this parser instance.</param>
+    /// <param name="file">File used by this parser instance.</param>
+    // --------------------------------------------------------------------------------
+  	public CSharpSyntaxParser(Scanner scanner, CompilationUnit unit, SourceFile file) 
+  	{
+	  	_Scanner = scanner;
+		  _CompilationUnit = unit;
+		  _File = file;
+  	}
+  	
+    #endregion
+    
+    #region Public properties
+    
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the instance representing the compilation unit being parsed
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CompilationUnit CompilationUnit
+    {
+      get { return _CompilationUnit; }
+      set { _CompilationUnit = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the instance representing the file being parsed
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceFile File
+    {
+      get { return _File; }
+      set { _File = value; }
+    }
+
+    #endregion
+
+	  #region Methods referenced when CoCo generates the parser code
+	  
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the next token from the input stream.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This method handles all the pragmas (like #region, #if, #endif, etc.) and 
+    /// positions to the next token accordingly. Sets the private member "t" to the 
+    /// current token, and member "la" to the next token.
+    /// </para>
+    /// <para>
+    /// Line and block comments are handled by the scanner and not the parser.
+    /// </para>
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+	  void Get () 
+  	{
+	  	for (;;) 
+	  	{
+        t = la;
+        la = _Scanner.Scan();
+        if (la.kind <= maxT) { ++errDist; break; }
 				if (la.kind == 131) {
 				AddConditionalDirective(la.val); 
 				}
@@ -830,40 +944,94 @@ public class Parser {
 				if (la.kind == 141) {
 				}
 
-			la = t;
-		}
-	}
+			  la = t;
+      }
+    }
 	
-	void Expect (int n) {
-		if (la.kind==n) Get(); else { SynErr(n); }
-	}
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Expects the next token to be as defined by tokenKind.
+    /// </summary>
+    /// <param name="tokenKind">Expected kind of token.</param>
+    /// <remarks>
+    /// If the token does not match with the kind specified, raises a syntax error.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    void Expect(int tokenKind)
+    {
+      if (la.kind == tokenKind) Get();
+      else
+      {
+        SynErr(tokenKind);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the lookahead token can be a start for the specified tokenKind.
+    /// </summary>
+    /// <param name="tokenKind">Kind of token to examine.</param>
+    /// <returns>
+    /// True, if the lookahead token can be a strat for tokenKind; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool StartOf(int tokenKind)
+    {
+      return _StartupSet[tokenKind, la.kind];
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Expects the next token to be as defined by tokenKind. If the expected token is
+    /// not found, steps forward in the input stream the find the token with type
+    /// of "follow".
+    /// </summary>
+    /// <param name="tokenKind">Expected kind of token.</param>
+    /// <param name="follow">Kind of week token to follow the parsing from.</param>
+    /// <remarks>
+    /// If the token does not match with the kind specified, raises a syntax error.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    void ExpectWeak(int tokenKind, int follow)
+    {
+      if (la.kind == tokenKind) Get();
+      else
+      {
+        SynErr(tokenKind);
+        while (!StartOf(follow)) Get();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Searches for a week separator.
+    /// </summary>
+    /// <param name="tokenKind"></param>
+    /// <param name="syFol"></param>
+    /// <param name="repFol"></param>
+    /// <returns></returns>
+    // --------------------------------------------------------------------------------
+    bool WeakSeparator(int tokenKind, int syFol, int repFol)
+    {
+      bool[] s = new bool[maxT + 1];
+      if (la.kind == tokenKind) { Get(); return true; }
+      else if (StartOf(repFol)) return false;
+      else
+      {
+        for (int i = 0; i <= maxT; i++)
+        {
+          s[i] = _StartupSet[syFol, i] || _StartupSet[repFol, i] || _StartupSet[0, i];
+        }
+        SynErr(tokenKind);
+        while (!s[la.kind]) Get();
+        return StartOf(syFol);
+      }
+    }
 	
-	bool StartOf (int s) {
-		return set[s, la.kind];
-	}
-	
-	void ExpectWeak (int n, int follow) {
-		if (la.kind == n) Get();
-		else {
-			SynErr(n);
-			while (!StartOf(follow)) Get();
-		}
-	}
-	
-	bool WeakSeparator (int n, int syFol, int repFol) {
-		bool[] s = new bool[maxT+1];
-		if (la.kind == n) { Get(); return true; }
-		else if (StartOf(repFol)) return false;
-		else {
-			for (int i=0; i <= maxT; i++) {
-				s[i] = set[syFol, i] || set[repFol, i] || set[0, i];
-			}
-			SynErr(n);
-			while (!s[la.kind]) Get();
-			return StartOf(syFol);
-		}
-	}
-	
+	  #endregion
+	  
+	  #region Parser methods generated by CoCo
+	  
 	void CS2() {
 		while (IsExternAliasDirective()) {
 			ExternAliasDirective(null);
@@ -886,10 +1054,10 @@ public class Parser {
 		if (t.val != "alias") 
 		 Error("CS1003", t, "Syntax error, 'alias' expected"); 
 		
-		Expect(1);
+		ExpectWeak(1, 2);
 		ExternalAlias externAlias = new ExternalAlias(token, t.val);
-		if (parent == null) _File.AddExternAlias(externAlias); 
-		else parent.AddExternAlias(externAlias); 
+		if (parent == null) _File.ExternAliases.Add(externAlias); 
+		else parent.ExternAliases.Add(externAlias); 
 		
 		Expect(114);
 	}
@@ -908,8 +1076,8 @@ public class Parser {
 		TypeName(out typeUsed);
 		Expect(114);
 		UsingClause uc = new UsingClause(token, name, typeUsed);
-		if (parent == null) _File.AddUsingClause(uc);
-		else parent.AddUsingClause(uc); 
+		if (parent == null) _File.Usings.Add(uc);
+		else parent.Usings.Add(uc); 
 		
 	}
 
@@ -917,7 +1085,7 @@ public class Parser {
 		Expect(97);
 		Expect(1);
 		if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
-		 Error("global attribute target specifier \"assembly\" or \"module\" expected");
+		 Error("UNDEF", t, "Global attribute target specifier \"assembly\" or \"module\" expected");
 		string scope = t.val;
 		AttributeDeclaration attr;
 		
@@ -939,7 +1107,7 @@ public class Parser {
 		Expect(112);
 	}
 
-	void NamespaceMemberDeclaration(NamespaceFragment parent, ProjectFile file) {
+	void NamespaceMemberDeclaration(NamespaceFragment parent, SourceFile file) {
 		if (la.kind == 45) {
 			Get();
 			Token startToken = t; 
@@ -965,7 +1133,7 @@ public class Parser {
 			if (la.kind == 114) {
 				Get();
 			}
-		} else if (StartOf(2)) {
+		} else if (StartOf(3)) {
 			Modifiers m = new Modifiers(this); 
 			TypeDeclaration td;
 			AttributeCollection attrs = new AttributeCollection();
@@ -979,9 +1147,9 @@ public class Parser {
 			{
 			  td.AssignAttributes(attrs);
 			  if (parent == null) 
-			    _File.AddTypeDeclaration(td);
+			    _File.TypeDeclarations.Add(td);
 			  else 
-			    parent.AddTypeDeclaration(td);
+			    parent.TypeDeclarations.Add(td);
 			}
 			
 		} else SynErr(131);
@@ -1035,7 +1203,7 @@ public class Parser {
 		if (IsAttrTargSpec()) {
 			if (la.kind == 1) {
 				Get();
-			} else if (StartOf(3)) {
+			} else if (StartOf(4)) {
 				Keyword();
 			} else SynErr(132);
 			scope = t.val; 
@@ -1060,7 +1228,7 @@ public class Parser {
 	}
 
 	void ModifierList(Modifiers m) {
-		while (StartOf(4)) {
+		while (StartOf(5)) {
 			switch (la.kind) {
 			case 46: {
 				Get();
@@ -1138,7 +1306,7 @@ public class Parser {
 
 	void TypeDeclaration(AttributeCollection attrs, Modifiers m, out TypeDeclaration td) {
 		td = null; 
-		if (StartOf(5)) {
+		if (StartOf(6)) {
 			bool isPartial = false; 
 			if (la.kind == 119) {
 				Get();
@@ -1245,7 +1413,7 @@ public class Parser {
 			td.AddTypeParameterConstraint(constraint); 
 		}
 		Expect(96);
-		while (StartOf(6)) {
+		while (StartOf(7)) {
 			InterfaceMemberDeclaration(ifd);
 		}
 		Expect(111);
@@ -1292,7 +1460,7 @@ public class Parser {
 			TypeParameterList(dd);
 		}
 		Expect(98);
-		if (StartOf(7)) {
+		if (StartOf(8)) {
 			FormalParameterList(dd.FormalParameters);
 		}
 		Expect(113);
@@ -1332,7 +1500,7 @@ public class Parser {
 	void TypeParameterConstraintsClause(out TypeParameterConstraint constraint) {
 		Expect(1);
 		if (t.val != "where") 
-		 Error("type parameter constraints clause must start with: where");
+		 Error("UNDEF", t, "type parameter constraints clause must start with: where");
 		
 		Expect(1);
 		constraint = new TypeParameterConstraint(t); 
@@ -1381,7 +1549,7 @@ public class Parser {
 	void ClassBody(TypeDeclaration td) {
 		AttributeCollection attrs = new AttributeCollection(); 
 		Expect(96);
-		while (StartOf(8)) {
+		while (StartOf(9)) {
 			while (la.kind == 97) {
 				Attributes(attrs);
 			}
@@ -1406,7 +1574,7 @@ public class Parser {
 	}
 
 	void ClassMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
-		if (StartOf(9)) {
+		if (StartOf(10)) {
 			StructMemberDeclaration(attrs, m, td);
 		} else if (la.kind == 115) {
 			Get();
@@ -1430,7 +1598,7 @@ public class Parser {
 	void StructBody(TypeDeclaration td) {
 		AttributeCollection attrs = new AttributeCollection(); 
 		Expect(96);
-		while (StartOf(10)) {
+		while (StartOf(11)) {
 			while (la.kind == 97) {
 				Attributes(attrs);
 			}
@@ -1449,7 +1617,7 @@ public class Parser {
 			EventDeclaration(attrs, m, td);
 		} else if (la.kind == _ident && Peek(1).kind == _lpar) {
 			ConstructorDeclaration(attrs, m, td);
-		} else if (StartOf(11)) {
+		} else if (StartOf(12)) {
 			Type(out typeRef, true);
 			if (la.kind == 49) {
 				OperatorDeclaration(attrs, m, typeRef, td);
@@ -1472,7 +1640,7 @@ public class Parser {
 			} else SynErr(141);
 		} else if (la.kind == 27 || la.kind == 37) {
 			CastOperatorDeclaration(attrs, m, td);
-		} else if (StartOf(12)) {
+		} else if (StartOf(13)) {
 			TypeDeclaration nestedType; 
 			TypeDeclaration(attrs, m, out nestedType);
 			nestedType.DeclaringType = td; 
@@ -1568,7 +1736,7 @@ public class Parser {
 			asgn.RightOperand = rightExpr; 
 			asgn.LeftOperand = leftExpr; 
 			expr = asgn; 
-		} else if (StartOf(13)) {
+		} else if (StartOf(14)) {
 			BinaryOperator simpleExpr; 
 			NullCoalescingExpr(out simpleExpr);
 			if (simpleExpr == null) 
@@ -1599,7 +1767,7 @@ public class Parser {
 
 	void Type(out TypeReference typeRef, bool voidAllowed) {
 		typeRef = new TypeReference(t); 
-		if (StartOf(14)) {
+		if (StartOf(15)) {
 			PrimitiveType();
 			typeRef = new TypeReference(t); 
 			typeRef.Name = t.val;
@@ -1615,10 +1783,10 @@ public class Parser {
 		} else SynErr(145);
 		if (la.kind == 110) {
 			Get();
-			if (typeRef.Kind == TypeKind.@void) { Error("Unexpected token ?, void must not be nullable."); } 
+			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "Unexpected token ?, void must not be nullable."); } 
 		}
 		PointerOrArray(ref typeRef);
-		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("type expected, void found, maybe you mean void*"); } 
+		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", t, "type expected, void found, maybe you mean void*"); } 
 	}
 
 	void FormalParameterList(FormalParameterCollection pars) {
@@ -1631,7 +1799,7 @@ public class Parser {
 		FormalParameter fp = new FormalParameter(t); 
 		fp.AssignAttributes(attrs);
 		
-		if (StartOf(15)) {
+		if (StartOf(16)) {
 			if (la.kind == 50 || la.kind == 57) {
 				if (la.kind == 57) {
 					Get();
@@ -1656,7 +1824,7 @@ public class Parser {
 			Get();
 			fp.HasParams = true; 
 			Type(out typeRef, false);
-			if (typeRef.Kind != TypeKind.array) { Error("params argument must be an array"); } 
+			if (typeRef.Kind != TypeKind.array) { Error("UNDEF", t, "params argument must be an array"); } 
 			Expect(1);
 			fp.Name = t.val; 
 			fp.Type = typeRef; 
@@ -1666,7 +1834,7 @@ public class Parser {
 
 	void Block(IBlockOwner block) {
 		Expect(96);
-		while (StartOf(16)) {
+		while (StartOf(17)) {
 			Statement(block);
 		}
 		Expect(111);
@@ -1714,7 +1882,7 @@ public class Parser {
 		cd.AssignAttributes(attrs);
 		
 		Expect(98);
-		if (StartOf(7)) {
+		if (StartOf(8)) {
 			FormalParameterList(cd.FormalParameters);
 		}
 		Expect(113);
@@ -1728,7 +1896,7 @@ public class Parser {
 				cd.HasThis = true; 
 			} else SynErr(148);
 			Expect(98);
-			if (StartOf(17)) {
+			if (StartOf(18)) {
 				Argument(null);
 				while (la.kind == 87) {
 					Get();
@@ -1749,7 +1917,7 @@ public class Parser {
 TypeDeclaration td) {
 		m.Check(Modifier.operators);
 		m.CheckMust(Modifier.operatorsMust);
-		if (typeRef.Kind == TypeKind.@void) { Error("operator not allowed on void"); } 
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "operator not allowed on void"); } 
 		OperatorDeclaration od = new OperatorDeclaration(t);
 		od.SetModifiers(m.Value);
 		od.AssignAttributes(attrs);
@@ -1779,9 +1947,9 @@ TypeDeclaration td) {
 			fp.Name = t.val; 
 			od.FormalParameters.Add(fp);
 			
-			if ((op & Operator.binary) == 0) Error("too many operands for unary operator"); 
+			if ((op & Operator.binary) == 0) Error("UNDEF", t, "too many operands for unary operator"); 
 		} else if (la.kind == 113) {
-			if ((op & Operator.unary) == 0) Error("too few operands for binary operator"); 
+			if ((op & Operator.unary) == 0) Error("UNDEF", t, "too few operands for binary operator"); 
 		} else SynErr(150);
 		Expect(113);
 		if (la.kind == 96) {
@@ -1795,7 +1963,7 @@ TypeDeclaration td) {
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
 TypeReference typeRef, bool isEvent, Modifier toCheck) {
 		m.Check(toCheck);
-		if (typeRef.Kind == TypeKind.@void) { Error("field type must not be void"); } 
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "field type must not be void"); } 
 		
 		SingleFieldMember(attrs, m, td, typeRef, isEvent);
 		while (la.kind == 87) {
@@ -1838,7 +2006,7 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 	void PropertyDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
 		m.Check(Modifier.propEvntMeths);
-		if (typeRef.Kind == TypeKind.@void) { Error("property type must not be void"); }
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "property type must not be void"); }
 		PropertyDeclaration pd = new PropertyDeclaration(t);
 		pd.SetModifiers(m.Value);
 		pd.AssignAttributes(attrs);
@@ -1854,7 +2022,7 @@ TypeReference memberRef, TypeDeclaration td) {
 	void IndexerDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
 		m.Check(Modifier.indexers);
-		if (typeRef.Kind == TypeKind.@void) { Error("indexer type must not be void"); }
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "indexer type must not be void"); }
 		IndexerDeclaration ind = new IndexerDeclaration(t);
 		ind.SetModifiers(m.Value);
 		ind.AssignAttributes(attrs);
@@ -1892,7 +2060,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			TypeParameterList(md);
 		}
 		Expect(98);
-		if (StartOf(7)) {
+		if (StartOf(8)) {
 			FormalParameterList(md.FormalParameters);
 		}
 		Expect(113);
@@ -1903,7 +2071,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		}
 		if (la.kind == 96) {
 			Block(md);
-			if (!allowBody || m.Has(Modifier.@abstract)) { Error("Body declaration is not allowed here!"); } 
+			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", t, "Body declaration is not allowed here!"); } 
 			md.HasBody = true;
 			
 		} else if (la.kind == 114) {
@@ -1929,7 +2097,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else SynErr(153);
 		Expect(49);
 		Type(out typeRef, false);
-		if (typeRef.Kind == TypeKind.@void) { Error("cast type must not be void"); } 
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "cast type must not be void"); } 
 		cod.ResultingType = typeRef;
 		cod.Name = typeRef.RightmostName;
 		
@@ -1981,7 +2149,7 @@ TypeReference typeRef) {
 			accessor = prop.Remover = new AccessorDeclaration(t); 
 		} else if (la.kind == 1) {
 			Get();
-			Error("add or remove expected"); 
+			Error("UNDEF", t, "add or remove expected"); 
 		} else SynErr(155);
 		Block(accessor);
 		accessor.HasBody = true;
@@ -1994,17 +2162,17 @@ TypeReference typeRef) {
 			}
 			if ("add".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasAdder) Error("add already declared");  
+				if (prop.HasAdder) Error("UNDEF", t, "add already declared");  
 				accessor = prop.Adder = new AccessorDeclaration(t);
 				
 			} else if ("remove".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasRemover) Error("set already declared");  
+				if (prop.HasRemover) Error("UNDEF", t, "set already declared");  
 				accessor = prop.Remover = new AccessorDeclaration(t);
 				
 			} else if (la.kind == 1) {
 				Get();
-				Error("add or remove expected"); 
+				Error("UNDEF", t, "add or remove expected"); 
 			} else SynErr(156);
 			Block(accessor);
 			accessor.HasBody = true;
@@ -2047,7 +2215,7 @@ TypeReference typeRef) {
 			accessor = prop.Getter = new AccessorDeclaration(t); 
 		} else if (la.kind == 1) {
 			Get();
-			Error("set or get expected"); 
+			Error("UNDEF", t, "set or get expected"); 
 		} else SynErr(157);
 		if (la.kind == 96) {
 			Block(accessor);
@@ -2059,7 +2227,7 @@ TypeReference typeRef) {
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs);
 		
-		if (StartOf(18)) {
+		if (StartOf(19)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 97) {
 				Attributes(attrs);
@@ -2069,17 +2237,17 @@ TypeReference typeRef) {
 			am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); 
 			if ("get".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasGetter) Error("get already declared");  
+				if (prop.HasGetter) Error("UNDEF", t, "get already declared");  
 				accessor = prop.Getter = new AccessorDeclaration(t);
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasSetter) Error("set already declared");  
+				if (prop.HasSetter) Error("UNDEF", t, "set already declared");  
 				accessor = prop.Setter = new AccessorDeclaration(t);
 				
 			} else if (la.kind == 1) {
 				Get();
-				Error("set or get expected"); 
+				Error("UNDEF", t, "set or get expected"); 
 			} else SynErr(159);
 			if (la.kind == 96) {
 				Block(accessor);
@@ -2185,7 +2353,7 @@ TypeReference typeRef) {
 			Get();
 			op = Operator.gt; 
 			if (la.kind == 93) {
-				if (la.pos > t.pos+1) Error("no whitespace allowed in right shift operator"); 
+				if (la.pos > t.pos+1) Error("UNDEF", t, "no whitespace allowed in right shift operator"); 
 				Get();
 				op = Operator.rshift; 
 			}
@@ -2234,7 +2402,7 @@ TypeReference typeRef) {
 		if (la.kind == 46) {
 			Get();
 		}
-		if (StartOf(11)) {
+		if (StartOf(12)) {
 			Type(out typeRef, true);
 			if (la.kind == 1) {
 				Get();
@@ -2256,7 +2424,7 @@ TypeReference typeRef) {
 				} else SynErr(162);
 			} else if (la.kind == 68) {
 				m.Check(Modifier.indexers);
-				if (typeRef.Kind == TypeKind.@void) { Error("indexer type must not be void"); }
+				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "indexer type must not be void"); }
 				IndexerDeclaration ind = new IndexerDeclaration(t);
 				ind.SetModifiers(m.Value);
 				ind.AssignAttributes(attrs);
@@ -2291,7 +2459,7 @@ TypeReference typeRef) {
 			accessor = prop.Setter = new AccessorDeclaration(t); 
 		} else if (la.kind == 1) {
 			Get();
-			Error("set or get expected"); 
+			Error("UNDEF", t, "set or get expected"); 
 		} else SynErr(165);
 		Expect(114);
 		accessor.AssignAttributes(attrs); 
@@ -2302,17 +2470,17 @@ TypeReference typeRef) {
 			}
 			if ("get".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasGetter) Error("get already declared");  
+				if (prop.HasGetter) Error("UNDEF", t, "get already declared");  
 				accessor = prop.Getter = new AccessorDeclaration(t);
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasSetter) Error("set already declared");  
+				if (prop.HasSetter) Error("UNDEF", t, "set already declared");  
 				accessor = prop.Setter = new AccessorDeclaration(t);
 				
 			} else if (la.kind == 1) {
 				Get();
-				Error("set or get expected"); 
+				Error("UNDEF", t, "set or get expected"); 
 			} else SynErr(166);
 			Expect(114);
 			accessor.AssignAttributes(attrs); 
@@ -2353,7 +2521,7 @@ TypeReference typeRef) {
 		if (block != null) block.Statements.Add(loc); 
 		if (la.kind == 85) {
 			Get();
-			if (StartOf(19)) {
+			if (StartOf(20)) {
 				Initializer init; 
 				VariableInitializer(out init);
 				loc.Initializer = init; 
@@ -2375,7 +2543,7 @@ TypeReference typeRef) {
 
 	void VariableInitializer(out Initializer init) {
 		Expression expr; init = null; 
-		if (StartOf(20)) {
+		if (StartOf(21)) {
 			Expression(out expr);
 			SimpleInitializer sin = new SimpleInitializer(t); 
 			sin.Expression = expr; 
@@ -2391,7 +2559,7 @@ TypeReference typeRef) {
 		init = new ArrayInitializer(t); 
 		Initializer arrayInit = null; 
 		Expect(96);
-		if (StartOf(19)) {
+		if (StartOf(20)) {
 			VariableInitializer(out arrayInit);
 			init.Initializers.Add(arrayInit); 
 			while (NotFinalComma()) {
@@ -2724,7 +2892,7 @@ TypeReference typeRef) {
 		AttributeArgument arg; 
 		bool nameFound = false; 
 		Expect(98);
-		if (StartOf(20)) {
+		if (StartOf(21)) {
 			arg = new AttributeArgument(t); 
 			if (IsAssignment()) {
 				Expect(1);
@@ -2744,8 +2912,8 @@ TypeReference typeRef) {
 					arg.Name = t.val; 
 					Expect(85);
 					nameFound = true; 
-				} else if (StartOf(20)) {
-					if (nameFound) Error("no positional argument after named arguments"); 
+				} else if (StartOf(21)) {
+					if (nameFound) Error("UNDEF", t, "no positional argument after named arguments"); 
 				} else SynErr(170);
 				Expression(out expr);
 				arg.Expression = expr; 
@@ -2756,7 +2924,7 @@ TypeReference typeRef) {
 	}
 
 	void PrimitiveType() {
-		if (StartOf(21)) {
+		if (StartOf(22)) {
 			IntegralType();
 		} else if (la.kind == 32) {
 			Get();
@@ -2788,13 +2956,13 @@ TypeReference typeRef) {
 	void TypeArgumentList(TypeReferenceCollection args) {
 		TypeReference paramType; 
 		Expect(100);
-		if (StartOf(11)) {
+		if (StartOf(12)) {
 			Type(out paramType, false);
 			args.Add(paramType); 
 		}
 		while (la.kind == 87) {
 			Get();
-			if (StartOf(11)) {
+			if (StartOf(12)) {
 				Type(out paramType, false);
 				args.Add(paramType); 
 			}
@@ -2812,7 +2980,7 @@ TypeReference typeRef) {
 		} else if (IsLocalVarDecl()) {
 			LocalVariableDeclaration(block);
 			Expect(114);
-		} else if (StartOf(22)) {
+		} else if (StartOf(23)) {
 			EmbeddedStatement(block);
 		} else SynErr(173);
 	}
@@ -2853,7 +3021,7 @@ TypeReference typeRef) {
 			UncheckedBlock(block);
 		} else if (la.kind == 76) {
 			UnsafeBlock(block);
-		} else if (StartOf(20)) {
+		} else if (StartOf(21)) {
 			StatementExpression(block);
 			Expect(114);
 		} else if (la.kind == 36) {
@@ -2932,7 +3100,7 @@ TypeReference typeRef) {
 		Unary(out expr);
 		ExpressionStatement es = new ExpressionStatement(t); 
 		es.Expression = expr; 
-		if (StartOf(23)) {
+		if (StartOf(24)) {
 			AssignmentOperator asgn; 
 			AssignmentOperator(out asgn);
 			es.Expression = asgn; 
@@ -2941,7 +3109,7 @@ TypeReference typeRef) {
 			Expression(out rightExpr);
 			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
-			if (isAssignment) Error("error in assignment."); 
+			if (isAssignment) Error("UNDEF", t, "error in assignment."); 
 		} else SynErr(176);
 		if (block != null) block.Add(es); 
 	}
@@ -3010,18 +3178,18 @@ TypeReference typeRef) {
 		ForStatement fs = new ForStatement(t); 
 		Expect(98);
 		if (block != null) block.Add(fs); 
-		if (StartOf(24)) {
+		if (StartOf(25)) {
 			fs.CreateInitializerBlock(t); 
 			ForInitializer(fs);
 		}
 		Expect(114);
-		if (StartOf(20)) {
+		if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr);
 			fs.Condition = expr; 
 		}
 		Expect(114);
-		if (StartOf(20)) {
+		if (StartOf(21)) {
 			ForIterator(fs);
 			fs.CreateIteratorBlock(t); 
 		}
@@ -3081,7 +3249,7 @@ TypeReference typeRef) {
 	void ReturnStatement(IBlockOwner block) {
 		Expect(58);
 		ReturnStatement yrs = new ReturnStatement(t); 
-		if (StartOf(20)) {
+		if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr);
 			yrs.Expression = expr; 
@@ -3093,7 +3261,7 @@ TypeReference typeRef) {
 	void ThrowStatement(IBlockOwner block) {
 		Expect(69);
 		ThrowStatement ts = new ThrowStatement(t); 
-		if (StartOf(20)) {
+		if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr);
 			ts.Expression = expr; 
@@ -3144,7 +3312,7 @@ TypeReference typeRef) {
 		if (IsLocalVarDecl()) {
 			us.CreateResourceDeclarations(t); 
 			LocalVariableDeclaration(us.ResourceDeclarations);
-		} else if (StartOf(20)) {
+		} else if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr);
 			us.ResourceExpression = expr; 
@@ -3174,7 +3342,7 @@ TypeReference typeRef) {
 		Expect(98);
 		TypeReference typeRef; 
 		Type(out typeRef, false);
-		if (typeRef.Kind != TypeKind.pointer) Error("can only fix pointer types"); 
+		if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", t, "can only fix pointer types"); 
 		ValueAssignmentStatement vas = new ValueAssignmentStatement(t); 
 		Expect(1);
 		vas.Name = t.val; 
@@ -3220,7 +3388,7 @@ TypeReference typeRef) {
 	void ForInitializer(ForStatement fs) {
 		if (IsLocalVarDecl()) {
 			LocalVariableDeclaration(fs.InitializerBlock);
-		} else if (StartOf(20)) {
+		} else if (StartOf(21)) {
 			StatementExpression(fs.InitializerBlock);
 			while (la.kind == 87) {
 				Get();
@@ -3326,7 +3494,7 @@ TypeReference typeRef) {
 			  expr = unOp;
 			}
 			
-		} else if (StartOf(25)) {
+		} else if (StartOf(26)) {
 			Primary(out expr);
 		} else SynErr(183);
 	}
@@ -3388,7 +3556,7 @@ TypeReference typeRef) {
 			Get();
 			int pos = t.pos; 
 			Expect(94);
-			if (pos+1 < t.pos) Error("no whitespace allowed in right shift assignment"); 
+			if (pos+1 < t.pos) Error("UNDEF", t, "no whitespace allowed in right shift assignment"); 
 			op = new RightShiftAssignmentOperator(t); 
 			break;
 		}
@@ -3593,8 +3761,8 @@ TypeReference typeRef) {
 		expr = null; 
 		ShiftExpr(out expr);
 		BinaryOperator oper = null; 
-		while (StartOf(26)) {
-			if (StartOf(27)) {
+		while (StartOf(27)) {
+			if (StartOf(28)) {
 				if (la.kind == 100) {
 					Get();
 					oper = new LessThanOperator(t); 
@@ -3797,7 +3965,7 @@ TypeReference typeRef) {
 		default: SynErr(190); break;
 		}
 		Expression curExpr = innerExpr; 
-		while (StartOf(28)) {
+		while (StartOf(29)) {
 			switch (la.kind) {
 			case 95: {
 				Get();
@@ -3826,7 +3994,7 @@ TypeReference typeRef) {
 			case 98: {
 				Get();
 				ArgumentListOperator alop = new ArgumentListOperator(t, innerExpr); 
-				if (StartOf(17)) {
+				if (StartOf(18)) {
 					Argument(alop.Arguments);
 					while (la.kind == 87) {
 						Get();
@@ -4020,7 +4188,7 @@ TypeReference typeRef) {
 		nop.Type = typeRef; 
 		if (la.kind == 98) {
 			Get();
-			if (StartOf(17)) {
+			if (StartOf(18)) {
 				Argument(nop.Arguments);
 				while (la.kind == 87) {
 					Get();
@@ -4108,7 +4276,7 @@ TypeReference typeRef) {
 		if (la.kind == 98) {
 			FormalParameter param; 
 			Get();
-			if (StartOf(15)) {
+			if (StartOf(16)) {
 				AnonymousMethodParameter(out param);
 				adop.FormalParameters.Add(param); 
 				while (la.kind == 87) {
@@ -4205,19 +4373,41 @@ TypeReference typeRef, bool isEvent) {
 	}
 
 
+    #endregion
 
-	public void Parse() {
-		la = new Token();
-		la.val = "";		
-		Get();
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Starts parsing and parses the whole input accordingly to the specified language
+    /// (C#) syntax.
+    /// </summary>
+    /// <remarks>
+    /// Source should be parsed fully: the file must be ended when parsing is ready.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void Parse()
+    {
+		  la = new Token();
+		  la.val = "";		
+		  Get();
 		CS2();
 
-    Expect(0);
-	}
+      Expect(0);
+  	}
 	
-	bool[,] set = {
+    // --------------------------------------------------------------------------------
+    /// <summary>This array represent the matrix of startup tokens.</summary>
+    /// <remarks>
+    /// In the cell of this matrix there is an "x" representing false and 
+    /// "T" representing true. A cells contains true, if the token kind represented by
+    /// the column (second dimension) can be directly followed by the token kind
+    /// represented by the row (first dimension).
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+	  private bool[,] _StartupSet = 
+    {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,T,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x},
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
@@ -4246,18 +4436,17 @@ TypeReference typeRef, bool isEvent) {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x}
 
-	};
-} // end Parser
+	  };
 
-
-public class Errors {
-	public int count = 0;                                    // number of errors detected
-	public System.IO.TextWriter errorStream = Console.Out;   // error messages go to this stream
-  public string errMsgFormat = "-- line {0} col {1}: {2}"; // 0=line, 1=column, 2=text
-  
-	public void SynErr (int line, int col, int n) {
-		string s;
-		switch (n) {
+	  #region Syntax error handling
+	  
+  	void SynErr (int n) 
+  	{
+		  if (errDist >= MinimumDistanceOfSeparateErrors)
+  		{
+    		string s;
+		    switch (n) 
+		    {
 			case 0: s = "EOF expected"; break;
 			case 1: s = "ident expected"; break;
 			case 2: s = "intCon expected"; break;
@@ -4453,31 +4642,15 @@ public class Errors {
 			case 192: s = "invalid PrimitiveNamedLiteral"; break;
 			case 193: s = "invalid NewOperator"; break;
 
-			default: s = "error " + n; break;
-		}
-		errorStream.WriteLine(errMsgFormat, line, col, s);
-		count++;
-	}
+  			  default: s = "error " + n; break;
+	  	  }
+        _CompilationUnit.ErrorHandler.Error("SYNERR", la, s, null);
+	  	}
+		  errDist = 0;
+	  }
 
-	public void SemErr (int line, int col, string s) {
-		errorStream.WriteLine(errMsgFormat, line, col, s);
-		count++;
-	}
-	
-	public void SemErr (string s) {
-		errorStream.WriteLine(s);
-		count++;
-	}
-	
-	public void Warning (int line, int col, string s) {
-		errorStream.WriteLine(errMsgFormat, line, col, s);
-	}
-	
-	public void Warning(string s) {
-		errorStream.WriteLine(s);
-	}
-} // Errors
-
+	  #endregion
+}
 
 public class FatalError: Exception {
 	public FatalError(string m): base(m) {}

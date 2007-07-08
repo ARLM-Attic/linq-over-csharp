@@ -91,7 +91,7 @@ namespace CSharpParser.ParserFiles
     #region Private fields
 
     private Modifier _Value = Modifier.none;
-    private Parser _Parser;
+    private CSharpSyntaxParser _Parser;
 
     #endregion
 
@@ -107,7 +107,7 @@ namespace CSharpParser.ParserFiles
     /// A Modifiers instance can send error messages to the Parser instance.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public Modifiers(Parser parser)
+    public Modifiers(CSharpSyntaxParser parser)
     {
       _Parser = parser;
     }
@@ -139,7 +139,7 @@ namespace CSharpParser.ParserFiles
     public void Add(Modifier m)
     {
       if ((_Value & m) == 0) _Value |= m;
-      else _Parser.Error("modifier " + m + " already defined");
+      else _Parser.Error("UNDEF", new Token(), "modifier " + m + " already defined");
     }
 
     // --------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ namespace CSharpParser.ParserFiles
     {
       Modifier wrong = _Value & (allowed ^ Modifier.all);
       if (wrong != Modifier.none)
-        _Parser.Error("modifier(s) " + wrong + " not allowed here");
+        _Parser.Error("UNDEF", new Token(), "modifier(s) " + wrong + " not allowed here");
     }
 
     // --------------------------------------------------------------------------------
@@ -193,15 +193,15 @@ namespace CSharpParser.ParserFiles
       Modifier wrong = _Value & ((allowEither | allowOr) ^ Modifier.all);
       if ((allowEither & allowOr) != Modifier.none)
       {
-        _Parser.Error("modifiers provided must not overlap");
+        _Parser.Error("UNDEF", new Token(), "modifiers provided must not overlap");
       }
       else if (wrong != Modifier.none)
       {
-        _Parser.Error("modifier(s) " + wrong + " not allowed here");
+        _Parser.Error("UNDEF", new Token(), "modifier(s) " + wrong + " not allowed here");
       }
       else if (((_Value & allowEither) != Modifier.none) && ((_Value & allowOr) != Modifier.none))
       {
-        _Parser.Error("modifier(s) may either be " + allowEither + " or " + allowOr);
+        _Parser.Error("UNDEF", new Token(), "modifier(s) may either be " + allowEither + " or " + allowOr);
       }
     }
 
@@ -216,7 +216,7 @@ namespace CSharpParser.ParserFiles
       Modifier missing = (_Value & mustHave) ^ mustHave;
       if (missing != Modifier.none)
       {
-        _Parser.Error("modifier(s) " + missing + " must be applied here");
+        _Parser.Error("UNDEF", new Token(), "modifier(s) " + missing + " must be applied here");
       }
     }
 

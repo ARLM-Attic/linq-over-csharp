@@ -27,7 +27,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance</param>
     // --------------------------------------------------------------------------------
-    public ClassDeclaration(Token token, Parser parser)
+    public ClassDeclaration(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
     }

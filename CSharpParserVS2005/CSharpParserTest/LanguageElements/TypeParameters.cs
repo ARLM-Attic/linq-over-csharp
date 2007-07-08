@@ -11,7 +11,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void TypeParameterConstraintsAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"TypeParameters\TypeParamConstraintsAreOk.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -72,7 +72,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void DuplicatedTypeParametersFail()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"TypeParameters\DuplicatedTypeParams.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 3);
@@ -84,7 +84,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void DuplicatedParameterConstraintsFail()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"TypeParameters\DuplicatedConstraints.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 2);

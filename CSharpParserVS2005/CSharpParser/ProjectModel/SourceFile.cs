@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using CSharpParser.Collections;
 
@@ -9,13 +8,13 @@ namespace CSharpParser.ProjectModel
   /// This class represents a C# file in the project to compile.
   /// </summary>
   // ==================================================================================
-  public sealed class ProjectFile
+  public sealed class SourceFile
   {
     #region Private fields
 
     private readonly string _Name;
     private readonly string _Folder;
-    private readonly CSharpProject _ParentProject;
+    private readonly CompilationUnit _ParentUnit;
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
     private readonly AttributeCollection _GlobalAttributes = new AttributeCollection();
@@ -28,16 +27,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new ProjectFile instance
+    /// Creates a new SourceFile instance
     /// </summary>
     /// <param name="name">Full file name</param>
     /// <param name="parent">Parent project of this file.</param>
     // --------------------------------------------------------------------------------
-    public ProjectFile(string name, CSharpProject parent)
+    public SourceFile(string name, CompilationUnit parent)
     {
-      _ParentProject = parent;
+      _ParentUnit = parent;
       _Name = Path.GetFileName(name);
       _Folder = Path.GetDirectoryName(name);
+      _TypeDeclarations.AfterAdd += TypeDeclarationsAfterAdd;
     }
 
     #endregion
@@ -49,9 +49,9 @@ namespace CSharpParser.ProjectModel
     /// Gets the parent project of this file.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CSharpProject ParentProject
+    public CompilationUnit ParentUnit
     {
-      get { return _ParentProject; }
+      get { return _ParentUnit; }
     } 
     
     // --------------------------------------------------------------------------------
@@ -138,39 +138,42 @@ namespace CSharpParser.ProjectModel
 
     #region Public methods
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Add a new external alias to this namespace.
-    /// </summary>
-    /// <param name="item"></param>
-    // --------------------------------------------------------------------------------
-    public void AddExternAlias(ExternalAlias item)
-    {
-      _ExternAliases.Add(item);
-    }
+    //// --------------------------------------------------------------------------------
+    ///// <summary>
+    ///// Add a new external alias to this namespace.
+    ///// </summary>
+    ///// <param name="item"></param>
+    //// --------------------------------------------------------------------------------
+    //public void AddExternAlias(ExternalAlias item)
+    //{
+    //  _ExternAliases.Add(item);
+    //}
+
+    //// --------------------------------------------------------------------------------
+    ///// <summary>
+    ///// Add a new external alias to this namespace.
+    ///// </summary>
+    ///// <param name="item"></param>
+    //// --------------------------------------------------------------------------------
+    //public void AddUsingClause(UsingClause item)
+    //{
+    //  _Usings.Add(item);
+    //}
+
+    #endregion
+
+    #region Private methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Add a new external alias to this namespace.
+    /// Adds the type declaration not only to the file but also to the project.
     /// </summary>
-    /// <param name="item"></param>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     // --------------------------------------------------------------------------------
-    public void AddUsingClause(UsingClause item)
+    void TypeDeclarationsAfterAdd(object sender, ItemedEventArgs<TypeDeclaration> e)
     {
-      _Usings.Add(item);
-    }
-
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a new type declaration to this namespace fragment.
-    /// </summary>
-    /// <param name="item"></param>
-    // --------------------------------------------------------------------------------
-    public void AddTypeDeclaration(TypeDeclaration item)
-    {
-      _TypeDeclarations.Add(item);
-      _ParentProject.DeclaredTypes.Add(item);
+      _ParentUnit.DeclaredTypes.Add(e.Item);
     }
 
     #endregion
@@ -181,7 +184,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a collection of project files.
   /// </summary>
   // ==================================================================================
-  public class ProjectFileCollection : RestrictedCollection<ProjectFile>
+  public class SourceFileCollection : RestrictedCollection<SourceFile>
   {
   }
 }

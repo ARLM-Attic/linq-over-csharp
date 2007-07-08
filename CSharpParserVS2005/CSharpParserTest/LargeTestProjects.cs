@@ -13,21 +13,21 @@ namespace CSharpParserTest
     [TestMethod]
     public void NUnitCoreInterfacesIsOK()
     {
-      CSharpProject parser = new CSharpProject(NUnitCoreInterfacesFolder, true);
+      CompilationUnit parser = new CompilationUnit(NUnitCoreInterfacesFolder, true);
       Assert.IsTrue(InvokeParser(parser));
     }
 
     [TestMethod]
     public void NUnitCoreIsOK()
     {
-      CSharpProject parser = new CSharpProject(NUnitCoreFolder, true);
+      CompilationUnit parser = new CompilationUnit(NUnitCoreFolder, true);
       Assert.IsTrue(InvokeParser(parser));
     }
 
     [TestMethod]
     public void CSLAIsOK()
     {
-      CSharpProject parser = new CSharpProject(CSLAFolder, true);
+      CompilationUnit parser = new CompilationUnit(CSLAFolder, true);
       Assert.IsTrue(InvokeParser(parser));
     }
   }

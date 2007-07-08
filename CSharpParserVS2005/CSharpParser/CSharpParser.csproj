@@ -42,10 +42,13 @@
     <Compile Include="ParserFiles\Parser.cs" />
     <Compile Include="ParserFiles\Scanner.cs" />
     <Compile Include="ParserFiles\TypeKind.cs" />
+    <Compile Include="ProjectModel\AssemblyReference.cs" />
     <Compile Include="ProjectModel\AttributeArgument.cs" />
     <Compile Include="ProjectModel\AttributeDeclaration.cs" />
     <Compile Include="ProjectModel\AttributedElement.cs" />
-    <Compile Include="ProjectModel\Error.cs" />
+    <Compile Include="ProjectModel\CompilationReference.cs" />
+    <Compile Include="ProjectModel\ErrorHandling\Error.cs" />
+    <Compile Include="ProjectModel\ErrorHandling\ICompilationErrorHandler.cs" />
     <Compile Include="ProjectModel\Expressions\Argument.cs" />
     <Compile Include="ProjectModel\Expressions\ArgumentList.cs" />
     <Compile Include="ProjectModel\Expressions\Expression.cs" />
@@ -135,6 +138,7 @@
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UnaryOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UnaryPlusOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UncheckedOperator.cs" />
+    <Compile Include="ProjectModel\ExternAliasResolution.cs" />
     <Compile Include="ProjectModel\Members\AccessorDeclaration.cs" />
     <Compile Include="ProjectModel\Members\CastOperatorDeclaration.cs" />
     <Compile Include="ProjectModel\Members\ConstDeclaration.cs" />
@@ -191,27 +195,25 @@
     <Compile Include="ProjectModel\Types\InterfaceDeclaration.cs" />
     <Compile Include="ProjectModel\LanguageElement.cs" />
     <Compile Include="ProjectModel\NamespaceFragment.cs" />
-    <Compile Include="ProjectModel\ProjectFile.cs" />
+    <Compile Include="ProjectModel\SourceFile.cs" />
     <Compile Include="ProjectModel\Types\StructDeclaration.cs" />
     <Compile Include="ProjectModel\Types\TypeDeclaration.cs" />
     <Compile Include="ProjectModel\Types\TypeParameter.cs" />
     <Compile Include="ProjectModel\UsingClause.cs" />
-    <Compile Include="ProjectModel\CSharpProject.cs" />
+    <Compile Include="ProjectModel\CompilationUnit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Semantics\NamespaceHierachy.cs" />
+    <Compile Include="Semantics\SemanticsParser.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
-    <Compile Include="Utility\ImmutableIndexedCollection.cs" />
-    <Compile Include="Utility\ImmutableList.cs" />
-    <Compile Include="Utility\IndexedCollection.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
     <Compile Include="Utility\RestrictedCollection.cs" />
     <Compile Include="Utility\RestrictedIndexedCollection.cs" />
-    <Compile Include="Utility\RestrictedList.cs" />
     <Compile Include="Utility\StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +224,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CoCoFiles\Coco.exe" />
+    <None Include="_Diagrams\CSharpProject.cd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

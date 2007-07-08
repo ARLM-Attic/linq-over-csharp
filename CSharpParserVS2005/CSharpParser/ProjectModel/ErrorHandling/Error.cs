@@ -13,10 +13,10 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private string _Code;
-    private string _Description;
-    private string _File;
-    private Token _ErrorPoint;
+    private readonly string _Code;
+    private readonly string _Description;
+    private readonly string _File;
+    private readonly Token _ErrorPoint;
 
     #endregion
 
@@ -31,12 +31,9 @@ namespace CSharpParser.ProjectModel
     /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     // --------------------------------------------------------------------------------
-    public Error(string code, Token errorPoint, string file, string description)
+    public Error(string code, Token errorPoint, string file, string description):
+      this(code, errorPoint, file, description, null)
     {
-      _Code = code;
-      _ErrorPoint = errorPoint;
-      _Description = description;
-      _File = file;
     }
 
     // --------------------------------------------------------------------------------
@@ -54,7 +51,14 @@ namespace CSharpParser.ProjectModel
     {
       _Code = code;
       _ErrorPoint = errorPoint;
-      _Description = String.Format(description, parameters);
+      if (parameters == null)
+      {
+        _Description = description;
+      }
+      else
+      {
+        _Description = String.Format(description, parameters);
+      }
       _File = file;
     }
 

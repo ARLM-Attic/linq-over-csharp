@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private readonly Token _Token;
-    private readonly Parser _Parser;
+    private readonly CSharpSyntaxParser _Parser;
     private string _Name;
 
     #endregion
@@ -40,7 +40,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="token">Token providing information about the element.</param>
     /// <param name="parser">Parser instance</param>
     // --------------------------------------------------------------------------------
-    protected LanguageElement(Token token, Parser parser)
+    protected LanguageElement(Token token, CSharpSyntaxParser parser)
     {
       _Token = token;
       _Name = token.val;
@@ -111,7 +111,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the parser.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Parser Parser
+    public CSharpSyntaxParser Parser
     {
       get { return _Parser; }
     }

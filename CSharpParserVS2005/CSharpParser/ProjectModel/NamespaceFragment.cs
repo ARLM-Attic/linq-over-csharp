@@ -19,7 +19,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private readonly NamespaceFragment _ParentNamespace;
-    private readonly ProjectFile _ParentFile; 
+    private readonly SourceFile _ParentFile; 
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly NamespaceFragmentCollection _NestedNamespaces = new NamespaceFragmentCollection();
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
@@ -39,7 +39,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="parentFile">Parent file defining this namespace.</param>
     // --------------------------------------------------------------------------------
     public NamespaceFragment(Token token, string name, NamespaceFragment parentNamespace, 
-      ProjectFile parentFile): base(token, name)
+      SourceFile parentFile): base(token, name)
     {
       _ParentNamespace = parentNamespace;
 
@@ -60,10 +60,10 @@ namespace CSharpParser.ProjectModel
       // --- of the file.
       if (parentNamespace == null) _ParentFile.Namespaces.Add(this);
 
-      // --- The namespace is added to the list of CSharpProject
+      // --- The namespace is added to the list of CompilationUnit
 
       Namespace nameSpace;
-      CSharpProject project = _ParentFile.ParentProject;
+      CompilationUnit project = _ParentFile.ParentUnit;
       if (project.DeclaredNamespaces.TryGetValue(FullName, out nameSpace))
       {
         // --- This namespace has been declared, add the new fragment.
@@ -203,7 +203,7 @@ namespace CSharpParser.ProjectModel
     {
       item.Namespace = this;
       _TypeDeclarations.Add(item);
-      _ParentFile.ParentProject.DeclaredTypes.Add(item);
+      _ParentFile.ParentUnit.DeclaredTypes.Add(item);
     }
 
     #endregion

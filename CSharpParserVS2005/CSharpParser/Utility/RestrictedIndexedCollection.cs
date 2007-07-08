@@ -18,6 +18,8 @@ namespace CSharpParser.Collections
     private readonly List<TValue> _Items;
     private readonly Dictionary<string, TValue> _indexedItems;
     protected bool _IsReadOnly;
+    private event EventHandler<ItemedCancelEventArgs<TValue>> _BeforeAdd;
+    private event EventHandler<ItemedEventArgs<TValue>> _AfterAdd;
 
     #endregion
 
@@ -42,6 +44,32 @@ namespace CSharpParser.Collections
       _Items = new List<TValue>(capacity);
       _indexedItems = new Dictionary<string, TValue>(capacity);
       _IsReadOnly = false;
+    }
+
+    #endregion
+
+    #region Public events
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds or removes event handler for the "BeforeAdd" event.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    public event EventHandler<ItemedCancelEventArgs<TValue>> BeforeAdd
+    {
+      add { _BeforeAdd += value; }
+      remove { _BeforeAdd -= value; }
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds or removes event handler for the "AfterAdd" event.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    public event EventHandler<ItemedEventArgs<TValue>> AfterAdd
+    {
+      add { _AfterAdd += value; }
+      remove { _AfterAdd -= value; }
     }
 
     #endregion
@@ -106,6 +134,28 @@ namespace CSharpParser.Collections
 
     // ----------------------------------------------------------------------------------
     /// <summary>
+    /// Adds the specified item to the collection.
+    /// </summary>
+    /// <param name="item"></param>
+    // ----------------------------------------------------------------------------------
+    public void Add(TValue item)
+    {
+      if (_BeforeAdd != null)
+      {
+        ItemedCancelEventArgs<TValue> eventArgs = new ItemedCancelEventArgs<TValue>(item);
+        _BeforeAdd(this, eventArgs);
+        if (eventArgs.Cancel) return;
+      }
+      _indexedItems.Add(GetKeyOfItem(item), item);
+      _Items.Insert(_Items.Count, item);
+      if (_AfterAdd != null)
+      {
+        _AfterAdd(this, new ItemedEventArgs<TValue>(item));
+      }
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
     /// Searches for the specified object and returns the zero-based index of the first
     /// occurrence within the entire <b>List</b>.
     /// </summary>
@@ -152,18 +202,6 @@ namespace CSharpParser.Collections
       string key = GetKeyOfItem(_Items[index]);
       _indexedItems.Remove(key);
       _Items.RemoveAt(index);
-    }
-
-    // ----------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds the specified item to the collection.
-    /// </summary>
-    /// <param name="item"></param>
-    // ----------------------------------------------------------------------------------
-    public void Add(TValue item)
-    {
-      _indexedItems.Add(GetKeyOfItem(item), item);
-      _Items.Insert(_Items.Count, item);
     }
 
     // ----------------------------------------------------------------------------------

@@ -1,0 +1,75 @@
+using CSharpParser.Collections;
+
+namespace CSharpParser.ProjectModel
+{
+  // ==================================================================================
+  /// <summary>
+  /// This type represents an abstract compilation reference.
+  /// </summary>
+  /// <remarks>
+  /// Compilation reference is a referenced assembly, a referenced project, or anything
+  /// that holds information about types and namespaces external to the compilation
+  /// unit.
+  /// </remarks>
+  // ==================================================================================
+  public abstract class CompilationReference
+  {
+    #region Private fields
+
+    private string _Name;
+
+    #endregion
+
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new compilation reference with the specified name.
+    /// </summary>
+    /// <param name="name">Name of the compilation reference.</param>
+    // --------------------------------------------------------------------------------
+    protected CompilationReference(string name)
+    {
+      this._Name = name;
+    }
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the compilation reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Name
+    {
+      get { return _Name; }
+    }
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of compilation references that can be indexed by 
+  /// the name of the reference.
+  /// </summary>
+  // ==================================================================================
+  public sealed class CompilationReferenceCollection : RestrictedIndexedCollection<CompilationReference>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used for indexing.
+    /// </summary>
+    /// <param name="item">CompilationReference item.</param>
+    /// <returns>
+    /// Name of the compilation reference.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(CompilationReference item)
+    {
+      return item.Name;
+    }
+  }
+}

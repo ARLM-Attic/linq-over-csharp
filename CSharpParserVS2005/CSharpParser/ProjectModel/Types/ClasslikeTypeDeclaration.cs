@@ -18,7 +18,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    protected ClasslikeTypeDeclaration(Token token, Parser parser)
+    protected ClasslikeTypeDeclaration(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
     }

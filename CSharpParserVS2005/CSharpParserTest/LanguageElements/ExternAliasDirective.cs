@@ -10,7 +10,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void ExternAliasDirectiveOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ExternAliasDirective\ExternAliasDirectiveOK.cs");
       Assert.IsTrue(InvokeParser(parser));
     }
@@ -18,21 +18,22 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void ExternAliasSyntaxError()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ExternAliasDirective\ExternAliasDirectiveFailed.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors.Count, 3);
       Assert.AreEqual(parser.Errors[0].Code, "CS1003");
       Assert.AreEqual(parser.Errors[1].Code, "CS1003");
+      Assert.AreEqual(parser.Errors[2].Code, "SYNERR");
     }
 
     [TestMethod]
     public void ExternAliasesCheckedOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ExternAliasDirective\ExternAliasesChecked.cs");
       Assert.IsTrue(InvokeParser(parser));
-      ProjectFile file = parser.Files[0];
+      SourceFile file = parser.Files[0];
       Assert.AreEqual(file.ExternAliases.Count, 3);
       Assert.AreEqual(file.ExternAliases[0].Name, "Alias1");
       Assert.AreEqual(file.ExternAliases[1].Name, "Alias2");

@@ -10,10 +10,10 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void UsingsAndNameSpacesAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       Assert.IsTrue(InvokeParser(parser));
-      ProjectFile file = parser.Files[0];
+      SourceFile file = parser.Files[0];
 
       // --- Check using clauses in the file
       Assert.AreEqual(file.Usings.Count, 5);

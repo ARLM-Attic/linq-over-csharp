@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using CSharpParser;
 using CSharpParser.ParserFiles;
 using CSharpParser.ProjectModel;
@@ -22,10 +20,12 @@ namespace CSharpParserTest
     [TestMethod]
     public void GlobalAttributesAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("GlobalAttributes.cs");
+      parser.AddAssemblyReference("System");
+      parser.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(parser));
-      ProjectFile file = parser.Files[0];
+      SourceFile file = parser.Files[0];
       Assert.AreEqual(file.GlobalAttributes.Count, 12);
       foreach (AttributeDeclaration attr in file.GlobalAttributes)
       {
@@ -39,10 +39,10 @@ namespace CSharpParserTest
     [TestMethod]
     public void EnumParsingIsOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("EnumTest.cs");
       Assert.IsTrue(InvokeParser(parser));
-      ProjectFile file = parser.Files[0];
+      SourceFile file = parser.Files[0];
       EnumDeclaration et = file.Namespaces[0].TypeDeclarations[0] as EnumDeclaration;
       Assert.IsNotNull(et);
       Assert.AreEqual(et.Name, "EnumTest1");
@@ -81,7 +81,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void ConstDeclarationsAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("ConstDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -119,7 +119,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void DelegatesAndEventsAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("EventDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -201,7 +201,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void PropertiesAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("PropertyDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[1];
@@ -290,7 +290,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void MethodsAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("MethodDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -344,7 +344,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void CastOperatorsAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("CastOperatorDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
@@ -372,7 +372,7 @@ namespace CSharpParserTest
     [TestMethod]
     public void SimpleStatementsAreOK()
     {
-      CSharpProject parser = new CSharpProject(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleStatements.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];

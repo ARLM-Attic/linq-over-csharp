@@ -44,7 +44,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="token">Token providing information about the element.</param>
     /// <param name="parser">Parser instance</param>
     // --------------------------------------------------------------------------------
-    protected AttributedElement(Token token, Parser parser)
+    protected AttributedElement(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
     } 
