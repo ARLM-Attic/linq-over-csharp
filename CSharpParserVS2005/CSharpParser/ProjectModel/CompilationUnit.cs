@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using CSharpParser.ParserFiles;
+using CSharpParser.ParserFiles.PPExpressions;
 using CSharpParser.ProjectModel;
+using Scanner=CSharpParser.ParserFiles.Scanner;
+using Token=CSharpParser.ParserFiles.Token;
 
 namespace CSharpParser
 {
@@ -21,6 +25,8 @@ namespace CSharpParser
     private readonly string _WorkingFolder = string.Empty;
     private readonly CompilationReferenceCollection _References = new CompilationReferenceCollection();
     private readonly ExternAliasResolutionCollection _ExternAliasResolutions = new ExternAliasResolutionCollection();
+    private readonly List<string> _ConditionalSymbols = new List<string>();
+
     private CSharpSyntaxParser _Parser;
     private SourceFile _CurrentFile;
 
@@ -160,9 +166,22 @@ namespace CSharpParser
       get { return _References; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of conditional compilation symbols
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<string> ConditionalSymbols
+    {
+      get { return _ConditionalSymbols; }
+    }
+
     #endregion
 
     #region Public methods
+
+#if (SymbolA || SymbolB) != (SymbolC && (SymbolD))
+#endif
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -247,6 +266,66 @@ namespace CSharpParser
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a list of conditional compilation symbol to the list of existing symbols.
+    /// </summary>
+    /// <param name="symbols">Array of symbols to add.</param>
+    // --------------------------------------------------------------------------------
+    public void AddConditionalCompilationSymbols(String[] symbols)
+    {
+      if (symbols != null)
+      {
+        for (int i = 0; i < symbols.Length; ++i)
+        {
+          symbols[i] = symbols[i].Trim();
+          if (symbols[i].Length > 0 && !_ConditionalSymbols.Contains(symbols[i]))
+          {
+            _ConditionalSymbols.Add(symbols[i]);
+          }
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a conditional directive to the list of existing conditionals
+    /// </summary>
+    /// <param name="symbol">Conditional directive</param>
+    // --------------------------------------------------------------------------------
+    public void AddConditionalDirective(String symbol)
+    {
+      if (!_ConditionalSymbols.Contains(symbol))
+      {
+        _ConditionalSymbols.Add(symbol);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes a conditional directive from the list of existing conditionals
+    /// </summary>
+    /// <param name="symbol">Conditional directive</param>
+    // --------------------------------------------------------------------------------
+    public void RemoveConditionalDirective(String symbol)
+    {
+      _ConditionalSymbols.Remove(symbol);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified symbol is a conditional symbol or not.
+    /// </summary>
+    /// <param name="symbol">Symbol to check.</param>
+    /// <returns>
+    /// True, if the symbol is a conditional symbol; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool IsConditionalSymbolDefined(String symbol)
+    {
+      return _ConditionalSymbols.Contains(symbol);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Parses all the files within the project.
     /// </summary>
     /// <returns>
@@ -274,6 +353,25 @@ namespace CSharpParser
 
       // --- Return the number of errors found
       return _Errors.Count;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Evaluates the specified preprocessor expression.
+    /// </summary>
+    /// <param name="preprocessorExpression">Expression to evaluate</param>
+    /// <returns>
+    /// Result of the preprocessor evaluation
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool EvaluatePreprocessorExpression(string preprocessorExpression)
+    {
+      MemoryStream memStream =
+        new MemoryStream(new UTF8Encoding().GetBytes(preprocessorExpression));
+      PPScanner scanner = new PPScanner(memStream);
+      CSharpPPExprSyntaxParser parser = new CSharpPPExprSyntaxParser(scanner);
+      parser.Parse();
+      return !parser.ErrorFound;
     }
 
     #endregion

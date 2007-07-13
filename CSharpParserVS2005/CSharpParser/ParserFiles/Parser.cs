@@ -149,6 +149,8 @@ public class CSharpSyntaxParser
 	const int _ppWarning = 139;
 	const int _ppRegion = 140;
 	const int _ppEndReg = 141;
+	const int _cBlockCom = 142;
+	const int _cLineCom = 143;
 
   #endregion
 
@@ -181,6 +183,15 @@ public class CSharpSyntaxParser
 
   /// <summary>Represents the current distance from the last error.</summary>
   private int errDist = MinimumDistanceOfSeparateErrors;
+
+  /// <summary>
+  /// Flag indicating if the first real token occurred in the stream.
+  /// </summary>
+  /// <remarks>
+  /// Needed to check for #define and #undef directives occure before any real
+  /// tokens as stated in S9.5.3.
+  /// </remarks>
+  private bool _FirstRealTokenOccurred;
 
   #endregion
 
@@ -216,30 +227,16 @@ public class CSharpSyntaxParser
 
     #endregion
 
-    #region Common parser methods
-
-    /// <summary>List of conditional symbols</summary>
-    List<string> _ConditionalSymbols = new List<string>();
+    #region Pragma handling methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a list of symbol to the list of existing symbols.
+    /// Signs that the first real token occurred in the source file.
     /// </summary>
-    /// <param name="symbols">Array of symbols to add.</param>
     // --------------------------------------------------------------------------------
-    public void AddConditionalCompilationSymbols(String[] symbols)
+    private void SignRealToken()
     {
-      if (symbols != null)
-      {
-        for (int i = 0; i < symbols.Length; ++i)
-        {
-          symbols[i] = symbols[i].Trim();
-          if (symbols[i].Length > 0 && !_ConditionalSymbols.Contains(symbols[i]))
-          {
-            _ConditionalSymbols.Add(symbols[i]);
-          }
-        }
-      }
+      _FirstRealTokenOccurred = true;    
     }
 
     // --------------------------------------------------------------------------------
@@ -305,11 +302,13 @@ public class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     void AddConditionalDirective(String symbol)
     {
-      symbol = RemovePreprocessorDirective(symbol);
-      if (!_ConditionalSymbols.Contains(symbol))
+      if (_FirstRealTokenOccurred)
       {
-        _ConditionalSymbols.Add(symbol);
+        DefineAndUndefError();
+        return;
       }
+      symbol = RemovePreprocessorDirective(symbol);
+      _CompilationUnit.AddConditionalDirective(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -320,7 +319,22 @@ public class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     void RemoveConditionalDirective(String symbol)
     {
-      _ConditionalSymbols.Remove(RemovePreprocessorDirective(symbol));
+      if (_FirstRealTokenOccurred)
+      {
+        DefineAndUndefError();
+        return;
+      }
+      _CompilationUnit.RemoveConditionalDirective(RemovePreprocessorDirective(symbol));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises the CS1032 error.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    void DefineAndUndefError()
+    {
+      Error("CS1032", la, "Cannot define/undefine preprocessor symbols after first token in file.");
     }
 
     // --------------------------------------------------------------------------------
@@ -334,7 +348,7 @@ public class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     bool IsConditionalSymbol(String symbol)
     {
-      return _ConditionalSymbols.Contains(RemovePreprocessorDirective(symbol));
+      return _CompilationUnit.IsConditionalSymbolDefined(RemovePreprocessorDirective(symbol));
     }
 
     // --------------------------------------------------------------------------------
@@ -399,6 +413,7 @@ public class CSharpSyntaxParser
             if (state == 0) { return; }
             --state;
             break;
+          case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
           default: break;
         }
         cur = _Scanner.Scan();
@@ -701,21 +716,44 @@ public class CSharpSyntaxParser
       return IsType(ref pt) && pt.kind == _ident;
     }
 
-    // "[" ("," | "]")
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent dimensions:
+    /// "[" ("," | "]")
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsDims()
     {
       int peek = Peek(1).kind;
       return la.kind == _lbrack && (peek == _comma || peek == _rbrack);
     }
 
-    // "*" | "[" ("," | "]")
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent pointer or dimensions:
+    /// "*" | "[" ("," | "]")
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsPointerOrDims()
     {
       return la.kind == _times || IsDims();
     }
 
-    /* skip: { "[" { "," } "]" | "*" }             */
-    /* !!! Proceeds from current peek position !!! */
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to skip pointer or dimension tokens.
+    /// </summary>
+    /// <param name="pt">The current token after skip.</param>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool SkipPointerOrDims(ref Token pt)
     {
       for (; ; )
@@ -732,14 +770,29 @@ public class CSharpSyntaxParser
       return true;
     }
 
-    // Is attribute target specifier
-    // (ident | keyword) ":"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if there is an attribute target specifier:
+    /// (ident | keyword) ":"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsAttrTargSpec()
     {
       return (la.kind == _ident || keyword[la.kind]) && Peek(1).kind == _colon;
     }
 
-    // ident ("," | "=" | ";")
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a field declaration:
+    /// ident ("," | "=" | ";")
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsFieldDecl()
     {
       int peek = Peek(1).kind;
@@ -747,6 +800,14 @@ public class CSharpSyntaxParser
              (peek == _comma || peek == _assgn || peek == _scolon);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type cast.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsTypeCast()
     {
       if (la.kind != _lpar) { return false; }
@@ -754,7 +815,15 @@ public class CSharpSyntaxParser
       return GuessTypeCast();
     }
 
-    // "(" typeKW ")"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type cast keyword:
+    /// "(" typeKW ")"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsSimpleTypeCast()
     {
       // assert: la.kind == _lpar
@@ -766,7 +835,15 @@ public class CSharpSyntaxParser
               (pt2.kind == _question && _Scanner.Peek().kind == _rpar));
     }
 
-    // "(" Type ")" castFollower
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type cast by guess:
+    /// "(" Type ")" castFollower
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool GuessTypeCast()
     {
       // assert: la.kind == _lpar
@@ -784,33 +861,57 @@ public class CSharpSyntaxParser
       return castFollower[pt.kind];
     }
 
-    // "[" "assembly"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a global assembly target:
+    /// "[" "assembly"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsGlobalAttrTarget()
     {
       Token pt = Peek(1);
       return la.kind == _lbrack && pt.kind == _ident && ("assembly".Equals(pt.val) || "module".Equals(pt.val));
     }
 
-    // "extern"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent an extern directive:
+    /// "extern"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsExternAliasDirective()
     {
       return la.kind == _extern;
     }
 
-    // true: anyToken"<"
-    // no whitespace between the token and the "<" allowed
-    // anything else will return false.
-    bool IsLtNoWs()
-    {
-      return (la.kind == _lt) && ((t.pos + t.val.Length) == la.pos);
-    }
-
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens no switch case or right backet.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsNoSwitchLabelOrRBrace()
     {
       return (la.kind != _case && la.kind != _default && la.kind != _rbrace) ||
              (la.kind == _default && Peek(1).kind != _colon);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token defines a shift operator.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsShift()
     {
       Token pt = Peek(1);
@@ -833,9 +934,9 @@ public class CSharpSyntaxParser
       return pt.kind != _lpar;
     }
 
-/*------------------------------------------------------------------------*
- *----- SCANNER DESCRIPTION ----------------------------------------------*
- *------------------------------------------------------------------------*/
+// ================================================================================
+// Scanner description
+// ================================================================================
 
 
 
@@ -943,6 +1044,10 @@ public class CSharpSyntaxParser
 				}
 				if (la.kind == 141) {
 				}
+				if (la.kind == 142) {
+				}
+				if (la.kind == 143) {
+				}
 
 			  la = t;
       }
@@ -1034,15 +1139,19 @@ public class CSharpSyntaxParser
 	  
 	void CS2() {
 		while (IsExternAliasDirective()) {
+			SignRealToken(); 
 			ExternAliasDirective(null);
 		}
 		while (la.kind == 78) {
 			UsingDirective(null);
+			SignRealToken(); 
 		}
 		while (IsGlobalAttrTarget()) {
+			SignRealToken(); 
 			GlobalAttributes();
 		}
 		while (StartOf(1)) {
+			SignRealToken(); 
 			NamespaceMemberDeclaration(null, _File);
 		}
 	}
@@ -1052,7 +1161,7 @@ public class CSharpSyntaxParser
 		Token token = t; 
 		Expect(1);
 		if (t.val != "alias") 
-		 Error("CS1003", t, "Syntax error, 'alias' expected"); 
+		 Error("CS1003", la, "Syntax error, 'alias' expected"); 
 		
 		ExpectWeak(1, 2);
 		ExternalAlias externAlias = new ExternalAlias(token, t.val);
@@ -1085,7 +1194,7 @@ public class CSharpSyntaxParser
 		Expect(97);
 		Expect(1);
 		if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
-		 Error("UNDEF", t, "Global attribute target specifier \"assembly\" or \"module\" expected");
+		 Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
 		string scope = t.val;
 		AttributeDeclaration attr;
 		
@@ -1500,7 +1609,7 @@ public class CSharpSyntaxParser
 	void TypeParameterConstraintsClause(out TypeParameterConstraint constraint) {
 		Expect(1);
 		if (t.val != "where") 
-		 Error("UNDEF", t, "type parameter constraints clause must start with: where");
+		 Error("UNDEF", la, "type parameter constraints clause must start with: where");
 		
 		Expect(1);
 		constraint = new TypeParameterConstraint(t); 
@@ -1783,10 +1892,10 @@ public class CSharpSyntaxParser
 		} else SynErr(145);
 		if (la.kind == 110) {
 			Get();
-			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "Unexpected token ?, void must not be nullable."); } 
+			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
 		}
 		PointerOrArray(ref typeRef);
-		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", t, "type expected, void found, maybe you mean void*"); } 
+		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
 	}
 
 	void FormalParameterList(FormalParameterCollection pars) {
@@ -1824,7 +1933,7 @@ public class CSharpSyntaxParser
 			Get();
 			fp.HasParams = true; 
 			Type(out typeRef, false);
-			if (typeRef.Kind != TypeKind.array) { Error("UNDEF", t, "params argument must be an array"); } 
+			if (typeRef.Kind != TypeKind.array) { Error("UNDEF", la, "params argument must be an array"); } 
 			Expect(1);
 			fp.Name = t.val; 
 			fp.Type = typeRef; 
@@ -1917,7 +2026,7 @@ public class CSharpSyntaxParser
 TypeDeclaration td) {
 		m.Check(Modifier.operators);
 		m.CheckMust(Modifier.operatorsMust);
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "operator not allowed on void"); } 
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "operator not allowed on void"); } 
 		OperatorDeclaration od = new OperatorDeclaration(t);
 		od.SetModifiers(m.Value);
 		od.AssignAttributes(attrs);
@@ -1947,9 +2056,9 @@ TypeDeclaration td) {
 			fp.Name = t.val; 
 			od.FormalParameters.Add(fp);
 			
-			if ((op & Operator.binary) == 0) Error("UNDEF", t, "too many operands for unary operator"); 
+			if ((op & Operator.binary) == 0) Error("UNDEF", la, "too many operands for unary operator"); 
 		} else if (la.kind == 113) {
-			if ((op & Operator.unary) == 0) Error("UNDEF", t, "too few operands for binary operator"); 
+			if ((op & Operator.unary) == 0) Error("UNDEF", la, "too few operands for binary operator"); 
 		} else SynErr(150);
 		Expect(113);
 		if (la.kind == 96) {
@@ -1963,7 +2072,7 @@ TypeDeclaration td) {
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
 TypeReference typeRef, bool isEvent, Modifier toCheck) {
 		m.Check(toCheck);
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "field type must not be void"); } 
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "field type must not be void"); } 
 		
 		SingleFieldMember(attrs, m, td, typeRef, isEvent);
 		while (la.kind == 87) {
@@ -2006,7 +2115,7 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 	void PropertyDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
 		m.Check(Modifier.propEvntMeths);
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "property type must not be void"); }
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "property type must not be void"); }
 		PropertyDeclaration pd = new PropertyDeclaration(t);
 		pd.SetModifiers(m.Value);
 		pd.AssignAttributes(attrs);
@@ -2022,7 +2131,7 @@ TypeReference memberRef, TypeDeclaration td) {
 	void IndexerDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
 		m.Check(Modifier.indexers);
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "indexer type must not be void"); }
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
 		IndexerDeclaration ind = new IndexerDeclaration(t);
 		ind.SetModifiers(m.Value);
 		ind.AssignAttributes(attrs);
@@ -2071,7 +2180,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		}
 		if (la.kind == 96) {
 			Block(md);
-			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", t, "Body declaration is not allowed here!"); } 
+			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
 			md.HasBody = true;
 			
 		} else if (la.kind == 114) {
@@ -2097,7 +2206,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else SynErr(153);
 		Expect(49);
 		Type(out typeRef, false);
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "cast type must not be void"); } 
+		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "cast type must not be void"); } 
 		cod.ResultingType = typeRef;
 		cod.Name = typeRef.RightmostName;
 		
@@ -2149,7 +2258,7 @@ TypeReference typeRef) {
 			accessor = prop.Remover = new AccessorDeclaration(t); 
 		} else if (la.kind == 1) {
 			Get();
-			Error("UNDEF", t, "add or remove expected"); 
+			Error("UNDEF", la, "add or remove expected"); 
 		} else SynErr(155);
 		Block(accessor);
 		accessor.HasBody = true;
@@ -2162,17 +2271,17 @@ TypeReference typeRef) {
 			}
 			if ("add".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasAdder) Error("UNDEF", t, "add already declared");  
+				if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
 				accessor = prop.Adder = new AccessorDeclaration(t);
 				
 			} else if ("remove".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasRemover) Error("UNDEF", t, "set already declared");  
+				if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
 				accessor = prop.Remover = new AccessorDeclaration(t);
 				
 			} else if (la.kind == 1) {
 				Get();
-				Error("UNDEF", t, "add or remove expected"); 
+				Error("UNDEF", la, "add or remove expected"); 
 			} else SynErr(156);
 			Block(accessor);
 			accessor.HasBody = true;
@@ -2215,7 +2324,7 @@ TypeReference typeRef) {
 			accessor = prop.Getter = new AccessorDeclaration(t); 
 		} else if (la.kind == 1) {
 			Get();
-			Error("UNDEF", t, "set or get expected"); 
+			Error("UNDEF", la, "set or get expected"); 
 		} else SynErr(157);
 		if (la.kind == 96) {
 			Block(accessor);
@@ -2237,17 +2346,17 @@ TypeReference typeRef) {
 			am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); 
 			if ("get".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasGetter) Error("UNDEF", t, "get already declared");  
+				if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
 				accessor = prop.Getter = new AccessorDeclaration(t);
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasSetter) Error("UNDEF", t, "set already declared");  
+				if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
 				accessor = prop.Setter = new AccessorDeclaration(t);
 				
 			} else if (la.kind == 1) {
 				Get();
-				Error("UNDEF", t, "set or get expected"); 
+				Error("UNDEF", la, "set or get expected"); 
 			} else SynErr(159);
 			if (la.kind == 96) {
 				Block(accessor);
@@ -2353,7 +2462,7 @@ TypeReference typeRef) {
 			Get();
 			op = Operator.gt; 
 			if (la.kind == 93) {
-				if (la.pos > t.pos+1) Error("UNDEF", t, "no whitespace allowed in right shift operator"); 
+				if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); 
 				Get();
 				op = Operator.rshift; 
 			}
@@ -2424,7 +2533,7 @@ TypeReference typeRef) {
 				} else SynErr(162);
 			} else if (la.kind == 68) {
 				m.Check(Modifier.indexers);
-				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "indexer type must not be void"); }
+				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
 				IndexerDeclaration ind = new IndexerDeclaration(t);
 				ind.SetModifiers(m.Value);
 				ind.AssignAttributes(attrs);
@@ -2459,7 +2568,7 @@ TypeReference typeRef) {
 			accessor = prop.Setter = new AccessorDeclaration(t); 
 		} else if (la.kind == 1) {
 			Get();
-			Error("UNDEF", t, "set or get expected"); 
+			Error("UNDEF", la, "set or get expected"); 
 		} else SynErr(165);
 		Expect(114);
 		accessor.AssignAttributes(attrs); 
@@ -2470,17 +2579,17 @@ TypeReference typeRef) {
 			}
 			if ("get".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasGetter) Error("UNDEF", t, "get already declared");  
+				if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
 				accessor = prop.Getter = new AccessorDeclaration(t);
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasSetter) Error("UNDEF", t, "set already declared");  
+				if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
 				accessor = prop.Setter = new AccessorDeclaration(t);
 				
 			} else if (la.kind == 1) {
 				Get();
-				Error("UNDEF", t, "set or get expected"); 
+				Error("UNDEF", la, "set or get expected"); 
 			} else SynErr(166);
 			Expect(114);
 			accessor.AssignAttributes(attrs); 
@@ -2913,7 +3022,7 @@ TypeReference typeRef) {
 					Expect(85);
 					nameFound = true; 
 				} else if (StartOf(21)) {
-					if (nameFound) Error("UNDEF", t, "no positional argument after named arguments"); 
+					if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); 
 				} else SynErr(170);
 				Expression(out expr);
 				arg.Expression = expr; 
@@ -3109,7 +3218,7 @@ TypeReference typeRef) {
 			Expression(out rightExpr);
 			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
-			if (isAssignment) Error("UNDEF", t, "error in assignment."); 
+			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
 		} else SynErr(176);
 		if (block != null) block.Add(es); 
 	}
@@ -3342,7 +3451,7 @@ TypeReference typeRef) {
 		Expect(98);
 		TypeReference typeRef; 
 		Type(out typeRef, false);
-		if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", t, "can only fix pointer types"); 
+		if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", la, "can only fix pointer types"); 
 		ValueAssignmentStatement vas = new ValueAssignmentStatement(t); 
 		Expect(1);
 		vas.Name = t.val; 
@@ -3556,7 +3665,7 @@ TypeReference typeRef) {
 			Get();
 			int pos = t.pos; 
 			Expect(94);
-			if (pos+1 < t.pos) Error("UNDEF", t, "no whitespace allowed in right shift assignment"); 
+			if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment"); 
 			op = new RightShiftAssignmentOperator(t); 
 			break;
 		}
@@ -4386,6 +4495,7 @@ TypeReference typeRef, bool isEvent) {
     // --------------------------------------------------------------------------------
     public void Parse()
     {
+      _FirstRealTokenOccurred = false;
 		  la = new Token();
 		  la.val = "";		
 		  Get();

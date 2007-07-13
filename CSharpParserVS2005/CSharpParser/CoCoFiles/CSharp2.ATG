@@ -37,30 +37,16 @@ COMPILER CS2
 
     #endregion
 
-    #region Common parser methods
-
-    /// <summary>List of conditional symbols</summary>
-    List<string> _ConditionalSymbols = new List<string>();
+    #region Pragma handling methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a list of symbol to the list of existing symbols.
+    /// Signs that the first real token occurred in the source file.
     /// </summary>
-    /// <param name="symbols">Array of symbols to add.</param>
     // --------------------------------------------------------------------------------
-    public void AddConditionalCompilationSymbols(String[] symbols)
+    private void SignRealToken()
     {
-      if (symbols != null)
-      {
-        for (int i = 0; i < symbols.Length; ++i)
-        {
-          symbols[i] = symbols[i].Trim();
-          if (symbols[i].Length > 0 && !_ConditionalSymbols.Contains(symbols[i]))
-          {
-            _ConditionalSymbols.Add(symbols[i]);
-          }
-        }
-      }
+      _FirstRealTokenOccurred = true;    
     }
 
     // --------------------------------------------------------------------------------
@@ -126,11 +112,13 @@ COMPILER CS2
     // --------------------------------------------------------------------------------
     void AddConditionalDirective(String symbol)
     {
-      symbol = RemovePreprocessorDirective(symbol);
-      if (!_ConditionalSymbols.Contains(symbol))
+      if (_FirstRealTokenOccurred)
       {
-        _ConditionalSymbols.Add(symbol);
+        DefineAndUndefError();
+        return;
       }
+      symbol = RemovePreprocessorDirective(symbol);
+      _CompilationUnit.AddConditionalDirective(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -141,7 +129,22 @@ COMPILER CS2
     // --------------------------------------------------------------------------------
     void RemoveConditionalDirective(String symbol)
     {
-      _ConditionalSymbols.Remove(RemovePreprocessorDirective(symbol));
+      if (_FirstRealTokenOccurred)
+      {
+        DefineAndUndefError();
+        return;
+      }
+      _CompilationUnit.RemoveConditionalDirective(RemovePreprocessorDirective(symbol));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises the CS1032 error.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    void DefineAndUndefError()
+    {
+      Error("CS1032", la, "Cannot define/undefine preprocessor symbols after first token in file.");
     }
 
     // --------------------------------------------------------------------------------
@@ -155,7 +158,7 @@ COMPILER CS2
     // --------------------------------------------------------------------------------
     bool IsConditionalSymbol(String symbol)
     {
-      return _ConditionalSymbols.Contains(RemovePreprocessorDirective(symbol));
+      return _CompilationUnit.IsConditionalSymbolDefined(RemovePreprocessorDirective(symbol));
     }
 
     // --------------------------------------------------------------------------------
@@ -220,6 +223,7 @@ COMPILER CS2
             if (state == 0) { return; }
             --state;
             break;
+          case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
           default: break;
         }
         cur = _Scanner.Scan();
@@ -522,21 +526,44 @@ COMPILER CS2
       return IsType(ref pt) && pt.kind == _ident;
     }
 
-    // "[" ("," | "]")
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent dimensions:
+    /// "[" ("," | "]")
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsDims()
     {
       int peek = Peek(1).kind;
       return la.kind == _lbrack && (peek == _comma || peek == _rbrack);
     }
 
-    // "*" | "[" ("," | "]")
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent pointer or dimensions:
+    /// "*" | "[" ("," | "]")
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsPointerOrDims()
     {
       return la.kind == _times || IsDims();
     }
 
-    /* skip: { "[" { "," } "]" | "*" }             */
-    /* !!! Proceeds from current peek position !!! */
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to skip pointer or dimension tokens.
+    /// </summary>
+    /// <param name="pt">The current token after skip.</param>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool SkipPointerOrDims(ref Token pt)
     {
       for (; ; )
@@ -553,14 +580,29 @@ COMPILER CS2
       return true;
     }
 
-    // Is attribute target specifier
-    // (ident | keyword) ":"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if there is an attribute target specifier:
+    /// (ident | keyword) ":"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsAttrTargSpec()
     {
       return (la.kind == _ident || keyword[la.kind]) && Peek(1).kind == _colon;
     }
 
-    // ident ("," | "=" | ";")
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a field declaration:
+    /// ident ("," | "=" | ";")
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsFieldDecl()
     {
       int peek = Peek(1).kind;
@@ -568,6 +610,14 @@ COMPILER CS2
              (peek == _comma || peek == _assgn || peek == _scolon);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type cast.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsTypeCast()
     {
       if (la.kind != _lpar) { return false; }
@@ -575,7 +625,15 @@ COMPILER CS2
       return GuessTypeCast();
     }
 
-    // "(" typeKW ")"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type cast keyword:
+    /// "(" typeKW ")"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsSimpleTypeCast()
     {
       // assert: la.kind == _lpar
@@ -587,7 +645,15 @@ COMPILER CS2
               (pt2.kind == _question && _Scanner.Peek().kind == _rpar));
     }
 
-    // "(" Type ")" castFollower
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a type cast by guess:
+    /// "(" Type ")" castFollower
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool GuessTypeCast()
     {
       // assert: la.kind == _lpar
@@ -605,33 +671,57 @@ COMPILER CS2
       return castFollower[pt.kind];
     }
 
-    // "[" "assembly"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent a global assembly target:
+    /// "[" "assembly"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsGlobalAttrTarget()
     {
       Token pt = Peek(1);
       return la.kind == _lbrack && pt.kind == _ident && ("assembly".Equals(pt.val) || "module".Equals(pt.val));
     }
 
-    // "extern"
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens represent an extern directive:
+    /// "extern"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsExternAliasDirective()
     {
       return la.kind == _extern;
     }
 
-    // true: anyToken"<"
-    // no whitespace between the token and the "<" allowed
-    // anything else will return false.
-    bool IsLtNoWs()
-    {
-      return (la.kind == _lt) && ((t.pos + t.val.Length) == la.pos);
-    }
-
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens no switch case or right backet.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsNoSwitchLabelOrRBrace()
     {
       return (la.kind != _case && la.kind != _default && la.kind != _rbrace) ||
              (la.kind == _default && Peek(1).kind != _colon);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token defines a shift operator.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     bool IsShift()
     {
       Token pt = Peek(1);
@@ -654,9 +744,9 @@ COMPILER CS2
       return pt.kind != _lpar;
     }
 
-/*------------------------------------------------------------------------*
- *----- SCANNER DESCRIPTION ----------------------------------------------*
- *------------------------------------------------------------------------*/
+// ================================================================================
+// Scanner description
+// ================================================================================
 
 CHARACTERS
 
@@ -677,6 +767,7 @@ CHARACTERS
   regularStringChar  = ANY - '"' - '\\' - newLine.
   notNewLine         = ANY - newLine .
   ws                 = " " + tab + '\u000b' + '\u000c'. /* Any character with Unicode class Zs */
+  blockComCh         = ANY - '*' - '/'.
 
 TOKENS
 
@@ -871,6 +962,9 @@ PRAGMAS
   ppRegion  = "#" {ws} "region" {notNewLine} newLine.
   ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.
 
+// Pragma for comments
+  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".
+  cLineCom  = "//" { notNewLine } newLine.
 
 // ****************************************************************************
 // If you would like to use C# comments in your grammar, use
@@ -887,11 +981,10 @@ PRAGMAS
 // CHARACTERS section).
 // ****************************************************************************
 
-COMMENTS FROM "/*" TO "*/"
-COMMENTS FROM "//" TO eol
+//COMMENTS FROM "/*" TO "*/"
+//COMMENTS FROM "//" TO eol
 
 IGNORE eol + cr + tab
-
 
 PRODUCTIONS
 
@@ -902,10 +995,21 @@ PRODUCTIONS
 // ====================================================================================
 CS2
 =                                                               
-  {IF (IsExternAliasDirective()) ExternAliasDirective<null>}
-  {UsingDirective<null>}
-  {IF (IsGlobalAttrTarget()) GlobalAttributes}
-  {NamespaceMemberDeclaration<null, _File>}
+  { 
+    IF (IsExternAliasDirective()) (. SignRealToken(); .)
+      ExternAliasDirective<null>
+  }
+  {
+    UsingDirective<null> (. SignRealToken(); .)
+  }
+  {
+    IF (IsGlobalAttrTarget()) (. SignRealToken(); .)
+      GlobalAttributes
+  }
+  {
+    (. SignRealToken(); .)
+    NamespaceMemberDeclaration<null, _File>
+  }
 .
 
 // ------------------------------------------------------------------------------------
@@ -918,7 +1022,7 @@ ExternAliasDirective<NamespaceFragment parent>
   "extern"   (. Token token = t; .)
   ident      (. 
                 if (t.val != "alias") 
-                  Error("CS1003", t, "Syntax error, 'alias' expected"); 
+                  Error("CS1003", la, "Syntax error, 'alias' expected"); 
              .)
   WEAK ident (. 
                ExternalAlias externAlias = new ExternalAlias(token, t.val);
@@ -961,7 +1065,7 @@ GlobalAttributes
                                   // We accept module because csc does (even if it is against 
                                   // the specification).
                                   if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
-                                    Error("UNDEF", t, "Global attribute target specifier \"assembly\" or \"module\" expected");
+                                    Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
                                   string scope = t.val;
                                   AttributeDeclaration attr;
                                .) 
@@ -1368,7 +1472,7 @@ PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
   TypeReference memberRef, TypeDeclaration td>
 =                 (. 
                      m.Check(Modifier.propEvntMeths);
-                     if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "property type must not be void"); }
+                     if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "property type must not be void"); }
                      PropertyDeclaration pd = new PropertyDeclaration(t);
                      pd.SetModifiers(m.Value);
                      pd.AssignAttributes(attrs);
@@ -1392,7 +1496,7 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
   TypeReference memberRef, TypeDeclaration td>
 =                 (. 
                      m.Check(Modifier.indexers);
-                     if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "indexer type must not be void"); }
+                     if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
                      IndexerDeclaration ind = new IndexerDeclaration(t);
                      ind.SetModifiers(m.Value);
                      ind.AssignAttributes(attrs);
@@ -1441,7 +1545,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
   } 
   ( 
     Block<md>                                       (. 
-                                                       if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", t, "Body declaration is not allowed here!"); } 
+                                                       if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
                                                        md.HasBody = true;
                                                     .)
     | ";"                                           (. md.HasBody = false; .)
@@ -1468,7 +1572,7 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       | "explicit"                      (. cod.IsExplicit = true; .)
     ) "operator"                        
     Type<out typeRef, false>            (. 
-                                           if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "cast type must not be void"); } 
+                                           if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "cast type must not be void"); } 
                                            cod.ResultingType = typeRef;
                                            cod.Name = typeRef.RightmostName;
                                         .)
@@ -1491,7 +1595,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
 =                                  (. 
                                       m.Check(Modifier.operators);
                                       m.CheckMust(Modifier.operatorsMust);
-                                      if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "operator not allowed on void"); } 
+                                      if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "operator not allowed on void"); } 
                                       OperatorDeclaration od = new OperatorDeclaration(t);
                                       od.SetModifiers(m.Value);
                                       od.AssignAttributes(attrs);
@@ -1516,8 +1620,8 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                       fp.Name = t.val; 
                                       od.FormalParameters.Add(fp);
                                    .)                                         
-                                   (. if ((op & Operator.binary) == 0) Error("UNDEF", t, "too many operands for unary operator"); .)
-  |                                (. if ((op & Operator.unary) == 0) Error("UNDEF", t, "too few operands for binary operator"); .)
+                                   (. if ((op & Operator.binary) == 0) Error("UNDEF", la, "too many operands for unary operator"); .)
+  |                                (. if ((op & Operator.unary) == 0) Error("UNDEF", la, "too few operands for binary operator"); .)
   ) ")"
   ( Block<od> | ";" )              (. td.Members.Add(od); .)
 .
@@ -1592,7 +1696,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
       )
     | (. 
          m.Check(Modifier.indexers);
-         if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "indexer type must not be void"); }
+         if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
          IndexerDeclaration ind = new IndexerDeclaration(t);
          ind.SetModifiers(m.Value);
          ind.AssignAttributes(attrs);
@@ -1719,7 +1823,7 @@ FormalParameterList<FormalParameterCollection pars>
                                        .)
     [ "," FormalParameterList<pars> ]
   | "params"                           (. fp.HasParams = true; .)
-    Type<out typeRef, false>           (. if (typeRef.Kind != TypeKind.array) { Error("UNDEF", t, "params argument must be an array"); } .)
+    Type<out typeRef, false>           (. if (typeRef.Kind != TypeKind.array) { Error("UNDEF", la, "params argument must be an array"); } .)
     ident                              (. fp.Name = t.val; .)
                                        (. fp.Type = typeRef; .)
                                        (. pars.Add(fp); .)
@@ -1750,7 +1854,7 @@ AccessorDeclarations<PropertyDeclaration prop>
   ModifierList<am>                    (. am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); .)
   ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t); .)
   | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t); .)
-  | ident                             (. Error("UNDEF", t, "set or get expected"); .)
+  | ident                             (. Error("UNDEF", la, "set or get expected"); .)
   ) 
   (
     Block<accessor>                   (. accessor.HasBody = true; .)
@@ -1763,14 +1867,14 @@ AccessorDeclarations<PropertyDeclaration prop>
     { Attributes<attrs> }             (. am = new Modifiers(this); .)
     ModifierList<am>                  (. am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); .)
     ( IF ("get".Equals(la.val)) ident (. 
-                                         if (prop.HasGetter) Error("UNDEF", t, "get already declared");  
+                                         if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
                                          accessor = prop.Getter = new AccessorDeclaration(t);
                                       .)
     | IF ("set".Equals(la.val)) ident (. 
-                                         if (prop.HasSetter) Error("UNDEF", t, "set already declared");  
+                                         if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
                                          accessor = prop.Setter = new AccessorDeclaration(t);
                                       .)
-    | ident                           (. Error("UNDEF", t, "set or get expected"); .)
+    | ident                           (. Error("UNDEF", la, "set or get expected"); .)
     ) 
     (
       Block<accessor>                 (. accessor.HasBody = true; .)
@@ -1794,7 +1898,7 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
 = { Attributes<attrs> }
   ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t); .)
   | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t); .)
-  | ident                                 (. Error("UNDEF", t, "add or remove expected"); .)
+  | ident                                 (. Error("UNDEF", la, "add or remove expected"); .)
   ) 
   Block<accessor>                         (. 
                                              accessor.HasBody = true;
@@ -1803,14 +1907,14 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
   [                                       (. attrs = new AttributeCollection(); .)                               
     { Attributes<attrs> }    
     ( IF ("add".Equals(la.val)) ident     (. 
-                                             if (prop.HasAdder) Error("UNDEF", t, "add already declared");  
+                                             if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
                                              accessor = prop.Adder = new AccessorDeclaration(t);
                                           .)
     | IF ("remove".Equals(la.val)) ident  (. 
-                                             if (prop.HasRemover) Error("UNDEF", t, "set already declared");  
+                                             if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
                                              accessor = prop.Remover = new AccessorDeclaration(t);
                                           .)
-    | ident                               (. Error("UNDEF", t, "add or remove expected"); .)
+    | ident                               (. Error("UNDEF", la, "add or remove expected"); .)
     ) 
     Block<accessor>                       (. 
                                              accessor.HasBody = true;
@@ -1831,19 +1935,19 @@ InterfaceAccessors<PropertyDeclaration prop>
 = { Attributes<attrs> }
   ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t); .)
   | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t); .)
-  | ident                               (. Error("UNDEF", t, "set or get expected"); .)
+  | ident                               (. Error("UNDEF", la, "set or get expected"); .)
   ) ";"                                 (. accessor.AssignAttributes(attrs); .)
   [                                     (. attrs = new AttributeCollection(); .)                               
     { Attributes<attrs> }    
     ( IF ("get".Equals(la.val)) ident   (. 
-                                         if (prop.HasGetter) Error("UNDEF", t, "get already declared");  
+                                         if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
                                          accessor = prop.Getter = new AccessorDeclaration(t);
                                         .)
     | IF ("set".Equals(la.val)) ident   (. 
-                                         if (prop.HasSetter) Error("UNDEF", t, "set already declared");  
+                                         if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
                                          accessor = prop.Setter = new AccessorDeclaration(t);
                                         .)
-    | ident                             (. Error("UNDEF", t, "set or get expected"); .)
+    | ident                             (. Error("UNDEF", la, "set or get expected"); .)
     ) ";"                               (. accessor.AssignAttributes(attrs); .)
   ]
 .
@@ -1920,7 +2024,7 @@ AttributeArguments<AttributeDeclaration attr>
         ( IF (IsAssignment())  
           ident                      (. arg.Name = t.val; .)
           "="                        (. nameFound = true; .)
-          |                          (. if (nameFound) Error("UNDEF", t, "no positional argument after named arguments"); .)
+          |                          (. if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); .)
         ) Expression<out expr>       (. arg.Expression = expr; .)
                                      (. attr.Arguments.Add(arg); .)
       }
@@ -1970,9 +2074,9 @@ Type<out TypeReference typeRef, bool voidAllowed>
                                                         typeRef.Kind = TypeKind.@void; 
                                                      .)
   )
-  [ "?"                                              (. if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "Unexpected token ?, void must not be nullable."); } .)
+  [ "?"                                              (. if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
   ]
-  PointerOrArray<ref typeRef>                        (. if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", t, "type expected, void found, maybe you mean void*"); } .)
+  PointerOrArray<ref typeRef>                        (. if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2460,7 +2564,7 @@ FixedStatement<IBlockOwner block>
   "("                         (. TypeReference typeRef; .)
           
     Type<out typeRef, false>          
-                              (. if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", t, "can only fix pointer types"); .)
+                              (. if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", la, "can only fix pointer types"); .)
                               (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t); .)
     ident                     (. vas.Name = t.val; .)
     "="                       (. Expression expr; .)
@@ -2489,7 +2593,7 @@ StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.ki
                                         (. asgn.LeftOperand = expr; .)
                                         (. Expression rightExpr; .)
     Expression<out rightExpr>           (. asgn.RightOperand = rightExpr; .)
-  | (. if (isAssignment) Error("UNDEF", t, "error in assignment."); .)
+  | (. if (isAssignment) Error("UNDEF", la, "error in assignment."); .)
   )                                     (. if (block != null) block.Add(es); .)
 .
 
@@ -2510,7 +2614,7 @@ AssignmentOperator<out AssignmentOperator op> (. op = null; .)
   | "^="    (. op = new XorAssignmentOperator(t); .)
   | "<<="   (. op = new LeftShiftAssignmentOperator(t); .)
   | ">"     (. int pos = t.pos; .)
-    ">="    (. if (pos+1 < t.pos) Error("UNDEF", t, "no whitespace allowed in right shift assignment"); .)
+    ">="    (. if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment"); .)
             (. op = new RightShiftAssignmentOperator(t); .)
 .
 
@@ -3300,7 +3404,7 @@ FieldMemberDeclarators<AttributeCollection attrs, Modifiers m, TypeDeclaration t
   TypeReference typeRef, bool isEvent, Modifier toCheck>
 =            (. 
                 m.Check(toCheck);
-                if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", t, "field type must not be void"); } 
+                if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "field type must not be void"); } 
              .)
   SingleFieldMember<attrs, m, td, typeRef, isEvent>
   { "," SingleFieldMember<attrs, m, td, typeRef, isEvent> }
@@ -3354,7 +3458,7 @@ OverloadableOp<out Operator op> (. op = Operator.plus; .)
   | "=="                        (. op = Operator.eq; .)
   | "!="                        (. op = Operator.neq; .)
   | ">"                         (. op = Operator.gt; .)
-        [                       (. if (la.pos > t.pos+1) Error("UNDEF", t, "no whitespace allowed in right shift operator"); .)
+        [                       (. if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); .)
           ">"                   (. op = Operator.rshift; .)
         ]
   | "<"                         (. op = Operator.lt; .)
@@ -3417,7 +3521,7 @@ TypeArgumentList<TypeReferenceCollection args>  (. TypeReference paramType; .)
 TypeParameterConstraintsClause<out TypeParameterConstraint constraint>         
 =
   ident                            (. if (t.val != "where") 
-                                        Error("UNDEF", t, "type parameter constraints clause must start with: where");
+                                        Error("UNDEF", la, "type parameter constraints clause must start with: where");
                                    .)
   ident                            (. 
                                       constraint = new TypeParameterConstraint(t); 

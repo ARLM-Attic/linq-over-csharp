@@ -77,6 +77,21 @@ namespace CSharpParser.ProjectModel
       get { return _Parent != null; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the leftmost name in this statement.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string LeftmostName
+    {
+      get
+      {
+        ExpressionStatement expStm = this as ExpressionStatement;
+        if (expStm != null) return expStm.Expression.LeftmostExpression.Name;
+        return Name;
+      }
+    }
+
     #endregion
 
     #region Public methods

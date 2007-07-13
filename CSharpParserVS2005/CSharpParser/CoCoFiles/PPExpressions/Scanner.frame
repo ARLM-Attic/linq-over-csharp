@@ -73,7 +73,7 @@ using System.Collections.Generic;
     #region Constant values
 
     public const int EOF = char.MaxValue + 1;
-    private const int MaxBufferLength = 256 * 1024; // 256KB
+    private const int MaxBufferLength = 4 * 1024; // 4KB
 
     #endregion
 
@@ -330,10 +330,10 @@ using System.Collections.Generic;
 
   // ==================================================================================
   /// <summary>
-  /// This class represents the scanner.
+  /// This class represents the scanner for preprocessor expressions.
   /// </summary>
   // ==================================================================================
-  public class Scanner
+  public class PPScanner
   {
     #region Constant declarations
 
@@ -368,31 +368,11 @@ using System.Collections.Generic;
 
     //-----------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a scanner instance based on the specified file.
-    /// </summary>
-    /// <param name="fileName">File to be scanned.</param>
-    //-----------------------------------------------------------------------------------
-    public Scanner(string fileName)
-    {
-      try
-      {
-        Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-        buffer = new Buffer(stream, false);
-        Init();
-      }
-      catch (IOException)
-      {
-        throw new FatalError("Cannot open file " + fileName);
-      }
-    }
-
-    //-----------------------------------------------------------------------------------
-    /// <summary>
     /// Creates a scanner instance based on the specified stream.
     /// </summary>
     /// <param name="s">Stream to scan.</param>
     //-----------------------------------------------------------------------------------
-    public Scanner(Stream s)
+    public PPScanner(Stream s)
     {
       buffer = new Buffer(s, true);
       Init();

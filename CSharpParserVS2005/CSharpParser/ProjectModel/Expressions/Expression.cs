@@ -30,7 +30,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region Public methods
+    #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -43,6 +43,26 @@ namespace CSharpParser.ProjectModel
       set { _BracketsUsed = value; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the leftmost part of this expression.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Expression LeftmostExpression
+    {
+      get
+      {
+        UnaryOperator unOp = this as UnaryOperator;
+        if (unOp != null) return unOp.Operand.LeftmostExpression;
+        else
+        {
+          BinaryOperator binOp = this as BinaryOperator;
+          if (binOp != null) return binOp.LeftOperand.LeftmostExpression;
+        }
+        return this;
+      }
+    }
     #endregion
+
   }
 }
