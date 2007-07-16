@@ -362,6 +362,9 @@ using System.Collections.Generic;
     char[] tval = new char[128]; // text of current token
     int tlen;         // length of current token
 
+    /// <summary>Signs that scanner should skip over block comment start.</summary>
+    private bool _SkipMode = false;
+
     #endregion
 
     #region Lifecycle methods
@@ -379,6 +382,7 @@ using System.Collections.Generic;
         Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
         buffer = new Buffer(stream, false);
         Init();
+        _SkipMode = false;
       }
       catch (IOException)
       {
@@ -396,12 +400,24 @@ using System.Collections.Generic;
     {
       buffer = new Buffer(s, true);
       Init();
+      _SkipMode = false;
     }
 
     #endregion
 	
     #region Public properties
 
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the current skipmode
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public bool SkipMode
+    {
+      get { return _SkipMode; }
+      set { _SkipMode = value; }
+    } 
+    
     //-----------------------------------------------------------------------------------
     /// <summary>
     /// Gets the current character

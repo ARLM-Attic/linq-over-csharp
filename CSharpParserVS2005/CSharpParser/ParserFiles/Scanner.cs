@@ -338,6 +338,9 @@ namespace CSharpParser.ParserFiles {
     char[] tval = new char[128]; // text of current token
     int tlen;         // length of current token
 
+    /// <summary>Signs that scanner should skip over block comment start.</summary>
+    private bool _SkipMode = false;
+
     #endregion
 
     #region Lifecycle methods
@@ -355,6 +358,7 @@ namespace CSharpParser.ParserFiles {
         Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
         buffer = new Buffer(stream, false);
         Init();
+        _SkipMode = false;
       }
       catch (IOException)
       {
@@ -372,12 +376,24 @@ namespace CSharpParser.ParserFiles {
     {
       buffer = new Buffer(s, true);
       Init();
+      _SkipMode = false;
     }
 
     #endregion
 	
     #region Public properties
 
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the current skipmode
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public bool SkipMode
+    {
+      get { return _SkipMode; }
+      set { _SkipMode = value; }
+    } 
+    
     //-----------------------------------------------------------------------------------
     /// <summary>
     /// Gets the current character
@@ -605,6 +621,14 @@ namespace CSharpParser.ParserFiles {
     Token NextToken()
     {
 		while (ch == ' ' || ch >= 9 && ch <= 10 || ch == 13) NextCh();
+
+    // Handle skip mode
+    if (ch != Buffer.EOF && _SkipMode)
+    {
+      // Skip "/*" block comment begin token
+      if (ch == '/') NextCh();
+      if (ch != Buffer.EOF && ch == '*') NextCh();
+    }
 
 		int apx = 0;
       t = new Token();

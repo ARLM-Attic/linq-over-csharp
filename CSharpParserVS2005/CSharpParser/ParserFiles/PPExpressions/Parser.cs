@@ -67,6 +67,11 @@ public class CSharpPPExprSyntaxParser
 
 private PPExpression _Expression;
     
+    public PPExpression Expression
+    {
+      get { return _Expression; }
+    }
+    
 // ================================================================================
 // Scanner description
 // ================================================================================
@@ -210,73 +215,53 @@ private PPExpression _Expression;
 
 	void PPExpression(out PPExpression expr) {
 		expr = null; 
-		OrExpression(out expr);
-	}
-
-	void OrExpression(out PPExpression expr) {
-		expr = null; 
-		if (StartOf(1)) {
-			AndExpression(out expr);
-		} else if (StartOf(1)) {
-			OrExpression(out expr);
-			Expect(9);
-			PPOrOperator oper = new PPOrOperator(); 
+		Unary(out expr);
+		PPBinaryOperator oper = null; 
+		PPExpression rightExpr; 
+		while (la.kind == 9) {
+			Get();
+			oper = new PPOrOperator(); 
 			oper.LeftOperand = expr; 
-			PPExpression rightExpr; 
-			AndExpression(out rightExpr);
-			expr = oper; oper.RightOperand = rightExpr; 
-		} else SynErr(12);
-	}
-
-	void AndExpression(out PPExpression expr) {
-		expr = null; 
-		if (StartOf(1)) {
-			EqualityExpression(out expr);
-		} else if (StartOf(1)) {
-			AndExpression(out expr);
-			Expect(4);
-			PPAndOperator oper = new PPAndOperator(); 
+			Unary(out rightExpr);
+			oper.RightOperand = rightExpr; 
+			expr = oper; 
+		}
+		while (la.kind == 4) {
+			Get();
+			oper = new PPAndOperator(); 
 			oper.LeftOperand = expr; 
-			PPExpression rightExpr; 
-			EqualityExpression(out rightExpr);
-			expr = oper; oper.RightOperand = rightExpr; 
-		} else SynErr(13);
-	}
-
-	void EqualityExpression(out PPExpression expr) {
-		expr = null; 
-		if (StartOf(1)) {
-			UnaryExpression(out expr);
-		} else if (StartOf(1)) {
-			EqualityExpression(out expr);
-			PPBinaryOperator oper = null; 
+			Unary(out rightExpr);
+			oper.RightOperand = rightExpr; 
+			expr = oper; 
+		}
+		while (la.kind == 5 || la.kind == 7) {
 			if (la.kind == 5) {
 				Get();
 				oper = new PPEqualOperator(); 
-			} else if (la.kind == 7) {
+			} else {
 				Get();
 				oper = new PPNotEqualOperator(); 
-			} else SynErr(14);
+			}
 			oper.LeftOperand = expr; 
-			PPExpression rightExpr; 
-			UnaryExpression(out rightExpr);
-			expr = oper; oper.RightOperand = rightExpr; 
-		} else SynErr(15);
+			Unary(out rightExpr);
+			oper.RightOperand = rightExpr; 
+			expr = oper; 
+		}
 	}
 
-	void UnaryExpression(out PPExpression expr) {
+	void Unary(out PPExpression expr) {
 		expr = null; 
-		if (StartOf(2)) {
-			PrimaryExpression(out expr);
+		if (StartOf(1)) {
+			Primary(out expr);
 		} else if (la.kind == 8) {
 			Get();
 			PPExpression operand; 
-			UnaryExpression(out operand);
+			Unary(out operand);
 			expr = new PPNotOperator(operand); 
-		} else SynErr(16);
+		} else SynErr(12);
 	}
 
-	void PrimaryExpression(out PPExpression expr) {
+	void Primary(out PPExpression expr) {
 		expr = null; 
 		if (la.kind == 3) {
 			Get();
@@ -291,7 +276,7 @@ private PPExpression _Expression;
 			Get();
 			PPExpression(out expr);
 			Expect(10);
-		} else SynErr(17);
+		} else SynErr(13);
 	}
 
 
@@ -328,7 +313,6 @@ private PPExpression _Expression;
 	  private bool[,] _StartupSet = 
     {
 		{T,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,T,T,T, x,x,T,x, T,x,x,x, x},
 		{x,T,T,T, x,x,T,x, x,x,x,x, x}
 
 	  };
@@ -352,12 +336,8 @@ private PPExpression _Expression;
 			case 9: s = "or expected"; break;
 			case 10: s = "rpar expected"; break;
 			case 11: s = "??? expected"; break;
-			case 12: s = "invalid OrExpression"; break;
-			case 13: s = "invalid AndExpression"; break;
-			case 14: s = "invalid EqualityExpression"; break;
-			case 15: s = "invalid EqualityExpression"; break;
-			case 16: s = "invalid UnaryExpression"; break;
-			case 17: s = "invalid PrimaryExpression"; break;
+			case 12: s = "invalid Unary"; break;
+			case 13: s = "invalid Primary"; break;
 
   		  default: s = "error " + n; break;
 	 	  }

@@ -1,13 +1,11 @@
 using System.Text;
 using System.Collections;
-using System.Collections.Generic;
+using CSharpParser.ParserFiles.PPExpressions;
 using CSharpParser.ProjectModel;
 
 using System;
 
 namespace CSharpParser.ParserFiles {
-
-
 
 // ==================================================================================
 /// <summary>
@@ -363,30 +361,58 @@ public class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     void IfPragma(String symbol)
     {
-      if (!IsConditionalSymbol(symbol))
+      symbol = RemovePreprocessorDirective(symbol);
+      PPEvaluationStatus evalStatus = _CompilationUnit.EvaluatePreprocessorExpression(symbol);
+      if (evalStatus == PPEvaluationStatus.Failed)
       {
-        int state = 0;
-        Token cur = _Scanner.Scan();
-
-        for (; ; )
+        Error("CS1517", la, "Invalid preprocessor expression");
+      }
+      if (_CompilationUnit.EvaluatePreprocessorExpression(symbol) != PPEvaluationStatus.True)
+      {
+        _Scanner.SkipMode = true;
+        try
         {
-          switch (cur.kind)
+          int state = 0;
+          Token cur = _Scanner.Scan();
+
+          for (;;)
           {
-            case _ppIf: ++state; break;
-            case _ppEndif:
-              if (state == 0) { return; }
-              --state;
-              break;
-            case _ppElif:
-              if (state == 0 && IsConditionalSymbol(cur.val)) { return; }
-              break;
-            case _ppElse:
-              if (state == 0) { return; }
-              break;
-            case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
-            default: break;
+            switch (cur.kind)
+            {
+              case _ppIf:
+                ++state;
+                break;
+              case _ppEndif:
+                if (state == 0)
+                {
+                  return;
+                }
+                --state;
+                break;
+              case _ppElif:
+                if (state == 0 && IsConditionalSymbol(cur.val))
+                {
+                  return;
+                }
+                break;
+              case _ppElse:
+                if (state == 0)
+                {
+                  return;
+                }
+                break;
+              case _EOF:
+                Error("INCFIL", cur, "Incomplete file.");
+                return;
+              default:
+                break;
+            }
+            cur = _Scanner.Scan();
           }
-          cur = _Scanner.Scan();
+        }
+        finally
+        {
+          _Scanner.SkipMode = false;
         }
       }
     }

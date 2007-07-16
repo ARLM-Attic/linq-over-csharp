@@ -180,9 +180,6 @@ namespace CSharpParser
 
     #region Public methods
 
-#if (SymbolA || SymbolB) != (SymbolC && (SymbolD))
-#endif
-
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Adds a file to the project.
@@ -364,14 +361,20 @@ namespace CSharpParser
     /// Result of the preprocessor evaluation
     /// </returns>
     // --------------------------------------------------------------------------------
-    public bool EvaluatePreprocessorExpression(string preprocessorExpression)
+    public PPEvaluationStatus EvaluatePreprocessorExpression(string preprocessorExpression)
     {
       MemoryStream memStream =
         new MemoryStream(new UTF8Encoding().GetBytes(preprocessorExpression));
       PPScanner scanner = new PPScanner(memStream);
       CSharpPPExprSyntaxParser parser = new CSharpPPExprSyntaxParser(scanner);
       parser.Parse();
-      return !parser.ErrorFound;
+      if (parser.ErrorFound)
+      {
+        return PPEvaluationStatus.Failed;
+      }
+      else return parser.Expression.Evaluate(_ConditionalSymbols)
+        ? PPEvaluationStatus.True
+        : PPEvaluationStatus.False;
     }
 
     #endregion

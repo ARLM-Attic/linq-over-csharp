@@ -4,6 +4,18 @@ namespace CSharpParser.ParserFiles.PPExpressions
 {
   // ==================================================================================
   /// <summary>
+  /// This enumeration signs how th preprocessor evaluation finished.
+  /// </summary>
+  // ==================================================================================
+  public enum PPEvaluationStatus
+  {
+    Failed,
+    True,
+    False
+  }
+
+  // ==================================================================================
+  /// <summary>
   /// This abstract type represents a preprocessor expression.
   /// </summary>
   // ==================================================================================
@@ -17,6 +29,26 @@ namespace CSharpParser.ParserFiles.PPExpressions
     /// <returns>Result of evaluation.</returns>
     // --------------------------------------------------------------------------------
     public abstract bool Evaluate(List<string> conditionalSymbols);
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the leftmost part of this expression.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public PPExpression LeftmostExpression
+    {
+      get
+      {
+        PPUnaryOperator unOp = this as PPUnaryOperator;
+        if (unOp != null) return unOp.Operand.LeftmostExpression;
+        else
+        {
+          PPBinaryOperator binOp = this as PPBinaryOperator;
+          if (binOp != null) return binOp.LeftOperand.LeftmostExpression;
+        }
+        return this;
+      }
+    }
   }
 
   // ==================================================================================
@@ -81,6 +113,16 @@ namespace CSharpParser.ParserFiles.PPExpressions
     public PPSymbol(string symbol)
     {
       _Symbol = symbol;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the symbol.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Symbol
+    {
+      get { return _Symbol; }
     } 
     
     // --------------------------------------------------------------------------------

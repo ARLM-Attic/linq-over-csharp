@@ -62,6 +62,7 @@ namespace CSharpParser.ProjectModel
         return this;
       }
     }
+
     #endregion
 
   }

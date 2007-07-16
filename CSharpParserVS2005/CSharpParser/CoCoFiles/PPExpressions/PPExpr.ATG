@@ -7,6 +7,11 @@ COMPILER CS2PPExpr
 
     private PPExpression _Expression;
     
+    public PPExpression Expression
+    {
+      get { return _Expression; }
+    }
+    
 // ================================================================================
 // Scanner description
 // ================================================================================
@@ -72,57 +77,43 @@ PRODUCTIONS
 // ====================================================================================
 CS2PPExpr = PPExpression<out _Expression>.
 
-PPExpression<out PPExpression expr> (. expr = null; .)
+PPExpression<out PPExpression expr>     (. expr = null; .)
 =                                   
-  OrExpression<out expr>
+  Unary<out expr>                       (. PPBinaryOperator oper = null; .)
+                                        (. PPExpression rightExpr; .)
+  {
+    "||"                                (. oper = new PPOrOperator(); .)
+                                        (. oper.LeftOperand = expr; .)
+    Unary<out rightExpr>                (. oper.RightOperand = rightExpr; .)
+                                        (. expr = oper; .)
+  }        
+  { 
+    "&&"                                (. oper = new PPAndOperator(); .)
+                                        (. oper.LeftOperand = expr; .)
+    Unary<out rightExpr>                (. oper.RightOperand = rightExpr; .)
+                                        (. expr = oper; .)
+  }
+  { 
+    (
+      "=="                              (. oper = new PPEqualOperator(); .)
+    | "!="                              (. oper = new PPNotEqualOperator(); .)
+    )                                   (. oper.LeftOperand = expr; .)
+    Unary<out rightExpr>                (. oper.RightOperand = rightExpr; .)
+                                        (. expr = oper; .)
+  }
 .
 
-OrExpression<out PPExpression expr> (. expr = null; .)
-= 
-    AndExpression<out expr> 
-  |
-    OrExpression<out expr>
-    "||"                          (. PPOrOperator oper = new PPOrOperator(); .)
-                                  (. oper.LeftOperand = expr; .)
-                                  (. PPExpression rightExpr; .)
-    AndExpression<out rightExpr>  (. expr = oper; oper.RightOperand = rightExpr; .)
-.
-
-AndExpression<out PPExpression expr> (. expr = null; .)
+Unary<out PPExpression expr>            (. expr = null; .)
 =
-    EqualityExpression<out expr> 
-  | 
-    AndExpression<out expr> 
-    "&&"                              (. PPAndOperator oper = new PPAndOperator(); .)
-                                      (. oper.LeftOperand = expr; .)
-                                      (. PPExpression rightExpr; .)
-    EqualityExpression<out rightExpr> (. expr = oper; oper.RightOperand = rightExpr; .)
+    Primary<out expr>
+  | "!"                                 (. PPExpression operand; .)
+    Unary<out operand>                  (. expr = new PPNotOperator(operand); .)
 .
 
-EqualityExpression<out PPExpression expr> (. expr = null; .) 
-=
-    UnaryExpression<out expr>
-  |
-    EqualityExpression<out expr>    (. PPBinaryOperator oper = null; .)
-  (                                 
-    "=="                            (. oper = new PPEqualOperator(); .)
-  | "!="                            (. oper = new PPNotEqualOperator(); .)
-  )                                 (. oper.LeftOperand = expr; .)
-                                    (. PPExpression rightExpr; .)
-    UnaryExpression<out rightExpr>  (. expr = oper; oper.RightOperand = rightExpr; .)
-.
-
-UnaryExpression<out PPExpression expr> (. expr = null; .)
-=
-    PrimaryExpression<out expr>
-  | "!"                           (. PPExpression operand; .)
-    UnaryExpression<out operand>  (. expr = new PPNotOperator(operand); .)
-.
-
-PrimaryExpression<out PPExpression expr> (. expr = null; .)
-=   true        (. expr = new PPTrueLiteral(); .)
-  | false       (. expr = new PPFalseLiteral(); .)
-  | ident       (. expr = new PPSymbol(t.val); .)
+Primary<out PPExpression expr>          (. expr = null; .)
+=   true                                (. expr = new PPTrueLiteral(); .)
+  | false                               (. expr = new PPFalseLiteral(); .)
+  | ident                               (. expr = new PPSymbol(t.val); .)
   | "(" PPExpression<out expr> ")"
 .
 

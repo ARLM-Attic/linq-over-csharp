@@ -73,15 +73,28 @@ namespace CSharpParserTest.LanguageElements
     public void BeginningCommentInIfOk()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
-      parser.AddFile(@"Pragmas\IfEndif2.cs");
+      parser.AddFile(@"Pragmas\IfEndif3.cs");
       Assert.IsTrue(InvokeParser(parser));
       ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
       Assert.IsNotNull(cd);
       MethodDeclaration md = cd.Members[0] as MethodDeclaration;
       Assert.IsNotNull(md);
-      //Assert.AreEqual(md.Statements.Count, 2);
-      //Assert.AreEqual(md.Statements[0].LeftmostName, "CheckConsistency");
-      //Assert.AreEqual(md.Statements[1].LeftmostName, "CommitHelper");
+      Assert.AreEqual(md.Statements.Count, 1);
+      Assert.AreEqual(md.Statements[0].LeftmostName, "Console");
+    }
+
+    [TestMethod]
+    public void IfEndifInVerbatimStringOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Pragmas\IfEndifInVerbatimString.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
+      Assert.IsNotNull(cd);
+      MethodDeclaration md = cd.Members[0] as MethodDeclaration;
+      Assert.IsNotNull(md);
+      Assert.AreEqual(md.Statements.Count, 1);
+      Assert.AreEqual(md.Statements[0].LeftmostName, "System");
     }
   }
 }
