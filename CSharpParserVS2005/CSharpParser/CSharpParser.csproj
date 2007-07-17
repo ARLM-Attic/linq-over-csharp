@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParserFiles\IfPragmaHandling.cs" />
     <Compile Include="ParserFiles\Modifier.cs" />
     <Compile Include="ParserFiles\Operator.cs" />
     <Compile Include="ParserFiles\Parser.cs" />

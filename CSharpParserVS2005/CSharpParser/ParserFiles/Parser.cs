@@ -1,11 +1,13 @@
 using System.Text;
 using System.Collections;
-using CSharpParser.ParserFiles.PPExpressions;
 using CSharpParser.ProjectModel;
+using CSharpParser.ParserFiles.PPExpressions;
 
 using System;
 
 namespace CSharpParser.ParserFiles {
+
+
 
 // ==================================================================================
 /// <summary>
@@ -190,6 +192,12 @@ public class CSharpSyntaxParser
   /// tokens as stated in S9.5.3.
   /// </remarks>
   private bool _FirstRealTokenOccurred;
+  
+  public const int ppIfKind = _ppIf;
+  public const int ppElifKind = _ppElif;
+  public const int ppElseKind = _ppElse;
+  public const int ppEndifKind = _ppEndif;
+  public const int EOFKind = _EOF;
 
   #endregion
 
@@ -226,16 +234,6 @@ public class CSharpSyntaxParser
     #endregion
 
     #region Pragma handling methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Signs that the first real token occurred in the source file.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    private void SignRealToken()
-    {
-      _FirstRealTokenOccurred = true;    
-    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -294,49 +292,6 @@ public class CSharpSyntaxParser
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a conditional directive to the list of existing conditionals
-    /// </summary>
-    /// <param name="symbol">Conditional directive</param>
-    // --------------------------------------------------------------------------------
-    void AddConditionalDirective(String symbol)
-    {
-      if (_FirstRealTokenOccurred)
-      {
-        DefineAndUndefError();
-        return;
-      }
-      symbol = RemovePreprocessorDirective(symbol);
-      _CompilationUnit.AddConditionalDirective(symbol);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Removes a conditional directive from the list of existing conditionals
-    /// </summary>
-    /// <param name="symbol">Conditional directive</param>
-    // --------------------------------------------------------------------------------
-    void RemoveConditionalDirective(String symbol)
-    {
-      if (_FirstRealTokenOccurred)
-      {
-        DefineAndUndefError();
-        return;
-      }
-      _CompilationUnit.RemoveConditionalDirective(RemovePreprocessorDirective(symbol));
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Raises the CS1032 error.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    void DefineAndUndefError()
-    {
-      Error("CS1032", la, "Cannot define/undefine preprocessor symbols after first token in file.");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Checks if the specified symbol is a conditional symbol or not.
     /// </summary>
     /// <param name="symbol">Symbol to check.</param>
@@ -347,74 +302,6 @@ public class CSharpSyntaxParser
     bool IsConditionalSymbol(String symbol)
     {
       return _CompilationUnit.IsConditionalSymbolDefined(RemovePreprocessorDirective(symbol));
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Handles the specified conditional symbol within the #if pragma
-    /// </summary>
-    /// <param name="symbol">Symbol to handle as conditional</param>
-    /// <remarks>
-    /// Search for the correct alternative and enter. Drop everything before the 
-    /// correct alternative.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    void IfPragma(String symbol)
-    {
-      symbol = RemovePreprocessorDirective(symbol);
-      PPEvaluationStatus evalStatus = _CompilationUnit.EvaluatePreprocessorExpression(symbol);
-      if (evalStatus == PPEvaluationStatus.Failed)
-      {
-        Error("CS1517", la, "Invalid preprocessor expression");
-      }
-      if (_CompilationUnit.EvaluatePreprocessorExpression(symbol) != PPEvaluationStatus.True)
-      {
-        _Scanner.SkipMode = true;
-        try
-        {
-          int state = 0;
-          Token cur = _Scanner.Scan();
-
-          for (;;)
-          {
-            switch (cur.kind)
-            {
-              case _ppIf:
-                ++state;
-                break;
-              case _ppEndif:
-                if (state == 0)
-                {
-                  return;
-                }
-                --state;
-                break;
-              case _ppElif:
-                if (state == 0 && IsConditionalSymbol(cur.val))
-                {
-                  return;
-                }
-                break;
-              case _ppElse:
-                if (state == 0)
-                {
-                  return;
-                }
-                break;
-              case _EOF:
-                Error("INCFIL", cur, "Incomplete file.");
-                return;
-              default:
-                break;
-            }
-            cur = _Scanner.Scan();
-          }
-        }
-        finally
-        {
-          _Scanner.SkipMode = false;
-        }
-      }
     }
 
     // --------------------------------------------------------------------------------
@@ -970,6 +857,7 @@ public class CSharpSyntaxParser
 
     private CompilationUnit _CompilationUnit;
     private SourceFile _File;
+    private PragmaHandler _PragmaHandler;
 
     #endregion 
     
@@ -989,6 +877,7 @@ public class CSharpSyntaxParser
 	  	_Scanner = scanner;
 		  _CompilationUnit = unit;
 		  _File = file;
+      _PragmaHandler = new PragmaHandler(this);
   	}
   	
     #endregion
@@ -1015,6 +904,36 @@ public class CSharpSyntaxParser
     {
       get { return _File; }
       set { _File = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the scanner used by this parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Scanner Scanner
+    {
+      get { return _Scanner; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the pragma handler used by this parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    internal PragmaHandler PragmaHandler
+    {
+      get { return _PragmaHandler; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the lookahead token.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Token Lookahead
+    {
+      get { return la; }
     }
 
     #endregion
@@ -1044,21 +963,22 @@ public class CSharpSyntaxParser
         la = _Scanner.Scan();
         if (la.kind <= maxT) { ++errDist; break; }
 				if (la.kind == 131) {
-				AddConditionalDirective(la.val); 
+				_PragmaHandler.AddConditionalDirective(la.val); 
 				}
 				if (la.kind == 132) {
-				RemoveConditionalDirective(la.val); 
+				_PragmaHandler.RemoveConditionalDirective(la.val); 
 				}
 				if (la.kind == 133) {
-				IfPragma(la.val); 
+				_PragmaHandler.IfPragma(la); 
 				}
 				if (la.kind == 134) {
-				ElifOrElsePragma(); 
+				_PragmaHandler.ElifPragma(la); 
 				}
 				if (la.kind == 135) {
-				ElifOrElsePragma(); 
+				_PragmaHandler.ElsePragma(la); 
 				}
 				if (la.kind == 136) {
+				_PragmaHandler.EndifPragma(la); 
 				}
 				if (la.kind == 137) {
 				}
@@ -1165,19 +1085,19 @@ public class CSharpSyntaxParser
 	  
 	void CS2() {
 		while (IsExternAliasDirective()) {
-			SignRealToken(); 
+			_PragmaHandler.SignRealToken(); 
 			ExternAliasDirective(null);
 		}
 		while (la.kind == 78) {
 			UsingDirective(null);
-			SignRealToken(); 
+			_PragmaHandler.SignRealToken(); 
 		}
 		while (IsGlobalAttrTarget()) {
-			SignRealToken(); 
+			_PragmaHandler.SignRealToken(); 
 			GlobalAttributes();
 		}
 		while (StartOf(1)) {
-			SignRealToken(); 
+			_PragmaHandler.SignRealToken(); 
 			NamespaceMemberDeclaration(null, _File);
 		}
 	}

@@ -82,6 +82,12 @@ public class CSharpSyntaxParser
   /// tokens as stated in S9.5.3.
   /// </remarks>
   private bool _FirstRealTokenOccurred;
+  
+  public const int ppIfKind = _ppIf;
+  public const int ppElifKind = _ppElif;
+  public const int ppElseKind = _ppElse;
+  public const int ppEndifKind = _ppEndif;
+  public const int EOFKind = _EOF;
 
   #endregion
 
@@ -91,6 +97,7 @@ public class CSharpSyntaxParser
 
     private CompilationUnit _CompilationUnit;
     private SourceFile _File;
+    private PragmaHandler _PragmaHandler;
 
     #endregion 
     
@@ -110,6 +117,7 @@ public class CSharpSyntaxParser
 	  	_Scanner = scanner;
 		  _CompilationUnit = unit;
 		  _File = file;
+      _PragmaHandler = new PragmaHandler(this);
   	}
   	
     #endregion
@@ -136,6 +144,36 @@ public class CSharpSyntaxParser
     {
       get { return _File; }
       set { _File = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the scanner used by this parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Scanner Scanner
+    {
+      get { return _Scanner; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the pragma handler used by this parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    internal PragmaHandler PragmaHandler
+    {
+      get { return _PragmaHandler; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the lookahead token.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Token Lookahead
+    {
+      get { return la; }
     }
 
     #endregion

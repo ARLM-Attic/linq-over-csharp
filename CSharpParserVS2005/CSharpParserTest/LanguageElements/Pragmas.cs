@@ -84,6 +84,65 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
+    public void BeginningCommentInElseOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Pragmas\IfEndif4.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
+      Assert.IsNotNull(cd);
+      MethodDeclaration md = cd.Members[0] as MethodDeclaration;
+      Assert.IsNotNull(md);
+      Assert.AreEqual(md.Statements.Count, 1);
+      Assert.AreEqual(md.Statements[0].LeftmostName, "Console");
+    }
+
+    [TestMethod]
+    public void DoubleTrueElifOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Pragmas\IfEndif5.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
+      Assert.IsNotNull(cd);
+      MethodDeclaration md = cd.Members[0] as MethodDeclaration;
+      Assert.IsNotNull(md);
+      Assert.AreEqual(md.Statements.Count, 1);
+      Assert.AreEqual(md.Statements[0].LeftmostName, "Console");
+    }
+
+    [TestMethod]
+    public void SimpleTrueElifOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Pragmas\IfEndif6.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
+      Assert.IsNotNull(cd);
+      MethodDeclaration md = cd.Members[0] as MethodDeclaration;
+      Assert.IsNotNull(md);
+      Assert.AreEqual(md.Statements.Count, 2);
+      Assert.AreEqual(md.Statements[0].LeftmostName, "Console");
+      Assert.AreEqual(md.Statements[1].LeftmostName, "Console");
+    }
+
+    [TestMethod]
+    public void ComplexNestedIffOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Pragmas\IfEndif7.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
+      Assert.IsNotNull(cd);
+      MethodDeclaration md = cd.Members[0] as MethodDeclaration;
+      Assert.IsNotNull(md);
+      Assert.AreEqual(md.Statements.Count, 3);
+      Assert.AreEqual(md.Statements[0].LeftmostName, "Console");
+      Assert.AreEqual(md.Statements[1].LeftmostName, "Console");
+      Assert.AreEqual(md.Statements[2].LeftmostName, "Console");
+    }
+
+    [TestMethod]
     public void IfEndifInVerbatimStringOk()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);

@@ -622,15 +622,15 @@ namespace CSharpParser.ParserFiles {
     {
 		while (ch == ' ' || ch >= 9 && ch <= 10 || ch == 13) NextCh();
 
-    // Handle skip mode
-    if (ch != Buffer.EOF && _SkipMode)
-    {
-      // Skip "/*" block comment begin token
-      if (ch == '/') NextCh();
-      if (ch != Buffer.EOF && ch == '*') NextCh();
-    }
-
 		int apx = 0;
+
+      // Handle skip mode
+      if (ch != Buffer.EOF && _SkipMode)
+      {
+        // Skip "/*" block comment begin token
+        if (ch == '/') NextCh();
+        if (ch != Buffer.EOF && ch == '*') NextCh();
+      }
       t = new Token();
       t.pos = pos; t.col = col; t.line = line;
       int state;
@@ -1364,6 +1364,25 @@ namespace CSharpParser.ParserFiles {
         {
           pt = pt.next;
         } while (pt.kind > maxT);
+      }
+      return pt;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Peek for the next token, but does not ignore pragmas 
+    /// </summary>
+    /// <returns>The next token.</returns>
+    //-----------------------------------------------------------------------------------
+    public Token PeekWithPragma()
+    {
+      if (pt.next == null)
+      {
+        pt = pt.next = NextToken();
+      }
+      else
+      {
+        pt = pt.next;
       }
       return pt;
     }

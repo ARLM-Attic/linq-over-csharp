@@ -237,6 +237,10 @@
     <None Include="TestFiles\EventDeclarations.cs" />
     <Compile Include="SimpleExpressionTests.cs" />
     <Compile Include="StringHelperTest.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif4.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif5.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif6.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif7.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />
     <None Include="TestFiles\Pragmas\IfEndif3.cs" />

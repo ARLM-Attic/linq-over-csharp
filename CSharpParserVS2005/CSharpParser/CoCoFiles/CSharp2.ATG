@@ -1,6 +1,7 @@
 using System.Text;
 using System.Collections;
 using CSharpParser.ProjectModel;
+using CSharpParser.ParserFiles.PPExpressions;
 
 COMPILER CS2
 
@@ -37,16 +38,6 @@ COMPILER CS2
     #endregion
 
     #region Pragma handling methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Signs that the first real token occurred in the source file.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    private void SignRealToken()
-    {
-      _FirstRealTokenOccurred = true;    
-    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -105,49 +96,6 @@ COMPILER CS2
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a conditional directive to the list of existing conditionals
-    /// </summary>
-    /// <param name="symbol">Conditional directive</param>
-    // --------------------------------------------------------------------------------
-    void AddConditionalDirective(String symbol)
-    {
-      if (_FirstRealTokenOccurred)
-      {
-        DefineAndUndefError();
-        return;
-      }
-      symbol = RemovePreprocessorDirective(symbol);
-      _CompilationUnit.AddConditionalDirective(symbol);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Removes a conditional directive from the list of existing conditionals
-    /// </summary>
-    /// <param name="symbol">Conditional directive</param>
-    // --------------------------------------------------------------------------------
-    void RemoveConditionalDirective(String symbol)
-    {
-      if (_FirstRealTokenOccurred)
-      {
-        DefineAndUndefError();
-        return;
-      }
-      _CompilationUnit.RemoveConditionalDirective(RemovePreprocessorDirective(symbol));
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Raises the CS1032 error.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    void DefineAndUndefError()
-    {
-      Error("CS1032", la, "Cannot define/undefine preprocessor symbols after first token in file.");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Checks if the specified symbol is a conditional symbol or not.
     /// </summary>
     /// <param name="symbol">Symbol to check.</param>
@@ -158,46 +106,6 @@ COMPILER CS2
     bool IsConditionalSymbol(String symbol)
     {
       return _CompilationUnit.IsConditionalSymbolDefined(RemovePreprocessorDirective(symbol));
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Handles the specified conditional symbol within the #if pragma
-    /// </summary>
-    /// <param name="symbol">Symbol to handle as conditional</param>
-    /// <remarks>
-    /// Search for the correct alternative and enter. Drop everything before the 
-    /// correct alternative.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    void IfPragma(String symbol)
-    {
-      if (!IsConditionalSymbol(symbol))
-      {
-        int state = 0;
-        Token cur = _Scanner.Scan();
-
-        for (; ; )
-        {
-          switch (cur.kind)
-          {
-            case _ppIf: ++state; break;
-            case _ppEndif:
-              if (state == 0) { return; }
-              --state;
-              break;
-            case _ppElif:
-              if (state == 0 && IsConditionalSymbol(cur.val)) { return; }
-              break;
-            case _ppElse:
-              if (state == 0) { return; }
-              break;
-            case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
-            default: break;
-          }
-          cur = _Scanner.Scan();
-        }
-      }
     }
 
     // --------------------------------------------------------------------------------
@@ -949,12 +857,12 @@ PRAGMAS
   /* Preprocessor directives.                                               *
    * The exact parsing of their syntax is left for later processing         */
 
-  ppDefine  = "#" {ws} "define" {notNewLine} newLine. (. AddConditionalDirective(la.val); .)
-  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.  (. RemoveConditionalDirective(la.val); .)
-  ppIf      = "#" {ws} "if" {notNewLine} newLine.     (. IfPragma(la.val); .)
-  ppElif    = "#" {ws} "elif" {notNewLine} newLine.   (. ElifOrElsePragma(); .)
-  ppElse    = "#" {ws} "else" {notNewLine} newLine.   (. ElifOrElsePragma(); .)
-  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.
+  ppDefine  = "#" {ws} "define" {notNewLine} newLine. (. _PragmaHandler.AddConditionalDirective(la.val); .)
+  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.  (. _PragmaHandler.RemoveConditionalDirective(la.val); .)
+  ppIf      = "#" {ws} "if" {notNewLine} newLine.     (. _PragmaHandler.IfPragma(la); .)
+  ppElif    = "#" {ws} "elif" {notNewLine} newLine.   (. _PragmaHandler.ElifPragma(la); .) 
+  ppElse    = "#" {ws} "else" {notNewLine} newLine.   (. _PragmaHandler.ElsePragma(la); .) 
+  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.  (. _PragmaHandler.EndifPragma(la); .) 
   ppLine    = "#" {ws} "line" {notNewLine} newLine.
   ppError   = "#" {ws} "error" {notNewLine} newLine.
   ppWarning = "#" {ws} "warning" {notNewLine} newLine.
@@ -995,18 +903,18 @@ PRODUCTIONS
 CS2
 =                                                               
   { 
-    IF (IsExternAliasDirective()) (. SignRealToken(); .)
+    IF (IsExternAliasDirective()) (. _PragmaHandler.SignRealToken(); .)
       ExternAliasDirective<null>
   }
   {
-    UsingDirective<null> (. SignRealToken(); .)
+    UsingDirective<null> (. _PragmaHandler.SignRealToken(); .)
   }
   {
-    IF (IsGlobalAttrTarget()) (. SignRealToken(); .)
+    IF (IsGlobalAttrTarget()) (. _PragmaHandler.SignRealToken(); .)
       GlobalAttributes
   }
   {
-    (. SignRealToken(); .)
+    (. _PragmaHandler.SignRealToken(); .)
     NamespaceMemberDeclaration<null, _File>
   }
 .

@@ -4,10 +4,10 @@ class PurchaseTransaction
   void Commit()
   {
 
-#if false
-    /* This is syntactically legal
-#else
+#if true
     Console.WriteLine("This");
+#else
+    /* This is syntactically legal
 #endif
   }
 }

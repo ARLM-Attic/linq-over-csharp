@@ -36,6 +36,8 @@ namespace CSharpParser
     private ICompilationErrorHandler _ErrorHandler;
     private TextWriter _ErrorStream;
     private string _ErrorMessageFormat = "-- line {0} col {1}: {2}"; // 0=line, 1=column, 2=text
+    private int _ErrorLineOffset;
+    private string _ErrorFile;
 
     #endregion
 
@@ -65,6 +67,8 @@ namespace CSharpParser
       _ErrorHandler = this;
       _WorkingFolder = workingFolder;
       _CurrentFile = null;
+      _ErrorLineOffset = 0;
+      _ErrorFile = null;
       if (addCSharpFiles)
       {
         AddAllFilesFrom(_WorkingFolder);

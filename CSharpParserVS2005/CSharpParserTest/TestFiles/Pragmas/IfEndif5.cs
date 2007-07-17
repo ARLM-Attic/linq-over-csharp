@@ -1,4 +1,3 @@
-#define Debug // Debugging on
 class PurchaseTransaction
 {
   void Commit()
@@ -6,8 +5,13 @@ class PurchaseTransaction
 
 #if false
     /* This is syntactically legal
-#else
+#elif true
     Console.WriteLine("This");
+#elif true
+    Console.WriteLine("");
+    Console.WriteLine("");
+#else
+    Console.WriteLine("");
 #endif
   }
 }
