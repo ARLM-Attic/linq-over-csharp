@@ -341,6 +341,17 @@ namespace CSharpParser.ParserFiles {
     /// <summary>Signs that scanner should skip over block comment start.</summary>
     private bool _SkipMode = false;
 
+    /// <summary>Flag indicating a new line has been found.</summary>
+    private bool _NewLineFound;
+
+    /// <summary>
+    /// Indicates the position of the first non-whitespace character within the line.
+    /// </summary>
+    private int _FirstNonWsInLine;
+
+    /// <summary>Indicates that an EOF found.</summary>
+    private bool _EOFFound;
+
     #endregion
 
     #region Lifecycle methods
@@ -358,7 +369,6 @@ namespace CSharpParser.ParserFiles {
         Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
         buffer = new Buffer(stream, false);
         Init();
-        _SkipMode = false;
       }
       catch (IOException)
       {
@@ -376,7 +386,6 @@ namespace CSharpParser.ParserFiles {
     {
       buffer = new Buffer(s, true);
       Init();
-      _SkipMode = false;
     }
 
     #endregion
@@ -414,6 +423,17 @@ namespace CSharpParser.ParserFiles {
       get { return buffer; }
     }
 
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the position of the first non-whitespace character in the current line
+    /// or -1 if no non-whitespace found.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public int FirstNonWsInLine
+    {
+      get { return _FirstNonWsInLine; }
+    }
+
     #endregion
 
     //-----------------------------------------------------------------------------------
@@ -423,6 +443,11 @@ namespace CSharpParser.ParserFiles {
     //-----------------------------------------------------------------------------------
     void Init()
     {
+      _SkipMode = false;
+      _FirstNonWsInLine = -1;
+      _NewLineFound = true;
+      _EOFFound = false;
+
       pos = -1; line = 1; col = 0;
       oldEols = 0;
       NextCh();
@@ -447,37 +472,37 @@ namespace CSharpParser.ParserFiles {
 		for (int i = 192; i <= 214; ++i) start[i] = 1;
 		for (int i = 216; i <= 246; ++i) start[i] = 1;
 		for (int i = 248; i <= 255; ++i) start[i] = 1;
-		for (int i = 49; i <= 57; ++i) start[i] = 163;
+		for (int i = 49; i <= 57; ++i) start[i] = 170;
 		start[92] = 15; 
-		start[64] = 164; 
-		start[48] = 165; 
-		start[46] = 166; 
+		start[64] = 171; 
+		start[48] = 172; 
+		start[46] = 173; 
 		start[39] = 44; 
 		start[34] = 61; 
-		start[38] = 201; 
-		start[61] = 167; 
-		start[58] = 168; 
+		start[38] = 208; 
+		start[61] = 174; 
+		start[58] = 175; 
 		start[44] = 79; 
-		start[45] = 202; 
-		start[47] = 203; 
-		start[62] = 169; 
-		start[43] = 170; 
+		start[45] = 209; 
+		start[47] = 210; 
+		start[62] = 176; 
+		start[43] = 177; 
 		start[123] = 86; 
 		start[91] = 87; 
 		start[40] = 88; 
-		start[60] = 204; 
-		start[37] = 205; 
-		start[33] = 171; 
-		start[124] = 206; 
-		start[63] = 207; 
+		start[60] = 211; 
+		start[37] = 212; 
+		start[33] = 178; 
+		start[124] = 213; 
+		start[63] = 214; 
 		start[125] = 95; 
 		start[93] = 96; 
 		start[41] = 97; 
 		start[59] = 98; 
 		start[126] = 99; 
-		start[42] = 172; 
-		start[94] = 208; 
-		start[35] = 173; 
+		start[42] = 179; 
+		start[94] = 215; 
+		start[35] = 180; 
 		start[Buffer.EOF] = -1;
 
   		pt = tokens = new Token();  // first token is a dummy
@@ -495,10 +520,31 @@ namespace CSharpParser.ParserFiles {
       {
         pos = buffer.Pos;
         ch = buffer.Read(); col++;
+        if (!_EOFFound && ch == Buffer.EOF)
+        {
+          _EOFFound = true;
+          ch = EOL;
+        }
         // replace isolated '\r' by '\n' in order to make
         // eol handling uniform across Windows, Unix and Mac
         if (ch == '\r' && buffer.Peek() != '\n') ch = EOL;
-        if (ch == EOL) { line++; col = 0; }
+        if (ch == EOL)
+        {
+          line++; 
+          col = 0;
+          _NewLineFound = true;
+        }
+        else if (_NewLineFound)
+        {
+          // --- Check if the first non-whitespace character is found
+          _FirstNonWsInLine = -1;
+          if (ch != ' ' && ch != 9 && ch != 10 && ch != 13)
+          {
+            // --- First non-whitespace found
+            _FirstNonWsInLine = col;
+            _NewLineFound = false;
+          }
+        }
       }
 
   	}
@@ -728,10 +774,10 @@ namespace CSharpParser.ParserFiles {
 				else {t.kind = noSym; break;}
 			case 28:
 				if (ch >= '0' && ch <= '9') {apx = 0; AddCh(); goto case 28;}
-				else if (ch == 'U') {apx = 0; AddCh(); goto case 174;}
-				else if (ch == 'u') {apx = 0; AddCh(); goto case 175;}
-				else if (ch == 'L') {apx = 0; AddCh(); goto case 176;}
-				else if (ch == 'l') {apx = 0; AddCh(); goto case 177;}
+				else if (ch == 'U') {apx = 0; AddCh(); goto case 181;}
+				else if (ch == 'u') {apx = 0; AddCh(); goto case 182;}
+				else if (ch == 'L') {apx = 0; AddCh(); goto case 183;}
+				else if (ch == 'l') {apx = 0; AddCh(); goto case 184;}
 				else {
 					tlen -= apx;
 					buffer.Pos = t.pos; NextCh(); line = t.line; col = t.col;
@@ -742,10 +788,10 @@ namespace CSharpParser.ParserFiles {
 				else {t.kind = noSym; break;}
 			case 30:
 				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 30;}
-				else if (ch == 'U') {AddCh(); goto case 178;}
-				else if (ch == 'u') {AddCh(); goto case 179;}
-				else if (ch == 'L') {AddCh(); goto case 180;}
-				else if (ch == 'l') {AddCh(); goto case 181;}
+				else if (ch == 'U') {AddCh(); goto case 185;}
+				else if (ch == 'u') {AddCh(); goto case 186;}
+				else if (ch == 'L') {AddCh(); goto case 187;}
+				else if (ch == 'l') {AddCh(); goto case 188;}
 				else {t.kind = 2; break;}
 			case 31:
 				{t.kind = 2; break;}
@@ -796,7 +842,7 @@ namespace CSharpParser.ParserFiles {
 				{t.kind = 3; break;}
 			case 44:
 				if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= '&' || ch >= '(' && ch <= '[' || ch >= ']' && ch <= 65535) {AddCh(); goto case 45;}
-				else if (ch == 92) {AddCh(); goto case 182;}
+				else if (ch == 92) {AddCh(); goto case 189;}
 				else {t.kind = noSym; break;}
 			case 45:
 				if (ch == 39) {AddCh(); goto case 60;}
@@ -805,7 +851,7 @@ namespace CSharpParser.ParserFiles {
 				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 47;}
 				else {t.kind = noSym; break;}
 			case 47:
-				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 183;}
+				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 190;}
 				else if (ch == 39) {AddCh(); goto case 60;}
 				else {t.kind = noSym; break;}
 			case 48:
@@ -849,16 +895,16 @@ namespace CSharpParser.ParserFiles {
 			case 61:
 				if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= '!' || ch >= '#' && ch <= '[' || ch >= ']' && ch <= 65535) {AddCh(); goto case 61;}
 				else if (ch == '"') {AddCh(); goto case 77;}
-				else if (ch == 92) {AddCh(); goto case 185;}
+				else if (ch == 92) {AddCh(); goto case 192;}
 				else {t.kind = noSym; break;}
 			case 62:
 				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 63;}
 				else {t.kind = noSym; break;}
 			case 63:
 				if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= '!' || ch >= '#' && ch <= '/' || ch >= ':' && ch <= '@' || ch >= 'G' && ch <= '[' || ch >= ']' && ch <= '`' || ch >= 'g' && ch <= 65535) {AddCh(); goto case 61;}
-				else if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 186;}
+				else if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 193;}
 				else if (ch == '"') {AddCh(); goto case 77;}
-				else if (ch == 92) {AddCh(); goto case 185;}
+				else if (ch == 92) {AddCh(); goto case 192;}
 				else {t.kind = noSym; break;}
 			case 64:
 				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 65;}
@@ -898,7 +944,7 @@ namespace CSharpParser.ParserFiles {
 				else {t.kind = noSym; break;}
 			case 76:
 				if (ch <= '!' || ch >= '#' && ch <= 65535) {AddCh(); goto case 76;}
-				else if (ch == '"') {AddCh(); goto case 188;}
+				else if (ch == '"') {AddCh(); goto case 195;}
 				else {t.kind = noSym; break;}
 			case 77:
 				{t.kind = 5; break;}
@@ -1080,19 +1126,19 @@ namespace CSharpParser.ParserFiles {
 			case 144:
 				{t.kind = 139; break;}
 			case 145:
-				if (ch == 'e') {AddCh(); goto case 146;}
+				if (ch == 'r') {AddCh(); goto case 146;}
 				else {t.kind = noSym; break;}
 			case 146:
-				if (ch == 'g') {AddCh(); goto case 147;}
+				if (ch == 'a') {AddCh(); goto case 147;}
 				else {t.kind = noSym; break;}
 			case 147:
-				if (ch == 'i') {AddCh(); goto case 148;}
+				if (ch == 'g') {AddCh(); goto case 148;}
 				else {t.kind = noSym; break;}
 			case 148:
-				if (ch == 'o') {AddCh(); goto case 149;}
+				if (ch == 'm') {AddCh(); goto case 149;}
 				else {t.kind = noSym; break;}
 			case 149:
-				if (ch == 'n') {AddCh(); goto case 150;}
+				if (ch == 'a') {AddCh(); goto case 150;}
 				else {t.kind = noSym; break;}
 			case 150:
 				if (ch == 10 || ch == 13) {AddCh(); goto case 151;}
@@ -1122,200 +1168,222 @@ namespace CSharpParser.ParserFiles {
 			case 158:
 				{t.kind = 141; break;}
 			case 159:
-				if (ch <= ')' || ch >= '+' && ch <= 65535) {AddCh(); goto case 159;}
-				else if (ch == '*') {AddCh(); goto case 189;}
+				if (ch == 'e') {AddCh(); goto case 160;}
 				else {t.kind = noSym; break;}
 			case 160:
-				{t.kind = 142; break;}
+				if (ch == 'g') {AddCh(); goto case 161;}
+				else {t.kind = noSym; break;}
 			case 161:
-				if (ch == 10 || ch == 13) {AddCh(); goto case 162;}
-				else if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= 65535) {AddCh(); goto case 161;}
+				if (ch == 'i') {AddCh(); goto case 162;}
 				else {t.kind = noSym; break;}
 			case 162:
-				{t.kind = 143; break;}
+				if (ch == 'o') {AddCh(); goto case 163;}
+				else {t.kind = noSym; break;}
 			case 163:
-				if (ch >= '0' && ch <= '9') {apx = 0; AddCh(); goto case 163;}
-				else if (ch == 'U') {apx = 0; AddCh(); goto case 174;}
-				else if (ch == 'u') {apx = 0; AddCh(); goto case 175;}
-				else if (ch == 'L') {apx = 0; AddCh(); goto case 176;}
-				else if (ch == 'l') {apx = 0; AddCh(); goto case 177;}
-				else if (ch == '.') {apx++; AddCh(); goto case 190;}
+				if (ch == 'n') {AddCh(); goto case 164;}
+				else {t.kind = noSym; break;}
+			case 164:
+				if (ch == 10 || ch == 13) {AddCh(); goto case 165;}
+				else if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= 65535) {AddCh(); goto case 164;}
+				else {t.kind = noSym; break;}
+			case 165:
+				{t.kind = 142; break;}
+			case 166:
+				if (ch <= ')' || ch >= '+' && ch <= 65535) {AddCh(); goto case 166;}
+				else if (ch == '*') {AddCh(); goto case 196;}
+				else {t.kind = noSym; break;}
+			case 167:
+				{t.kind = 143; break;}
+			case 168:
+				if (ch == 10 || ch == 13) {AddCh(); goto case 169;}
+				else if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= 65535) {AddCh(); goto case 168;}
+				else {t.kind = noSym; break;}
+			case 169:
+				{t.kind = 144; break;}
+			case 170:
+				if (ch >= '0' && ch <= '9') {apx = 0; AddCh(); goto case 170;}
+				else if (ch == 'U') {apx = 0; AddCh(); goto case 181;}
+				else if (ch == 'u') {apx = 0; AddCh(); goto case 182;}
+				else if (ch == 'L') {apx = 0; AddCh(); goto case 183;}
+				else if (ch == 'l') {apx = 0; AddCh(); goto case 184;}
+				else if (ch == '.') {apx++; AddCh(); goto case 197;}
 				else if (ch == 'E' || ch == 'e') {apx = 0; AddCh(); goto case 40;}
 				else if (ch == 'D' || ch == 'F' || ch == 'M' || ch == 'd' || ch == 'f' || ch == 'm') {apx = 0; AddCh(); goto case 43;}
 				else {t.kind = 2; break;}
-			case 164:
+			case 171:
 				if (ch >= 'A' && ch <= 'Z' || ch == '_' || ch >= 'a' && ch <= 'z' || ch == 170 || ch == 181 || ch == 186 || ch >= 192 && ch <= 214 || ch >= 216 && ch <= 246 || ch >= 248 && ch <= 255) {AddCh(); goto case 1;}
 				else if (ch == 92) {AddCh(); goto case 15;}
 				else if (ch == '"') {AddCh(); goto case 76;}
 				else {t.kind = noSym; break;}
-			case 165:
-				if (ch >= '0' && ch <= '9') {apx = 0; AddCh(); goto case 163;}
-				else if (ch == 'U') {apx = 0; AddCh(); goto case 174;}
-				else if (ch == 'u') {apx = 0; AddCh(); goto case 175;}
-				else if (ch == 'L') {apx = 0; AddCh(); goto case 176;}
-				else if (ch == 'l') {apx = 0; AddCh(); goto case 177;}
-				else if (ch == '.') {apx++; AddCh(); goto case 190;}
+			case 172:
+				if (ch >= '0' && ch <= '9') {apx = 0; AddCh(); goto case 170;}
+				else if (ch == 'U') {apx = 0; AddCh(); goto case 181;}
+				else if (ch == 'u') {apx = 0; AddCh(); goto case 182;}
+				else if (ch == 'L') {apx = 0; AddCh(); goto case 183;}
+				else if (ch == 'l') {apx = 0; AddCh(); goto case 184;}
+				else if (ch == '.') {apx++; AddCh(); goto case 197;}
 				else if (ch == 'X' || ch == 'x') {apx = 0; AddCh(); goto case 29;}
 				else if (ch == 'E' || ch == 'e') {apx = 0; AddCh(); goto case 40;}
 				else if (ch == 'D' || ch == 'F' || ch == 'M' || ch == 'd' || ch == 'f' || ch == 'm') {apx = 0; AddCh(); goto case 43;}
 				else {t.kind = 2; break;}
-			case 166:
+			case 173:
 				if (ch >= '0' && ch <= '9') {AddCh(); goto case 32;}
 				else {t.kind = 90; break;}
-			case 167:
+			case 174:
 				if (ch == '=') {AddCh(); goto case 83;}
 				else {t.kind = 85; break;}
-			case 168:
+			case 175:
 				if (ch == ':') {AddCh(); goto case 82;}
 				else {t.kind = 86; break;}
-			case 169:
+			case 176:
 				if (ch == '=') {AddCh(); goto case 84;}
 				else {t.kind = 93; break;}
-			case 170:
+			case 177:
 				if (ch == '+') {AddCh(); goto case 85;}
 				else if (ch == '=') {AddCh(); goto case 94;}
 				else {t.kind = 108; break;}
-			case 171:
+			case 178:
 				if (ch == '=') {AddCh(); goto case 92;}
 				else {t.kind = 106; break;}
-			case 172:
+			case 179:
 				if (ch == '=') {AddCh(); goto case 100;}
 				else {t.kind = 116; break;}
-			case 173:
-				if (ch == 9 || ch >= 11 && ch <= 12 || ch == ' ') {AddCh(); goto case 173;}
+			case 180:
+				if (ch == 9 || ch >= 11 && ch <= 12 || ch == ' ') {AddCh(); goto case 180;}
 				else if (ch == 'd') {AddCh(); goto case 102;}
 				else if (ch == 'u') {AddCh(); goto case 109;}
 				else if (ch == 'i') {AddCh(); goto case 115;}
-				else if (ch == 'e') {AddCh(); goto case 192;}
+				else if (ch == 'e') {AddCh(); goto case 199;}
 				else if (ch == 'l') {AddCh(); goto case 127;}
 				else if (ch == 'w') {AddCh(); goto case 137;}
-				else if (ch == 'r') {AddCh(); goto case 145;}
+				else if (ch == 'p') {AddCh(); goto case 145;}
+				else if (ch == 'r') {AddCh(); goto case 152;}
 				else {t.kind = noSym; break;}
-			case 174:
-				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
-			case 175:
-				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
-			case 176:
-				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
-			case 177:
-				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
-			case 178:
-				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
-			case 179:
-				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
-			case 180:
-				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
-				else {t.kind = 2; break;}
 			case 181:
-				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
+				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
 				else {t.kind = 2; break;}
 			case 182:
+				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 183:
+				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 184:
+				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 185:
+				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 186:
+				if (ch == 'L' || ch == 'l') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 187:
+				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 188:
+				if (ch == 'U' || ch == 'u') {AddCh(); goto case 31;}
+				else {t.kind = 2; break;}
+			case 189:
 				if (ch == '"' || ch == 39 || ch == '0' || ch == 92 || ch >= 'a' && ch <= 'b' || ch == 'f' || ch == 'n' || ch == 'r' || ch == 't' || ch == 'v') {AddCh(); goto case 45;}
 				else if (ch == 'x') {AddCh(); goto case 46;}
 				else if (ch == 'u') {AddCh(); goto case 48;}
 				else if (ch == 'U') {AddCh(); goto case 52;}
 				else {t.kind = noSym; break;}
-			case 183:
-				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 184;}
+			case 190:
+				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 191;}
 				else if (ch == 39) {AddCh(); goto case 60;}
 				else {t.kind = noSym; break;}
-			case 184:
+			case 191:
 				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 45;}
 				else if (ch == 39) {AddCh(); goto case 60;}
 				else {t.kind = noSym; break;}
-			case 185:
+			case 192:
 				if (ch == '"' || ch == 39 || ch == '0' || ch == 92 || ch >= 'a' && ch <= 'b' || ch == 'f' || ch == 'n' || ch == 'r' || ch == 't' || ch == 'v') {AddCh(); goto case 61;}
 				else if (ch == 'x') {AddCh(); goto case 62;}
 				else if (ch == 'u') {AddCh(); goto case 64;}
 				else if (ch == 'U') {AddCh(); goto case 68;}
 				else {t.kind = noSym; break;}
-			case 186:
-				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 187;}
+			case 193:
+				if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {AddCh(); goto case 194;}
 				else if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= '!' || ch >= '#' && ch <= '/' || ch >= ':' && ch <= '@' || ch >= 'G' && ch <= '[' || ch >= ']' && ch <= '`' || ch >= 'g' && ch <= 65535) {AddCh(); goto case 61;}
 				else if (ch == '"') {AddCh(); goto case 77;}
-				else if (ch == 92) {AddCh(); goto case 185;}
+				else if (ch == 92) {AddCh(); goto case 192;}
 				else {t.kind = noSym; break;}
-			case 187:
+			case 194:
 				if (ch <= 9 || ch >= 11 && ch <= 12 || ch >= 14 && ch <= '!' || ch >= '#' && ch <= '[' || ch >= ']' && ch <= 65535) {AddCh(); goto case 61;}
 				else if (ch == '"') {AddCh(); goto case 77;}
-				else if (ch == 92) {AddCh(); goto case 185;}
+				else if (ch == 92) {AddCh(); goto case 192;}
 				else {t.kind = noSym; break;}
-			case 188:
+			case 195:
 				if (ch == '"') {AddCh(); goto case 76;}
 				else {t.kind = 5; break;}
-			case 189:
-				if (ch <= ')' || ch >= '+' && ch <= '.' || ch >= '0' && ch <= 65535) {AddCh(); goto case 159;}
-				else if (ch == '/') {AddCh(); goto case 160;}
-				else if (ch == '*') {AddCh(); goto case 189;}
+			case 196:
+				if (ch <= ')' || ch >= '+' && ch <= '.' || ch >= '0' && ch <= 65535) {AddCh(); goto case 166;}
+				else if (ch == '/') {AddCh(); goto case 167;}
+				else if (ch == '*') {AddCh(); goto case 196;}
 				else {t.kind = noSym; break;}
-			case 190:
+			case 197:
 				if (ch <= '/' || ch >= ':' && ch <= 65535) {apx++; AddCh(); goto case 28;}
 				else if (ch >= '0' && ch <= '9') {apx = 0; AddCh(); goto case 36;}
 				else {t.kind = noSym; break;}
-			case 191:
+			case 198:
 				if (ch == '=') {AddCh(); goto case 89;}
 				else {t.kind = 101; break;}
-			case 192:
-				if (ch == 'l') {AddCh(); goto case 193;}
-				else if (ch == 'n') {AddCh(); goto case 194;}
+			case 199:
+				if (ch == 'l') {AddCh(); goto case 200;}
+				else if (ch == 'n') {AddCh(); goto case 201;}
 				else if (ch == 'r') {AddCh(); goto case 132;}
 				else {t.kind = noSym; break;}
-			case 193:
+			case 200:
 				if (ch == 'i') {AddCh(); goto case 118;}
 				else if (ch == 's') {AddCh(); goto case 121;}
 				else {t.kind = noSym; break;}
-			case 194:
-				if (ch == 'd') {AddCh(); goto case 195;}
-				else {t.kind = noSym; break;}
-			case 195:
-				if (ch == 'i') {AddCh(); goto case 124;}
-				else if (ch == 'r') {AddCh(); goto case 152;}
-				else {t.kind = noSym; break;}
-			case 196:
-				{t.kind = 121; break;}
-			case 197:
-				{t.kind = 122; break;}
-			case 198:
-				{t.kind = 123; break;}
-			case 199:
-				{t.kind = 126; break;}
-			case 200:
-				{t.kind = 129; break;}
 			case 201:
-				if (ch == '=') {AddCh(); goto case 78;}
-				else if (ch == '&') {AddCh(); goto case 198;}
-				else {t.kind = 83; break;}
+				if (ch == 'd') {AddCh(); goto case 202;}
+				else {t.kind = noSym; break;}
 			case 202:
+				if (ch == 'i') {AddCh(); goto case 124;}
+				else if (ch == 'r') {AddCh(); goto case 159;}
+				else {t.kind = noSym; break;}
+			case 203:
+				{t.kind = 121; break;}
+			case 204:
+				{t.kind = 122; break;}
+			case 205:
+				{t.kind = 123; break;}
+			case 206:
+				{t.kind = 126; break;}
+			case 207:
+				{t.kind = 129; break;}
+			case 208:
+				if (ch == '=') {AddCh(); goto case 78;}
+				else if (ch == '&') {AddCh(); goto case 205;}
+				else {t.kind = 83; break;}
+			case 209:
 				if (ch == '-') {AddCh(); goto case 80;}
 				else if (ch == '=') {AddCh(); goto case 90;}
-				else if (ch == '>') {AddCh(); goto case 200;}
+				else if (ch == '>') {AddCh(); goto case 207;}
 				else {t.kind = 102; break;}
-			case 203:
+			case 210:
 				if (ch == '=') {AddCh(); goto case 81;}
-				else if (ch == '*') {AddCh(); goto case 159;}
-				else if (ch == '/') {AddCh(); goto case 161;}
+				else if (ch == '*') {AddCh(); goto case 166;}
+				else if (ch == '/') {AddCh(); goto case 168;}
 				else {t.kind = 127; break;}
-			case 204:
-				if (ch == '<') {AddCh(); goto case 191;}
-				else if (ch == '=') {AddCh(); goto case 199;}
+			case 211:
+				if (ch == '<') {AddCh(); goto case 198;}
+				else if (ch == '=') {AddCh(); goto case 206;}
 				else {t.kind = 100; break;}
-			case 205:
+			case 212:
 				if (ch == '=') {AddCh(); goto case 91;}
 				else {t.kind = 128; break;}
-			case 206:
+			case 213:
 				if (ch == '=') {AddCh(); goto case 93;}
-				else if (ch == '|') {AddCh(); goto case 197;}
+				else if (ch == '|') {AddCh(); goto case 204;}
 				else {t.kind = 124; break;}
-			case 207:
-				if (ch == '?') {AddCh(); goto case 196;}
+			case 214:
+				if (ch == '?') {AddCh(); goto case 203;}
 				else {t.kind = 110; break;}
-			case 208:
+			case 215:
 				if (ch == '=') {AddCh(); goto case 101;}
 				else {t.kind = 125; break;}
 

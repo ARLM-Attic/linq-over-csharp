@@ -20,6 +20,8 @@ namespace CSharpParser.ProjectModel
     private readonly AttributeCollection _GlobalAttributes = new AttributeCollection();
     private readonly NamespaceFragmentCollection _Namespaces = new NamespaceFragmentCollection();
     private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
+    private readonly RegionInfoCollection _Regions = new RegionInfoCollection();
+    private readonly CommentInfoCollection _Comments = new CommentInfoCollection();
 
     #endregion
 
@@ -134,31 +136,51 @@ namespace CSharpParser.ProjectModel
       get { return _TypeDeclarations; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the #region..#endregion information about this source file.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public RegionInfoCollection Regions
+    {
+      get { return _Regions; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of comment information of this source file.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CommentInfoCollection Comments
+    {
+      get { return _Comments; }
+    }
+
     #endregion
 
     #region Public methods
 
-    //// --------------------------------------------------------------------------------
-    ///// <summary>
-    ///// Add a new external alias to this namespace.
-    ///// </summary>
-    ///// <param name="item"></param>
-    //// --------------------------------------------------------------------------------
-    //public void AddExternAlias(ExternalAlias item)
-    //{
-    //  _ExternAliases.Add(item);
-    //}
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new region to this source file.
+    /// </summary>
+    /// <param name="region">#region information.</param>
+    // --------------------------------------------------------------------------------
+    public void AddRegion(RegionInfo region)
+    {
+      _Regions.Add(region);
+    }
 
-    //// --------------------------------------------------------------------------------
-    ///// <summary>
-    ///// Add a new external alias to this namespace.
-    ///// </summary>
-    ///// <param name="item"></param>
-    //// --------------------------------------------------------------------------------
-    //public void AddUsingClause(UsingClause item)
-    //{
-    //  _Usings.Add(item);
-    //}
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new comment to this source file.
+    /// </summary>
+    /// <param name="comment">Comment information.</param>
+    // --------------------------------------------------------------------------------
+    public void AddComment(CommentInfo comment)
+    {
+      _Comments.Add(comment);
+    }
 
     #endregion
 

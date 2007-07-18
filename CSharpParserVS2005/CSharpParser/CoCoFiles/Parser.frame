@@ -98,6 +98,7 @@ public class CSharpSyntaxParser
     private CompilationUnit _CompilationUnit;
     private SourceFile _File;
     private PragmaHandler _PragmaHandler;
+    private CommentHandler _CommentHandler;
 
     #endregion 
     
@@ -118,6 +119,7 @@ public class CSharpSyntaxParser
 		  _CompilationUnit = unit;
 		  _File = file;
       _PragmaHandler = new PragmaHandler(this);
+      _CommentHandler = new CommentHandler(this);
   	}
   	
     #endregion
@@ -164,6 +166,16 @@ public class CSharpSyntaxParser
     internal PragmaHandler PragmaHandler
     {
       get { return _PragmaHandler; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the comment handler used by this parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    internal CommentHandler CommentHandler
+    {
+      get { return _CommentHandler; }
     }
 
     // --------------------------------------------------------------------------------
@@ -311,6 +323,10 @@ public class CSharpSyntaxParser
 		  Get();
 -->parseRoot
       Expect(0);
+      if (_PragmaHandler.OpenRegionCount > 0)
+      {
+        _CompilationUnit.ErrorHandler.Error("CS1038", la, "#endregion directive expected.");
+      }
   	}
 	
     // --------------------------------------------------------------------------------

@@ -67,7 +67,7 @@ namespace CSharpParser
       _ErrorHandler = this;
       _WorkingFolder = workingFolder;
       _CurrentFile = null;
-      _ErrorLineOffset = 0;
+      _ErrorLineOffset = -1;
       _ErrorFile = null;
       if (addCSharpFiles)
       {
@@ -463,6 +463,31 @@ namespace CSharpParser
       SignError(_Warnings, code, warningPoint, description, parameters);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Redirects line numbering and file name handling.
+    /// </summary>
+    /// <param name="currentLine">Current source line.</param>
+    /// <param name="lineNumber">New line number.</param>
+    /// <param name="fileName">Redirected filename.</param>
+    // --------------------------------------------------------------------------------
+    void ICompilationErrorHandler.Redirect(int currentLine, int lineNumber, string fileName)
+    {
+      _ErrorLineOffset = lineNumber - currentLine;
+      _ErrorFile = fileName;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resets the line number and file name redirection.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    void ICompilationErrorHandler.ResetRedirection()
+    {
+      _ErrorLineOffset = -1;
+      _ErrorFile = null;
+    }
+
     #endregion
 
     #region Private methods
@@ -480,7 +505,14 @@ namespace CSharpParser
     private void SignError(ErrorCollection errors, string code, Token errorPoint, string description,
                                           params object[] parameters)
     {
-      Error error = new Error(code, errorPoint, _CurrentFile.Name, description, parameters);
+      Error error = new Error(
+        code, 
+        _ErrorLineOffset < 0 ? errorPoint.line : errorPoint.line + _ErrorLineOffset, 
+        errorPoint.col, 
+        errorPoint.pos,
+        string.IsNullOrEmpty(_ErrorFile) ? _CurrentFile.Name : _ErrorFile, 
+        description, 
+        parameters);
       errors.Add(error);
       if (_ErrorStream != null)
       {

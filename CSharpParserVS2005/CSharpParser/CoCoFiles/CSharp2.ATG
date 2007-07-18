@@ -37,108 +37,6 @@ COMPILER CS2
 
     #endregion
 
-    #region Pragma handling methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the end of the whitespaces in the given string.
-    /// </summary>
-    /// <param name="symbol">Symbol to search for white spaces</param>
-    /// <param name="start">Startinf index of the string representing the symbol</param>
-    /// <param name="whitespaces">
-    /// Flag indicating if we look for whitespace or non-whitespace
-    /// </param>
-    /// <returns>
-    /// The end of the whitespaces in the given string if whitespaces is true;
-    /// otherwise returns the end of the non-whitespaces.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    int EndOf(String symbol, int start, bool whitespaces)
-    {
-      while ((start < symbol.Length) && (Char.IsWhiteSpace(symbol[start]) ^ !whitespaces))
-      {
-        ++start;
-      }
-
-      return start;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Removes preprocessor directive.
-    /// </summary>
-    /// <param name="symbol">Symbol representing the preprocessor directive</param>
-    /// <returns>
-    /// Preprocessor tag
-    /// </returns>
-    /// <remarks>
-    /// input:        "#" {ws} directive ws {ws} {not-newline} {newline}
-    /// valid input:  "#" {ws} directive ws {ws} {non-ws} {ws} {newline}
-    /// output:       {non-ws}
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    String RemovePreprocessorDirective(String symbol)
-    {
-      int start = 1;
-      int end;
-
-      // skip {ws}
-      start = EndOf(symbol, start, true);
-      // skip directive  
-      start = EndOf(symbol, start, false);
-      // skip ws {ws}
-      start = EndOf(symbol, start, true);
-      // search end of symbol
-      end = EndOf(symbol, start, false);
-
-      return symbol.Substring(start, end - start);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks if the specified symbol is a conditional symbol or not.
-    /// </summary>
-    /// <param name="symbol">Symbol to check.</param>
-    /// <returns>
-    /// True, if the symbol is a conditional symbol; otherwise, false.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    bool IsConditionalSymbol(String symbol)
-    {
-      return _CompilationUnit.IsConditionalSymbolDefined(RemovePreprocessorDirective(symbol));
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Handles the #elseif or #else pragma.
-    /// </summary>
-    /// <remarks>
-    /// Drops everything until the end of this if, elif, else directive.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    void ElifOrElsePragma()
-    {
-      int state = 0;
-      Token cur = _Scanner.Scan();
-
-      for (; ; )
-      {
-        switch (cur.kind)
-        {
-          case _ppIf: ++state; break;
-          case _ppEndif:
-            if (state == 0) { return; }
-            --state;
-            break;
-          case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
-          default: break;
-        }
-        cur = _Scanner.Scan();
-      }
-    }
-
-    #endregion
-
     #region Token sets
 
     // --------------------------------------------------------------------------------
@@ -854,42 +752,26 @@ TOKENS
 
 PRAGMAS
 
-  /* Preprocessor directives.                                               *
-   * The exact parsing of their syntax is left for later processing         */
+// Preprocessor directives.                                               
+// The exact parsing of their syntax is left for later processing        
 
-  ppDefine  = "#" {ws} "define" {notNewLine} newLine. (. _PragmaHandler.AddConditionalDirective(la.val); .)
-  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.  (. _PragmaHandler.RemoveConditionalDirective(la.val); .)
-  ppIf      = "#" {ws} "if" {notNewLine} newLine.     (. _PragmaHandler.IfPragma(la); .)
-  ppElif    = "#" {ws} "elif" {notNewLine} newLine.   (. _PragmaHandler.ElifPragma(la); .) 
-  ppElse    = "#" {ws} "else" {notNewLine} newLine.   (. _PragmaHandler.ElsePragma(la); .) 
-  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.  (. _PragmaHandler.EndifPragma(la); .) 
-  ppLine    = "#" {ws} "line" {notNewLine} newLine.
-  ppError   = "#" {ws} "error" {notNewLine} newLine.
-  ppWarning = "#" {ws} "warning" {notNewLine} newLine.
-  ppRegion  = "#" {ws} "region" {notNewLine} newLine.
-  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.
+  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     (. _PragmaHandler.AddConditionalDirective(la); .)
+  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      (. _PragmaHandler.RemoveConditionalDirective(la); .)
+  ppIf      = "#" {ws} "if" {notNewLine} newLine.         (. _PragmaHandler.IfPragma(la); .)
+  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       (. _PragmaHandler.ElifPragma(la); .) 
+  ppElse    = "#" {ws} "else" {notNewLine} newLine.       (. _PragmaHandler.ElsePragma(la); .) 
+  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      (. _PragmaHandler.EndifPragma(la); .) 
+  ppLine    = "#" {ws} "line" {notNewLine} newLine.       (. _PragmaHandler.LinePragma(la); .) 
+  ppError   = "#" {ws} "error" {notNewLine} newLine.      (. _PragmaHandler.ErrorPragma(la); .) 
+  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    (. _PragmaHandler.WarningPragma(la); .) 
+  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     (. _PragmaHandler.PragmaPragma(la); .) 
+  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     (. _PragmaHandler.RegionPragma(la); .) 
+  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  (. _PragmaHandler.EndregionPragma(la); .) 
 
 // Pragma for comments
-  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".
-  cLineCom  = "//" { notNewLine } newLine.
-
-// ****************************************************************************
-// If you would like to use C# comments in your grammar, use
-// pragmas for that purpose and remove the COMMENTS.
-//
-// The pragma for the block comment looks like this:
-//     cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".
-// where blockComCh is a character set (CHARACTERS section) defined as:
-//     blockComCh = ANY - '*' - '/'.
-//
-// The line comment is simpler:
-//     cLineCom = "//" { notNewLine } newLine.
-// where newLine and notNewLine are character sets (already defined in the
-// CHARACTERS section).
-// ****************************************************************************
-
-//COMMENTS FROM "/*" TO "*/"
-//COMMENTS FROM "//" TO eol
+  
+  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  (. _CommentHandler.HandleBlockComment(la); .)
+  cLineCom  = "//" { notNewLine } newLine.                                  (. _CommentHandler.HandleLineComment(la); .)
 
 IGNORE eol + cr + tab
 

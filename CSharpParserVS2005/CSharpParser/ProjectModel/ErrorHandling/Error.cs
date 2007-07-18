@@ -1,6 +1,5 @@
 using System;
 using CSharpParser.Collections;
-using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
@@ -16,7 +15,9 @@ namespace CSharpParser.ProjectModel
     private readonly string _Code;
     private readonly string _Description;
     private readonly string _File;
-    private readonly Token _ErrorPoint;
+    private readonly int _Line;
+    private readonly int _Column;
+    private readonly int _Posititon;
 
     #endregion
 
@@ -27,12 +28,15 @@ namespace CSharpParser.ProjectModel
     /// Creates a new error instance.
     /// </summary>
     /// <param name="code">Error code.</param>
-    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="line">Line number</param>
+    /// <param name="column">Column number</param>
+    /// <param name="position">File position number</param>
     /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     // --------------------------------------------------------------------------------
-    public Error(string code, Token errorPoint, string file, string description):
-      this(code, errorPoint, file, description, null)
+    public Error(string code, int line, int column, int position, string file, 
+      string description):
+      this(code, line, column, position, file, description, null)
     {
     }
 
@@ -41,16 +45,20 @@ namespace CSharpParser.ProjectModel
     /// Creates a new error instance.
     /// </summary>
     /// <param name="code">Error code.</param>
-    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="line">Line number</param>
+    /// <param name="column">Column number</param>
+    /// <param name="position">File position number</param>
     /// <param name="file">File that caused the error.</param>
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    public Error(string code, Token errorPoint, string file, string description,
-      params object[] parameters)
+    public Error(string code, int line, int column, int position, string file, 
+      string description, params object[] parameters)
     {
       _Code = code;
-      _ErrorPoint = errorPoint;
+      _Line = line;
+      _Column = column;
+      _Posititon = position;
       if (parameters == null)
       {
         _Description = description;
@@ -103,7 +111,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int Line
     {
-      get { return _ErrorPoint.line; }
+      get { return _Line; }
     }
 
     // --------------------------------------------------------------------------------
@@ -113,7 +121,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int Column
     {
-      get { return _ErrorPoint.col; }
+      get { return _Column; }
     }
 
     // --------------------------------------------------------------------------------
@@ -123,7 +131,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int Position
     {
-      get { return _ErrorPoint.pos; }
+      get { return _Posititon; }
     }
 
     #endregion

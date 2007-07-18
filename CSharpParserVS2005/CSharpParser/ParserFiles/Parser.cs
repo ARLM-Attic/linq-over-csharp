@@ -147,10 +147,11 @@ public class CSharpSyntaxParser
 	const int _ppLine = 137;
 	const int _ppError = 138;
 	const int _ppWarning = 139;
-	const int _ppRegion = 140;
-	const int _ppEndReg = 141;
-	const int _cBlockCom = 142;
-	const int _cLineCom = 143;
+	const int _ppPragma = 140;
+	const int _ppRegion = 141;
+	const int _ppEndReg = 142;
+	const int _cBlockCom = 143;
+	const int _cLineCom = 144;
 
   #endregion
 
@@ -229,108 +230,6 @@ public class CSharpSyntaxParser
       params object[] parameters)
     {
       _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
-    }
-
-    #endregion
-
-    #region Pragma handling methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the end of the whitespaces in the given string.
-    /// </summary>
-    /// <param name="symbol">Symbol to search for white spaces</param>
-    /// <param name="start">Startinf index of the string representing the symbol</param>
-    /// <param name="whitespaces">
-    /// Flag indicating if we look for whitespace or non-whitespace
-    /// </param>
-    /// <returns>
-    /// The end of the whitespaces in the given string if whitespaces is true;
-    /// otherwise returns the end of the non-whitespaces.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    int EndOf(String symbol, int start, bool whitespaces)
-    {
-      while ((start < symbol.Length) && (Char.IsWhiteSpace(symbol[start]) ^ !whitespaces))
-      {
-        ++start;
-      }
-
-      return start;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Removes preprocessor directive.
-    /// </summary>
-    /// <param name="symbol">Symbol representing the preprocessor directive</param>
-    /// <returns>
-    /// Preprocessor tag
-    /// </returns>
-    /// <remarks>
-    /// input:        "#" {ws} directive ws {ws} {not-newline} {newline}
-    /// valid input:  "#" {ws} directive ws {ws} {non-ws} {ws} {newline}
-    /// output:       {non-ws}
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    String RemovePreprocessorDirective(String symbol)
-    {
-      int start = 1;
-      int end;
-
-      // skip {ws}
-      start = EndOf(symbol, start, true);
-      // skip directive  
-      start = EndOf(symbol, start, false);
-      // skip ws {ws}
-      start = EndOf(symbol, start, true);
-      // search end of symbol
-      end = EndOf(symbol, start, false);
-
-      return symbol.Substring(start, end - start);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks if the specified symbol is a conditional symbol or not.
-    /// </summary>
-    /// <param name="symbol">Symbol to check.</param>
-    /// <returns>
-    /// True, if the symbol is a conditional symbol; otherwise, false.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    bool IsConditionalSymbol(String symbol)
-    {
-      return _CompilationUnit.IsConditionalSymbolDefined(RemovePreprocessorDirective(symbol));
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Handles the #elseif or #else pragma.
-    /// </summary>
-    /// <remarks>
-    /// Drops everything until the end of this if, elif, else directive.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    void ElifOrElsePragma()
-    {
-      int state = 0;
-      Token cur = _Scanner.Scan();
-
-      for (; ; )
-      {
-        switch (cur.kind)
-        {
-          case _ppIf: ++state; break;
-          case _ppEndif:
-            if (state == 0) { return; }
-            --state;
-            break;
-          case _EOF: Error("INCFIL", cur, "Incomplete file."); return;
-          default: break;
-        }
-        cur = _Scanner.Scan();
-      }
     }
 
     #endregion
@@ -858,6 +757,7 @@ public class CSharpSyntaxParser
     private CompilationUnit _CompilationUnit;
     private SourceFile _File;
     private PragmaHandler _PragmaHandler;
+    private CommentHandler _CommentHandler;
 
     #endregion 
     
@@ -878,6 +778,7 @@ public class CSharpSyntaxParser
 		  _CompilationUnit = unit;
 		  _File = file;
       _PragmaHandler = new PragmaHandler(this);
+      _CommentHandler = new CommentHandler(this);
   	}
   	
     #endregion
@@ -928,6 +829,16 @@ public class CSharpSyntaxParser
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the comment handler used by this parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    internal CommentHandler CommentHandler
+    {
+      get { return _CommentHandler; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the lookahead token.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -963,10 +874,10 @@ public class CSharpSyntaxParser
         la = _Scanner.Scan();
         if (la.kind <= maxT) { ++errDist; break; }
 				if (la.kind == 131) {
-				_PragmaHandler.AddConditionalDirective(la.val); 
+				_PragmaHandler.AddConditionalDirective(la); 
 				}
 				if (la.kind == 132) {
-				_PragmaHandler.RemoveConditionalDirective(la.val); 
+				_PragmaHandler.RemoveConditionalDirective(la); 
 				}
 				if (la.kind == 133) {
 				_PragmaHandler.IfPragma(la); 
@@ -981,18 +892,28 @@ public class CSharpSyntaxParser
 				_PragmaHandler.EndifPragma(la); 
 				}
 				if (la.kind == 137) {
+				_PragmaHandler.LinePragma(la); 
 				}
 				if (la.kind == 138) {
+				_PragmaHandler.ErrorPragma(la); 
 				}
 				if (la.kind == 139) {
+				_PragmaHandler.WarningPragma(la); 
 				}
 				if (la.kind == 140) {
+				_PragmaHandler.PragmaPragma(la); 
 				}
 				if (la.kind == 141) {
+				_PragmaHandler.RegionPragma(la); 
 				}
 				if (la.kind == 142) {
+				_PragmaHandler.EndregionPragma(la); 
 				}
 				if (la.kind == 143) {
+				_CommentHandler.HandleBlockComment(la); 
+				}
+				if (la.kind == 144) {
+				_CommentHandler.HandleLineComment(la); 
 				}
 
 			  la = t;
@@ -4448,6 +4369,10 @@ TypeReference typeRef, bool isEvent) {
 		CS2();
 
       Expect(0);
+      if (_PragmaHandler.OpenRegionCount > 0)
+      {
+        _CompilationUnit.ErrorHandler.Error("CS1038", la, "#endregion directive expected.");
+      }
   	}
 	
     // --------------------------------------------------------------------------------

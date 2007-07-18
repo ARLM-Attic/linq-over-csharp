@@ -62,5 +62,22 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     void Warning(string code, Token warningPoint, string description,
                params object[] parameters);
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Redirects line numbering and file name handling.
+    /// </summary>
+    /// <param name="currentLine">Current source line.</param>
+    /// <param name="lineNumber">New line number.</param>
+    /// <param name="fileName">Redirected filename.</param>
+    // --------------------------------------------------------------------------------
+    void Redirect(int currentLine, int lineNumber, string fileName);
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resets the line number and file name redirection.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    void ResetRedirection();
   }
 }

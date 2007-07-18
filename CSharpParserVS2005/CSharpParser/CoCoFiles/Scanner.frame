@@ -365,6 +365,17 @@ using System.Collections.Generic;
     /// <summary>Signs that scanner should skip over block comment start.</summary>
     private bool _SkipMode = false;
 
+    /// <summary>Flag indicating a new line has been found.</summary>
+    private bool _NewLineFound;
+
+    /// <summary>
+    /// Indicates the position of the first non-whitespace character within the line.
+    /// </summary>
+    private int _FirstNonWsInLine;
+
+    /// <summary>Indicates that an EOF found.</summary>
+    private bool _EOFFound;
+
     #endregion
 
     #region Lifecycle methods
@@ -382,7 +393,6 @@ using System.Collections.Generic;
         Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
         buffer = new Buffer(stream, false);
         Init();
-        _SkipMode = false;
       }
       catch (IOException)
       {
@@ -400,7 +410,6 @@ using System.Collections.Generic;
     {
       buffer = new Buffer(s, true);
       Init();
-      _SkipMode = false;
     }
 
     #endregion
@@ -438,6 +447,17 @@ using System.Collections.Generic;
       get { return buffer; }
     }
 
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the position of the first non-whitespace character in the current line
+    /// or -1 if no non-whitespace found.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public int FirstNonWsInLine
+    {
+      get { return _FirstNonWsInLine; }
+    }
+
     #endregion
 
     //-----------------------------------------------------------------------------------
@@ -447,6 +467,11 @@ using System.Collections.Generic;
     //-----------------------------------------------------------------------------------
     void Init()
     {
+      _SkipMode = false;
+      _FirstNonWsInLine = -1;
+      _NewLineFound = true;
+      _EOFFound = false;
+
       pos = -1; line = 1; col = 0;
       oldEols = 0;
       NextCh();
@@ -478,10 +503,31 @@ using System.Collections.Generic;
       {
         pos = buffer.Pos;
         ch = buffer.Read(); col++;
+        if (!_EOFFound && ch == Buffer.EOF)
+        {
+          _EOFFound = true;
+          ch = EOL;
+        }
         // replace isolated '\r' by '\n' in order to make
         // eol handling uniform across Windows, Unix and Mac
         if (ch == '\r' && buffer.Peek() != '\n') ch = EOL;
-        if (ch == EOL) { line++; col = 0; }
+        if (ch == EOL)
+        {
+          line++; 
+          col = 0;
+          _NewLineFound = true;
+        }
+        else if (_NewLineFound)
+        {
+          // --- Check if the first non-whitespace character is found
+          _FirstNonWsInLine = -1;
+          if (ch != ' ' && ch != 9 && ch != 10 && ch != 13)
+          {
+            // --- First non-whitespace found
+            _FirstNonWsInLine = col;
+            _NewLineFound = false;
+          }
+        }
       }
 -->casing1
   	}
