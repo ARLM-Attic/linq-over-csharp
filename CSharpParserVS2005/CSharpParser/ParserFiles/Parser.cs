@@ -1125,7 +1125,7 @@ public class CSharpSyntaxParser
 			  if (parent == null) 
 			    _File.TypeDeclarations.Add(td);
 			  else 
-			    parent.TypeDeclarations.Add(td);
+			    parent.AddTypeDeclaration(td);
 			}
 			
 		} else SynErr(131);

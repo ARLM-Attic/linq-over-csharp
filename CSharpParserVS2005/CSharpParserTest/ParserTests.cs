@@ -133,7 +133,7 @@ namespace CSharpParserTest
 
       dd = td.NestedTypes[0] as DelegateDeclaration;
       Assert.IsNotNull(dd);
-      Assert.AreEqual(dd.Name, "MyEvent1");
+      Assert.AreEqual(dd.Name, "MyEvent1`2");
       Assert.AreEqual(dd.Visibility, Visibility.Private);
       Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
       Assert.AreEqual(dd.TypeParameters.Count, 2);
@@ -149,7 +149,7 @@ namespace CSharpParserTest
 
       dd = td.NestedTypes[2] as DelegateDeclaration;
       Assert.IsNotNull(dd);
-      Assert.AreEqual(dd.Name, "MyEvent3");
+      Assert.AreEqual(dd.Name, "MyEvent3`1");
       Assert.AreEqual(dd.Visibility, Visibility.Public);
       Assert.AreEqual(dd.ReturnType.Name, "T");
       Assert.AreEqual(dd.TypeParameters.Count, 1);
@@ -192,10 +192,10 @@ namespace CSharpParserTest
       Assert.IsTrue(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_Event3");
       Assert.AreEqual(fd.Visibility, Visibility.Private);
-      Assert.AreEqual(fd.ResultingType.Name, "MyEvent1");
+      Assert.AreEqual(fd.ResultingType.Name, "MyEvent1<List<int>, List<string>>");
       Assert.AreEqual(fd.ResultingType.Arguments.Count, 2);
-      Assert.AreEqual(fd.ResultingType.Arguments[0].Name, "int");
-      Assert.AreEqual(fd.ResultingType.Arguments[1].Name, "string");
+      Assert.AreEqual(fd.ResultingType.Arguments[0].Name, "List<int>");
+      Assert.AreEqual(fd.ResultingType.Arguments[1].Name, "List<string>");
     }
 
     [TestMethod]

@@ -1,4 +1,5 @@
 using CSharpParser;
+using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest
@@ -6,9 +7,9 @@ namespace CSharpParserTest
   [TestClass]
   public class LargeTestProjects: ParserTestBed
   {
-    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQ-CSF\CSharpParser\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
-    const string NUnitCoreFolder = @"C:\Work\LINQ-CSF\CSharpParser\CSharpParserTest\LargeTestProjects\NUnit.Core";
-    const string CSLAFolder = @"C:\Work\LINQ-CSF\CSharpParser\CSharpParserTest\LargeTestProjects\CSLA";
+    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
+    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core";
+    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\CSLA";
 
     [TestMethod]
     public void NUnitCoreInterfacesIsOK()

@@ -80,6 +80,9 @@
     <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestResult.cs" />
     <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestRunner.cs" />
     <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestSuiteResult.cs" />
+    <Compile Include="..\CSharpParser\Properties\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
     <Compile Include="LanguageElements\Comments.cs" />
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
     <Compile Include="LanguageElements\Pragmas.cs" />
@@ -236,6 +239,7 @@
     <None Include="TestFiles\PropertyDeclarations.cs" />
     <None Include="TestFiles\SimpleStatements.cs" />
     <None Include="TestFiles\EventDeclarations.cs" />
+    <Compile Include="Regression\ParserRegressionTests.cs" />
     <Compile Include="SimpleExpressionTests.cs" />
     <Compile Include="StringHelperTest.cs" />
     <None Include="TestFiles\Pragmas\IfEndif4.cs" />

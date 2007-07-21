@@ -1,3 +1,4 @@
+using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
@@ -89,6 +90,37 @@ namespace CSharpParser.ProjectModel
     public bool HasSubType
     {
       get { return _SubType != null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Overrides the name property to use generic arguments
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string Name
+    {
+      get
+      {
+        if (_TypeArguments.Count > 0)
+        {
+          StringBuilder sb = new StringBuilder(100);
+          sb.Append(base.Name);
+          sb.Append('<');
+          bool firstParam = true;
+          foreach (TypeReference paramType in _TypeArguments)
+          {
+            if (!firstParam) sb.Append(", ");
+            sb.Append(paramType.Name);
+            firstParam = false;
+          }
+          sb.Append('>');
+          return sb.ToString();
+        }
+        else
+        {
+          return base.Name;
+        }
+      }
     }
 
     // --------------------------------------------------------------------------------

@@ -14,6 +14,6 @@ namespace CSharpParserTest.TestFiles
 
     public new event NewDelegate _Event1, _Event2;
     protected volatile int _IntField1, _IntField2 = 23;
-    private event MyEvent1<int, string> _Event3;
+    private event MyEvent1<List<int>, List<string>> _Event3;
   }
 }

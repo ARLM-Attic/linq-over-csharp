@@ -42,8 +42,6 @@ namespace CSharpParser.ProjectModel
     private readonly TypeDeclarationCollection _NestedTypes = new TypeDeclarationCollection();
     private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
 
-    
-
     #endregion
 
     #region Lifecycle methods
@@ -58,6 +56,7 @@ namespace CSharpParser.ProjectModel
     protected TypeDeclaration(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
+      _Members.BeforeAdd += BeforeAddMembers;
     }
 
     #endregion
@@ -141,21 +140,30 @@ namespace CSharpParser.ProjectModel
     /// Overrides the name property to use generic notation.
     /// </summary>
     // --------------------------------------------------------------------------------
+    public override string Name
+    {
+      get
+      {
+        if (IsGenericType)
+        {
+          return String.Format("{0}`{1}", base.Name, _TypeParameters.Count);
+        }
+        return base.Name;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of this type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
     public string FullName
     {
       get
       {
-        string normalName = IsNestedType 
+        return IsNestedType 
           ? _DeclaringType.FullName + "+" + Name 
           : Name;
-        if (IsGenericType)
-        {
-          return String.Format("{0}´{1}", normalName, _TypeParameters.Count);
-        }
-        else
-        {
-          return normalName;
-        }
       }
     }
 
@@ -171,7 +179,7 @@ namespace CSharpParser.ProjectModel
         if (IsGenericType)
         {
           StringBuilder sb = new StringBuilder(100);
-          sb.Append(Name);
+          sb.Append(base.Name);
           sb.Append('<');
           bool firstParam = true;
           foreach (TypeParameter param in _TypeParameters)
@@ -482,6 +490,27 @@ namespace CSharpParser.ProjectModel
           String.Format("A constraint clause has already been specified for type " + 
           "parameter '{0}'. All of the constraints for a type parameter must be " +
           "specified in a single where clause.", constraint.Name));
+      }
+    }
+
+    #endregion
+
+    #region Private members
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if a member with the specified name already exists or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    void BeforeAddMembers(object sender, ItemedCancelEventArgs<MemberDeclaration> e)
+    {
+      if (_Members.Contains(e.Item))
+      {
+        Parser.CompilationUnit.ErrorHandler.Error("CS0101",
+          e.Item.Token,
+          String.Format("The namespace '{0}' already contains a definition for '{1}'",
+          Name, e.Item.Signature));
+        e.Cancel = true;
       }
     }
 

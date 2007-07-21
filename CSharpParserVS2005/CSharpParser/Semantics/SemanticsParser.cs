@@ -1,3 +1,5 @@
+using CSharpParser.ProjectModel;
+
 namespace CSharpParser
 {
   public sealed class SemanticsParser

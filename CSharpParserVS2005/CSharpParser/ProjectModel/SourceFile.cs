@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using CSharpParser.Collections;
 
@@ -195,7 +196,17 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     void TypeDeclarationsAfterAdd(object sender, ItemedEventArgs<TypeDeclaration> e)
     {
-      _ParentUnit.DeclaredTypes.Add(e.Item);
+      try
+      {
+        _ParentUnit.DeclaredTypes.Add(e.Item);
+      }
+      catch (ArgumentException ex)
+      {
+        _ParentUnit.ErrorHandler.Error("CS0101",
+          e.Item.Token,
+          String.Format("The namespace '{0}' already contains a definition for '{1}'",
+          Name, e.Item.FullName));
+      }
     }
 
     #endregion

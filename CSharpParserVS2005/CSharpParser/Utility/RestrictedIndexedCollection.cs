@@ -224,7 +224,7 @@ namespace CSharpParser.Collections
     // ----------------------------------------------------------------------------------
     public bool Contains(TValue item)
     {
-      return _Items.Contains(item);
+      return ContainsKey(GetKeyOfItem(item));
     }
 
     // ----------------------------------------------------------------------------------

@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="ParserFiles\CommentHandler.cs" />
     <Compile Include="ParserFiles\PragmaHandler.cs" />
     <Compile Include="ParserFiles\Modifier.cs" />
@@ -231,6 +232,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CoCoFiles\Coco.exe" />
+    <None Include="CoCoFiles\PPExpressions\compile.bat" />
     <None Include="CoCoFiles\PPExpressions\Parser.frame" />
     <None Include="CoCoFiles\PPExpressions\PPExpr.ATG" />
     <None Include="CoCoFiles\PPExpressions\Scanner.frame" />

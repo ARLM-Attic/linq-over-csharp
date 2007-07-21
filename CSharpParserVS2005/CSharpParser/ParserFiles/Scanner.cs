@@ -341,14 +341,6 @@ namespace CSharpParser.ParserFiles {
     /// <summary>Signs that scanner should skip over block comment start.</summary>
     private bool _SkipMode = false;
 
-    /// <summary>Flag indicating a new line has been found.</summary>
-    private bool _NewLineFound;
-
-    /// <summary>
-    /// Indicates the position of the first non-whitespace character within the line.
-    /// </summary>
-    private int _FirstNonWsInLine;
-
     /// <summary>Indicates that an EOF found.</summary>
     private bool _EOFFound;
 
@@ -423,17 +415,6 @@ namespace CSharpParser.ParserFiles {
       get { return buffer; }
     }
 
-    //-----------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the position of the first non-whitespace character in the current line
-    /// or -1 if no non-whitespace found.
-    /// </summary>
-    //-----------------------------------------------------------------------------------
-    public int FirstNonWsInLine
-    {
-      get { return _FirstNonWsInLine; }
-    }
-
     #endregion
 
     //-----------------------------------------------------------------------------------
@@ -444,8 +425,6 @@ namespace CSharpParser.ParserFiles {
     void Init()
     {
       _SkipMode = false;
-      _FirstNonWsInLine = -1;
-      _NewLineFound = true;
       _EOFFound = false;
 
       pos = -1; line = 1; col = 0;
@@ -532,18 +511,6 @@ namespace CSharpParser.ParserFiles {
         {
           line++; 
           col = 0;
-          _NewLineFound = true;
-        }
-        else if (_NewLineFound)
-        {
-          // --- Check if the first non-whitespace character is found
-          _FirstNonWsInLine = -1;
-          if (ch != ' ' && ch != 9 && ch != 10 && ch != 13)
-          {
-            // --- First non-whitespace found
-            _FirstNonWsInLine = col;
-            _NewLineFound = false;
-          }
         }
       }
 

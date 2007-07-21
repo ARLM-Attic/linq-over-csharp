@@ -372,11 +372,16 @@ namespace CSharpParser.ParserFiles
     // --------------------------------------------------------------------------------
     private bool CheckPragmaIsFirstInLine(Token symbol)
     {
-      if (_Parser.Scanner.FirstNonWsInLine < 0 || 
-        _Parser.Scanner.FirstNonWsInLine >= symbol.col)
+      int oldPos = _Parser.Scanner.Buffer.Pos;
+      bool wsOnly = true;
+      for (int i = symbol.col - 1; i >= 1; i--)
       {
-        return true;
+        _Parser.Scanner.Buffer.Pos = symbol.pos - i;
+        int ch = _Parser.Scanner.Buffer.Peek();
+        wsOnly &= (ch == ' ' || (ch >= 9 && ch <= 13));
       }
+      _Parser.Scanner.Buffer.Pos = oldPos;
+      if (wsOnly) return true;
       _Parser.Error("CS1040", symbol, "Preprocessor directives must appear as the first non-whitespace character on a line.");
       return false;
     }

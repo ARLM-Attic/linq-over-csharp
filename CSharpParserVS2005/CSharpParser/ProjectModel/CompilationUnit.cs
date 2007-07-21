@@ -8,7 +8,7 @@ using CSharpParser.ProjectModel;
 using Scanner=CSharpParser.ParserFiles.Scanner;
 using Token=CSharpParser.ParserFiles.Token;
 
-namespace CSharpParser
+namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
@@ -341,7 +341,6 @@ namespace CSharpParser
       // --- Syntax parsing
       foreach (SourceFile file in _Files)
       {
-        Console.WriteLine("Parsing file '{0}'", file.FullName);
         Scanner scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
         _CurrentFile = file;
         _Parser = new CSharpSyntaxParser(scanner, this, file);

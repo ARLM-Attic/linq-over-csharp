@@ -5,6 +5,7 @@ using CSharpParser.Properties;
 
 namespace CSharpParser.ProjectModel
 {
+
   // ==================================================================================
   /// <summary>
   /// This class represents a namespace declared in a file.
@@ -203,7 +204,17 @@ namespace CSharpParser.ProjectModel
     {
       item.Namespace = this;
       _TypeDeclarations.Add(item);
-      _ParentFile.ParentUnit.DeclaredTypes.Add(item);
+      try
+      {
+        _ParentFile.ParentUnit.DeclaredTypes.Add(item);
+      }
+      catch (ArgumentException ex)
+      {
+        _ParentFile.ParentUnit.ErrorHandler.Error("CS0101", 
+          item.Token,
+          String.Format("The namespace '{0}' already contains a definition for '{1}'",
+          Name, item.FullName));
+      }
     }
 
     #endregion
