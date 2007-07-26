@@ -7,11 +7,8 @@ namespace CSharpParser.ProjectModel
   /// This type represents a destructor declaration.
   /// </summary>
   // ==================================================================================
-  public sealed class DestructorDeclaration : MethodDeclaration
+  public sealed class FinalizerDeclaration : MethodDeclaration
   {
-    #region Private fields
-    #endregion
-
     #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
@@ -20,7 +17,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public DestructorDeclaration(Token token)
+    public FinalizerDeclaration(Token token)
       : base(token)
     {
     }
@@ -28,6 +25,20 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the finalizer.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string Name
+    {
+      get
+      {
+        return "~" + base.Name;
+      }
+    }
+
     #endregion
   }
 }

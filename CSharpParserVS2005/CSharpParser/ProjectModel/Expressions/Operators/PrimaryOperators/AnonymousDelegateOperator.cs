@@ -62,6 +62,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the element owning the block;
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public LanguageElement Owner
+    {
+      get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Adds a new statement to the method body.
     /// </summary>
     /// <param name="statement">Statement to add.</param>

@@ -200,7 +200,7 @@ namespace CSharpParser.ProjectModel
       {
         _ParentUnit.DeclaredTypes.Add(e.Item);
       }
-      catch (ArgumentException ex)
+      catch (ArgumentException)
       {
         _ParentUnit.ErrorHandler.Error("CS0101",
           e.Item.Token,

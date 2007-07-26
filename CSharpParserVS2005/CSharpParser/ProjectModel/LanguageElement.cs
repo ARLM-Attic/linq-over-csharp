@@ -14,6 +14,7 @@ namespace CSharpParser.ProjectModel
     private readonly Token _Token;
     private readonly CSharpSyntaxParser _Parser;
     private string _Name;
+    private CommentInfo _Comment;
 
     #endregion
 
@@ -124,6 +125,27 @@ namespace CSharpParser.ProjectModel
     public Token Token
     {
       get { return _Token; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the comment belonging to this language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CommentInfo Comment
+    {
+      get { return _Comment; }
+      set { _Comment = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this language element has a comment or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasComment
+    {
+      get { return _Comment == null; }
     }
 
     #endregion

@@ -1,4 +1,5 @@
 using CSharpParser.Collections;
+using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
@@ -7,15 +8,15 @@ namespace CSharpParser.ProjectModel
   /// This abstract class a C# comment.
   /// </summary>
   // ==================================================================================
-  public abstract class CommentInfo
+  public abstract class CommentInfo: LanguageElement
   {
     #region Private fields
 
-    private readonly int _StartLine;
-    private readonly int _StartColumn;
-    private readonly int _EndLine;
-    private readonly int _EndColumn;
-    private readonly string _Text;
+    protected int _StartLine;
+    protected int _StartColumn;
+    protected int _EndLine;
+    protected int _EndColumn;
+    protected string _Text;
     private LanguageElement _RelatedElement;
 
     #endregion
@@ -26,45 +27,22 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Creates a new comment instance.
     /// </summary>
-    /// <param name="_StartLine">Starting line.</param>
-    /// <param name="_StartColumn">Starting column.</param>
-    /// <param name="_EndLine">Ending line.</param>
-    /// <param name="_EndColumn">Ending column.</param>
-    /// <param name="_Text">Comment text.</param>
+    /// <param name="token">Start token of the comment.</param>
+    /// <param name="endLine">Ending line.</param>
+    /// <param name="endColumn">Ending column.</param>
+    /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    protected CommentInfo(int _StartLine, int _StartColumn, int _EndLine, int _EndColumn, 
-      string _Text)
+    protected CommentInfo(Token token, int endLine, int endColumn, 
+      string text): base(token)
     {
-      this._StartLine = _StartLine;
-      this._StartColumn = _StartColumn;
-      this._EndLine = _EndLine;
-      this._EndColumn = _EndColumn;
-      this._Text = _Text;
+      _EndLine = endLine;
+      _EndColumn = endColumn;
+      _Text = text;
     }
 
     #endregion
 
     #region Public properties
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the line where #region directive starts.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public int StartLine
-    {
-      get { return _StartLine; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the column where #region directive starts.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public int StartColumn
-    {
-      get { return _StartColumn; }
-    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -91,7 +69,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the text of the comment excluding the comment mark tokens.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string Text
+    public virtual string Text
     {
       get { return _Text; }
     }
@@ -121,14 +99,14 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Creates a new comment instance.
     /// </summary>
-    /// <param name="_StartLine">Starting line.</param>
-    /// <param name="_StartColumn">Starting column.</param>
-    /// <param name="_EndLine">Ending line.</param>
-    /// <param name="_EndColumn">Ending column.</param>
-    /// <param name="_Text">Comment text.</param>
+    /// <param name="token">Start token of the comment.</param>
+    /// <param name="endLine">Ending line.</param>
+    /// <param name="endColumn">Ending column.</param>
+    /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public LineComment(int _StartLine, int _StartColumn, int _EndLine, int _EndColumn, 
-      string _Text) : base(_StartLine, _StartColumn, _EndLine, _EndColumn, _Text)
+    public LineComment(Token token, int endLine, int endColumn, string text)
+      : 
+      base(token, endLine, endColumn, text)
     {
     }
   }
@@ -144,14 +122,13 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Creates a new comment instance.
     /// </summary>
-    /// <param name="_StartLine">Starting line.</param>
-    /// <param name="_StartColumn">Starting column.</param>
-    /// <param name="_EndLine">Ending line.</param>
-    /// <param name="_EndColumn">Ending column.</param>
-    /// <param name="_Text">Comment text.</param>
+    /// <param name="token">Start token of the comment.</param>
+    /// <param name="endLine">Ending line.</param>
+    /// <param name="endColumn">Ending column.</param>
+    /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public BlockComment(int _StartLine, int _StartColumn, int _EndLine, int _EndColumn, 
-      string _Text) : base(_StartLine, _StartColumn, _EndLine, _EndColumn, _Text)
+    public BlockComment(Token token, int endLine, int endColumn, string text)
+      : base(token, endLine, endColumn, text)
     {
     }
   }
@@ -167,14 +144,13 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Creates a new comment instance.
     /// </summary>
-    /// <param name="_StartLine">Starting line.</param>
-    /// <param name="_StartColumn">Starting column.</param>
-    /// <param name="_EndLine">Ending line.</param>
-    /// <param name="_EndColumn">Ending column.</param>
-    /// <param name="_Text">Comment text.</param>
+    /// <param name="token">Start token of the comment.</param>
+    /// <param name="endLine">Ending line.</param>
+    /// <param name="endColumn">Ending column.</param>
+    /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public XmlComment(int _StartLine, int _StartColumn, int _EndLine, int _EndColumn, 
-      string _Text) : base(_StartLine, _StartColumn, _EndLine, _EndColumn, _Text)
+    public XmlComment(Token token, int endLine, int endColumn, string text)
+      : base(token, endLine, endColumn, text)
     {
     }
   }

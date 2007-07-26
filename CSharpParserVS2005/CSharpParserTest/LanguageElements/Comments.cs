@@ -1,5 +1,3 @@
-using System;
-using CSharpParser;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,12 +13,33 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"Comments\SimpleLineComments.cs");
       Assert.IsTrue(InvokeParser(parser));
       Assert.AreEqual(parser.Files[0].Comments.Count, 8);
-      foreach(CommentInfo c in parser.Files[0].Comments)
-      {
-        Console.WriteLine("type: {5}, sl:{0} sc:{1}, el:{2}, ec{3}, '{4}'",
-                          c.StartLine, c.StartColumn, c.EndLine, c.EndColumn, c.Text,
-                          c.GetType().Name);
-      }
+    }
+
+    [TestMethod]
+    public void LanguageElementCommentsOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Comments\CompoundComments.cs");
+      Assert.IsTrue(InvokeParser(parser));
+
+      MultiCommentBlock ci = parser.Files[0].Namespaces[0].Comment as MultiCommentBlock;
+      Assert.IsNotNull(ci);
+      Assert.AreEqual(ci.Comments[1].Text, " Namespace comment");
+
+      ClassDeclaration cd = parser.DeclaredTypes[0] as ClassDeclaration;
+      Assert.IsNotNull(cd);
+      ci = cd.Comment as MultiCommentBlock;
+      Assert.IsNotNull(ci);
+      Assert.IsTrue(ci.Comments[0] is LineComment);
+      Assert.IsTrue(ci.Comments[0].Text.StartsWith(" ========"));
+      Assert.IsTrue(ci.Comments[1] is XmlComment);
+      Assert.IsTrue(ci.Comments[1].Text.StartsWith(" <summary>"));
+      Assert.IsTrue(ci.Comments[2] is XmlComment);
+      Assert.IsTrue(ci.Comments[2].Text.StartsWith(" This class"));
+      Assert.IsTrue(ci.Comments[3] is XmlComment);
+      Assert.IsTrue(ci.Comments[3].Text.StartsWith(" </summary>"));
+      Assert.IsTrue(ci.Comments[4] is LineComment);
+      Assert.IsTrue(ci.Comments[4].Text.StartsWith(" ========"));
     }
   }
 }

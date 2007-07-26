@@ -85,6 +85,7 @@
     </Compile>
     <Compile Include="LanguageElements\Comments.cs" />
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
+    <Compile Include="LanguageElements\Members.cs" />
     <Compile Include="LanguageElements\Pragmas.cs" />
     <Compile Include="LanguageElements\TypeParameters.cs" />
     <Compile Include="LanguageElements\UsingsAndNamespaces.cs" />
@@ -252,6 +253,13 @@
     <None Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\Pragmas\OpenRegion.cs" />
     <None Include="TestFiles\Comments\SimpleLineComments.cs" />
+    <None Include="TestFiles\Comments\CompoundComments.cs" />
+    <None Include="TestFiles\Members\DuplicateConst.cs" />
+    <None Include="TestFiles\Members\DuplicateCtor.cs" />
+    <None Include="TestFiles\Members\DuplicateEventProp.cs" />
+    <None Include="TestFiles\Members\DuplicateProp.cs" />
+    <None Include="TestFiles\Members\DuplicateFinalizer.cs" />
+    <None Include="TestFiles\Members\DuplicateIndexer.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />

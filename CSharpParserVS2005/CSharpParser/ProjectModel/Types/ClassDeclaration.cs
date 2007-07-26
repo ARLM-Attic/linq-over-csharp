@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using CSharpParser.ParserFiles;
 
@@ -15,6 +16,7 @@ namespace CSharpParser.ProjectModel
     private bool _IsAbstract;
     private bool _IsStatic;
     private bool _IsSealed;
+    private FinalizerDeclaration _Finalizer;
 
     #endregion
 
@@ -66,6 +68,26 @@ namespace CSharpParser.ProjectModel
       get { return _IsSealed; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the finalizer of this type declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public FinalizerDeclaration Finalizer
+    {
+      get { return _Finalizer; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if the type has a finalizer or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasFinalizer
+    {
+      get { return _Finalizer != null; }
+    }
+
     #endregion
 
     #region Overridden methods
@@ -114,6 +136,32 @@ namespace CSharpParser.ProjectModel
       }
 
       return sb.ToString();
+    }
+
+    #endregion
+
+    #region Internal methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if this class has already a finalizer or not.
+    /// </summary>
+    /// <param name="finalizer">Finalizer declared in the class.</param>
+    /// <remarks>
+    /// Raises a compilation error, if the class already has a finalizer.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    internal bool HasAlreadyFinalizer(FinalizerDeclaration finalizer)
+    {
+      if (HasFinalizer)
+      {
+        Parser.CompilationUnit.ErrorHandler.Error("CS0111", finalizer.Token,
+          String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
+          Name, finalizer.Signature));
+        return true;
+      }
+      _Finalizer = finalizer;
+      return false;
     }
 
     #endregion

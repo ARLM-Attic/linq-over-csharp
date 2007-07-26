@@ -241,7 +241,7 @@ namespace CSharpParserTest
 
       IndexerDeclaration ind = td.Members[6] as IndexerDeclaration;
       Assert.IsNotNull(ind);
-      Assert.AreEqual(ind.Name, "");
+      Assert.AreEqual(ind.Name, "this");
       Assert.AreEqual(ind.ResultingType.Name, "string");
       Assert.AreEqual(ind.FormalParameters.Count, 2);
       Assert.IsTrue(pd.HasGetter);

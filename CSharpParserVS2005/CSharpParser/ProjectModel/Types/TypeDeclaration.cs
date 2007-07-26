@@ -40,7 +40,15 @@ namespace CSharpParser.ProjectModel
     private readonly TypeParameterConstraintCollection _ParameterConstraints =
       new TypeParameterConstraintCollection();
     private readonly TypeDeclarationCollection _NestedTypes = new TypeDeclarationCollection();
+
+    //ers of the type
     private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
+    private readonly ConstDeclarationCollection _Consts = new ConstDeclarationCollection();
+    private readonly ConstructorDeclarationCollection _Constructors = new ConstructorDeclarationCollection();
+    private readonly EventPropertyDeclarationCollection _EventProperties = 
+      new EventPropertyDeclarationCollection();
+    private readonly PropertyDeclarationCollection _Properties = new PropertyDeclarationCollection();
+    private readonly IndexerDeclarationCollection _Indexers = new IndexerDeclarationCollection();
 
     #endregion
 
@@ -293,6 +301,56 @@ namespace CSharpParser.ProjectModel
       get { return _NestedTypes.Count > 0; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of constant declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ConstDeclarationCollection Consts
+    {
+      get { return _Consts; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of constructor declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ConstructorDeclarationCollection Constructors
+    {
+      get { return _Constructors; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of event property declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public EventPropertyDeclarationCollection EventProperties
+    {
+      get { return _EventProperties; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of indexer declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IndexerDeclarationCollection Indexers
+    {
+      get { return _Indexers; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of property declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public PropertyDeclarationCollection Properties
+    {
+      get { return _Properties; }
+    }
+
     #endregion
 
     #region Public methods
@@ -370,22 +428,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets all constant members within the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<ConstDeclaration> Consts
-    {
-      get
-      {
-        foreach (MemberDeclaration member in _Members)
-        {
-          if (member is ConstDeclaration) yield return member as ConstDeclaration;
-        }
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets all field members within the type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -413,38 +455,6 @@ namespace CSharpParser.ProjectModel
         {
           FieldDeclaration fi = member as FieldDeclaration;
           if (fi != null && fi.IsEvent) yield return fi;
-        }
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets all constructor members within the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<ConstructorDeclaration> Constructors
-    {
-      get
-      {
-        foreach (MemberDeclaration member in _Members)
-        {
-          if (member is ConstructorDeclaration) yield return member as ConstructorDeclaration;
-        }
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets all property members within the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<PropertyDeclaration> Properties
-    {
-      get
-      {
-        foreach (MemberDeclaration member in _Members)
-        {
-          if (member is PropertyDeclaration) yield return member as PropertyDeclaration;
         }
       }
     }
@@ -504,6 +514,98 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     void BeforeAddMembers(object sender, ItemedCancelEventArgs<MemberDeclaration> e)
     {
+      // --- Check, if member is a constant
+      ConstDeclaration constDecl = e.Item as ConstDeclaration;
+      if (constDecl != null)
+      {
+        if (_Consts.Contains(constDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
+                                                    String.Format(
+                                                      "The type '{0}' already contains a definition for '{1}'", Name,
+                                                      e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Consts.Add(constDecl);
+      }
+
+      // --- Check, if member is a constructor
+      ConstructorDeclaration ctorDecl = e.Item as ConstructorDeclaration;
+      if (ctorDecl != null)
+      {
+        if (_Constructors.Contains(ctorDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
+                                                    String.Format(
+                                                      "Type '{0}' already defines a member called '{1}' with the same parameter types",
+                                                      Name, e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Constructors.Add(ctorDecl);
+      }
+
+      // --- Check, if member is an event property
+      EventPropertyDeclaration evPropDecl = e.Item as EventPropertyDeclaration;
+      if (evPropDecl != null)
+      {
+        if (_EventProperties.Contains(evPropDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
+                                                    String.Format(
+                                                      "The type '{0}' already contains a definition for '{1}'", Name,
+                                                      e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _EventProperties.Add(evPropDecl);
+      }
+
+      // --- Check, if member is an indexer property
+      IndexerDeclaration indDecl = e.Item as IndexerDeclaration;
+      if (indDecl != null)
+      {
+        if (_Indexers.Contains(indDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
+            String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
+                                                      Name, e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Indexers.Add(indDecl);
+      }
+
+      // --- Check, if member is a property
+      PropertyDeclaration propDecl = e.Item as PropertyDeclaration;
+      if (propDecl != null)
+      {
+        if (_Properties.Contains(propDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
+                                                    String.Format(
+                                                      "The type '{0}' already contains a definition for '{1}'", Name,
+                                                      e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Properties.Add(propDecl);
+      }
+
+      // --- Check for finalizer
+      FinalizerDeclaration finDecl = e.Item as FinalizerDeclaration;
+      ClassDeclaration thisClass = this as ClassDeclaration;
+      if (finDecl != null && thisClass != null)
+      {
+        if (thisClass.HasAlreadyFinalizer(finDecl))
+        {
+          e.Cancel = true;
+          return;
+        }
+      }
+
+      // --- Add member to the other members
       if (_Members.Contains(e.Item))
       {
         Parser.CompilationUnit.ErrorHandler.Error("CS0101",

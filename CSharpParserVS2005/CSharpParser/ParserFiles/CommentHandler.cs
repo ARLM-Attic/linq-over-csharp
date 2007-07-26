@@ -43,12 +43,12 @@ namespace CSharpParser.ParserFiles
     {
       CommentInfo comment;
       string text = commentToken.val.Substring(2);
+      if (text.EndsWith("\r")) text = text.Substring(0, text.Length - 1);
       if (text.StartsWith("/"))
       {
         text = text.Substring(1);
         comment = new XmlComment(
-          commentToken.line,
-          commentToken.col,
+          commentToken,
           commentToken.line,
           commentToken.col + commentToken.val.Length,
           text);
@@ -56,13 +56,42 @@ namespace CSharpParser.ParserFiles
       else
       {
         comment = new LineComment(
-          commentToken.line,
-          commentToken.col,
+          commentToken,
           commentToken.line,
           commentToken.col + commentToken.val.Length,
           text);
       }
       _Parser.File.AddComment(comment);
+
+      // --- Check, if the comment is the first token in this line
+      if (_Parser.CheckTokenIsFirstInLine(commentToken))
+      {
+        // --- This token is the first in this line, so attach it to the orphan comment.
+        MultiCommentBlock multiBlock = _Parser.OrphanComment as MultiCommentBlock;
+        if (_Parser.OrphanComment == null)
+        {
+          // --- This is the first part of the orphan comment.
+          _Parser.OrphanComment = comment;
+        }
+        else
+        {
+          if (multiBlock == null)
+          {
+            // --- The orphan comment should be converted to a multi-comment block.
+            multiBlock = new MultiCommentBlock(_Parser.OrphanComment);
+            _Parser.OrphanComment = multiBlock;
+          }
+          multiBlock.AttachComment(comment);
+        }
+      }
+      else
+      {
+        // --- This comment is an end-of-line comment, so attach it to the previous token.
+        if (commentToken.prev != null)
+        {
+          comment.RelatedElement = new TokenElement(commentToken.prev, _Parser);
+        }
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -77,6 +106,5 @@ namespace CSharpParser.ParserFiles
     }
 
     #endregion
-
   }
 }

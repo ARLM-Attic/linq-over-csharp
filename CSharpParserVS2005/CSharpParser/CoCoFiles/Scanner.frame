@@ -58,8 +58,36 @@ using System.Collections.Generic;
     /// <summary>Token value.</summary>
     public string val;
 
-    /// <summary>Tokens are kept in linked list.</summary>
-    public Token next; 
+    /// <summary>Points to the next token.</summary>
+    private Token _next;
+
+    /// <summary>Points to the previous token.</summary>
+    private Token _prev;
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the next token.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public Token next
+    {
+      get { return _next; }
+      set
+      {
+        _next = value;
+        if (value != null) _next._prev = this;
+      }
+    }
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the previous token.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public Token prev
+    {
+      get { return _prev; }
+    }
   }
 
   // ==================================================================================

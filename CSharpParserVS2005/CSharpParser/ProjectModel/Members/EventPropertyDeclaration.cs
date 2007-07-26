@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -77,5 +78,29 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of type declarations that can be indexed by the
+  /// full name of the type.
+  /// </summary>
+  // ==================================================================================
+  public class EventPropertyDeclarationCollection : 
+    RestrictedIndexedCollection<EventPropertyDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">EventPropertyDeclaration item.</param>
+    /// <returns>
+    /// Name of the event property declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(EventPropertyDeclaration item)
+    {
+      return item.Signature;
+    }
   }
 }

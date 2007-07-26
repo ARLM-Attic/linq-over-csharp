@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -23,6 +24,16 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"Utility\RestrictedCollection.cs");
       bool result = InvokeParser(parser);
       Assert.IsTrue(result);
+      Console.WriteLine('\u00a0');
+      Console.WriteLine('\u00aa');
+      Console.WriteLine('\u00b5');
+      Console.WriteLine('\u00ba');
+      Console.WriteLine('\u00c0');
+      Console.WriteLine('\u00d6');
+      Console.WriteLine('\u00d8');
+      Console.WriteLine('\u00f6');
+      Console.WriteLine('\u00f8');
+      Console.WriteLine('\u00ff');
     }
   }
 }

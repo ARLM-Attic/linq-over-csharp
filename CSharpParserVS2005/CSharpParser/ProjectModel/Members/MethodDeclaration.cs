@@ -134,6 +134,11 @@ namespace CSharpParser.ProjectModel
           {
             sb.Append(", ");
           }
+          if (par.Kind != FormalParameterKind.In)
+          {
+            sb.Append(par.Kind.ToString().ToLower());
+            sb.Append(' ');
+          }
           sb.Append(par.Type.FullName);
           isFirst = false;
         }
@@ -145,6 +150,16 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region IBlockOwner Members
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the element owning the block;
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public LanguageElement Owner
+    {
+      get { return this; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

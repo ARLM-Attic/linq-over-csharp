@@ -1,4 +1,5 @@
 using System.Text;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -12,7 +13,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private FormalParameterCollection _FormalParameters = new FormalParameterCollection();
+    private readonly FormalParameterCollection _FormalParameters = new FormalParameterCollection();
 
     #endregion
 
@@ -27,6 +28,7 @@ namespace CSharpParser.ProjectModel
     public IndexerDeclaration(Token token)
       : base(token)
     {
+      Name = "this";
     }
 
     #endregion
@@ -75,5 +77,29 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of type declarations that can be indexed by the
+  /// full name of the type.
+  /// </summary>
+  // ==================================================================================
+  public class IndexerDeclarationCollection :
+    RestrictedIndexedCollection<IndexerDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">IndexerDeclaration item.</param>
+    /// <returns>
+    /// Name of the indexer declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(IndexerDeclaration item)
+    {
+      return item.Signature;
+    }
   }
 }

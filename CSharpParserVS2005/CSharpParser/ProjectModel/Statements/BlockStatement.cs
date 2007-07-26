@@ -34,7 +34,6 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of statements in this block.
     /// </summary>
@@ -47,6 +46,16 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region IBlockOwner Members
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the element owning the block;
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public LanguageElement Owner
+    {
+      get { return this; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

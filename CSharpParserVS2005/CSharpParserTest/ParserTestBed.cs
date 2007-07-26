@@ -19,15 +19,10 @@ namespace CSharpParserTest
     {
       int errors = parser.Parse();
       Console.WriteLine("{0} errors detected", errors);
-      foreach (SourceFile file in parser.Files)
+      foreach (Error error in parser.Errors)
       {
-        foreach (NamespaceFragment ns in file.Namespaces)
-        {
-          foreach (TypeDeclaration td in ns.TypeDeclarations)
-          {
-            DisplayTypeInfo(td, 0);
-          }
-        }
+        Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", error.Line, error.Column,
+          error.Code, error.Description, error.File);
       }
       return errors == 0;
     }

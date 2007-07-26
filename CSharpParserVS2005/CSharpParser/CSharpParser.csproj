@@ -37,6 +37,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
+    <Compile Include="ProjectModel\TokenElement.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="ParserFiles\CommentHandler.cs" />
     <Compile Include="ParserFiles\PragmaHandler.cs" />
@@ -52,7 +54,7 @@
     <Compile Include="ProjectModel\AttributeArgument.cs" />
     <Compile Include="ProjectModel\AttributeDeclaration.cs" />
     <Compile Include="ProjectModel\AttributedElement.cs" />
-    <Compile Include="ProjectModel\CommentInfo.cs" />
+    <Compile Include="ProjectModel\Comments\CommentInfo.cs" />
     <Compile Include="ProjectModel\CompilationReference.cs" />
     <Compile Include="ProjectModel\ErrorHandling\Error.cs" />
     <Compile Include="ProjectModel\ErrorHandling\ICompilationErrorHandler.cs" />
@@ -150,7 +152,7 @@
     <Compile Include="ProjectModel\Members\CastOperatorDeclaration.cs" />
     <Compile Include="ProjectModel\Members\ConstDeclaration.cs" />
     <Compile Include="ProjectModel\Members\ConstructorDeclaration.cs" />
-    <Compile Include="ProjectModel\Members\DestructorDeclaration.cs" />
+    <Compile Include="ProjectModel\Members\FinalizerDeclaration.cs" />
     <Compile Include="ProjectModel\Members\EventPropertyDeclaration.cs" />
     <Compile Include="ProjectModel\Members\IndexerDeclaration.cs" />
     <Compile Include="ProjectModel\Members\OperatorDeclaration.cs" />
