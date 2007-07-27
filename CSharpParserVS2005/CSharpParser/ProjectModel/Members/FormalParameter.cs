@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -19,7 +20,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a formal parameter declaration.
   /// </summary>
   // ==================================================================================
-  public class FormalParameter : AttributedElement
+  public class FormalParameter : AttributedElement, IResolutionRequired
   {
     #region Private fields
 
@@ -79,6 +80,26 @@ namespace CSharpParser.ProjectModel
     {
       get { return _Type; }
       set { _Type = value; }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      if (_Type != null)
+      {
+        _Type.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

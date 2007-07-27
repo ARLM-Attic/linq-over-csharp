@@ -10,7 +10,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class UInt64Constant : IntegerConstant
   {
-    private UInt64 _Value;
+    private readonly UInt64 _Value;
 
     // --------------------------------------------------------------------------------
     /// <summary>

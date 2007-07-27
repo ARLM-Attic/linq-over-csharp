@@ -10,7 +10,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class DecimalConstant : RealConstant
   {
-    private Decimal _Value;
+    private readonly Decimal _Value;
 
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -64,5 +65,28 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of operator declarations that can be indexed by the
+  /// signature of the method.
+  /// </summary>
+  // ==================================================================================
+  public class OperatorDeclarationCollection : RestrictedIndexedCollection<OperatorDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">OperatorDeclaration item.</param>
+    /// <returns>
+    /// Signature of the operator declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(OperatorDeclaration item)
+    {
+      return item.Signature;
+    }
   }
 }

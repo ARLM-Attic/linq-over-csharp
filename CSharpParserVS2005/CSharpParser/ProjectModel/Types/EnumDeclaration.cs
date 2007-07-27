@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private List<EnumValueDeclaration> _Values = new List<EnumValueDeclaration>();
+    private readonly List<EnumValueDeclaration> _Values = new List<EnumValueDeclaration>();
 
     #endregion
 
@@ -23,6 +23,7 @@ namespace CSharpParser.ProjectModel
     /// Creates a new enumeration declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used.</param>
     // --------------------------------------------------------------------------------
     public EnumDeclaration(Token token, CSharpSyntaxParser parser)
       : base(token, parser)

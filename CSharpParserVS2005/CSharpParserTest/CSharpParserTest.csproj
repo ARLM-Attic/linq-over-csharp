@@ -260,6 +260,10 @@
     <None Include="TestFiles\Members\DuplicateProp.cs" />
     <None Include="TestFiles\Members\DuplicateFinalizer.cs" />
     <None Include="TestFiles\Members\DuplicateIndexer.cs" />
+    <None Include="TestFiles\Members\DuplicateMethod.cs" />
+    <None Include="TestFiles\Members\DuplicateOperator.cs" />
+    <None Include="TestFiles\Members\DuplicateCastOperator.cs" />
+    <None Include="TestFiles\Members\DuplicateField.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />

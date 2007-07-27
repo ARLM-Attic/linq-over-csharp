@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -14,8 +15,8 @@ namespace CSharpParser.ProjectModel
 
     private TypeReference _Type;
     private ArrayInitializer _Initializer;
-    private ArgumentList _Arguments = new ArgumentList();
-    private List<Expression> _Dimensions = new List<Expression>();
+    private readonly ArgumentList _Arguments = new ArgumentList();
+    private readonly List<Expression> _Dimensions = new List<Expression>();
     private int _RunningDimensions;
 
     #endregion
@@ -119,6 +120,35 @@ namespace CSharpParser.ProjectModel
     public bool IsArrayInitialization
     {
       get { return _Dimensions.Count == 0 && _Initializer != null; }
+    }
+
+    #endregion
+
+    #region Type resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      if (_Type != null)
+      {
+        _Type.ResolveTypeReferences(contextType, contextInstance);
+      }
+      foreach (Argument arg in _Arguments)
+      {
+        arg.ResolveTypeReferences(contextType, contextInstance);
+      }
+      foreach (Expression expr in _Dimensions)
+      {
+        expr.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

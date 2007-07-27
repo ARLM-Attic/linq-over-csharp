@@ -1,5 +1,6 @@
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -8,7 +9,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents an abstract statement.
   /// </summary>
   // ==================================================================================
-  public abstract class Statement : LanguageElement
+  public abstract class Statement : LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -155,6 +156,43 @@ namespace CSharpParser.ProjectModel
         {
           yield return stmt;
         }
+      }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+    }
+
+    #endregion
+
+    #region Public static methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in the specified statement block.
+    /// </summary>
+    /// <param name="block">Statement block</param>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public static void ResolveTypeReferences(IBlockOwner block, 
+      ResolutionContext contextType, IResolutionRequired contextInstance)
+    {
+      foreach (Statement stm in block.Statements)
+      {
+        stm.ResolveTypeReferences(contextType, contextInstance);
       }
     }
 

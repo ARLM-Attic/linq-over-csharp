@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -7,11 +8,11 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a "base" literal.
   /// </summary>
   // ==================================================================================
-  public sealed class BaseNamedLiteral : BaseLiteral
+  public class BaseNamedLiteral : BaseLiteral
   {
     #region Private fields
 
-    private TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
+    private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
     
     #endregion
 
@@ -43,5 +44,25 @@ namespace CSharpParser.ProjectModel
     }
     
 #endregion
+
+    #region Type resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      foreach (TypeReference arg in _TypeArguments)
+      {
+        arg.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    #endregion
   }
 }

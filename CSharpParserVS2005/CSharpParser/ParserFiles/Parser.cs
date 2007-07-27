@@ -194,7 +194,7 @@ public class CSharpSyntaxParser
 
 
 
-    #region Project Model extension fields
+    #region CompilationUnit Model extension fields
 
     private CompilationUnit _CompilationUnit;
     private SourceFile _File;

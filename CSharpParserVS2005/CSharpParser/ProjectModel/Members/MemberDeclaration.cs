@@ -1,5 +1,6 @@
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -8,7 +9,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a type member declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class MemberDeclaration : AttributedElement
+  public abstract class MemberDeclaration : AttributedElement, IResolutionRequired
   {
     #region Private fields
 
@@ -250,6 +251,30 @@ namespace CSharpParser.ProjectModel
     public virtual string Signature
     {
       get { return FullName; }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      if (_ResultingType != null)
+      {
+        _ResultingType.ResolveTypeReferences(contextType, contextInstance);
+      }
+      if (_ExplicitName != null)
+      {
+        _ExplicitName.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

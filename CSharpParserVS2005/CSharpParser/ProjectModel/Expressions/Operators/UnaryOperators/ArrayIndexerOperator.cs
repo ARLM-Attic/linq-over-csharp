@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -53,6 +54,26 @@ namespace CSharpParser.ProjectModel
     public List<Expression> Indexers
     {
       get { return _Indexers; }
+    }
+
+    #endregion
+  
+    #region TypeResolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      foreach (Expression expr in _Indexers)
+      {
+        expr.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

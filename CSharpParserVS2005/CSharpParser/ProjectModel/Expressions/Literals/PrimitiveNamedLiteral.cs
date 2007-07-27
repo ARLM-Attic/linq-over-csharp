@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -7,12 +8,11 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a primitive method literal.
   /// </summary>
   // ==================================================================================
-  public sealed class PrimitiveNamedLiteral : Literal
+  public sealed class PrimitiveNamedLiteral : BaseNamedLiteral
   {
     #region Private fields
 
     private TypeReference _Type;
-    private TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
 
     #endregion
 
@@ -44,17 +44,26 @@ namespace CSharpParser.ProjectModel
       set { _Type = value; }
     }
 
+    #endregion
+
+    #region Type resolution
+
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type arguments of the primitive method.
+    /// Resolves all unresolved type references.
     /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
-    public TypeReferenceCollection TypeArguments
+    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
     {
-      get { return _TypeArguments; }
+      base.ResolveTypeReferences(contextType, contextInstance);
+      if (_Type != null)
+      {
+        _Type.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion
-
   }
 }

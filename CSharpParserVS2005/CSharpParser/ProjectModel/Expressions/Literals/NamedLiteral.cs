@@ -7,12 +7,11 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a named literal.
   /// </summary>
   // ==================================================================================
-  public sealed class NamedLiteral : Literal
+  public sealed class NamedLiteral : BaseNamedLiteral
   {
     #region Private fields
 
     private bool _IsGlobal;
-    private TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
 
     #endregion
 
@@ -44,17 +43,6 @@ namespace CSharpParser.ProjectModel
       set { _IsGlobal = value; }
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the type arguments of the primitive method.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public TypeReferenceCollection TypeArguments
-    {
-      get { return _TypeArguments; }
-    }
-
     #endregion
-
   }
 }

@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -12,7 +13,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private TypeReference _ReturnType;
-    private FormalParameterCollection _FormalParameters = new FormalParameterCollection();
+    private readonly FormalParameterCollection _FormalParameters = new FormalParameterCollection();
 
     #endregion
 
@@ -53,6 +54,30 @@ namespace CSharpParser.ProjectModel
     public FormalParameterCollection FormalParameters
     {
       get { return _FormalParameters; }
+    }
+
+    #endregion
+
+    #region Type Resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this namespace fragment.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      if (_ReturnType != null)
+      {
+        _ReturnType.ResolveTypeReferences(contextType, contextInstance);
+      }
+      foreach (FormalParameter param in _FormalParameters)
+      {
+        param.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -77,6 +78,23 @@ namespace CSharpParser.ProjectModel
     public void Add(Statement statement)
     {
       Statements.Add(statement);
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      Statement.ResolveTypeReferences(this, contextType, contextInstance);
     }
 
     #endregion

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -12,7 +13,8 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private List<ValueAssignmentStatement> _Assignments = new List<ValueAssignmentStatement>();
+    private readonly List<ValueAssignmentStatement> _Assignments = 
+      new List<ValueAssignmentStatement>();
 
     #endregion
 
@@ -74,5 +76,25 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Type resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      foreach (ValueAssignmentStatement stm in _Assignments)
+      {
+        stm.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    #endregion
   }
 }

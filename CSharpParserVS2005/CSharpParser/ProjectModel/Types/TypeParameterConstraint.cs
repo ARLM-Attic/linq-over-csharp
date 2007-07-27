@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 using CSharpParser.Collections;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -22,7 +23,7 @@ namespace CSharpParser.ProjectModel
   /// generic type or member definition.
   /// </summary>
   // ==================================================================================
-  public sealed class TypeParameterConstraint : LanguageElement
+  public sealed class TypeParameterConstraint : LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -83,6 +84,25 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this namespace fragment.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      foreach (TypeReference typeReference in _Constraints)
+      {
+        typeReference.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    #endregion
   }
 
   // ==================================================================================

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CSharpParser.Collections;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -9,7 +10,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a C# file in the project to compile.
   /// </summary>
   // ==================================================================================
-  public sealed class SourceFile
+  public sealed class SourceFile: IResolutionRequired
   {
     #region Private fields
 
@@ -206,6 +207,30 @@ namespace CSharpParser.ProjectModel
           e.Item.Token,
           String.Format("The namespace '{0}' already contains a definition for '{1}'",
           Name, e.Item.FullName));
+      }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this source file.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      foreach (TypeDeclaration typeDeclaration in _TypeDeclarations)
+      {
+        typeDeclaration.ResolveTypeReferences(ResolutionContext.SourceFile, this);
+      }
+      foreach (NamespaceFragment nameSpace in _Namespaces)
+      {
+        nameSpace.ResolveTypeReferences(ResolutionContext.SourceFile, this);
       }
     }
 

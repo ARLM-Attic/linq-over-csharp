@@ -10,7 +10,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class Int32Constant : IntegerConstant
   {
-    private Int32 _Value;
+    private readonly Int32 _Value;
 
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -10,7 +10,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class DoubleConstant : RealConstant
   {
-    private Double _Value;
+    private readonly Double _Value;
 
     // --------------------------------------------------------------------------------
     /// <summary>

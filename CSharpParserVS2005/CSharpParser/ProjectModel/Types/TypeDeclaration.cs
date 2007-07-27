@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.Collections;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -25,7 +25,8 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner
+  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner, 
+    IResolutionRequired
   {
     #region Private fields
 
@@ -41,7 +42,7 @@ namespace CSharpParser.ProjectModel
       new TypeParameterConstraintCollection();
     private readonly TypeDeclarationCollection _NestedTypes = new TypeDeclarationCollection();
 
-    //ers of the type
+    // --- Members of the type
     private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
     private readonly ConstDeclarationCollection _Consts = new ConstDeclarationCollection();
     private readonly ConstructorDeclarationCollection _Constructors = new ConstructorDeclarationCollection();
@@ -49,6 +50,11 @@ namespace CSharpParser.ProjectModel
       new EventPropertyDeclarationCollection();
     private readonly PropertyDeclarationCollection _Properties = new PropertyDeclarationCollection();
     private readonly IndexerDeclarationCollection _Indexers = new IndexerDeclarationCollection();
+    private readonly MethodDeclarationCollection _Methods = new MethodDeclarationCollection();
+    private readonly OperatorDeclarationCollection _Operators = new OperatorDeclarationCollection();
+    private readonly CastOperatorDeclarationCollection _CastOperators = 
+      new CastOperatorDeclarationCollection();
+    private readonly FieldDeclarationCollection _Fields = new FieldDeclarationCollection();
 
     #endregion
 
@@ -351,6 +357,46 @@ namespace CSharpParser.ProjectModel
       get { return _Properties; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of method declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MethodDeclarationCollection Methods
+    {
+      get { return _Methods; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of operator declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public OperatorDeclarationCollection Operators
+    {
+      get { return _Operators; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of cast operator declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CastOperatorDeclarationCollection CastOperators
+    {
+      get { return _CastOperators; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of field operator declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public FieldDeclarationCollection Fields
+    {
+      get { return _Fields; }
+    }
+
     #endregion
 
     #region Public methods
@@ -424,43 +470,6 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region Public iterators
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets all field members within the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<FieldDeclaration> Fields
-    {
-      get
-      {
-        foreach (MemberDeclaration member in _Members)
-        {
-          if (member is FieldDeclaration) yield return member as FieldDeclaration;
-        }
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets all event members within the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<FieldDeclaration> Events
-    {
-      get
-      {
-        foreach (MemberDeclaration member in _Members)
-        {
-          FieldDeclaration fi = member as FieldDeclaration;
-          if (fi != null && fi.IsEvent) yield return fi;
-        }
-      }
-    }
-
-    #endregion
-
     #region ITypeParameterOwner members
 
     // --------------------------------------------------------------------------------
@@ -505,6 +514,45 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this namespace fragment.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      // --- Resolve base types
+      foreach (TypeReference typeReference in _BaseTypes)
+      {
+        typeReference.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
+      }
+
+      // --- Resolve type argument constraints
+      foreach (TypeParameterConstraint constraint in _ParameterConstraints)
+      {
+        constraint.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
+      }
+
+      // --- Resolve nested type definitions
+      foreach (TypeDeclaration nestedType in _NestedTypes)
+      {
+        nestedType.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
+      }
+
+      // --- Resolve types in members
+      foreach (MemberDeclaration member in _Members)
+      {
+        member.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
+      }
+    }
+
+    #endregion
+
     #region Private members
 
     // --------------------------------------------------------------------------------
@@ -528,6 +576,22 @@ namespace CSharpParser.ProjectModel
           return;
         }
         else _Consts.Add(constDecl);
+      }
+
+      // --- Check, if member is a field
+      FieldDeclaration fieldDecl = e.Item as FieldDeclaration;
+      if (fieldDecl != null)
+      {
+        if (_Fields.Contains(fieldDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
+                                                    String.Format(
+                                                      "The type '{0}' already contains a definition for '{1}'", Name,
+                                                      e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Fields.Add(fieldDecl);
       }
 
       // --- Check, if member is a constructor
@@ -591,6 +655,50 @@ namespace CSharpParser.ProjectModel
           return;
         }
         else _Properties.Add(propDecl);
+      }
+
+      // --- Check, if member is an operator declaration
+      OperatorDeclaration operDecl = e.Item as OperatorDeclaration;
+      if (operDecl != null)
+      {
+        if (_Operators.Contains(operDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
+            String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
+                                                      Name, e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Operators.Add(operDecl);
+      }
+
+      // --- Check, if member is a cast operator declaration
+      CastOperatorDeclaration castDecl = e.Item as CastOperatorDeclaration;
+      if (castDecl != null)
+      {
+        if (_CastOperators.Contains(castDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0557", e.Item.Token,
+            String.Format("Duplicate user-defined conversion in type '{0}'", Name));
+          e.Cancel = true;
+          return;
+        }
+        else _CastOperators.Add(castDecl);
+      }
+
+      // --- Check, if member is a method
+      MethodDeclaration methodDecl = e.Item as MethodDeclaration;
+      if (methodDecl != null)
+      {
+        if (_Methods.Contains(methodDecl))
+        {
+          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
+            String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
+                                                      Name, e.Item.Signature));
+          e.Cancel = true;
+          return;
+        }
+        else _Methods.Add(methodDecl);
       }
 
       // --- Check for finalizer

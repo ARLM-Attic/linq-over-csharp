@@ -11,7 +11,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class StringLiteral : Literal
   {
-    private string _Value;
+    private readonly string _Value;
 
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -10,7 +10,7 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class SingleConstant : RealConstant
   {
-    private Single _Value;
+    private readonly Single _Value;
 
     // --------------------------------------------------------------------------------
     /// <summary>

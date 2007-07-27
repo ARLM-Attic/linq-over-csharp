@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -7,7 +8,7 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents an expression.
   /// </summary>
   // ==================================================================================
-  public abstract class Expression : LanguageElement
+  public abstract class Expression : LanguageElement, IResolutionRequired
   {
     #region Privat fields
 
@@ -65,5 +66,20 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+    }
+
+    #endregion
   }
 }

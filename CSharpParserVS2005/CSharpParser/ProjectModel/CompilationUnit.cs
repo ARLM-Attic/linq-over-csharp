@@ -5,6 +5,7 @@ using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.ParserFiles.PPExpressions;
 using CSharpParser.ProjectModel;
+using CSharpParser.Semantics;
 using Scanner=CSharpParser.ParserFiles.Scanner;
 using Token=CSharpParser.ParserFiles.Token;
 
@@ -349,7 +350,7 @@ namespace CSharpParser.ProjectModel
 
       // --- Semantical parsing
       SemanticsParser semParser = new SemanticsParser(this);
-      semParser.CheckSemantics();
+      semParser.ResolveTypeReferences();
 
       // --- Return the number of errors found
       return _Errors.Count;
@@ -501,7 +502,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    private void SignError(ErrorCollection errors, string code, Token errorPoint, string description,
+    private void SignError(ICollection<Error> errors, string code, Token errorPoint, string description,
                                           params object[] parameters)
     {
       Error error = new Error(

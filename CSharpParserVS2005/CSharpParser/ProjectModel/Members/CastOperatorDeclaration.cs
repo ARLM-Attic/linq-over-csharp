@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -54,5 +55,29 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of cast operator declarations that can be indexed 
+  /// by the signature of the method.
+  /// </summary>
+  // ==================================================================================
+  public class CastOperatorDeclarationCollection : 
+    RestrictedIndexedCollection<CastOperatorDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">CastOperatorDeclaration item.</param>
+    /// <returns>
+    /// Signature of the cast operator declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(CastOperatorDeclaration item)
+    {
+      return item.Signature;
+    }
   }
 }

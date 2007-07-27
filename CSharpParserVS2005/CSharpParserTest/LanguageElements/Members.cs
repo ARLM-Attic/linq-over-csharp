@@ -69,5 +69,50 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors.Count, 1);
       Assert.AreEqual(parser.Errors[0].Code, "CS0111");
     }
+
+    [TestMethod]
+    public void DuplicateMethodFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\DuplicateMethod.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 4);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0111");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0111");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0111");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0111");
+    }
+
+    [TestMethod]
+    public void DuplicateOperatorFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\DuplicateOperator.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0111");
+    }
+
+    [TestMethod]
+    public void DuplicateCastOperatorFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\DuplicateCastOperator.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0557");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0557");
+    }
+
+    [TestMethod]
+    public void DuplicateFieldFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\DuplicateField.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0102");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0102");
+    }
   }
 }

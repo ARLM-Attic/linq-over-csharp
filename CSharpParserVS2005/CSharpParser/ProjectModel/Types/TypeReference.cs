@@ -1,6 +1,7 @@
 using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -9,7 +10,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a base type on the ancestor list of a type.
   /// </summary>
   // ==================================================================================
-  public sealed class TypeReference : LanguageElement
+  public sealed class TypeReference : LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -17,6 +18,8 @@ namespace CSharpParser.ProjectModel
     private TypeReference _SubType;
     private TypeKind _Kind;
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
+    private ResolutionResult _ResolutionResult;
+    private ResolutionTarget _ResolutionTarget;
 
     #endregion
 
@@ -33,6 +36,8 @@ namespace CSharpParser.ProjectModel
     {
       _Kind = TypeKind.simple;
       Name = token.val;
+      _ResolutionResult = ResolutionResult.Unresolved;
+      _ResolutionTarget = ResolutionTarget.Unresolved;
     }
 
     #endregion
@@ -182,6 +187,49 @@ namespace CSharpParser.ProjectModel
         while (currentPart.HasSubType) currentPart = currentPart.SubType;
         return currentPart.Name;
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if the type has been resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolved
+    {
+      get { return _ResolutionResult != ResolutionResult.Unresolved; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if the type has been successfully resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool SuccessfullyResolved
+    {
+      get { return IsResolved && _ResolutionTarget != ResolutionTarget.Ambiguous; }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this type reference
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      // --- Resolve the type argument types
+      foreach (TypeReference typeReference in _TypeArguments)
+      {
+        typeReference.ResolveTypeReferences(contextType, contextInstance);
+      }
+
+      // TODO: Resolve this type
     }
 
     #endregion

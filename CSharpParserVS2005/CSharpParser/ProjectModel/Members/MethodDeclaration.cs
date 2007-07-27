@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -217,5 +219,45 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      Statement.ResolveTypeReferences(this, contextType, contextInstance);
+    }
+
+    #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type defines a collection of method declarations that can be indexed by the
+  /// signature of the method.
+  /// </summary>
+  // ==================================================================================
+  public class MethodDeclarationCollection : RestrictedIndexedCollection<MethodDeclaration>
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the key to be used by the indexing.
+    /// </summary>
+    /// <param name="item">MethodDeclaration item.</param>
+    /// <returns>
+    /// Signature of the member declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    protected override string GetKeyOfItem(MethodDeclaration item)
+    {
+      return item.Signature;
+    }
   }
 }

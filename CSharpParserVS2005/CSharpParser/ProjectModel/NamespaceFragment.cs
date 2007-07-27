@@ -2,6 +2,7 @@ using System;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.Properties;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -15,7 +16,7 @@ namespace CSharpParser.ProjectModel
   /// declarations.
   /// </remarks>
   // ==================================================================================
-  public sealed class NamespaceFragment: LanguageElement
+  public sealed class NamespaceFragment: LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -215,6 +216,22 @@ namespace CSharpParser.ProjectModel
           String.Format("The namespace '{0}' already contains a definition for '{1}'",
           Name, item.FullName));
       }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this namespace fragment.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
     }
 
     #endregion
