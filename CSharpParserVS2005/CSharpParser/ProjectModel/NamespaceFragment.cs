@@ -232,6 +232,21 @@ namespace CSharpParser.ProjectModel
     public void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
+      // --- Resolve using claues
+      foreach (UsingClause usingClause in _Usings)
+      {
+        usingClause.ResolveTypeReferences(contextType, contextInstance);
+      }
+      // --- Resolve types in this namespace
+      foreach (TypeDeclaration type in _TypeDeclarations)
+      {
+        type.ResolveTypeReferences(contextType, contextInstance);
+      }
+      // --- Resolve references in nseted namespaces
+      foreach (NamespaceFragment nameSpace in _NestedNamespaces)
+      {
+        nameSpace.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

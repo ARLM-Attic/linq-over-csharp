@@ -153,6 +153,10 @@ namespace CSharpParser.ProjectModel
       {
         _InitializerBlock.ResolveTypeReferences(contextType, contextInstance);
       }
+      if (_Condition != null)
+      {
+        _Condition.ResolveTypeReferences(contextType, contextInstance);
+      }
       if (_IteratorBlock != null)
       {
         _IteratorBlock.ResolveTypeReferences(contextType, contextInstance);

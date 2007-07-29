@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -130,5 +131,31 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Type resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      if (_ResourceExpression != null)
+      {
+        _ResourceExpression.ResolveTypeReferences(contextType, contextInstance);
+      }
+      if (_ResourceDeclarations != null)
+      {
+        _ResourceDeclarations.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    #endregion
+
   }
 }

@@ -194,7 +194,7 @@ public class CSharpSyntaxParser
 
 
 
-    #region CompilationUnit Model extension fields
+    #region Project Model extension fields
 
     private CompilationUnit _CompilationUnit;
     private SourceFile _File;
@@ -1596,15 +1596,16 @@ public class CSharpSyntaxParser
 	}
 
 	void ClassType(out TypeReference typeRef) {
-		typeRef = new TypeReference(t); 
+		typeRef = null; 
 		if (la.kind == 1) {
 			TypeName(out typeRef);
-		} else if (la.kind == 48) {
-			Get();
-			typeRef.Name = t.val; 
-		} else if (la.kind == 65) {
-			Get();
-			typeRef.Name = t.val; 
+		} else if (la.kind == 48 || la.kind == 65) {
+			if (la.kind == 48) {
+				Get();
+			} else {
+				Get();
+			}
+			typeRef = new TypeReference(t); 
 		} else SynErr(137);
 	}
 
@@ -1803,7 +1804,7 @@ public class CSharpSyntaxParser
 	}
 
 	void Type(out TypeReference typeRef, bool voidAllowed) {
-		typeRef = new TypeReference(t); 
+		typeRef = null; 
 		if (StartOf(14)) {
 			PrimitiveType();
 			typeRef = new TypeReference(t); 
@@ -2244,6 +2245,7 @@ TypeReference typeRef) {
 		}
 		Expression expr; 
 		Expression(out expr);
+		arg.Expression = expr; 
 		if (argList != null) argList.Add(arg); 
 	}
 
@@ -3216,6 +3218,7 @@ TypeReference typeRef) {
 			SwitchSection(sws);
 		}
 		Expect(111);
+		if (block != null) block.Add(sws); 
 	}
 
 	void WhileStatement(IBlockOwner block) {
@@ -3459,6 +3462,7 @@ TypeReference typeRef) {
 	void SwitchSection(SwitchStatement sws) {
 		SwitchSection section = sws.CreateSwitchSection(t);
 		CurrentElement = section;
+		sws.Sections.Add(section);
 		Expression expr;
 		
 		SwitchLabel(out expr);
@@ -3989,7 +3993,7 @@ TypeReference typeRef) {
 	}
 
 	void Primary(out Expression expr) {
-		TypeReference type = new TypeReference(t); 
+		TypeReference type = null; 
 		Expression innerExpr = null;
 		expr = null;
 		

@@ -141,6 +141,10 @@ namespace CSharpParser.ProjectModel
       {
         _Type.ResolveTypeReferences(contextType, contextInstance);
       }
+      if (_Initializer != null)
+      {
+        _Initializer.ResolveTypeReferences(contextType, contextInstance);
+      }
       foreach (Argument arg in _Arguments)
       {
         arg.ResolveTypeReferences(contextType, contextInstance);

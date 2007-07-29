@@ -35,5 +35,55 @@ namespace CSharpParserTest.LanguageElements
       Console.WriteLine('\u00f8');
       Console.WriteLine('\u00ff');
     }
+
+    [TestMethod]
+    public void TypeResolutionCounterIsOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
+      TypeReference.Locations.Clear();
+      TypeReference.ResolutionCounter = 0;
+      parser.AddFile(@"ParserFiles\CommentHandler.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
+      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
+
+      int counter = 0;
+      foreach (TypeReferenceLocation loc in TypeReference.Locations)
+      {
+        if (!loc.Reference.IsResolved)
+        {
+          Console.WriteLine("{0}, ({1}, {2})", loc.File.Name, loc.Reference.StartLine,
+            loc.Reference.StartColumn);
+          counter++;
+        }
+        if (counter > 10) break;
+      }
+    }
+
+    [TestMethod]
+    public void _TypeResolutionCounterIsOk2()
+    {
+      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
+      TypeReference.Locations.Clear();
+      TypeReference.ResolutionCounter = 0;
+      parser.AddFile(@"ParserFiles\Modifier.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
+      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
+
+      int counter = 0;
+      foreach (TypeReferenceLocation loc in TypeReference.Locations)
+      {
+        if (!loc.Reference.IsResolved)
+        {
+          Console.WriteLine("{0}, ({1}, {2})", loc.File.Name, loc.Reference.StartLine,
+            loc.Reference.StartColumn);
+          counter++;
+        }
+        if (counter > 10) break;
+      }
+    }
   }
 }

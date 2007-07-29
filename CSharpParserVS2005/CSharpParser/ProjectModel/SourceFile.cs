@@ -224,6 +224,14 @@ namespace CSharpParser.ProjectModel
     public void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
+      foreach (UsingClause usingClause in _Usings)
+      {
+        usingClause.ResolveTypeReferences(contextType, contextInstance);
+      }
+      foreach (AttributeDeclaration attr in _GlobalAttributes)
+      {
+        attr.ResolveTypeReferences(contextType, contextInstance);
+      }
       foreach (TypeDeclaration typeDeclaration in _TypeDeclarations)
       {
         typeDeclaration.ResolveTypeReferences(ResolutionContext.SourceFile, this);

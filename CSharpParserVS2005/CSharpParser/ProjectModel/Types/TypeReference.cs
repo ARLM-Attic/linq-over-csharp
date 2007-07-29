@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
@@ -10,7 +11,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a base type on the ancestor list of a type.
   /// </summary>
   // ==================================================================================
-  public sealed class TypeReference : LanguageElement, IResolutionRequired
+  public class TypeReference : LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -38,6 +39,10 @@ namespace CSharpParser.ProjectModel
       Name = token.val;
       _ResolutionResult = ResolutionResult.Unresolved;
       _ResolutionTarget = ResolutionTarget.Unresolved;
+
+    #if DIAGNOSTICS
+      _Locations.Add(new TypeReferenceLocation(this, CompilationUnit.CurrentLocation));
+    #endif
     }
 
     #endregion
@@ -209,6 +214,28 @@ namespace CSharpParser.ProjectModel
       get { return IsResolved && _ResolutionTarget != ResolutionTarget.Ambiguous; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the type's resolution result.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionResult ResolutionResult
+    {
+      get { return _ResolutionResult; }
+      set { _ResolutionResult = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the type's resolution target.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionTarget ResolutionTarget
+    {
+      get { return _ResolutionTarget; }
+      set { _ResolutionTarget = value; }
+    }
+
     #endregion
 
     #region IResolutionRequired implementation
@@ -228,10 +255,48 @@ namespace CSharpParser.ProjectModel
       {
         typeReference.ResolveTypeReferences(contextType, contextInstance);
       }
+      if (_SubType != null)
+      {
+        _SubType.ResolveTypeReferences(contextType, contextInstance);
+      }
 
       // TODO: Resolve this type
+      _ResolutionCounter++;
+      _ResolutionResult = ResolutionResult.RuntimeType;
     }
 
+    #endregion
+
+    #region Diagnostics region
+
+    #if DIAGNOSTICS
+
+    private static int _ResolutionCounter;
+    private static readonly List<TypeReferenceLocation> _Locations = 
+      new List<TypeReferenceLocation>();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public static int ResolutionCounter
+    {
+      get { return _ResolutionCounter; }
+      set { _ResolutionCounter = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the location of type references.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public static List<TypeReferenceLocation> Locations
+    {
+      get { return _Locations; }
+    }
+#endif
+    
     #endregion
   }
 
@@ -241,5 +306,35 @@ namespace CSharpParser.ProjectModel
   /// </summary>
   // ==================================================================================
   public sealed class TypeReferenceCollection : RestrictedCollection<TypeReference>
-  {}
+  { }
+
+  #region Diagnostics
+
+  #if DIAGNOSTICS
+
+  public class TypeReferenceLocation
+  {
+    private readonly SourceFile _File;
+    private readonly TypeReference _Reference;
+    
+    public TypeReferenceLocation(TypeReference reference, SourceFile file)
+    {
+      _Reference = reference;
+      _File = file;
+    }
+
+    public SourceFile File
+    {
+      get { return _File; }
+    }
+
+    public TypeReference Reference
+    {
+      get { return _Reference; }
+    }
+  }
+
+  #endif
+  
+  #endregion
 }

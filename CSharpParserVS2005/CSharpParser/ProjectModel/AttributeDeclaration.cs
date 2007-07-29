@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -9,7 +10,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents an attribute declaration
   /// </summary>
   // ==================================================================================
-  public sealed class AttributeDeclaration: LanguageElement
+  public sealed class AttributeDeclaration : LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -69,6 +70,30 @@ namespace CSharpParser.ProjectModel
     public List<AttributeArgument> Arguments
     {
       get { return _Arguments; }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this type reference
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      if (_TypeReference != null)
+      {
+        _TypeReference.ResolveTypeReferences(contextType, contextInstance);
+      }
+      foreach (AttributeArgument arg in _Arguments)
+      {
+        arg.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

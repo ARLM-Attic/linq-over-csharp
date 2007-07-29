@@ -168,6 +168,10 @@ namespace CSharpParser.ProjectModel
       IResolutionRequired contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
+      if (_Condition != null)
+      {
+        _Condition.ResolveTypeReferences(contextType, contextInstance);
+      }
       if (_ThenStatements != null)
       {
         _ThenStatements.ResolveTypeReferences(contextType, contextInstance);

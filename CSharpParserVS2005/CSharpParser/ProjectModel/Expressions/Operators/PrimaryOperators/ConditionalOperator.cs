@@ -88,7 +88,7 @@ namespace CSharpParser.ProjectModel
       }
       if (_TrueExpression != null)
       {
-        _Condition.ResolveTypeReferences(contextType, contextInstance);
+        _TrueExpression.ResolveTypeReferences(contextType, contextInstance);
       }
       if (_FalseExpression != null)
       {

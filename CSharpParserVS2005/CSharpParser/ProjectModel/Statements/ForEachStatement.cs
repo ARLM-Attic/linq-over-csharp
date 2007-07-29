@@ -75,6 +75,10 @@ namespace CSharpParser.ProjectModel
       {
         _ItemType.ResolveTypeReferences(contextType, contextInstance);
       }
+      if (_Expression != null)
+      {
+        _Expression.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

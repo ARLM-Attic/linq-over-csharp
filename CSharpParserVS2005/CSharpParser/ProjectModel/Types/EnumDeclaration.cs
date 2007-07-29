@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -60,6 +61,26 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Type resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this namespace fragment.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
+    {
+      base.ResolveTypeReferences(contextType, contextInstance);
+      foreach (EnumValueDeclaration enumVal in _Values)
+      {
+        enumVal.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    #endregion
   }
 
   // ==================================================================================
@@ -67,7 +88,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents an enumeration value declaration.
   /// </summary>
   // ==================================================================================
-  public sealed class EnumValueDeclaration : AttributedElement
+  public sealed class EnumValueDeclaration : AttributedElement, IResolutionRequired
   {
     #region Private fields
 
@@ -111,6 +132,26 @@ namespace CSharpParser.ProjectModel
     public bool HasValueExpression
     {
       get { return _ValueExpression != null; }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this type reference
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      if (_ValueExpression != null)
+      {
+        _ValueExpression.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

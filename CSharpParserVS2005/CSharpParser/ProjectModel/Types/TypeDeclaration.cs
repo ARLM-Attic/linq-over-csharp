@@ -526,6 +526,12 @@ namespace CSharpParser.ProjectModel
     public virtual void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
+      // --- Resolve attributes
+      foreach (AttributeDeclaration attr in Attributes)
+      {
+        attr.ResolveTypeReferences(contextType, contextInstance);
+      }
+
       // --- Resolve base types
       foreach (TypeReference typeReference in _BaseTypes)
       {

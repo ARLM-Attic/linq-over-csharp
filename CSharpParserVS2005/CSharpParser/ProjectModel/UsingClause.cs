@@ -1,6 +1,7 @@
 using System;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -10,7 +11,7 @@ namespace CSharpParser.ProjectModel
   /// file or in a namespace.
   /// </summary>
   // ==================================================================================
-  public sealed class UsingClause: LanguageElement
+  public sealed class UsingClause : LanguageElement, IResolutionRequired
   {
     #region Private fields
 
@@ -55,6 +56,41 @@ namespace CSharpParser.ProjectModel
     public TypeReference TypeUsed
     {
       get { return _TypeUsed; }
+    }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this type reference
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      if (_TypeUsed == null) return;
+      if (Name == String.Empty)
+      {
+        TypeReference currentType = _TypeUsed;
+        while (currentType != null)
+        {
+          // --- No alias is used, so the type is resolved.
+          currentType.ResolutionResult = ResolutionResult.SourceType;
+          currentType.ResolutionTarget = ResolutionTarget.Namespace;
+          currentType = currentType.SubType;
+#if DIAGNOSTICS
+          TypeReference.ResolutionCounter++;
+#endif
+        }
+      }
+      else
+      {
+        _TypeUsed.ResolveTypeReferences(contextType, contextInstance);
+      }
     }
 
     #endregion

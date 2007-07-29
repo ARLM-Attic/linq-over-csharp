@@ -133,6 +133,10 @@ namespace CSharpParser.ProjectModel
       IResolutionRequired contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
+      if (_Expression != null)
+      {
+        _Expression.ResolveTypeReferences(contextType, contextInstance);
+      }
       foreach (SwitchSection section in _Sections)
       {
         section.ResolveTypeReferences(contextType, contextInstance);

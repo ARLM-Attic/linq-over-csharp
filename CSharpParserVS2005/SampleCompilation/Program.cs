@@ -30,6 +30,7 @@ namespace SampleCompilation
       // --- and measure parse time
       Stopwatch watch = new Stopwatch();
       watch.Start();
+      TypeReference.ResolutionCounter = 0;
       project.Parse();
       watch.Stop();
 
@@ -72,6 +73,20 @@ namespace SampleCompilation
       // --- Display parse time
       Console.WriteLine();
       Console.WriteLine("Parsing time: {0} ms", watch.ElapsedMilliseconds);
+      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
+
+      int counter = 0;
+      foreach (TypeReferenceLocation loc in TypeReference.Locations)
+      {
+        if (!loc.Reference.IsResolved)
+        {
+          Console.WriteLine("{0}, ({1}, {2})", loc.File.Name, loc.Reference.StartLine,
+            loc.Reference.StartColumn);
+          counter++;
+        }
+        if (counter > 10) break;
+      }
     }
   }
 }

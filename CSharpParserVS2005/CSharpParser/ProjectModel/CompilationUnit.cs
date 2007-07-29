@@ -40,6 +40,16 @@ namespace CSharpParser.ProjectModel
     private int _ErrorLineOffset;
     private string _ErrorFile;
 
+#if DIAGNOSTICS
+
+    private static SourceFile _CurrentLocation;
+
+    public static SourceFile CurrentLocation
+    {
+      get { return _CurrentLocation; }
+    }
+
+#endif
     #endregion
 
     #region Lifecycle methods
@@ -344,6 +354,9 @@ namespace CSharpParser.ProjectModel
       {
         Scanner scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
         _CurrentFile = file;
+#if DIAGNOSTICS
+        _CurrentLocation = file;
+#endif
         _Parser = new CSharpSyntaxParser(scanner, this, file);
         _Parser.Parse();
       }

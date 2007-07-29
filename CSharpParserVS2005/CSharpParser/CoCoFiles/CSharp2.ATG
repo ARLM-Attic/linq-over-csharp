@@ -1108,6 +1108,7 @@ Argument<ArgumentList argList>
     | "out"   (. arg.Kind = FormalParameterKind.Out; .)
   ]           (. Expression expr; .)
   Expression<out expr>
+              (. arg.Expression = expr; .)
               (. if (argList != null) argList.Add(arg); .)
 .
 
@@ -1345,7 +1346,7 @@ ModifierList<Modifiers m>
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
 Type<out TypeReference typeRef, bool voidAllowed>    
-=                                                    (. typeRef = new TypeReference(t); .)
+=                                                    (. typeRef = null; .)
   ( PrimitiveType                                    (. 
                                                         typeRef = new TypeReference(t); 
                                                         typeRef.Name = t.val;
@@ -1396,11 +1397,13 @@ IntegralType
 // Types that are taken into account as class types.
 // +typeRef: resulting type reference.
 // ------------------------------------------------------------------------------------
-ClassType<out TypeReference typeRef>   (. typeRef = new TypeReference(t); .)
+ClassType<out TypeReference typeRef>   (. typeRef = null; .)
 =                                                               
   TypeName<out typeRef> |               
-  "object"                             (. typeRef.Name = t.val; .)
-  | "string"                           (. typeRef.Name = t.val; .)
+  (
+    "object"                             
+    | "string"
+  )                                    (. typeRef = new TypeReference(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1535,7 +1538,7 @@ SwitchStatement<IBlockOwner block>
   { 
     SwitchSection<sws> 
   } 
-  "}"
+  "}"                     (. if (block != null) block.Add(sws); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1938,6 +1941,7 @@ SwitchSection<SwitchStatement sws>
 =                         (. 
                              SwitchSection section = sws.CreateSwitchSection(t);
                              CurrentElement = section;
+                             sws.Sections.Add(section);
                              Expression expr;
                           .)
   SwitchLabel<out expr>   (. 
@@ -2406,7 +2410,7 @@ Unary<out Expression expr>
 // Retrieves a primary expression.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
-Primary<out Expression expr>  (. TypeReference type = new TypeReference(t); 
+Primary<out Expression expr>  (. TypeReference type = null; 
                                  Expression innerExpr = null;
                                  expr = null;
                               .)
