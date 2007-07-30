@@ -94,12 +94,12 @@ namespace CSharpParser.Utility
               try
               {
                 uint charValue = UInt32.Parse(source.Substring(pos, 4), NumberStyles.HexNumber);
-                c = (char) charValue;
+                c = (char)charValue;
                 pos += 3;
               }
               catch (SystemException)
               {
-                throw new ArgumentException("Unrecognized escape sequence");  
+                throw new ArgumentException("Unrecognized escape sequence");
               }
               break;
             case 'U':

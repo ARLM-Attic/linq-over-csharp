@@ -62,7 +62,7 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
-    public void _TypeResolutionCounterIsOk2()
+    public void TypeResolutionCounterIsOk2()
     {
       CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
       TypeReference.Locations.Clear();
@@ -84,6 +84,81 @@ namespace CSharpParserTest.LanguageElements
         }
         if (counter > 10) break;
       }
+    }
+
+    [TestMethod]
+    public void TypeResolutionCounterIsOk3()
+    {
+      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
+      TypeReference.Locations.Clear();
+      TypeReference.ResolutionCounter = 0;
+      parser.AddFile(@"ProjectModel\CompilationUnit.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
+
+      int counter = 0;
+      foreach (TypeReferenceLocation loc in TypeReference.Locations)
+      {
+        if (!loc.Reference.IsResolved)
+        {
+          Console.WriteLine("{0}, ({1}, {2})", loc.File.Name, loc.Reference.StartLine,
+            loc.Reference.StartColumn);
+          counter++;
+        }
+        if (counter > 10) break;
+      }
+      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
+    }
+
+    [TestMethod]
+    public void TypeResolutionCounterIsOk4()
+    {
+      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
+      TypeReference.Locations.Clear();
+      TypeReference.ResolutionCounter = 0;
+      parser.AddFile(@"Utility\StringHelper.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
+
+      int counter = 0;
+      foreach (TypeReferenceLocation loc in TypeReference.Locations)
+      {
+        if (!loc.Reference.IsResolved)
+        {
+          Console.WriteLine("{0}, ({1}, {2})", loc.File.Name, loc.Reference.StartLine,
+            loc.Reference.StartColumn);
+          counter++;
+        }
+        if (counter > 10) break;
+      }
+      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
+    }
+
+    [TestMethod]
+    public void _TypeResolutionCounterIsOk5()
+    {
+      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
+      TypeReference.Locations.Clear();
+      TypeReference.ResolutionCounter = 0;
+      parser.AddFile(@"Properties\Resources.Designer.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
+
+      int counter = 0;
+      foreach (TypeReferenceLocation loc in TypeReference.Locations)
+      {
+        if (!loc.Reference.IsResolved)
+        {
+          Console.WriteLine("{0}, ({1}, {2})", loc.File.Name, loc.Reference.StartLine,
+            loc.Reference.StartColumn);
+          counter++;
+        }
+        if (counter > 10) break;
+      }
+      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
     }
   }
 }

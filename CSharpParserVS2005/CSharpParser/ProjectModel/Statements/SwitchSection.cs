@@ -13,7 +13,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private List<Expression> _Labels = new List<Expression>();
+    private readonly List<Expression> _Labels = new List<Expression>();
     private bool _IsDefault;
 
     #endregion

@@ -9,7 +9,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a type member declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class MemberDeclaration : AttributedElement, IResolutionRequired
+  public abstract class MemberDeclaration : AttributedElement
   {
     #region Private fields
 
@@ -255,7 +255,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region Type resolution
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -264,13 +264,18 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextType">Type of context where the resolution occurs.</param>
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
-    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+    public override void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
+      base.ResolveTypeReferences(contextType, contextInstance);
+
+      // --- Resolve the return type
       if (_ResultingType != null)
       {
         _ResultingType.ResolveTypeReferences(contextType, contextInstance);
       }
+
+      // --- Resolve the explicit name of the member
       if (_ExplicitName != null)
       {
         _ExplicitName.ResolveTypeReferences(contextType, contextInstance);

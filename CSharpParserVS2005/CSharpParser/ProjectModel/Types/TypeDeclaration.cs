@@ -25,8 +25,7 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner, 
-    IResolutionRequired
+  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner
   {
     #region Private fields
 
@@ -523,14 +522,10 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextType">Type of context where the resolution occurs.</param>
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
-    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+    public override void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
-      // --- Resolve attributes
-      foreach (AttributeDeclaration attr in Attributes)
-      {
-        attr.ResolveTypeReferences(contextType, contextInstance);
-      }
+      base.ResolveTypeReferences(contextType, contextInstance);
 
       // --- Resolve base types
       foreach (TypeReference typeReference in _BaseTypes)

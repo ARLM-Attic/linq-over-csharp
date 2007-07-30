@@ -53,7 +53,7 @@ namespace SampleCompilation
       // --- Display files parsed
       Console.WriteLine();
       Console.WriteLine("{0} files have been parsed.", project.Files.Count);
-
+      
       // --- Display namespaces declared 
       Console.WriteLine();
       Console.WriteLine("{0} namespaces have been declared.", project.DeclaredNamespaces.Count);

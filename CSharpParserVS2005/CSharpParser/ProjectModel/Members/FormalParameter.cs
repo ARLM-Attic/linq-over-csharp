@@ -20,7 +20,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a formal parameter declaration.
   /// </summary>
   // ==================================================================================
-  public class FormalParameter : AttributedElement, IResolutionRequired
+  public class FormalParameter : AttributedElement
   {
     #region Private fields
 
@@ -84,7 +84,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region Type resolution
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -93,9 +93,11 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextType">Type of context where the resolution occurs.</param>
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveTypeReferences(ResolutionContext contextType,
+    public override void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
+      base.ResolveTypeReferences(contextType, contextInstance);
+
       if (_Type != null)
       {
         _Type.ResolveTypeReferences(contextType, contextInstance);

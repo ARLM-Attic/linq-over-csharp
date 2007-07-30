@@ -1174,7 +1174,6 @@ public class CSharpSyntaxParser
 			TypeDeclaration(attrs, m, out td);
 			if (td != null)
 			{
-			  td.AssignAttributes(attrs);
 			  if (parent == null) 
 			    _File.TypeDeclarations.Add(td);
 			  else 
@@ -1585,6 +1584,7 @@ public class CSharpSyntaxParser
 		AttributeCollection attrs = new AttributeCollection(); 
 		Expect(96);
 		while (StartOf(8)) {
+			attrs = new AttributeCollection(); 
 			while (la.kind == 97) {
 				Attributes(attrs);
 			}
@@ -1636,6 +1636,7 @@ public class CSharpSyntaxParser
 		AttributeCollection attrs = new AttributeCollection(); 
 		Expect(96);
 		while (StartOf(10)) {
+			attrs = new AttributeCollection(); 
 			while (la.kind == 97) {
 				Attributes(attrs);
 			}
@@ -1789,7 +1790,7 @@ public class CSharpSyntaxParser
 			
 			if (la.kind == 110) {
 				ConditionalOperator condExpr = new ConditionalOperator(t); 
-				condExpr.Condition = simpleExpr; 
+				condExpr.Condition = expr; 
 				expr = condExpr; 
 				Get();
 				Expression trueExpr; 
@@ -3462,7 +3463,6 @@ TypeReference typeRef) {
 	void SwitchSection(SwitchStatement sws) {
 		SwitchSection section = sws.CreateSwitchSection(t);
 		CurrentElement = section;
-		sws.Sections.Add(section);
 		Expression expr;
 		
 		SwitchLabel(out expr);

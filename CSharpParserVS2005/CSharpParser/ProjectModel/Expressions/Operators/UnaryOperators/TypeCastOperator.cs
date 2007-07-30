@@ -58,7 +58,7 @@ namespace CSharpParser.ProjectModel
     public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
-      if (_Type == null)
+      if (_Type != null)
       {
         _Type.ResolveTypeReferences(contextType, contextInstance);
       }

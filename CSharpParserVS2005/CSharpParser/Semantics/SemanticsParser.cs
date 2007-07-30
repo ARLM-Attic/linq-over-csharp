@@ -30,6 +30,7 @@ namespace CSharpParser.Semantics
     {
       foreach (SourceFile source in _CompilationUnit.Files)
       {
+        CompilationUnit.CurrentLocation = source;
         source.ResolveTypeReferences(ResolutionContext.SourceFile, source);
       }
     }

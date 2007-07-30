@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using CSharpParser.Collections;
@@ -255,14 +256,21 @@ namespace CSharpParser.ProjectModel
       {
         typeReference.ResolveTypeReferences(contextType, contextInstance);
       }
+
+      if (IsResolved)
+      {
+        Console.WriteLine("{0}: ({1}, {2})", CompilationUnit.CurrentLocation.Name,
+                          Token.line, Token.col);
+      }
+      // TODO: Resolve this type
+      _ResolutionCounter++;
+      _ResolutionResult = ResolutionResult.RuntimeType;
+      Console.WriteLine("Resolved: {0}", FullName);
+
       if (_SubType != null)
       {
         _SubType.ResolveTypeReferences(contextType, contextInstance);
       }
-
-      // TODO: Resolve this type
-      _ResolutionCounter++;
-      _ResolutionResult = ResolutionResult.RuntimeType;
     }
 
     #endregion

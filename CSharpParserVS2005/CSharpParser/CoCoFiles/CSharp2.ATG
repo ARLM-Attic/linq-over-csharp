@@ -362,7 +362,6 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
       TypeDeclaration<attrs, m, out td>          (.
                                                     if (td != null)
                                                     {
-                                                      td.AssignAttributes(attrs);
                                                       if (parent == null) 
                                                         _File.TypeDeclarations.Add(td);
                                                       else 
@@ -443,7 +442,8 @@ ClassBase<ClassDeclaration cd>
 // ------------------------------------------------------------------------------------
 ClassBody<TypeDeclaration td>
 =                                     (. AttributeCollection attrs = new AttributeCollection(); .)
-  "{" { { Attributes<attrs> }         (. Modifiers m = new Modifiers(this); .)                          
+  "{" {                               (. attrs = new AttributeCollection(); .)
+        { Attributes<attrs> }         (. Modifiers m = new Modifiers(this); .)                          
         ModifierList<m>
         ClassMemberDeclaration<attrs, m, td>
       }
@@ -485,7 +485,8 @@ StructDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 // ------------------------------------------------------------------------------------
 StructBody<TypeDeclaration td>
 =                                    (. AttributeCollection attrs = new AttributeCollection(); .)
-  "{" { { Attributes<attrs> }        (. Modifiers m = new Modifiers(this); .)                             
+  "{" {                              (. attrs = new AttributeCollection(); .)
+        { Attributes<attrs> }        (. Modifiers m = new Modifiers(this); .)                             
         ModifierList<m>
         StructMemberDeclaration<attrs, m, td>
       }
@@ -1941,7 +1942,6 @@ SwitchSection<SwitchStatement sws>
 =                         (. 
                              SwitchSection section = sws.CreateSwitchSection(t);
                              CurrentElement = section;
-                             sws.Sections.Add(section);
                              Expression expr;
                           .)
   SwitchLabel<out expr>   (. 
@@ -2039,7 +2039,7 @@ Expression<out Expression expr>   (. expr = null; .)
                                      }
                                   .)
     [                             (. ConditionalOperator condExpr = new ConditionalOperator(t); .)
-                                  (. condExpr.Condition = simpleExpr; .)
+                                  (. condExpr.Condition = expr; .)
                                   (. expr = condExpr; .)    
       "?"                         (. Expression trueExpr; .)
       Expression<out trueExpr>    (. condExpr.TrueExpression = trueExpr; .)

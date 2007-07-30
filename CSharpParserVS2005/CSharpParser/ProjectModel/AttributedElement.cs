@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -8,9 +9,15 @@ namespace CSharpParser.ProjectModel
   /// This class is the common base class of all language elements having attributes.
   /// </summary>
   // ==================================================================================
-  public abstract class AttributedElement : LanguageElement
+  public abstract class AttributedElement : LanguageElement, IResolutionRequired
   {
+    #region Private fields
+
     private AttributeCollection _Attributes = new AttributeCollection();
+
+    #endregion
+
+    #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -47,8 +54,12 @@ namespace CSharpParser.ProjectModel
     protected AttributedElement(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
-    } 
-    
+    }
+
+    #endregion
+
+    #region Public properties
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or the collection of attributes belonging to this type declaration.
@@ -58,6 +69,10 @@ namespace CSharpParser.ProjectModel
     {
       get { return _Attributes; }
     }
+
+    #endregion
+
+    #region Public methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -76,5 +91,28 @@ namespace CSharpParser.ProjectModel
         _Attributes = attrs;
       }
     }
+
+    #endregion
+
+    #region IResolutionRequired implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this namespace fragment.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextInstance">Instance of the context.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void ResolveTypeReferences(ResolutionContext contextType,
+      IResolutionRequired contextInstance)
+    {
+      // --- Resolve attributes
+      foreach (AttributeDeclaration attr in Attributes)
+      {
+        attr.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    #endregion
   }
 }

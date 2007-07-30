@@ -88,7 +88,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents an enumeration value declaration.
   /// </summary>
   // ==================================================================================
-  public sealed class EnumValueDeclaration : AttributedElement, IResolutionRequired
+  public sealed class EnumValueDeclaration : AttributedElement
   {
     #region Private fields
 
@@ -145,9 +145,10 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextType">Type of context where the resolution occurs.</param>
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveTypeReferences(ResolutionContext contextType,
+    public override void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
+      base.ResolveTypeReferences(contextType, contextInstance);
       if (_ValueExpression != null)
       {
         _ValueExpression.ResolveTypeReferences(contextType, contextInstance);

@@ -47,6 +47,7 @@ namespace CSharpParser.ProjectModel
     public static SourceFile CurrentLocation
     {
       get { return _CurrentLocation; }
+      set { _CurrentLocation = value; }
     }
 
 #endif
