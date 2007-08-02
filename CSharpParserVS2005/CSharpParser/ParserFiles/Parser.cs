@@ -1465,11 +1465,9 @@ public class CSharpSyntaxParser
 		ed.Name = t.val; 
 		if (la.kind == 86) {
 			Get();
-			IntegralType();
-			TypeReference tr = new TypeReference(t);
-			tr.Name = t.val; 
-			ed.BaseTypes.Add(tr);
-			
+			TypeReference typeRef; 
+			IntegralType(out typeRef);
+			ed.BaseTypes.Add(typeRef); 
 		}
 		EnumBody(ed);
 		if (la.kind == 114) {
@@ -1602,10 +1600,11 @@ public class CSharpSyntaxParser
 		} else if (la.kind == 48 || la.kind == 65) {
 			if (la.kind == 48) {
 				Get();
+				typeRef = new TypeReference(t, typeof(object)); 
 			} else {
 				Get();
+				typeRef = new TypeReference(t, typeof(string)); 
 			}
-			typeRef = new TypeReference(t); 
 		} else SynErr(137);
 	}
 
@@ -1685,42 +1684,52 @@ public class CSharpSyntaxParser
 		} else SynErr(142);
 	}
 
-	void IntegralType() {
+	void IntegralType(out TypeReference typeRef) {
+		typeRef = null; 
 		switch (la.kind) {
 		case 59: {
 			Get();
+			typeRef = new TypeReference(t, typeof(sbyte)); 
 			break;
 		}
 		case 11: {
 			Get();
+			typeRef = new TypeReference(t, typeof(byte)); 
 			break;
 		}
 		case 61: {
 			Get();
+			typeRef = new TypeReference(t, typeof(short)); 
 			break;
 		}
 		case 77: {
 			Get();
+			typeRef = new TypeReference(t, typeof(ushort)); 
 			break;
 		}
 		case 39: {
 			Get();
+			typeRef = new TypeReference(t, typeof(int)); 
 			break;
 		}
 		case 73: {
 			Get();
+			typeRef = new TypeReference(t, typeof(uint)); 
 			break;
 		}
 		case 44: {
 			Get();
+			typeRef = new TypeReference(t, typeof(long)); 
 			break;
 		}
 		case 74: {
 			Get();
+			typeRef = new TypeReference(t, typeof(ulong)); 
 			break;
 		}
 		case 14: {
 			Get();
+			typeRef = new TypeReference(t, typeof(char)); 
 			break;
 		}
 		default: SynErr(143); break;
@@ -1807,10 +1816,7 @@ public class CSharpSyntaxParser
 	void Type(out TypeReference typeRef, bool voidAllowed) {
 		typeRef = null; 
 		if (StartOf(14)) {
-			PrimitiveType();
-			typeRef = new TypeReference(t); 
-			typeRef.Name = t.val;
-			
+			PrimitiveType(out typeRef);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			ClassType(out typeRef);
 		} else if (la.kind == 80) {
@@ -1872,7 +1878,7 @@ public class CSharpSyntaxParser
 	}
 
 	void Block(IBlockOwner block) {
-		CurrentElement = block.Owner; 
+		CurrentElement = block.Owner as LanguageElement; 
 		Expect(96);
 		while (StartOf(16)) {
 			Statement(block);
@@ -2579,7 +2585,7 @@ TypeReference typeRef) {
 
 	void LocalVariableDeclarator(IBlockOwner block, TypeReference typeRef) {
 		Expect(1);
-		LocalVariableDeclaration loc = new LocalVariableDeclaration(t); 
+		LocalVariableDeclaration loc = new LocalVariableDeclaration(t, block); 
 		CurrentElement = loc; 
 		loc.Name = t.val; 
 		loc.ResultingType = typeRef; 
@@ -2988,17 +2994,22 @@ TypeReference typeRef) {
 		Expect(113);
 	}
 
-	void PrimitiveType() {
+	void PrimitiveType(out TypeReference typeRef) {
+		typeRef = null; 
 		if (StartOf(21)) {
-			IntegralType();
+			IntegralType(out typeRef);
 		} else if (la.kind == 32) {
 			Get();
+			typeRef = new TypeReference(t, typeof(float)); 
 		} else if (la.kind == 23) {
 			Get();
+			typeRef = new TypeReference(t, typeof(double)); 
 		} else if (la.kind == 19) {
 			Get();
+			typeRef = new TypeReference(t, typeof(decimal)); 
 		} else if (la.kind == 9) {
 			Get();
+			typeRef = new TypeReference(t, typeof(bool)); 
 		} else SynErr(171);
 	}
 
@@ -3053,7 +3064,7 @@ TypeReference typeRef) {
 	void ConstStatement(IBlockOwner block) {
 		Expect(17);
 		TypeReference typeRef; 
-		ConstStatement cs = new ConstStatement(t); 
+		ConstStatement cs = new ConstStatement(t, block); 
 		CurrentElement = cs; 
 		Type(out typeRef, false);
 		Expect(1);
@@ -3065,7 +3076,7 @@ TypeReference typeRef) {
 		if (block != null) block.Add(cs); 
 		while (la.kind == 87) {
 			Get();
-			cs = new ConstStatement(t); 
+			cs = new ConstStatement(t, block); 
 			Expect(1);
 			cs.Name = t.val; 
 			Expect(85);
@@ -3133,14 +3144,14 @@ TypeReference typeRef) {
 
 	void EmptyStatement(IBlockOwner block) {
 		Expect(114);
-		EmptyStatement es = new EmptyStatement(t); 
+		EmptyStatement es = new EmptyStatement(t, block); 
 		CurrentElement = es; 
 		if (block != null) block.Add(es); 
 	}
 
 	void CheckedBlock(IBlockOwner block) {
 		Expect(15);
-		CheckedBlock cb = new CheckedBlock(t);
+		CheckedBlock cb = new CheckedBlock(t, block);
 		CurrentElement = cb;
 		if (block != null) block.Add(cb);
 		
@@ -3149,7 +3160,7 @@ TypeReference typeRef) {
 
 	void UncheckedBlock(IBlockOwner block) {
 		Expect(75);
-		UncheckedBlock ucb = new UncheckedBlock(t);
+		UncheckedBlock ucb = new UncheckedBlock(t, block);
 		CurrentElement = ucb;
 		if (block != null) block.Add(ucb);
 		
@@ -3158,7 +3169,7 @@ TypeReference typeRef) {
 
 	void UnsafeBlock(IBlockOwner block) {
 		Expect(76);
-		UnsafeBlock usb = new UnsafeBlock(t);
+		UnsafeBlock usb = new UnsafeBlock(t, block);
 		CurrentElement = usb;
 		if (block != null) block.Add(usb);
 		
@@ -3169,7 +3180,7 @@ TypeReference typeRef) {
 		bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); 
 		Expression expr = null; 
 		Unary(out expr);
-		ExpressionStatement es = new ExpressionStatement(t); 
+		ExpressionStatement es = new ExpressionStatement(t, block); 
 		CurrentElement = es; 
 		es.Expression = expr; 
 		if (StartOf(23)) {
@@ -3188,7 +3199,7 @@ TypeReference typeRef) {
 
 	void IfStatement(IBlockOwner block) {
 		Expect(36);
-		IfStatement ifs = new IfStatement(t); 
+		IfStatement ifs = new IfStatement(t, block); 
 		CurrentElement = ifs; 
 		Expect(98);
 		if (block != null) block.Add(ifs); 
@@ -3207,7 +3218,7 @@ TypeReference typeRef) {
 
 	void SwitchStatement(IBlockOwner block) {
 		Expect(67);
-		SwitchStatement sws = new SwitchStatement(t); 
+		SwitchStatement sws = new SwitchStatement(t, block); 
 		CurrentElement = sws; 
 		Expect(98);
 		Expression expr; 
@@ -3224,7 +3235,7 @@ TypeReference typeRef) {
 
 	void WhileStatement(IBlockOwner block) {
 		Expect(82);
-		WhileStatement whs = new WhileStatement(t); 
+		WhileStatement whs = new WhileStatement(t, block); 
 		CurrentElement = whs; 
 		Expect(98);
 		if (block != null) block.Add(whs); 
@@ -3237,7 +3248,7 @@ TypeReference typeRef) {
 
 	void DoWhileStatement(IBlockOwner block) {
 		Expect(22);
-		DoWhileStatement whs = new DoWhileStatement(t); 
+		DoWhileStatement whs = new DoWhileStatement(t, block); 
 		CurrentElement = whs; 
 		EmbeddedStatement(whs);
 		if (block != null) block.Add(whs); 
@@ -3252,7 +3263,7 @@ TypeReference typeRef) {
 
 	void ForStatement(IBlockOwner block) {
 		Expect(33);
-		ForStatement fs = new ForStatement(t); 
+		ForStatement fs = new ForStatement(t, block); 
 		CurrentElement = fs; 
 		Expect(98);
 		if (block != null) block.Add(fs); 
@@ -3277,7 +3288,7 @@ TypeReference typeRef) {
 
 	void ForEachStatement(IBlockOwner block) {
 		Expect(34);
-		ForEachStatement fes = new ForEachStatement(t); 
+		ForEachStatement fes = new ForEachStatement(t, block); 
 		CurrentElement = fes; 
 		Expect(98);
 		if (block != null) block.Add(fes); 
@@ -3297,7 +3308,7 @@ TypeReference typeRef) {
 	void BreakStatement(IBlockOwner block) {
 		Expect(10);
 		Expect(114);
-		BreakStatement bs = new BreakStatement(t); 
+		BreakStatement bs = new BreakStatement(t, block); 
 		CurrentElement = bs; 
 		if (block != null) block.Add(bs); 
 	}
@@ -3305,14 +3316,14 @@ TypeReference typeRef) {
 	void ContinueStatement(IBlockOwner block) {
 		Expect(18);
 		Expect(114);
-		ContinueStatement cs = new ContinueStatement(t); 
+		ContinueStatement cs = new ContinueStatement(t, block); 
 		CurrentElement = cs; 
 		if (block != null) block.Add(cs); 
 	}
 
 	void GotoStatement(IBlockOwner block) {
 		Expect(35);
-		GotoStatement gs = new GotoStatement(t); 
+		GotoStatement gs = new GotoStatement(t, block); 
 		CurrentElement = gs; 
 		if (block != null) block.Add(gs); 
 		if (la.kind == 1) {
@@ -3332,7 +3343,7 @@ TypeReference typeRef) {
 
 	void ReturnStatement(IBlockOwner block) {
 		Expect(58);
-		ReturnStatement yrs = new ReturnStatement(t); 
+		ReturnStatement yrs = new ReturnStatement(t, block); 
 		CurrentElement = yrs; 
 		if (StartOf(20)) {
 			Expression expr; 
@@ -3345,7 +3356,7 @@ TypeReference typeRef) {
 
 	void ThrowStatement(IBlockOwner block) {
 		Expect(69);
-		ThrowStatement ts = new ThrowStatement(t); 
+		ThrowStatement ts = new ThrowStatement(t, block); 
 		CurrentElement = ts; 
 		if (StartOf(20)) {
 			Expression expr; 
@@ -3358,7 +3369,7 @@ TypeReference typeRef) {
 
 	void TryFinallyBlock(IBlockOwner block) {
 		Expect(71);
-		TryStatement ts = new TryStatement(t); 
+		TryStatement ts = new TryStatement(t, block); 
 		CurrentElement = ts;
 		ts.CreateTryBlock(t);
 		if (block != null) block.Add(ts);
@@ -3380,7 +3391,7 @@ TypeReference typeRef) {
 
 	void LockStatement(IBlockOwner block) {
 		Expect(43);
-		LockStatement ls = new LockStatement(t); 
+		LockStatement ls = new LockStatement(t, block); 
 		CurrentElement = ls; 
 		if (block != null) block.Add(ls); 
 		Expect(98);
@@ -3393,7 +3404,7 @@ TypeReference typeRef) {
 
 	void UsingStatement(IBlockOwner block) {
 		Expect(78);
-		UsingStatement us = new UsingStatement(t);
+		UsingStatement us = new UsingStatement(t, block);
 		CurrentElement = us;
 		if (block != null) block.Add(us);
 		
@@ -3414,7 +3425,7 @@ TypeReference typeRef) {
 		Expect(58);
 		Expression expr; 
 		Expression(out expr);
-		YieldReturnStatement yrs = new YieldReturnStatement(t); 
+		YieldReturnStatement yrs = new YieldReturnStatement(t, block); 
 		CurrentElement = yrs; 
 		yrs.Expression = expr; 
 		if (block != null) block.Add(yrs); 
@@ -3422,21 +3433,21 @@ TypeReference typeRef) {
 
 	void YieldBreakStatement(IBlockOwner block) {
 		Expect(10);
-		YieldBreakStatement ybs = new YieldBreakStatement(t); 
+		YieldBreakStatement ybs = new YieldBreakStatement(t, block); 
 		CurrentElement = ybs; 
 		if (block != null) block.Add(ybs); 
 	}
 
 	void FixedStatement(IBlockOwner block) {
 		Expect(31);
-		FixedStatement fs = new FixedStatement(t); 
+		FixedStatement fs = new FixedStatement(t, block); 
 		CurrentElement = fs; 
 		if (block != null) block.Add(fs); 
 		Expect(98);
 		TypeReference typeRef; 
 		Type(out typeRef, false);
 		if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", la, "can only fix pointer types"); 
-		ValueAssignmentStatement vas = new ValueAssignmentStatement(t); 
+		ValueAssignmentStatement vas = new ValueAssignmentStatement(t, block); 
 		CurrentElement = vas; 
 		Expect(1);
 		vas.Name = t.val; 
@@ -3447,7 +3458,7 @@ TypeReference typeRef) {
 		fs.Assignments.Add(vas); 
 		while (la.kind == 87) {
 			Get();
-			vas = new ValueAssignmentStatement(t); 
+			vas = new ValueAssignmentStatement(t, block); 
 			CurrentElement = vas; 
 			Expect(1);
 			vas.Name = t.val; 
@@ -4157,72 +4168,86 @@ TypeReference typeRef) {
 
 	void PrimitiveNamedLiteral(out Expression expr) {
 		expr = null; 
+		PrimitiveNamedLiteral pml = null; 
 		switch (la.kind) {
 		case 9: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(bool)); 
 			break;
 		}
 		case 11: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(byte)); 
 			break;
 		}
 		case 14: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(char)); 
 			break;
 		}
 		case 19: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(decimal)); 
 			break;
 		}
 		case 23: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(double)); 
 			break;
 		}
 		case 32: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(float)); 
 			break;
 		}
 		case 39: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(int)); 
 			break;
 		}
 		case 44: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(long)); 
 			break;
 		}
 		case 48: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(object)); 
 			break;
 		}
 		case 59: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(sbyte)); 
 			break;
 		}
 		case 61: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(short)); 
 			break;
 		}
 		case 65: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(string)); 
 			break;
 		}
 		case 73: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(uint)); 
 			break;
 		}
 		case 74: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(ulong)); 
 			break;
 		}
 		case 77: {
 			Get();
+			pml = new PrimitiveNamedLiteral(t, typeof(ushort)); 
 			break;
 		}
 		default: SynErr(192); break;
 		}
-		PrimitiveNamedLiteral pml = new PrimitiveNamedLiteral(t); 
 		expr = pml; 
-		pml.Type = new TypeReference(t); 
 		Expect(90);
 		Expect(1);
 		pml.Name = t.val; 

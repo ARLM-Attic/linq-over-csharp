@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "const" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public ValueAssignmentStatement(Token token)
-      : base(token)
+    public ValueAssignmentStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 

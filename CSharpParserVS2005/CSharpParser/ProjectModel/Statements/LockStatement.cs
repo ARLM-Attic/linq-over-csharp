@@ -23,9 +23,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "lock" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parent">Parent block of the statement.</param>
     // --------------------------------------------------------------------------------
-    public LockStatement(Token token)
-      : base(token)
+    public LockStatement(Token token, IBlockOwner parent)
+      : base(token, parent)
     {
     }
 

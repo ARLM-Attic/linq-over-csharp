@@ -5,7 +5,7 @@ namespace CSharpParser.Semantics
 {
   public sealed class SemanticsParser
   {
-    private CompilationUnit _CompilationUnit;
+    private readonly CompilationUnit _CompilationUnit;
 
     public SemanticsParser(CompilationUnit project)
     {

@@ -14,9 +14,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "yield return" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public YieldReturnStatement(Token token)
-      : base(token)
+    public YieldReturnStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
   }

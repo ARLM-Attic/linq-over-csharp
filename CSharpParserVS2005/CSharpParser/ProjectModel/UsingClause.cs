@@ -27,6 +27,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="name">Using alias name, if defined, otherwise null or empty.</param>
+    /// <param name="typeUsed">Type reference used by this using clause.</param>
     // --------------------------------------------------------------------------------
     public UsingClause(Token token, string name, TypeReference typeUsed): 
       base (token, name)
@@ -79,8 +80,8 @@ namespace CSharpParser.ProjectModel
         while (currentType != null)
         {
           // --- No alias is used, so the type is resolved.
-          currentType.ResolutionResult = ResolutionResult.SourceType;
-          currentType.ResolutionTarget = ResolutionTarget.Namespace;
+          currentType.ResolutionInfo.Add(
+            new ResolutionItem(ResolutionTarget.Namespace, ResolutionMode.SourceType, currentType));
           currentType = currentType.SubType;
 #if DIAGNOSTICS
           TypeReference.ResolutionCounter++;

@@ -15,5 +15,11 @@ namespace CSharpParser.Semantics
 
     /// <summary>Type declaration, out of any members.</summary>
     TypeDeclaration,
+
+    /// <summary>Type declaration in a method declaration.</summary>
+    MethodDeclaration,
+
+    /// <summary>Type declaration in an accessor declaration.</summary>
+    AccessorDeclaration
   }
 }

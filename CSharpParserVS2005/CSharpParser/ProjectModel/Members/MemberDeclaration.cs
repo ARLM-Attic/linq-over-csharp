@@ -236,11 +236,12 @@ namespace CSharpParser.ProjectModel
       _IsExtern = (mod & Modifier.@extern) != 0;
       _IsReadOnly = (mod & Modifier.@readonly) != 0;
       _IsVolatile = (mod & Modifier.@volatile) != 0;
+      AfterSetModifiers();
     }
 
     #endregion
 
-    #region Virtual methods
+    #region Virtual properties and methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -251,6 +252,16 @@ namespace CSharpParser.ProjectModel
     public virtual string Signature
     {
       get { return FullName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This method is to override by derived classes to be able to responde the member
+    /// modifiers set.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual void AfterSetModifiers()
+    {
     }
 
     #endregion

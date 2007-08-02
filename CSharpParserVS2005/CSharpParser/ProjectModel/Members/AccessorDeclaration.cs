@@ -64,9 +64,19 @@ namespace CSharpParser.ProjectModel
     /// Gets the element owning the block;
     /// </summary>
     // --------------------------------------------------------------------------------
-    public LanguageElement Owner
+    public IBlockOwner Owner
     {
       get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// An accessor declaration never has a parent block, so this property return null.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IBlockOwner ParentBlock
+    {
+      get { return null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -95,7 +105,7 @@ namespace CSharpParser.ProjectModel
       IResolutionRequired contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
-      Statement.ResolveTypeReferences(this, contextType, contextInstance);
+      Statement.ResolveTypeReferences(this, ResolutionContext.AccessorDeclaration, this);
     }
 
     #endregion

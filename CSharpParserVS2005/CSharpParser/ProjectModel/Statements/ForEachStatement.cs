@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "foreach" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public ForEachStatement(Token token)
-      : base(token)
+    public ForEachStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 

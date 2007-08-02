@@ -265,6 +265,8 @@
     <None Include="TestFiles\Members\DuplicateCastOperator.cs" />
     <None Include="TestFiles\Members\DuplicateField.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
+    <Compile Include="TypeResolution\TypeResolution.cs" />
+    <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />
     <None Include="TestFiles\Pragmas\IfEndif3.cs" />

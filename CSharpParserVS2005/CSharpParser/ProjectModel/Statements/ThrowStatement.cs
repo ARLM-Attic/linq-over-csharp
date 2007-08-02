@@ -23,9 +23,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new throw statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public ThrowStatement(Token token)
-      : base(token)
+    public ThrowStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 

@@ -65,9 +65,19 @@ namespace CSharpParser.ProjectModel
     /// Gets the element owning the block;
     /// </summary>
     // --------------------------------------------------------------------------------
-    public LanguageElement Owner
+    public IBlockOwner Owner
     {
       get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// A method declaration never has a parent block, so this property return null.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IBlockOwner ParentBlock
+    {
+      get { return null; }
     }
 
     // --------------------------------------------------------------------------------

@@ -158,9 +158,19 @@ namespace CSharpParser.ProjectModel
     /// Gets the element owning the block;
     /// </summary>
     // --------------------------------------------------------------------------------
-    public LanguageElement Owner
+    public IBlockOwner Owner
     {
       get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// A method declaration never has a parent block, so this property return null.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IBlockOwner ParentBlock
+    {
+      get { return null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -235,9 +245,9 @@ namespace CSharpParser.ProjectModel
       base.ResolveTypeReferences(contextType, contextInstance);
       foreach (FormalParameter param in _FormalParameters)
       {
-        param.ResolveTypeReferences(contextType, contextInstance);
+        param.ResolveTypeReferences(ResolutionContext.MethodDeclaration, this);
       }
-      Statement.ResolveTypeReferences(this, contextType, contextInstance);
+      Statement.ResolveTypeReferences(this, ResolutionContext.MethodDeclaration, this);
     }
 
     #endregion

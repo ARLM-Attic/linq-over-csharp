@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "fixed" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parent">Parent block of the statement.</param>
     // --------------------------------------------------------------------------------
-    public CatchClause(Token token)
-      : base(token)
+    public CatchClause(Token token, IBlockOwner parent)
+      : base(token, parent)
     {
     }
 

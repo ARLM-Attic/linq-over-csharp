@@ -27,6 +27,7 @@ namespace CSharpParser.ProjectModel
     private FormalParameterKind _Kind;
     private bool _HasParams;
     private TypeReference _Type;
+    private VariableInfo _VariableInfo;
 
     #endregion
 
@@ -41,22 +42,33 @@ namespace CSharpParser.ProjectModel
     public FormalParameter(Token token)
       : base(token)
     {
-      _Kind = FormalParameterKind.In;
+      Kind = FormalParameterKind.In;
     }
 
     #endregion
 
-    #region Public methods
+    #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the kind (in, out, ref) of the parameter.
     /// </summary>
+    /// <remarks>
+    /// The kind of formal parameter determines the type of variable.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public FormalParameterKind Kind
     {
       get { return _Kind; }
-      set { _Kind = value; }
+      set
+      {
+        _Kind = value;
+        VariableCategory varcat = VariableCategory.ValueParameter;
+        if (_Kind == FormalParameterKind.Out) varcat = VariableCategory.OutputParameter;
+        else if (_Kind == FormalParameterKind.Ref) varcat = VariableCategory.ReferenceParameter;
+        _VariableInfo = 
+          new VariableInfo(varcat, varcat != VariableCategory.OutputParameter, Token);
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -80,6 +92,16 @@ namespace CSharpParser.ProjectModel
     {
       get { return _Type; }
       set { _Type = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the variable information about this field.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public VariableInfo VariableInfo
+    {
+      get { return _VariableInfo; }
     }
 
     #endregion

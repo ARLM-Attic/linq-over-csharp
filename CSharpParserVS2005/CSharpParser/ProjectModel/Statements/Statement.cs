@@ -16,6 +16,7 @@ namespace CSharpParser.ProjectModel
     private int _Depth;
     private string _Label;
     private Statement _Parent;
+    private IBlockOwner _ParentBlock;
 
     #endregion
 
@@ -26,10 +27,12 @@ namespace CSharpParser.ProjectModel
     /// Creates a new statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    protected Statement(Token token)
+    protected Statement(Token token, IBlockOwner parentBlock)
       : base(token)
     {
+      _ParentBlock = parentBlock;
       _Depth = 0;
     }
 
@@ -93,6 +96,16 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the block owning the statement
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IBlockOwner ParentBlock
+    {
+      get { return _ParentBlock; }
+    }
+
     #endregion
 
     #region Public methods
@@ -101,7 +114,7 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Sets the parent block of this statement.
     /// </summary>
-    /// <param name="parent">Parent block.</param>
+    /// <param name="parent">ParentBlock block.</param>
     // --------------------------------------------------------------------------------
     public void SetParent(Statement parent)
     {

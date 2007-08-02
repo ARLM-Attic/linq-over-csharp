@@ -26,9 +26,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "if" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public IfStatement(Token token)
-      : base(token)
+    public IfStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 
@@ -89,7 +90,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateThenBlock(Token t)
     {
-      _ThenStatements = new BlockStatement(t);
+      _ThenStatements = new BlockStatement(t, ParentBlock);
       _ThenStatements.SetParent(this);
     }
 
@@ -101,7 +102,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateElseBlock(Token t)
     {
-      _ElseStatements = new BlockStatement(t);
+      _ElseStatements = new BlockStatement(t, ParentBlock);
       _ElseStatements.SetParent(this);
     }
 

@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new local variable declaration statement.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public LocalVariableDeclaration(Token token)
-      : base(token)
+    public LocalVariableDeclaration(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 

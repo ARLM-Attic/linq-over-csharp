@@ -26,9 +26,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "try...catch...finally" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public TryStatement(Token token)
-      : base(token)
+    public TryStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 
@@ -88,7 +89,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateTryBlock(Token t)
     {
-      _TryBlock = new BlockStatement(t);
+      _TryBlock = new BlockStatement(t, ParentBlock);
       _TryBlock.SetParent(this);
     }
 
@@ -100,7 +101,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateFinallyBlock(Token t)
     {
-      _FinallyBlock = new BlockStatement(t);
+      _FinallyBlock = new BlockStatement(t, ParentBlock);
       _FinallyBlock.SetParent(this);
     }
 
@@ -113,7 +114,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public CatchClause CreateCatchClause(Token t)
     {
-      CatchClause result = new CatchClause(t);  
+      CatchClause result = new CatchClause(t, ParentBlock);  
       result.SetParent(this);
       _CatchClauses.Add(result);
       return result;

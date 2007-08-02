@@ -15,6 +15,7 @@ namespace CSharpParser.ProjectModel
 
     private Initializer _Initializer;
     private bool _IsEvent;
+    private VariableInfo _VariableInfo;
 
     #endregion
 
@@ -65,6 +66,34 @@ namespace CSharpParser.ProjectModel
     {
       get { return _Initializer; }
       set { _Initializer = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the variable information about this field.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public VariableInfo VariableInfo
+    {
+      get { return _VariableInfo; }
+    }
+
+    #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This method sets the variable category according to the field modifiers.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void AfterSetModifiers()
+    {
+      // TODO: Make a distinction between class and struct types. See Section 12.1.2
+      VariableCategory varCat = _IsStatic
+        ? VariableCategory.Static
+        : VariableCategory.Instance;
+      _VariableInfo = new VariableInfo(varCat, _IsStatic, Token);
     }
 
     #endregion

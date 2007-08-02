@@ -498,19 +498,15 @@ StructBody<TypeDeclaration td>
 // ------------------------------------------------------------------------------------
 EnumDeclaration<Modifiers m, out TypeDeclaration td>
 =
-  "enum"             (. 
-                        m.Check(Modifier.nonClassTypes); 
-                        EnumDeclaration ed = new EnumDeclaration(t, this);
-                        td = ed;
-                        CurrentElement = ed;
-                     .)
-  ident              (. ed.Name = t.val; .)
-  [ ":" 
-    IntegralType     (. 
-                        TypeReference tr = new TypeReference(t);
-                        tr.Name = t.val; 
-                        ed.BaseTypes.Add(tr);
-                     .)
+  "enum"                      (. 
+                                 m.Check(Modifier.nonClassTypes); 
+                                 EnumDeclaration ed = new EnumDeclaration(t, this);
+                                 td = ed;
+                                 CurrentElement = ed;
+                              .)
+  ident                       (. ed.Name = t.val; .)
+  [ ":"                       (. TypeReference typeRef; .)
+    IntegralType<out typeRef> (. ed.BaseTypes.Add(typeRef); .)
   ] 
   EnumBody<ed> 
   [ ";" ]                                                       
@@ -1019,7 +1015,7 @@ LocalVariableDeclaration<IBlockOwner block> (. TypeReference typeRef; .)
 // ------------------------------------------------------------------------------------
 LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef>
 = 
-  ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t); .)
+  ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, block); .)
         (. CurrentElement = loc; .)
         (. loc.Name = t.val; .)
         (. loc.ResultingType = typeRef; .)
@@ -1346,12 +1342,9 @@ ModifierList<Modifiers m>
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-Type<out TypeReference typeRef, bool voidAllowed>    
-=                                                    (. typeRef = null; .)
-  ( PrimitiveType                                    (. 
-                                                        typeRef = new TypeReference(t); 
-                                                        typeRef.Name = t.val;
-                                                     .)
+Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
+=                                                    
+  ( PrimitiveType<out typeRef>
   | ClassType<out typeRef>                                               
   | "void"                                           (. 
                                                         typeRef = new TypeReference(t); 
@@ -1381,17 +1374,29 @@ PointerOrArray<ref TypeReference typeRef>
 // ------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------
-PrimitiveType
+PrimitiveType<out TypeReference typeRef> (. typeRef = null; .)
 =
-  IntegralType | "float" | "double" | "decimal" | "bool"
+  IntegralType<out typeRef> 
+  | "float"     (. typeRef = new TypeReference(t, typeof(float)); .)    
+  | "double"    (. typeRef = new TypeReference(t, typeof(double)); .) 
+  | "decimal"   (. typeRef = new TypeReference(t, typeof(decimal)); .)
+  | "bool"      (. typeRef = new TypeReference(t, typeof(bool)); .)
 .
 
 // ------------------------------------------------------------------------------------
 // Types that are taken into account as integral types.
 // ------------------------------------------------------------------------------------
-IntegralType
+IntegralType<out TypeReference typeRef> (. typeRef = null; .)
 =
-  "sbyte" | "byte" | "short" | "ushort" | "int" | "uint" | "long" | "ulong" | "char"
+  "sbyte"       (. typeRef = new TypeReference(t, typeof(sbyte)); .)
+  | "byte"      (. typeRef = new TypeReference(t, typeof(byte)); .)
+  | "short"     (. typeRef = new TypeReference(t, typeof(short)); .)
+  | "ushort"    (. typeRef = new TypeReference(t, typeof(ushort)); .)
+  | "int"       (. typeRef = new TypeReference(t, typeof(int)); .)
+  | "uint"      (. typeRef = new TypeReference(t, typeof(uint)); .)
+  | "long"      (. typeRef = new TypeReference(t, typeof(long)); .)
+  | "ulong"     (. typeRef = new TypeReference(t, typeof(ulong)); .)
+  | "char"      (. typeRef = new TypeReference(t, typeof(char)); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1401,10 +1406,10 @@ IntegralType
 ClassType<out TypeReference typeRef>   (. typeRef = null; .)
 =                                                               
   TypeName<out typeRef> |               
-  (
-    "object"                             
-    | "string"
-  )                                    (. typeRef = new TypeReference(t); .)
+  (                                    
+    "object"                           (. typeRef = new TypeReference(t, typeof(object)); .)
+    | "string"                         (. typeRef = new TypeReference(t, typeof(string)); .)
+  )                                    
 .
 
 // ------------------------------------------------------------------------------------
@@ -1519,7 +1524,7 @@ EmbeddedStatement<IBlockOwner block>
 // Defines a block of statements.
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
-Block<IBlockOwner block> (. CurrentElement = block.Owner; .)
+Block<IBlockOwner block> (. CurrentElement = block.Owner as LanguageElement; .)
 =
   "{" { Statement<block> } "}"
 .
@@ -1531,7 +1536,7 @@ Block<IBlockOwner block> (. CurrentElement = block.Owner; .)
 // ------------------------------------------------------------------------------------
 SwitchStatement<IBlockOwner block>
 =
-  "switch"                (. SwitchStatement sws = new SwitchStatement(t); .)
+  "switch"                (. SwitchStatement sws = new SwitchStatement(t, block); .)
                           (. CurrentElement = sws; .)
   "("                     (. Expression expr; .)
   Expression<out expr>    (. sws.Expression = expr; .)
@@ -1549,14 +1554,14 @@ SwitchStatement<IBlockOwner block>
 ConstStatement<IBlockOwner block>
 =
   "const"                (. TypeReference typeRef; .)
-                         (. ConstStatement cs = new ConstStatement(t); .)
+                         (. ConstStatement cs = new ConstStatement(t, block); .)
                          (. CurrentElement = cs; .)
   Type<out typeRef, false> 
   ident                  (. cs.Name = t.val; .)
   "="                    (. Expression expr; .)
   Expression<out expr>   (. cs.Expression = expr; .)
                          (. if (block != null) block.Add(cs); .)
-  { ","                  (. cs = new ConstStatement(t); .)
+  { ","                  (. cs = new ConstStatement(t, block); .)
     ident                (. cs.Name = t.val; .)
     "=" 
     Expression<out expr> (. cs.Expression = expr; .)
@@ -1569,7 +1574,7 @@ ConstStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 EmptyStatement<IBlockOwner block>
 =
-  ";"     (. EmptyStatement es = new EmptyStatement(t); .)
+  ";"     (. EmptyStatement es = new EmptyStatement(t, block); .)
           (. CurrentElement = es; .)
           (. if (block != null) block.Add(es); .)
 .
@@ -1583,7 +1588,7 @@ CheckedBlock<IBlockOwner block>
   (
     IF (la.kind == _checked && Peek(1).kind == _lbrace) 
       "checked" (. 
-                   CheckedBlock cb = new CheckedBlock(t);
+                   CheckedBlock cb = new CheckedBlock(t, block);
                    CurrentElement = cb;
                    if (block != null) block.Add(cb);
                 .)
@@ -1600,7 +1605,7 @@ UncheckedBlock<IBlockOwner block>
   (
     IF (la.kind == _unchecked && Peek(1).kind == _lbrace) 
     "unchecked" (. 
-                   UncheckedBlock ucb = new UncheckedBlock(t);
+                   UncheckedBlock ucb = new UncheckedBlock(t, block);
                    CurrentElement = ucb;
                    if (block != null) block.Add(ucb);
                 .)
@@ -1616,7 +1621,7 @@ UncheckedBlock<IBlockOwner block>
 UnsafeBlock<IBlockOwner block>
 =
   "unsafe" (. 
-              UnsafeBlock usb = new UnsafeBlock(t);
+              UnsafeBlock usb = new UnsafeBlock(t, block);
               CurrentElement = usb;
               if (block != null) block.Add(usb);
            .)
@@ -1629,7 +1634,7 @@ UnsafeBlock<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 IfStatement<IBlockOwner block>
 =   
-  "if"                   (. IfStatement ifs = new IfStatement(t); .)
+  "if"                   (. IfStatement ifs = new IfStatement(t, block); .)
                          (. CurrentElement = ifs; .)
   "("                    (. if (block != null) block.Add(ifs); .)
                          (. Expression expr; .)
@@ -1647,7 +1652,7 @@ IfStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 WhileStatement<IBlockOwner block>
 = 
-  "while"                 (. WhileStatement whs = new WhileStatement(t); .)
+  "while"                 (. WhileStatement whs = new WhileStatement(t, block); .)
                           (. CurrentElement = whs; .)
   "("                     (. if (block != null) block.Add(whs); .)
                           (. Expression expr; .)
@@ -1662,7 +1667,7 @@ WhileStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 DoWhileStatement<IBlockOwner block>
 =   
-  "do"                      (. DoWhileStatement whs = new DoWhileStatement(t); .)
+  "do"                      (. DoWhileStatement whs = new DoWhileStatement(t, block); .)
                             (. CurrentElement = whs; .)
     EmbeddedStatement<whs>  (. if (block != null) block.Add(whs); .)
   "while" 
@@ -1677,7 +1682,7 @@ DoWhileStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ForStatement<IBlockOwner block>
 = 
-  "for"                       (. ForStatement fs = new ForStatement(t); .)
+  "for"                       (. ForStatement fs = new ForStatement(t, block); .)
                               (. CurrentElement = fs; .)
   "("                         (. if (block != null) block.Add(fs); .)
     [                         (. fs.CreateInitializerBlock(t); .)
@@ -1699,7 +1704,7 @@ ForStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ForEachStatement<IBlockOwner block>
 =
-  "foreach"                   (. ForEachStatement fes = new ForEachStatement(t); .)
+  "foreach"                   (. ForEachStatement fes = new ForEachStatement(t, block); .)
                               (. CurrentElement = fes; .)
   "("                         (. if (block != null) block.Add(fes); .)
                               (. TypeReference typeRef; .)
@@ -1717,7 +1722,7 @@ ForEachStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 BreakStatement<IBlockOwner block>
 =
-  "break" ";" (. BreakStatement bs = new BreakStatement(t); .)
+  "break" ";" (. BreakStatement bs = new BreakStatement(t, block); .)
               (. CurrentElement = bs; .)
               (. if (block != null) block.Add(bs); .)
 .    
@@ -1728,7 +1733,7 @@ BreakStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 GotoStatement<IBlockOwner block>
 =
-  "goto"                  (. GotoStatement gs = new GotoStatement(t); .)
+  "goto"                  (. GotoStatement gs = new GotoStatement(t, block); .)
                           (. CurrentElement = gs; .)
                           (. if (block != null) block.Add(gs); .)
   ( 
@@ -1747,7 +1752,7 @@ GotoStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ContinueStatement<IBlockOwner block>
 =
-  "continue" ";"  (. ContinueStatement cs = new ContinueStatement(t); .)
+  "continue" ";"  (. ContinueStatement cs = new ContinueStatement(t, block); .)
                   (. CurrentElement = cs; .)
                   (. if (block != null) block.Add(cs); .)
 .    
@@ -1759,7 +1764,7 @@ ContinueStatement<IBlockOwner block>
 TryFinallyBlock<IBlockOwner block>
 =
   "try"         (. 
-                   TryStatement ts = new TryStatement(t); 
+                   TryStatement ts = new TryStatement(t, block); 
                    CurrentElement = ts;
                    ts.CreateTryBlock(t);
                    if (block != null) block.Add(ts);
@@ -1782,7 +1787,7 @@ TryFinallyBlock<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 LockStatement<IBlockOwner block>
 =   
-  "lock"                  (. LockStatement ls = new LockStatement(t); .)
+  "lock"                  (. LockStatement ls = new LockStatement(t, block); .)
                           (. CurrentElement = ls; .)
                           (. if (block != null) block.Add(ls); .)
   "("                     (. Expression expr; .)
@@ -1798,7 +1803,7 @@ LockStatement<IBlockOwner block>
 UsingStatement<IBlockOwner block>
 =
   "using" (. 
-              UsingStatement us = new UsingStatement(t);
+              UsingStatement us = new UsingStatement(t, block);
               CurrentElement = us;
               if (block != null) block.Add(us);
            .)
@@ -1819,7 +1824,7 @@ UsingStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ReturnStatement<IBlockOwner block>
 =
-  "return"                 (. ReturnStatement yrs = new ReturnStatement(t); .)
+  "return"                 (. ReturnStatement yrs = new ReturnStatement(t, block); .)
                            (. CurrentElement = yrs; .)
   [                        (. Expression expr; .)
   Expression<out expr>     (. yrs.Expression = expr; .)
@@ -1834,7 +1839,7 @@ ReturnStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ThrowStatement<IBlockOwner block>
 =
-  "throw"                 (. ThrowStatement ts = new ThrowStatement(t); .)
+  "throw"                 (. ThrowStatement ts = new ThrowStatement(t, block); .)
                           (. CurrentElement = ts; .)
   [                       (. Expression expr; .)
     Expression<out expr>  (. ts.Expression = expr; .)
@@ -1848,7 +1853,7 @@ ThrowStatement<IBlockOwner block>
 YieldReturnStatement<IBlockOwner block>
 =
   "return"                 (. Expression expr; .)
-  Expression<out expr>     (. YieldReturnStatement yrs = new YieldReturnStatement(t); .)
+  Expression<out expr>     (. YieldReturnStatement yrs = new YieldReturnStatement(t, block); .)
                            (. CurrentElement = yrs; .)
                            (. yrs.Expression = expr; .)
                            (. if (block != null) block.Add(yrs); .)
@@ -1860,7 +1865,7 @@ YieldReturnStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 YieldBreakStatement<IBlockOwner block>
 =
-  "break"   (. YieldBreakStatement ybs = new YieldBreakStatement(t); .)
+  "break"   (. YieldBreakStatement ybs = new YieldBreakStatement(t, block); .)
             (. CurrentElement = ybs; .) 
             (. if (block != null) block.Add(ybs); .)
 .
@@ -1871,21 +1876,21 @@ YieldBreakStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 FixedStatement<IBlockOwner block>
 = 
-  "fixed"                     (. FixedStatement fs = new FixedStatement(t); .)
+  "fixed"                     (. FixedStatement fs = new FixedStatement(t, block); .)
                               (. CurrentElement = fs; .)
                               (. if (block != null) block.Add(fs); .)
   "("                         (. TypeReference typeRef; .)
           
     Type<out typeRef, false>          
                               (. if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", la, "can only fix pointer types"); .)
-                              (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t); .)
+                              (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t, block); .)
                               (. CurrentElement = vas; .)
     ident                     (. vas.Name = t.val; .)
     "="                       (. Expression expr; .)
     Expression<out expr>      (. vas.Expression = expr; .)
                               (. fs.Assignments.Add(vas); .)
     { 
-      ","                     (. vas = new ValueAssignmentStatement(t); .)
+      ","                     (. vas = new ValueAssignmentStatement(t, block); .)
                               (. CurrentElement = vas; .)
       ident                   (. vas.Name = t.val; .)
       "=" 
@@ -1901,7 +1906,7 @@ FixedStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
 =                                       (. Expression expr = null; .)
-  Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t); .)
+  Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t, block); .)
                                         (. CurrentElement = es; .)
                                         (. es.Expression = expr; .)
   ( (. AssignmentOperator asgn; .)
@@ -2474,27 +2479,25 @@ Literal<out Expression value>
 // +expr: Literal expression value.
 // ------------------------------------------------------------------------------------
 PrimitiveNamedLiteral<out Expression expr>  (. expr = null; .)
-= 
-  (   "bool"  
-    | "byte"   
-    | "char" 
-    | "decimal" 
-    | "double"
-    | "float" 
-    | "int"    
-    | "long" 
-    | "object"  
-    | "sbyte"
-    | "short" 
-    | "string" 
-    | "uint" 
-    | "ulong"   
-    | "ushort"
-  )             (. PrimitiveNamedLiteral pml = new PrimitiveNamedLiteral(t); .)
-                (. expr = pml; .)
-                (. pml.Type = new TypeReference(t); .)
+=                 (. PrimitiveNamedLiteral pml = null; .)
+  (   "bool"      (. pml = new PrimitiveNamedLiteral(t, typeof(bool)); .)
+    | "byte"      (. pml = new PrimitiveNamedLiteral(t, typeof(byte)); .)
+    | "char"      (. pml = new PrimitiveNamedLiteral(t, typeof(char)); .)
+    | "decimal"   (. pml = new PrimitiveNamedLiteral(t, typeof(decimal)); .)
+    | "double"    (. pml = new PrimitiveNamedLiteral(t, typeof(double)); .)
+    | "float"     (. pml = new PrimitiveNamedLiteral(t, typeof(float)); .)
+    | "int"       (. pml = new PrimitiveNamedLiteral(t, typeof(int)); .)
+    | "long"      (. pml = new PrimitiveNamedLiteral(t, typeof(long)); .)
+    | "object"    (. pml = new PrimitiveNamedLiteral(t, typeof(object)); .)
+    | "sbyte"     (. pml = new PrimitiveNamedLiteral(t, typeof(sbyte)); .)
+    | "short"     (. pml = new PrimitiveNamedLiteral(t, typeof(short)); .)
+    | "string"    (. pml = new PrimitiveNamedLiteral(t, typeof(string)); .)
+    | "uint"      (. pml = new PrimitiveNamedLiteral(t, typeof(uint)); .)
+    | "ulong"     (. pml = new PrimitiveNamedLiteral(t, typeof(ulong)); .)
+    | "ushort"    (. pml = new PrimitiveNamedLiteral(t, typeof(ushort)); .)
+  )               (. expr = pml; .)
   "." 
-  ident         (. pml.Name = t.val; .)
+  ident           (. pml.Name = t.val; .)
   [ 
     IF (IsGeneric()) TypeArgumentList<pml.TypeArguments> 
   ]

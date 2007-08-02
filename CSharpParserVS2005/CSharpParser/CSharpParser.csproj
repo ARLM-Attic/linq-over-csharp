@@ -217,12 +217,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Semantics\ResolutionIfo.cs" />
     <Compile Include="Semantics\IResolutionRequired.cs" />
     <Compile Include="Semantics\NamespaceHierachy.cs" />
     <Compile Include="Semantics\ResolutionContext.cs" />
-    <Compile Include="Semantics\ResolutionResult.cs" />
+    <Compile Include="Semantics\ResolutionMode.cs" />
     <Compile Include="Semantics\ResolutionTarget.cs" />
     <Compile Include="Semantics\SemanticsParser.cs" />
+    <Compile Include="ProjectModel\Variables\VariableCategory.cs" />
+    <Compile Include="ProjectModel\Variables\VariableInfo.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />

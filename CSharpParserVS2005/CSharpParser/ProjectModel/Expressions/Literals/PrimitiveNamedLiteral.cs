@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
@@ -20,13 +21,15 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new primitive method literal.
+    /// Creates a new primitive method literal with the specified type.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="type">Type of the literal</param>
     // --------------------------------------------------------------------------------
-    public PrimitiveNamedLiteral(Token token)
+    public PrimitiveNamedLiteral(Token token, Type type)
       : base(token)
     {
+      _Type = new TypeReference(token, type);
     }
 
     #endregion
@@ -42,26 +45,6 @@ namespace CSharpParser.ProjectModel
     {
       get { return _Type; }
       set { _Type = value; }
-    }
-
-    #endregion
-
-    #region Type resolution
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves all unresolved type references.
-    /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
-    // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
-    {
-      base.ResolveTypeReferences(contextType, contextInstance);
-      if (_Type != null)
-      {
-        _Type.ResolveTypeReferences(contextType, contextInstance);
-      }
     }
 
     #endregion

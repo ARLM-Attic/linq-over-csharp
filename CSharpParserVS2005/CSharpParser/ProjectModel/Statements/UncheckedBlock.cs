@@ -14,9 +14,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "unchecked" block declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parent">Parent block of the statement.</param>
     // --------------------------------------------------------------------------------
-    public UncheckedBlock(Token token)
-      : base(token)
+    public UncheckedBlock(Token token, IBlockOwner parent)
+      : base(token, parent)
     {
     }
   }

@@ -14,9 +14,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "break" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public BreakStatement(Token token)
-      : base(token)
+    public BreakStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
   }

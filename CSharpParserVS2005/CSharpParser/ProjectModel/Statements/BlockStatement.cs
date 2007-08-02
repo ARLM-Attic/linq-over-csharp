@@ -14,6 +14,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private readonly StatementCollection _Statements;
+    private readonly IBlockOwner _Parent;
 
     #endregion
 
@@ -24,10 +25,12 @@ namespace CSharpParser.ProjectModel
     /// Creates a new block statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parent">ParentBlock block of this block.</param>
     // --------------------------------------------------------------------------------
-    public BlockStatement(Token token)
-      : base(token)
+    public BlockStatement(Token token, IBlockOwner parent)
+      : base(token, parent)
     {
+      _Parent = parent;
       _Statements = new StatementCollection(this);
     }
 
@@ -53,9 +56,19 @@ namespace CSharpParser.ProjectModel
     /// Gets the element owning the block;
     /// </summary>
     // --------------------------------------------------------------------------------
-    public LanguageElement Owner
+    public IBlockOwner Owner
     {
       get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent block of this block;
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IBlockOwner ParentBlock
+    {
+      get { return _Parent; }
     }
 
     // --------------------------------------------------------------------------------

@@ -23,9 +23,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new goto statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public GotoStatement(Token token)
-      : base(token)
+    public GotoStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 

@@ -34,7 +34,7 @@ namespace CSharpParser.ProjectModel
     /// Creates a new SourceFile instance
     /// </summary>
     /// <param name="name">Full file name</param>
-    /// <param name="parent">Parent project of this file.</param>
+    /// <param name="parent">ParentBlock project of this file.</param>
     // --------------------------------------------------------------------------------
     public SourceFile(string name, CompilationUnit parent)
     {

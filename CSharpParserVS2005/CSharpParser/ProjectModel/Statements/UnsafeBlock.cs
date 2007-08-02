@@ -14,9 +14,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "unsafe" block declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public UnsafeBlock(Token token)
-      : base(token)
+    public UnsafeBlock(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
   }

@@ -15,7 +15,14 @@ namespace CSharpParser.ProjectModel
     /// Gets the element owning the block;
     /// </summary>
     // --------------------------------------------------------------------------------
-    LanguageElement Owner { get; }
+    IBlockOwner Owner { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent block of this block;
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    IBlockOwner ParentBlock { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -23,9 +23,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "return" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public ReturnStatement(Token token)
-      : base(token)
+    public ReturnStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 

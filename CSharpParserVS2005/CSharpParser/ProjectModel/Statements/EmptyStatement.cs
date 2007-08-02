@@ -14,9 +14,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new empty statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public EmptyStatement(Token token)
-      : base(token)
+    public EmptyStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
   }

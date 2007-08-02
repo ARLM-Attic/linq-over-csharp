@@ -20,8 +20,7 @@ namespace CSharpParser.ProjectModel
     private TypeReference _SubType;
     private TypeKind _Kind;
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
-    private ResolutionResult _ResolutionResult;
-    private ResolutionTarget _ResolutionTarget;
+    private ResolutionInfo _ResolutionInfo;
 
     #endregion
 
@@ -29,21 +28,33 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new base type element.
+    /// Creates a new type reference instance.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     // --------------------------------------------------------------------------------
-    public TypeReference(Token token)
-      : base(token)
+    public TypeReference(Token token) : base(token)
     {
       _Kind = TypeKind.simple;
       Name = token.val;
-      _ResolutionResult = ResolutionResult.Unresolved;
-      _ResolutionTarget = ResolutionTarget.Unresolved;
+      _ResolutionInfo = new ResolutionInfo();
 
     #if DIAGNOSTICS
       _Locations.Add(new TypeReferenceLocation(this, CompilationUnit.CurrentLocation));
     #endif
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new type reference instance and immediatelly resolves it to the 
+    /// specified type.
+    /// </summary>
+    /// <param name="token">Token providing position information.</param>
+    /// <param name="type">Type this reference is resolved to.</param>
+    // --------------------------------------------------------------------------------
+    public TypeReference(Token token, Type type)
+      : this(token)
+    {
+      ResolveToType(type);
     }
 
     #endregion
@@ -197,44 +208,12 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if the type has been resolved.
+    /// Gets the information about the type resolution.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsResolved
+    public ResolutionInfo ResolutionInfo
     {
-      get { return _ResolutionResult != ResolutionResult.Unresolved; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if the type has been successfully resolved.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool SuccessfullyResolved
-    {
-      get { return IsResolved && _ResolutionTarget != ResolutionTarget.Ambiguous; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the type's resolution result.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ResolutionResult ResolutionResult
-    {
-      get { return _ResolutionResult; }
-      set { _ResolutionResult = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the type's resolution target.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ResolutionTarget ResolutionTarget
-    {
-      get { return _ResolutionTarget; }
-      set { _ResolutionTarget = value; }
+      get { return _ResolutionInfo; }
     }
 
     #endregion
@@ -257,19 +236,133 @@ namespace CSharpParser.ProjectModel
         typeReference.ResolveTypeReferences(contextType, contextInstance);
       }
 
-      if (IsResolved)
+      // --- Do not resolve the type reference again
+      if (_ResolutionInfo.IsResolved) return;
+
+      switch (contextType)
       {
-        Console.WriteLine("{0}: ({1}, {2})", CompilationUnit.CurrentLocation.Name,
-                          Token.line, Token.col);
+        case ResolutionContext.SourceFile:
+          ResolveTypeInSourceFile(contextInstance);
+          break;
+        case ResolutionContext.Namespace:
+          ResolveTypeInNamespace(contextInstance);
+          break;
+        case ResolutionContext.TypeDeclaration:
+          ResolveTypeInTypeDeclaration(contextInstance);
+          break;
+        case ResolutionContext.MethodDeclaration:
+          ResolveTypeInMethodDeclaration(contextInstance);
+          break;
+        case ResolutionContext.AccessorDeclaration:
+          ResolveTypeInAccessorDeclaration(contextInstance);
+          break;
+        default:
+          throw new InvalidOperationException("Invalid resolution context detected.");
       }
-      // TODO: Resolve this type
+
+      // --- Do not resolve the type reference again
+      if (_ResolutionInfo.IsResolved) return;
+
+      _ResolutionInfo.Add(
+        new ResolutionItem(ResolutionTarget.Type, ResolutionMode.RuntimeType, this));
       _ResolutionCounter++;
-      _ResolutionResult = ResolutionResult.RuntimeType;
-      Console.WriteLine("Resolved: {0}", FullName);
 
       if (_SubType != null)
       {
         _SubType.ResolveTypeReferences(contextType, contextInstance);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to the specified system type.
+    /// </summary>
+    /// <param name="type">System type.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToType(Type type)
+    {
+      _ResolutionInfo.Add(
+        new ResolutionItem(ResolutionTarget.Type, ResolutionMode.RuntimeType, type));
+      _ResolutionCounter++;
+      _ResolvedToSystemType++;
+    }
+
+    #endregion
+
+    #region Private type resolution methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the type within a source file.
+    /// </summary>
+    /// <param name="instance">Source file instance.</param>
+    // --------------------------------------------------------------------------------
+    private void ResolveTypeInSourceFile(IResolutionRequired instance)
+    {
+      SourceFile file = instance as SourceFile;
+      if (file == null)
+      {
+        throw new InvalidOperationException("Source file context expected.");
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the type within a namespace declaration.
+    /// </summary>
+    /// <param name="instance">Namespace declaration instance.</param>
+    // --------------------------------------------------------------------------------
+    private void ResolveTypeInNamespace(IResolutionRequired instance)
+    {
+      NamespaceFragment nameSpace = instance as NamespaceFragment;
+      if (nameSpace == null)
+      {
+        throw new InvalidOperationException("Namspace context expected.");
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the type within a type declaration.
+    /// </summary>
+    /// <param name="instance">Type declaration instance.</param>
+    // --------------------------------------------------------------------------------
+    private void ResolveTypeInTypeDeclaration(IResolutionRequired instance)
+    {
+      TypeDeclaration typeDecl = instance as TypeDeclaration;
+      if (typeDecl == null)
+      {
+        throw new InvalidOperationException("Type declaration context expected.");
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the type within an accessor declaration.
+    /// </summary>
+    /// <param name="instance">Accessor declaration instance.</param>
+    // --------------------------------------------------------------------------------
+    private void ResolveTypeInAccessorDeclaration(IResolutionRequired instance)
+    {
+      AccessorDeclaration accDecl = instance as AccessorDeclaration;
+      if (accDecl == null)
+      {
+        throw new InvalidOperationException("Accessor declaration context expected.");
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the type within a method declaration.
+    /// </summary>
+    /// <param name="instance">Method declaration instance.</param>
+    // --------------------------------------------------------------------------------
+    private void ResolveTypeInMethodDeclaration(IResolutionRequired instance)
+    {
+      MethodDeclaration methodDecl = instance as MethodDeclaration;
+      if (methodDecl == null)
+      {
+        throw new InvalidOperationException("Method declaration context expected.");
       }
     }
 
@@ -280,6 +373,7 @@ namespace CSharpParser.ProjectModel
     #if DIAGNOSTICS
 
     private static int _ResolutionCounter;
+    private static int _ResolvedToSystemType;
     private static readonly List<TypeReferenceLocation> _Locations = 
       new List<TypeReferenceLocation>();
 
@@ -294,6 +388,17 @@ namespace CSharpParser.ProjectModel
       set { _ResolutionCounter = value; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved to system types.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public static int ResolvedToSystemType
+    {
+      get { return _ResolvedToSystemType; }
+      set { _ResolvedToSystemType = value; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the location of type references.

@@ -25,9 +25,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "return" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public SwitchStatement(Token token)
-      : base(token)
+    public SwitchStatement(Token token, IBlockOwner parentBlock)
+      : base(token, parentBlock)
     {
     }
 
@@ -69,7 +70,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public SwitchSection CreateSwitchSection(Token t)
     {
-      SwitchSection result = new SwitchSection(t);
+      SwitchSection result = new SwitchSection(t, ParentBlock);
       result.SetParent(this);
       _Sections.Add(result);
       return result;

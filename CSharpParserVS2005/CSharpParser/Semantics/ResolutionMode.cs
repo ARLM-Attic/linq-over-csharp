@@ -5,7 +5,7 @@ namespace CSharpParser
   /// This enumeration defines the result how a referenced type can be resolved.
   /// </summary>
   // ==================================================================================
-  public enum ResolutionResult
+  public enum ResolutionMode
   {
     /// <summary>
     /// The type has not been resolved.
