@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new array initializer instance.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public ArrayInitializer(Token token)
-      : base(token)
+    public ArrayInitializer(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
     }
 

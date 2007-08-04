@@ -266,10 +266,11 @@ ExternAliasDirective<NamespaceFragment parent>
   "extern"   (. Token token = t; .)
   ident      (. 
                 if (t.val != "alias") 
-                  Error("CS1003", la, "Syntax error, 'alias' expected"); 
+                  Error1003(la, "alias"); 
              .)
   ident      (. 
-               ExternalAlias externAlias = new ExternalAlias(token, t.val);
+               ExternalAlias externAlias = new ExternalAlias(token, this);
+               externAlias.Name = t.val;
                CurrentElement = externAlias;
                if (parent == null) _File.ExternAliases.Add(externAlias); 
                else parent.ExternAliases.Add(externAlias); 
@@ -344,7 +345,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
   { 
     "." ident    (. sb.Append("."); sb.Append(t.val); .)
   }              (. 
-                    NamespaceFragment ns = new NamespaceFragment(startToken, sb.ToString(), parent, file); 
+                    NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
                     CurrentElement = ns;
                  .)
   "{" 
@@ -533,9 +534,8 @@ EnumMemberDeclaration<EnumDeclaration ed>
 =                            (. AttributeCollection attrs = new AttributeCollection(); .)
   { Attributes<attrs> } 
   ident                      (. 
-                                 EnumValueDeclaration ev = new EnumValueDeclaration(t); 
+                                 EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
                                  CurrentElement = ev;
-                                 ev.Name = t.val;
                                  Expression expr;
                              .)
   [ 
@@ -582,7 +582,7 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 =
   StructMemberDeclaration<attrs, m, td>
   | "~" ident   (. 
-                   FinalizerDeclaration dd = new FinalizerDeclaration(t);
+                   FinalizerDeclaration dd = new FinalizerDeclaration(t, td);
                    CurrentElement = dd;
                    dd.Name = t.val;
                    dd.SetModifiers(m.Value);
@@ -653,7 +653,7 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   TypeReference typeRef>
 =                            (.  .)
   ident                      (. 
-                                ConstDeclaration cd = new ConstDeclaration(t); 
+                                ConstDeclaration cd = new ConstDeclaration(t, td); 
                                 CurrentElement = cd;
                                 cd.AssignAttributes(attrs);
                                 cd.SetModifiers(m.Value);
@@ -678,7 +678,7 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
     FieldMemberDeclarators<attrs, m, td, typeRef, true, Modifier.propEvntMeths> ";"
   |                              (. TypeReference memberRef; .)
     TypeName<out memberRef> 
-    "{"                          (. EventPropertyDeclaration ep = new EventPropertyDeclaration(t);  .)   
+    "{"                          (. EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  .)   
                                  (. CurrentElement = ep; .)
                                  (. ep.ResultingType = typeRef; .) 
                                  (. ep.ExplicitName = memberRef; .)
@@ -697,7 +697,7 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
 ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
 = (. m.Check(Modifier.constructors | Modifier.staticConstr); .)
     ident                   (. 
-                               ConstructorDeclaration cd = new ConstructorDeclaration(t);
+                               ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
                                CurrentElement = cd;
                                cd.Name = t.val;
                                cd.SetModifiers(m.Value);
@@ -730,7 +730,7 @@ PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
 =                 (. 
                      m.Check(Modifier.propEvntMeths);
                      if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "property type must not be void"); }
-                     PropertyDeclaration pd = new PropertyDeclaration(t);
+                     PropertyDeclaration pd = new PropertyDeclaration(t, td);
                      CurrentElement = pd;
                      pd.SetModifiers(m.Value);
                      pd.AssignAttributes(attrs);
@@ -755,7 +755,7 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
 =                 (. 
                      m.Check(Modifier.indexers);
                      if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
-                     IndexerDeclaration ind = new IndexerDeclaration(t);
+                     IndexerDeclaration ind = new IndexerDeclaration(t, td);
                      CurrentElement = ind;
                      ind.SetModifiers(m.Value);
                      ind.AssignAttributes(attrs);
@@ -789,7 +789,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
   TypeReference memberRef, TypeDeclaration td, bool allowBody>
 =                                                   (. 
                                                        m.Check(Modifier.propEvntMeths);
-                                                       MethodDeclaration md = new MethodDeclaration(t);
+                                                       MethodDeclaration md = new MethodDeclaration(t, td);
                                                        CurrentElement = md;
                                                        md.SetModifiers(m.Value);
                                                        md.AssignAttributes(attrs);
@@ -822,7 +822,7 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
 =                                       (. 
                                            m.Check(Modifier.operators);
                                            m.CheckMust(Modifier.operatorsMust);
-                                           CastOperatorDeclaration cod = new CastOperatorDeclaration(t);
+                                           CastOperatorDeclaration cod = new CastOperatorDeclaration(t, td);
                                            CurrentElement = cod;
                                            cod.SetModifiers(m.Value);
                                            cod.AssignAttributes(attrs);
@@ -837,7 +837,7 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
                                            cod.ResultingType = typeRef;
                                            cod.Name = typeRef.RightmostName;
                                         .)
-    "("                                 (. FormalParameter fp = new FormalParameter(t);.)
+    "("                                 (. FormalParameter fp = new FormalParameter(t, this);.)
       Type<out typeRef, false>          (. fp.Type = typeRef; .)
       ident                             (. fp.Name = t.val; .)
     ")"                                 (. cod.FormalParameters.Add(fp); .)
@@ -857,7 +857,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                       m.Check(Modifier.operators);
                                       m.CheckMust(Modifier.operatorsMust);
                                       if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "operator not allowed on void"); } 
-                                      OperatorDeclaration od = new OperatorDeclaration(t);
+                                      OperatorDeclaration od = new OperatorDeclaration(t, td);
                                       CurrentElement = od;
                                       od.SetModifiers(m.Value);
                                       od.AssignAttributes(attrs);
@@ -868,7 +868,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
   OverloadableOp<out op>           (. od.Operator = op; .)
   "("                              (. 
                                       od.Name = op.ToString(); 
-                                      FormalParameter fp = new FormalParameter(t);
+                                      FormalParameter fp = new FormalParameter(t, this);
                                       TypeReference parType;
                                          .)
   Type<out parType, false>         (. fp.Type = parType; .)
@@ -876,7 +876,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                       fp.Name = t.val; 
                                       od.FormalParameters.Add(fp);
                                    .)
-  ( ","                            (. fp = new FormalParameter(t); .)
+  ( ","                            (. fp = new FormalParameter(t, this); .)
     Type<out parType, false>       (. fp.Type = parType; .)
     ident                          (. 
                                       fp.Name = t.val; 
@@ -943,13 +943,13 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
   ( Type<out typeRef, true>
     (                          
       ident                   (.
-                                 TypeReference memberRef = new TypeReference(t); 
+                                 TypeReference memberRef = new TypeReference(t, this); 
                                  memberRef.Name = t.val;
                               .)
       ( 
         MethodDeclaration<attrs, m, typeRef, memberRef, ifd, false>        
       | // --- Interface property
-        (. PropertyDeclaration prop = new PropertyDeclaration(t); .)
+        (. PropertyDeclaration prop = new PropertyDeclaration(t, ifd); .)
         (. CurrentElement = prop; .)
         (. ifd.Members.Add(prop); .)
         (. prop.ResultingType = typeRef; .)
@@ -961,7 +961,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
     | (. 
          m.Check(Modifier.indexers);
          if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
-         IndexerDeclaration ind = new IndexerDeclaration(t);
+         IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
          CurrentElement =ind;
          ind.SetModifiers(m.Value);
          ind.AssignAttributes(attrs);
@@ -986,7 +986,7 @@ InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDecla
 =
   "event" Type<out typeRef, false> 
   ident (. 
-           FieldDeclaration fd = new FieldDeclaration(t); 
+           FieldDeclaration fd = new FieldDeclaration(t, ifd); 
            CurrentElement = fd;
            fd.SetModifiers(m.Value);
            fd.AssignAttributes(attrs);
@@ -1015,18 +1015,18 @@ LocalVariableDeclaration<IBlockOwner block> (. TypeReference typeRef; .)
 // ------------------------------------------------------------------------------------
 LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef>
 = 
-  ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, block); .)
+  ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); .)
         (. CurrentElement = loc; .)
         (. loc.Name = t.val; .)
-        (. loc.ResultingType = typeRef; .)
+        (. loc.Variable.ResultingType = typeRef; .)
         (. if (block != null) block.Statements.Add(loc); .)       
   [
     "=" 
     (   (. Initializer init; .)
-      VariableInitializer<out init> (. loc.Initializer = init; .)
+      VariableInitializer<out init> (. loc.Variable.Initializer = init; .)
       | "stackalloc" 
-        (. StackAllocInitializer saIn = new StackAllocInitializer(t); .)
-        (. loc.Initializer = saIn; .)
+        (. StackAllocInitializer saIn = new StackAllocInitializer(t, this); .)
+        (. loc.Variable.Initializer = saIn; .)
         (. TypeReference tr; .)
       Type<out tr, false> 
         (. saIn.Type = tr; .)
@@ -1037,6 +1037,7 @@ LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef>
       "]" 
     )
   ]
+        (. block.Add(loc.Variable); .)
 . 
 
 // ------------------------------------------------------------------------------------
@@ -1045,8 +1046,7 @@ LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef>
 // ------------------------------------------------------------------------------------
 VariableInitializer<out Initializer init> (. Expression expr; init = null; .)
 = 
-  Expression<out expr>  (. SimpleInitializer sin = new SimpleInitializer(t); .)
-                        (. sin.Expression = expr; .)
+  Expression<out expr>  (. SimpleInitializer sin = new SimpleInitializer(t, this, expr); .)
                         (. init = sin; .)
   |                     (. ArrayInitializer arrInit; .)
     ArrayInitializer<out arrInit> (. init = arrInit;.)
@@ -1056,7 +1056,7 @@ VariableInitializer<out Initializer init> (. Expression expr; init = null; .)
 // Creates an array initializer.
 // +init: Initializer created.
 // ------------------------------------------------------------------------------------
-ArrayInitializer<out ArrayInitializer init> (. init = new ArrayInitializer(t); .)
+ArrayInitializer<out ArrayInitializer init> (. init = new ArrayInitializer(t, this); .)
 = (. Initializer arrayInit = null; .)
   "{" [ 
   VariableInitializer<out arrayInit> (. init.Initializers.Add(arrayInit); .)
@@ -1075,7 +1075,7 @@ FormalParameterList<FormalParameterCollection pars>
                                           AttributeCollection attrs = new AttributeCollection();
                                        .)
   { Attributes<attrs> }                (. 
-                                          FormalParameter fp = new FormalParameter(t); 
+                                          FormalParameter fp = new FormalParameter(t, this); 
                                           fp.AssignAttributes(attrs);
                                        .)
   (                                    
@@ -1098,7 +1098,7 @@ FormalParameterList<FormalParameterCollection pars>
 .
 
 Argument<ArgumentList argList> 
-              (. Argument arg = new Argument(t); .)
+              (. Argument arg = new Argument(t, this); .)
 = 
   [           
     "ref"     (. arg.Kind = FormalParameterKind.Ref; .)
@@ -1120,9 +1120,9 @@ AccessorDeclarations<PropertyDeclaration prop>
        .)
 = { Attributes<attrs> }               (. Modifiers am = new Modifiers(this); .)
   ModifierList<am>                    (. am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); .)
-  ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t); .)
+  ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
                                       (. CurrentElement = accessor; .)
-  | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t); .)
+  | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
                                       (. CurrentElement = accessor; .)
   | ident                             (. Error("UNDEF", la, "set or get expected"); .)
   ) 
@@ -1138,12 +1138,12 @@ AccessorDeclarations<PropertyDeclaration prop>
     ModifierList<am>                  (. am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); .)
     ( IF ("get".Equals(la.val)) ident (. 
                                          if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-                                         accessor = prop.Getter = new AccessorDeclaration(t);
+                                         accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
                                          CurrentElement = accessor;
                                       .)
     | IF ("set".Equals(la.val)) ident (. 
                                          if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-                                         accessor = prop.Setter = new AccessorDeclaration(t);
+                                         accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType);
                                          CurrentElement = accessor;
                                       .)
     | ident                           (. Error("UNDEF", la, "set or get expected"); .)
@@ -1168,9 +1168,9 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
           AccessorDeclaration accessor = null;
        .)
 = { Attributes<attrs> }
-  ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t); .)
+  ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType); .)
                                           (. CurrentElement = accessor; .)
-  | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t); .)
+  | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType); .)
                                           (. CurrentElement = accessor; .)
   | ident                                 (. Error("UNDEF", la, "add or remove expected"); .)
   ) 
@@ -1182,12 +1182,12 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
     { Attributes<attrs> }    
     ( IF ("add".Equals(la.val)) ident     (. 
                                              if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
-                                             accessor = prop.Adder = new AccessorDeclaration(t);
+                                             accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType);
                                              CurrentElement = accessor;
                                           .)
     | IF ("remove".Equals(la.val)) ident  (. 
                                              if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
-                                             accessor = prop.Remover = new AccessorDeclaration(t);
+                                             accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType);
                                              CurrentElement = accessor;
                                           .)
     | ident                               (. Error("UNDEF", la, "add or remove expected"); .)
@@ -1209,9 +1209,9 @@ InterfaceAccessors<PropertyDeclaration prop>
           AccessorDeclaration accessor = null;
        .)
 = { Attributes<attrs> }
-  ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t); .)
+  ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
                                         (. CurrentElement = accessor; .)
-  | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t); .)
+  | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType); .)
                                         (. CurrentElement = accessor; .)
   | ident                               (. Error("UNDEF", la, "set or get expected"); .)
   ) ";"                                 (. accessor.AssignAttributes(attrs); .)
@@ -1219,12 +1219,12 @@ InterfaceAccessors<PropertyDeclaration prop>
     { Attributes<attrs> }    
     ( IF ("get".Equals(la.val)) ident   (. 
                                            if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-                                           accessor = prop.Getter = new AccessorDeclaration(t);
+                                           accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
                                            CurrentElement = accessor;
                                         .)
     | IF ("set".Equals(la.val)) ident   (. 
                                            if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-                                           accessor = prop.Setter = new AccessorDeclaration(t);
+                                           accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType);
                                            CurrentElement = accessor;
                                         .)
     | ident                             (. Error("UNDEF", la, "set or get expected"); .)
@@ -1279,9 +1279,8 @@ Keyword
 Attribute<out AttributeDeclaration attr> (. TypeReference typeRef; .)
 =  
   TypeName<out typeRef>                  (. 
-                                            attr = new AttributeDeclaration(t); 
+                                            attr = new AttributeDeclaration(t, this, typeRef); 
                                             CurrentElement = attr;
-                                            attr.TypeReference = typeRef;
                                          .)
   [ AttributeArguments<attr> ] 
 .
@@ -1294,14 +1293,14 @@ AttributeArguments<AttributeDeclaration attr>
                                      (. AttributeArgument arg; .)
 =                                    (. bool nameFound = false; .)
   "(" 
-    [                                (. arg = new AttributeArgument(t); .)
+    [                                (. arg = new AttributeArgument(t,this); .)
       [ IF (IsAssignment())          
         ident                        (. arg.Name = t.val; .)
         "="                          (. nameFound = true; .)
       ]                              (. Expression expr; .)
       Expression<out expr>           (. arg.Expression = expr; .)
                                      (. attr.Arguments.Add(arg); .)
-      { ","                          (. arg = new AttributeArgument(t); .)
+      { ","                          (. arg = new AttributeArgument(t, this); .)
         ( IF (IsAssignment())  
           ident                      (. arg.Name = t.val; .)
           "="                        (. nameFound = true; .)
@@ -1347,7 +1346,7 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
   ( PrimitiveType<out typeRef>
   | ClassType<out typeRef>                                               
   | "void"                                           (. 
-                                                        typeRef = new TypeReference(t); 
+                                                        typeRef = new TypeReference(t, this); 
                                                         typeRef.Name = t.val;
                                                         typeRef.Kind = TypeKind.@void; 
                                                      .)
@@ -1377,10 +1376,10 @@ PointerOrArray<ref TypeReference typeRef>
 PrimitiveType<out TypeReference typeRef> (. typeRef = null; .)
 =
   IntegralType<out typeRef> 
-  | "float"     (. typeRef = new TypeReference(t, typeof(float)); .)    
-  | "double"    (. typeRef = new TypeReference(t, typeof(double)); .) 
-  | "decimal"   (. typeRef = new TypeReference(t, typeof(decimal)); .)
-  | "bool"      (. typeRef = new TypeReference(t, typeof(bool)); .)
+  | "float"     (. typeRef = new TypeReference(t, this, typeof(float)); .)    
+  | "double"    (. typeRef = new TypeReference(t, this, typeof(double)); .) 
+  | "decimal"   (. typeRef = new TypeReference(t, this, typeof(decimal)); .)
+  | "bool"      (. typeRef = new TypeReference(t, this, typeof(bool)); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1388,15 +1387,15 @@ PrimitiveType<out TypeReference typeRef> (. typeRef = null; .)
 // ------------------------------------------------------------------------------------
 IntegralType<out TypeReference typeRef> (. typeRef = null; .)
 =
-  "sbyte"       (. typeRef = new TypeReference(t, typeof(sbyte)); .)
-  | "byte"      (. typeRef = new TypeReference(t, typeof(byte)); .)
-  | "short"     (. typeRef = new TypeReference(t, typeof(short)); .)
-  | "ushort"    (. typeRef = new TypeReference(t, typeof(ushort)); .)
-  | "int"       (. typeRef = new TypeReference(t, typeof(int)); .)
-  | "uint"      (. typeRef = new TypeReference(t, typeof(uint)); .)
-  | "long"      (. typeRef = new TypeReference(t, typeof(long)); .)
-  | "ulong"     (. typeRef = new TypeReference(t, typeof(ulong)); .)
-  | "char"      (. typeRef = new TypeReference(t, typeof(char)); .)
+  "sbyte"       (. typeRef = new TypeReference(t, this, typeof(sbyte)); .)
+  | "byte"      (. typeRef = new TypeReference(t, this, typeof(byte)); .)
+  | "short"     (. typeRef = new TypeReference(t, this, typeof(short)); .)
+  | "ushort"    (. typeRef = new TypeReference(t, this, typeof(ushort)); .)
+  | "int"       (. typeRef = new TypeReference(t, this, typeof(int)); .)
+  | "uint"      (. typeRef = new TypeReference(t, this, typeof(uint)); .)
+  | "long"      (. typeRef = new TypeReference(t, this, typeof(long)); .)
+  | "ulong"     (. typeRef = new TypeReference(t, this, typeof(ulong)); .)
+  | "char"      (. typeRef = new TypeReference(t, this, typeof(char)); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1407,8 +1406,8 @@ ClassType<out TypeReference typeRef>   (. typeRef = null; .)
 =                                                               
   TypeName<out typeRef> |               
   (                                    
-    "object"                           (. typeRef = new TypeReference(t, typeof(object)); .)
-    | "string"                         (. typeRef = new TypeReference(t, typeof(string)); .)
+    "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
+    | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
   )                                    
 .
 
@@ -1419,14 +1418,14 @@ ClassType<out TypeReference typeRef>   (. typeRef = null; .)
 MemberName<out TypeReference typeRef>                                              
 = 
   ident                                  (. 
-                                            typeRef = new TypeReference(t);
+                                            typeRef = new TypeReference(t, this);
                                             typeRef.Name = t.val; 
                                             TypeReference nextType = typeRef;
                                          .)
   [ 
     "::"                                 (. typeRef.IsGlobal = true; .)
     ident                                (. 
-                                            typeRef.SubType = new TypeReference(t);
+                                            typeRef.SubType = new TypeReference(t, this);
                                             typeRef.SubType.Name = t.val; 
                                             nextType = typeRef.SubType;
                                          .)
@@ -1437,7 +1436,7 @@ MemberName<out TypeReference typeRef>
   ]
   { IF (la.kind == _dot && Peek(1).kind == _ident)
       "." ident                          (. 
-                                            nextType.SubType = new TypeReference(t);
+                                            nextType.SubType = new TypeReference(t, this);
                                             nextType.SubType.Name = t.val;
                                             nextType = nextType.SubType;
                                          .)
@@ -1455,14 +1454,14 @@ MemberName<out TypeReference typeRef>
 TypeName<out TypeReference typeRef>                             
 =                                                               
   ident                                  (. 
-                                            typeRef = new TypeReference(t);
+                                            typeRef = new TypeReference(t, this);
                                             typeRef.Name = t.val; 
                                             TypeReference nextType = typeRef;
                                          .)
   [ 
     "::"                                 (. typeRef.IsGlobal = true; .)
     ident                                (. 
-                                            typeRef.SubType = new TypeReference(t);
+                                            typeRef.SubType = new TypeReference(t, this);
                                             typeRef.SubType.Name = t.val; 
                                             nextType = typeRef.SubType;
                                          .)
@@ -1470,7 +1469,7 @@ TypeName<out TypeReference typeRef>
   [ TypeArgumentList<typeRef.Arguments> ]                                    
   {
     "." ident                            (. 
-                                            nextType.SubType = new TypeReference(t);
+                                            nextType.SubType = new TypeReference(t, this);
                                             nextType.SubType.Name = t.val;
                                          .)
     [ TypeArgumentList<typeRef.Arguments> ]        (. nextType = nextType.SubType; .)
@@ -1496,7 +1495,8 @@ Statement<IBlockOwner block>
 EmbeddedStatement<IBlockOwner block> 
 =   
     // --- Block nested into a statement
-    Block<block>
+                    (. BlockStatement embedded = new BlockStatement(t, this, block); .)
+    Block<embedded> (. if (block != null) block.Add(embedded); .)
   | EmptyStatement<block>
   | CheckedBlock<block>
   | UncheckedBlock<block>
@@ -1536,7 +1536,7 @@ Block<IBlockOwner block> (. CurrentElement = block.Owner as LanguageElement; .)
 // ------------------------------------------------------------------------------------
 SwitchStatement<IBlockOwner block>
 =
-  "switch"                (. SwitchStatement sws = new SwitchStatement(t, block); .)
+  "switch"                (. SwitchStatement sws = new SwitchStatement(t, this, block); .)
                           (. CurrentElement = sws; .)
   "("                     (. Expression expr; .)
   Expression<out expr>    (. sws.Expression = expr; .)
@@ -1554,14 +1554,14 @@ SwitchStatement<IBlockOwner block>
 ConstStatement<IBlockOwner block>
 =
   "const"                (. TypeReference typeRef; .)
-                         (. ConstStatement cs = new ConstStatement(t, block); .)
+                         (. ConstStatement cs = new ConstStatement(t, this, block); .)
                          (. CurrentElement = cs; .)
   Type<out typeRef, false> 
   ident                  (. cs.Name = t.val; .)
   "="                    (. Expression expr; .)
   Expression<out expr>   (. cs.Expression = expr; .)
                          (. if (block != null) block.Add(cs); .)
-  { ","                  (. cs = new ConstStatement(t, block); .)
+  { ","                  (. cs = new ConstStatement(t, this, block); .)
     ident                (. cs.Name = t.val; .)
     "=" 
     Expression<out expr> (. cs.Expression = expr; .)
@@ -1574,7 +1574,7 @@ ConstStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 EmptyStatement<IBlockOwner block>
 =
-  ";"     (. EmptyStatement es = new EmptyStatement(t, block); .)
+  ";"     (. EmptyStatement es = new EmptyStatement(t, this, block); .)
           (. CurrentElement = es; .)
           (. if (block != null) block.Add(es); .)
 .
@@ -1588,7 +1588,7 @@ CheckedBlock<IBlockOwner block>
   (
     IF (la.kind == _checked && Peek(1).kind == _lbrace) 
       "checked" (. 
-                   CheckedBlock cb = new CheckedBlock(t, block);
+                   CheckedBlock cb = new CheckedBlock(t, this, block);
                    CurrentElement = cb;
                    if (block != null) block.Add(cb);
                 .)
@@ -1605,7 +1605,7 @@ UncheckedBlock<IBlockOwner block>
   (
     IF (la.kind == _unchecked && Peek(1).kind == _lbrace) 
     "unchecked" (. 
-                   UncheckedBlock ucb = new UncheckedBlock(t, block);
+                   UncheckedBlock ucb = new UncheckedBlock(t, this, block);
                    CurrentElement = ucb;
                    if (block != null) block.Add(ucb);
                 .)
@@ -1621,7 +1621,7 @@ UncheckedBlock<IBlockOwner block>
 UnsafeBlock<IBlockOwner block>
 =
   "unsafe" (. 
-              UnsafeBlock usb = new UnsafeBlock(t, block);
+              UnsafeBlock usb = new UnsafeBlock(t, this, block);
               CurrentElement = usb;
               if (block != null) block.Add(usb);
            .)
@@ -1634,7 +1634,7 @@ UnsafeBlock<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 IfStatement<IBlockOwner block>
 =   
-  "if"                   (. IfStatement ifs = new IfStatement(t, block); .)
+  "if"                   (. IfStatement ifs = new IfStatement(t, this, block); .)
                          (. CurrentElement = ifs; .)
   "("                    (. if (block != null) block.Add(ifs); .)
                          (. Expression expr; .)
@@ -1652,7 +1652,7 @@ IfStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 WhileStatement<IBlockOwner block>
 = 
-  "while"                 (. WhileStatement whs = new WhileStatement(t, block); .)
+  "while"                 (. WhileStatement whs = new WhileStatement(t, this, block); .)
                           (. CurrentElement = whs; .)
   "("                     (. if (block != null) block.Add(whs); .)
                           (. Expression expr; .)
@@ -1667,7 +1667,7 @@ WhileStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 DoWhileStatement<IBlockOwner block>
 =   
-  "do"                      (. DoWhileStatement whs = new DoWhileStatement(t, block); .)
+  "do"                      (. DoWhileStatement whs = new DoWhileStatement(t, this, block); .)
                             (. CurrentElement = whs; .)
     EmbeddedStatement<whs>  (. if (block != null) block.Add(whs); .)
   "while" 
@@ -1682,7 +1682,7 @@ DoWhileStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ForStatement<IBlockOwner block>
 = 
-  "for"                       (. ForStatement fs = new ForStatement(t, block); .)
+  "for"                       (. ForStatement fs = new ForStatement(t, this, block); .)
                               (. CurrentElement = fs; .)
   "("                         (. if (block != null) block.Add(fs); .)
     [                         (. fs.CreateInitializerBlock(t); .)
@@ -1704,15 +1704,15 @@ ForStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ForEachStatement<IBlockOwner block>
 =
-  "foreach"                   (. ForEachStatement fes = new ForEachStatement(t, block); .)
+  "foreach"                   (. ForEachStatement fes = new ForEachStatement(t, this, block); .)
                               (. CurrentElement = fes; .)
   "("                         (. if (block != null) block.Add(fes); .)
                               (. TypeReference typeRef; .)
-    Type<out typeRef, false>  (. fes.ItemType = typeRef; .)
-    ident                     (. fes.Name = t.val; .)
+    Type<out typeRef, false>  (. fes.Variable.ResultingType = typeRef; .)
+    ident                     (. fes.Variable.Name = t.val; .)
     "in"                      (. Expression expr; .)
     Expression<out expr>      (. fes.Expression = expr; .)
-  ")"
+  ")"                         (. fes.Add(fes.Variable); .)
   EmbeddedStatement<fes>
 .    
 
@@ -1722,7 +1722,7 @@ ForEachStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 BreakStatement<IBlockOwner block>
 =
-  "break" ";" (. BreakStatement bs = new BreakStatement(t, block); .)
+  "break" ";" (. BreakStatement bs = new BreakStatement(t, this, block); .)
               (. CurrentElement = bs; .)
               (. if (block != null) block.Add(bs); .)
 .    
@@ -1733,7 +1733,7 @@ BreakStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 GotoStatement<IBlockOwner block>
 =
-  "goto"                  (. GotoStatement gs = new GotoStatement(t, block); .)
+  "goto"                  (. GotoStatement gs = new GotoStatement(t, this, block); .)
                           (. CurrentElement = gs; .)
                           (. if (block != null) block.Add(gs); .)
   ( 
@@ -1752,7 +1752,7 @@ GotoStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ContinueStatement<IBlockOwner block>
 =
-  "continue" ";"  (. ContinueStatement cs = new ContinueStatement(t, block); .)
+  "continue" ";"  (. ContinueStatement cs = new ContinueStatement(t, this, block); .)
                   (. CurrentElement = cs; .)
                   (. if (block != null) block.Add(cs); .)
 .    
@@ -1764,7 +1764,7 @@ ContinueStatement<IBlockOwner block>
 TryFinallyBlock<IBlockOwner block>
 =
   "try"         (. 
-                   TryStatement ts = new TryStatement(t, block); 
+                   TryStatement ts = new TryStatement(t, this, block); 
                    CurrentElement = ts;
                    ts.CreateTryBlock(t);
                    if (block != null) block.Add(ts);
@@ -1787,7 +1787,7 @@ TryFinallyBlock<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 LockStatement<IBlockOwner block>
 =   
-  "lock"                  (. LockStatement ls = new LockStatement(t, block); .)
+  "lock"                  (. LockStatement ls = new LockStatement(t, this, block); .)
                           (. CurrentElement = ls; .)
                           (. if (block != null) block.Add(ls); .)
   "("                     (. Expression expr; .)
@@ -1803,7 +1803,7 @@ LockStatement<IBlockOwner block>
 UsingStatement<IBlockOwner block>
 =
   "using" (. 
-              UsingStatement us = new UsingStatement(t, block);
+              UsingStatement us = new UsingStatement(t, this, block);
               CurrentElement = us;
               if (block != null) block.Add(us);
            .)
@@ -1824,7 +1824,7 @@ UsingStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ReturnStatement<IBlockOwner block>
 =
-  "return"                 (. ReturnStatement yrs = new ReturnStatement(t, block); .)
+  "return"                 (. ReturnStatement yrs = new ReturnStatement(t, this, block); .)
                            (. CurrentElement = yrs; .)
   [                        (. Expression expr; .)
   Expression<out expr>     (. yrs.Expression = expr; .)
@@ -1839,7 +1839,7 @@ ReturnStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ThrowStatement<IBlockOwner block>
 =
-  "throw"                 (. ThrowStatement ts = new ThrowStatement(t, block); .)
+  "throw"                 (. ThrowStatement ts = new ThrowStatement(t, this, block); .)
                           (. CurrentElement = ts; .)
   [                       (. Expression expr; .)
     Expression<out expr>  (. ts.Expression = expr; .)
@@ -1853,7 +1853,7 @@ ThrowStatement<IBlockOwner block>
 YieldReturnStatement<IBlockOwner block>
 =
   "return"                 (. Expression expr; .)
-  Expression<out expr>     (. YieldReturnStatement yrs = new YieldReturnStatement(t, block); .)
+  Expression<out expr>     (. YieldReturnStatement yrs = new YieldReturnStatement(t, this, block); .)
                            (. CurrentElement = yrs; .)
                            (. yrs.Expression = expr; .)
                            (. if (block != null) block.Add(yrs); .)
@@ -1865,7 +1865,7 @@ YieldReturnStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 YieldBreakStatement<IBlockOwner block>
 =
-  "break"   (. YieldBreakStatement ybs = new YieldBreakStatement(t, block); .)
+  "break"   (. YieldBreakStatement ybs = new YieldBreakStatement(t, this, block); .)
             (. CurrentElement = ybs; .) 
             (. if (block != null) block.Add(ybs); .)
 .
@@ -1876,21 +1876,21 @@ YieldBreakStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 FixedStatement<IBlockOwner block>
 = 
-  "fixed"                     (. FixedStatement fs = new FixedStatement(t, block); .)
+  "fixed"                     (. FixedStatement fs = new FixedStatement(t, this, block); .)
                               (. CurrentElement = fs; .)
                               (. if (block != null) block.Add(fs); .)
   "("                         (. TypeReference typeRef; .)
           
     Type<out typeRef, false>          
                               (. if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", la, "can only fix pointer types"); .)
-                              (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t, block); .)
+                              (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t, this, block); .)
                               (. CurrentElement = vas; .)
     ident                     (. vas.Name = t.val; .)
     "="                       (. Expression expr; .)
     Expression<out expr>      (. vas.Expression = expr; .)
                               (. fs.Assignments.Add(vas); .)
     { 
-      ","                     (. vas = new ValueAssignmentStatement(t, block); .)
+      ","                     (. vas = new ValueAssignmentStatement(t, this, block); .)
                               (. CurrentElement = vas; .)
       ident                   (. vas.Name = t.val; .)
       "=" 
@@ -1906,7 +1906,7 @@ FixedStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
 =                                       (. Expression expr = null; .)
-  Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t, block); .)
+  Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t, this, block); .)
                                         (. CurrentElement = es; .)
                                         (. es.Expression = expr; .)
   ( (. AssignmentOperator asgn; .)
@@ -1924,19 +1924,19 @@ StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.ki
 // ------------------------------------------------------------------------------------
 AssignmentOperator<out AssignmentOperator op> (. op = null; .)
 =
-    "="     (. op = new AssignmentOperator(t); .)
-  | "+="    (. op = new PlusAssignmentOperator(t); .)
-  | "-="    (. op = new MinusAssignmentOperator(t); .)
-  | "*="    (. op = new MultiplyAssignmentOperator(t); .)
-  | "/="    (. op = new DivideAssignmentOperator(t); .)
-  | "%="    (. op = new ModuloAssignmentOperator(t); .)
-  | "&="    (. op = new AndAssignmentOperator(t); .)
-  | "|="    (. op = new OrAssignmentOperator(t); .)
-  | "^="    (. op = new XorAssignmentOperator(t); .)
-  | "<<="   (. op = new LeftShiftAssignmentOperator(t); .)
+    "="     (. op = new AssignmentOperator(t, this); .)
+  | "+="    (. op = new PlusAssignmentOperator(t, this); .)
+  | "-="    (. op = new MinusAssignmentOperator(t, this); .)
+  | "*="    (. op = new MultiplyAssignmentOperator(t, this); .)
+  | "/="    (. op = new DivideAssignmentOperator(t, this); .)
+  | "%="    (. op = new ModuloAssignmentOperator(t, this); .)
+  | "&="    (. op = new AndAssignmentOperator(t, this); .)
+  | "|="    (. op = new OrAssignmentOperator(t, this); .)
+  | "^="    (. op = new XorAssignmentOperator(t, this); .)
+  | "<<="   (. op = new LeftShiftAssignmentOperator(t, this); .)
   | ">"     (. int pos = t.pos; .)
     ">="    (. if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment"); .)
-            (. op = new RightShiftAssignmentOperator(t); .)
+            (. op = new RightShiftAssignmentOperator(t, this); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2043,8 +2043,7 @@ Expression<out Expression expr>   (. expr = null; .)
                                        expr = simpleExpr;
                                      }
                                   .)
-    [                             (. ConditionalOperator condExpr = new ConditionalOperator(t); .)
-                                  (. condExpr.Condition = expr; .)
+    [                             (. ConditionalOperator condExpr = new ConditionalOperator(t, this, expr); .)
                                   (. expr = condExpr; .)    
       "?"                         (. Expression trueExpr; .)
       Expression<out trueExpr>    (. condExpr.TrueExpression = trueExpr; .)
@@ -2062,7 +2061,7 @@ NullCoalescingExpr<out BinaryOperator expr> (. expr = null; .)
 =                     
   OrExpr<out expr>    
   { 
-    "??"                  (. BinaryOperator oper = new NullCoalescingOperator(t); .)
+    "??"                  (. BinaryOperator oper = new NullCoalescingOperator(t, this); .)
                           (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .)
@@ -2089,7 +2088,7 @@ OrExpr<out BinaryOperator expr> (. expr = null; .)
 = 
   AndExpr<out expr>    
   { 
-    "||"                  (. BinaryOperator oper = new OrOperator(t); .)
+    "||"                  (. BinaryOperator oper = new OrOperator(t, this); .)
                           (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .)
@@ -2116,7 +2115,7 @@ AndExpr<out BinaryOperator expr> (. expr = null; .)
 = 
   BitOrExpr<out expr>    
   { 
-    "&&"                  (. BinaryOperator oper = new AndOperator(t); .)
+    "&&"                  (. BinaryOperator oper = new AndOperator(t, this); .)
                           (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .)
@@ -2143,7 +2142,7 @@ BitOrExpr<out BinaryOperator expr> (. expr = null; .)
 = 
   BitXorExpr<out expr>    
   { 
-    "|"                   (. BinaryOperator oper = new BitwiseOrOperator(t); .)
+    "|"                   (. BinaryOperator oper = new BitwiseOrOperator(t, this); .)
                           (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .)
@@ -2170,7 +2169,7 @@ BitXorExpr<out BinaryOperator expr> (. expr = null; .)
 = 
   BitAndExpr<out expr>    
   { 
-    "^"                   (. BinaryOperator oper = new BitwiseXorOperator(t); .)
+    "^"                   (. BinaryOperator oper = new BitwiseXorOperator(t, this); .)
                           (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .)
@@ -2197,7 +2196,7 @@ BitAndExpr<out BinaryOperator expr> (. expr = null; .)
 = 
   EqlExpr<out expr>    
   { 
-    "&"                   (. BinaryOperator oper = new BitwiseAndOperator(t); .)
+    "&"                   (. BinaryOperator oper = new BitwiseAndOperator(t, this); .)
                           (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .)
@@ -2225,8 +2224,8 @@ EqlExpr<out BinaryOperator expr> (. expr = null; .)
   RelExpr<out expr>       (. BinaryOperator oper; .)
   {           
     (                     
-      "!="                (. oper = new EqualOperator(t); .)
-      | "=="              (. oper = new NotEqualOperator(t); .)
+      "!="                (. oper = new EqualOperator(t, this); .)
+      | "=="              (. oper = new NotEqualOperator(t, this); .)
     )                     (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
@@ -2254,10 +2253,10 @@ RelExpr<out BinaryOperator expr> (. expr = null; .)
   ShiftExpr<out expr>     (. BinaryOperator oper = null; .)
   { 
     (
-      "<"                 (. oper = new LessThanOperator(t); .)
-      | ">"               (. oper = new GreaterThanOperator(t); .)
-      | "<="              (. oper = new LessThanOrEqualOperator(t); .)
-      | ">="              (. oper = new GreaterThanOrEqualOperator(t); .)
+      "<"                 (. oper = new LessThanOperator(t, this); .)
+      | ">"               (. oper = new GreaterThanOperator(t, this); .)
+      | "<="              (. oper = new LessThanOrEqualOperator(t, this); .)
+      | ">="              (. oper = new GreaterThanOrEqualOperator(t, this); .)
     )                     (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
@@ -2276,8 +2275,8 @@ RelExpr<out BinaryOperator expr> (. expr = null; .)
                           .)
     | 
       (
-        "is"              (. oper = new IsOperator(t); .)
-        | "as"            (. oper = new IsOperator(t); .)
+        "is"              (. oper = new IsOperator(t, this); .)
+        | "as"            (. oper = new IsOperator(t, this); .)
       )                   (. oper.LeftOperand = expr; .)
                           (. TypeReference typeRef; .)
       Type<out typeRef, false>
@@ -2295,8 +2294,8 @@ ShiftExpr<out BinaryOperator expr> (. expr = null; .)
   AddExpr<out expr>       (. BinaryOperator oper = null; .)
   { IF (IsShift())
     (
-      "<<"                (. oper = new LeftShiftOperator(t); .)
-      | ">" ">"           (. oper = new RightShiftOperator(t); .)
+      "<<"                (. oper = new LeftShiftOperator(t, this); .)
+      | ">" ">"           (. oper = new RightShiftOperator(t, this); .)
     )                     (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
@@ -2325,8 +2324,8 @@ AddExpr<out BinaryOperator expr> (. expr = null; .)
   MulExpr<out expr>       (. BinaryOperator oper = null; .)
   {
     ( 
-      "+"                 (. oper = new AddOperator(t); .)
-      | "-"               (. oper = new SubtractOperator(t); .)
+      "+"                 (. oper = new AddOperator(t, this); .)
+      | "-"               (. oper = new SubtractOperator(t, this); .)
     )                     (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
@@ -2358,9 +2357,9 @@ MulExpr<out BinaryOperator expr>
 =                          
   {
     (
-      "*"                 (. oper = new MultiplyOperator(t); .)
-      | "/"               (. oper = new DivideOperator(t); .)
-      | "%"               (. oper = new ModuloOperator(t); .)
+      "*"                 (. oper = new MultiplyOperator(t, this); .)
+      | "/"               (. oper = new DivideOperator(t, this); .)
+      | "%"               (. oper = new ModuloOperator(t, this); .)
     )                     (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
     Unary<out unExpr>     (. oper.RightOperand = unExpr; .)
@@ -2382,17 +2381,17 @@ Unary<out Expression expr>
   (
     IF (unaryHead[la.kind] || IsTypeCast())
     ( 
-      "+"     (. unOp = new UnaryPlusOperator(t); .)
-      | "-"   (. unOp = new UnaryMinusOperator(t); .)
-      | "!"   (. unOp = new NotOperator(t); .)
-      | "~"   (. unOp = new BitwiseNotOperator(t); .)
-      | "++"  (. unOp = new PreIncrementOperator(t); .)
-      | "--"  (. unOp = new PreDecrementOperator(t); .)
-      | "*"   (. unOp = new PointerOperator(t); .)
-      | "&"   (. unOp = new ReferenceOperator(t); .)
+      "+"     (. unOp = new UnaryPlusOperator(t, this); .)
+      | "-"   (. unOp = new UnaryMinusOperator(t, this); .)
+      | "!"   (. unOp = new NotOperator(t, this); .)
+      | "~"   (. unOp = new BitwiseNotOperator(t, this); .)
+      | "++"  (. unOp = new PreIncrementOperator(t, this); .)
+      | "--"  (. unOp = new PreDecrementOperator(t, this); .)
+      | "*"   (. unOp = new PointerOperator(t, this); .)
+      | "&"   (. unOp = new ReferenceOperator(t, this); .)
       | "("   (. TypeReference typeRef; .)
         Type<out typeRef, false> 
-        ")"   (. TypeCastOperator tcOp = new TypeCastOperator(t); .)
+        ")"   (. TypeCastOperator tcOp = new TypeCastOperator(t, this); .)
               (. tcOp.Type = typeRef; .)
               (. unOp = tcOp; .)
               
@@ -2425,7 +2424,7 @@ Primary<out Expression expr>  (. TypeReference type = null;
   | "(" Expression<out innerExpr> ")"  (. if (innerExpr != null) innerExpr.BracketsUsed = true; .)
   | PrimitiveNamedLiteral<out innerExpr>
   | NamedLiteral<out innerExpr>
-  | "this" (. innerExpr = new ThisLiteral(t); .)
+  | "this" (. innerExpr = new ThisLiteral(t, this); .)
   | "base" ( BaseNamedLiteral<out expr> | BaseIndexerOperator<out expr> )  
   | NewOperator<out innerExpr>
   | TypeOfOperator<out innerExpr>
@@ -2439,18 +2438,18 @@ Primary<out Expression expr>  (. TypeReference type = null;
   (. Expression curExpr = innerExpr; .)
 
   { 
-      "++"  (. curExpr = new PostIncrementOperator(t, innerExpr); .) 
-    | "--"  (. curExpr = new PostDecrementOperator(t, innerExpr); .) 
+      "++"  (. curExpr = new PostIncrementOperator(t, this, innerExpr); .) 
+    | "--"  (. curExpr = new PostDecrementOperator(t, this, innerExpr); .) 
     | "->"  (. NamedLiteral nl; .)
       SimpleNamedLiteral<out nl>
             (. curExpr = new CTypeMemberAccessOperator(t, innerExpr, nl); .)
     | "."   (. NamedLiteral nl; .)
       SimpleNamedLiteral<out nl>
             (. curExpr = new MemberAccessOperator(t, innerExpr, nl); .)
-    | "("   (. ArgumentListOperator alop = new ArgumentListOperator(t, innerExpr); .)
+    | "("   (. ArgumentListOperator alop = new ArgumentListOperator(t, this, innerExpr); .)
         [ Argument<alop.Arguments> { "," Argument<alop.Arguments> } ] 
       ")"   (. curExpr = alop; .)
-    |       (. ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, innerExpr); .)                                                                         
+    |       (. ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, this, innerExpr); .)                                                                         
       ArrayIndexer<aiop> 
             (. curExpr = aiop; .)
   }
@@ -2465,13 +2464,13 @@ Primary<out Expression expr>  (. TypeReference type = null;
 Literal<out Expression value>
   (. value = null; .)
 = 
-  intCon        (. value = IntegerConstant.Create(t); .)
-  | realCon     (. value = RealConstant.Create(t); .)
-  | charCon     (. value = new CharLiteral(t); .)
-  | stringCon   (. value = new StringLiteral(t); .)
-  | "true"      (. value = new TrueLiteral(t); .)
-  | "false"     (. value = new FalseLiteral(t); .)
-  | "null"      (. value = new NullLiteral(t); .)
+  intCon        (. value = IntegerConstant.Create(t, this); .)
+  | realCon     (. value = RealConstant.Create(t, this); .)
+  | charCon     (. value = new CharLiteral(t, this); .)
+  | stringCon   (. value = new StringLiteral(t, this); .)
+  | "true"      (. value = new TrueLiteral(t, this); .)
+  | "false"     (. value = new FalseLiteral(t, this); .)
+  | "null"      (. value = new NullLiteral(t, this); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2480,21 +2479,21 @@ Literal<out Expression value>
 // ------------------------------------------------------------------------------------
 PrimitiveNamedLiteral<out Expression expr>  (. expr = null; .)
 =                 (. PrimitiveNamedLiteral pml = null; .)
-  (   "bool"      (. pml = new PrimitiveNamedLiteral(t, typeof(bool)); .)
-    | "byte"      (. pml = new PrimitiveNamedLiteral(t, typeof(byte)); .)
-    | "char"      (. pml = new PrimitiveNamedLiteral(t, typeof(char)); .)
-    | "decimal"   (. pml = new PrimitiveNamedLiteral(t, typeof(decimal)); .)
-    | "double"    (. pml = new PrimitiveNamedLiteral(t, typeof(double)); .)
-    | "float"     (. pml = new PrimitiveNamedLiteral(t, typeof(float)); .)
-    | "int"       (. pml = new PrimitiveNamedLiteral(t, typeof(int)); .)
-    | "long"      (. pml = new PrimitiveNamedLiteral(t, typeof(long)); .)
-    | "object"    (. pml = new PrimitiveNamedLiteral(t, typeof(object)); .)
-    | "sbyte"     (. pml = new PrimitiveNamedLiteral(t, typeof(sbyte)); .)
-    | "short"     (. pml = new PrimitiveNamedLiteral(t, typeof(short)); .)
-    | "string"    (. pml = new PrimitiveNamedLiteral(t, typeof(string)); .)
-    | "uint"      (. pml = new PrimitiveNamedLiteral(t, typeof(uint)); .)
-    | "ulong"     (. pml = new PrimitiveNamedLiteral(t, typeof(ulong)); .)
-    | "ushort"    (. pml = new PrimitiveNamedLiteral(t, typeof(ushort)); .)
+  (   "bool"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(bool)); .)
+    | "byte"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(byte)); .)
+    | "char"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(char)); .)
+    | "decimal"   (. pml = new PrimitiveNamedLiteral(t, this, typeof(decimal)); .)
+    | "double"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(double)); .)
+    | "float"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(float)); .)
+    | "int"       (. pml = new PrimitiveNamedLiteral(t, this, typeof(int)); .)
+    | "long"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(long)); .)
+    | "object"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(object)); .)
+    | "sbyte"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(sbyte)); .)
+    | "short"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(short)); .)
+    | "string"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(string)); .)
+    | "uint"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(uint)); .)
+    | "ulong"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(ulong)); .)
+    | "ushort"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(ushort)); .)
   )               (. expr = pml; .)
   "." 
   ident           (. pml.Name = t.val; .)
@@ -2509,7 +2508,7 @@ PrimitiveNamedLiteral<out Expression expr>  (. expr = null; .)
 // ------------------------------------------------------------------------------------
 NamedLiteral<out Expression expr>  (. expr = null; .)
 = 
-  ident        (. NamedLiteral nl = new NamedLiteral(t); .)
+  ident        (. NamedLiteral nl = new NamedLiteral(t, this); .)
                (. expr = nl; .)
                (. nl.Name = t.val; .)
   [ "::"       (. nl.IsGlobal = true; .)
@@ -2524,7 +2523,7 @@ NamedLiteral<out Expression expr>  (. expr = null; .)
 // ------------------------------------------------------------------------------------
 SimpleNamedLiteral<out NamedLiteral expr> 
 = 
-  ident        (. expr = new NamedLiteral(t); .)
+  ident        (. expr = new NamedLiteral(t, this); .)
   [ IF (IsGeneric()) TypeArgumentList<expr.TypeArguments> ]
 .
 
@@ -2535,7 +2534,7 @@ SimpleNamedLiteral<out NamedLiteral expr>
 BaseNamedLiteral<out Expression expr>  (. expr = null; .)
 = 
   "."       
-  ident    (. BaseNamedLiteral bnl = new BaseNamedLiteral(t); .)
+  ident    (. BaseNamedLiteral bnl = new BaseNamedLiteral(t, this); .)
            (. bnl.Name = t.val; .)
            (. expr = bnl; .)
    [ IF (IsGeneric()) TypeArgumentList<bnl.TypeArguments> ]
@@ -2547,7 +2546,7 @@ BaseNamedLiteral<out Expression expr>  (. expr = null; .)
 // ------------------------------------------------------------------------------------
 BaseIndexerOperator<out Expression expr>
 = 
-  "["                             (. BaseIndexerOperator bio = new BaseIndexerOperator(t); .)
+  "["                             (. BaseIndexerOperator bio = new BaseIndexerOperator(t, this); .)
                                   (. expr = bio; .)
                                   (. Expression indexExpr; .)
   Expression<out indexExpr>       (. bio.Indexes.Add(indexExpr); .) 
@@ -2563,7 +2562,7 @@ BaseIndexerOperator<out Expression expr>
 // ------------------------------------------------------------------------------------
 TypeOfOperator<out Expression expr>
 = 
-  "typeof"                   (. TypeOfOperator top = new TypeOfOperator(t); .)
+  "typeof"                   (. TypeOfOperator top = new TypeOfOperator(t, this); .)
   "("                        (. expr = top; .)
                              (. TypeReference typeRef; .)
     Type<out typeRef, true>  (. top.Type = typeRef; .)
@@ -2576,7 +2575,7 @@ TypeOfOperator<out Expression expr>
 // ------------------------------------------------------------------------------------
 SizeOfOperator<out Expression expr>
 = 
-  "sizeof"                   (. SizeOfOperator sop = new SizeOfOperator(t); .)
+  "sizeof"                   (. SizeOfOperator sop = new SizeOfOperator(t, this); .)
   "("                        (. expr = sop; .)
                              (. TypeReference typeRef; .)
     Type<out typeRef, true>  (. sop.Type = typeRef; .)
@@ -2589,7 +2588,7 @@ SizeOfOperator<out Expression expr>
 // ------------------------------------------------------------------------------------
 CheckedOperator<out Expression expr>
 = 
-  "checked"                     (. CheckedOperator cop = new CheckedOperator(t); .)
+  "checked"                     (. CheckedOperator cop = new CheckedOperator(t, this); .)
   "("                           (. expr = cop; .)
                                 (. Expression innerExpr; .)
     Expression<out innerExpr>   (. cop.Operand = innerExpr; .)
@@ -2602,7 +2601,7 @@ CheckedOperator<out Expression expr>
 // ------------------------------------------------------------------------------------
 UncheckedOperator<out Expression expr>
 = 
-  "unchecked"                   (. UncheckedOperator uop = new UncheckedOperator(t); .)
+  "unchecked"                   (. UncheckedOperator uop = new UncheckedOperator(t, this); .)
   "("                           (. expr = uop; .)
                                 (. Expression innerExpr; .)
     Expression<out innerExpr>   (. uop.Operand = innerExpr; .)
@@ -2615,7 +2614,7 @@ UncheckedOperator<out Expression expr>
 // ------------------------------------------------------------------------------------
 DefaultOperator<out Expression expr>
 = 
-  "default"                 (. DefaultOperator dop = new DefaultOperator(t); .)
+  "default"                 (. DefaultOperator dop = new DefaultOperator(t, this); .)
   "("                       (. expr = dop; .)
                             (. Expression innerExpr; .)
     Primary<out innerExpr>  (. dop.Operand = innerExpr; .)
@@ -2628,7 +2627,7 @@ DefaultOperator<out Expression expr>
 // ------------------------------------------------------------------------------------
 NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
 = 
-  "new"                           (. NewOperator nop = new NewOperator(t); .)
+  "new"                           (. NewOperator nop = new NewOperator(t, this); .)
                                   (. expr = nop; .)
                                   (. TypeReference typeRef; .)
   Type<out typeRef, false>        (. nop.Type = typeRef; .)
@@ -2669,7 +2668,7 @@ NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
 // ------------------------------------------------------------------------------------
 AnonymousDelegate<out Expression expr>  
 = 
-  "delegate"            (. AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t); .)
+  "delegate"            (. AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this); .)
                         (. CurrentElement = adop; .)
   [                     (. FormalParameter param; .)
     "(" 
@@ -2689,7 +2688,7 @@ AnonymousDelegate<out Expression expr>
 // Declaration of an anonymous method parameter.
 // +param: Parameter definition.
 // ------------------------------------------------------------------------------------
-AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParameter(t); .)
+AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParameter(t, this); .)
 =
   [                             
     "ref"                       (. param.Kind = FormalParameterKind.Ref; .) 
@@ -2744,7 +2743,7 @@ SingleFieldMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   TypeReference typeRef, bool isEvent>
 = 
   ident                      (. 
-                                FieldDeclaration fd = new FieldDeclaration(t); 
+                                FieldDeclaration fd = new FieldDeclaration(t, td); 
                                 CurrentElement = fd;
                                 fd.SetModifiers(m.Value);
                                 fd.AssignAttributes(attrs);
@@ -2810,7 +2809,7 @@ TypeParameter<out TypeParameter tp>
 =                                   (. AttributeCollection attrs = new AttributeCollection(); .)
   { Attributes<attrs> } 
   ident                             (. 
-                                       tp = new TypeParameter(t);
+                                       tp = new TypeParameter(t, this);
                                        tp.Name = t.val;
                                        tp.AssignAttributes(attrs);
                                     .)
@@ -2847,7 +2846,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint>
                                         Error("UNDEF", la, "type parameter constraints clause must start with: where");
                                    .)
   ident                            (. 
-                                      constraint = new TypeParameterConstraint(t); 
+                                      constraint = new TypeParameterConstraint(t, this); 
                                       constraint.Name = t.val;
                                    .)
   ":"                              (. 
@@ -2860,7 +2859,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint>
         "class"                    (. constraint.ParameterType = ParameterConstraintType.Class; .)
         | "struct"                 (. constraint.ParameterType = ParameterConstraintType.Struct; .)
       )                            (.
-                                      typeRef = new TypeReference(t);
+                                      typeRef = new TypeReference(t, this);
                                       typeRef.Name = t.val;
                                    .)
       | TypeName<out typeRef>                                   

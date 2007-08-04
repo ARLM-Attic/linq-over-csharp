@@ -30,7 +30,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="typeUsed">Type reference used by this using clause.</param>
     // --------------------------------------------------------------------------------
     public UsingClause(Token token, string name, TypeReference typeUsed): 
-      base (token, name)
+      base (token, typeUsed.Parser, name)
     {
       _TypeUsed = typeUsed;
     }

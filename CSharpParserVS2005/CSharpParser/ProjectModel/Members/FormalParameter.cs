@@ -20,14 +20,15 @@ namespace CSharpParser.ProjectModel
   /// This type represents a formal parameter declaration.
   /// </summary>
   // ==================================================================================
-  public class FormalParameter : AttributedElement
+  public class FormalParameter : AttributedElement, IVariableInfo
   {
     #region Private fields
 
     private FormalParameterKind _Kind;
     private bool _HasParams;
     private TypeReference _Type;
-    private VariableInfo _VariableInfo;
+    private VariableCategory _Category;
+    private bool _IsInitiallyAssigned;
 
     #endregion
 
@@ -38,9 +39,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new formal parameter declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public FormalParameter(Token token)
-      : base(token)
+    public FormalParameter(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
       Kind = FormalParameterKind.In;
     }
@@ -63,11 +65,10 @@ namespace CSharpParser.ProjectModel
       set
       {
         _Kind = value;
-        VariableCategory varcat = VariableCategory.ValueParameter;
-        if (_Kind == FormalParameterKind.Out) varcat = VariableCategory.OutputParameter;
-        else if (_Kind == FormalParameterKind.Ref) varcat = VariableCategory.ReferenceParameter;
-        _VariableInfo = 
-          new VariableInfo(varcat, varcat != VariableCategory.OutputParameter, Token);
+        _Category = VariableCategory.ValueParameter;
+        if (_Kind == FormalParameterKind.Out) _Category = VariableCategory.OutputParameter;
+        else if (_Kind == FormalParameterKind.Ref) _Category = VariableCategory.ReferenceParameter;
+        _IsInitiallyAssigned = _Category != VariableCategory.OutputParameter;
       }
     }
 
@@ -96,12 +97,32 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the variable information about this field.
+    /// Defines the category of the variable.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public VariableInfo VariableInfo
+    public VariableCategory Category
     {
-      get { return _VariableInfo; }
+      get { return _Category; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs if the variable is initially assigned or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsInitiallyAssigned
+    {
+      get { return _IsInitiallyAssigned; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Stores the declaration point (token) of the variable.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int DeclarationPosition
+    {
+      get { return Token.pos; }
     }
 
     #endregion

@@ -21,31 +21,7 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates an attributed element descriptor according to the info provided by the
-    /// specified token.
-    /// </summary>
-    /// <param name="token">Token providing information about the element.</param>
-    // --------------------------------------------------------------------------------
-    protected AttributedElement(Token token) : base(token)
-    {
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates an attributed element descriptor according to the info provided by the
-    /// specified token and name.
-    /// </summary>
-    /// <param name="token">Token providing information about the element.</param>
-    /// <param name="name">Language element name</param>
-    // --------------------------------------------------------------------------------
-    protected AttributedElement(Token token, string name)
-      : base(token, name)
-    {
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates an attributed element descriptor according to the info provided by the
+    /// Creates a language element descriptor according to the info provided by the
     /// specified token.
     /// </summary>
     /// <param name="token">Token providing information about the element.</param>
@@ -53,6 +29,21 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected AttributedElement(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
+    {
+    }
+
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a language element descriptor according to the info provided by the
+    /// specified token.
+    /// </summary>
+    /// <param name="token">Token providing information about the element.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
+    /// <param name="name">Name of the element.</param>
+    // --------------------------------------------------------------------------------
+    protected AttributedElement(Token token, CSharpSyntaxParser parser, string name)
+      : base(token, parser, name)
     {
     }
 

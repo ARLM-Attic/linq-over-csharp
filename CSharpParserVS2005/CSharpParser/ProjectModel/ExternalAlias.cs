@@ -16,10 +16,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new external alias declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
-    /// <param name="name">External alias name.</param>
+    /// <param name="parser">Parser used by the comment</param>
     // --------------------------------------------------------------------------------
-    public ExternalAlias(Token token, string name)
-      : base(token, name)
+    public ExternalAlias(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
     }
   }

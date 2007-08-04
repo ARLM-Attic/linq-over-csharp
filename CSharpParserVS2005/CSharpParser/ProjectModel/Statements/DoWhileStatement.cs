@@ -23,10 +23,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "do...while" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="parent">Parent block of the statement.</param>
     // --------------------------------------------------------------------------------
-    public DoWhileStatement(Token token, IBlockOwner parent)
-      : base(token, parent)
+    public DoWhileStatement(Token token, CSharpSyntaxParser parser, IBlockOwner parent)
+      : base(token, parser, parent)
     {
     }
 

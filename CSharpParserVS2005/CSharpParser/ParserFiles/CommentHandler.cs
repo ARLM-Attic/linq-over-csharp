@@ -49,6 +49,7 @@ namespace CSharpParser.ParserFiles
         text = text.Substring(1);
         comment = new XmlComment(
           commentToken,
+          _Parser,
           commentToken.line,
           commentToken.col + commentToken.val.Length,
           text);
@@ -57,6 +58,7 @@ namespace CSharpParser.ParserFiles
       {
         comment = new LineComment(
           commentToken,
+          _Parser,
           commentToken.line,
           commentToken.col + commentToken.val.Length,
           text);

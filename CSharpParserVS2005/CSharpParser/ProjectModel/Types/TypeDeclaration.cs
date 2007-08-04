@@ -485,8 +485,7 @@ namespace CSharpParser.ProjectModel
       }
       catch (ArgumentException)
       {
-        Parser.Error("CS0692", parameter.Token, 
-          String.Format("Duplicate type parameter '{0}'", parameter.Name));
+        Parser.Error0692(parameter.Token, parameter.Name);
       }
     }
 
@@ -504,10 +503,7 @@ namespace CSharpParser.ProjectModel
       }
       catch (ArgumentException)
       {
-        Parser.Error("CS0409", constraint.Token,
-          String.Format("A constraint clause has already been specified for type " + 
-          "parameter '{0}'. All of the constraints for a type parameter must be " +
-          "specified in a single where clause.", constraint.Name));
+        Parser.Error0409(constraint.Token, constraint.Name);
       }
     }
 
@@ -569,10 +565,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Consts.Contains(constDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
-                                                    String.Format(
-                                                      "The type '{0}' already contains a definition for '{1}'", Name,
-                                                      e.Item.Signature));
+          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -585,10 +578,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Fields.Contains(fieldDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
-                                                    String.Format(
-                                                      "The type '{0}' already contains a definition for '{1}'", Name,
-                                                      e.Item.Signature));
+          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -601,10 +591,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Constructors.Contains(ctorDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
-                                                    String.Format(
-                                                      "Type '{0}' already defines a member called '{1}' with the same parameter types",
-                                                      Name, e.Item.Signature));
+          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -617,10 +604,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_EventProperties.Contains(evPropDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
-                                                    String.Format(
-                                                      "The type '{0}' already contains a definition for '{1}'", Name,
-                                                      e.Item.Signature));
+          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -633,9 +617,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Indexers.Contains(indDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
-            String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
-                                                      Name, e.Item.Signature));
+          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -648,10 +630,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Properties.Contains(propDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0102", e.Item.Token,
-                                                    String.Format(
-                                                      "The type '{0}' already contains a definition for '{1}'", Name,
-                                                      e.Item.Signature));
+          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -664,9 +643,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Operators.Contains(operDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
-            String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
-                                                      Name, e.Item.Signature));
+          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -679,8 +656,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_CastOperators.Contains(castDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0557", e.Item.Token,
-            String.Format("Duplicate user-defined conversion in type '{0}'", Name));
+          Parser.Error0557(e.Item.Token, Name);
           e.Cancel = true;
           return;
         }
@@ -693,9 +669,7 @@ namespace CSharpParser.ProjectModel
       {
         if (_Methods.Contains(methodDecl))
         {
-          Parser.CompilationUnit.ErrorHandler.Error("CS0111", e.Item.Token,
-            String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
-                                                      Name, e.Item.Signature));
+          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
           e.Cancel = true;
           return;
         }
@@ -717,10 +691,7 @@ namespace CSharpParser.ProjectModel
       // --- Add member to the other members
       if (_Members.Contains(e.Item))
       {
-        Parser.CompilationUnit.ErrorHandler.Error("CS0101",
-          e.Item.Token,
-          String.Format("The namespace '{0}' already contains a definition for '{1}'",
-          Name, e.Item.Signature));
+        Parser.Error0101(e.Item.Token, Name, e.Item.Signature);
         e.Cancel = true;
       }
     }

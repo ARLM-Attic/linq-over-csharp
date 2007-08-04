@@ -9,13 +9,12 @@ namespace CSharpParser.ProjectModel
   /// This type represents a field member declaration.
   /// </summary>
   // ==================================================================================
-  public class FieldDeclaration : MemberDeclaration
+  public class FieldDeclaration : MemberDeclaration, IVariableInfo
   {
     #region Private fields
 
     private Initializer _Initializer;
     private bool _IsEvent;
-    private VariableInfo _VariableInfo;
 
     #endregion
 
@@ -26,9 +25,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new field member declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="declaringType">Type declaring this member.</param>
     // --------------------------------------------------------------------------------
-    public FieldDeclaration(Token token)
-      : base(token)
+    public FieldDeclaration(Token token, TypeDeclaration declaringType)
+      : base(token, declaringType)
     {
     }
 
@@ -70,30 +70,32 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the variable information about this field.
+    /// Defines the category of the variable.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public VariableInfo VariableInfo
+    public VariableCategory Category
     {
-      get { return _VariableInfo; }
+      get { return _IsStatic ? VariableCategory.Static : VariableCategory.Instance; }
     }
-
-    #endregion
-
-    #region Overridden methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// This method sets the variable category according to the field modifiers.
+    /// Signs if the variable is initially assigned or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public override void AfterSetModifiers()
+    public bool IsInitiallyAssigned
     {
-      // TODO: Make a distinction between class and struct types. See Section 12.1.2
-      VariableCategory varCat = _IsStatic
-        ? VariableCategory.Static
-        : VariableCategory.Instance;
-      _VariableInfo = new VariableInfo(varCat, _IsStatic, Token);
+      get { return _IsStatic; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Stores the declaration point (token) of the variable.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int DeclarationPosition
+    {
+      get { return Token.pos; }
     }
 
     #endregion

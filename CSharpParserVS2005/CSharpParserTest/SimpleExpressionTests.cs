@@ -24,10 +24,10 @@ namespace CSharpParserTest
 
       // int x = 6;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
       Assert.AreEqual(decl1.Name, "x");
-      Assert.IsNotNull(decl1.Initializer);
-      SimpleInitializer sin = decl1.Initializer as SimpleInitializer;
+      Assert.IsNotNull(decl1.Variable.Initializer);
+      SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
       Assert.IsNotNull(sin);
       Int32Constant con6 = sin.Expression as Int32Constant;
       Assert.AreEqual(con6.Value, 6);
@@ -47,10 +47,10 @@ namespace CSharpParserTest
 
       // int y = x = 8;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
       Assert.AreEqual(decl1.Name, "y");
-      Assert.IsNotNull(decl1.Initializer);
-      SimpleInitializer sin = decl1.Initializer as SimpleInitializer;
+      Assert.IsNotNull(decl1.Variable.Initializer);
+      SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
       Assert.IsNotNull(sin);
       AssignmentOperator asg = sin.Expression as AssignmentOperator;
       Assert.IsNotNull(asg);
@@ -75,10 +75,10 @@ namespace CSharpParserTest
 
       // int a1 = 2*3*4;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
       Assert.AreEqual(decl1.Name, "a1");
-      Assert.IsNotNull(decl1.Initializer);
-      SimpleInitializer sin = decl1.Initializer as SimpleInitializer;
+      Assert.IsNotNull(decl1.Variable.Initializer);
+      SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
       Assert.IsNotNull(sin);
       MultiplyOperator op1 = sin.Expression as MultiplyOperator;
       Assert.IsNotNull(op1);
@@ -106,10 +106,10 @@ namespace CSharpParserTest
 
       // int a2 = 2 + 3 + 4;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
       Assert.AreEqual(decl1.Name, "a2");
-      Assert.IsNotNull(decl1.Initializer);
-      SimpleInitializer sin = decl1.Initializer as SimpleInitializer;
+      Assert.IsNotNull(decl1.Variable.Initializer);
+      SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
       Assert.IsNotNull(sin);
       AddOperator op1 = sin.Expression as AddOperator;
       Assert.IsNotNull(op1);
@@ -137,10 +137,10 @@ namespace CSharpParserTest
 
       // int a3 = 2 + 3 * 4 + 5;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
       Assert.AreEqual(decl1.Name, "a3");
-      Assert.IsNotNull(decl1.Initializer);
-      SimpleInitializer sin = decl1.Initializer as SimpleInitializer;
+      Assert.IsNotNull(decl1.Variable.Initializer);
+      SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
       Assert.IsNotNull(sin);
       AddOperator op1 = sin.Expression as AddOperator;
       Assert.IsNotNull(op1);

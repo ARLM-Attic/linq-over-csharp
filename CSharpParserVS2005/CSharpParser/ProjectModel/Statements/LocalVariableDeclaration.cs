@@ -12,8 +12,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private TypeReference _ResultingType;
-    private Initializer _Initializer;
+    private readonly LocalVariable _Variable;
 
     #endregion
 
@@ -24,11 +23,13 @@ namespace CSharpParser.ProjectModel
     /// Creates a new local variable declaration statement.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public LocalVariableDeclaration(Token token, IBlockOwner parentBlock)
-      : base(token, parentBlock)
+    public LocalVariableDeclaration(Token token, CSharpSyntaxParser parser, IBlockOwner parentBlock)
+      : base(token, parser, parentBlock)
     {
+      _Variable = new LocalVariable(token, parser, parentBlock);
     }
 
     #endregion
@@ -37,24 +38,12 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type of the constant.
+    /// Gets the variable information for this declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference ResultingType
+    public LocalVariable Variable
     {
-      get { return _ResultingType; }
-      set { _ResultingType = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the initializer of this declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public Initializer Initializer
-    {
-      get { return _Initializer; }
-      set { _Initializer = value; }
+      get { return _Variable; }
     }
 
     #endregion
@@ -72,13 +61,13 @@ namespace CSharpParser.ProjectModel
       IResolutionRequired contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
-      if (_ResultingType != null)
+      if (_Variable.ResultingType != null)
       {
-        _ResultingType.ResolveTypeReferences(contextType, contextInstance);
+        _Variable.ResultingType.ResolveTypeReferences(contextType, contextInstance);
       }
-      if (_Initializer != null)
+      if (_Variable.Initializer != null)
       {
-        _Initializer.ResolveTypeReferences(contextType, contextInstance);
+        _Variable.Initializer.ResolveTypeReferences(contextType, contextInstance);
       }
     }
 

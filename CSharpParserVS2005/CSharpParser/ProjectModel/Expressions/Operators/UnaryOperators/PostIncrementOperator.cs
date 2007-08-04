@@ -14,9 +14,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new operator expression.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public PostIncrementOperator(Token token)
-      : base(token)
+    public PostIncrementOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
 
@@ -25,10 +25,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new operator using the specified operand.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="operand">LeftOperand of the operator</param>
     // --------------------------------------------------------------------------------
-    public PostIncrementOperator(Token token, Expression operand)
-      : base(token, operand)
+    public PostIncrementOperator(Token token, CSharpSyntaxParser parser, Expression operand)
+      : base(token, parser, operand)
     {
     } 
   }

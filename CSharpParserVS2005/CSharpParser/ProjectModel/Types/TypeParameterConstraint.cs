@@ -40,9 +40,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new parameter constraint declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public TypeParameterConstraint(Token token)
-      : base(token)
+    public TypeParameterConstraint(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
     }
 

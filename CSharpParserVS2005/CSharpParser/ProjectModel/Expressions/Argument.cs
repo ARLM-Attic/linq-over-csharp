@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new argument.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public Argument(Token token)
-      : base(token)
+    public Argument(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
       _Kind = FormalParameterKind.In;
     }

@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private Expression _Expression;
+    private readonly Expression _Expression;
 
     #endregion
 
@@ -23,10 +23,13 @@ namespace CSharpParser.ProjectModel
     /// Creates a new simple initializer instance.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
+    /// <param name="expr">Expression element creating this element</param>
     // --------------------------------------------------------------------------------
-    public SimpleInitializer(Token token)
-      : base(token)
+    public SimpleInitializer(Token token, CSharpSyntaxParser parser, Expression expr)
+      : base(token, parser)
     {
+      _Expression = expr;
     }
 
     #endregion
@@ -41,7 +44,6 @@ namespace CSharpParser.ProjectModel
     public Expression Expression
     {
       get { return _Expression; }
-      set { _Expression = value; }
     }
 
     #endregion

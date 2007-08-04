@@ -37,8 +37,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
+    <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
     <Compile Include="ProjectModel\TokenElement.cs" />
+    <Compile Include="ProjectModel\Variables\IVariableInfo.cs" />
+    <Compile Include="ProjectModel\Variables\LocalVariable.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="ParserFiles\CommentHandler.cs" />
     <Compile Include="ParserFiles\PragmaHandler.cs" />
@@ -225,7 +229,6 @@
     <Compile Include="Semantics\ResolutionTarget.cs" />
     <Compile Include="Semantics\SemanticsParser.cs" />
     <Compile Include="ProjectModel\Variables\VariableCategory.cs" />
-    <Compile Include="ProjectModel\Variables\VariableInfo.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />

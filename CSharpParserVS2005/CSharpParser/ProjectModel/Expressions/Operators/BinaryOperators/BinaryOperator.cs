@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
@@ -24,9 +25,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new unary operator.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    protected BinaryOperator(Token token)
-      : base(token)
+    protected BinaryOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
 
@@ -38,8 +39,9 @@ namespace CSharpParser.ProjectModel
     /// <param name="leftOperand">Left operand of the operator</param>
     // --------------------------------------------------------------------------------
     public BinaryOperator(Token token, Expression leftOperand)
-      : base(token)
+      : base(token, leftOperand.Parser)
     {
+      if (leftOperand == null) throw new ArgumentNullException("leftOperand");
       _LeftOperand = leftOperand;
     }
 
@@ -52,9 +54,11 @@ namespace CSharpParser.ProjectModel
     /// <param name="rightOperand">Right operand of the operator</param>
     // --------------------------------------------------------------------------------
     protected BinaryOperator(Token token, Expression leftOperand, Expression rightOperand)
-      : base(token)
+      : base(token, leftOperand.Parser)
     {
+      if (leftOperand == null) throw new ArgumentNullException("leftOperand");
       _LeftOperand = leftOperand;
+      if (rightOperand == null) throw new ArgumentNullException("rightOperand");
       _RightOperand = rightOperand;
     }
 

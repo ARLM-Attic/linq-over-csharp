@@ -14,9 +14,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "true" literal.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public TrueLiteral(Token token)
-      : base(token)
+    public TrueLiteral(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
   }

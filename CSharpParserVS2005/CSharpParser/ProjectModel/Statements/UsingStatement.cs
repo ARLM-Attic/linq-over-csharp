@@ -25,10 +25,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "using" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="parent">Parent block of the statement.</param>
     // --------------------------------------------------------------------------------
-    public UsingStatement(Token token, IBlockOwner parent)
-      : base(token, parent)
+    public UsingStatement(Token token, CSharpSyntaxParser parser, IBlockOwner parent)
+      : base(token, parser, parent)
     {
     }
 
@@ -79,7 +80,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateResourceDeclarations(Token t)
     {
-      _ResourceDeclarations = new BlockStatement(t, ParentBlock);
+      _ResourceDeclarations = new BlockStatement(t, Parser, ParentBlock);
       _ResourceDeclarations.SetParent(this);
     }
 

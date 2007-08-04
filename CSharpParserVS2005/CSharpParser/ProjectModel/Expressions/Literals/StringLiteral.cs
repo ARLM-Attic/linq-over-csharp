@@ -18,9 +18,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new string constant.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public StringLiteral(Token token)
-      : base(token)
+    public StringLiteral(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
       if (token.val.EndsWith(@""""))
       {

@@ -27,9 +27,13 @@ namespace CSharpParser.ProjectModel
     /// Creates a new attribute declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
+    /// <param name="type">Attribute type</param>
     // --------------------------------------------------------------------------------
-    public AttributeDeclaration(Token token): base (token)
+    public AttributeDeclaration(Token token, CSharpSyntaxParser parser, TypeReference type): 
+      base (token, parser)
     {
+      _TypeReference = type;
     }
 
     #endregion

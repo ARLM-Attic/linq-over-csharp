@@ -28,12 +28,13 @@ namespace CSharpParser.ProjectModel
     /// Creates a new comment instance.
     /// </summary>
     /// <param name="token">Start token of the comment.</param>
+    /// <param name="parser">Parser used by the comment</param>
     /// <param name="endLine">Ending line.</param>
     /// <param name="endColumn">Ending column.</param>
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    protected CommentInfo(Token token, int endLine, int endColumn, 
-      string text): base(token)
+    protected CommentInfo(Token token, CSharpSyntaxParser parser, int endLine, 
+      int endColumn, string text): base(token, parser)
     {
       _EndLine = endLine;
       _EndColumn = endColumn;
@@ -100,13 +101,15 @@ namespace CSharpParser.ProjectModel
     /// Creates a new comment instance.
     /// </summary>
     /// <param name="token">Start token of the comment.</param>
+    /// <param name="parser">Parser used by the comment</param>
     /// <param name="endLine">Ending line.</param>
     /// <param name="endColumn">Ending column.</param>
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public LineComment(Token token, int endLine, int endColumn, string text)
+    public LineComment(Token token, CSharpSyntaxParser parser, int endLine, 
+      int endColumn, string text)
       : 
-      base(token, endLine, endColumn, text)
+      base(token, parser, endLine, endColumn, text)
     {
     }
   }
@@ -123,12 +126,14 @@ namespace CSharpParser.ProjectModel
     /// Creates a new comment instance.
     /// </summary>
     /// <param name="token">Start token of the comment.</param>
+    /// <param name="parser">Parser used by the comment</param>
     /// <param name="endLine">Ending line.</param>
     /// <param name="endColumn">Ending column.</param>
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public BlockComment(Token token, int endLine, int endColumn, string text)
-      : base(token, endLine, endColumn, text)
+    public BlockComment(Token token, CSharpSyntaxParser parser, int endLine, 
+      int endColumn, string text)
+      : base(token, parser, endLine, endColumn, text)
     {
     }
   }
@@ -145,12 +150,14 @@ namespace CSharpParser.ProjectModel
     /// Creates a new comment instance.
     /// </summary>
     /// <param name="token">Start token of the comment.</param>
+    /// <param name="parser">Parser used by the comment</param>
     /// <param name="endLine">Ending line.</param>
     /// <param name="endColumn">Ending column.</param>
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public XmlComment(Token token, int endLine, int endColumn, string text)
-      : base(token, endLine, endColumn, text)
+    public XmlComment(Token token, CSharpSyntaxParser parser, int endLine, 
+      int endColumn, string text)
+      : base(token, parser, endLine, endColumn, text)
     {
     }
   }

@@ -16,9 +16,9 @@ namespace CSharpParser.ProjectModel
     /// specified token.
     /// </summary>
     /// <param name="token">Token providing information about the element.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public TypeParameter(Token token)
-      : base(token)
+    public TypeParameter(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
   }

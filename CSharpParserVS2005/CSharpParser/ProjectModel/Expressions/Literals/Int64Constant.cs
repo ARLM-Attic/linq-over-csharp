@@ -17,10 +17,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new UInt64 constant.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="value">Value to initiate with.</param>
     // --------------------------------------------------------------------------------
-    public Int64Constant(Token token, Int64 value)
-      : base(token)
+    public Int64Constant(Token token, CSharpSyntaxParser parser, Int64 value)
+      : base(token, parser)
     {
       _Value = value;
     }

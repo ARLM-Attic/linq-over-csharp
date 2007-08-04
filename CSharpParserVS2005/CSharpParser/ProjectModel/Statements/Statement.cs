@@ -16,7 +16,7 @@ namespace CSharpParser.ProjectModel
     private int _Depth;
     private string _Label;
     private Statement _Parent;
-    private IBlockOwner _ParentBlock;
+    private readonly IBlockOwner _ParentBlock;
 
     #endregion
 
@@ -27,10 +27,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    protected Statement(Token token, IBlockOwner parentBlock)
-      : base(token)
+    protected Statement(Token token, CSharpSyntaxParser parser, IBlockOwner parentBlock)
+      : base(token, parser)
     {
       _ParentBlock = parentBlock;
       _Depth = 0;

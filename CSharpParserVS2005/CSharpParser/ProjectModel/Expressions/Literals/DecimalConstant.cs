@@ -17,10 +17,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new Decimal constant.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="value">Value to initiate with.</param>
     // --------------------------------------------------------------------------------
-    public DecimalConstant(Token token, Decimal value)
-      : base(token)
+    public DecimalConstant(Token token, CSharpSyntaxParser parser, Decimal value)
+      : base(token, parser)
     {
       _Value = value;
     }

@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
@@ -23,21 +24,22 @@ namespace CSharpParser.ProjectModel
     /// Creates a new unary operator.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    protected UnaryOperator(Token token)
-      : base(token)
+    protected UnaryOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
-
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new operator using the specified operand.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="operand">LeftOperand of the operator</param>
     // --------------------------------------------------------------------------------
-    public UnaryOperator(Token token, Expression operand)
-      : base(token)
+    public UnaryOperator(Token token, CSharpSyntaxParser parser, Expression operand)
+      : base(token, parser)
     {
       Operand = operand;
     }

@@ -16,9 +16,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new destructor declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="declaringType">Type declaring this member.</param>
     // --------------------------------------------------------------------------------
-    public FinalizerDeclaration(Token token)
-      : base(token)
+    public FinalizerDeclaration(Token token, TypeDeclaration declaringType)
+      : base(token, declaringType)
     {
     }
 

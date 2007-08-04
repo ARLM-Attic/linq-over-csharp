@@ -14,9 +14,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new operator expression.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public PointerOperator(Token token)
-      : base(token)
+    public PointerOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
   }

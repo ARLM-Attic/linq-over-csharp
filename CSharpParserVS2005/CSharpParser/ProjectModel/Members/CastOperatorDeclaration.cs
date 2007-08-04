@@ -23,9 +23,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new cast operator declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="declaringType">Type declaring this member.</param>
     // --------------------------------------------------------------------------------
-    public CastOperatorDeclaration(Token token)
-      : base(token)
+    public CastOperatorDeclaration(Token token, TypeDeclaration declaringType)
+      : base(token, declaringType)
     {
     }
 

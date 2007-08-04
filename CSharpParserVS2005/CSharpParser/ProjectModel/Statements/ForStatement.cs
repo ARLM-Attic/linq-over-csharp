@@ -26,10 +26,11 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "for" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="parent">Parent block of the statement.</param>
     // --------------------------------------------------------------------------------
-    public ForStatement(Token token, IBlockOwner parent)
-      : base(token, parent)
+    public ForStatement(Token token, CSharpSyntaxParser parser, IBlockOwner parent)
+      : base(token, parser, parent)
     {
     }
 
@@ -80,7 +81,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateInitializerBlock(Token t)
     {
-      _InitializerBlock = new BlockStatement(t, ParentBlock);  
+      _InitializerBlock = new BlockStatement(t, Parser, ParentBlock);  
       _InitializerBlock.SetParent(this);
     }
 
@@ -92,7 +93,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CreateIteratorBlock(Token t)
     {
-      _IteratorBlock = new BlockStatement(t, ParentBlock);
+      _IteratorBlock = new BlockStatement(t, Parser, ParentBlock);
       _IteratorBlock.SetParent(this);
     }
 

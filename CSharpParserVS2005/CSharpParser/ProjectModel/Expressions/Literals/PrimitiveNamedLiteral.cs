@@ -24,12 +24,13 @@ namespace CSharpParser.ProjectModel
     /// Creates a new primitive method literal with the specified type.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="type">Type of the literal</param>
     // --------------------------------------------------------------------------------
-    public PrimitiveNamedLiteral(Token token, Type type)
-      : base(token)
+    public PrimitiveNamedLiteral(Token token, CSharpSyntaxParser parser, Type type)
+      : base(token, parser)
     {
-      _Type = new TypeReference(token, type);
+      _Type = new TypeReference(token, parser, type);
     }
 
     #endregion

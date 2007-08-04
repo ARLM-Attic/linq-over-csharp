@@ -12,8 +12,8 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private TypeReference _ItemType;
     private Expression _Expression;
+    private readonly LocalVariable _Variable;
 
     #endregion
 
@@ -24,11 +24,14 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "foreach" statement declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     /// <param name="parentBlock">Block owning this statement.</param>
     // --------------------------------------------------------------------------------
-    public ForEachStatement(Token token, IBlockOwner parentBlock)
-      : base(token, parentBlock)
+    public ForEachStatement(Token token, CSharpSyntaxParser parser, IBlockOwner parentBlock)
+      : base(token, parser, parentBlock)
     {
+      _Variable = new LocalVariable(token, parser, parentBlock);
+      _Variable.IsInitiallyAssigned = true;
     }
 
     #endregion
@@ -37,15 +40,14 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type of foreach items.
+    /// Gets the foreach variable
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference ItemType
+    public LocalVariable Variable
     {
-      get { return _ItemType; }
-      set { _ItemType = value; }
-    }
-
+      get { return _Variable; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the container expression of foreach statement.
@@ -56,6 +58,11 @@ namespace CSharpParser.ProjectModel
       get { return _Expression; }
       set { _Expression = value; }
     }
+
+    #endregion
+
+    #region Public methods
+
 
     #endregion
 
@@ -72,9 +79,9 @@ namespace CSharpParser.ProjectModel
       IResolutionRequired contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
-      if (_ItemType != null)
+      if (_Variable.ResultingType != null)
       {
-        _ItemType.ResolveTypeReferences(contextType, contextInstance);
+        _Variable.ResultingType.ResolveTypeReferences(contextType, contextInstance);
       }
       if (_Expression != null)
       {

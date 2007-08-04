@@ -265,7 +265,12 @@
     <None Include="TestFiles\Members\DuplicateCastOperator.cs" />
     <None Include="TestFiles\Members\DuplicateField.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable1.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable2.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable3.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable4.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
+    <Compile Include="Variables\Variables.cs" />
     <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />

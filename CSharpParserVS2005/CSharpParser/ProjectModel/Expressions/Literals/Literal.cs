@@ -14,11 +14,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new literal expression.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    protected Literal(Token token)
-      : base(token)
+    protected Literal(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
-      Name = token.val;
     }
   }
 }

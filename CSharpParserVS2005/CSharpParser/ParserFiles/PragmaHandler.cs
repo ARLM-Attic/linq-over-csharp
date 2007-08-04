@@ -118,7 +118,7 @@ namespace CSharpParser.ParserFiles
       if (!CheckPragmaIsFirstInLine(pragma)) return;
       if (_FirstRealTokenOccurred)
       {
-        DefineAndUndefError();
+        _Parser.Error1032(_Parser.Lookahead);
         return;
       }
       string symbol = GetPreprocessorSymbol(pragma.val);
@@ -136,7 +136,7 @@ namespace CSharpParser.ParserFiles
       if (!CheckPragmaIsFirstInLine(pragma)) return;
       if (_FirstRealTokenOccurred)
       {
-        DefineAndUndefError();
+        _Parser.Error1032(_Parser.Lookahead);
         return;
       }
       _Parser.CompilationUnit.RemoveConditionalDirective(GetPreprocessorSymbol(pragma.val));
@@ -262,8 +262,7 @@ namespace CSharpParser.ParserFiles
           }
         }
       }
-      _Parser.CompilationUnit.ErrorHandler.
-        Error("CS1576", pragma, "The line number specified for #line directive is missing or invalid.");
+      _Parser.Error1576(pragma);
     }
 
     // --------------------------------------------------------------------------------
@@ -275,8 +274,7 @@ namespace CSharpParser.ParserFiles
     public void ErrorPragma(Token pragma)
     {
       if (!CheckPragmaIsFirstInLine(pragma)) return;
-      _Parser.CompilationUnit.ErrorHandler.
-        Error("CS1029", pragma, "#error: " + GetPreprocessorText(pragma.val));
+      _Parser.Error1029(pragma, GetPreprocessorText(pragma.val));
     }
 
     // --------------------------------------------------------------------------------
@@ -331,7 +329,7 @@ namespace CSharpParser.ParserFiles
       if (!CheckPragmaIsFirstInLine(pragma)) return;
       if (_RegionStack.Count == 0)
       {
-        ReportUnexpectedDirective();
+        _Parser.Error1028(pragma);
         return;
       }
       RegionInfo regInfo = _RegionStack.Pop();
@@ -359,7 +357,7 @@ namespace CSharpParser.ParserFiles
         if (symbol.kind == CSharpSyntaxParser.ppEndifKind || !status.ElseBlockFound)
           return false;
       }
-      ReportUnexpectedDirective();
+      _Parser.Error1028(symbol);
       return true;
     }
 
@@ -373,7 +371,7 @@ namespace CSharpParser.ParserFiles
     private bool CheckPragmaIsFirstInLine(Token symbol)
     {
       if (_Parser.CheckTokenIsFirstInLine(symbol)) return true;
-      _Parser.Error("CS1040", symbol, "Preprocessor directives must appear as the first non-whitespace character on a line.");
+      _Parser.Error1040(symbol);
       return false;
     }
 
@@ -441,26 +439,6 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Raises the CS1028 error.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    private void ReportUnexpectedDirective()
-    {
-      _Parser.Error("CS1028", _Parser.Lookahead, "Unexpected preprocessor directive.");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Raises the CS1032 error.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    private void DefineAndUndefError()
-    {
-      _Parser.Error("CS1032", _Parser.Lookahead, "Cannot define/undefine preprocessor symbols after first token in file.");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Evaluates the specified pragma condition.
     /// </summary>
     /// <param name="pragma">Pragma condition</param>
@@ -472,7 +450,7 @@ namespace CSharpParser.ParserFiles
       PPEvaluationStatus evalStatus = _Parser.CompilationUnit.EvaluatePreprocessorExpression(symbol);
       if (evalStatus == PPEvaluationStatus.Failed)
       {
-        _Parser.Error("CS1517", pragma, "Invalid preprocessor expression");
+        _Parser.Error1517(pragma);
       }
       return evalStatus;
     }

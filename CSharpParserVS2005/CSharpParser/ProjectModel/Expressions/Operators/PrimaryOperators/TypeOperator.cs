@@ -23,9 +23,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new operator expression.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public TypeOperator(Token token)
-      : base(token)
+    public TypeOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
 
@@ -37,7 +37,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="type">Type used by the operator</param>
     // --------------------------------------------------------------------------------
     public TypeOperator(Token token, TypeReference type)
-      : base(token)
+      : base(token, type.Parser)
     {
       _Type = type;
     }

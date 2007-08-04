@@ -38,5 +38,27 @@ namespace CSharpParser.ProjectModel
     /// <param name="statement">Statement to add.</param>
     // --------------------------------------------------------------------------------
     void Add(Statement statement);
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list ob child block in this one.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    List<IBlockOwner> ChildBlocks { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of variables belonging to this block.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    VariableCollection Variables { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new localVariable the block.
+    /// </summary>
+    /// <param name="localVariable">Variable to add to the block.</param>
+    // --------------------------------------------------------------------------------
+    void Add(LocalVariable localVariable);
   }
 }

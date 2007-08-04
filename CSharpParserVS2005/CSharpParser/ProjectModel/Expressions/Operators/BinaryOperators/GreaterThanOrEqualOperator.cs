@@ -14,12 +14,12 @@ namespace CSharpParser.ProjectModel
     /// Creates a new unary operator.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public GreaterThanOrEqualOperator(Token token)
-      : base(token)
+    public GreaterThanOrEqualOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
-    }
-
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new operator using the specified left operand.

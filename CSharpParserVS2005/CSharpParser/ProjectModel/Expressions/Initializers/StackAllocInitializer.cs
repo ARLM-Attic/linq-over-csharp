@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new "stackalloc" initializer instance.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public StackAllocInitializer(Token token)
-      : base(token)
+    public StackAllocInitializer(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
     }
 

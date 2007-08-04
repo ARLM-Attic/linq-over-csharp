@@ -33,5 +33,19 @@ namespace CSharpParser.ProjectModel
       get { return _IsPartial; }
       set { _IsPartial = value; }
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Overrides the name property to use generic notation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string Name
+    {
+      get
+      {
+        if (!_IsPartial) return base.Name;
+        return base.Name + "|" + Namespace.ParentFile.Name + "|" + Token.pos;
+      }
+    }
   }
 }

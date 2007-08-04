@@ -203,10 +203,7 @@ namespace CSharpParser.ProjectModel
       }
       catch (ArgumentException)
       {
-        _ParentUnit.ErrorHandler.Error("CS0101",
-          e.Item.Token,
-          String.Format("The namespace '{0}' already contains a definition for '{1}'",
-          Name, e.Item.FullName));
+        _ParentUnit.Parser.Error0101(e.Item.Token, Name, e.Item.FullName);
       }
     }
 

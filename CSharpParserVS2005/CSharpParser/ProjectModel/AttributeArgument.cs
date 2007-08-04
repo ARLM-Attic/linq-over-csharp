@@ -24,9 +24,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new argument.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public AttributeArgument(Token token)
-      : base(token)
+    public AttributeArgument(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
     }
 

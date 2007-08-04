@@ -18,9 +18,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new char constant.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public CharLiteral(Token token)
-      : base(token)
+    public CharLiteral(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
       if (token.val.StartsWith("'") && token.val.EndsWith("'"))
         _Value = StringHelper.CharFromCSharpLiteral(token.val.Substring(1, token.val.Length - 2));

@@ -13,6 +13,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
+    private readonly TypeDeclaration _DeclaringType;
     private Visibility _Visibility;
     private bool _DefaultVisibility;
     private TypeReference _ResultingType;
@@ -37,15 +38,27 @@ namespace CSharpParser.ProjectModel
     /// Creates a new type member declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="declaringType">Type declaring this member.</param>
     // --------------------------------------------------------------------------------
-    protected MemberDeclaration(Token token)
-      : base(token)
+    protected MemberDeclaration(Token token, TypeDeclaration declaringType)
+      : base(token, declaringType.Parser)
     {
+      _DeclaringType = declaringType;
     }
 
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type declaring this member.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeDeclaration DeclaringType
+    {
+      get { return _DeclaringType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

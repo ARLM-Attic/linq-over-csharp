@@ -26,20 +26,7 @@ namespace CSharpParser.ProjectModel
     /// specified token.
     /// </summary>
     /// <param name="token">Token providing information about the element.</param>
-    // --------------------------------------------------------------------------------
-    protected LanguageElement(Token token)
-    {
-      _Token = token;
-      _Name = token.val;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a language element descriptor according to the info provided by the
-    /// specified token.
-    /// </summary>
-    /// <param name="token">Token providing information about the element.</param>
-    /// <param name="parser">Parser instance</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
     protected LanguageElement(Token token, CSharpSyntaxParser parser)
     {
@@ -51,14 +38,15 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a language element descriptor according to the info provided by the
-    /// specified token and name.
+    /// specified token.
     /// </summary>
     /// <param name="token">Token providing information about the element.</param>
-    /// <param name="name">Language element name</param>
+    /// <param name="parser">Parser instance creating this element.</param>
+    /// <param name="name">Name of the element.</param>
     // --------------------------------------------------------------------------------
-    protected LanguageElement(Token token, string name)
+    protected LanguageElement(Token token, CSharpSyntaxParser parser, string name):
+      this(token, parser)
     {
-      _Token = token;
       _Name = name;
     }
 

@@ -36,13 +36,15 @@ namespace CSharpParser.ProjectModel
     /// Creates a new namespace belonging to a file.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by the comment</param>
     /// <param name="name">Name of the namespace (relative to the parent).</param>
     /// <param name="parentNamespace">Parent namespace of this namespace.</param>
     /// <param name="parentFile">Parent file defining this namespace.</param>
     // --------------------------------------------------------------------------------
-    public NamespaceFragment(Token token, string name, NamespaceFragment parentNamespace, 
-      SourceFile parentFile): base(token, name)
+    public NamespaceFragment(Token token, CSharpSyntaxParser parser, string name, 
+      NamespaceFragment parentNamespace, SourceFile parentFile): base(token, parser)
     {
+      Name = name;
       _ParentNamespace = parentNamespace;
 
       // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
@@ -84,6 +86,16 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the file where the namespace has been declared.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceFile ParentFile
+    {
+      get { return _ParentFile; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the full name of this namespace.
@@ -211,10 +223,7 @@ namespace CSharpParser.ProjectModel
       }
       catch (ArgumentException)
       {
-        _ParentFile.ParentUnit.ErrorHandler.Error("CS0101", 
-          item.Token,
-          String.Format("The namespace '{0}' already contains a definition for '{1}'",
-          Name, item.FullName));
+        Parser.Error0101(item.Token, Name, item.FullName);
       }
     }
 

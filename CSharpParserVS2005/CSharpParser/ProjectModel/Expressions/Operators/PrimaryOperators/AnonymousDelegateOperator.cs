@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
@@ -14,6 +15,8 @@ namespace CSharpParser.ProjectModel
 
     private readonly FormalParameterCollection _FormalParameters = new FormalParameterCollection();
     private readonly StatementCollection _Statements;
+    private readonly VariableCollection _Variables = new VariableCollection();
+    private readonly List<IBlockOwner> _ChildBlocks = new List<IBlockOwner>();
 
     #endregion
 
@@ -24,9 +27,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new operator expression.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public AnonymousDelegateOperator(Token token)
-      : base(token)
+    public AnonymousDelegateOperator(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
       Name = string.Empty;
       _Statements = new StatementCollection(null);
@@ -89,6 +93,42 @@ namespace CSharpParser.ProjectModel
     public void Add(Statement statement)
     {
       Statements.Add(statement);
+      IBlockOwner blockStatement = statement as IBlockOwner;
+      if (blockStatement != null)
+      {
+        _ChildBlocks.Add(blockStatement);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list ob child block in this one.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<IBlockOwner> ChildBlocks
+    {
+      get { return _ChildBlocks; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of variables belonging to this block.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public VariableCollection Variables
+    {
+      get { return _Variables; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new variable the block.
+    /// </summary>
+    /// <param name="localVariable">Variable to add to the block.</param>
+    // --------------------------------------------------------------------------------
+    public void Add(LocalVariable localVariable)
+    {
+      BlockStatement.AddVariableToBlock(this, localVariable);
     }
 
     #endregion

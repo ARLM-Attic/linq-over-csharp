@@ -25,9 +25,10 @@ namespace CSharpParser.ProjectModel
     /// Creates a new property member declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="declaringType">Type declaring this member.</param>
     // --------------------------------------------------------------------------------
-    public PropertyDeclaration(Token token)
-      : base(token)
+    public PropertyDeclaration(Token token, TypeDeclaration declaringType)
+      : base(token, declaringType)
     {
     }
 

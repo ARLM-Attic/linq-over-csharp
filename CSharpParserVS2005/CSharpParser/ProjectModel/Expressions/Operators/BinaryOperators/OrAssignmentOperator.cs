@@ -14,9 +14,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new unary operator.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public OrAssignmentOperator(Token token)
-      : base(token)
+    public OrAssignmentOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
 

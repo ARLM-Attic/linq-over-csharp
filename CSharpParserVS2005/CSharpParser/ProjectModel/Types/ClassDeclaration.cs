@@ -155,9 +155,7 @@ namespace CSharpParser.ProjectModel
     {
       if (HasFinalizer)
       {
-        Parser.CompilationUnit.ErrorHandler.Error("CS0111", finalizer.Token,
-          String.Format("Type '{0}' already defines a member called '{1}' with the same parameter types",
-          Name, finalizer.Signature));
+        Parser.Error0111(finalizer.Token, Name, finalizer.Signature);
         return true;
       }
       _Finalizer = finalizer;

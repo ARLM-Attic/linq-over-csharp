@@ -23,13 +23,15 @@ namespace CSharpParser.ProjectModel
     /// Creates a new comment instance.
     /// </summary>
     /// <param name="token">Start token of the comment.</param>
+    /// <param name="parser">Parser used by the comment</param>
     /// <param name="endLine">Ending line.</param>
     /// <param name="endColumn">Ending column.</param>
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public MultiCommentBlock(Token token, int endLine, int endColumn, string text)
+    public MultiCommentBlock(Token token, CSharpSyntaxParser parser, int endLine, 
+      int endColumn, string text)
       : 
-      base(token, endLine, endColumn, text)
+      base(token, parser, endLine, endColumn, text)
     {
     }
 
@@ -41,7 +43,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public MultiCommentBlock(CommentInfo comment)
       :
-      base (comment.Token, comment.EndLine, comment.EndColumn, comment.Text)
+      base (comment.Token, comment.Parser, comment.EndLine, comment.EndColumn, comment.Text)
     {
       AttachComment(comment);
     }

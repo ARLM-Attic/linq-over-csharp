@@ -17,9 +17,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new unary operator.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    protected PrimaryOperator(Token token)
-      : base(token)
+    protected PrimaryOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
   }

@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private Expression _Condition;
+    private readonly Expression _Condition;
     private Expression _TrueExpression;
     private Expression _FalseExpression;
 
@@ -25,10 +25,13 @@ namespace CSharpParser.ProjectModel
     /// Creates a new operator expression.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance creating this element.</param>
+    /// <param name="expr">Conditional expression</param>
     // --------------------------------------------------------------------------------
-    public ConditionalOperator(Token token)
-      : base(token)
+    public ConditionalOperator(Token token,CSharpSyntaxParser parser, Expression expr)
+      : base(token, parser)
     {
+      _Condition = expr;
     }
 
     #endregion
@@ -43,7 +46,6 @@ namespace CSharpParser.ProjectModel
     public Expression Condition
     {
       get { return _Condition; }
-      set { _Condition = value; }
     }
 
     // --------------------------------------------------------------------------------

@@ -20,7 +20,7 @@ namespace CSharpParser.ProjectModel
     private TypeReference _SubType;
     private TypeKind _Kind;
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
-    private ResolutionInfo _ResolutionInfo;
+    private readonly ResolutionInfo _ResolutionInfo;
 
     #endregion
 
@@ -31,8 +31,9 @@ namespace CSharpParser.ProjectModel
     /// Creates a new type reference instance.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public TypeReference(Token token) : base(token)
+    public TypeReference(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
       _Kind = TypeKind.simple;
       Name = token.val;
@@ -49,10 +50,11 @@ namespace CSharpParser.ProjectModel
     /// specified type.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
     /// <param name="type">Type this reference is resolved to.</param>
     // --------------------------------------------------------------------------------
-    public TypeReference(Token token, Type type)
-      : this(token)
+    public TypeReference(Token token, CSharpSyntaxParser parser, Type type)
+      : this(token, parser)
     {
       ResolveToType(type);
     }
