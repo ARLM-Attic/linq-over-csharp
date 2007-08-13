@@ -92,6 +92,7 @@ namespace CSharpParser.ProjectModel
     {
       _TryBlock = new BlockStatement(t, Parser, ParentBlock);
       _TryBlock.SetParent(this);
+      ParentBlock.ChildBlocks.Add(_TryBlock);
     }
 
     // --------------------------------------------------------------------------------
@@ -104,6 +105,7 @@ namespace CSharpParser.ProjectModel
     {
       _FinallyBlock = new BlockStatement(t, Parser, ParentBlock);
       _FinallyBlock.SetParent(this);
+      ParentBlock.ChildBlocks.Add(_FinallyBlock);
     }
 
     // --------------------------------------------------------------------------------
@@ -118,6 +120,7 @@ namespace CSharpParser.ProjectModel
       CatchClause result = new CatchClause(t, Parser, ParentBlock);  
       result.SetParent(this);
       _CatchClauses.Add(result);
+      ParentBlock.ChildBlocks.Add(result);
       return result;
     }
 

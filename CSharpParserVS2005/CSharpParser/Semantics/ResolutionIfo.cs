@@ -105,7 +105,7 @@ namespace CSharpParser.Semantics
     /// Gets the object of the successfully resolving this name or type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public object Resolver
+    public ITypeCharacteristics Resolver
     {
       get
       {
@@ -146,7 +146,7 @@ namespace CSharpParser.Semantics
 
     public readonly ResolutionTarget Target;
     public readonly ResolutionMode Mode;
-    public readonly object Resolver;
+    public readonly ITypeCharacteristics Resolver;
 
     #endregion
 
@@ -160,7 +160,8 @@ namespace CSharpParser.Semantics
     /// <param name="mode">Mode of resolution</param>
     /// <param name="resolver">Object resolving the name or type.</param>
     // --------------------------------------------------------------------------------
-    public ResolutionItem(ResolutionTarget target, ResolutionMode mode, object resolver)
+    public ResolutionItem(ResolutionTarget target, ResolutionMode mode, 
+      ITypeCharacteristics resolver)
     {
       Target = target;
       Mode = mode;

@@ -35,6 +35,7 @@
       <HintPath>..\..\..\..\Windows\assembly\GAC_MSIL\Microsoft.VisualStudio.QualityTools.UnitTestFramework\8.0.0.0__b03f5f7f11d50a3a\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -269,8 +270,21 @@
     <None Include="TestFiles\Variables\DuplicatedVariable2.cs" />
     <None Include="TestFiles\Variables\DuplicatedVariable3.cs" />
     <None Include="TestFiles\Variables\DuplicatedVariable4.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable5.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable6.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable7.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable8.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable9.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessCombination1.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessCombination2.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier1.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier2.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier3.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier4.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier5.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
+    <Compile Include="Visibility\Visibility.cs" />
     <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />

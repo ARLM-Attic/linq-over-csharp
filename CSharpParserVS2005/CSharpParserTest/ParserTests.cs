@@ -90,28 +90,28 @@ namespace CSharpParserTest
       ConstDeclaration cd = td.Members[0] as ConstDeclaration;
       Assert.IsNotNull(cd);
       Assert.AreEqual(cd.Name, "a");
-      Assert.AreEqual(cd.Visibility, Visibility.Private);
+      Assert.AreEqual(cd.DeclaredVisibility, Visibility.Private);
       Assert.AreEqual(cd.ResultingType.Name, "int");
       Assert.IsFalse(cd.IsNew);
 
       cd = td.Members[1] as ConstDeclaration;
       Assert.IsNotNull(cd);
       Assert.AreEqual(cd.Name, "b");
-      Assert.AreEqual(cd.Visibility, Visibility.Public);
+      Assert.AreEqual(cd.DeclaredVisibility, Visibility.Public);
       Assert.AreEqual(cd.ResultingType.Name, "string");
       Assert.IsFalse(cd.IsNew);
 
       cd = td.Members[2] as ConstDeclaration;
       Assert.IsNotNull(cd);
       Assert.AreEqual(cd.Name, "c");
-      Assert.AreEqual(cd.Visibility, Visibility.Internal);
+      Assert.AreEqual(cd.DeclaredVisibility, Visibility.Internal);
       Assert.AreEqual(cd.ResultingType.Name, "char");
       Assert.IsTrue(cd.IsNew);
 
       cd = td.Members[3] as ConstDeclaration;
       Assert.IsNotNull(cd);
       Assert.AreEqual(cd.Name, "d");
-      Assert.AreEqual(cd.Visibility, Visibility.Protected);
+      Assert.AreEqual(cd.DeclaredVisibility, Visibility.Protected);
       Assert.AreEqual(cd.ResultingType.FullName, "System.Double");
       Assert.IsFalse(cd.IsNew);
     }
@@ -134,7 +134,7 @@ namespace CSharpParserTest
       dd = td.NestedTypes[0] as DelegateDeclaration;
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "MyEvent1`2");
-      Assert.AreEqual(dd.Visibility, Visibility.Private);
+      Assert.AreEqual(dd.DeclaredVisibility, Visibility.Private);
       Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
       Assert.AreEqual(dd.TypeParameters.Count, 2);
       Assert.AreEqual(dd.TypeParameters[0].Name, "T");
@@ -143,14 +143,14 @@ namespace CSharpParserTest
       dd = td.NestedTypes[1] as DelegateDeclaration;
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "MyEvent2");
-      Assert.AreEqual(dd.Visibility, Visibility.Protected);
+      Assert.AreEqual(dd.DeclaredVisibility, Visibility.Protected);
       Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
       Assert.AreEqual(dd.TypeParameters.Count, 0);
 
       dd = td.NestedTypes[2] as DelegateDeclaration;
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "MyEvent3`1");
-      Assert.AreEqual(dd.Visibility, Visibility.Public);
+      Assert.AreEqual(dd.DeclaredVisibility, Visibility.Public);
       Assert.AreEqual(dd.ReturnType.Name, "T");
       Assert.AreEqual(dd.TypeParameters.Count, 1);
       Assert.AreEqual(dd.TypeParameters[0].Name, "T");
@@ -161,21 +161,21 @@ namespace CSharpParserTest
       Assert.IsNotNull(fd);
       Assert.IsTrue(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_Event1");
-      Assert.AreEqual(fd.Visibility, Visibility.Public);
+      Assert.AreEqual(fd.DeclaredVisibility, Visibility.Public);
       Assert.AreEqual(fd.ResultingType.Name, "NewDelegate");
 
       fd = td.Members[1] as FieldDeclaration;
       Assert.IsNotNull(fd);
       Assert.IsTrue(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_Event2");
-      Assert.AreEqual(fd.Visibility, Visibility.Public);
+      Assert.AreEqual(fd.DeclaredVisibility, Visibility.Public);
       Assert.AreEqual(fd.ResultingType.Name, "NewDelegate");
 
       fd = td.Members[2] as FieldDeclaration;
       Assert.IsNotNull(fd);
       Assert.IsFalse(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_IntField1");
-      Assert.AreEqual(fd.Visibility, Visibility.Protected);
+      Assert.AreEqual(fd.DeclaredVisibility, Visibility.Protected);
       Assert.IsTrue(fd.IsVolatile);
       Assert.AreEqual(fd.ResultingType.Name, "int");
 
@@ -183,7 +183,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(fd);
       Assert.IsFalse(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_IntField2");
-      Assert.AreEqual(fd.Visibility, Visibility.Protected);
+      Assert.AreEqual(fd.DeclaredVisibility, Visibility.Protected);
       Assert.IsTrue(fd.IsVolatile);
       Assert.AreEqual(fd.ResultingType.Name, "int");
 
@@ -191,7 +191,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(fd);
       Assert.IsTrue(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_Event3");
-      Assert.AreEqual(fd.Visibility, Visibility.Private);
+      Assert.AreEqual(fd.DeclaredVisibility, Visibility.Private);
       Assert.AreEqual(fd.ResultingType.Name, "MyEvent1<List<int>, List<string>>");
       Assert.AreEqual(fd.ResultingType.Arguments.Count, 2);
       Assert.AreEqual(fd.ResultingType.Arguments[0].Name, "List<int>");
@@ -214,9 +214,9 @@ namespace CSharpParserTest
       Assert.AreEqual(pd.ResultingType.Name, "int");
       Assert.IsTrue(pd.HasGetter);
       Assert.IsTrue(pd.HasSetter);
-      Assert.AreEqual(pd.Getter.Visibility, Visibility.Default);
+      Assert.AreEqual(pd.Getter.DeclaredVisibility, Visibility.Default);
       Assert.IsTrue(pd.Getter.HasBody);
-      Assert.AreEqual(pd.Setter.Visibility, Visibility.Protected);
+      Assert.AreEqual(pd.Setter.DeclaredVisibility, Visibility.Protected);
       Assert.IsTrue(pd.Setter.HasBody);
 
       pd = td.Members[4] as PropertyDeclaration;
@@ -225,9 +225,9 @@ namespace CSharpParserTest
       Assert.AreEqual(pd.ResultingType.Name, "int");
       Assert.IsTrue(pd.HasGetter);
       Assert.IsTrue(pd.HasSetter);
-      Assert.AreEqual(pd.Getter.Visibility, Visibility.Default);
+      Assert.AreEqual(pd.Getter.DeclaredVisibility, Visibility.Default);
       Assert.IsTrue(pd.Getter.HasBody);
-      Assert.AreEqual(pd.Setter.Visibility, Visibility.Private);
+      Assert.AreEqual(pd.Setter.DeclaredVisibility, Visibility.Private);
       Assert.IsTrue(pd.Setter.HasBody);
 
       pd = td.Members[5] as PropertyDeclaration;
@@ -236,7 +236,7 @@ namespace CSharpParserTest
       Assert.AreEqual(pd.ResultingType.Name, "string");
       Assert.IsTrue(pd.HasGetter);
       Assert.IsFalse(pd.HasSetter);
-      Assert.AreEqual(pd.Getter.Visibility, Visibility.Default);
+      Assert.AreEqual(pd.Getter.DeclaredVisibility, Visibility.Default);
       Assert.IsTrue(pd.Getter.HasBody);
 
       IndexerDeclaration ind = td.Members[6] as IndexerDeclaration;
@@ -246,7 +246,7 @@ namespace CSharpParserTest
       Assert.AreEqual(ind.FormalParameters.Count, 2);
       Assert.IsTrue(pd.HasGetter);
       Assert.IsFalse(pd.HasSetter);
-      Assert.AreEqual(pd.Getter.Visibility, Visibility.Default);
+      Assert.AreEqual(pd.Getter.DeclaredVisibility, Visibility.Default);
       Assert.IsTrue(pd.Getter.HasBody);
 
       FormalParameter fp = ind.FormalParameters[0];
@@ -281,9 +281,9 @@ namespace CSharpParserTest
       Assert.AreEqual(pd.ResultingType.Name, "int");
       Assert.IsTrue(pd.HasGetter);
       Assert.IsTrue(pd.HasSetter);
-      Assert.AreEqual(pd.Getter.Visibility, Visibility.Default);
+      Assert.AreEqual(pd.Getter.DeclaredVisibility, Visibility.Default);
       Assert.IsFalse(pd.Getter.HasBody);
-      Assert.AreEqual(pd.Setter.Visibility, Visibility.Default);
+      Assert.AreEqual(pd.Setter.DeclaredVisibility, Visibility.Default);
       Assert.IsFalse(pd.Setter.HasBody);
     }
 
@@ -300,7 +300,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(md);
       Assert.AreEqual(md.ResultingType.Kind, TypeKind.@void);
       Assert.AreEqual(md.Name, "SimpleMethod");
-      Assert.AreEqual(md.Visibility, Visibility.Public);
+      Assert.AreEqual(md.DeclaredVisibility, Visibility.Public);
       Assert.IsTrue(md.IsStatic);
       Assert.AreEqual(md.FormalParameters.Count, 0);
 
@@ -308,7 +308,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(md);
       Assert.AreEqual(md.ResultingType.RightmostName, "string");
       Assert.AreEqual(md.Name, "ReverseString");
-      Assert.AreEqual(md.Visibility, Visibility.Protected);
+      Assert.AreEqual(md.DeclaredVisibility, Visibility.Protected);
       Assert.AreEqual(md.FormalParameters.Count, 1);
       FormalParameter fp = md.FormalParameters[0];
       Assert.AreEqual(fp.Name, "source");
@@ -318,7 +318,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(md);
       Assert.AreEqual(md.ResultingType.RightmostName, "T");
       Assert.AreEqual(md.Name, "AbstractMethod");
-      Assert.AreEqual(md.Visibility, Visibility.Private);
+      Assert.AreEqual(md.DeclaredVisibility, Visibility.Private);
       Assert.IsTrue(md.IsAbstract);
       Assert.AreEqual(md.FormalParameters.Count, 2);
       fp = md.FormalParameters[0];
@@ -337,7 +337,7 @@ namespace CSharpParserTest
       Assert.AreEqual(md.ResultingType.RightmostName, "IEnumerator");
       Assert.AreEqual(md.ExplicitName.FullName, "IEnumerable.GetEnumerator");
       Assert.AreEqual(md.Name, "GetEnumerator");
-      Assert.AreEqual(md.Visibility, Visibility.Default);
+      Assert.AreEqual(md.DeclaredVisibility, Visibility.Default);
       Assert.AreEqual(md.FormalParameters.Count, 0);
     }
 

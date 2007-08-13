@@ -32,5 +32,31 @@ namespace CSharpParser.ProjectModel
     #region Public properties
 
     #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the properties using the modifiers.
+    /// </summary>
+    /// <param name="mod">Modifier enumeration value.</param>
+    // --------------------------------------------------------------------------------
+    public override void SetModifiers(Modifier mod)
+    {
+      base.SetModifiers(mod);
+
+      // --- Structure members can have only private, public and internal modifiers.
+      // --- protected or protected internal modifiers are not allowed.
+      if (IsNested && DeclaringType is StructDeclaration)
+      {
+        if (_DeclaredVisibility == Visibility.Protected ||
+            _DeclaredVisibility == Visibility.ProtectedInternal)
+        {
+          Parser.Error0106(Token, "protected");
+        }
+      }
+    }
+
+    #endregion
   }
 }

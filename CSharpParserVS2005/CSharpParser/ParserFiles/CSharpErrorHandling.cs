@@ -76,6 +76,30 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0106: The modifier '{0}' is not valid for this item.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="modifier">Modifier information</param>
+    // --------------------------------------------------------------------------------
+    public void Error0106(Token token, string modifier)
+    {
+      Error("CS0106", token, 
+        string.Format("The modifier '{0}' is not valid for this item", modifier));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0107: More than one protection modifier.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0107(Token token)
+    {
+      Error("CS0107", token, "More than one protection modifier");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0111: Type '{0}' already defines a member called '{1}' with the
     /// same parameter types.
     /// </summary>
@@ -246,6 +270,19 @@ namespace CSharpParser.ParserFiles
     public void Error1517(Token token)
     {
       Error("CS1517", token, "Invalid preprocessor expression");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1527: Namespace elements cannot be explicitly declared as private, 
+    /// protected, or protected internal.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error1527(Token token)
+    {
+      Error("CS1527", token, "Namespace elements cannot be explicitly declared as " +
+        "private, protected, or protected internal");
     }
 
     // --------------------------------------------------------------------------------

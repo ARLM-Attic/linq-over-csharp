@@ -36,6 +36,20 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the name of this member
+    /// </summary>
+    /// <remarks>
+    /// Adds an "op_" prefix before the operator name to avoid collision with 
+    /// constructors having the same parameter signature.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public override string Name
+    {
+      get { return "castOp_" + base.Name; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the flag indicating if this is an explicit operator or not.
     /// </summary>
     // --------------------------------------------------------------------------------

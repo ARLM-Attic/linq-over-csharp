@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using CSharpParser.ParserFiles;
 
@@ -13,9 +12,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private bool _IsAbstract;
     private bool _IsStatic;
-    private bool _IsSealed;
     private FinalizerDeclaration _Finalizer;
 
     #endregion
@@ -40,32 +37,12 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if this type has an 'abstract' modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsAbstract
-    {
-      get { return _IsAbstract; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the flag indicating if this type has a 'static' modifier or not.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsStatic
     {
       get { return _IsStatic; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type has an 'sealed' modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsSealed
-    {
-      get { return _IsSealed; }
     }
 
     // --------------------------------------------------------------------------------
@@ -101,8 +78,6 @@ namespace CSharpParser.ProjectModel
     public override void SetModifiers(Modifier mod)
     {
       base.SetModifiers(mod);
-      _IsAbstract = (mod & Modifier.@abstract) != 0;
-      _IsSealed = (mod & Modifier.@sealed) != 0;
       _IsStatic = (mod & Modifier.@static) != 0;
     }
 
@@ -117,13 +92,13 @@ namespace CSharpParser.ProjectModel
     public override string GetModifiersText()
     {
       StringBuilder sb = new StringBuilder(base.GetModifiersText());
-      if (_IsAbstract)
+      if (IsAbstract)
       {
         if (sb.Length > 0) sb.Append(' ');
         sb.Append("abstract");
       }
 
-      if (_IsSealed)
+      if (IsSealed)
       {
         if (sb.Length > 0) sb.Append(' ');
         sb.Append("sealed");

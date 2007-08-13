@@ -14,7 +14,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private readonly TypeDeclaration _DeclaringType;
-    private Visibility _Visibility;
+    private Visibility _DeclaredVisibility;
     private bool _DefaultVisibility;
     private TypeReference _ResultingType;
     private TypeReference _ExplicitName;
@@ -65,10 +65,26 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the visibility of the type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
+    public Visibility DeclaredVisibility
+    {
+      get { return _DeclaredVisibility; }
+      set { _DeclaredVisibility = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the effective visibility of the type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
     public Visibility Visibility
     {
-      get { return _Visibility; }
-      set { _Visibility = value; }
+      get {
+        return _DefaultVisibility
+                 ? (_DeclaringType.IsClass || _DeclaringType.IsStruct
+                      ? Visibility.Private
+                      : Visibility.Public)
+                 : _DeclaredVisibility;
+        }
     }
 
     // --------------------------------------------------------------------------------
@@ -231,12 +247,19 @@ namespace CSharpParser.ProjectModel
     public void SetModifiers(Modifier mod)
     {
       // --- Set visibility
-      _Visibility = Visibility.Default;
-      if ((mod & Modifier.@private) != 0) _Visibility = Visibility.Private;
-      else if ((mod & Modifier.@protected) != 0) _Visibility = Visibility.Protected;
-      else if ((mod & Modifier.@public) != 0) _Visibility = Visibility.Public;
-      else if ((mod & Modifier.@internal) != 0) _Visibility = Visibility.Internal;
-      _DefaultVisibility = _Visibility == Visibility.Default;
+      Modifier visOnly = mod & Modifier.VisibilityAccessors;
+      if (visOnly == 0) _DeclaredVisibility = Visibility.Default;
+      else if (visOnly == Modifier.@private) _DeclaredVisibility = Visibility.Private;
+      else if (visOnly == Modifier.@protected) _DeclaredVisibility = Visibility.Protected;
+      else if (visOnly == Modifier.@public) _DeclaredVisibility = Visibility.Public;
+      else if (visOnly == Modifier.@internal) _DeclaredVisibility = Visibility.Internal;
+      else if (visOnly == Modifier.ProtectedInternal) _DeclaredVisibility = Visibility.ProtectedInternal;
+      else
+      {
+        // --- An invalid combination of access modifiers is used
+        Parser.Error0107(Token);
+      }
+      _DefaultVisibility = _DeclaredVisibility == Visibility.Default;
 
       // --- Set other modifiers
       _IsNew = (mod & Modifier.@new) != 0;
@@ -250,6 +273,26 @@ namespace CSharpParser.ProjectModel
       _IsReadOnly = (mod & Modifier.@readonly) != 0;
       _IsVolatile = (mod & Modifier.@volatile) != 0;
       AfterSetModifiers();
+
+      // --- Check visibility regulations of members
+      if (_DeclaringType is StructDeclaration)
+      {
+        // --- Structure members can have only private, public and internal modifiers.
+        // --- protected or protected internal modifiers are not allowed.
+        if (_DeclaredVisibility == Visibility.Protected ||
+            _DeclaredVisibility == Visibility.ProtectedInternal)
+        {
+          Parser.Error0106(Token, "protected");
+        }
+      }
+      else if (_DeclaringType.IsInterface || _DeclaringType.IsEnum)
+      {
+        // --- Interface and enum members cannot have visibility modifiers.
+        if (!_DefaultVisibility)
+        {
+          Parser.Error0106(Token, _DeclaredVisibility.ToString().ToLower());
+        }
+      }
     }
 
     #endregion

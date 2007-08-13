@@ -54,6 +54,18 @@ namespace CSharpParser.ProjectModel
       _Assembly = Assembly.LoadFrom(Path.Combine(path, name));
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a reference from the specified assembly.
+    /// </summary>
+    /// <param name="assembly">.NET assembly</param>
+    // --------------------------------------------------------------------------------
+    public AssemblyReference(Assembly assembly)
+      : base(assembly.FullName)
+    {
+      _Assembly = assembly;
+    }
+
     #endregion
 
     #region Public properties
@@ -66,6 +78,16 @@ namespace CSharpParser.ProjectModel
     public static string DotNetSystemFolder
     {
       get { return _DotNetSystemFolder; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the assembly used by this reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Assembly Assembly
+    {
+      get { return _Assembly; }
     }
 
     #endregion

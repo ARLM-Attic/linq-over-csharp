@@ -36,29 +36,30 @@ namespace CSharpParser.ParserFiles
     @extern = 0x2000,
 
     // --- Visibility modifiers
-    visibility = @public | @protected | @internal | @private,
+    VisibilityAccessors = @public | @protected | @internal | @private,
+    ProtectedInternal = @protected | @internal,
 
     // --- Modifiers applicable for classes
-    classes = visibility | @new | @unsafe | @abstract | @sealed | @static,
+    classes = VisibilityAccessors | @new | @unsafe | @abstract | @sealed | @static,
 
     // --- Modifiers applicable for non-class types
-    nonClassTypes = visibility | @new | @unsafe,
+    nonClassTypes = VisibilityAccessors | @new | @unsafe,
 
     // --- Modifiers applicable for constants
-    constants = visibility | @new ,
+    constants = VisibilityAccessors | @new ,
 
     // --- Modifiers applicable for fields
-    fields = visibility | @new | @unsafe | @static | @readonly | @volatile,
+    fields = VisibilityAccessors | @new | @unsafe | @static | @readonly | @volatile,
 
     // --- Modifiers applicable for property event methods
-    propEvntMeths = visibility | @new | @unsafe | @static | @virtual | @sealed | @override | @abstract | @extern,
+    propEvntMeths = VisibilityAccessors | @new | @unsafe | @static | @virtual | @sealed | @override | @abstract | @extern,
 
     // --- Modifiers applicable for property accessors: the two set cannot overlap each other
     accessorsPossib1 = @private,
     accessorsPossib2 = @protected | @internal,
 
     // --- Modifiers applicable for indexers
-    indexers = visibility | @new | @unsafe | @virtual | @sealed | @override | @abstract | @extern,
+    indexers = VisibilityAccessors | @new | @unsafe | @virtual | @sealed | @override | @abstract | @extern,
 
     // --- Modifiers applicable for operator overloads
     operators = @public | @unsafe | @static | @extern,
@@ -67,7 +68,7 @@ namespace CSharpParser.ParserFiles
     operatorsMust = @public | @static,
 
     // --- Modifiers applicable for constructors
-    constructors = visibility | @unsafe | @extern,
+    constructors = VisibilityAccessors | @unsafe | @extern,
 
     // --- Modifiers applicable for static constructors
     staticConstr = @extern | @static,

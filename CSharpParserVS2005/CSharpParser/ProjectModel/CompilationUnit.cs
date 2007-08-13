@@ -30,6 +30,7 @@ namespace CSharpParser.ProjectModel
 
     private CSharpSyntaxParser _Parser;
     private SourceFile _CurrentFile;
+    private readonly CompilationUnitReference _ThisUnit;
 
     // --- Members related to error handling
     private readonly ErrorCollection _Errors = new ErrorCollection();
@@ -85,11 +86,22 @@ namespace CSharpParser.ProjectModel
       {
         AddAllFilesFrom(_WorkingFolder);
       }
+      _ThisUnit = new CompilationUnitReference(this, "_ThisUnit_");
     }
 
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reference for this compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CompilationUnitReference ThisUnit
+    {
+      get { return _ThisUnit; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

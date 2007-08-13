@@ -46,8 +46,19 @@ namespace CSharpParser.ProjectModel
         else if (valueStr.EndsWith("l"))
           return new Int64Constant(t, parser,
             Int64.Parse(valueStr, NumberStyles.HexNumber));
-        else return new Int32Constant(t, parser, 
-          Int32.Parse(valueStr, NumberStyles.HexNumber));
+        else
+        {
+          try
+          {
+            return new Int32Constant(t, parser,
+              Int32.Parse(valueStr, NumberStyles.HexNumber));
+          }
+          catch (OverflowException)
+          {
+            return new UInt32Constant(t, parser,
+              UInt32.Parse(valueStr, NumberStyles.HexNumber));
+          }
+        }
       }
       else
       { 
@@ -59,7 +70,17 @@ namespace CSharpParser.ProjectModel
         else if (valueStr.EndsWith("l"))
           return new Int64Constant(t, parser,
             Int64.Parse(valueStr));
-        else return new Int32Constant(t, parser, Int32.Parse(valueStr));
+        else
+        {
+          try
+          {
+            return new Int32Constant(t, parser, Int32.Parse(valueStr));
+          }
+          catch (OverflowException)
+          {
+            return new UInt32Constant(t, parser, UInt32.Parse(valueStr));
+          }
+        }
       }
     }
   }

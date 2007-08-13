@@ -83,6 +83,7 @@ namespace CSharpParser.ProjectModel
     {
       _InitializerBlock = new BlockStatement(t, Parser, ParentBlock);  
       _InitializerBlock.SetParent(this);
+      ParentBlock.ChildBlocks.Add(_InitializerBlock);
     }
 
     // --------------------------------------------------------------------------------
@@ -95,6 +96,7 @@ namespace CSharpParser.ProjectModel
     {
       _IteratorBlock = new BlockStatement(t, Parser, ParentBlock);
       _IteratorBlock.SetParent(this);
+      ParentBlock.ChildBlocks.Add(_IteratorBlock);
     }
 
     #endregion

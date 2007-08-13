@@ -1,4 +1,3 @@
-using System;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
@@ -14,6 +13,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private TypeReference _ExceptionType;
+    private LocalVariable _Variable;
 
     #endregion
 
@@ -59,13 +59,42 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the flag indicating if this clause has an exception instance name
+    /// Gets the flag indicating if this clause has an exception instance variable 
     /// specified.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool HasName
+    public bool HasVariable
     {
-      get { return !String.IsNullOrEmpty(Name); }
+      get { return _Variable != null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the local variable defined by this catch clause.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public LocalVariable Variable
+    {
+      get { return _Variable; }
+    }
+
+    #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an instance variable for this catch block.
+    /// </summary>
+    /// <param name="type">Exception type</param>
+    /// <param name="name">Variable name</param>
+    // --------------------------------------------------------------------------------
+    public void CreateInstanceVariable(TypeReference type, string name)
+    {
+      _Variable = new LocalVariable(Token, Parser, this);
+      _Variable.ResultingType = type;
+      _Variable.Name = name;
+      Add(_Variable);
     }
 
     #endregion

@@ -40,6 +40,7 @@
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
+    <Compile Include="ProjectModel\CompilationUnitReference.cs" />
     <Compile Include="ProjectModel\TokenElement.cs" />
     <Compile Include="ProjectModel\Variables\IVariableInfo.cs" />
     <Compile Include="ProjectModel\Variables\LocalVariable.cs" />
@@ -221,6 +222,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Semantics\ITypeCharacteristics.cs" />
+    <Compile Include="Semantics\NetBinaryType.cs" />
     <Compile Include="Semantics\ResolutionIfo.cs" />
     <Compile Include="Semantics\IResolutionRequired.cs" />
     <Compile Include="Semantics\NamespaceHierachy.cs" />

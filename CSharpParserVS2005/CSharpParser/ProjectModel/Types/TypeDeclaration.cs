@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.Collections;
@@ -17,7 +18,8 @@ namespace CSharpParser.ProjectModel
     Private,
     Protected,
     Public,
-    Internal
+    Internal,
+    ProtectedInternal
   }
 
   // ==================================================================================
@@ -25,17 +27,20 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner
+  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner,
+    ITypeCharacteristics
   {
     #region Private fields
 
-    private Visibility _Visibility;
-    private bool _DefaultVisibility;
+    protected Visibility _DeclaredVisibility;
+    protected bool _DefaultVisibility;
     private NamespaceFragment _Namespace;
     private readonly TypeReferenceCollection _BaseTypes = new TypeReferenceCollection();
     private TypeDeclaration _DeclaringType;
     private bool _IsNew;
     private bool _IsUnsafe;
+    private bool _IsAbstract;
+    private bool _IsSealed;
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
     private readonly TypeParameterConstraintCollection _ParameterConstraints =
       new TypeParameterConstraintCollection();
@@ -54,6 +59,9 @@ namespace CSharpParser.ProjectModel
     private readonly CastOperatorDeclarationCollection _CastOperators = 
       new CastOperatorDeclarationCollection();
     private readonly FieldDeclarationCollection _Fields = new FieldDeclarationCollection();
+
+    // --- Fields used by ITypeCharacteristics
+    private ITypeCharacteristics _BaseType;
 
     #endregion
 
@@ -78,13 +86,23 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the visibility of the type declaration.
+    /// Gets or sets the declared visibility of the type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Visibility DeclaredVisibility
+    {
+      get { return _DeclaredVisibility; }
+      set { _DeclaredVisibility = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the effective visibility of the type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
     public Visibility Visibility
     {
-      get { return _Visibility; }
-      set { _Visibility = value; }
+      get { return _DefaultVisibility ? Visibility.Internal : _DeclaredVisibility; }  
     }
 
     // --------------------------------------------------------------------------------
@@ -130,6 +148,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether the current Type represents a generic type 
+    /// definition, from which other generic types can be constructed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsGenericTypeDefinition
+    {
+      get { return _TypeParameters.Count > 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the base type elements belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -167,6 +196,71 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the namespace of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    string ITypeCharacteristics.Namespace
+    {
+      get { return _Namespace.FullName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reference unit where the type is defined.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CompilationReference Compilation
+    {
+      get { return Parser.CompilationUnit.ThisUnit; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type of this type.
+    /// </summary>
+    /// <remarks>
+    /// If there is no explicit base type for this type, a corresponding reference to
+    /// System.Object should be returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics BaseType
+    {
+      get
+      {
+        if (_BaseTypes.Count != 0)
+        {
+          if (_BaseType == null)
+          {
+            _BaseType = NetBinaryType.Object;
+          }
+        }
+        else
+        {
+          if (_BaseType == null)
+          {
+            // TODO: Change it to a type reference
+            throw new NotImplementedException();
+          }
+        }
+        return _BaseType;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type that declares the current nested type.
+    /// </summary>
+    /// <remarks>
+    /// If there is no declaring type, null should be returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    ITypeCharacteristics ITypeCharacteristics.DeclaringType
+    {
+      get { return _DeclaringType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the full name of this type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -178,6 +272,40 @@ namespace CSharpParser.ProjectModel
           ? _DeclaringType.FullName + "+" + Name 
           : Name;
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type encompasses or refers to 
+    /// another type; that is, whether the current Type is an array, a pointer, or is 
+    /// passed by reference.
+    /// </summary>
+    /// <remarks>
+    /// Always returns false, because a type declaration never has an element type.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool HasElementType
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is abstract and must be overridden.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsAbstract
+    {
+      get { return _IsAbstract; }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the Type is an array.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsArray
+    {
+      get { throw new NotImplementedException(); }
     }
 
     // --------------------------------------------------------------------------------
@@ -221,6 +349,15 @@ namespace CSharpParser.ProjectModel
       get { return this is ClassDeclaration; }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the current Type represents an enumeration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsEnum
+    {
+      get { return this is EnumDeclaration; }
+    }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is a struct or not.
@@ -239,6 +376,151 @@ namespace CSharpParser.ProjectModel
     public bool IsInterface
     {
       get { return this is InterfaceDeclaration; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type object represents a type 
+    /// whose definition is nested inside the definition of another type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNested
+    {
+      get { return _DeclaringType != null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is nested and visible only within 
+    /// its own assembly.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedAssembly
+    {
+      get { return IsNested && _DeclaredVisibility == ProjectModel.Visibility.Internal; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is nested and declared private.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedPrivate
+    {
+      get { return IsNested && _DeclaredVisibility == ProjectModel.Visibility.Private; }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a class is nested and declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedPublic
+    {
+      get { return IsNested && _DeclaredVisibility == ProjectModel.Visibility.Public; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is not declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNotPublic
+    {
+      get { return (_DeclaredVisibility & ProjectModel.Visibility.Public) != 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a pointer.
+    /// </summary>
+    /// <remarks>
+    /// Always returns false.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsPointer
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is one of the primitive types.
+    /// </summary>
+    /// <remarks>
+    /// Always returns false.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsPrimitive
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPublic
+    {
+      get { return (_DeclaredVisibility & ProjectModel.Visibility.Public) == 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared sealed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsSealed
+    {
+      get { return _IsSealed; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a value type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsValueType
+    {
+      get { return IsStruct || IsEnum; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type can be accessed by code outside the 
+    /// assembly.
+    /// </summary>
+    /// <value>
+    /// true if the current Type is a public type or a public nested type such that 
+    /// all the enclosing types are public; otherwise, false.
+    /// </value>
+    /// <remarks>
+    /// Use this property to determine whether a type is part of the public 
+    /// interface of a component assembly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsVisible
+    {
+      get
+      {
+        return (!IsNested && IsPublic) || (IsNestedPublic && DeclaringType.IsVisible);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a MemberTypes value indicating that this member is a type or a nested 
+    /// type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MemberTypes MemberType
+    {
+      get 
+      {
+        return IsNested
+                 ? MemberTypes.TypeInfo | MemberTypes.NestedType
+                 : MemberTypes.TypeInfo;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -271,6 +553,7 @@ namespace CSharpParser.ProjectModel
       get { return _DeclaringType; }
       set
       {
+        if (_DeclaringType == value) return;
         _DeclaringType = value;
         _DeclaringType.NestedTypes.Add(this);
       }
@@ -409,16 +692,33 @@ namespace CSharpParser.ProjectModel
     public virtual void SetModifiers(Modifier mod)
     {
       // --- Set visibility
-      _Visibility = Visibility.Default;
-      if ((mod & Modifier.@private) != 0) _Visibility = Visibility.Private;
-      else if ((mod & Modifier.@protected) != 0) _Visibility = Visibility.Protected;
-      else if ((mod & Modifier.@public) != 0) _Visibility = Visibility.Public;
-      else if ((mod & Modifier.@internal) != 0) _Visibility = Visibility.Internal;
-      _DefaultVisibility = _Visibility == Visibility.Default;
+      Modifier visOnly = mod & Modifier.VisibilityAccessors;
+      if (visOnly == 0) _DeclaredVisibility = Visibility.Default;
+      else if (visOnly == Modifier.@private) _DeclaredVisibility = Visibility.Private;
+      else if (visOnly == Modifier.@protected) _DeclaredVisibility = Visibility.Protected;
+      else if (visOnly == Modifier.@public) _DeclaredVisibility = Visibility.Public;
+      else if (visOnly == Modifier.@internal) _DeclaredVisibility = Visibility.Internal;
+      else if (visOnly == Modifier.ProtectedInternal) _DeclaredVisibility = Visibility.ProtectedInternal;
+      else
+      {
+        // --- An invalid combination of access modifiers is used
+        Parser.Error0107(Token);
+      }
+      _DefaultVisibility = _DeclaredVisibility == Visibility.Default;
 
       // --- New and unsafe
       _IsNew = (mod & Modifier.@new) != 0;
       _IsUnsafe = (mod & Modifier.@unsafe) != 0;
+      _IsAbstract = (mod & Modifier.@abstract) != 0;
+      _IsSealed = (mod & Modifier.@sealed) != 0;
+
+      // --- Types declared within a namespace but out of a type declaration can only
+      // --- be public or internal
+      if (!IsNested && Visibility != Visibility.Public &&
+        Visibility != Visibility.Internal)
+      {
+        Parser.Error1527(Token);
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -443,7 +743,7 @@ namespace CSharpParser.ProjectModel
     public virtual string GetModifiersText()
     {
       StringBuilder sb = new StringBuilder(40);
-      if (!_DefaultVisibility) sb.Append(_Visibility.ToString().ToLower());
+      if (!_DefaultVisibility) sb.Append(_DeclaredVisibility.ToString().ToLower());
       if (_IsNew)
       {
         if (sb.Length > 0) sb.Append(' ');
@@ -465,6 +765,16 @@ namespace CSharpParser.ProjectModel
     public MemberDeclarationCollection Members
     {
       get { return _Members; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the object carrying detailed information about this type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public object TypeObject
+    {
+      get { return this; }
     }
 
     #endregion

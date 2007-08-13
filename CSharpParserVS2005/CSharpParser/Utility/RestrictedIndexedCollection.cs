@@ -346,4 +346,116 @@ namespace CSharpParser.Collections
 
     #endregion
   }
+
+  // ====================================================================================
+  /// <summary>
+  /// This class embeds strings to change the standard hash algorithm to use FNV hash 
+  /// algorithm (see http://www.isthe.com/chongo/tech/comp/fnv for details)
+  /// </summary>
+  // ====================================================================================
+  public sealed class FnvHashedString
+  {
+    // --- Constants used by the FNV hash algorithm
+
+    private const UInt32 _OffsetBasis = 2166136261;
+    private const UInt32 _FnvPrime = 16777619;
+
+    private readonly string _Value;
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an FNV hashed string.
+    /// </summary>
+    /// <param name="value">Original string value.</param>
+    // ----------------------------------------------------------------------------------
+    private FnvHashedString(string value)
+    {
+      _Value = value;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the original string.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    public string Value
+    {
+      get { return _Value; }
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks for equality.
+    /// </summary>
+    /// <param name="obj">Other object to check for equality.</param>
+    /// <returns>
+    /// True, if the two object values are equal.
+    /// </returns>
+    // ----------------------------------------------------------------------------------
+    public override bool Equals(object obj)
+    {
+      return _Value.Equals(obj);
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates the hash code using the FNV algorithm.
+    /// </summary>
+    /// <returns>
+    /// Hash value of the string.
+    /// </returns>
+    // ----------------------------------------------------------------------------------
+    public override int GetHashCode()
+    {
+      UInt32 hash = _OffsetBasis;
+      for (int i = 0; i < _Value.Length; i++ )
+      {
+        char c = _Value[i];
+        hash *= _FnvPrime;
+        hash ^= (byte)c;
+        hash *= _FnvPrime;
+        hash ^= (byte)(c >> 8);
+      }
+      return (Int32) hash;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this value.
+    /// </summary>
+    /// <returns>String representation.</returns>
+    // ----------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return _Value;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Implicit conversion operator from FnvHashedString to string.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns>
+    /// Converted value.
+    /// </returns>
+    // ----------------------------------------------------------------------------------
+    public static implicit operator string(FnvHashedString value)
+    {
+      return value.Value;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Implicit conversion operator from string to FnvHashedString.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns>
+    /// Converted value.
+    /// </returns>
+    // ----------------------------------------------------------------------------------
+    public static implicit operator FnvHashedString(string value)
+    {
+      return new FnvHashedString(value);
+    }
+  }
 }

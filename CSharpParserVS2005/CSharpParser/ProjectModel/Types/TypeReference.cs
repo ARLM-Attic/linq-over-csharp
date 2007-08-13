@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
@@ -12,7 +13,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a base type on the ancestor list of a type.
   /// </summary>
   // ==================================================================================
-  public class TypeReference : LanguageElement, IResolutionRequired
+  public class TypeReference : LanguageElement, IResolutionRequired, ITypeCharacteristics
   {
     #region Private fields
 
@@ -149,6 +150,63 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the namespace of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Namespace
+    {
+      get { return _ResolutionInfo.Resolver.Namespace; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the object carrying detailed information about this type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public object TypeObject
+    {
+      get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reference unit where the type is defined.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CompilationReference Compilation
+    {
+      get { return _ResolutionInfo.Resolver.Compilation; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type of this type.
+    /// </summary>
+    /// <remarks>
+    /// If there is no explicit base type for this type, a corresponding reference to
+    /// System.Object should be returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics BaseType
+    {
+      get { return _ResolutionInfo.Resolver.BaseType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type that declares the current nested type.
+    /// </summary>
+    /// <remarks>
+    /// If there is no declaring type, null should be returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics DeclaringType
+    {
+      get { return _ResolutionInfo.Resolver.DeclaringType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the full name of this type reference.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -165,6 +223,223 @@ namespace CSharpParser.ProjectModel
           return TypeName;
         }
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type encompasses or refers to 
+    /// another type; that is, whether the current Type is an array, a pointer, or is 
+    /// passed by reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasElementType
+    {
+      get { return _ResolutionInfo.Resolver.HasElementType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is abstract and must be overridden.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsAbstract
+    {
+      get { return _ResolutionInfo.Resolver.IsAbstract; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is an array.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsArray
+    {
+      get { return _ResolutionInfo.Resolver.IsArray; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a class; that is, not a value 
+    /// type or interface.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsClass
+    {
+      get { return _ResolutionInfo.Resolver.IsClass; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type represents an enumeration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsEnum
+    {
+      get { return _ResolutionInfo.Resolver.IsEnum; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current type is a generic type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsGenericType
+    {
+      get { return _ResolutionInfo.Resolver.IsGenericType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type represents a generic type 
+    /// definition, from which other generic types can be constructed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsGenericTypeDefinition
+    {
+      get { return _ResolutionInfo.Resolver.IsGenericTypeDefinition; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is an interface; that is, not a 
+    /// class or a value type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsInterface
+    {
+      get { return _ResolutionInfo.Resolver.IsInterface; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type object represents a type 
+    /// whose definition is nested inside the definition of another type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNested
+    {
+      get { return _ResolutionInfo.Resolver.IsNested; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is nested and visible only within 
+    /// its own assembly.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedAssembly
+    {
+      get { return _ResolutionInfo.Resolver.IsNestedAssembly; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is nested and declared private.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedPrivate
+    {
+      get { return _ResolutionInfo.Resolver.IsNestedPrivate; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a class is nested and declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedPublic
+    {
+      get { return _ResolutionInfo.Resolver.IsNestedPublic; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is not declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNotPublic
+    {
+      get { return _ResolutionInfo.Resolver.IsNotPublic; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a pointer.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPointer
+    {
+      get { return _ResolutionInfo.Resolver.IsPointer; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is one of the primitive types.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPrimitive
+    {
+      get { return _ResolutionInfo.Resolver.IsPrimitive; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPublic
+    {
+      get { return _ResolutionInfo.Resolver.IsPublic; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared sealed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsSealed
+    {
+      get { return _ResolutionInfo.Resolver.IsSealed; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a value type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsValueType
+    {
+      get { return _ResolutionInfo.Resolver.IsValueType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type can be accessed by code outside the 
+    /// assembly.
+    /// </summary>
+    /// <value>
+    /// true if the current Type is a public type or a public nested type such that 
+    /// all the enclosing types are public; otherwise, false.
+    /// </value>
+    /// <remarks>
+    /// Use this property to determine whether a type is part of the public 
+    /// interface of a component assembly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsVisible
+    {
+      get { return _ResolutionInfo.Resolver.IsVisible; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a MemberTypes value indicating that this member is a type or a nested 
+    /// type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MemberTypes MemberType
+    {
+      get { return _ResolutionInfo.Resolver.MemberType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -284,7 +559,8 @@ namespace CSharpParser.ProjectModel
     public void ResolveToType(Type type)
     {
       _ResolutionInfo.Add(
-        new ResolutionItem(ResolutionTarget.Type, ResolutionMode.RuntimeType, type));
+        new ResolutionItem(ResolutionTarget.Type, ResolutionMode.RuntimeType, 
+        new NetBinaryType(type)));
       _ResolutionCounter++;
       _ResolvedToSystemType++;
     }

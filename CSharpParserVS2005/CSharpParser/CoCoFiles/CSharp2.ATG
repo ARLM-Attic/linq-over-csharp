@@ -360,7 +360,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
                                                  .)  
       { Attributes<attrs> } 
       ModifierList<m> 
-      TypeDeclaration<attrs, m, out td>          (.
+      TypeDeclaration<attrs, null, m, out td>    (.
                                                     if (td != null)
                                                     {
                                                       if (parent == null) 
@@ -376,7 +376,8 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
 // +modifiers: Set of modifiers belongign to the type.
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-TypeDeclaration<AttributeCollection attrs, Modifiers m, out TypeDeclaration td>            
+TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers m, 
+  out TypeDeclaration td>            
 =                                                    (. td = null; .)
   (                                                             
                                                      (. bool isPartial = false; .)
@@ -393,6 +394,7 @@ TypeDeclaration<AttributeCollection attrs, Modifiers m, out TypeDeclaration td>
   )                                                  (. 
                                                         if (td != null)
                                                         {
+                                                          td.DeclaringType = parentType;
                                                           td.SetModifiers(m.Value); 
                                                           td.AssignAttributes(attrs);
                                                         }
@@ -521,9 +523,9 @@ EnumBody<EnumDeclaration ed>
 =
   "{" [ 
     EnumMemberDeclaration<ed> 
-    {IF (NotFinalComma())  "," EnumMemberDeclaration<ed>} 
+    {IF (NotFinalComma())  "," SYNC EnumMemberDeclaration<ed>} 
     [ "," ] ] 
-  "}"
+  SYNC "}"
 .
 
 // ------------------------------------------------------------------------------------
@@ -559,7 +561,6 @@ DelegateDeclaration<Modifiers m, out TypeDeclaration td>
                                                       DelegateDeclaration dd = new DelegateDeclaration(t, this);
                                                       td = dd;
                                                       CurrentElement = dd;
-                                                      dd.SetModifiers(m.Value);
                                                       TypeReference returnType;
                                                    .)
   Type<out returnType, true>                       (. dd.ReturnType = returnType; .)
@@ -624,7 +625,7 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
     )
   | CastOperatorDeclaration<attrs, m, td>
   |                                              (. TypeDeclaration nestedType; .)
-    TypeDeclaration<attrs, m, out nestedType>    (. nestedType.DeclaringType = td; .)
+    TypeDeclaration<attrs, td, m, out nestedType>
   )
 .
 
@@ -939,7 +940,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
                                .)
 =                              (. FormalParameterCollection pars = new FormalParameterCollection(); .)
   { Attributes<attrs> } 
-  [ "new" ]
+  ModifierList<m>
   ( Type<out typeRef, true>
     (                          
       ident                   (.
@@ -1809,8 +1810,7 @@ UsingStatement<IBlockOwner block>
            .)
   "(" 
   (
-    IF (IsLocalVarDecl())       (. us.CreateResourceDeclarations(t); .)
-    LocalVariableDeclaration<us.ResourceDeclarations>  
+    IF (IsLocalVarDecl()) LocalVariableDeclaration<us>  
   |                             (. Expression expr; .)
     Expression<out expr>        (. us.ResourceExpression = expr; .)
   ) 
@@ -1983,7 +1983,7 @@ SwitchLabel<out Expression expr> (. expr = null; .)
 // ------------------------------------------------------------------------------------
 ForInitializer<ForStatement fs>
 =
-  IF (IsLocalVarDecl()) LocalVariableDeclaration<fs.InitializerBlock>
+  IF (IsLocalVarDecl()) LocalVariableDeclaration<fs>
   | StatementExpression<fs.InitializerBlock> { "," StatementExpression<fs.InitializerBlock> }
 .
 
@@ -2011,6 +2011,7 @@ CatchClauses<TryStatement tryStm>
     ClassType<out typeRef>  (. cc.ExceptionType = typeRef; .)
     [ 
       ident                 (. cc.Name = t.val; .)
+                            (. cc.CreateInstanceVariable(typeRef, t.val); .)
     ] 
     ")" Block<cc> 
     [ CatchClauses<tryStm> ]

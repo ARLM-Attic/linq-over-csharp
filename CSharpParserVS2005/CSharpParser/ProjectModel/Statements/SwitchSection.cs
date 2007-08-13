@@ -60,6 +60,26 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new localVariable the block.
+    /// </summary>
+    /// <param name="localVariable">Variable to add to the block.</param>
+    /// <remarks>
+    /// The scope of variables in a switch section is the scope of the whole switch
+    /// statement. So variables should be added to the block of the switch statement
+    /// rather than to the section itself.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public override void Add(LocalVariable localVariable)
+    {
+      AddVariableToBlock(ParentBlock, localVariable);
+    }
+
+    #endregion
+
     #region Type resolution
 
     // --------------------------------------------------------------------------------

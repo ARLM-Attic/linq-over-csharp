@@ -16,7 +16,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private string _Name;
+    private readonly string _Name;
 
     #endregion
 
@@ -30,7 +30,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected CompilationReference(string name)
     {
-      this._Name = name;
+      _Name = name;
     }
 
     #endregion

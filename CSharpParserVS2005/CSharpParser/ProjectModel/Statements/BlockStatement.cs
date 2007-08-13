@@ -106,7 +106,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="localVariable">Variable to add to the block.</param>
     // --------------------------------------------------------------------------------
-    public void Add(LocalVariable localVariable)
+    public virtual void Add(LocalVariable localVariable)
     {
       AddVariableToBlock(this, localVariable);
     }

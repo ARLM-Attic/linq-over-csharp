@@ -73,6 +73,7 @@ namespace CSharpParser.ProjectModel
     {
       SwitchSection result = new SwitchSection(t, Parser, ParentBlock);
       result.SetParent(this);
+      ParentBlock.ChildBlocks.Add(result);
       _Sections.Add(result);
       return result;
     }
