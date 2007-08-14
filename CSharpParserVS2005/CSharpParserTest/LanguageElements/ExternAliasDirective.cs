@@ -1,4 +1,3 @@
-using CSharpParser;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

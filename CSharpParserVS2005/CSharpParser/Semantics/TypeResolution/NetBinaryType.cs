@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using CSharpParser.ProjectModel;
 
@@ -5,18 +6,108 @@ namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
-  /// This interface defines the characteristic of a type that can be either a .NET
-  /// type or a type declared in a compilation unit.
+  /// This type represents a .NET binary type described by a System.Type instance.
   /// </summary>
+  /// <remarks>This class implements the ITypeCharactersitic interface.</remarks>
   // ==================================================================================
-  public interface ITypeCharacteristics
+  public sealed class NetBinaryType : ITypeCharacteristics, IEquatable<NetBinaryType>
   {
+    #region Private fields
+
+    private readonly Type _TypeObject;
+    private readonly CompilationReference _AssemblyRef;
+    private readonly ITypeCharacteristics _BaseType;
+    private readonly ITypeCharacteristics _DeclaringType;
+
+    #endregion
+
+    #region Static public members
+
+    /// <summary>Represents the System.Object type</summary>
+    public static NetBinaryType Object = new NetBinaryType(typeof(Object));
+
+    /// <summary>Represents the System.Boolean type</summary>
+    public static NetBinaryType Boolean = new NetBinaryType(typeof(Boolean));
+
+    /// <summary>Represents the System.Byte type</summary>
+    public static NetBinaryType Byte = new NetBinaryType(typeof(Byte));
+
+    /// <summary>Represents the System.SByte type</summary>
+    public static NetBinaryType SByte = new NetBinaryType(typeof(SByte));
+
+    /// <summary>Represents the System.Char type</summary>
+    public static NetBinaryType Char = new NetBinaryType(typeof(Char));
+
+    /// <summary>Represents the System.Decimal type</summary>
+    public static NetBinaryType Decimal = new NetBinaryType(typeof(Decimal));
+
+    /// <summary>Represents the System.Double type</summary>
+    public static NetBinaryType Double = new NetBinaryType(typeof(Double));
+
+    /// <summary>Represents the System.Singe type</summary>
+    public static NetBinaryType Single = new NetBinaryType(typeof(Single));
+
+    /// <summary>Represents the System.Int16 type</summary>
+    public static NetBinaryType Int16 = new NetBinaryType(typeof(Int16));
+
+    /// <summary>Represents the System.Int32 type</summary>
+    public static NetBinaryType Int32 = new NetBinaryType(typeof(Int32));
+
+    /// <summary>Represents the System.Int64 type</summary>
+    public static NetBinaryType Int64 = new NetBinaryType(typeof(Int64));
+
+    /// <summary>Represents the System.UInt16 type</summary>
+    public static NetBinaryType UInt16 = new NetBinaryType(typeof(UInt16));
+
+    /// <summary>Represents the System.Int32 type</summary>
+    public static NetBinaryType UInt32 = new NetBinaryType(typeof(UInt32));
+
+    /// <summary>Represents the System.Int64 type</summary>
+    public static NetBinaryType UInt64 = new NetBinaryType(typeof(UInt64));
+
+    /// <summary>Represents the System.String type</summary>
+    public static NetBinaryType String = new NetBinaryType(typeof(String));
+
+    #endregion
+
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance of this class to represent the specified .NET binary
+    /// type.
+    /// </summary>
+    /// <param name="typeObject">.NET binary type represented by this instance.</param>
+    // --------------------------------------------------------------------------------
+    public NetBinaryType(Type typeObject)
+    {
+      if (typeObject == null)
+      {
+        throw new ArgumentNullException();
+      }
+      _TypeObject = typeObject;
+      _AssemblyRef = new AssemblyReference(typeObject.Assembly);
+      _BaseType = typeObject.BaseType == null
+                    ? Object
+                    : new NetBinaryType(typeObject.BaseType);
+      _DeclaringType = typeObject.DeclaringType == null
+                         ? null
+                         : new NetBinaryType(typeObject.DeclaringType);
+    }
+
+    #endregion
+
+    #region ITypeCharacteristics implementation
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    CompilationReference Compilation { get; }
+    public CompilationReference Compilation
+    {
+      get { return _AssemblyRef; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -27,7 +118,10 @@ namespace CSharpParser.Semantics
     /// System.Object should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics BaseType { get; }
+    public ITypeCharacteristics BaseType
+    {
+      get { return _BaseType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -37,14 +131,20 @@ namespace CSharpParser.Semantics
     /// If there is no declaring type, null should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics DeclaringType { get; }
+    public ITypeCharacteristics DeclaringType
+    {
+      get { return _DeclaringType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the fully qualified name of the type, including the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string FullName { get; }
+    public string FullName
+    {
+      get { return _TypeObject.FullName; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -53,21 +153,30 @@ namespace CSharpParser.Semantics
     /// passed by reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool HasElementType { get; }
+    public bool HasElementType
+    {
+      get { return _TypeObject.HasElementType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsAbstract { get; }
+    public bool IsAbstract
+    {
+      get { return _TypeObject.IsAbstract; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsArray { get; }
+    public bool IsArray
+    {
+      get { return _TypeObject.IsArray; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -75,21 +184,30 @@ namespace CSharpParser.Semantics
     /// type or interface.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsClass { get; }
+    public bool IsClass
+    {
+      get { return _TypeObject.IsClass; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsEnum { get; }
+    public bool IsEnum
+    {
+      get { return _TypeObject.IsEnum; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current type is a generic type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsGenericType { get; }
+    public bool IsGenericType
+    {
+      get { return _TypeObject.IsGenericType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -97,7 +215,10 @@ namespace CSharpParser.Semantics
     /// definition, from which other generic types can be constructed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsGenericTypeDefinition { get; }
+    public bool IsGenericTypeDefinition
+    {
+      get { return _TypeObject.IsGenericTypeDefinition; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -105,7 +226,10 @@ namespace CSharpParser.Semantics
     /// class or a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsInterface { get; }
+    public bool IsInterface
+    {
+      get { return _TypeObject.IsInterface; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -113,7 +237,10 @@ namespace CSharpParser.Semantics
     /// whose definition is nested inside the definition of another type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsNested { get; }
+    public bool IsNested
+    {
+      get { return _TypeObject.IsNested; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -121,63 +248,90 @@ namespace CSharpParser.Semantics
     /// its own assembly.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsNestedAssembly { get; }
+    public bool IsNestedAssembly
+    {
+      get { return _TypeObject.IsNestedAssembly; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is nested and declared private.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsNestedPrivate { get; }
+    public bool IsNestedPrivate
+    {
+      get { return _TypeObject.IsNestedPrivate; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether a class is nested and declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsNestedPublic { get; }
+    public bool IsNestedPublic
+    {
+      get { return _TypeObject.IsNestedPublic; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsNotPublic { get; }
+    public bool IsNotPublic
+    {
+      get { return _TypeObject.IsNotPublic; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a pointer.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsPointer { get; }
+    public bool IsPointer
+    {
+      get { return _TypeObject.IsPointer; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is one of the primitive types.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsPrimitive { get; }
+    public bool IsPrimitive
+    {
+      get { return _TypeObject.IsPrimitive; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsPublic { get; }
+    public bool IsPublic
+    {
+      get { return _TypeObject.IsPublic; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsSealed { get; }
+    public bool IsSealed
+    {
+      get { return _TypeObject.IsSealed; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsValueType { get; }
+    public bool IsValueType
+    {
+      get { return _TypeObject.IsValueType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -193,7 +347,10 @@ namespace CSharpParser.Semantics
     /// interface of a component assembly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsVisible { get; }
+    public bool IsVisible
+    {
+      get { return _TypeObject.IsVisible; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -201,27 +358,102 @@ namespace CSharpParser.Semantics
     /// type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    MemberTypes MemberType { get; }
+    public MemberTypes MemberType
+    {
+      get { return _TypeObject.MemberType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the simple name of the current member.
+    /// </summary>
+    /// <remarks>The simple name does not contain any adornements.</remarks>
+    // --------------------------------------------------------------------------------
+    public string SimpleName
+    {
+      get
+      {
+        int pos = _TypeObject.Name.IndexOf('`');
+        if (pos < 0) return _TypeObject.Name;
+        return _TypeObject.Name.Substring(0, pos);
+      }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the name of the current member.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string Name { get; }
+    public string Name
+    {
+      get { return _TypeObject.Name; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string Namespace { get; }
+    public string Namespace
+    {
+      get { return _TypeObject.Namespace; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the object carrying detailed information about this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-     object TypeObject { get; }
+    public object TypeObject
+    {
+      get { return _TypeObject;  }
+    }
+
+    #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if two NetBinaryType instances refer to the same type.
+    /// </summary>
+    /// <param name="obj">Object to check the equality with this instance.</param>
+    /// <returns>
+    /// True, if the two objects are equal; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override bool Equals(object obj)
+    {
+      NetBinaryType type = obj as NetBinaryType;
+      if (type == null) return false;
+      return _TypeObject.Equals(type._TypeObject);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if two NetBinaryType instances refer to the same type.
+    /// </summary>
+    /// <param name="other">Object to check the equality with this instance.</param>
+    /// <returns>
+    /// True, if the two objects are equal; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool Equals(NetBinaryType other)
+    {
+      return _TypeObject.Equals(other._TypeObject);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the hash code of the aggregated type instance.
+    /// </summary>
+    /// <returns>Hash code of this instance.</returns>
+    // --------------------------------------------------------------------------------
+    public override int GetHashCode()
+    {
+      return _TypeObject.GetHashCode();
+    }
+
+    #endregion
   }
 }

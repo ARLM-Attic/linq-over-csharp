@@ -27,6 +27,9 @@ namespace CSharpParser.ProjectModel
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
     private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
 
+    // --- Fields used for semantics check
+    private NamespaceResolutionNode _ResolverNode;
+
     #endregion
 
     #region Lifecycle methods
@@ -44,31 +47,32 @@ namespace CSharpParser.ProjectModel
     public NamespaceFragment(Token token, CSharpSyntaxParser parser, string name, 
       NamespaceFragment parentNamespace, SourceFile parentFile): base(token, parser)
     {
-      Name = name;
-      _ParentNamespace = parentNamespace;
-
-      // --- If this namespace has a parent, this namespace is a nested namespace of the parent.
-      if (_ParentNamespace != null)
-      {
-        _ParentNamespace.NestedNamespaces.Add(this);
-      }
-
       // --- A namespace must belong to a file.
       if (parentFile == null)
-      {
         throw new InvalidOperationException(Resources.ParentFileNotDeclared);
-      }
       _ParentFile = parentFile;
 
-      // --- If this is a root namespace in the file, we add it to the namespace list
-      // --- of the file.
-      if (parentNamespace == null) _ParentFile.Namespaces.Add(this);
+      // --- Store attributes
+      Name = name;
+      _ParentNamespace = parentNamespace;
+      CompilationUnit unit = Parser.CompilationUnit;
+
+      if (_ParentNamespace != null) 
+      {
+        // --- This namespace has a parent, this namespace is a nested 
+        // --- namespace of the parent.
+        _ParentNamespace.NestedNamespaces.Add(this);
+      }
+      else
+      {
+        // --- This is a root namespace in the file, we add it to the namespace list
+        // --- of the file.
+        _ParentFile.Namespaces.Add(this);
+      }
 
       // --- The namespace is added to the list of CompilationUnit
-
       Namespace nameSpace;
-      CompilationUnit project = _ParentFile.ParentUnit;
-      if (project.DeclaredNamespaces.TryGetValue(FullName, out nameSpace))
+      if (unit.DeclaredNamespaces.TryGetValue(FullName, out nameSpace))
       {
         // --- This namespace has been declared, add the new fragment.
         nameSpace.Fragments.Add(this);
@@ -78,7 +82,7 @@ namespace CSharpParser.ProjectModel
         // --- This is the first declaration of this namespace.
         Namespace newNamespace = new Namespace(FullName);
         newNamespace.Fragments.Add(this);
-        project.DeclaredNamespaces.Add(newNamespace);
+        unit.DeclaredNamespaces.Add(newNamespace);
       }
     }
 
@@ -181,9 +185,67 @@ namespace CSharpParser.ProjectModel
       get { return _TypeDeclarations; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolver node of this namespace fragment.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceResolutionNode ResolverNode
+    {
+      get { return _ResolverNode; }
+    }
+
     #endregion
 
     #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the resolver during the semantic parsing.
+    /// </summary>
+    /// <remarks>
+    /// This method can be called only after the full syntax parsing. First sets the
+    /// resolver of this namespace then in its types and nested namespaces.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void SetResolver()
+    {
+      ResolutionNodeBase resolverNode;
+      if (_ParentNamespace == null)
+      {
+        // --- This is a global namespace
+        resolverNode = Parser.CompilationUnit.GlobalHierarchy;
+      }
+      else
+      {
+        // --- This is a nested namespace
+        resolverNode = _ParentNamespace.ResolverNode;
+      }
+
+      // --- Register the namespace
+      if (resolverNode != null)
+      {
+        ResolutionNodeBase conflictingNode;
+        if (!resolverNode.RegisterNamespace(Name, out _ResolverNode, out conflictingNode))
+        {
+          Parser.Error0101(Token,
+            _ParentNamespace == null ? "global namespace" : _ParentNamespace.Name,
+            conflictingNode.Name);
+        }
+
+        // --- Set the resolver for the nested types
+        foreach (TypeDeclaration nested in _TypeDeclarations)
+        {
+          nested.SetResolver();
+        }
+
+        // --- Set resolvers for nested namespaces
+        foreach (NamespaceFragment nested in _NestedNamespaces)
+        {
+          nested.SetResolver();
+        }
+      }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

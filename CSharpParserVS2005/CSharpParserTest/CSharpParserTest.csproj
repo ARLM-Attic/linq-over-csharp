@@ -282,6 +282,9 @@
     <None Include="TestFiles\Visibility\InvalidAccessModifier3.cs" />
     <None Include="TestFiles\Visibility\InvalidAccessModifier4.cs" />
     <None Include="TestFiles\Visibility\InvalidAccessModifier5.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidNamespace1.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidNamespace2.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidNamespace3.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
     <Compile Include="Visibility\Visibility.cs" />

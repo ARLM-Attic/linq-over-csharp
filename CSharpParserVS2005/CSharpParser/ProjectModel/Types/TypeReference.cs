@@ -444,6 +444,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the simple name of the current member.
+    /// </summary>
+    /// <remarks>The simple name does not contain any adornements.</remarks>
+    // --------------------------------------------------------------------------------
+    public string SimpleName
+    {
+      get { return ShortName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets type name of this type reference (Name modified with the array or 
     /// pointer modifier).
     /// </summary>

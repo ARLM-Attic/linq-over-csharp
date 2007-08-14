@@ -1,4 +1,3 @@
-using CSharpParser;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,17 +17,17 @@ namespace CSharpParserTest.LanguageElements
       // --- Check using clauses in the file
       Assert.AreEqual(file.Usings.Count, 5);
       Assert.IsFalse(file.Usings[0].HasAlias);
-      Assert.AreEqual(file.Usings[0].TypeUsed.FullName, "System");
+      Assert.AreEqual(file.Usings[0].Name, "System");
       Assert.IsFalse(file.Usings[1].HasAlias);
-      Assert.AreEqual(file.Usings[1].TypeUsed.FullName, "System.Collections.Generic");
+      Assert.AreEqual(file.Usings[1].Name, "System.Collections.Generic");
       Assert.IsFalse(file.Usings[2].HasAlias);
-      Assert.AreEqual(file.Usings[2].TypeUsed.FullName, "System.Text");
+      Assert.AreEqual(file.Usings[2].Name, "System.Text");
       Assert.IsTrue(file.Usings[3].HasAlias);
       Assert.AreEqual(file.Usings[3].Name, "AliasName");
-      Assert.AreEqual(file.Usings[3].TypeUsed.FullName, "System.Text.Encoding");
+      Assert.AreEqual(file.Usings[3].AliasedType.FullName, "System.Text.Encoding");
       Assert.IsTrue(file.Usings[4].HasAlias);
       Assert.AreEqual(file.Usings[4].Name, "SecondAlias");
-      Assert.AreEqual(file.Usings[4].TypeUsed.FullName, "Microsoft.Win32");
+      Assert.AreEqual(file.Usings[4].AliasedType.FullName, "Microsoft.Win32");
 
       // --- Check namespaces in the file
       Assert.AreEqual(file.Namespaces.Count, 3);
@@ -42,7 +41,7 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(ns1a.ParentNamespace, ns1);
       Assert.AreEqual(ns1a.Name, "Level1");
       Assert.AreEqual(ns1a.Usings.Count, 1);
-      Assert.AreEqual(ns1a.Usings[0].TypeUsed.FullName, "System.Xml");
+      Assert.AreEqual(ns1a.Usings[0].Name, "System.Xml");
       Assert.IsFalse(ns1a.Usings[0].HasAlias);
       Assert.IsTrue(ns1a.HasNestedNamespace);
       Assert.AreEqual(ns1a.NestedNamespaces.Count, 1);

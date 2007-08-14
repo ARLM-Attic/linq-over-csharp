@@ -63,6 +63,9 @@ namespace CSharpParser.ProjectModel
     // --- Fields used by ITypeCharacteristics
     private ITypeCharacteristics _BaseType;
 
+    // --- Fields used for semantics check
+    private TypeResolutionNode _ResolverNode;
+
     #endregion
 
     #region Lifecycle methods
@@ -525,6 +528,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the simple name of the current member.
+    /// </summary>
+    /// <remarks>The simple name does not contain any adornements.</remarks>
+    // --------------------------------------------------------------------------------
+    public string SimpleName
+    {
+      get { return ShortName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type has a 'new' modifier or not.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -679,9 +693,66 @@ namespace CSharpParser.ProjectModel
       get { return _Fields; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolver node of this type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeResolutionNode ResolverNode
+    {
+      get { return _ResolverNode; }
+    }
+
     #endregion
 
     #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the resolver during the semantic parsing.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual void SetResolver()
+    {
+      ResolutionNodeBase resolverNode;
+      if (IsNested)
+      {
+        // --- Use the resolver of the declaring type
+        resolverNode = _DeclaringType.ResolverNode;
+      }
+      else if (_Namespace == null)
+      {
+        // --- This is a global type, use the resolver of the compilation unit
+        resolverNode = Parser.CompilationUnit.GlobalHierarchy;
+      }
+      else
+      {
+        // --- This is a type within a namespace
+        resolverNode = _Namespace.ResolverNode;
+      }
+
+      // --- Register the type for the resolver node
+      if (resolverNode != null)
+      {
+        if (!resolverNode.RegisterType(this, out _ResolverNode))
+        {
+          Parser.Error0101(Token, 
+            _Namespace == null ? "global namespace" : _Namespace.Name, 
+            SimpleName);
+        }
+        else
+        {
+          // --- Add this type as a resolver
+          _ResolverNode.AddTypeResolver(this);
+        }
+
+        // --- Set the resolver for the nested types
+        foreach (TypeDeclaration nested in _NestedTypes)
+        {
+          nested.SetResolver();
+        }
+      }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

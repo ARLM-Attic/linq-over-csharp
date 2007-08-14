@@ -1,5 +1,4 @@
 using System;
-using CSharpParser;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParserTest
@@ -24,22 +23,8 @@ namespace CSharpParserTest
         Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", error.Line, error.Column,
           error.Code, error.Description, error.File);
       }
+      parser.GlobalHierarchy.Trace(Console.Out, 0);
       return errors == 0;
-    }
-
-    public void DisplayTypeInfo(TypeDeclaration td, int level)
-    {
-      Console.WriteLine("{0}{1}: ({2}, {3})", String.Empty.PadLeft(level * 2, ' '),
-        td.ParametrizedName, td.StartLine, td.StartColumn);
-      foreach (TypeReference bte in td.BaseTypes)
-      {
-        Console.WriteLine("{0}{1}: ({2}, {3})", String.Empty.PadLeft(level * 2 + 2, ' '),
-          bte.Name, bte.StartLine, bte.StartColumn);
-      }
-      foreach (TypeDeclaration subType in td.NestedTypes)
-      {
-        DisplayTypeInfo(subType, level + 1);
-      }
     }
   }
 }

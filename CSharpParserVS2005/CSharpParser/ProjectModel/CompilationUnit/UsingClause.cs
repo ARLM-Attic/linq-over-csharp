@@ -1,4 +1,3 @@
-using System;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
@@ -15,7 +14,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private readonly TypeReference _TypeUsed;
+    private readonly TypeReference _AliasedType;
 
     #endregion
 
@@ -27,12 +26,14 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="name">Using alias name, if defined, otherwise null or empty.</param>
+    /// <param name="parser">Parser instance</param>
     /// <param name="typeUsed">Type reference used by this using clause.</param>
     // --------------------------------------------------------------------------------
-    public UsingClause(Token token, string name, TypeReference typeUsed): 
-      base (token, typeUsed.Parser, name)
+    public UsingClause(Token token, CSharpSyntaxParser parser, string name, 
+      TypeReference typeUsed): 
+      base (token, parser, name)
     {
-      _TypeUsed = typeUsed;
+      _AliasedType = typeUsed;
     }
 
     #endregion
@@ -46,7 +47,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasAlias
     {
-      get { return !String.IsNullOrEmpty(Name); }
+      get { return _AliasedType != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -54,9 +55,9 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the type used by this directive.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference TypeUsed
+    public TypeReference AliasedType
     {
-      get { return _TypeUsed; }
+      get { return _AliasedType; }
     }
 
     #endregion
@@ -73,24 +74,9 @@ namespace CSharpParser.ProjectModel
     public void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
-      if (_TypeUsed == null) return;
-      if (Name == String.Empty)
+      if (_AliasedType != null)
       {
-        TypeReference currentType = _TypeUsed;
-        while (currentType != null)
-        {
-          // --- No alias is used, so the type is resolved.
-          currentType.ResolutionInfo.Add(
-            new ResolutionItem(ResolutionTarget.Namespace, ResolutionMode.SourceType, currentType));
-          currentType = currentType.SubType;
-#if DIAGNOSTICS
-          TypeReference.ResolutionCounter++;
-#endif
-        }
-      }
-      else
-      {
-        _TypeUsed.ResolveTypeReferences(contextType, contextInstance);
+        _AliasedType.ResolveTypeReferences(contextType, contextInstance);
       }
     }
 

@@ -509,10 +509,18 @@ public partial class CSharpSyntaxParser
 			Expect(1);
 			name = t.val; 
 			Expect(85);
-		}
-		TypeName(out typeUsed);
+			TypeName(out typeUsed);
+		} else if (la.kind == 1) {
+			Get();
+			name = t.val; 
+			while (la.kind == 90) {
+				Get();
+				Expect(1);
+				name += "." + t.val; 
+			}
+		} else SynErr(131);
 		Expect(114);
-		UsingClause uc = new UsingClause(token, name, typeUsed);
+		UsingClause uc = new UsingClause(token, this, name, typeUsed);
 		CurrentElement = uc;
 		if (parent == null) _File.Usings.Add(uc);
 		else parent.Usings.Add(uc); 
@@ -593,7 +601,7 @@ public partial class CSharpSyntaxParser
 			    parent.AddTypeDeclaration(td);
 			}
 			
-		} else SynErr(131);
+		} else SynErr(132);
 	}
 
 	void TypeName(out TypeReference typeRef) {
@@ -646,7 +654,7 @@ public partial class CSharpSyntaxParser
 				Get();
 			} else if (StartOf(3)) {
 				Keyword();
-			} else SynErr(132);
+			} else SynErr(133);
 			scope = t.val; 
 			Expect(86);
 		}
@@ -760,12 +768,12 @@ out TypeDeclaration td) {
 				StructDeclaration(m, isPartial, out td);
 			} else if (la.kind == 40) {
 				InterfaceDeclaration(m, isPartial, out td);
-			} else SynErr(133);
+			} else SynErr(134);
 		} else if (la.kind == 25) {
 			EnumDeclaration(m, out td);
 		} else if (la.kind == 21) {
 			DelegateDeclaration(m, out td);
-		} else SynErr(134);
+		} else SynErr(135);
 		if (td != null)
 		{
 		  td.DeclaringType = parentType;
@@ -963,7 +971,7 @@ out TypeDeclaration td) {
 				} else if (la.kind == 66) {
 					Get();
 					constraint.ParameterType = ParameterConstraintType.Struct; 
-				} else SynErr(135);
+				} else SynErr(136);
 				typeRef = new TypeReference(t, this);
 				typeRef.Name = t.val;
 				
@@ -988,7 +996,7 @@ out TypeDeclaration td) {
 			Expect(98);
 			Expect(113);
 			constraint.HasNew = true; 
-		} else SynErr(136);
+		} else SynErr(137);
 	}
 
 	void ClassBody(TypeDeclaration td) {
@@ -1018,7 +1026,7 @@ out TypeDeclaration td) {
 				Get();
 				typeRef = new TypeReference(t, this, typeof(string)); 
 			}
-		} else SynErr(137);
+		} else SynErr(138);
 	}
 
 	void ClassMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
@@ -1039,9 +1047,9 @@ out TypeDeclaration td) {
 				Block(dd);
 			} else if (la.kind == 114) {
 				Get();
-			} else SynErr(138);
+			} else SynErr(139);
 			td.Members.Add(dd); 
-		} else SynErr(139);
+		} else SynErr(140);
 	}
 
 	void StructBody(TypeDeclaration td) {
@@ -1084,16 +1092,16 @@ out TypeDeclaration td) {
 					IndexerDeclaration(attrs, m, typeRef, memberRef, td);
 				} else if (la.kind == 98 || la.kind == 100) {
 					MethodDeclaration(attrs, m, typeRef, memberRef, td, true);
-				} else SynErr(140);
+				} else SynErr(141);
 			} else if (la.kind == 68) {
 				IndexerDeclaration(attrs, m, typeRef, null, td);
-			} else SynErr(141);
+			} else SynErr(142);
 		} else if (la.kind == 27 || la.kind == 37) {
 			CastOperatorDeclaration(attrs, m, td);
 		} else if (StartOf(12)) {
 			TypeDeclaration nestedType; 
 			TypeDeclaration(attrs, td, m, out nestedType);
-		} else SynErr(142);
+		} else SynErr(143);
 	}
 
 	void IntegralType(out TypeReference typeRef) {
@@ -1144,7 +1152,7 @@ out TypeDeclaration td) {
 			typeRef = new TypeReference(t, this, typeof(char)); 
 			break;
 		}
-		default: SynErr(143); break;
+		default: SynErr(144); break;
 		}
 	}
 
@@ -1154,14 +1162,14 @@ out TypeDeclaration td) {
 			EnumMemberDeclaration(ed);
 			while (NotFinalComma()) {
 				Expect(87);
-				while (!(la.kind == 0 || la.kind == 1 || la.kind == 97)) {SynErr(144); Get();}
+				while (!(la.kind == 0 || la.kind == 1 || la.kind == 97)) {SynErr(145); Get();}
 				EnumMemberDeclaration(ed);
 			}
 			if (la.kind == 87) {
 				Get();
 			}
 		}
-		while (!(la.kind == 0 || la.kind == 111)) {SynErr(145); Get();}
+		while (!(la.kind == 0 || la.kind == 111)) {SynErr(146); Get();}
 		Expect(111);
 	}
 
@@ -1222,7 +1230,7 @@ out TypeDeclaration td) {
 				Expression(out falseExpr);
 				condExpr.FalseExpression = falseExpr; 
 			}
-		} else SynErr(146);
+		} else SynErr(147);
 	}
 
 	void Type(out TypeReference typeRef, bool voidAllowed) {
@@ -1237,7 +1245,7 @@ out TypeDeclaration td) {
 			typeRef.Name = t.val;
 			typeRef.Kind = TypeKind.@void; 
 			
-		} else SynErr(147);
+		} else SynErr(148);
 		if (la.kind == 110) {
 			Get();
 			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
@@ -1286,7 +1294,7 @@ out TypeDeclaration td) {
 			fp.Name = t.val; 
 			fp.Type = typeRef; 
 			pars.Add(fp); 
-		} else SynErr(148);
+		} else SynErr(149);
 	}
 
 	void Block(IBlockOwner block) {
@@ -1329,7 +1337,7 @@ out TypeDeclaration td) {
 			td.Members.Add(ep); 
 			EventAccessorDeclarations(ep);
 			Expect(111);
-		} else SynErr(149);
+		} else SynErr(150);
 	}
 
 	void ConstructorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
@@ -1354,7 +1362,7 @@ out TypeDeclaration td) {
 			} else if (la.kind == 68) {
 				Get();
 				cd.HasThis = true; 
-			} else SynErr(150);
+			} else SynErr(151);
 			Expect(98);
 			if (StartOf(17)) {
 				Argument(null);
@@ -1369,7 +1377,7 @@ out TypeDeclaration td) {
 			Block(cd);
 		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(151);
+		} else SynErr(152);
 		td.Members.Add(cd); 
 	}
 
@@ -1411,13 +1419,13 @@ TypeDeclaration td) {
 			if ((op & Operator.binary) == 0) Error("UNDEF", la, "too many operands for unary operator"); 
 		} else if (la.kind == 113) {
 			if ((op & Operator.unary) == 0) Error("UNDEF", la, "too few operands for binary operator"); 
-		} else SynErr(152);
+		} else SynErr(153);
 		Expect(113);
 		if (la.kind == 96) {
 			Block(od);
 		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(153);
+		} else SynErr(154);
 		td.Members.Add(od); 
 	}
 
@@ -1541,7 +1549,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else if (la.kind == 114) {
 			Get();
 			md.HasBody = false; 
-		} else SynErr(154);
+		} else SynErr(155);
 		td.Members.Add(md); 
 	}
 
@@ -1559,7 +1567,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else if (la.kind == 27) {
 			Get();
 			cod.IsExplicit = true; 
-		} else SynErr(155);
+		} else SynErr(156);
 		Expect(49);
 		Type(out typeRef, false);
 		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "cast type must not be void"); } 
@@ -1578,7 +1586,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			Block(cod);
 		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(156);
+		} else SynErr(157);
 		td.Members.Add(cod); 
 	}
 
@@ -1618,7 +1626,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "add or remove expected"); 
-		} else SynErr(157);
+		} else SynErr(158);
 		Block(accessor);
 		accessor.HasBody = true;
 		accessor.AssignAttributes(attrs); 
@@ -1643,7 +1651,7 @@ TypeReference typeRef) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "add or remove expected"); 
-			} else SynErr(158);
+			} else SynErr(159);
 			Block(accessor);
 			accessor.HasBody = true;
 			accessor.AssignAttributes(attrs); 
@@ -1689,14 +1697,14 @@ TypeReference typeRef) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "set or get expected"); 
-		} else SynErr(159);
+		} else SynErr(160);
 		if (la.kind == 96) {
 			Block(accessor);
 			accessor.HasBody = true; 
 		} else if (la.kind == 114) {
 			Get();
 			accessor.HasBody = false; 
-		} else SynErr(160);
+		} else SynErr(161);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs);
 		
@@ -1723,14 +1731,14 @@ TypeReference typeRef) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "set or get expected"); 
-			} else SynErr(161);
+			} else SynErr(162);
 			if (la.kind == 96) {
 				Block(accessor);
 				accessor.HasBody = true; 
 			} else if (la.kind == 114) {
 				Get();
 				accessor.HasBody = false; 
-			} else SynErr(162);
+			} else SynErr(163);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs);
 			
@@ -1849,7 +1857,7 @@ TypeReference typeRef) {
 			op = Operator.lte; 
 			break;
 		}
-		default: SynErr(163); break;
+		default: SynErr(164); break;
 		}
 	}
 
@@ -1895,7 +1903,7 @@ TypeReference typeRef) {
 					Get();
 					InterfaceAccessors(prop);
 					Expect(111);
-				} else SynErr(164);
+				} else SynErr(165);
 			} else if (la.kind == 68) {
 				m.Check(Modifier.indexers);
 				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
@@ -1913,10 +1921,10 @@ TypeReference typeRef) {
 				Expect(96);
 				InterfaceAccessors(ind);
 				Expect(111);
-			} else SynErr(165);
+			} else SynErr(166);
 		} else if (la.kind == 26) {
 			InterfaceEventDeclaration(attrs, m, ifd);
-		} else SynErr(166);
+		} else SynErr(167);
 	}
 
 	void InterfaceAccessors(PropertyDeclaration prop) {
@@ -1937,7 +1945,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "set or get expected"); 
-		} else SynErr(167);
+		} else SynErr(168);
 		Expect(114);
 		accessor.AssignAttributes(attrs); 
 		if (la.kind == 1 || la.kind == 97) {
@@ -1960,7 +1968,7 @@ TypeReference typeRef) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "set or get expected"); 
-			} else SynErr(168);
+			} else SynErr(169);
 			Expect(114);
 			accessor.AssignAttributes(attrs); 
 		}
@@ -2018,7 +2026,7 @@ TypeReference typeRef) {
 				Expression(out expr);
 				saIn.Expression = expr; 
 				Expect(112);
-			} else SynErr(169);
+			} else SynErr(170);
 		}
 		block.Add(loc.Variable); 
 	}
@@ -2033,7 +2041,7 @@ TypeReference typeRef) {
 			ArrayInitializer arrInit; 
 			ArrayInitializer(out arrInit);
 			init = arrInit;
-		} else SynErr(170);
+		} else SynErr(171);
 	}
 
 	void ArrayInitializer(out ArrayInitializer init) {
@@ -2365,7 +2373,7 @@ TypeReference typeRef) {
 			Get();
 			break;
 		}
-		default: SynErr(171); break;
+		default: SynErr(172); break;
 		}
 	}
 
@@ -2395,7 +2403,7 @@ TypeReference typeRef) {
 					nameFound = true; 
 				} else if (StartOf(20)) {
 					if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); 
-				} else SynErr(172);
+				} else SynErr(173);
 				Expression(out expr);
 				arg.Expression = expr; 
 				attr.Arguments.Add(arg); 
@@ -2420,7 +2428,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 9) {
 			Get();
 			typeRef = new TypeReference(t, this, typeof(bool)); 
-		} else SynErr(173);
+		} else SynErr(174);
 	}
 
 	void PointerOrArray(ref TypeReference typeRef) {
@@ -2435,7 +2443,7 @@ TypeReference typeRef) {
 				}
 				Expect(112);
 				typeRef.Kind = TypeKind.array; 
-			} else SynErr(174);
+			} else SynErr(175);
 		}
 	}
 
@@ -2468,7 +2476,7 @@ TypeReference typeRef) {
 			Expect(114);
 		} else if (StartOf(22)) {
 			EmbeddedStatement(block);
-		} else SynErr(175);
+		} else SynErr(176);
 	}
 
 	void ConstStatement(IBlockOwner block) {
@@ -2547,11 +2555,11 @@ TypeReference typeRef) {
 				YieldReturnStatement(block);
 			} else if (la.kind == 10) {
 				YieldBreakStatement(block);
-			} else SynErr(176);
+			} else SynErr(177);
 			Expect(114);
 		} else if (la.kind == 31) {
 			FixedStatement(block);
-		} else SynErr(177);
+		} else SynErr(178);
 	}
 
 	void EmptyStatement(IBlockOwner block) {
@@ -2605,7 +2613,7 @@ TypeReference typeRef) {
 			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
 			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
-		} else SynErr(178);
+		} else SynErr(179);
 		if (block != null) block.Add(es); 
 	}
 
@@ -2750,7 +2758,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 20) {
 			Get();
 			gs.Name = t.val; 
-		} else SynErr(179);
+		} else SynErr(180);
 		Expect(114);
 	}
 
@@ -2799,7 +2807,7 @@ TypeReference typeRef) {
 			Get();
 			ts.CreateFinallyBlock(t); 
 			Block(ts.FinallyBlock);
-		} else SynErr(180);
+		} else SynErr(181);
 	}
 
 	void LockStatement(IBlockOwner block) {
@@ -2828,7 +2836,7 @@ TypeReference typeRef) {
 			Expression expr; 
 			Expression(out expr);
 			us.ResourceExpression = expr; 
-		} else SynErr(181);
+		} else SynErr(182);
 		Expect(113);
 		EmbeddedStatement(us);
 	}
@@ -2913,7 +2921,7 @@ TypeReference typeRef) {
 				Get();
 				StatementExpression(fs.InitializerBlock);
 			}
-		} else SynErr(182);
+		} else SynErr(183);
 	}
 
 	void ForIterator(ForStatement fs) {
@@ -2945,7 +2953,7 @@ TypeReference typeRef) {
 			if (la.kind == 13) {
 				CatchClauses(tryStm);
 			}
-		} else SynErr(183);
+		} else SynErr(184);
 	}
 
 	void Unary(out Expression expr) {
@@ -3004,7 +3012,7 @@ TypeReference typeRef) {
 				unOp = tcOp; 
 				break;
 			}
-			default: SynErr(184); break;
+			default: SynErr(185); break;
 			}
 			Expression unaryExpr; 
 			Unary(out unaryExpr);
@@ -3017,7 +3025,7 @@ TypeReference typeRef) {
 			
 		} else if (StartOf(25)) {
 			Primary(out expr);
-		} else SynErr(185);
+		} else SynErr(186);
 	}
 
 	void AssignmentOperator(out AssignmentOperator op) {
@@ -3081,7 +3089,7 @@ TypeReference typeRef) {
 			op = new RightShiftAssignmentOperator(t, this); 
 			break;
 		}
-		default: SynErr(186); break;
+		default: SynErr(187); break;
 		}
 	}
 
@@ -3094,7 +3102,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 20) {
 			Get();
 			Expect(86);
-		} else SynErr(187);
+		} else SynErr(188);
 	}
 
 	void NullCoalescingExpr(out BinaryOperator expr) {
@@ -3296,7 +3304,7 @@ TypeReference typeRef) {
 				} else if (la.kind == 94) {
 					Get();
 					oper = new GreaterThanOrEqualOperator(t, this); 
-				} else SynErr(188);
+				} else SynErr(189);
 				oper.LeftOperand = expr; 
 				Expression unExpr; 
 				Unary(out unExpr);
@@ -3320,7 +3328,7 @@ TypeReference typeRef) {
 				} else if (la.kind == 7) {
 					Get();
 					oper = new IsOperator(t, this); 
-				} else SynErr(189);
+				} else SynErr(190);
 				oper.LeftOperand = expr; 
 				TypeReference typeRef; 
 				Type(out typeRef, false);
@@ -3342,7 +3350,7 @@ TypeReference typeRef) {
 				Get();
 				Expect(93);
 				oper = new RightShiftOperator(t, this); 
-			} else SynErr(190);
+			} else SynErr(191);
 			oper.LeftOperand = expr; 
 			Expression unExpr; 
 			Unary(out unExpr);
@@ -3452,7 +3460,7 @@ TypeReference typeRef) {
 				BaseNamedLiteral(out expr);
 			} else if (la.kind == 97) {
 				BaseIndexerOperator(out expr);
-			} else SynErr(191);
+			} else SynErr(192);
 			break;
 		}
 		case 46: {
@@ -3483,7 +3491,7 @@ TypeReference typeRef) {
 			SizeOfOperator(out innerExpr);
 			break;
 		}
-		default: SynErr(192); break;
+		default: SynErr(193); break;
 		}
 		Expression curExpr = innerExpr; 
 		while (StartOf(28)) {
@@ -3575,7 +3583,7 @@ TypeReference typeRef) {
 			value = new NullLiteral(t, this); 
 			break;
 		}
-		default: SynErr(193); break;
+		default: SynErr(194); break;
 		}
 	}
 
@@ -3658,7 +3666,7 @@ TypeReference typeRef) {
 			pml = new PrimitiveNamedLiteral(t, this, typeof(ushort)); 
 			break;
 		}
-		default: SynErr(194); break;
+		default: SynErr(195); break;
 		}
 		expr = pml; 
 		Expect(90);
@@ -3758,7 +3766,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 96) {
 			ArrayInitializer(out arrayInit);
 			nop.Initializer = arrayInit; 
-		} else SynErr(195);
+		} else SynErr(196);
 	}
 
 	void TypeOfOperator(out Expression expr) {
@@ -4118,71 +4126,72 @@ TypeReference typeRef, bool isEvent) {
 			case 128: s = "\"%\" expected"; break;
 			case 129: s = "\"->\" expected"; break;
 			case 130: s = "??? expected"; break;
-			case 131: s = "invalid NamespaceMemberDeclaration"; break;
-			case 132: s = "invalid Attributes"; break;
-			case 133: s = "invalid TypeDeclaration"; break;
+			case 131: s = "invalid UsingDirective"; break;
+			case 132: s = "invalid NamespaceMemberDeclaration"; break;
+			case 133: s = "invalid Attributes"; break;
 			case 134: s = "invalid TypeDeclaration"; break;
-			case 135: s = "invalid TypeParameterConstraintsClause"; break;
+			case 135: s = "invalid TypeDeclaration"; break;
 			case 136: s = "invalid TypeParameterConstraintsClause"; break;
-			case 137: s = "invalid ClassType"; break;
-			case 138: s = "invalid ClassMemberDeclaration"; break;
+			case 137: s = "invalid TypeParameterConstraintsClause"; break;
+			case 138: s = "invalid ClassType"; break;
 			case 139: s = "invalid ClassMemberDeclaration"; break;
-			case 140: s = "invalid StructMemberDeclaration"; break;
+			case 140: s = "invalid ClassMemberDeclaration"; break;
 			case 141: s = "invalid StructMemberDeclaration"; break;
 			case 142: s = "invalid StructMemberDeclaration"; break;
-			case 143: s = "invalid IntegralType"; break;
-			case 144: s = "this symbol not expected in EnumBody"; break;
+			case 143: s = "invalid StructMemberDeclaration"; break;
+			case 144: s = "invalid IntegralType"; break;
 			case 145: s = "this symbol not expected in EnumBody"; break;
-			case 146: s = "invalid Expression"; break;
-			case 147: s = "invalid Type"; break;
-			case 148: s = "invalid FormalParameterList"; break;
-			case 149: s = "invalid EventDeclaration"; break;
-			case 150: s = "invalid ConstructorDeclaration"; break;
+			case 146: s = "this symbol not expected in EnumBody"; break;
+			case 147: s = "invalid Expression"; break;
+			case 148: s = "invalid Type"; break;
+			case 149: s = "invalid FormalParameterList"; break;
+			case 150: s = "invalid EventDeclaration"; break;
 			case 151: s = "invalid ConstructorDeclaration"; break;
-			case 152: s = "invalid OperatorDeclaration"; break;
+			case 152: s = "invalid ConstructorDeclaration"; break;
 			case 153: s = "invalid OperatorDeclaration"; break;
-			case 154: s = "invalid MethodDeclaration"; break;
-			case 155: s = "invalid CastOperatorDeclaration"; break;
+			case 154: s = "invalid OperatorDeclaration"; break;
+			case 155: s = "invalid MethodDeclaration"; break;
 			case 156: s = "invalid CastOperatorDeclaration"; break;
-			case 157: s = "invalid EventAccessorDeclarations"; break;
+			case 157: s = "invalid CastOperatorDeclaration"; break;
 			case 158: s = "invalid EventAccessorDeclarations"; break;
-			case 159: s = "invalid AccessorDeclarations"; break;
+			case 159: s = "invalid EventAccessorDeclarations"; break;
 			case 160: s = "invalid AccessorDeclarations"; break;
 			case 161: s = "invalid AccessorDeclarations"; break;
 			case 162: s = "invalid AccessorDeclarations"; break;
-			case 163: s = "invalid OverloadableOp"; break;
-			case 164: s = "invalid InterfaceMemberDeclaration"; break;
+			case 163: s = "invalid AccessorDeclarations"; break;
+			case 164: s = "invalid OverloadableOp"; break;
 			case 165: s = "invalid InterfaceMemberDeclaration"; break;
 			case 166: s = "invalid InterfaceMemberDeclaration"; break;
-			case 167: s = "invalid InterfaceAccessors"; break;
+			case 167: s = "invalid InterfaceMemberDeclaration"; break;
 			case 168: s = "invalid InterfaceAccessors"; break;
-			case 169: s = "invalid LocalVariableDeclarator"; break;
-			case 170: s = "invalid VariableInitializer"; break;
-			case 171: s = "invalid Keyword"; break;
-			case 172: s = "invalid AttributeArguments"; break;
-			case 173: s = "invalid PrimitiveType"; break;
-			case 174: s = "invalid PointerOrArray"; break;
-			case 175: s = "invalid Statement"; break;
-			case 176: s = "invalid EmbeddedStatement"; break;
+			case 169: s = "invalid InterfaceAccessors"; break;
+			case 170: s = "invalid LocalVariableDeclarator"; break;
+			case 171: s = "invalid VariableInitializer"; break;
+			case 172: s = "invalid Keyword"; break;
+			case 173: s = "invalid AttributeArguments"; break;
+			case 174: s = "invalid PrimitiveType"; break;
+			case 175: s = "invalid PointerOrArray"; break;
+			case 176: s = "invalid Statement"; break;
 			case 177: s = "invalid EmbeddedStatement"; break;
-			case 178: s = "invalid StatementExpression"; break;
-			case 179: s = "invalid GotoStatement"; break;
-			case 180: s = "invalid TryFinallyBlock"; break;
-			case 181: s = "invalid UsingStatement"; break;
-			case 182: s = "invalid ForInitializer"; break;
-			case 183: s = "invalid CatchClauses"; break;
-			case 184: s = "invalid Unary"; break;
+			case 178: s = "invalid EmbeddedStatement"; break;
+			case 179: s = "invalid StatementExpression"; break;
+			case 180: s = "invalid GotoStatement"; break;
+			case 181: s = "invalid TryFinallyBlock"; break;
+			case 182: s = "invalid UsingStatement"; break;
+			case 183: s = "invalid ForInitializer"; break;
+			case 184: s = "invalid CatchClauses"; break;
 			case 185: s = "invalid Unary"; break;
-			case 186: s = "invalid AssignmentOperator"; break;
-			case 187: s = "invalid SwitchLabel"; break;
-			case 188: s = "invalid RelExpr"; break;
+			case 186: s = "invalid Unary"; break;
+			case 187: s = "invalid AssignmentOperator"; break;
+			case 188: s = "invalid SwitchLabel"; break;
 			case 189: s = "invalid RelExpr"; break;
-			case 190: s = "invalid ShiftExpr"; break;
-			case 191: s = "invalid Primary"; break;
+			case 190: s = "invalid RelExpr"; break;
+			case 191: s = "invalid ShiftExpr"; break;
 			case 192: s = "invalid Primary"; break;
-			case 193: s = "invalid Literal"; break;
-			case 194: s = "invalid PrimitiveNamedLiteral"; break;
-			case 195: s = "invalid NewOperator"; break;
+			case 193: s = "invalid Primary"; break;
+			case 194: s = "invalid Literal"; break;
+			case 195: s = "invalid PrimitiveNamedLiteral"; break;
+			case 196: s = "invalid NewOperator"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

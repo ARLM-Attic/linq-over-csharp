@@ -46,5 +46,37 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(md.FormalParameters[13].Type.ResolutionInfo.Resolver, NetBinaryType.UInt64);
       Assert.AreEqual(md.FormalParameters[14].Type.ResolutionInfo.Resolver, NetBinaryType.UInt16);
     }
+
+    [TestMethod]
+    public void ConflictingNamespaceFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\InvalidNamespace1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0101");
+    }
+
+    [TestMethod]
+    public void ConflictingNamespaceFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\InvalidNamespace2.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0101");
+    }
+
+    [TestMethod]
+    public void ConflictingNamespaceFails3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\InvalidNamespace3.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0101");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0101");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0101");
+    }
   }
 }

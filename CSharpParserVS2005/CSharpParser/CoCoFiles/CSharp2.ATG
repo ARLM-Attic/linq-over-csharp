@@ -290,17 +290,47 @@ UsingDirective<NamespaceFragment parent>
                               string name = String.Empty; 
                               TypeReference typeUsed = null;
                            .)
-  [ IF (IsAssignment()) 
-    ident                  (. name = t.val; .)
-    "=" ]
-  TypeName<out typeUsed> 
-  ";"                      (. 
-                              UsingClause uc = new UsingClause(token, name, typeUsed);
+   ( IF (IsAssignment()) 
+     ident                 (. name = t.val; .)
+     "="
+     TypeName<out typeUsed> 
+  | 
+    ident                 (. name = t.val; .)
+    { 
+      "." ident           (. name += "." + t.val; .)
+    }
+  )
+  ";"                     (. 
+                              UsingClause uc = new UsingClause(token, this, name, typeUsed);
                               CurrentElement = uc;
                               if (parent == null) _File.Usings.Add(uc);
                               else parent.Usings.Add(uc); 
-                           .)
+                          .)
 .
+
+// ------------------------------------------------------------------------------------
+// "using" directive that is used in conjunction with a files or a namespace.
+// +parent: Parent namespace of the "using" directive. If this parameter is null, 
+//   the directive belongs to the file and not to the specified namespace.
+// ------------------------------------------------------------------------------------
+//UsingDirective<NamespaceFragment parent>
+//=                                                               
+//  "using"                  (. 
+//                              Token token = t;
+//                              string name = String.Empty; 
+//                              TypeReference typeUsed = null;
+//                           .)
+//  [ IF (IsAssignment()) 
+//    ident                  (. name = t.val; .)
+//    "=" ]
+//  TypeName<out typeUsed> 
+//  ";"                      (. 
+//                              UsingClause uc = new UsingClause(token, name, typeUsed);
+//                              CurrentElement = uc;
+//                              if (parent == null) _File.Usings.Add(uc);
+//                              else parent.Usings.Add(uc); 
+//                           .)
+// .
 
 // ------------------------------------------------------------------------------------
 // Global attributes belonging to a file.

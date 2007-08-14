@@ -56,8 +56,21 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the short name of this language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string ShortName
+    {
+      get { return _Name; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the name of the language element.
     /// </summary>
+    /// <remarks>
+    /// This name can be overridden.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public virtual string Name
     {

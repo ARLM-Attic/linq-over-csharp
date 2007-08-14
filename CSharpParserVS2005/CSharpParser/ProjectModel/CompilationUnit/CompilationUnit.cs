@@ -41,6 +41,11 @@ namespace CSharpParser.ProjectModel
     private int _ErrorLineOffset;
     private string _ErrorFile;
 
+    // --- Members related to semantics
+    private readonly NamespaceHierachy _GlobalHierarchy = new NamespaceHierachy("global");
+    private readonly Dictionary<string, NamespaceHierachy> _NamespaceHierarchies =
+      new Dictionary<string, NamespaceHierachy>();
+
 #if DIAGNOSTICS
 
     private static SourceFile _CurrentLocation;
@@ -204,6 +209,29 @@ namespace CSharpParser.ProjectModel
       get { return _ConditionalSymbols; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the global namespace hierarchy of this compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceHierachy GlobalHierarchy
+    {
+      get { return _GlobalHierarchy; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the named namespace hierarchies of this compilation unit.
+    /// </summary>
+    /// <remarks>
+    /// The global namespace hierarchy in not included among these hierarchies.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, NamespaceHierachy> NamespaceHierarchies
+    {
+      get { return _NamespaceHierarchies; }
+    }
+
     #endregion
 
     #region Public methods
@@ -359,8 +387,10 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int Parse()
     {
-      // --- Reset errors
+      // --- Init parsing
       (_Errors as IList<Error>).Clear();
+      _GlobalHierarchy.Clear();
+      _NamespaceHierarchies.Clear();
 
       // --- Syntax parsing
       foreach (SourceFile file in _Files)
@@ -376,6 +406,10 @@ namespace CSharpParser.ProjectModel
 
       // --- Semantical parsing
       SemanticsParser semParser = new SemanticsParser(this);
+
+      // --- Phase 1: Set resolvers
+      semParser.SetResolvers();
+      // --- Phase 2: Resolve all type references
       semParser.ResolveTypeReferences();
 
       // --- Return the number of errors found

@@ -58,7 +58,7 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
       TypeReference.Locations.Clear();
       TypeReference.ResolutionCounter = 0;
-      parser.AddFile(@"ProjectModel\CompilationUnit.cs");
+      parser.AddFile(@"ProjectModel\CompilationUnit\CompilationUnit.cs");
       Assert.IsTrue(InvokeParser(parser));
       Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
       Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
