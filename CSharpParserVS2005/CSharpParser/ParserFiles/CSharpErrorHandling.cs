@@ -164,6 +164,32 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0430: The extern alias '{0}' was not specified in a /reference option
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Missing alias</param>
+    // --------------------------------------------------------------------------------
+    public void Error0430(Token token, string name)
+    {
+      Error("CS0430", token,
+        string.Format("The extern alias '{0}' was not specified in a /reference option", 
+        name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0432: Alias '{0}' not found
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Missing alias</param>
+    // --------------------------------------------------------------------------------
+    public void Error0432(Token token, string name)
+    {
+      Error("CS0432", token, string.Format("Alias '{0}' not found", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0557: Duplicate user-defined conversion in type '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>

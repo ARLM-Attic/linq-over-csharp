@@ -290,22 +290,17 @@ UsingDirective<NamespaceFragment parent>
                               string name = String.Empty; 
                               TypeReference typeUsed = null;
                            .)
-   ( IF (IsAssignment()) 
+   [ IF (IsAssignment()) 
      ident                 (. name = t.val; .)
      "="
+   ]
      TypeName<out typeUsed> 
-  | 
-    ident                 (. name = t.val; .)
-    { 
-      "." ident           (. name += "." + t.val; .)
-    }
-  )
-  ";"                     (. 
+   ";"                     (. 
                               UsingClause uc = new UsingClause(token, this, name, typeUsed);
                               CurrentElement = uc;
                               if (parent == null) _File.Usings.Add(uc);
                               else parent.Usings.Add(uc); 
-                          .)
+                           .)
 .
 
 // ------------------------------------------------------------------------------------

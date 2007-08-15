@@ -8,7 +8,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents an assembly reference.
   /// </summary>
   // ==================================================================================
-  public sealed class AssemblyReference : CompilationReference
+  public sealed class ReferencedAssembly : ReferencedUnit
   {
     #region Private fields 
 
@@ -24,7 +24,7 @@ namespace CSharpParser.ProjectModel
     /// Obtains the location of system assemblies.
     /// </summary>
     // --------------------------------------------------------------------------------
-    static AssemblyReference()
+    static ReferencedAssembly()
     {
       Assembly systemAsm = Assembly.ReflectionOnlyLoad("mscorlib");
       _DotNetSystemFolder = Path.GetDirectoryName(systemAsm.Location);
@@ -36,7 +36,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="name">System assembly name.</param>
     // --------------------------------------------------------------------------------
-    public AssemblyReference(string name)
+    public ReferencedAssembly(string name)
       : this(name + ".dll", _DotNetSystemFolder)
     {
     }
@@ -48,7 +48,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="name">Assembly name</param>
     /// <param name="path">Assembly path</param>
     // --------------------------------------------------------------------------------
-    public AssemblyReference(string name, string path)
+    public ReferencedAssembly(string name, string path)
       : base(name)
     {
       _Assembly = Assembly.LoadFrom(Path.Combine(path, name));
@@ -60,8 +60,8 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="assembly">.NET assembly</param>
     // --------------------------------------------------------------------------------
-    public AssemblyReference(Assembly assembly)
-      : base(assembly.FullName)
+    public ReferencedAssembly(Assembly assembly)
+      : base(assembly.GetName().Name)
     {
       _Assembly = assembly;
     }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using CSharpParser.Collections;
 
 namespace CSharpParser.ProjectModel
@@ -13,6 +14,7 @@ namespace CSharpParser.ProjectModel
 
     private readonly string _Alias;
     private readonly string _ResourceName;
+    private Assembly _Assembly;
 
     #endregion
 
@@ -53,6 +55,31 @@ namespace CSharpParser.ProjectModel
     public string ResourceName
     {
       get { return _ResourceName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the assembly addressed by this resolution item.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Assembly Assembly
+    {
+      get
+      {
+        if (_Assembly == null)
+        {
+          ReferencedAssembly asmRef;
+          int pos = _ResourceName.IndexOf(',');
+          if (pos < 0) asmRef = new ReferencedAssembly(_ResourceName);
+          else
+          {
+            asmRef = new ReferencedAssembly(_ResourceName.Substring(0, pos),
+                                           _ResourceName.Substring(pos + 1));
+          }
+          _Assembly = asmRef.Assembly;
+        }
+        return _Assembly;
+      }
     }
 
     #endregion

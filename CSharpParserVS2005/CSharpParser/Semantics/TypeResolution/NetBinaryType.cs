@@ -15,7 +15,7 @@ namespace CSharpParser.Semantics
     #region Private fields
 
     private readonly Type _TypeObject;
-    private readonly CompilationReference _AssemblyRef;
+    private readonly ReferencedUnit _AssemblyRef;
     private readonly ITypeCharacteristics _BaseType;
     private readonly ITypeCharacteristics _DeclaringType;
 
@@ -86,7 +86,7 @@ namespace CSharpParser.Semantics
         throw new ArgumentNullException();
       }
       _TypeObject = typeObject;
-      _AssemblyRef = new AssemblyReference(typeObject.Assembly);
+      _AssemblyRef = new ReferencedAssembly(typeObject.Assembly);
       _BaseType = typeObject.BaseType == null
                     ? Object
                     : new NetBinaryType(typeObject.BaseType);
@@ -104,7 +104,7 @@ namespace CSharpParser.Semantics
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CompilationReference Compilation
+    public ReferencedUnit Compilation
     {
       get { return _AssemblyRef; }
     }

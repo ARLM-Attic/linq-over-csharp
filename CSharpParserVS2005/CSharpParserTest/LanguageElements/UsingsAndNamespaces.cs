@@ -24,10 +24,10 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(file.Usings[2].Name, "System.Text");
       Assert.IsTrue(file.Usings[3].HasAlias);
       Assert.AreEqual(file.Usings[3].Name, "AliasName");
-      Assert.AreEqual(file.Usings[3].AliasedType.FullName, "System.Text.Encoding");
+      Assert.AreEqual(file.Usings[3].ReferencedName.FullName, "System.Text.Encoding");
       Assert.IsTrue(file.Usings[4].HasAlias);
       Assert.AreEqual(file.Usings[4].Name, "SecondAlias");
-      Assert.AreEqual(file.Usings[4].AliasedType.FullName, "Microsoft.Win32");
+      Assert.AreEqual(file.Usings[4].ReferencedName.FullName, "Microsoft.Win32");
 
       // --- Check namespaces in the file
       Assert.AreEqual(file.Namespaces.Count, 3);

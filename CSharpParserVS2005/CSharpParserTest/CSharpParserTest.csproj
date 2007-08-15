@@ -285,6 +285,8 @@
     <None Include="TestFiles\TypeResolution\InvalidNamespace1.cs" />
     <None Include="TestFiles\TypeResolution\InvalidNamespace2.cs" />
     <None Include="TestFiles\TypeResolution\InvalidNamespace3.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace1.cs" />
+    <Compile Include="TestFiles\TypeResolution\UsingNamespace2.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
     <Compile Include="Visibility\Visibility.cs" />

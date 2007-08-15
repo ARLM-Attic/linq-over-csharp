@@ -12,7 +12,7 @@ namespace CSharpParser.ProjectModel
   /// unit.
   /// </remarks>
   // ==================================================================================
-  public abstract class CompilationReference
+  public abstract class ReferencedUnit
   {
     #region Private fields
 
@@ -28,7 +28,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="name">Name of the compilation reference.</param>
     // --------------------------------------------------------------------------------
-    protected CompilationReference(string name)
+    protected ReferencedUnit(string name)
     {
       _Name = name;
     }
@@ -56,18 +56,18 @@ namespace CSharpParser.ProjectModel
   /// the name of the reference.
   /// </summary>
   // ==================================================================================
-  public sealed class CompilationReferenceCollection : RestrictedIndexedCollection<CompilationReference>
+  public sealed class CompilationReferenceCollection : RestrictedIndexedCollection<ReferencedUnit>
   {
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Defines the key to be used for indexing.
     /// </summary>
-    /// <param name="item">CompilationReference item.</param>
+    /// <param name="item">ReferencedUnit item.</param>
     /// <returns>
     /// Name of the compilation reference.
     /// </returns>
     // --------------------------------------------------------------------------------
-    protected override string GetKeyOfItem(CompilationReference item)
+    protected override string GetKeyOfItem(ReferencedUnit item)
     {
       return item.Name;
     }

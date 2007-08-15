@@ -14,7 +14,8 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private readonly TypeReference _AliasedType;
+    private readonly TypeReference _ReferencedName;
+    private readonly bool _HasAlias;
 
     #endregion
 
@@ -33,7 +34,13 @@ namespace CSharpParser.ProjectModel
       TypeReference typeUsed): 
       base (token, parser, name)
     {
-      _AliasedType = typeUsed;
+      _ReferencedName = typeUsed;
+      _HasAlias = true;
+      if (string.IsNullOrEmpty(name))
+      {
+        _HasAlias = false;
+        Name = typeUsed.FullName;
+      }
     }
 
     #endregion
@@ -47,7 +54,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasAlias
     {
-      get { return _AliasedType != null; }
+      get { return _HasAlias; }
     }
 
     // --------------------------------------------------------------------------------
@@ -55,9 +62,9 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the type used by this directive.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference AliasedType
+    public TypeReference ReferencedName
     {
-      get { return _AliasedType; }
+      get { return _ReferencedName; }
     }
 
     #endregion
@@ -74,9 +81,9 @@ namespace CSharpParser.ProjectModel
     public void ResolveTypeReferences(ResolutionContext contextType,
       IResolutionRequired contextInstance)
     {
-      if (_AliasedType != null)
+      if (_ReferencedName != null)
       {
-        _AliasedType.ResolveTypeReferences(contextType, contextInstance);
+        _ReferencedName.ResolveTypeReferences(contextType, contextInstance);
       }
     }
 

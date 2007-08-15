@@ -16,7 +16,7 @@ namespace CSharpParser.Semantics
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    CompilationReference Compilation { get; }
+    ReferencedUnit Compilation { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

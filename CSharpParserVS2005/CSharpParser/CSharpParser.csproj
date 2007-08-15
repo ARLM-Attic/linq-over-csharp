@@ -40,7 +40,7 @@
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
-    <Compile Include="ProjectModel\CompilationUnit\CompilationUnitReference.cs" />
+    <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />
     <Compile Include="ProjectModel\CompilationUnit\TokenElement.cs" />
     <Compile Include="ProjectModel\Variables\IVariableInfo.cs" />
     <Compile Include="ProjectModel\Variables\LocalVariable.cs" />
@@ -55,12 +55,12 @@
     <Compile Include="ParserFiles\PPExpressions\Scanner.cs" />
     <Compile Include="ParserFiles\Scanner.cs" />
     <Compile Include="ParserFiles\TypeKind.cs" />
-    <Compile Include="ProjectModel\CompilationUnit\AssemblyReference.cs" />
+    <Compile Include="ProjectModel\CompilationUnit\ReferencedAssembly.cs" />
     <Compile Include="ProjectModel\CompilationUnit\AttributeArgument.cs" />
     <Compile Include="ProjectModel\CompilationUnit\AttributeDeclaration.cs" />
     <Compile Include="ProjectModel\CompilationUnit\AttributedElement.cs" />
     <Compile Include="ProjectModel\Comments\CommentInfo.cs" />
-    <Compile Include="ProjectModel\CompilationUnit\CompilationReference.cs" />
+    <Compile Include="ProjectModel\CompilationUnit\ReferencedUnit.cs" />
     <Compile Include="ProjectModel\ErrorHandling\Error.cs" />
     <Compile Include="ProjectModel\ErrorHandling\ICompilationErrorHandler.cs" />
     <Compile Include="ProjectModel\Expressions\Argument.cs" />
@@ -228,7 +228,7 @@
     <Compile Include="Semantics\TypeResolution\NetBinaryType.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionIfo.cs" />
     <Compile Include="Semantics\TypeResolution\IResolutionRequired.cs" />
-    <Compile Include="Semantics\TypeResolution\NamespaceHierachy.cs" />
+    <Compile Include="Semantics\TypeResolution\NamespaceHierarchy.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionContext.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionMode.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionTarget.cs" />

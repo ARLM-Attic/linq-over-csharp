@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.ParserFiles.PPExpressions;
@@ -30,7 +31,7 @@ namespace CSharpParser.ProjectModel
 
     private CSharpSyntaxParser _Parser;
     private SourceFile _CurrentFile;
-    private readonly CompilationUnitReference _ThisUnit;
+    private readonly ReferencedCompilation _ThisUnit;
 
     // --- Members related to error handling
     private readonly ErrorCollection _Errors = new ErrorCollection();
@@ -42,9 +43,9 @@ namespace CSharpParser.ProjectModel
     private string _ErrorFile;
 
     // --- Members related to semantics
-    private readonly NamespaceHierachy _GlobalHierarchy = new NamespaceHierachy("global");
-    private readonly Dictionary<string, NamespaceHierachy> _NamespaceHierarchies =
-      new Dictionary<string, NamespaceHierachy>();
+    private readonly NamespaceHierarchy _GlobalHierarchy = new NamespaceHierarchy("global");
+    private readonly Dictionary<string, NamespaceHierarchy> _NamespaceHierarchies =
+      new Dictionary<string, NamespaceHierarchy>();
 
 #if DIAGNOSTICS
 
@@ -91,7 +92,7 @@ namespace CSharpParser.ProjectModel
       {
         AddAllFilesFrom(_WorkingFolder);
       }
-      _ThisUnit = new CompilationUnitReference(this, "_ThisUnit_");
+      _ThisUnit = new ReferencedCompilation(this, "_ThisUnit_");
     }
 
     #endregion
@@ -103,7 +104,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the reference for this compilation unit.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CompilationUnitReference ThisUnit
+    public ReferencedCompilation ThisUnit
     {
       get { return _ThisUnit; }
     }
@@ -161,6 +162,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the list of 'extern alias' resolutions.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ExternAliasResolutionCollection ExternAliasResolutions
+    {
+      get { return _ExternAliasResolutions; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the current file that is under compilation.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -214,7 +225,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the global namespace hierarchy of this compilation unit.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public NamespaceHierachy GlobalHierarchy
+    public NamespaceHierarchy GlobalHierarchy
     {
       get { return _GlobalHierarchy; }
     }
@@ -227,7 +238,7 @@ namespace CSharpParser.ProjectModel
     /// The global namespace hierarchy in not included among these hierarchies.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, NamespaceHierachy> NamespaceHierarchies
+    public Dictionary<string, NamespaceHierarchy> NamespaceHierarchies
     {
       get { return _NamespaceHierarchies; }
     }
@@ -277,7 +288,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAssemblyReference(string name)
     {
-      _References.Add(new AssemblyReference(name));  
+      _References.Add(new ReferencedAssembly(name));  
     }
 
     // --------------------------------------------------------------------------------
@@ -289,7 +300,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAssemblyReference(string name, string path)
     {
-      _References.Add(new AssemblyReference(name, path));
+      _References.Add(new ReferencedAssembly(name, path));
     }
 
     // --------------------------------------------------------------------------------
@@ -407,9 +418,21 @@ namespace CSharpParser.ProjectModel
       // --- Semantical parsing
       SemanticsParser semParser = new SemanticsParser(this);
 
-      // --- Phase 1: Set resolvers
+      // --- Phase 1: Collect namespaces from referenced assemblies
+      // --- Set resolvers according to the source code.
+      CollectReferencedGlobalNamespaces();
+      CollectDeclaredNamespaces();
       semParser.SetResolvers();
-      // --- Phase 2: Resolve all type references
+      
+      // --- Phase 2: Create namspace hierarchies and resolve using clauses in the 
+      // --- compilation unit
+      semParser.CreateNamespaceHierarchies();
+      semParser.ResolveUsingDirectives();
+
+      //// --- Phase 1: Import referenced assemblies into the namespace hierarchy
+      //semParser.ImportReferences();
+      //semParser.ImportExternalReferences();
+      // --- Phase 3: Resolve all type references
       semParser.ResolveTypeReferences();
 
       // --- Return the number of errors found
@@ -546,6 +569,80 @@ namespace CSharpParser.ProjectModel
     {
       _ErrorLineOffset = -1;
       _ErrorFile = null;
+    }
+
+    #endregion
+
+    #region Methods for semantic parsing
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Collects namespace information from the referenced assemblies there are in the
+    /// global namespace hierarchy.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CollectReferencedGlobalNamespaces()
+    {
+      foreach (ReferencedUnit reference in References)
+      {
+        ReferencedAssembly asmRef = reference as ReferencedAssembly;
+        if (asmRef != null)
+        {
+          CollectNamespaces(GlobalHierarchy, asmRef.Assembly);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Collects namespace information from the specified assembliy.
+    /// </summary>
+    /// <param name="nsHierarchy">Destination hierarchy of namespaces</param>
+    /// <param name="asm">Assembly to collect the namespaces from</param>
+    // --------------------------------------------------------------------------------
+    public void CollectNamespaces(NamespaceHierarchy nsHierarchy, Assembly asm)
+    {
+      // --- Store namespaces already imported to avoid repeated processing
+      Dictionary<string, int> nsCache = new Dictionary<string, int>();
+      foreach (Type type in asm.GetTypes())
+      {
+        if (!String.IsNullOrEmpty(type.Namespace) && !nsCache.ContainsKey(type.Namespace))
+        {
+          // --- This namespace is not collected yet
+          NamespaceResolutionNode nsResolver;
+          ResolutionNodeBase conflictingNode;
+          if (!nsHierarchy.RegisterNamespace(type.Namespace, out nsResolver, 
+            out conflictingNode))
+          {
+            throw new InvalidOperationException(
+              String.Format("Type and namespace conflict within the assembly: {0}",
+                            asm.FullName));
+          }
+          nsResolver.AddResolver(type.Assembly.FullName, new ReferencedAssembly(asm));
+          nsCache.Add(type.Namespace, 0);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Collects namespaces declared in this compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CollectDeclaredNamespaces()
+    {
+      foreach (Namespace ns in DeclaredNamespaces)
+      {
+        NamespaceResolutionNode nsResolver;
+        ResolutionNodeBase conflictingNode;
+        if (!GlobalHierarchy.RegisterNamespace(ns.Name, out nsResolver,
+          out conflictingNode))
+        {
+          throw new InvalidOperationException(
+            "Type and namespace conflict within the compilation unit");
+        }
+        nsResolver.AddResolver(ThisUnit.Name, ThisUnit);
+      }
     }
 
     #endregion

@@ -1,5 +1,6 @@
 using System;
 using CSharpParser.ProjectModel;
+using CSharpParser.Semantics;
 
 namespace CSharpParserTest
 {
@@ -23,7 +24,12 @@ namespace CSharpParserTest
         Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", error.Line, error.Column,
           error.Code, error.Description, error.File);
       }
-      parser.GlobalHierarchy.Trace(Console.Out, 0);
+      Console.WriteLine();
+      //parser.GlobalHierarchy.Trace(Console.Out, 0);
+      foreach (NamespaceHierarchy nsh in parser.NamespaceHierarchies.Values)
+      {
+        //nsh.Trace(Console.Out, 0);
+      }
       return errors == 0;
     }
   }

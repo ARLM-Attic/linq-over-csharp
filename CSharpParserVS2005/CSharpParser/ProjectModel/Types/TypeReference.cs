@@ -173,7 +173,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CompilationReference Compilation
+    public ReferencedUnit Compilation
     {
       get { return _ResolutionInfo.Resolver.Compilation; }
     }

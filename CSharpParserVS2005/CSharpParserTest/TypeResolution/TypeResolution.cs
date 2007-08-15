@@ -78,5 +78,18 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS0101");
       Assert.AreEqual(parser.Errors[2].Code, "CS0101");
     }
+
+    [TestMethod]
+    public void ImportSystemIsOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace1.cs");
+      parser.AddAssemblyReference("System");
+      parser.AddAliasResolution("EA1", "System.Data");
+      parser.AddAliasResolution("EA1", "System.Xml");
+      parser.AddAliasResolution("EA2", "System.Xml");
+      parser.AddAliasResolution("System.Xml");
+      Assert.IsTrue(InvokeParser(parser));
+    }
   }
 }

@@ -5,7 +5,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a reference to a compiation unit.
   /// </summary>
   // ==================================================================================
-  public sealed class CompilationUnitReference : CompilationReference
+  public sealed class ReferencedCompilation : ReferencedUnit
   {
     #region Private fields
 
@@ -22,7 +22,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="unit">Compilation unit instance</param>
     /// <param name="name">Name</param>
     // --------------------------------------------------------------------------------
-    public CompilationUnitReference(CompilationUnit unit, string name)
+    public ReferencedCompilation(CompilationUnit unit, string name)
       : base(name)
     {
       _CompilationUnit = unit;
