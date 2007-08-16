@@ -82,5 +82,34 @@ namespace CSharpParser.ProjectModel
     {
       return item.Name;
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if there is any namespace partially specified by the key.
+    /// </summary>
+    /// <param name="key">Namespace partial key</param>
+    /// <param name="parent">Parent namespace</param>
+    /// <returns>
+    /// True if the key is contained fully or partially.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool ContainsPartially(string key, out string parent)
+    {
+      parent = string.Empty;
+      if (ContainsKey(key)) return true;
+      string start = key + ".";
+      string part = "." + start;
+      foreach (string otherKey in Keys)
+      {
+        if (otherKey.StartsWith(start)) return true;
+        int pos = otherKey.IndexOf(part);
+        if (pos > 0)
+        {
+          parent = otherKey.Substring(0, pos);
+          return true;
+        }
+      }
+      return false;
+    }
   }
 }

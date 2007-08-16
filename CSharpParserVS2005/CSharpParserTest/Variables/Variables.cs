@@ -96,6 +96,7 @@ namespace CSharpParserTest.LanguageElements
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"Variables\DuplicatedVariable9.cs");
+      parser.AddAssemblyReference("System.Data");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 4);
       Assert.AreEqual(parser.Errors[0].Code, "CS0136");

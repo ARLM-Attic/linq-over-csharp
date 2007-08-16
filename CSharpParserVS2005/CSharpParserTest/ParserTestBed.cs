@@ -17,6 +17,8 @@ namespace CSharpParserTest
 
     public bool InvokeParser(CompilationUnit parser)
     {
+      parser.AddAssemblyReference("mscorlib");
+      parser.AddAssemblyReference("System");
       int errors = parser.Parse();
       Console.WriteLine("{0} errors detected", errors);
       foreach (Error error in parser.Errors)

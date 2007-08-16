@@ -6,7 +6,7 @@
 
 #define SymbolA
 
-extern alias alias;
+using System;
 
 #define WrongDefine
 #undef WrongUndef

@@ -19,6 +19,10 @@ namespace CSharpParser.Semantics
   {
     #region Private fields
 
+    // --- Contains a list of imported assemblies to check before duplicate import
+    private readonly List<string> _ImportedAssemblies =
+      new List<string>();
+    // --- Contains a shortcut cache to accelerate nested namespace node access
     private readonly Dictionary<string, NamespaceResolutionNode> _Cache = 
       new Dictionary<string, NamespaceResolutionNode>();
 
@@ -40,6 +44,16 @@ namespace CSharpParser.Semantics
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of imported assembly names
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<string> ImportedAssemblies
+    {
+      get { return _ImportedAssemblies; }
+    }
+
     #endregion
 
     #region Public methods
@@ -51,6 +65,7 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public void Clear()
     {
+      _ImportedAssemblies.Clear();
       _Cache.Clear();
       Children.Clear();
     }

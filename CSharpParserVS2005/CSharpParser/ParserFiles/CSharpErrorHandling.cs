@@ -147,6 +147,36 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0138: A using namespace directive can only be applied to namespaces; 
+    /// '{0}' is a type not a namespace.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Mismatched name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0138(Token token, string name)
+    {
+      Error("CS0138", token,
+        string.Format("A using namespace directive can only be applied to namespaces; " +
+        "'{0}' is a type not a namespace", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0246: The type or namespace name '{0}' could not be found (are  you 
+    /// missing a using directive or an assembly reference?)
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0246(Token token, string name)
+    {
+      Error("CS0246", token,
+        string.Format("The type or namespace name '{0}' could not be found (are you "+
+        "missing a using directive or an assembly reference?)", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0409: A constraint clause has already been specified for type
     /// parameter '{0}'. All of the constraints for a type parameter must be
     /// specified in a single where clause.

@@ -152,7 +152,6 @@
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UnaryOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UnaryPlusOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UncheckedOperator.cs" />
-    <Compile Include="ProjectModel\CompilationUnit\ExternAliasResolution.cs" />
     <Compile Include="ProjectModel\Members\AccessorDeclaration.cs" />
     <Compile Include="ProjectModel\Members\CastOperatorDeclaration.cs" />
     <Compile Include="ProjectModel\Members\ConstDeclaration.cs" />

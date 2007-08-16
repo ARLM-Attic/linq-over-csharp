@@ -1,27 +1,24 @@
-namespace N1
-{
-}
+extern alias MISSING1;
+extern alias MISSING2;
 
-namespace  N2A
+using System.IO;
+using System.Data;
+
+namespace MyNamespace
 {
+  extern alias MISSING3;
+  extern alias MISSING4;
+
+  using System.Collections;
+  using System.Xml;
   
-}
-
-namespace N2.N2A
-{
-  class A {}  
-}
-
-namespace N2
-{
-  namespace N2A
+  namespace MySubNamespace
   {
-    
-  }
+    extern alias MISSING1;
+    extern alias MISSING2;
 
-  namespace N2B
-  {
-    using N2A;
-    class B: A {}
+    using System.Collections;
+    using System.Xml;
+    using System.Data;
   }
 }

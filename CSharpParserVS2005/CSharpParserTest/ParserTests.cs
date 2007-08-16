@@ -14,7 +14,10 @@ namespace CSharpParserTest
     [TestMethod]
     public void BasicTestIsOK()
     {
-      Assert.IsTrue(InvokeParser("Parser.cs"));
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile("Parser.cs");
+      parser.AddAssemblyReference("System.Drawing");
+      Assert.IsTrue(InvokeParser(parser));
     }
 
     [TestMethod]
@@ -22,7 +25,6 @@ namespace CSharpParserTest
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("GlobalAttributes.cs");
-      parser.AddAssemblyReference("System");
       parser.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(parser));
       SourceFile file = parser.Files[0];

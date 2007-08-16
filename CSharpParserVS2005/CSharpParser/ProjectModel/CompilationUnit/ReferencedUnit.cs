@@ -56,7 +56,7 @@ namespace CSharpParser.ProjectModel
   /// the name of the reference.
   /// </summary>
   // ==================================================================================
-  public sealed class CompilationReferenceCollection : RestrictedIndexedCollection<ReferencedUnit>
+  public sealed class ReferencedUnitCollection : RestrictedCollection<ReferencedUnit>
   {
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -67,9 +67,9 @@ namespace CSharpParser.ProjectModel
     /// Name of the compilation reference.
     /// </returns>
     // --------------------------------------------------------------------------------
-    protected override string GetKeyOfItem(ReferencedUnit item)
-    {
-      return item.Name;
-    }
+    //protected override string GetKeyOfItem(ReferencedUnit item)
+    //{
+    //  return item.Name;
+    //}
   }
 }

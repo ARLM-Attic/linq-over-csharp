@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Reflection;
-using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
 {
@@ -18,8 +17,8 @@ namespace CSharpParser.Semantics
   {
     #region Private fields
 
-    private readonly Dictionary<string, ReferencedUnit> _Resolvers =
-      new Dictionary<string, ReferencedUnit>();
+    private readonly Dictionary<string, Assembly> _Resolvers =
+      new Dictionary<string, Assembly>();
 
     #endregion
 
@@ -53,11 +52,11 @@ namespace CSharpParser.Semantics
     /// Resolving reference if found; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ReferencedUnit this[string key]
+    public Assembly this[string key]
     {
       get
       {
-        ReferencedUnit result;
+        Assembly result;
         if (_Resolvers.TryGetValue(key, out result)) return result;
         return null;
       }
@@ -72,11 +71,11 @@ namespace CSharpParser.Semantics
     /// Adds a resolver to this node.
     /// </summary>
     /// <param name="key">Name of the resolver</param>
-    /// <param name="resolver">Resolver object</param>
+    /// <param name="resolvingAssembly">Resolving assembly instance</param>
     // --------------------------------------------------------------------------------
-    public void AddResolver(string key, ReferencedUnit resolver)
+    public void AddResolver(string key, Assembly resolvingAssembly)
     {
-      _Resolvers.Add(key, resolver);
+      _Resolvers.Add(key, resolvingAssembly);
     }
 
     #endregion

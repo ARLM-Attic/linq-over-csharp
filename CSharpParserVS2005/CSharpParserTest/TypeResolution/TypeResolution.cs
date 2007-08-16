@@ -84,12 +84,74 @@ namespace CSharpParserTest.LanguageElements
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"TypeResolution\UsingNamespace1.cs");
-      parser.AddAssemblyReference("System");
-      parser.AddAliasResolution("EA1", "System.Data");
-      parser.AddAliasResolution("EA1", "System.Xml");
-      parser.AddAliasResolution("EA2", "System.Xml");
-      parser.AddAliasResolution("System.Xml");
+      parser.AddAliasedReference("EA1", "System.Data");
+      parser.AddAliasedReference("EA1", "System.Xml");
+      parser.AddAliasedReference("EA2", "System.Xml");
+      parser.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void MissingExternAliasDetected1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace2.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      parser.AddAliasedReference("EA1", "System.Data");
+      parser.AddAliasedReference("EA2", "System.Xml");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 6);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0430");
+    }
+
+    [TestMethod]
+    public void MissingExternAliasDetected2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace2.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      parser.AddAliasedReference("MISSING3", "System.Data");
+      parser.AddAliasedReference("MISSING4", "System.Xml");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 4);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0430");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0430");
+    }
+
+    [TestMethod]
+    public void MissingExternAliasDetected3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace2.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      parser.AddAliasedReference("MISSING1", "System.Data");
+      parser.AddAliasedReference("MISSING2", "System.Xml");
+      parser.AddAliasedReference("MISSING3", "System.Data");
+      parser.AddAliasedReference("MISSING4", "System.Xml");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void MissingNamespaceHierarchy1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace3.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      parser.AddAliasedReference("EA1", "System.Data");
+      parser.AddAliasedReference("EA2", "System.Xml");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 6);
     }
   }
 }

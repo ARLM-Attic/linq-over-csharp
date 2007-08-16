@@ -470,7 +470,6 @@ public partial class CSharpSyntaxParser
 		}
 		while (la.kind == 78) {
 			UsingDirective(null);
-			_PragmaHandler.SignRealToken(); 
 		}
 		while (IsGlobalAttrTarget()) {
 			_PragmaHandler.SignRealToken(); 
@@ -504,6 +503,7 @@ public partial class CSharpSyntaxParser
 		Token token = t;
 		string name = String.Empty; 
 		TypeReference typeUsed = null;
+		_PragmaHandler.SignRealToken();
 		
 		if (IsAssignment()) {
 			Expect(1);

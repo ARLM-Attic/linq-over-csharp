@@ -11,6 +11,8 @@ namespace CSharpParserTest.LanguageElements
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(parser));
       SourceFile file = parser.Files[0];
 

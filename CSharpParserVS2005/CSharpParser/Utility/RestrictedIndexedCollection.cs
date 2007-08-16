@@ -16,7 +16,7 @@ namespace CSharpParser.Collections
     #region Private fields
 
     private readonly List<TValue> _Items;
-    private readonly Dictionary<string, TValue> _indexedItems;
+    private readonly Dictionary<string, TValue> _IndexedItems;
     protected bool _IsReadOnly;
     private event EventHandler<ItemedCancelEventArgs<TValue>> _BeforeAdd;
     private event EventHandler<ItemedEventArgs<TValue>> _AfterAdd;
@@ -31,7 +31,7 @@ namespace CSharpParser.Collections
     public RestrictedIndexedCollection()
     {
       _Items = new List<TValue>();
-      _indexedItems = new Dictionary<string, TValue>();
+      _IndexedItems = new Dictionary<string, TValue>();
       _IsReadOnly = false;
     }
 
@@ -42,7 +42,7 @@ namespace CSharpParser.Collections
     public RestrictedIndexedCollection(int capacity)
     {
       _Items = new List<TValue>(capacity);
-      _indexedItems = new Dictionary<string, TValue>(capacity);
+      _IndexedItems = new Dictionary<string, TValue>(capacity);
       _IsReadOnly = false;
     }
 
@@ -110,9 +110,9 @@ namespace CSharpParser.Collections
         CheckReadOnly();
         string oldKey = GetKeyOfItem(_Items[index]);
         string newKey = GetKeyOfItem(value);
-        _indexedItems.Remove(oldKey);
+        _IndexedItems.Remove(oldKey);
         _Items[index] = value;
-        _indexedItems.Add(newKey, value);
+        _IndexedItems.Add(newKey, value);
       }
     }
 
@@ -125,7 +125,17 @@ namespace CSharpParser.Collections
     // ----------------------------------------------------------------------------------
     public TValue this[string key]
     {
-      get { return _indexedItems[key]; }
+      get { return _IndexedItems[key]; }
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the keys of this collection.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    public IEnumerable<string> Keys
+    {
+      get { return _IndexedItems.Keys; }
     }
 
     #endregion
@@ -146,7 +156,7 @@ namespace CSharpParser.Collections
         _BeforeAdd(this, eventArgs);
         if (eventArgs.Cancel) return;
       }
-      _indexedItems.Add(GetKeyOfItem(item), item);
+      _IndexedItems.Add(GetKeyOfItem(item), item);
       _Items.Insert(_Items.Count, item);
       if (_AfterAdd != null)
       {
@@ -187,7 +197,7 @@ namespace CSharpParser.Collections
     // ----------------------------------------------------------------------------------
     void IList<TValue>.Insert(int index, TValue item)
     {
-      _indexedItems.Add(GetKeyOfItem(item), item);
+      _IndexedItems.Add(GetKeyOfItem(item), item);
       _Items.Insert(index, item);
     }
 
@@ -200,7 +210,7 @@ namespace CSharpParser.Collections
     void IList<TValue>.RemoveAt(int index)
     {
       string key = GetKeyOfItem(_Items[index]);
-      _indexedItems.Remove(key);
+      _IndexedItems.Remove(key);
       _Items.RemoveAt(index);
     }
 
@@ -212,7 +222,7 @@ namespace CSharpParser.Collections
     public void Clear()
     {
       _Items.Clear();
-      _indexedItems.Clear();
+      _IndexedItems.Clear();
     }
 
     // ----------------------------------------------------------------------------------
@@ -236,7 +246,7 @@ namespace CSharpParser.Collections
     // ----------------------------------------------------------------------------------
     public bool ContainsKey(string key)
     {
-      return _indexedItems.ContainsKey(key);
+      return _IndexedItems.ContainsKey(key);
     }
 
     // ----------------------------------------------------------------------------------
@@ -251,7 +261,7 @@ namespace CSharpParser.Collections
     // ----------------------------------------------------------------------------------
     public bool TryGetValue(string key, out TValue value)
     {
-      return _indexedItems.TryGetValue(key, out value);
+      return _IndexedItems.TryGetValue(key, out value);
     }
 
     // ----------------------------------------------------------------------------------

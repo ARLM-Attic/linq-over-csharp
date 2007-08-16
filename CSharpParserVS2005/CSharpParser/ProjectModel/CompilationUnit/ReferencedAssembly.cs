@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 
@@ -12,6 +13,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields 
 
+    private readonly string _Alias;
     private readonly Assembly _Assembly;
     private static readonly string _DotNetSystemFolder;
 
@@ -37,7 +39,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="name">System assembly name.</param>
     // --------------------------------------------------------------------------------
     public ReferencedAssembly(string name)
-      : this(name + ".dll", _DotNetSystemFolder)
+      : this(name, _DotNetSystemFolder, String.Empty)
     {
     }
 
@@ -49,9 +51,23 @@ namespace CSharpParser.ProjectModel
     /// <param name="path">Assembly path</param>
     // --------------------------------------------------------------------------------
     public ReferencedAssembly(string name, string path)
+      : this(name, path, String.Empty)
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a reference to the specified assembly.
+    /// </summary>
+    /// <param name="name">Assembly name</param>
+    /// <param name="path">Assembly path</param>
+    /// <param name="alias">Alias name</param>
+    // --------------------------------------------------------------------------------
+    public ReferencedAssembly(string name, string path, string alias)
       : base(name)
     {
-      _Assembly = Assembly.LoadFrom(Path.Combine(path, name));
+      _Assembly = Assembly.LoadFrom(Path.Combine(path, name + ".dll"));
+      _Alias = alias;
     }
 
     // --------------------------------------------------------------------------------
@@ -61,9 +77,22 @@ namespace CSharpParser.ProjectModel
     /// <param name="assembly">.NET assembly</param>
     // --------------------------------------------------------------------------------
     public ReferencedAssembly(Assembly assembly)
+      : this(assembly, String.Empty)
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a reference from the specified assembly with the provided alias.
+    /// </summary>
+    /// <param name="assembly">.NET assembly</param>
+    /// <param name="alias">Assembly alias name</param>
+    // --------------------------------------------------------------------------------
+    public ReferencedAssembly(Assembly assembly, string alias)
       : base(assembly.GetName().Name)
     {
       _Assembly = assembly;
+      _Alias = alias;
     }
 
     #endregion
@@ -78,6 +107,16 @@ namespace CSharpParser.ProjectModel
     public static string DotNetSystemFolder
     {
       get { return _DotNetSystemFolder; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the alias.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Alias
+    {
+      get { return _Alias; }
     }
 
     // --------------------------------------------------------------------------------
