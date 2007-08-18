@@ -14,37 +14,37 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"TypeResolution\PrimitiveTypes.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration cd = parser.Files[0].TypeDeclarations[0];
-      Assert.AreEqual(cd.Fields[0].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Boolean);
-      Assert.AreEqual(cd.Fields[1].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Byte);
-      Assert.AreEqual(cd.Fields[2].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Char);
-      Assert.AreEqual(cd.Fields[3].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Decimal);
-      Assert.AreEqual(cd.Fields[4].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Double);
-      Assert.AreEqual(cd.Fields[5].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Single);
-      Assert.AreEqual(cd.Fields[6].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Int32);
-      Assert.AreEqual(cd.Fields[7].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Int64);
-      Assert.AreEqual(cd.Fields[8].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Object);
-      Assert.AreEqual(cd.Fields[9].ResultingType.ResolutionInfo.Resolver, NetBinaryType.SByte);
-      Assert.AreEqual(cd.Fields[10].ResultingType.ResolutionInfo.Resolver, NetBinaryType.Int16);
-      Assert.AreEqual(cd.Fields[11].ResultingType.ResolutionInfo.Resolver, NetBinaryType.String);
-      Assert.AreEqual(cd.Fields[12].ResultingType.ResolutionInfo.Resolver, NetBinaryType.UInt32);
-      Assert.AreEqual(cd.Fields[13].ResultingType.ResolutionInfo.Resolver, NetBinaryType.UInt64);
-      Assert.AreEqual(cd.Fields[14].ResultingType.ResolutionInfo.Resolver, NetBinaryType.UInt16);
+      Assert.AreEqual(cd.Fields[0].ResultingType.TypeResolver, NetBinaryType.Boolean);
+      Assert.AreEqual(cd.Fields[1].ResultingType.TypeResolver, NetBinaryType.Byte);
+      Assert.AreEqual(cd.Fields[2].ResultingType.TypeResolver, NetBinaryType.Char);
+      Assert.AreEqual(cd.Fields[3].ResultingType.TypeResolver, NetBinaryType.Decimal);
+      Assert.AreEqual(cd.Fields[4].ResultingType.TypeResolver, NetBinaryType.Double);
+      Assert.AreEqual(cd.Fields[5].ResultingType.TypeResolver, NetBinaryType.Single);
+      Assert.AreEqual(cd.Fields[6].ResultingType.TypeResolver, NetBinaryType.Int32);
+      Assert.AreEqual(cd.Fields[7].ResultingType.TypeResolver, NetBinaryType.Int64);
+      Assert.AreEqual(cd.Fields[8].ResultingType.TypeResolver, NetBinaryType.Object);
+      Assert.AreEqual(cd.Fields[9].ResultingType.TypeResolver, NetBinaryType.SByte);
+      Assert.AreEqual(cd.Fields[10].ResultingType.TypeResolver, NetBinaryType.Int16);
+      Assert.AreEqual(cd.Fields[11].ResultingType.TypeResolver, NetBinaryType.String);
+      Assert.AreEqual(cd.Fields[12].ResultingType.TypeResolver, NetBinaryType.UInt32);
+      Assert.AreEqual(cd.Fields[13].ResultingType.TypeResolver, NetBinaryType.UInt64);
+      Assert.AreEqual(cd.Fields[14].ResultingType.TypeResolver, NetBinaryType.UInt16);
       MethodDeclaration md = cd.Methods[0];
-      Assert.AreEqual(md.FormalParameters[0].Type.ResolutionInfo.Resolver, NetBinaryType.Boolean);
-      Assert.AreEqual(md.FormalParameters[1].Type.ResolutionInfo.Resolver, NetBinaryType.Byte);
-      Assert.AreEqual(md.FormalParameters[2].Type.ResolutionInfo.Resolver, NetBinaryType.Char);
-      Assert.AreEqual(md.FormalParameters[3].Type.ResolutionInfo.Resolver, NetBinaryType.Decimal);
-      Assert.AreEqual(md.FormalParameters[4].Type.ResolutionInfo.Resolver, NetBinaryType.Double);
-      Assert.AreEqual(md.FormalParameters[5].Type.ResolutionInfo.Resolver, NetBinaryType.Single);
-      Assert.AreEqual(md.FormalParameters[6].Type.ResolutionInfo.Resolver, NetBinaryType.Int32);
-      Assert.AreEqual(md.FormalParameters[7].Type.ResolutionInfo.Resolver, NetBinaryType.Int64);
-      Assert.AreEqual(md.FormalParameters[8].Type.ResolutionInfo.Resolver, NetBinaryType.Object);
-      Assert.AreEqual(md.FormalParameters[9].Type.ResolutionInfo.Resolver, NetBinaryType.SByte);
-      Assert.AreEqual(md.FormalParameters[10].Type.ResolutionInfo.Resolver, NetBinaryType.Int16);
-      Assert.AreEqual(md.FormalParameters[11].Type.ResolutionInfo.Resolver, NetBinaryType.String);
-      Assert.AreEqual(md.FormalParameters[12].Type.ResolutionInfo.Resolver, NetBinaryType.UInt32);
-      Assert.AreEqual(md.FormalParameters[13].Type.ResolutionInfo.Resolver, NetBinaryType.UInt64);
-      Assert.AreEqual(md.FormalParameters[14].Type.ResolutionInfo.Resolver, NetBinaryType.UInt16);
+      Assert.AreEqual(md.FormalParameters[0].Type.TypeResolver, NetBinaryType.Boolean);
+      Assert.AreEqual(md.FormalParameters[1].Type.TypeResolver, NetBinaryType.Byte);
+      Assert.AreEqual(md.FormalParameters[2].Type.TypeResolver, NetBinaryType.Char);
+      Assert.AreEqual(md.FormalParameters[3].Type.TypeResolver, NetBinaryType.Decimal);
+      Assert.AreEqual(md.FormalParameters[4].Type.TypeResolver, NetBinaryType.Double);
+      Assert.AreEqual(md.FormalParameters[5].Type.TypeResolver, NetBinaryType.Single);
+      Assert.AreEqual(md.FormalParameters[6].Type.TypeResolver, NetBinaryType.Int32);
+      Assert.AreEqual(md.FormalParameters[7].Type.TypeResolver, NetBinaryType.Int64);
+      Assert.AreEqual(md.FormalParameters[8].Type.TypeResolver, NetBinaryType.Object);
+      Assert.AreEqual(md.FormalParameters[9].Type.TypeResolver, NetBinaryType.SByte);
+      Assert.AreEqual(md.FormalParameters[10].Type.TypeResolver, NetBinaryType.Int16);
+      Assert.AreEqual(md.FormalParameters[11].Type.TypeResolver, NetBinaryType.String);
+      Assert.AreEqual(md.FormalParameters[12].Type.TypeResolver, NetBinaryType.UInt32);
+      Assert.AreEqual(md.FormalParameters[13].Type.TypeResolver, NetBinaryType.UInt64);
+      Assert.AreEqual(md.FormalParameters[14].Type.TypeResolver, NetBinaryType.UInt16);
     }
 
     [TestMethod]
@@ -152,6 +152,22 @@ namespace CSharpParserTest.LanguageElements
       parser.AddAliasedReference("EA2", "System.Xml");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 6);
+    }
+
+    [TestMethod]
+    public void NestedUsingsOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace4.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void NestedUsingsOk2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace5.cs");
+      Assert.IsTrue(InvokeParser(parser));
     }
   }
 }

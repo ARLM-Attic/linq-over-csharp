@@ -22,6 +22,7 @@ namespace CSharpParserTest
     public void NUnitCoreIsOK()
     {
       CompilationUnit parser = new CompilationUnit(NUnitCoreFolder, true);
+      parser.AddAssemblyReference("NUnit.Core.Interfaces", AsmFolder);
       Assert.IsTrue(InvokeParser(parser));
     }
 
@@ -29,6 +30,17 @@ namespace CSharpParserTest
     public void CSLAIsOK()
     {
       CompilationUnit parser = new CompilationUnit(CSLAFolder, true);
+      parser.AddAssemblyReference("System.Configuration");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Design");
+      parser.AddAssemblyReference("System.Drawing");
+      parser.AddAssemblyReference("System.EnterpriseServices");
+      parser.AddAssemblyReference("System.Runtime.Remoting");
+      parser.AddAssemblyReference("System.Transactions");
+      parser.AddAssemblyReference("System.Web");
+      parser.AddAssemblyReference("System.Web.Services");
+      parser.AddAssemblyReference("System.Windows.Forms");
+      parser.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(parser));
     }
   }

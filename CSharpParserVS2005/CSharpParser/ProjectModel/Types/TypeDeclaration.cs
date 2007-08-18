@@ -209,10 +209,20 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the flag indicating if this type is .NET runtime type or not
+    /// </summary>
+    /// <remarks>Always returns false.</remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsRuntimeType
+    {
+      get { return false; }
+    }
+
+    /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ReferencedUnit Compilation
+    public ReferencedUnit DeclaringUnit
     {
       get { return Parser.CompilationUnit.ThisUnit; }
     }
@@ -723,7 +733,7 @@ namespace CSharpParser.ProjectModel
       else if (_Namespace == null)
       {
         // --- This is a global type, use the resolver of the compilation unit
-        resolverNode = Parser.CompilationUnit.GlobalHierarchy;
+        resolverNode = Parser.CompilationUnit.SourceResolutionTree;
       }
       else
       {

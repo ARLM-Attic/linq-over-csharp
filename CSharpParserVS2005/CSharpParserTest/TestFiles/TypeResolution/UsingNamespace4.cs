@@ -8,6 +8,7 @@ namespace A
   {
     namespace G.H
     {
+      using B.C;
       using I.J;
 
       namespace I.J

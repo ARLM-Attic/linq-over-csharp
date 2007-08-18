@@ -214,7 +214,7 @@ namespace CSharpParser.ProjectModel
       if (_ParentNamespace == null)
       {
         // --- This is a global namespace
-        resolverNode = Parser.CompilationUnit.GlobalHierarchy;
+        resolverNode = Parser.CompilationUnit.SourceResolutionTree;
       }
       else
       {

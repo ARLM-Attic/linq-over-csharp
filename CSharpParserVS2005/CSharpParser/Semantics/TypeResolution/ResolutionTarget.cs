@@ -9,6 +9,8 @@ namespace CSharpParser
   {
     /// <summary>The name has not been resolved.</summary>
     Unresolved = 0,
+    /// <summary>The name has been resolved as a namespace hierarchy.</summary>
+    NamespaceHierarchy,
     /// <summary>The name has been resolved as a namespace.</summary>
     Namespace,
     /// <summary>The name has been resolved as a type.</summary>

@@ -7,6 +7,7 @@ namespace CSharpParserTest
   public abstract class ParserTestBed
   {
     protected const string WorkingFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\TestFiles";
+    protected const string AsmFolder = WorkingFolder + @"\Assemblies";
 
     public bool InvokeParser(string fileName)
     {

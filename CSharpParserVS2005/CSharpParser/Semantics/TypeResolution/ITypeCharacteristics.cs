@@ -13,10 +13,17 @@ namespace CSharpParser.Semantics
   {
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the flag indicating if this type is .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    bool IsRuntimeType { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    ReferencedUnit Compilation { get; }
+    ReferencedUnit DeclaringUnit { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

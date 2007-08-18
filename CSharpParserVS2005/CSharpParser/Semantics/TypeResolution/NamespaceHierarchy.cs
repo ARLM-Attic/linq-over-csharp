@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
-  /// This class represents a namespace hierarchy that ise used when resolving type
-  /// names.
+  /// This class represents a namespace hierarchy that contains one or more 
+  /// ResolutionTrees to resolv namespaces and types.
   /// </summary>
   /// <remarks>
   /// During the compilation there is a global namespece hierarchy including the 
@@ -15,16 +15,12 @@ namespace CSharpParser.Semantics
   /// aliased with the "extern alias" directive.
   /// </remarks>
   // ==================================================================================
-  public sealed class NamespaceHierarchy: ResolutionNodeBase
+  public sealed class NamespaceHierarchy
   {
     #region Private fields
 
-    // --- Contains a list of imported assemblies to check before duplicate import
-    private readonly List<string> _ImportedAssemblies =
-      new List<string>();
-    // --- Contains a shortcut cache to accelerate nested namespace node access
-    private readonly Dictionary<string, NamespaceResolutionNode> _Cache = 
-      new Dictionary<string, NamespaceResolutionNode>();
+    private readonly Dictionary<string, TypeResolutionTree> _ResolutionTrees =
+      new Dictionary<string, TypeResolutionTree>();
 
     #endregion
 
@@ -32,11 +28,10 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new namespace hierarchy with the specified name.
+    /// Creates a new namespace hierarchy
     /// </summary>
-    /// <param name="name">Name of the namespace hierarchy.</param>
     // --------------------------------------------------------------------------------
-    public NamespaceHierarchy(string name): base(null, name)
+    public NamespaceHierarchy()
     {
     }
 
@@ -46,12 +41,12 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of imported assembly names
+    /// Gets the list of resolution trees in this namespace hierarchy.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<string> ImportedAssemblies
+    public IEnumerable<TypeResolutionTree> ResolutionTrees
     {
-      get { return _ImportedAssemblies; }
+      get { return _ResolutionTrees.Values; }
     }
 
     #endregion
@@ -60,162 +55,120 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Clear all nodes of this hierarchy.
+    /// Add the specified reolution tree to the hierarchy.
+    /// </summary>
+    /// <param name="name">Name of the resolution tree</param>
+    /// <param name="tree">Tree instance</param>
+    // --------------------------------------------------------------------------------
+    public void AddTree(string name, TypeResolutionTree tree)
+    {
+      _ResolutionTrees.Add(name, tree);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Clears all items in this namespace hierarchy.
     /// </summary>
     // --------------------------------------------------------------------------------
     public void Clear()
     {
-      _ImportedAssemblies.Clear();
-      _Cache.Clear();
-      Children.Clear();
+      _ResolutionTrees.Clear();
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the resolver node belonging to the specified namespace key.
+    /// Checks if this namespace hierarchy contains the specified tree or not.
     /// </summary>
-    /// <param name="nsKey">Namespace key</param>
+    /// <param name="key">Key of the tree to check</param>
     /// <returns>
-    /// The resolver node belonging to the namespace if found; otherwise, null.
+    /// True, if the tree exists within the hierarchy; otherwise, false.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public NamespaceResolutionNode this[string nsKey]
+    public bool ContainsTree(string key)
+    {
+      return _ResolutionTrees.ContainsKey(key);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type resolution tree with the specified name. 
+    /// </summary>
+    /// <param name="key">Name of the type resolution tree</param>
+    /// <returns>
+    /// Tree instance, if found; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public TypeResolutionTree this[string key]
     {
       get
       {
-        NamespaceResolutionNode result;
-        if (_Cache.TryGetValue(nsKey, out result)) return result;
+        TypeResolutionTree result;
+        if (_ResolutionTrees.TryGetValue(key, out result)) return result;
         return null;
       }
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports all types from the specified assembly.
-    /// </summary>
-    /// <param name="asm">Assembly to import types from</param>
-    /// <param name="importNs">Namespace to import</param>
-    /// <remarks>
-    /// If importNs is null, imports all types. If importNs is an empty string, imports
-    /// types within the global namespace; otherwise imports only types in the 
-    /// specified namespace.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public void ImportTypes(Assembly asm, string importNs)
-    {
-      // --- Go through all types an import them one-by-one
-      foreach (Type type in asm.GetTypes())
-      {
-        if (importNs == String.Empty && !String.IsNullOrEmpty(type.Namespace))
-          continue;
-        if (importNs != null && type.Namespace != importNs)
-          continue;
-        ResolutionNodeBase nsResolver = ObtainNamespaceResolver(type);
-        ImportTypeToHierarchy(nsResolver, type);
-      }
-    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Obtains the namespace resolver for the specified type.
+    /// Finds the name in any resolution trees within this hierarchy.
     /// </summary>
-    /// <param name="type">Type to obtain the namespace resolver for.</param>
-    /// <returns>The namespace resolver of the specified type.</returns>
+    /// <param name="type">TypeReference representing the name to find.</param>
+    /// <param name="nextPart">Next part of the name that cannot be resolved.</param>
+    /// <returns>
+    /// List of resolution nodes that could resolve the name as long as
+    /// 'nextpart' indicates.
+    /// </returns>
     // --------------------------------------------------------------------------------
-    public ResolutionNodeBase ObtainNamespaceResolver(Type type)
+    public ResolutionNodeList FindName(TypeReference type, out TypeReference nextPart)
     {
-      if (String.IsNullOrEmpty(type.Namespace))
+      // --- Init name resolution
+      ResolutionNodeList result = new ResolutionNodeList();
+      nextPart = type;
+      int maxResolutionLength = 0;
+      foreach (TypeResolutionTree resTree in _ResolutionTrees.Values)
       {
-        // --- These types belong to the global namespace hierarchy
-        return this;
-      }
-      // --- Type has an explicit namspace, register it.
-      NamespaceResolutionNode nsResolver;
-      ResolutionNodeBase conflictingNode;
-      if (!RegisterNamespace(type.Namespace, out nsResolver, out conflictingNode))
-      {
-        throw new InvalidOperationException(
-          String.Format("Type and namespace conflict within the assembly: {0}",
-                        type.Assembly.FullName));
-      }
-      return nsResolver;
-    }
+        ResolutionNodeBase resolvingNode;
+        TypeReference carryOnPart;
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the type to the specified resolver node and creates the hierarchy
-    /// according to type nesting.
-    /// </summary>
-    /// <param name="resolverRoot">Resolver node</param>
-    /// <param name="type">Type to import.</param>
-    /// <returns>Type resolution node of the specified type.</returns>
-    /// <remarks>
-    /// If the type is a nested type, first imports its declaring type.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public TypeResolutionNode ImportTypeToHierarchy(ResolutionNodeBase resolverRoot, 
-      Type type)
-    {
-      if (type.DeclaringType == null)
-      {
-        // --- This is a simple type
-        return ImportType(resolverRoot, type);
-      }
-      else
-      {
-        // --- This is a type nested in an other type. We must provide that the declaring 
-        // --- type is imported.
-        TypeResolutionNode typeResolver = 
-          ImportTypeToHierarchy(resolverRoot, type.DeclaringType);
-        return ImportType(typeResolver, type);
-      }
-    }
+        // --- Resolve the name in the current tree
+        int depth = resTree.FindName(type, out resolvingNode, out carryOnPart);
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the type to the specified resolver node.
-    /// </summary>
-    /// <param name="resolverRoot">Resolver node</param>
-    /// <param name="type">Type to import.</param>
-    /// <returns>Type resolution node of the specified type.</returns>
-    // --------------------------------------------------------------------------------
-    public TypeResolutionNode ImportType(ResolutionNodeBase resolverRoot, Type type)
-    {
-      // --- Wrap the type
-      NetBinaryType binType = new NetBinaryType(type);
-      TypeResolutionNode typeResolver;
-      // --- This is a type not nested in any type. Register it for the root resolver node.
-      ResolutionNodeBase resolver;
-      if (resolverRoot.Children.TryGetValue(binType.SimpleName, out resolver))
-      {
-        // --- There is a node with this type name
-        typeResolver = resolver as TypeResolutionNode;
-        if (typeResolver == null)
+        // --- This time we could not resolve the name as deep as before, forget
+        // --- about this result.
+        if (depth < maxResolutionLength) continue;
+
+        // --- This time we resolved the name deeper then before. Forget about
+        // --- partial results found before and register only this new result.
+        if (depth > maxResolutionLength)
         {
-          throw new InvalidOperationException(
-            String.Format("Type and namespace conflict within the assembly: {0}",
-            type.Assembly.FullName));
+          result.Clear();
+          maxResolutionLength = depth;
         }
-        foreach (ITypeCharacteristics resolvedType in typeResolver.Resolvers)
-        {
-          if (resolvedType.Compilation.Name.Equals(type.Assembly.GetName().Name))
-          {
-            // --- This type has already been resolved by the assembly of this type.
-            return typeResolver;
-          }
-        }
-      }
-      else
-      {
-        // --- There is no node for this type
-        typeResolver = new TypeResolutionNode(resolverRoot, binType.SimpleName);
-      }
 
-      // --- At this point we add a resolver to this type node
-      typeResolver.AddTypeResolver(binType);
-      return typeResolver;
+        // --- Add the result found to the list resolution nodes
+        result.Add(resolvingNode);
+        nextPart = carryOnPart;
+      }
+      return result;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Imports the specified namespace into this hierarchy.
+    /// </summary>
+    /// <param name="nameSpace">Namespace to import.</param>
+    // --------------------------------------------------------------------------------
+    public void ImportNamespace(string nameSpace)
+    {
+      foreach (TypeResolutionTree tree in _ResolutionTrees.Values)
+      {
+        AssemblyResolutionTree asmTree = tree as AssemblyResolutionTree;
+        if (asmTree != null) asmTree.ImportNamespace(nameSpace);
+      }
     }
 
     #endregion
   }
+
 }

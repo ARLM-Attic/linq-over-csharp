@@ -354,5 +354,29 @@ namespace CSharpParser.ParserFiles
     }
 
     #endregion
+
+    #region Warning methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS0435: The namespace '{0}' in '{1}' conflicts with the imported
+    /// type '{2}' in '{3}'. Using the namespace.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="nameSpace">Namespace name</param>
+    /// <param name="nsLocation">The location of namespace definition</param>
+    /// <param name="name">Type name</param>
+    /// <param name="nameLocation">The location of namespacedefinition.</param>
+    // --------------------------------------------------------------------------------
+    public void Warning0435(Token token, string nameSpace, string nsLocation, 
+      string name, string nameLocation)
+    {
+      Error("CS0101", token,
+        string.Format("The namespace '{0}' in '{1}' conflicts with the imported "+
+        "type '{2}' in '{3}'. Using the namespace.",
+          nameSpace, nsLocation, name, nameLocation));
+    }
+
+    #endregion
   }
 }

@@ -30,8 +30,9 @@ namespace SampleCompilation
       // --- and measure parse time
       Stopwatch watch = new Stopwatch();
       watch.Start();
-      TypeReference.ResolutionCounter = 0;
-      TypeReference.ResolvedToSystemType = 0;
+      TypeReference.ResetDiagnosticCounters();
+      project.AddAssemblyReference("mscorlib");
+      project.AddAssemblyReference("System");
       project.Parse();
       watch.Stop();
 
@@ -77,6 +78,9 @@ namespace SampleCompilation
       Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
       Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
       Console.WriteLine("Resolved to system type: {0}", TypeReference.ResolvedToSystemType);
+      Console.WriteLine("Resolved to source type: {0}", TypeReference.ResolvedToSourceType);
+      Console.WriteLine("Resolved to namespace: {0}", TypeReference.ResolvedToNamespace);
+      Console.WriteLine("Resolved to hierarchy: {0}", TypeReference.ResolvedToHierarchy);
     }
   }
 }

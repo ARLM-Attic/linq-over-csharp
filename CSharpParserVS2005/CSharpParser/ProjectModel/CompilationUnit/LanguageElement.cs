@@ -12,6 +12,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private readonly Token _Token;
+    private LanguageElement _ContextElement;
     private readonly CSharpSyntaxParser _Parser;
     private string _Name;
     private CommentInfo _Comment;
@@ -19,6 +20,21 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a language element descriptor according to the info provided by the
+    /// specified token. The element uses the specifed element as a context element.
+    /// </summary>
+    /// <param name="token">Token providing information about the element.</param>
+    /// <param name="contextElement">Contex of this language element.</param>
+    // --------------------------------------------------------------------------------
+    protected LanguageElement(Token token, LanguageElement contextElement)
+      :
+      this (token, contextElement.Parser)
+    {
+      _ContextElement = contextElement;
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -147,6 +163,27 @@ namespace CSharpParser.ProjectModel
     public bool HasComment
     {
       get { return _Comment == null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the context of this language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public LanguageElement ContextElement
+    {
+      get { return _ContextElement; }
+      internal set { _ContextElement = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this language element has a context or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasContextElement
+    {
+      get { return _ContextElement == null; }
     }
 
     #endregion

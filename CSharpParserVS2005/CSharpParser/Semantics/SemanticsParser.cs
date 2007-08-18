@@ -21,7 +21,7 @@ namespace CSharpParser.Semantics
     public void CheckSemantics()
     {
     }
-
+/*
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Imports the 'extern alias' assemblies into the appropriate namespace hierarchy.
@@ -71,7 +71,7 @@ namespace CSharpParser.Semantics
         }
       }
     }
-
+*/
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Sets resolver information for all types and namespaces declared in the

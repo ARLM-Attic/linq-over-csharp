@@ -62,6 +62,16 @@ namespace CSharpParser.Semantics
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolvers of this namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, Assembly> Resolvers
+    {
+      get { return _Resolvers; }
+    }
+
     #endregion
 
     #region Public methods

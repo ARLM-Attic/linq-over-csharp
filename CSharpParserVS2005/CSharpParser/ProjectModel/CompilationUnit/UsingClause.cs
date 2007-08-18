@@ -17,6 +17,9 @@ namespace CSharpParser.ProjectModel
     private readonly TypeReference _ReferencedName;
     private readonly bool _HasAlias;
 
+    // --- Fields related to name resolution
+    private readonly ResolutionNodeList _Resolvers = new ResolutionNodeList();
+
     #endregion
 
     #region Lifecycle methods
@@ -65,6 +68,16 @@ namespace CSharpParser.ProjectModel
     public TypeReference ReferencedName
     {
       get { return _ReferencedName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of resolvers belonging to this using clause.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList Resolvers
+    {
+      get { return _Resolvers; }
     }
 
     #endregion

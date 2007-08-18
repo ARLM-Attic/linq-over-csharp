@@ -33,6 +33,7 @@ namespace CSharpParserTest.LanguageElements
       TypeReference.Locations.Clear();
       TypeReference.ResolutionCounter = 0;
       parser.AddFile(@"ParserFiles\CommentHandler.cs");
+      parser.AddAssemblyReference("CSharpParser", AsmFolder);
       Assert.IsTrue(InvokeParser(parser));
       Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
       Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
@@ -59,6 +60,7 @@ namespace CSharpParserTest.LanguageElements
       TypeReference.Locations.Clear();
       TypeReference.ResolutionCounter = 0;
       parser.AddFile(@"ProjectModel\CompilationUnit\CompilationUnit.cs");
+      parser.AddAssemblyReference("CSharpParser", AsmFolder);
       Assert.IsTrue(InvokeParser(parser));
       Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
       Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);

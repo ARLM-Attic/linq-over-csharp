@@ -48,12 +48,10 @@ namespace CSharpParser.ProjectModel
     private string _ErrorFile;
 
     // --- Members related to semantics
-    private readonly NamespaceHierarchy _GlobalHierarchy = new NamespaceHierarchy("global");
+    private readonly NamespaceHierarchy _GlobalHierarchy = new NamespaceHierarchy();
+    private SourceResolutionTree _SourceResolutionTree;
     private readonly Dictionary<string, NamespaceHierarchy> _NamespaceHierarchies =
       new Dictionary<string, NamespaceHierarchy>();
-
-    private readonly Dictionary<string, List<string>> _ImportedAssemblies = 
-      new Dictionary<string, List<string>>();
 
 #if DIAGNOSTICS
 
@@ -228,6 +226,16 @@ namespace CSharpParser.ProjectModel
       get { return _GlobalHierarchy; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the tree to resolve namespaces and types declared in the source code.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceResolutionTree SourceResolutionTree
+    {
+      get { return _SourceResolutionTree; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the named namespace hierarchies of this compilation unit.
@@ -598,29 +606,56 @@ namespace CSharpParser.ProjectModel
     {
       // --- Init data structures
       _GlobalHierarchy.Clear();
+
+      // --- Create a tree representing the types in the source code
+      _SourceResolutionTree = new SourceResolutionTree(ThisUnitName);
+      _GlobalHierarchy.AddTree(ThisUnitName, _SourceResolutionTree);
+
+      // --- No named heirarchies found yet
       _NamespaceHierarchies.Clear();
-      _ImportedAssemblies.Clear();
+
+      Dictionary<string, AssemblyResolutionTree> importedAssemblies = 
+        new Dictionary<string, AssemblyResolutionTree>();
 
       // --- Go through all referenced assemblies, skip ohter kind of referencies.
       foreach (ReferencedUnit reference in ReferencedUnits)
       {
         ReferencedAssembly asmRef = reference as ReferencedAssembly;
         if (asmRef == null) continue;
+
+        // --- Check, if this assembly has already been loaded into a resolution tree
+        string treeName = asmRef.Assembly.FullName;
+        AssemblyResolutionTree tree;
+        if (!importedAssemblies.TryGetValue(treeName, out tree))
+        {
+          // --- Create and load the assembly
+          tree = new AssemblyResolutionTree(asmRef.Assembly);
+          importedAssemblies.Add(treeName, tree);
+        }
+
+        // --- At this point we have the assembly loaded.
+        // --- Decide in which namespace hierarchy should this assembly be put.
+        NamespaceHierarchy hierarchy;
         if (String.IsNullOrEmpty(asmRef.Alias))
         {
-          // --- Put namespace information into the global namespace hierarchy
-          CollectNamespaces(GlobalHierarchy, asmRef.Assembly);
+          // --- Put information into the global namespace hierarchy
+          hierarchy = _GlobalHierarchy;
         }
         else
         {
-          // --- Collect only the name of the hierarchy
-          NamespaceHierarchy hierarchy;
+          // --- Put information into a named hierarchy
           if (!NamespaceHierarchies.TryGetValue(asmRef.Alias, out hierarchy))
           {
-            hierarchy = new NamespaceHierarchy(asmRef.Alias);
+            hierarchy = new NamespaceHierarchy();
             NamespaceHierarchies.Add(asmRef.Alias, hierarchy);
-            CollectNamespaces(hierarchy, asmRef.Assembly);
           }
+        }
+
+        // --- Now we have the hierarchy where the resolution tree should be added.
+        // --- Check for duplication before add.
+        if (!hierarchy.ContainsTree(treeName))
+        {
+          hierarchy.AddTree(treeName, tree);
         }
       }
 
@@ -630,69 +665,14 @@ namespace CSharpParser.ProjectModel
       {
         NamespaceResolutionNode nsResolver;
         ResolutionNodeBase conflictingNode;
-        if (!GlobalHierarchy.RegisterNamespace(ns.Name, out nsResolver,
+        if (!_SourceResolutionTree.RegisterNamespace(ns.Name, out nsResolver,
           out conflictingNode))
         {
           // --- This situation should not occure!
           throw new InvalidOperationException(
             "Type and namespace conflict within the compilation unit");
         }
-        nsResolver.AddResolver(ThisUnit.Name, typeof(int).Assembly);
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Collects namespace information from the specified assembliy.
-    /// </summary>
-    /// <param name="nsHierarchy">Destination hierarchy of namespaces</param>
-    /// <param name="asm">Assembly to collect the namespaces from</param>
-    // --------------------------------------------------------------------------------
-    private void CollectNamespaces(NamespaceHierarchy nsHierarchy, Assembly asm)
-    {
-      // --- If the hierarchy already imported the assembly, there is no need to
-      // --- import the namespaces again
-      if (nsHierarchy.ImportedAssemblies.Contains(asm.FullName)) return;
-
-      // --- If any namespace hierarchy imported the assembly, we take their
-      // --- namespace list without going through the assembly's types
-      List<string> namespaceList;
-      if (_ImportedAssemblies.TryGetValue(asm.FullName, out namespaceList))
-      {
-        foreach (string nameSpace in namespaceList)
-        {
-          // --- This namespace is not collected yet from this assembly instance
-          NamespaceResolutionNode nsResolver =
-            RegisterNamespace(nsHierarchy, nameSpace, asm.FullName);
-          nsResolver.AddResolver(asm.FullName, asm);
-        }
-      }
-      else
-      {
-        // --- Store namespaces already imported to avoid repeated processing
-        Dictionary<string, int> nsCache = new Dictionary<string, int>();
-        List<string> nsList = new List<string>();
-
-        // --- This is the first time we import namespaces from this assembly. We go
-        // --- through its types to obtain namespace names.
-        foreach (Type type in asm.GetTypes())
-        {
-          if (!String.IsNullOrEmpty(type.Namespace) && !nsCache.ContainsKey(type.Namespace))
-          {
-            // --- This namespace is not collected yet from this assembly instance
-            NamespaceResolutionNode nsResolver =
-              RegisterNamespace(nsHierarchy, type.Namespace, asm.FullName);
-            nsResolver.AddResolver(asm.FullName, asm);
-            nsCache.Add(type.Namespace, 0);
-            nsList.Add(type.Namespace);
-          }
-        }
-
-        // --- Sign that namespaces in the assembly have been imported
-        _ImportedAssemblies.Add(asm.FullName, nsList);
-      }
-      // --- Sign that namespaces in the assembly have been imported into this hierarchy
-      nsHierarchy.ImportedAssemblies.Add(asm.FullName);
     }
 
     // --------------------------------------------------------------------------------
@@ -825,35 +805,11 @@ namespace CSharpParser.ProjectModel
         // --- Resolve the clause
         if (usingClause.HasAlias)
         {
-          // --- Resolve using aliases
+          // ResolveUsingAlias(usingClause, nsFragment);
         }
         else
         {
-          // --- Resolve using directive
-          // --- Step 1: Select the appropriate namespace hierarchy
-          NamespaceHierarchy hierarchy;
-          TypeReference nextNamePart;
-          if (!ObtainHierarchy(usingClause.ReferencedName, out hierarchy, out nextNamePart))
-            continue;
-
-          // --- Step 2: Now we have the namespace hierarchy, lets check that this 
-          // --- namespace is valid
-          NamespaceResolutionNode nsResolver;
-          TypeReference typeResolutionPart;
-          if (ObtainNamespace(nextNamePart, nsFragment, hierarchy, out nsResolver,
-                          out typeResolutionPart))
-          {
-            // --- Check if partially resolved
-            if (typeResolutionPart != null)
-            {
-              Parser.Error0246(typeResolutionPart.Token, typeResolutionPart.Name);
-            }
-          }
-          else
-          {
-            // --- Namespace is resolved to a type
-            Parser.Error0138(nextNamePart.Token, nextNamePart.Name);
-          }
+          ResolveUsingDirective(usingClause, nsFragment);
         }
       }
 
@@ -867,6 +823,117 @@ namespace CSharpParser.ProjectModel
       {
         ResolveUsingDirectives(file, fragment);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the specified using directive within the provided namespace.
+    /// </summary>
+    /// <param name="usingClause">Using directive</param>
+    /// <param name="nsFragment">Namespce to use for resolution</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveUsingDirective(UsingClause usingClause, NamespaceFragment nsFragment)
+    {
+      ResolutionNodeList results;
+      TypeReference nextNamePart;
+      NamespaceHierarchy hierarchy;
+      if (!ResolveUsingName(usingClause, nsFragment, out hierarchy, out results, 
+        out nextNamePart))
+      {
+        // --- The name cannot be fully resolved
+        return;
+      }
+
+      // --- We should add the namespace resolution points to the using clause
+      foreach (ResolutionNodeBase item in results)
+      {
+        NamespaceResolutionNode nsNode = item as NamespaceResolutionNode;
+        if (item != null)
+        {
+          usingClause.Resolvers.Add(nsNode);
+        }
+      }
+
+      // --- If no namespace node found, name is resolved to a type.
+      if (usingClause.Resolvers.IsEmpty)
+      {
+        Parser.Error0138(nextNamePart.Token, nextNamePart.Name);
+      }
+      else
+      {
+        // --- OK, namespace resolved, import types.
+        hierarchy.ImportNamespace(usingClause.ReferencedName.FullName);
+        // --- Sign that the type references are resolved.
+        while (nextNamePart != null)
+        {
+          nextNamePart.ResolveToNamespace();
+          nextNamePart = nextNamePart.SubType;
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the specified using alias directive within the provided namespace.
+    /// </summary>
+    /// <param name="usingClause">Using directive</param>
+    /// <param name="nsFragment">Namespce to use for resolution</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveUsingAlias(UsingClause usingClause, NamespaceFragment nsFragment)
+    {
+      ResolutionNodeList results;
+      TypeReference nextNamePart;
+      NamespaceHierarchy hierarchy;
+      if (!ResolveUsingName(usingClause, nsFragment, out hierarchy, out results,
+        out nextNamePart))
+      {
+        // --- The name cannot be fully resolved
+        return;
+      }
+
+      // TODO: Check for namespace/type collision
+      // TODO: Check for ambuguity
+      // TODO: Register the resolved type in UsingClause
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the specified using name within the provided namespace.
+    /// </summary>
+    /// <param name="usingClause">Using directive</param>
+    /// <param name="nsFragment">Namespce to use for resolution</param>
+    /// <param name="hierarchy">Namespace hierarchy used</param>
+    /// <param name="results">Result nodes</param>
+    /// <param name="nextNamePart">Next part that cannot be resolved</param>
+    /// <returns>
+    /// True, if the name is successfully resolved; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool ResolveUsingName(UsingClause usingClause, NamespaceFragment nsFragment,
+      out NamespaceHierarchy hierarchy, out ResolutionNodeList results, 
+      out TypeReference nextNamePart)
+    {
+      // --- Resolve using directive
+      // --- Step 1: Select the appropriate namespace hierarchy
+      results = null;
+      if (!ObtainHierarchy(usingClause.ReferencedName, out hierarchy, out nextNamePart))
+      {
+        // --- Error, when obtaining the hierarchy, name resolution stops.
+        return false;
+      }
+
+      // --- Step 2: Now we have the namespace hierarchy, lets check that this 
+      // --- namespace is valid
+      TypeReference typeResolutionPart;
+      results = ObtainName(nextNamePart, nsFragment, hierarchy, out typeResolutionPart);
+
+      // --- Check if partially resolved
+      if (typeResolutionPart != null)
+      {
+        Parser.Error0246(typeResolutionPart.Token, typeResolutionPart.Name);
+        return false;
+      }
+      return true;
     }
 
     // --------------------------------------------------------------------------------
@@ -903,6 +970,7 @@ namespace CSharpParser.ProjectModel
 
       // --- Go on with the next part of the name
       nextPart = type.SubType;
+      type.ResolveToNamespaceHierarchy();
       return true;
     }
 
@@ -913,11 +981,9 @@ namespace CSharpParser.ProjectModel
     /// <param name="type">Type/namespace to resolve</param>
     /// <param name="fragment">Current namespace fragment.</param>
     /// <param name="hierarchy">Hierarchy to check for the namespace</param>
-    /// <param name="nsResolver">Resolver node for the found namespace</param>
     /// <param name="nextPart">Type reference for the next point of resolution.</param>
     /// <returns>
-    /// True, if the namespace is partially resolved. False, if the namespace is resolved
-    /// to a type.
+    /// The list of resolver nodes that can resolve the specified namespace
     /// </returns>
     /// <remarks>
     /// If the 'nextPart' returned is the same as 'type' the no namespace part is
@@ -926,74 +992,87 @@ namespace CSharpParser.ProjectModel
     /// type resolution.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    private bool ObtainNamespace(TypeReference type, NamespaceFragment fragment, 
-      NamespaceHierarchy hierarchy, out NamespaceResolutionNode nsResolver, 
-      out TypeReference nextPart)
+    private ResolutionNodeList ObtainName(TypeReference type, 
+      NamespaceFragment fragment, NamespaceHierarchy hierarchy, out TypeReference nextPart)
     {
-      nsResolver = null;
-      nextPart = type;
-      ResolutionNodeBase node;
-      // --- Find the first resolver.
-      if (hierarchy == _GlobalHierarchy && fragment != null)
+      // --- If we are not in the global namespace, we should search only that hierarchy
+      // --- from its root.
+      if (hierarchy != _GlobalHierarchy)
       {
+        return hierarchy.FindName(type, out nextPart);
+      }
+
+      // --- We are in the global namespce hierarchy. If we are out of any namespace,
+      // --- we can find the namespace among the source-declared namespaces or among
+      // --- the namespaces of referenced assemblies. If we are within a namespace,
+      // --- we go from the current namespace to the top namespace and try to find
+      // --- the name.
+
+      ResolutionNodeList result = new ResolutionNodeList();
+      ResolutionNodeBase sourceNode;
+      TypeReference carryOnPart;
+
+      // --- Step 1: check for source-declared name
+      // --- Check, if the source code has a definition for the namespace.
+      if (fragment != null)
+      {
+        ResolutionNodeBase nsResolver = null;
         // --- We are within a namespace in the global declaration space
         // --- Check direct children of the current namespace fragment
-        if (!fragment.ResolverNode.Children.TryGetValue(type.Name, out node))
+        if (fragment.ResolverNode.Children.ContainsKey(type.Name))
         {
+          nsResolver = fragment.ResolverNode;
+        }
+        else
+        {
+          // --- No child namespace with matching name, go up in the namespace 
+          // --- hierarchy to check parent namespaces
           fragment = fragment.ParentNamespace;
           while (fragment != null)
           {
-            if (fragment.ResolverNode.Children.TryGetValue(type.Name, out node)) break;
+            if (fragment.ResolverNode.Children.ContainsKey(type.Name))
+            {
+              nsResolver = fragment.ResolverNode;
+              break;
+            }
             fragment = fragment.ParentNamespace;
+          }
+        }
+        if (nsResolver != null)
+        {
+          if (nsResolver.FindName(type, out sourceNode, out carryOnPart) > 0)
+          {
+            if (carryOnPart == null)
+            {
+              // --- Name found in the source code, add it to the results
+              result.Add(sourceNode);
+            }
           }
         }
       }
 
-      // --- If we have not found the namespacetag yet, look in from the root
-      if (!hierarchy.Children.TryGetValue(type.Name, out node)) return true;
-
-      // --- Resolved to a namespace?
-      nsResolver = node as NamespaceResolutionNode;
-      if (nsResolver == null) return false;
-
-      // --- At this point we have found the first part of the namespace
-      nextPart = type.SubType;
-
-      // --- Go and search for next part while there is any part left, or
-      // --- further resolution fails.
-      while (nextPart != null)
+      // --- Step 2: Check, if related assemblies have definition for the namespace
+      TypeReference asmCarryOnPart;
+      ResolutionNodeList asmResolutionNodes = hierarchy.FindName(type, out asmCarryOnPart);
+      if (asmCarryOnPart == null)
       {
-        if (!nsResolver.Children.TryGetValue(nextPart.Name, out node)) return true;
-        NamespaceResolutionNode temp = node as NamespaceResolutionNode;
-        if (temp == null) return true;
-        nsResolver = temp;
-        nextPart = nextPart.SubType;
+        // --- Found the full name in related assemblies. Merge the results with the source
+        // --- code results.
+        asmResolutionNodes.Merge(result);
+        nextPart = null;
+        return asmResolutionNodes;
       }
-      return true;
-    }
 
-    #endregion
+      if (!result.IsEmpty)
+      {
+        // --- We found the name only in the source code
+        nextPart = null;
+        return result;
+      }
 
-    #region Methods for importing types within a namespace
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the specified namespace into the given namespace hierarchy.
-    /// </summary>
-    /// <param name="hierarchy">Destination hierarchy of types.</param>
-    /// <param name="nameSpace">Namespace to import</param>
-    /// <returns>
-    /// True, if the namespace exists in the hierarchy and types have been imported;
-    /// otherwise, false.
-    /// </returns>
-    /// <remarks>
-    /// Before calling this method, the namespace hierarchies should be prepared and
-    /// filled up with the namespace information.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    private bool ImportTypesInNamespace(NamespaceHierarchy hierarchy, string nameSpace)
-    {
-      return true;
+      // --- At this point no result is found.
+      nextPart = asmCarryOnPart;
+      return result;
     }
 
     #endregion

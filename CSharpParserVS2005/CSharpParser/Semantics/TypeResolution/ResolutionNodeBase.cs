@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
 {
@@ -106,6 +107,39 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Finds the name described by the specified type reference instance.
+    /// </summary>
+    /// <param name="type">TypeReference representing the name to find.</param>
+    /// <param name="resolvedNode">
+    /// The node that fully or partially resolved the name.</param>
+    /// <param name="nextPart">Next part of the name that cannot be resolved.</param>
+    /// <returns>
+    /// Number of name fragments successfully resolved.
+    /// </returns>
+    /// <remarks>
+    /// If returns 0, it means that no part of the name could be resolved. If 
+    /// 'nextPart' is null, it means the whole name has been susseccfully resolved.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public int FindName(TypeReference type, out ResolutionNodeBase resolvedNode,
+      out TypeReference nextPart)
+    {
+      int depth = 0;
+      resolvedNode = null;
+      ResolutionNodeBase node = this;
+      nextPart = type;
+      while (nextPart != null && node.Children.TryGetValue(nextPart.Name, out node))
+      {
+        // --- We resolved the current part
+        resolvedNode = node;
+        nextPart = nextPart.SubType;
+        depth++;
+      }
+      return depth;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Registers a namespace node.
     /// </summary>
     /// <param name="nameSpace">Namespace to register.</param>
@@ -120,7 +154,7 @@ namespace CSharpParser.Semantics
     /// any namespace node is missing, this methods creates that node.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool RegisterNamespace(string nameSpace, out NamespaceResolutionNode node,
+    public virtual bool RegisterNamespace(string nameSpace, out NamespaceResolutionNode node,
       out ResolutionNodeBase conflictingNode)
     {
       string[] parts = nameSpace.Split('.');
@@ -180,7 +214,7 @@ namespace CSharpParser.Semantics
     /// this methods creates the node.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool RegisterType(ITypeCharacteristics type, out TypeResolutionNode node)
+    public virtual bool RegisterType(ITypeCharacteristics type, out TypeResolutionNode node)
     {
       // --- Search for the type node
       ResolutionNodeBase currentNode;
