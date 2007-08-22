@@ -6,13 +6,19 @@ namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
-  /// This class represents a namespace hierarchy that contains one or more 
-  /// ResolutionTrees to resolv namespaces and types.
+  /// This class represents a namespace hierarchy.
   /// </summary>
   /// <remarks>
-  /// During the compilation there is a global namespece hierarchy including the 
+  /// <para>
+  /// The namespace hierarchy is the top level of the resolution hierarchy. During 
+  /// the compilation there is a global namespace hierarchy including the 
   /// types and namespaced declared in the source code plus types in assemblies not 
   /// aliased with the "extern alias" directive.
+  /// </para>
+  /// <para>
+  /// A namespace hierarchy containts one or more type resolution tree representing
+  /// a referenced assembly or the source code.
+  /// </para>
   /// </remarks>
   // ==================================================================================
   public sealed class NamespaceHierarchy
@@ -38,16 +44,6 @@ namespace CSharpParser.Semantics
     #endregion
 
     #region Public properties
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of resolution trees in this namespace hierarchy.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<TypeResolutionTree> ResolutionTrees
-    {
-      get { return _ResolutionTrees.Values; }
-    }
 
     #endregion
 
@@ -108,7 +104,16 @@ namespace CSharpParser.Semantics
       }
     }
 
-
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolution trees belonging to this namespace hierarchy.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, TypeResolutionTree> ResolutionTrees
+    {
+      get { return _ResolutionTrees; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Finds the name in any resolution trees within this hierarchy.
@@ -120,38 +125,39 @@ namespace CSharpParser.Semantics
     /// 'nextpart' indicates.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ResolutionNodeList FindName(TypeReference type, out TypeReference nextPart)
-    {
-      // --- Init name resolution
-      ResolutionNodeList result = new ResolutionNodeList();
-      nextPart = type;
-      int maxResolutionLength = 0;
-      foreach (TypeResolutionTree resTree in _ResolutionTrees.Values)
-      {
-        ResolutionNodeBase resolvingNode;
-        TypeReference carryOnPart;
+    //public ResolutionNodeList FindName(TypeReference type, out TypeReference nextPart)
+    //{
+    //  // --- Init name resolution
+    //  ResolutionNodeList result = new ResolutionNodeList();
+    //  nextPart = type;
+    //  int maxResolutionLength = 0;
+    //  foreach (TypeResolutionTree resTree in _ResolutionTrees.Values)
+    //  {
+    //    ResolutionNodeBase resolvingNode;
+    //    TypeReference carryOnPart;
 
-        // --- Resolve the name in the current tree
-        int depth = resTree.FindName(type, out resolvingNode, out carryOnPart);
+    //    // --- Resolve the name in the current tree
+    //    int depth = resTree.FindName(type, out resolvingNode, out carryOnPart);
+    //    if (depth == 0) continue;
 
-        // --- This time we could not resolve the name as deep as before, forget
-        // --- about this result.
-        if (depth < maxResolutionLength) continue;
+    //    // --- This time we could not resolve the name as deep as before, forget
+    //    // --- about this result.
+    //    if (depth < maxResolutionLength) continue;
 
-        // --- This time we resolved the name deeper then before. Forget about
-        // --- partial results found before and register only this new result.
-        if (depth > maxResolutionLength)
-        {
-          result.Clear();
-          maxResolutionLength = depth;
-        }
+    //    // --- This time we resolved the name deeper then before. Forget about
+    //    // --- partial results found before and register only this new result.
+    //    if (depth > maxResolutionLength)
+    //    {
+    //      result.Clear();
+    //      maxResolutionLength = depth;
+    //    }
 
-        // --- Add the result found to the list resolution nodes
-        result.Add(resolvingNode);
-        nextPart = carryOnPart;
-      }
-      return result;
-    }
+    //    // --- Add the result found to the list resolution nodes
+    //    result.Add(resolvingNode);
+    //    nextPart = carryOnPart;
+    //  }
+    //  return result;
+    //}
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -159,14 +165,14 @@ namespace CSharpParser.Semantics
     /// </summary>
     /// <param name="nameSpace">Namespace to import.</param>
     // --------------------------------------------------------------------------------
-    public void ImportNamespace(string nameSpace)
-    {
-      foreach (TypeResolutionTree tree in _ResolutionTrees.Values)
-      {
-        AssemblyResolutionTree asmTree = tree as AssemblyResolutionTree;
-        if (asmTree != null) asmTree.ImportNamespace(nameSpace);
-      }
-    }
+    //public void ImportNamespace(string nameSpace)
+    //{
+    //  foreach (TypeResolutionTree tree in _ResolutionTrees.Values)
+    //  {
+    //    AssemblyResolutionTree asmTree = tree as AssemblyResolutionTree;
+    //    if (asmTree != null) asmTree.ImportNamespace(nameSpace);
+    //  }
+    //}
 
     #endregion
   }

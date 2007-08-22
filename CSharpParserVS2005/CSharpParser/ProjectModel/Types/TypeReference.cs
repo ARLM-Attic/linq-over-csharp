@@ -22,8 +22,10 @@ namespace CSharpParser.ProjectModel
     private TypeReference _SubType;
     private TypeKind _Kind;
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
-    public ResolutionTarget _Target;
-    public ITypeCharacteristics _TypeResolver;
+    private ResolutionTarget _Target;
+    private ITypeCharacteristics _ResolvingType;
+    private NamespaceHierarchy _ResolvingHierarchy;
+    private UsingClause _ResolvingAlias;
 
     #endregion
 
@@ -67,24 +69,32 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type resolver of this type reference.
+    /// Gets the type resolving type of this type reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics TypeResolver
+    public ITypeCharacteristics ResolvingType
     {
-      get
-      {
-        if (_Target == ResolutionTarget.Unresolved)
-        {
-          throw new InvalidOperationException("This type reference is not resolved yet.");
-        }
-        if (_Target != ResolutionTarget.Type)
-        {
-          throw new InvalidOperationException(
-            String.Format("This type reference is resolved to '{0}'", _Target));
-        }
-        return _TypeResolver;
-      }
+      get { return _ResolvingType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace hierarchy resolving this reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceHierarchy ResolvingHierarchy
+    {
+      get { return _ResolvingHierarchy; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the using alias resolving this reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public UsingClause ResolvingAlias
+    {
+      get { return _ResolvingAlias; }
     }
 
     // --------------------------------------------------------------------------------
@@ -237,7 +247,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public string Namespace
     {
-      get { return TypeResolver.Namespace; }
+      get { return ResolvingType.Namespace; }
     }
 
     // --------------------------------------------------------------------------------
@@ -267,7 +277,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ReferencedUnit DeclaringUnit
     {
-      get { return TypeResolver.DeclaringUnit; }
+      get { return ResolvingType.DeclaringUnit; }
     }
 
     // --------------------------------------------------------------------------------
@@ -281,7 +291,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ITypeCharacteristics BaseType
     {
-      get { return TypeResolver.BaseType; }
+      get { return ResolvingType.BaseType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -294,7 +304,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ITypeCharacteristics DeclaringType
     {
-      get { return TypeResolver.DeclaringType; }
+      get { return ResolvingType.DeclaringType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -326,7 +336,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasElementType
     {
-      get { return TypeResolver.HasElementType; }
+      get { return ResolvingType.HasElementType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -336,7 +346,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsAbstract
     {
-      get { return TypeResolver.IsAbstract; }
+      get { return ResolvingType.IsAbstract; }
     }
 
     // --------------------------------------------------------------------------------
@@ -346,7 +356,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsArray
     {
-      get { return TypeResolver.IsArray; }
+      get { return ResolvingType.IsArray; }
     }
 
     // --------------------------------------------------------------------------------
@@ -357,7 +367,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsClass
     {
-      get { return TypeResolver.IsClass; }
+      get { return ResolvingType.IsClass; }
     }
 
     // --------------------------------------------------------------------------------
@@ -367,7 +377,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsEnum
     {
-      get { return TypeResolver.IsEnum; }
+      get { return ResolvingType.IsEnum; }
     }
 
     // --------------------------------------------------------------------------------
@@ -377,7 +387,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsGenericType
     {
-      get { return TypeResolver.IsGenericType; }
+      get { return ResolvingType.IsGenericType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -388,7 +398,17 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsGenericTypeDefinition
     {
-      get { return TypeResolver.IsGenericTypeDefinition; }
+      get { return ResolvingType.IsGenericTypeDefinition; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of type parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int TypeParameterCount
+    {
+      get { return _ResolvingType.TypeParameterCount; }
     }
 
     // --------------------------------------------------------------------------------
@@ -399,7 +419,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsInterface
     {
-      get { return TypeResolver.IsInterface; }
+      get { return ResolvingType.IsInterface; }
     }
 
     // --------------------------------------------------------------------------------
@@ -410,7 +430,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNested
     {
-      get { return TypeResolver.IsNested; }
+      get { return ResolvingType.IsNested; }
     }
 
     // --------------------------------------------------------------------------------
@@ -421,7 +441,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedAssembly
     {
-      get { return TypeResolver.IsNestedAssembly; }
+      get { return ResolvingType.IsNestedAssembly; }
     }
 
     // --------------------------------------------------------------------------------
@@ -431,7 +451,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedPrivate
     {
-      get { return TypeResolver.IsNestedPrivate; }
+      get { return ResolvingType.IsNestedPrivate; }
     }
 
     // --------------------------------------------------------------------------------
@@ -441,7 +461,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedPublic
     {
-      get { return TypeResolver.IsNestedPublic; }
+      get { return ResolvingType.IsNestedPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -451,7 +471,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNotPublic
     {
-      get { return TypeResolver.IsNotPublic; }
+      get { return ResolvingType.IsNotPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -461,7 +481,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsPointer
     {
-      get { return TypeResolver.IsPointer; }
+      get { return ResolvingType.IsPointer; }
     }
 
     // --------------------------------------------------------------------------------
@@ -471,7 +491,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsPrimitive
     {
-      get { return TypeResolver.IsPrimitive; }
+      get { return ResolvingType.IsPrimitive; }
     }
 
     // --------------------------------------------------------------------------------
@@ -481,7 +501,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsPublic
     {
-      get { return TypeResolver.IsPublic; }
+      get { return ResolvingType.IsPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -491,7 +511,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsSealed
     {
-      get { return TypeResolver.IsSealed; }
+      get { return ResolvingType.IsSealed; }
     }
 
     // --------------------------------------------------------------------------------
@@ -501,7 +521,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsValueType
     {
-      get { return TypeResolver.IsValueType; }
+      get { return ResolvingType.IsValueType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -520,7 +540,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsVisible
     {
-      get { return TypeResolver.IsVisible; }
+      get { return ResolvingType.IsVisible; }
     }
 
     // --------------------------------------------------------------------------------
@@ -531,7 +551,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public MemberTypes MemberType
     {
-      get { return TypeResolver.MemberType; }
+      get { return ResolvingType.MemberType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -650,7 +670,7 @@ namespace CSharpParser.ProjectModel
     public void ResolveToType(Type type)
     {
       _Target = ResolutionTarget.Type;
-      _TypeResolver = new NetBinaryType(type);
+      _ResolvingType = new NetBinaryType(type);
 #if DIAGNOSTICS
       _ResolutionCounter++;
       _ResolvedToSystemType++;
@@ -666,7 +686,7 @@ namespace CSharpParser.ProjectModel
     public void ResolveToType(TypeDeclaration type)
     {
       _Target = ResolutionTarget.Type;
-      _TypeResolver = type;
+      _ResolvingType = type;
 #if DIAGNOSTICS
       _ResolutionCounter++;
       _ResolvedToSourceType++;
@@ -681,7 +701,7 @@ namespace CSharpParser.ProjectModel
     public void ResolveToNamespace()
     {
       _Target = ResolutionTarget.Namespace;
-      _TypeResolver = null;
+      _ResolvingType = null;
 #if DIAGNOSTICS
       _ResolutionCounter++;
       _ResolvedToNamespace++;
@@ -696,7 +716,7 @@ namespace CSharpParser.ProjectModel
     public void ResolveToNamespaceHierarchy()
     {
       _Target = ResolutionTarget.NamespaceHierarchy;
-      _TypeResolver = null;
+      _ResolvingType = null;
 #if DIAGNOSTICS
       _ResolutionCounter++;
       _ResolvedToHierarchy++;

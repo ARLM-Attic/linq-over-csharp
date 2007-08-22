@@ -56,6 +56,16 @@ namespace CSharpParser.Semantics
       get { return _ImportedNamespaces; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the assembly belonging to this resolution tree.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Assembly Assembly
+    {
+      get { return _Assembly; }
+    }
+
     #endregion
 
     #region Public methods
@@ -107,7 +117,7 @@ namespace CSharpParser.Semantics
         if (!String.IsNullOrEmpty(type.Namespace) && !nsCache.ContainsKey(type.Namespace))
         {
           // --- This namespace is not collected yet from this assembly instance
-          AddNamespace(type.Namespace, _Assembly.FullName);
+          CreateNamespace(type.Namespace);
           nsCache.Add(type.Namespace, 0);
         }
       }
@@ -120,18 +130,18 @@ namespace CSharpParser.Semantics
     /// <param name="ns">Namespace information</param>
     /// <param name="resolverName">Name of resolver registering the namespace.</param>
     // --------------------------------------------------------------------------------
-    private void AddNamespace(string ns, string resolverName)
-    {
-      NamespaceResolutionNode nsResolver;
-      ResolutionNodeBase conflictingNode;
-      if (!RegisterNamespace(ns, out nsResolver, out conflictingNode))
-      {
-        throw new InvalidOperationException(
-          String.Format("Conflict when resolving namespace '{0}' in '{1}'",
-                        ns, resolverName));
-      }
-      return;
-    }
+    //private void AddNamespace(string ns, string resolverName)
+    //{
+    //  NamespaceResolutionNode nsResolver;
+    //  ResolutionNodeBase conflictingNode;
+    //  if (!RegisterNamespace(ns, out nsResolver, out conflictingNode))
+    //  {
+    //    throw new InvalidOperationException(
+    //      String.Format("Conflict when resolving namespace '{0}' in '{1}'",
+    //                    ns, resolverName));
+    //  }
+    //  return;
+    //}
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -139,98 +149,25 @@ namespace CSharpParser.Semantics
     /// </summary>
     /// <param name="nameSpace">Namespace</param>
     // --------------------------------------------------------------------------------
-    public void ImportNamespace(string nameSpace)
-    {
-      // --- Check if this tree has the specified namespace
-      if (this[nameSpace] == null) return;
+    //public void ImportNamespace(string nameSpace)
+    //{
+    //  // --- Check if this tree has the specified namespace
+    //  if (this[nameSpace] == null) return;
 
-      // --- Check if this namespace has already been imported by the hierarchy
-      if (IsImported(nameSpace)) return;
+    //  // --- Check if this namespace has already been imported by the hierarchy
+    //  if (IsImported(nameSpace)) return;
 
-      // --- This tree has this namespace but types has not been imported yet.
-      foreach (Type type in _Assembly.GetTypes())
-      {
-        if (nameSpace == String.Empty && !String.IsNullOrEmpty(type.Namespace))
-          continue;
-        if (nameSpace != null && type.Namespace != nameSpace)
-          continue;
-        ImportTypeToHierarchy(type);
-        SignNamespaceIsImported(nameSpace);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the type to the specified resolver node and creates the hierarchy
-    /// according to type nesting.
-    /// </summary>
-    /// <param name="type">Type to import.</param>
-    /// <returns>Type resolution node of the specified type.</returns>
-    /// <remarks>
-    /// If the type is a nested type, first imports its declaring type.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public TypeResolutionNode ImportTypeToHierarchy(Type type)
-    {
-      if (type.DeclaringType == null)
-      {
-        // --- This is a simple type
-        return ImportType(this, type);
-      }
-      else
-      {
-        // --- This is a type nested in an other type. We must provide that the declaring 
-        // --- type is imported.
-        TypeResolutionNode typeResolver =
-          ImportTypeToHierarchy(type.DeclaringType);
-        return ImportType(typeResolver, type);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the type to the specified resolver node.
-    /// </summary>
-    /// <param name="resolverRoot">Resolver node</param>
-    /// <param name="type">Type to import.</param>
-    /// <returns>Type resolution node of the specified type.</returns>
-    // --------------------------------------------------------------------------------
-    public TypeResolutionNode ImportType(ResolutionNodeBase resolverRoot, Type type)
-    {
-      // --- Wrap the type
-      NetBinaryType binType = new NetBinaryType(type);
-      TypeResolutionNode typeResolver;
-      // --- This is a type not nested in any type. Register it for the root resolver node.
-      ResolutionNodeBase resolver;
-      if (resolverRoot.Children.TryGetValue(binType.SimpleName, out resolver))
-      {
-        // --- There is a node with this type name
-        typeResolver = resolver as TypeResolutionNode;
-        if (typeResolver == null)
-        {
-          throw new InvalidOperationException(
-            String.Format("Type ({0}) and namespace conflict within the assembly: {1}",
-            type.FullName, type.Assembly.FullName));
-        }
-        foreach (ITypeCharacteristics resolvedType in typeResolver.Resolvers)
-        {
-          if (resolvedType.DeclaringUnit.Name.Equals(type.Assembly.GetName().Name))
-          {
-            // --- This type has already been resolved by the assembly of this type.
-            return typeResolver;
-          }
-        }
-      }
-      else
-      {
-        // --- There is no node for this type
-        typeResolver = new TypeResolutionNode(resolverRoot, binType.SimpleName);
-      }
-
-      // --- At this point we add a resolver to this type node
-      typeResolver.AddTypeResolver(binType);
-      return typeResolver;
-    }
+    //  // --- This tree has this namespace but types has not been imported yet.
+    //  foreach (Type type in _Assembly.GetTypes())
+    //  {
+    //    if (nameSpace == String.Empty && !String.IsNullOrEmpty(type.Namespace))
+    //      continue;
+    //    if (nameSpace != null && type.Namespace != nameSpace)
+    //      continue;
+    //    ImportTypeToHierarchy(new NetBinaryType(type));
+    //    SignNamespaceIsImported(nameSpace);
+    //  }
+    //}
 
     #endregion
   }

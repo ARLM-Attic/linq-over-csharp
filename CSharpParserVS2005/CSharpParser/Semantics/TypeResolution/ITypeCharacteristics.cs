@@ -108,6 +108,13 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the number of type parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    int TypeParameterCount { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether the Type is an interface; that is, not a 
     /// class or a value type.
     /// </summary>

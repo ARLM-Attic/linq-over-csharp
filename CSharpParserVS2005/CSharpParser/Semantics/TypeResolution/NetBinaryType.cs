@@ -232,6 +232,16 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the number of type parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int TypeParameterCount
+    {
+      get { return _TypeObject.GetGenericArguments().Length; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether the Type is an interface; that is, not a 
     /// class or a value type.
     /// </summary>

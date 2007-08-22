@@ -17,6 +17,41 @@ namespace CSharpParser.Semantics
 
     #endregion
 
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an empty resolution node list.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList()
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes the list with the specified nodes.
+    /// </summary>
+    /// <param name="items">Collection containing the nodes.</param>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList(IEnumerable<ResolutionNodeBase> items)
+    {
+      Merge(items);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes the list with the trees of the specified hierarchy.
+    /// </summary>
+    /// <param name="hierarchy">Hierarchy with trees.</param>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList(NamespaceHierarchy hierarchy)
+    {
+      Merge(hierarchy);
+    }
+
+    #endregion
+
     #region Public properties
 
     // --------------------------------------------------------------------------------
@@ -41,13 +76,58 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Merge the specified listto this list.
+    /// Merge the specified list to this list.
     /// </summary>
     /// <param name="list">List to merge to this list</param>
     // --------------------------------------------------------------------------------
-    public void Merge(ResolutionNodeList list)
+    public void Merge(IEnumerable<ResolutionNodeBase> list)
     {
       foreach (ResolutionNodeBase item in list) Add(item);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Merge the specified hierarchy to this list.
+    /// </summary>
+    /// <param name="hierarchy">Hierarchy to merge to this list</param>
+    // --------------------------------------------------------------------------------
+    public void Merge(NamespaceHierarchy hierarchy)
+    {
+      foreach (TypeResolutionTree tree in hierarchy.ResolutionTrees.Values) Add(tree);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the nodes defining namespace resolutions.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<NamespaceResolutionNode> GetNamespaceResolutions()
+    {
+      List<NamespaceResolutionNode> results =
+        new List<NamespaceResolutionNode>();
+      foreach (ResolutionNodeBase item in _Nodes)
+      {
+        NamespaceResolutionNode node = item as NamespaceResolutionNode;
+        if (node != null) results.Add(node);
+      }
+      return results;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the nodes defining type resolutions.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<TypeResolutionNode> GetTypeResolutions()
+    {
+      List<TypeResolutionNode> results =
+        new List<TypeResolutionNode>();
+      foreach (ResolutionNodeBase item in _Nodes)
+      {
+        TypeResolutionNode node = item as TypeResolutionNode;
+        if (node != null) results.Add(node);
+      }
+      return results;
     }
 
     #endregion

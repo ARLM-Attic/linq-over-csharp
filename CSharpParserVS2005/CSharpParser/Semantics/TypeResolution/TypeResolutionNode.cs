@@ -1,23 +1,49 @@
 using System;
-using System.Collections.Generic;
 
 namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
-  /// This class describes a type node in the resolution tree.
+  /// This class describes a type name node in the resolution tree.
   /// </summary>
   /// <remarks>
   /// One simple type name can be used by several types due to generics. This node
-  /// keeps a list of types having the same name.
+  /// is a container node for non-generic and generic types having the same name.
+  /// </remarks>
+  // ==================================================================================
+  public sealed class TypeNameResolutionNode : ResolutionNodeBase
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new node with the specified parent and name.
+    /// </summary>
+    /// <param name="parentNode">Parent node.</param>
+    /// <param name="name">The name of this node.</param>
+    /// <remarks>
+    /// The parent cannot be null.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public TypeNameResolutionNode(ResolutionNodeBase parentNode, string name)
+      : base(parentNode, name)
+    {
+      if (parentNode == null) throw new ArgumentNullException("parentNode");
+    }
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class describes a type node in the resolution tree.
+  /// </summary>
+  /// <remarks>
+  /// This node is a child of TypeNameResolutionNode and its name is always the number
+  /// of generic type parameters (0 in case of non-generic types).
   /// </remarks>
   // ==================================================================================
   public sealed class TypeResolutionNode : ResolutionNodeBase
   {
     #region Private fields
 
-    private readonly List<ITypeCharacteristics> _Resolvers = 
-      new List<ITypeCharacteristics>();
+    private ITypeCharacteristics _Resolver;
 
     #endregion
 
@@ -28,14 +54,15 @@ namespace CSharpParser.Semantics
     /// Creates a new node with the specified parent and name.
     /// </summary>
     /// <param name="parentNode">Parent node.</param>
-    /// <param name="name">Node name.</param>
+    /// <param name="type">Type behind this resolution node.</param>
     /// <remarks>
     /// The parent can be null (the node has no parent), name cannot be null or empty.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public TypeResolutionNode(ResolutionNodeBase parentNode, string name)
-      : base(parentNode, name)
+    public TypeResolutionNode(ResolutionNodeBase parentNode, ITypeCharacteristics type)
+      : base(parentNode, type.TypeParameterCount.ToString())
     {
+      _Resolver = type;
     }
 
     #endregion
@@ -44,52 +71,13 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of resolvers for this type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public List<ITypeCharacteristics> Resolvers
-    {
-      get { return _Resolvers; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type has only and exactly one resolver.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsUnambigous
-    {
-      get { return _Resolvers.Count == 1; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the resolver for an unambigously resolved type.
+    /// Gets the first resolvers for this type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public ITypeCharacteristics Resolver
     {
-      get
-      {
-        if (!IsUnambigous) 
-          throw new InvalidOperationException("This type is not unambigously resolved!");
-        return _Resolvers[0];
-      }
-    }
-
-    #endregion
-
-    #region Public methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a new resolver for this type.
-    /// </summary>
-    /// <param name="type">Type to add to the resolver list.</param>
-    // --------------------------------------------------------------------------------
-    public void AddTypeResolver(ITypeCharacteristics type)
-    {
-      _Resolvers.Add(type);
+      get { return _Resolver; }
+      set { _Resolver = value; }
     }
 
     #endregion

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
@@ -19,6 +20,9 @@ namespace CSharpParser.ProjectModel
 
     // --- Fields related to name resolution
     private readonly ResolutionNodeList _Resolvers = new ResolutionNodeList();
+    private bool _IsResolved;
+    private bool _ResolvedToNamespace;
+    private ITypeCharacteristics _ResolvingType;
 
     #endregion
 
@@ -44,6 +48,7 @@ namespace CSharpParser.ProjectModel
         _HasAlias = false;
         Name = typeUsed.FullName;
       }
+      _IsResolved = false;
     }
 
     #endregion
@@ -80,6 +85,36 @@ namespace CSharpParser.ProjectModel
       get { return _Resolvers; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this using clause has been resolved to t namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool ResolvedToNamespace
+    {
+      get { return _ResolvedToNamespace; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type this using alias has been resolved to.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics ResolvingType
+    {
+      get { return _ResolvingType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if the using clause is resolved or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolved
+    {
+      get { return _IsResolved; }
+    }
+
     #endregion
 
     #region IResolutionRequired implementation
@@ -101,6 +136,48 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sign that using clause is resolved to a type.
+    /// </summary>
+    /// <param name="type">Type this using clause is resolved to.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToType(ITypeCharacteristics type)
+    {
+      _ResolvedToNamespace = false;
+      _ResolvingType = type;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sign that using clause is resolved to a namespace.
+    /// </summary>
+    /// <param name="nsNodes">Namespac resolver nodes.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToNamespace(IEnumerable<NamespaceResolutionNode> nsNodes)
+    {
+      _ResolvedToNamespace = true;
+      _Resolvers.Clear();
+      foreach (NamespaceResolutionNode nsNode in nsNodes)
+      {
+        _Resolvers.Add(nsNode);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs that this using clause has been resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void SignResolved()
+    {
+      _IsResolved = true;
+    }
+
+    #endregion
   }
 
   // ==================================================================================
@@ -110,5 +187,23 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public class UsingClauseCollection : RestrictedCollection<UsingClause>
   {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the using clause having the specified alias name.
+    /// </summary>
+    /// <param name="key">Alias name.</param>
+    /// <returns>
+    /// Using clause, if found by the alias name; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public UsingClause this[string key]
+    {
+      get
+      {
+        foreach(UsingClause item in this)
+          if (item.HasAlias && item.Name == key) return item;
+        return null;
+      }
+    }
   }
 }

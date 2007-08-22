@@ -40,6 +40,34 @@ namespace CSharpParser.ParserFiles
       _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new warning instance.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="description">Detailed error description.</param>
+    // --------------------------------------------------------------------------------
+    public void Warning(string code, Token errorPoint, string description)
+    {
+      _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, null);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new error instance.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="description">Detailed error description.</param>
+    /// <param name="parameters">Error parameters.</param>
+    // --------------------------------------------------------------------------------
+    public void Warning(string code, Token errorPoint, string description,
+      params object[] parameters)
+    {
+      _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, parameters);
+    }
+
     #endregion
 
     #region Error methods
@@ -208,6 +236,21 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0431: Cannot use alias '{0}' with '::' since the alias references a 
+    /// type. Use '.' instead.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Missing alias</param>
+    // --------------------------------------------------------------------------------
+    public void Error0431(Token token, string name)
+    {
+      Error("CS0431", token, 
+        string.Format("Cannot use alias '{0}' with '::' since the alias references "+
+        "a type. Use '.' instead.", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0432: Alias '{0}' not found
     /// </summary>
     /// <param name="token">Error point</param>
@@ -216,6 +259,40 @@ namespace CSharpParser.ParserFiles
     public void Error0432(Token token, string name)
     {
       Error("CS0432", token, string.Format("Alias '{0}' not found", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0433: The type '{0}' exists in both '{1}' and '{2}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="type">Conflicting type</param>
+    /// <param name="location1">First conflicting location</param>
+    /// <param name="location2">Second conflicting location</param>
+    // --------------------------------------------------------------------------------
+    public void Error0433(Token token, string type, string location1, string location2)
+    {
+      Error("CS0433", token, 
+        string.Format("The type '{0}' exists in both '{1}' and '{2}'", 
+        type, location1, location2));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0434: The namespace '{0}' in '{1}' conflicts with the type '{2}' 
+    /// in '{3}'
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="nameSpace">Conflicting namespace</param>
+    /// <param name="location1">Location of the namespace</param>
+    /// <param name="type">Conflicting type</param>
+    /// <param name="location2">Location of the type</param>
+    // --------------------------------------------------------------------------------
+    public void Error0434(Token token, string nameSpace, string location1,
+      string type, string location2)
+    {
+      Error("CS0434", token, string.Format("The namespace '{0}' in '{1}' conflicts "+
+        "with the type '{2}' in '{3}'", nameSpace, location1, type, location2));
     }
 
     // --------------------------------------------------------------------------------
@@ -359,22 +436,53 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Warning CS0435: The namespace '{0}' in '{1}' conflicts with the imported
-    /// type '{2}' in '{3}'. Using the namespace.
+    /// Warning CS0435: The namespace '{0}' in source code conflicts with the imported
+    /// type in '{1}'. Using the namespace in the source code.
     /// </summary>
     /// <param name="token">Error point</param>
     /// <param name="nameSpace">Namespace name</param>
-    /// <param name="nsLocation">The location of namespace definition</param>
-    /// <param name="name">Type name</param>
-    /// <param name="nameLocation">The location of namespacedefinition.</param>
+    /// <param name="location">The location of the imported type</param>
     // --------------------------------------------------------------------------------
-    public void Warning0435(Token token, string nameSpace, string nsLocation, 
-      string name, string nameLocation)
+    public void Warning0435(Token token, string nameSpace, string location)
     {
-      Error("CS0101", token,
-        string.Format("The namespace '{0}' in '{1}' conflicts with the imported "+
-        "type '{2}' in '{3}'. Using the namespace.",
-          nameSpace, nsLocation, name, nameLocation));
+      Warning("CS0435", token,
+        string.Format("The namespace '{0}' in source code conflicts with the imported "+
+        "type in '{1}'. Using the namespace in the source code.",
+          nameSpace, location));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS0436: The type '{0}' declared in source code conflicts with the 
+    /// imported type '{1}'. Using the one in the source code.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="type">Type name</param>
+    /// <param name="location">Location of imported type</param>
+    // --------------------------------------------------------------------------------
+    public void Warning0436(Token token, string type, string location)
+    {
+      Warning("CS0436", token,
+        string.Format("The type '{0}' in source code conflicts with the imported type "+
+        "in '{1}'. Using the one in the source code.",
+          type, location));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS0437: The type '{0}' in source code conflicts with the imported 
+    /// namespace '{1}'. Using the type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="type">Type name</param>
+    /// <param name="name">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning0437(Token token, string type, string name)
+    {
+      Warning("CS0437", token,
+        string.Format("The type '{0}' in source code conflicts with the imported "+
+        "namespace '{1}'. Using the type.",
+          type, name));
     }
 
     #endregion

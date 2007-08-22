@@ -208,12 +208,12 @@ namespace CSharpParser.ProjectModel
     /// resolver of this namespace then in its types and nested namespaces.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public void SetResolver()
+    public void SetNamespaceResolvers()
     {
       ResolutionNodeBase resolverNode;
       if (_ParentNamespace == null)
       {
-        // --- This is a global namespace
+        // --- This is a top namespace
         resolverNode = Parser.CompilationUnit.SourceResolutionTree;
       }
       else
@@ -225,24 +225,53 @@ namespace CSharpParser.ProjectModel
       // --- Register the namespace
       if (resolverNode != null)
       {
-        ResolutionNodeBase conflictingNode;
-        if (!resolverNode.RegisterNamespace(Name, out _ResolverNode, out conflictingNode))
-        {
-          Parser.Error0101(Token,
-            _ParentNamespace == null ? "global namespace" : _ParentNamespace.Name,
-            conflictingNode.Name);
-        }
+        _ResolverNode = resolverNode.CreateNamespace(Name);
+        _ResolverNode.SignDefinedInSource();
 
-        // --- Set the resolver for the nested types
-        foreach (TypeDeclaration nested in _TypeDeclarations)
+        // --- Set resolvers for nested namespaces
+        foreach (NamespaceFragment nested in _NestedNamespaces)
         {
-          nested.SetResolver();
+          nested.SetNamespaceResolvers();
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the resolver during the semantic parsing.
+    /// </summary>
+    /// <remarks>
+    /// This method can be called only after the full syntax parsing. First sets the
+    /// resolver of this namespace then in its types and nested namespaces.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void SetTypeResolvers()
+    {
+      ResolutionNodeBase resolverNode;
+      if (_ParentNamespace == null)
+      {
+        // --- This is a top namespace
+        resolverNode = Parser.CompilationUnit.SourceResolutionTree;
+      }
+      else
+      {
+        // --- This is a nested namespace
+        resolverNode = _ParentNamespace.ResolverNode;
+      }
+
+      // --- Register the namespace
+      if (resolverNode != null)
+      {
+        // --- Set resolvers for types declared here
+        foreach (TypeDeclaration type in _TypeDeclarations)
+        {
+          type.SetTypeResolvers();
         }
 
         // --- Set resolvers for nested namespaces
         foreach (NamespaceFragment nested in _NestedNamespaces)
         {
-          nested.SetResolver();
+          nested.SetTypeResolvers();
         }
       }
     }

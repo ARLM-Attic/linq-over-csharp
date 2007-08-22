@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Reflection;
+using System;
 
 namespace CSharpParser.Semantics
 {
@@ -17,9 +16,8 @@ namespace CSharpParser.Semantics
   {
     #region Private fields
 
-    private readonly Dictionary<string, Assembly> _Resolvers =
-      new Dictionary<string, Assembly>();
-
+    private bool _DefinedInSource;
+    private bool _TypesAlreadyImported;
     #endregion
 
     #region Lifecycle methods
@@ -37,6 +35,8 @@ namespace CSharpParser.Semantics
     public NamespaceResolutionNode(ResolutionNodeBase parentNode, string name)
       : base(parentNode, name)
     {
+      _DefinedInSource = false;
+      _TypesAlreadyImported = false;
     }
 
     #endregion
@@ -45,31 +45,23 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the resolving reference with the specified name.
+    /// Gets the flag indicating if the namespace has been declared in the source
+    /// code or not.
     /// </summary>
-    /// <param name="key">Reference key</param>
-    /// <returns>
-    /// Resolving reference if found; otherwise, null.
-    /// </returns>
     // --------------------------------------------------------------------------------
-    public Assembly this[string key]
+    public bool DefinedInSource
     {
-      get
-      {
-        Assembly result;
-        if (_Resolvers.TryGetValue(key, out result)) return result;
-        return null;
-      }
+      get { return _DefinedInSource; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the resolvers of this namespace.
+    /// Gets the flag indicating if types in this namspace are already imported or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, Assembly> Resolvers
+    public bool TypesAlreadyImported
     {
-      get { return _Resolvers; }
+      get { return _DefinedInSource || _TypesAlreadyImported; }
     }
 
     #endregion
@@ -78,14 +70,104 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a resolver to this node.
+    /// Indicates that the namespace has been defined in the source code.
     /// </summary>
-    /// <param name="key">Name of the resolver</param>
-    /// <param name="resolvingAssembly">Resolving assembly instance</param>
+    /// <remarks>
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    public void AddResolver(string key, Assembly resolvingAssembly)
+    public void SignDefinedInSource()
     {
-      _Resolvers.Add(key, resolvingAssembly);
+      _DefinedInSource = true;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Imports the types for this namespace.
+    /// </summary>
+    /// <remarks>
+    /// If types are already imported, this method returns immediately.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void ImportTypes()
+    {
+      if (TypesAlreadyImported) return;
+
+      // --- Find the parent node of this namespace resolution node
+      string nameSpace = string.Empty;
+      ResolutionNodeBase currentNode = this;
+      while (currentNode.ParentNode != null)
+      {
+        nameSpace = currentNode.Name + (nameSpace.Length > 0 ? "." : "") + nameSpace;
+        currentNode = currentNode.ParentNode;
+      }
+
+      // --- At this point we have the parent node. It must be az AssemblyResolutionTree.
+      AssemblyResolutionTree asmTree = currentNode as AssemblyResolutionTree;
+      if (asmTree == null)
+        throw new InvalidOperationException("AssemblyResolutionNode expected.");
+
+      // --- At this point we have all information to import types from an assembly.
+      foreach (Type type in asmTree.Assembly.GetTypes())
+      {
+        if (nameSpace == String.Empty && !String.IsNullOrEmpty(type.Namespace))
+          continue;
+        if (nameSpace != null && type.Namespace != nameSpace)
+          continue;
+        ImportTypeToHierarchy(new NetBinaryType(type));
+      }
+
+      // --- OK, sign types are already imported.
+      _TypesAlreadyImported = true;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Imports the type to the specified resolver node and creates the hierarchy
+    /// according to type nesting.
+    /// </summary>
+    /// <param name="type">Type to import.</param>
+    /// <returns>Type resolution node of the specified type.</returns>
+    /// <remarks>
+    /// If the type is a nested type, first imports its declaring type.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public TypeResolutionNode ImportTypeToHierarchy(ITypeCharacteristics type)
+    {
+      if (type.DeclaringType == null)
+      {
+        // --- This is a simple type
+        return ImportType(this, type);
+      }
+      else
+      {
+        // --- This is a type nested in an other type. We must provide that the declaring 
+        // --- type is imported.
+        TypeResolutionNode typeResolver =
+          ImportTypeToHierarchy(type.DeclaringType);
+        return ImportType(typeResolver, type);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Imports the type to the specified resolver node.
+    /// </summary>
+    /// <param name="resolverRoot">Resolver node</param>
+    /// <param name="type">Type to import.</param>
+    /// <returns>Type resolution node of the specified type.</returns>
+    // --------------------------------------------------------------------------------
+    public TypeResolutionNode ImportType(ResolutionNodeBase resolverRoot, 
+      ITypeCharacteristics type)
+    {
+      // --- This is a type not nested in any type. Register it for the root resolver node.
+      TypeResolutionNode resolver;
+      if ((resolver = resolverRoot.CreateType(type)) == null)
+      {
+        throw new InvalidOperationException(
+          String.Format("Type ({0}) and namespace conflict within the assembly: {1}",
+                        type.FullName, type.DeclaringUnit.Name));
+      }
+      return resolver;
     }
 
     #endregion

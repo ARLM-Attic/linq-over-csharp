@@ -294,7 +294,7 @@
     <None Include="TestFiles\TypeResolution\UsingNamespace3.cs" />
     <Compile Include="TestFiles\TypeResolution\UsingNamespace4.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace5.cs" />
-    <None Include="TestFiles\TypeResolution\UsingNamespace6.cs" />
+    <Compile Include="TestFiles\TypeResolution\UsingNamespace6.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
     <Compile Include="Visibility\Visibility.cs" />

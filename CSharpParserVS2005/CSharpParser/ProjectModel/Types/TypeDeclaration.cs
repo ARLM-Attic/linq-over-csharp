@@ -162,6 +162,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the number of type parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int TypeParameterCount
+    {
+      get { return _TypeParameters.Count; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the base type elements belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -722,7 +732,7 @@ namespace CSharpParser.ProjectModel
     /// Sets the resolver during the semantic parsing.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual void SetResolver()
+    public virtual void SetTypeResolvers()
     {
       ResolutionNodeBase resolverNode;
       if (IsNested)
@@ -744,22 +754,15 @@ namespace CSharpParser.ProjectModel
       // --- Register the type for the resolver node
       if (resolverNode != null)
       {
-        if (!resolverNode.RegisterType(this, out _ResolverNode))
+        if ((_ResolverNode = resolverNode.CreateType(this)) == null)
         {
-          Parser.Error0101(Token, 
-            _Namespace == null ? "global namespace" : _Namespace.Name, 
-            SimpleName);
-        }
-        else
-        {
-          // --- Add this type as a resolver
-          _ResolverNode.AddTypeResolver(this);
+          Parser.Error0101(Token, Name, Name);
         }
 
         // --- Set the resolver for the nested types
         foreach (TypeDeclaration nested in _NestedTypes)
         {
-          nested.SetResolver();
+          nested.SetTypeResolvers();
         }
       }
     }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
 {
@@ -18,6 +17,7 @@ namespace CSharpParser.Semantics
     private readonly string _Name;
     private readonly Dictionary<string, ResolutionNodeBase> _Children = 
       new Dictionary<string, ResolutionNodeBase>();
+    private readonly int _Depth;
 
     #endregion
 
@@ -35,19 +35,34 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     protected ResolutionNodeBase(ResolutionNodeBase parentNode, string name)
     {
-      if (string.IsNullOrEmpty(name))
-      {
-        throw new ArgumentNullException("name");
-      }
-      _ParentNode = parentNode;
+      if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
       _Name = name;
-      if (parentNode != null) parentNode.Children.Add(name, this);
+      _ParentNode = parentNode;
+      if (parentNode == null)
+      {
+        _Depth = 0;
+      }
+      else
+      {
+        _Depth = parentNode._Depth + 1;
+        parentNode._Children.Add(name, this);
+      }
     }
 
     #endregion
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the 
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int Depth
+    {
+      get { return _Depth; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the parent of this node.
@@ -83,20 +98,10 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the child nodes belonging to this node.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public Dictionary<string, ResolutionNodeBase> Children
-    {
-      get { return _Children; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the flag indicating if this node has any child or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool HasChild
+    public bool HasAnyChild
     {
       get { return _Children.Count > 0; }
     }
@@ -107,35 +112,153 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Finds the name described by the specified type reference instance.
+    /// Clears the nodes within this resolution node.
     /// </summary>
-    /// <param name="type">TypeReference representing the name to find.</param>
-    /// <param name="resolvedNode">
-    /// The node that fully or partially resolved the name.</param>
-    /// <param name="nextPart">Next part of the name that cannot be resolved.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void Clear()
+    {
+      _Children.Clear();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds the child node having the specified name.
+    /// </summary>
+    /// <param name="key">Name of the child to be found.</param>
     /// <returns>
-    /// Number of name fragments successfully resolved.
+    /// Child node if found; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeBase FindChild(string key)
+    {
+      ResolutionNodeBase child;
+      if (_Children.TryGetValue(key, out child)) return child;
+      return null;  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if this node contains a child node having the specified name.
+    /// </summary>
+    /// <param name="key">Name of the child to be found.</param>
+    /// <returns>
+    /// True, if child node found; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool HasChild(string key)
+    {
+      return _Children.ContainsKey(key);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a node within the type resolution tree representing a namespace.
+    /// </summary>
+    /// <param name="nameSpace">Full namespace to create.</param>
+    /// <returns>
+    /// Node representing the namespace node created.
     /// </returns>
     /// <remarks>
-    /// If returns 0, it means that no part of the name could be resolved. If 
-    /// 'nextPart' is null, it means the whole name has been susseccfully resolved.
+    /// Creates a separate node for each partof the namespace. For example, 
+    /// "System.Collections.Generic" gereates three nodes as 
+    /// System --> Collections --> Generic, and the "Generic" node is retreived.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public int FindName(TypeReference type, out ResolutionNodeBase resolvedNode,
-      out TypeReference nextPart)
+    public virtual NamespaceResolutionNode CreateNamespace(string nameSpace)
     {
-      int depth = 0;
-      resolvedNode = null;
-      ResolutionNodeBase node = this;
-      nextPart = type;
-      while (nextPart != null && node.Children.TryGetValue(nextPart.Name, out node))
+      string[] parts = nameSpace.Split('.');
+      ResolutionNodeBase currentNode = this;
+      int partIndex = 0;
+
+      // --- Search for existing nodes
+      while (partIndex < parts.Length)
       {
-        // --- We resolved the current part
-        resolvedNode = node;
-        nextPart = nextPart.SubType;
-        depth++;
+        ResolutionNodeBase nextNode;
+        if ((nextNode = currentNode.FindChild(parts[partIndex])) == null)
+        {
+          // --- No further part can be found.
+          break;
+        }
+
+        // --- nextNode contains the part found. It can only be a NamespaceResolution
+        // --- node. In any other case it is a name collision with a type and this may
+        // --- bot occur when calling this method.
+        if (nextNode is NamespaceResolutionNode)
+        {
+          // --- OK, this is a namespace resolution node, so move to the next part.
+          currentNode = nextNode;
+          partIndex++;
+        }
+        else
+          throw new InvalidOperationException("NamespaceResolutionNode expected.");
       }
-      return depth;
+
+      // --- At this point currentNode contains the last part that can be found.
+      // --- All the remaining namespace parts should be created.
+      while (partIndex < parts.Length)
+      {
+        currentNode = new NamespaceResolutionNode(currentNode, parts[partIndex++]);
+      }
+
+      // --- Now the whole namespace is registered.
+      return currentNode as NamespaceResolutionNode;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a node within the type resolution tree representing a type.
+    /// </summary>
+    /// <param name="type">Type to create the resolution node for.</param>
+    /// <returns>
+    /// Node representing the type node created.
+    /// </returns>
+    /// Name of the node representing the type if creation is OK. Null, if the node
+    /// with the type name is already reserved for a namespace.
+    /// <remarks>
+    /// <para>
+    /// For each type creates two chained node. The first node is a TypeNameResolutionNode,
+    /// the second is a TypeResolutionNode. The first node names the type, the second is
+    /// named by the number of generic parameters (0 for non-generic types).
+    /// </para>
+    /// <para>
+    /// For example, for List{T}: 
+    /// TypeNameResolutionNode("List") --> TypeResolutionNode("1").
+    /// </para>
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual TypeResolutionNode CreateType(ITypeCharacteristics type)
+    {
+      // --- Search for the type node
+      ResolutionNodeBase currentNode;
+      TypeNameResolutionNode namingNode;
+      if ((currentNode = FindChild(type.SimpleName)) != null)
+      {
+        // --- currentNode contains the node found. It can only be a TypeNameResolution
+        // --- node. In any other case it is a name collision with a namespace.
+        namingNode = currentNode as TypeNameResolutionNode;
+        if (namingNode == null) return null;
+      }
+      else 
+      {
+        namingNode = new TypeNameResolutionNode(this, type.SimpleName);
+        return new TypeResolutionNode(namingNode, type);
+      }
+
+      // --- At this point we have the naming node, lets check for the type node
+      if ((currentNode = currentNode.FindChild(type.TypeParameterCount.ToString())) != null)
+      {
+        TypeResolutionNode resultNode = currentNode as TypeResolutionNode;
+
+        // --- Node at this position must be a TypeResolutionNode
+        if (resultNode == null)
+        {
+          throw new InvalidOperationException("Typeresolution node missing.");
+        }
+        return resultNode;
+      }
+
+      // --- Create the type resolution node for this type
+      return new TypeResolutionNode(namingNode, type);
     }
 
     // --------------------------------------------------------------------------------
@@ -154,50 +277,83 @@ namespace CSharpParser.Semantics
     /// any namespace node is missing, this methods creates that node.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public virtual bool RegisterNamespace(string nameSpace, out NamespaceResolutionNode node,
-      out ResolutionNodeBase conflictingNode)
-    {
-      string[] parts = nameSpace.Split('.');
-      ResolutionNodeBase currentNode = this;
-      conflictingNode = null;
-      node = null;
-      int partIndex = 0;
+    //public virtual bool RegisterNamespace(string nameSpace, out NamespaceResolutionNode node,
+    //  out ResolutionNodeBase conflictingNode)
+    //{
+    //  string[] parts = nameSpace.Split('.');
+    //  ResolutionNodeBase currentNode = this;
+    //  conflictingNode = null;
+    //  node = null;
+    //  int partIndex = 0;
 
-      // --- Search for existing nodes
-      while (partIndex < parts.Length)
-      {
-        ResolutionNodeBase nextNode;
-        if (!currentNode.Children.TryGetValue(parts[partIndex], out nextNode))
-        {
-          // --- No further part can be found.
-          break;
-        }
+    //  // --- Search for existing nodes
+    //  while (partIndex < parts.Length)
+    //  {
+    //    ResolutionNodeBase nextNode;
+    //    if ((nextNode = currentNode.FindChild(parts[partIndex])) == null)
+    //    {
+    //      // --- No further part can be found.
+    //      break;
+    //    }
 
-        // --- nextNode contains the part found. It can only be a NamespaceResolution
-        // --- node. In any other case it is a name collision with a type.
-        node = nextNode as NamespaceResolutionNode;
-        if (node == null)
-        {
-          conflictingNode = nextNode;
-          return false;
-        }
+    //    // --- nextNode contains the part found. It can only be a NamespaceResolution
+    //    // --- node. In any other case it is a name collision with a type.
+    //    node = nextNode as NamespaceResolutionNode;
+    //    if (node == null)
+    //    {
+    //      conflictingNode = nextNode;
+    //      return false;
+    //    }
 
-        // --- OK, this is a namespace resolution node, so move to the next part.
-        currentNode = nextNode;
-        partIndex++;
-      }
+    //    // --- OK, this is a namespace resolution node, so move to the next part.
+    //    currentNode = nextNode;
+    //    partIndex++;
+    //  }
 
-      // --- At this point currentNode contains the last part that can be found.
-      // --- All the remaining namespace parts should be created.
-      while (partIndex < parts.Length)
-      {
-        node = new NamespaceResolutionNode(currentNode, parts[partIndex++]);
-        currentNode = node;
-      }
+    //  // --- At this point currentNode contains the last part that can be found.
+    //  // --- All the remaining namespace parts should be created.
+    //  while (partIndex < parts.Length)
+    //  {
+    //    node = new NamespaceResolutionNode(currentNode, parts[partIndex++]);
+    //    currentNode = node;
+    //  }
 
-      // --- Now the whole namespace is registered.
-      return true;
-    }
+    //  // --- Now the whole namespace is registered.
+    //  return true;
+    //}
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds the name described by the specified type reference instance.
+    /// </summary>
+    /// <param name="type">TypeReference representing the name to find.</param>
+    /// <param name="resolvedNode">
+    /// The node that fully or partially resolved the name.</param>
+    /// <param name="nextPart">Next part of the name that cannot be resolved.</param>
+    /// <returns>
+    /// Number of name fragments successfully resolved.
+    /// </returns>
+    /// <remarks>
+    /// If returns 0, it means that no part of the name could be resolved. If 
+    /// 'nextPart' is null, it means the whole name has been susseccfully resolved.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    //public int FindName(TypeReference type, out ResolutionNodeBase resolvedNode,
+    //  out TypeReference nextPart)
+    //{
+    //  int depth = 0;
+    //  resolvedNode = null;
+    //  ResolutionNodeBase node = this;
+    //  nextPart = type;
+    //  while (nextPart != null && node.Children.TryGetValue(nextPart.Name, out node))
+    //  {
+    //    // --- We resolved the current part
+    //    resolvedNode = node;
+    //    nextPart = nextPart.SubType;
+    //    depth++;
+    //  }
+    //  return depth;
+    //}
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -214,22 +370,22 @@ namespace CSharpParser.Semantics
     /// this methods creates the node.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public virtual bool RegisterType(ITypeCharacteristics type, out TypeResolutionNode node)
-    {
-      // --- Search for the type node
-      ResolutionNodeBase currentNode;
-      if (Children.TryGetValue(type.SimpleName, out currentNode))
-      {
-        // --- currentNode contains the node found. It can only be a TypeResolution
-        // --- node. In any other case it is a name collision with a namespace.
-        node = currentNode as TypeResolutionNode;
-        return node != null;
-      }
+    //public virtual bool RegisterType(ITypeCharacteristics type, out TypeResolutionNode node)
+    //{
+    //  // --- Search for the type node
+    //  ResolutionNodeBase currentNode;
+    //  if (Children.TryGetValue(type.SimpleName, out currentNode))
+    //  {
+    //    // --- currentNode contains the node found. It can only be a TypeResolution
+    //    // --- node. In any other case it is a name collision with a namespace.
+    //    node = currentNode as TypeResolutionNode;
+    //    return node != null;
+    //  }
 
-      // --- Register the new type resolution node
-      node = new TypeResolutionNode(this, type.SimpleName);
-      return true;
-    }
+    //  // --- Register the new type resolution node
+    //  node = new TypeResolutionNode(this, type);
+    //  return true;
+    //}
 
     #endregion
 
@@ -247,7 +403,7 @@ namespace CSharpParser.Semantics
     public void Trace(TextWriter tw, int depth)
     {
       tw.WriteLine("{0}{1}: {2}", "".PadLeft(2*depth, ' '), GetType().Name, Name);
-      foreach (ResolutionNodeBase node in Children.Values)
+      foreach (ResolutionNodeBase node in _Children.Values)
       {
         node.Trace(tw, depth+1);
       }
