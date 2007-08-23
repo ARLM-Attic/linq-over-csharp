@@ -22,7 +22,7 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"Comments\CompoundComments.cs");
       Assert.IsTrue(InvokeParser(parser));
 
-      MultiCommentBlock ci = parser.Files[0].Namespaces[0].Comment as MultiCommentBlock;
+      MultiCommentBlock ci = parser.Files[0].NestedNamespaces[0].Comment as MultiCommentBlock;
       Assert.IsNotNull(ci);
       Assert.AreEqual(ci.Comments[1].Text, " Namespace comment");
 

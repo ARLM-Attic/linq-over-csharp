@@ -27,14 +27,16 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeDeclaration: AttributedElement, ITypeParameterOwner,
-    ITypeCharacteristics
+  public abstract class TypeDeclaration: AttributedElement, 
+    ITypeParameterOwner,
+    ITypeCharacteristics,
+    IResolutionContext
   {
     #region Private fields
 
     protected Visibility _DeclaredVisibility;
     protected bool _DefaultVisibility;
-    private NamespaceFragment _Namespace;
+    private NamespaceFragment _EnclosingNamespace;
     private readonly TypeReferenceCollection _BaseTypes = new TypeReferenceCollection();
     private TypeDeclaration _DeclaringType;
     private bool _IsNew;
@@ -106,17 +108,6 @@ namespace CSharpParser.ProjectModel
     public Visibility Visibility
     {
       get { return _DefaultVisibility ? Visibility.Internal : _DeclaredVisibility; }  
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the namespace of the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public NamespaceFragment Namespace
-    {
-      get { return _Namespace; }
-      set { _Namespace = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -214,7 +205,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     string ITypeCharacteristics.Namespace
     {
-      get { return _Namespace.FullName; }
+      get { return _EnclosingNamespace.FullName; }
     }
 
     // --------------------------------------------------------------------------------
@@ -740,7 +731,7 @@ namespace CSharpParser.ProjectModel
         // --- Use the resolver of the declaring type
         resolverNode = _DeclaringType.ResolverNode;
       }
-      else if (_Namespace == null)
+      else if (_EnclosingNamespace == null)
       {
         // --- This is a global type, use the resolver of the compilation unit
         resolverNode = Parser.CompilationUnit.SourceResolutionTree;
@@ -748,7 +739,7 @@ namespace CSharpParser.ProjectModel
       else
       {
         // --- This is a type within a namespace
-        resolverNode = _Namespace.ResolverNode;
+        resolverNode = _EnclosingNamespace.ResolverNode;
       }
 
       // --- Register the type for the resolver node
@@ -903,7 +894,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -913,7 +904,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public override void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
 
@@ -940,6 +931,51 @@ namespace CSharpParser.ProjectModel
       {
         member.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
       }
+    }
+
+    #endregion
+
+    #region IResolutionContext implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the source file enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceFile EnclosingSourceFile
+    {
+      get { throw new NotSupportedException("TypeDeclaration has no enclosing source file."); }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragment EnclosingNamespace
+    {
+      get { return _EnclosingNamespace; }
+      set { _EnclosingNamespace = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeDeclaration EnclosingType
+    {
+      get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the method declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MethodDeclaration EnclosingMethod
+    {
+      get { throw new NotSupportedException("TypeDeclaration has no enclosing method."); }
     }
 
     #endregion
@@ -1112,7 +1148,10 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected override string GetKeyOfItem(TypeDeclaration item)
     {
-      return (item.Namespace == null ? String.Empty : item.Namespace.FullName) + item.FullName;
+      return (item.EnclosingNamespace == null 
+        ? String.Empty 
+        : item.EnclosingNamespace.FullName) 
+        + item.FullName;
     }
   }
 }

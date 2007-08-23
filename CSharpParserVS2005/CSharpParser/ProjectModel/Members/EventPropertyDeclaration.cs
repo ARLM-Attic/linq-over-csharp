@@ -81,7 +81,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -91,7 +91,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public override void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
       if (_Adder != null)

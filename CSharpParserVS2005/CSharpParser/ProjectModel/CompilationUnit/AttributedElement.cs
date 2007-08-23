@@ -9,7 +9,7 @@ namespace CSharpParser.ProjectModel
   /// This class is the common base class of all language elements having attributes.
   /// </summary>
   // ==================================================================================
-  public abstract class AttributedElement : LanguageElement, IResolutionRequired
+  public abstract class AttributedElement : LanguageElement, IUsesResolutionContext
   {
     #region Private fields
 
@@ -85,7 +85,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -95,7 +95,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public virtual void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       // --- Resolve attributes
       foreach (AttributeDeclaration attr in Attributes)

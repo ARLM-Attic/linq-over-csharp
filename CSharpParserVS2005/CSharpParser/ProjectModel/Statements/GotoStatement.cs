@@ -88,7 +88,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public override void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
       if (_LabelExpression != null)

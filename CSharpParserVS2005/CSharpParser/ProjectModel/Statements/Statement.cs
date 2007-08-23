@@ -9,7 +9,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents an abstract statement.
   /// </summary>
   // ==================================================================================
-  public abstract class Statement : LanguageElement, IResolutionRequired
+  public abstract class Statement : LanguageElement, IUsesResolutionContext
   {
     #region Private fields
 
@@ -175,7 +175,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -185,7 +185,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public virtual void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
     }
 
@@ -202,7 +202,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public static void ResolveTypeReferences(IBlockOwner block, 
-      ResolutionContext contextType, IResolutionRequired contextInstance)
+      ResolutionContext contextType, IUsesResolutionContext contextInstance)
     {
       foreach (Statement stm in block.Statements)
       {

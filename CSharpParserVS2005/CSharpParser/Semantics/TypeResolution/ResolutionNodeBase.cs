@@ -106,6 +106,26 @@ namespace CSharpParser.Semantics
       get { return _Children.Count > 0; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this node represents a namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNamespace
+    {
+      get { return this is NamespaceResolutionNode; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this node represents a type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsType
+    {
+      get { return this is TypeResolutionNode; }
+    }
+
     #endregion
 
     #region Public methods

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using CSharpParser.Collections;
 using CSharpParser.Semantics;
@@ -10,7 +11,10 @@ namespace CSharpParser.ProjectModel
   /// This class represents a C# file in the project to compile.
   /// </summary>
   // ==================================================================================
-  public sealed class SourceFile: IResolutionRequired
+  public sealed class SourceFile: 
+    ITypeDeclarationScope,
+    IResolutionContext,
+    IUsesResolutionContext
   {
     #region Private fields
 
@@ -123,7 +127,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of namespace declarations in this project file
     /// </summary>
     // --------------------------------------------------------------------------------
-    public NamespaceFragmentCollection Namespaces
+    public NamespaceFragmentCollection NestedNamespaces
     {
       get { return _Namespaces; }
     }
@@ -184,6 +188,20 @@ namespace CSharpParser.ProjectModel
       _Comments.Add(comment);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the scope within the file using the specified namespace.
+    /// </summary>
+    /// <param name="ns">Namespace within the file.</param>
+    /// <returns>
+    /// The namespace scope, if that is not null; otherwise the file scope.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeDeclarationScope NamespaceScope(ITypeDeclarationScope ns)
+    {
+      return ns ?? (ITypeDeclarationScope)this;
+    }
+
     #endregion
 
     #region Private methods
@@ -209,7 +227,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -219,7 +237,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       foreach (UsingClause usingClause in _Usings)
       {
@@ -237,6 +255,72 @@ namespace CSharpParser.ProjectModel
       {
         nameSpace.ResolveTypeReferences(ResolutionContext.SourceFile, this);
       }
+    }
+
+    #endregion
+
+    #region IResolutionContext implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the source file enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceFile EnclosingSourceFile
+    {
+      get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragment EnclosingNamespace
+    {
+      get { throw new NotSupportedException("Source file has no enclosing namespace."); }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeDeclaration EnclosingType
+    {
+      get { throw new NotSupportedException("Source file has no enclosing type."); }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the method declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MethodDeclaration EnclosingMethod
+    {
+      get { throw new NotSupportedException("Source file has no enclosing method."); }
+    }
+
+    #endregion
+
+    #region Iterators
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterates through the enclosing namespaces to this source file using the 
+    /// specified inner namespace as a starting point.
+    /// </summary>
+    /// <param name="ns">Namespace to start from.</param>
+    /// <returns>Current enclosing declaration scope.</returns>
+    // --------------------------------------------------------------------------------
+    public IEnumerable<ITypeDeclarationScope> ScopesToOuter(NamespaceFragment ns)
+    {
+      while (ns != null)
+      {
+        yield return ns;
+        ns = ns.ParentNamespace;
+      }
+      yield return this;
     }
 
     #endregion

@@ -13,7 +13,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a base type on the ancestor list of a type.
   /// </summary>
   // ==================================================================================
-  public class TypeReference : LanguageElement, IResolutionRequired, ITypeCharacteristics
+  public class TypeReference : LanguageElement, IUsesResolutionContext, ITypeCharacteristics
   {
     #region Private fields
 
@@ -23,9 +23,8 @@ namespace CSharpParser.ProjectModel
     private TypeKind _Kind;
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
     private ResolutionTarget _Target;
+    private ResolutionNodeBase _ResolvingNode;
     private ITypeCharacteristics _ResolvingType;
-    private NamespaceHierarchy _ResolvingHierarchy;
-    private UsingClause _ResolvingAlias;
 
     #endregion
 
@@ -75,26 +74,6 @@ namespace CSharpParser.ProjectModel
     public ITypeCharacteristics ResolvingType
     {
       get { return _ResolvingType; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the namespace hierarchy resolving this reference.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public NamespaceHierarchy ResolvingHierarchy
-    {
-      get { return _ResolvingHierarchy; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the using alias resolving this reference.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public UsingClause ResolvingAlias
-    {
-      get { return _ResolvingAlias; }
     }
 
     // --------------------------------------------------------------------------------
@@ -189,6 +168,16 @@ namespace CSharpParser.ProjectModel
       set { _Kind = value; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolution target.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionTarget Target
+    {
+      get { return _Target; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of type arguments.
@@ -608,7 +597,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -618,7 +607,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       // --- Resolve the type argument types
       foreach (TypeReference typeReference in _TypeArguments)
@@ -671,6 +660,7 @@ namespace CSharpParser.ProjectModel
     {
       _Target = ResolutionTarget.Type;
       _ResolvingType = new NetBinaryType(type);
+      _ResolvingNode = null;
 #if DIAGNOSTICS
       _ResolutionCounter++;
       _ResolvedToSystemType++;
@@ -681,12 +671,13 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves this type reference to the specified source-declared type.
     /// </summary>
-    /// <param name="type">Type declaration instance.</param>
+    /// <param name="node">Node representing the type.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveToType(TypeDeclaration type)
+    public void ResolveToType(TypeResolutionNode node)
     {
       _Target = ResolutionTarget.Type;
-      _ResolvingType = type;
+      _ResolvingNode = node;
+      _ResolvingType = node.Resolver;
 #if DIAGNOSTICS
       _ResolutionCounter++;
       _ResolvedToSourceType++;
@@ -697,10 +688,12 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves this type reference to a namespace.
     /// </summary>
+    /// <param name="node">Node representing the namespace.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveToNamespace()
+    public void ResolveToNamespace(ResolutionNodeBase node)
     {
       _Target = ResolutionTarget.Namespace;
+      _ResolvingNode = node;
       _ResolvingType = null;
 #if DIAGNOSTICS
       _ResolutionCounter++;
@@ -733,7 +726,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="instance">Source file instance.</param>
     // --------------------------------------------------------------------------------
-    private void ResolveTypeInSourceFile(IResolutionRequired instance)
+    private void ResolveTypeInSourceFile(IUsesResolutionContext instance)
     {
       SourceFile file = instance as SourceFile;
       if (file == null)
@@ -748,7 +741,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="instance">Namespace declaration instance.</param>
     // --------------------------------------------------------------------------------
-    private void ResolveTypeInNamespace(IResolutionRequired instance)
+    private void ResolveTypeInNamespace(IUsesResolutionContext instance)
     {
       NamespaceFragment nameSpace = instance as NamespaceFragment;
       if (nameSpace == null)
@@ -763,7 +756,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="instance">Type declaration instance.</param>
     // --------------------------------------------------------------------------------
-    private void ResolveTypeInTypeDeclaration(IResolutionRequired instance)
+    private void ResolveTypeInTypeDeclaration(IUsesResolutionContext instance)
     {
       TypeDeclaration typeDecl = instance as TypeDeclaration;
       if (typeDecl == null)
@@ -778,7 +771,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="instance">Accessor declaration instance.</param>
     // --------------------------------------------------------------------------------
-    private void ResolveTypeInAccessorDeclaration(IResolutionRequired instance)
+    private void ResolveTypeInAccessorDeclaration(IUsesResolutionContext instance)
     {
       AccessorDeclaration accDecl = instance as AccessorDeclaration;
       if (accDecl == null)
@@ -793,7 +786,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="instance">Method declaration instance.</param>
     // --------------------------------------------------------------------------------
-    private void ResolveTypeInMethodDeclaration(IResolutionRequired instance)
+    private void ResolveTypeInMethodDeclaration(IUsesResolutionContext instance)
     {
       MethodDeclaration methodDecl = instance as MethodDeclaration;
       if (methodDecl == null)

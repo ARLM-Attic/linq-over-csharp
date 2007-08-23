@@ -17,6 +17,7 @@ namespace CSharpParser.ProjectModel
     /// Creates a new classlike type declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser instance.</param>
     // --------------------------------------------------------------------------------
     protected ClasslikeTypeDeclaration(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
@@ -44,7 +45,7 @@ namespace CSharpParser.ProjectModel
       get
       {
         if (!_IsPartial) return base.Name;
-        return base.Name + "|" + Namespace.ParentFile.Name + "|" + Token.pos;
+        return base.Name + "|" + EnclosingNamespace.EnclosingSourceFile.Name + "|" + Token.pos;
       }
     }
   }

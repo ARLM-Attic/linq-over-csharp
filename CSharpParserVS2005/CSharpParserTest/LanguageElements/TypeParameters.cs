@@ -12,7 +12,7 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"TypeParameters\TypeParamConstraintsAreOk.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       TypeParameterConstraintCollection coList = td.ParameterConstraints;
       Assert.AreEqual(coList.Count, 6);
 

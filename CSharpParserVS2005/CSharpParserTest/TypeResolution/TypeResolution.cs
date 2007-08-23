@@ -169,5 +169,16 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"TypeResolution\UsingNamespace5.cs");
       Assert.IsTrue(InvokeParser(parser));
     }
+
+    [TestMethod]
+    public void InvalidGlobalNameFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace6.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0400");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0400");
+    }
   }
 }

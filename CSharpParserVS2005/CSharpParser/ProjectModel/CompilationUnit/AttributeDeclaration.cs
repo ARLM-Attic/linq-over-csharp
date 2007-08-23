@@ -10,7 +10,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents an attribute declaration
   /// </summary>
   // ==================================================================================
-  public sealed class AttributeDeclaration : LanguageElement, IResolutionRequired
+  public sealed class AttributeDeclaration : LanguageElement, IUsesResolutionContext
   {
     #region Private fields
 
@@ -78,7 +78,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -88,7 +88,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       if (_TypeReference != null)
       {

@@ -684,7 +684,7 @@ namespace CSharpParser.ProjectModel
       foreach (SourceFile source in Files)
       {
         _CurrentFile = source;
-        foreach (NamespaceFragment fragment in source.Namespaces)
+        foreach (NamespaceFragment fragment in source.NestedNamespaces)
         {
           fragment.SetNamespaceResolvers();
         }
@@ -709,7 +709,7 @@ namespace CSharpParser.ProjectModel
         {
           type.SetTypeResolvers();
         }
-        foreach (NamespaceFragment fragment in source.Namespaces)
+        foreach (NamespaceFragment fragment in source.NestedNamespaces)
         {
           fragment.SetTypeResolvers();
         }
@@ -773,13 +773,9 @@ namespace CSharpParser.ProjectModel
     {
       if (file == null) throw new ArgumentNullException("file");
 
-      // --- Obtain the collection of 'extern alias' clauses
-      ExternalAliasCollection aliases = nsFragment == null
-        ? file.ExternAliases
-        : nsFragment.ExternAliases;
-
+      ITypeDeclarationScope scope = file.NamespaceScope(nsFragment);
       // --- Resolve 'exter alias' in this declaration space
-      foreach (ExternalAlias alias in aliases)
+      foreach (ExternalAlias alias in scope.ExternAliases)
       {
         // --- Check, if we have an 'extern alias' for the namespace hierarchy root
         NamespaceHierarchy hierarchy;
@@ -794,13 +790,8 @@ namespace CSharpParser.ProjectModel
         }
       }
 
-      // --- Obtain the collection of the child namespace fragments 
-      NamespaceFragmentCollection childNamespaces = nsFragment == null
-        ? file.Namespaces
-        : nsFragment.NestedNamespaces;
-
       // --- Resolve 'extern alias' clauses in child namespaces recursively.
-      foreach (NamespaceFragment fragment in childNamespaces)
+      foreach (NamespaceFragment fragment in scope.NestedNamespaces)
       {
         ResolveExternAliasClauses(file, fragment);
       }
@@ -840,35 +831,53 @@ namespace CSharpParser.ProjectModel
     {
       if (file == null) throw new ArgumentNullException("file");
 
-      // --- Obtain the collection of using clauses
-      UsingClauseCollection usings = nsFragment == null
-        ? file.Usings
-        : nsFragment.Usings;
-
+      ITypeDeclarationScope scope = file.NamespaceScope(nsFragment);
       // --- Resolve the using clauses in two steps. In first step we resolve usings,
       // --- in second step we commit the resolution. It is because using alias clauses
-      // --- defined here should not influence the other using clauses
+      // --- defined here should not influence the other using clauses. When resolving 
+      // --- types we accept only committed using clauses.
+
       // --- Step 1: Resolve usings in this file or namespace
-      foreach (UsingClause usingClause in usings)
+      foreach (UsingClause usingClause in scope.Usings)
       {
-        //ResolveUsingDirective(usingClause, nsFragment);
+        ResolveUsingDirective(usingClause, file, nsFragment);
       }
 
       // --- Step 2: Commit resolutions
-      foreach (UsingClause usingClause in usings)
+      foreach (UsingClause usingClause in scope.Usings)
       {
         usingClause.SignResolved();
       }
 
-      // --- Obtain the collection of the cild namespace fragments 
-      NamespaceFragmentCollection childNamespaces = nsFragment == null
-        ? file.Namespaces
-        : nsFragment.NestedNamespaces;
-
       // --- Resolve using clauses in child namespaces recursively.
-      foreach (NamespaceFragment fragment in childNamespaces)
+      foreach (NamespaceFragment fragment in scope.NestedNamespaces)
       {
         ResolveUsingDirectives(file, fragment);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the specified using directive within the provided namespace.
+    /// </summary>
+    /// <param name="usingClause">Using directive</param>
+    /// <param name="file">Source file.</param>
+    /// <param name="nsFragment">Namespce to use for resolution</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveUsingDirective(UsingClause usingClause, SourceFile file, 
+      NamespaceFragment nsFragment)
+    {
+      if (usingClause == null) throw new ArgumentNullException("usingClause");
+      if (file == null) throw new ArgumentNullException("file");
+      if (nsFragment == null)
+      {
+        NamespaceOrTypeResolver.
+          Resolve(usingClause.ReferencedName,ResolutionContext.SourceFile, file);
+      }
+      else
+      {
+        NamespaceOrTypeResolver.
+          Resolve(usingClause.ReferencedName,ResolutionContext.Namespace, nsFragment);
       }
     }
 

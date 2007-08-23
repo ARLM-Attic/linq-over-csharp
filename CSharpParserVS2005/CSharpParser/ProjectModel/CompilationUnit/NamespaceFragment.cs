@@ -6,7 +6,6 @@ using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
-
   // ==================================================================================
   /// <summary>
   /// This class represents a namespace declared in a file.
@@ -16,12 +15,15 @@ namespace CSharpParser.ProjectModel
   /// declarations.
   /// </remarks>
   // ==================================================================================
-  public sealed class NamespaceFragment: LanguageElement, IResolutionRequired
+  public sealed class NamespaceFragment: LanguageElement, 
+    ITypeDeclarationScope,
+    IResolutionContext,
+    IUsesResolutionContext
   {
     #region Private fields
 
     private readonly NamespaceFragment _ParentNamespace;
-    private readonly SourceFile _ParentFile; 
+    private readonly SourceFile _EnclosingFile; 
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly NamespaceFragmentCollection _NestedNamespaces = new NamespaceFragmentCollection();
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
@@ -50,7 +52,7 @@ namespace CSharpParser.ProjectModel
       // --- A namespace must belong to a file.
       if (parentFile == null)
         throw new InvalidOperationException(Resources.ParentFileNotDeclared);
-      _ParentFile = parentFile;
+      _EnclosingFile = parentFile;
 
       // --- Store attributes
       Name = name;
@@ -67,7 +69,7 @@ namespace CSharpParser.ProjectModel
       {
         // --- This is a root namespace in the file, we add it to the namespace list
         // --- of the file.
-        _ParentFile.Namespaces.Add(this);
+        _EnclosingFile.NestedNamespaces.Add(this);
       }
 
       // --- The namespace is added to the list of CompilationUnit
@@ -90,16 +92,6 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the file where the namespace has been declared.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public SourceFile ParentFile
-    {
-      get { return _ParentFile; }
-    } 
-    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the full name of this namespace.
@@ -306,11 +298,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddTypeDeclaration(TypeDeclaration item)
     {
-      item.Namespace = this;
+      item.EnclosingNamespace = this;
       _TypeDeclarations.Add(item);
       try
       {
-        _ParentFile.ParentUnit.DeclaredTypes.Add(item);
+        _EnclosingFile.ParentUnit.DeclaredTypes.Add(item);
       }
       catch (ArgumentException)
       {
@@ -320,7 +312,51 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IResolutionContext implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the source file enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceFile EnclosingSourceFile
+    {
+      get { return _EnclosingFile; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragment EnclosingNamespace
+    {
+      get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeDeclaration EnclosingType
+    {
+      get { throw new NotSupportedException("Namespace has no enclosing type."); }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the method declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MethodDeclaration EnclosingMethod
+    {
+      get { throw new NotSupportedException("Namespace has no enclosing method."); }
+    }
+
+    #endregion
+
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -330,7 +366,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       // --- Resolve using claues
       foreach (UsingClause usingClause in _Usings)

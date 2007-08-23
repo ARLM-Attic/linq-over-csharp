@@ -45,7 +45,7 @@ namespace CSharpParserTest
       parser.AddFile("EnumTest.cs");
       Assert.IsTrue(InvokeParser(parser));
       SourceFile file = parser.Files[0];
-      EnumDeclaration et = file.Namespaces[0].TypeDeclarations[0] as EnumDeclaration;
+      EnumDeclaration et = file.NestedNamespaces[0].TypeDeclarations[0] as EnumDeclaration;
       Assert.IsNotNull(et);
       Assert.AreEqual(et.Name, "EnumTest1");
       Assert.AreEqual(et.BaseTypeName, "byte");
@@ -62,7 +62,7 @@ namespace CSharpParserTest
       Assert.AreEqual(et.Values[3].Name, "Value4");
       Assert.AreEqual(et.Values[3].Attributes.Count, 0);
 
-      et = file.Namespaces[0].TypeDeclarations[1] as EnumDeclaration;
+      et = file.NestedNamespaces[0].TypeDeclarations[1] as EnumDeclaration;
       Assert.IsNotNull(et);
       Assert.AreEqual(et.Name, "EnumTest2");
       Assert.IsFalse(et.HasBaseType);
@@ -86,7 +86,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("ConstDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.AreEqual(td.Members.Count, 14);
 
       ConstDeclaration cd = td.Members[0] as ConstDeclaration;
@@ -124,13 +124,13 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("EventDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       DelegateDeclaration dd = td as DelegateDeclaration;
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "NewDelegate");
       Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
 
-      td = parser.Files[0].Namespaces[0].TypeDeclarations[1];
+      td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[1];
       Assert.AreEqual(td.NestedTypes.Count, 3);
 
       dd = td.NestedTypes[0] as DelegateDeclaration;
@@ -206,7 +206,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("PropertyDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[1];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[1];
       Assert.IsNotNull(td);
       Assert.AreEqual(td.Members.Count, 9);
 
@@ -295,7 +295,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("MethodDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
 
       MethodDeclaration md = td.Members[0] as MethodDeclaration;
@@ -349,7 +349,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("CastOperatorDeclarations.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
 
       CastOperatorDeclaration md = td.Members[0] as CastOperatorDeclaration;
@@ -377,7 +377,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleStatements.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
       MethodDeclaration md = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(md);

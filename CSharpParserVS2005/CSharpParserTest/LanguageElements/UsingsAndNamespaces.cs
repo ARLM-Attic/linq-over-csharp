@@ -32,8 +32,8 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(file.Usings[4].ReferencedName.FullName, "Microsoft.Win32");
 
       // --- Check namespaces in the file
-      Assert.AreEqual(file.Namespaces.Count, 3);
-      NamespaceFragment ns1 = file.Namespaces[0];
+      Assert.AreEqual(file.NestedNamespaces.Count, 3);
+      NamespaceFragment ns1 = file.NestedNamespaces[0];
       Assert.AreEqual(ns1.Name, "CSharpParserTest.TestFiles");
       Assert.AreEqual(ns1.Usings.Count, 3);
       Assert.AreEqual(ns1.NestedNamespaces.Count, 3);
@@ -56,12 +56,12 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(ns1b.NestedNamespaces.Count, 1);
       Assert.AreEqual(ns1b.NestedNamespaces[0].FullName, "CSharpParserTest.TestFiles.Level1.A.Level2.A");
 
-      NamespaceFragment ns2 = file.Namespaces[1];
+      NamespaceFragment ns2 = file.NestedNamespaces[1];
       Assert.AreEqual(ns2.Name, "OtherNameSpace");
       Assert.AreEqual(ns2.Usings.Count, 0);
       Assert.AreEqual(ns2.NestedNamespaces.Count, 1);
 
-      ns1 = file.Namespaces[2];
+      ns1 = file.NestedNamespaces[2];
       Assert.AreEqual(ns1.Name, "CSharpParserTest.TestFiles");
       Assert.AreEqual(ns1.Usings.Count, 2);
       Assert.AreEqual(ns1.NestedNamespaces.Count, 1);

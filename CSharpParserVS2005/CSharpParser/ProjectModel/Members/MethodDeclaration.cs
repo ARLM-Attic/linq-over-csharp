@@ -12,7 +12,10 @@ namespace CSharpParser.ProjectModel
   /// This type represents a method declaration.
   /// </summary>
   // ==================================================================================
-  public class MethodDeclaration : MemberDeclaration, IBlockOwner, ITypeParameterOwner
+  public class MethodDeclaration : MemberDeclaration, 
+    IBlockOwner,
+    ITypeParameterOwner,
+    IResolutionContext
   {
     #region Private fields
 
@@ -265,7 +268,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -275,7 +278,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public override void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
       foreach (FormalParameter param in _FormalParameters)
@@ -283,6 +286,50 @@ namespace CSharpParser.ProjectModel
         param.ResolveTypeReferences(ResolutionContext.MethodDeclaration, this);
       }
       Statement.ResolveTypeReferences(this, ResolutionContext.MethodDeclaration, this);
+    }
+
+    #endregion
+
+    #region IResolutionContext implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the source file enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public SourceFile EnclosingSourceFile
+    {
+      get { return DeclaringType.EnclosingSourceFile; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragment EnclosingNamespace
+    {
+      get { return DeclaringType.EnclosingNamespace; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeDeclaration EnclosingType
+    {
+      get { return DeclaringType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the method declaration enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MethodDeclaration EnclosingMethod
+    {
+      get { return this; }
     }
 
     #endregion

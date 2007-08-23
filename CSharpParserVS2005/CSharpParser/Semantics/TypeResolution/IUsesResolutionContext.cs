@@ -6,7 +6,7 @@ namespace CSharpParser.Semantics
   /// resolution.
   /// </summary>
   // ==================================================================================
-  public interface IResolutionRequired
+  public interface IUsesResolutionContext
   {
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -16,6 +16,6 @@ namespace CSharpParser.Semantics
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     void ResolveTypeReferences(ResolutionContext contextType, 
-      IResolutionRequired contextInstance);
+      IUsesResolutionContext contextInstance);
   }
 }

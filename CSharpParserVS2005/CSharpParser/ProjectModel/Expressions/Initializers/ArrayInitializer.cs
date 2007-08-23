@@ -56,7 +56,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextType">Type of context where the resolution occurs.</param>
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType, IResolutionRequired contextInstance)
+    public override void ResolveTypeReferences(ResolutionContext contextType, IUsesResolutionContext contextInstance)
     {
       base.ResolveTypeReferences(contextType, contextInstance);
       foreach (Initializer init in _Initializers)

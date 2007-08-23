@@ -16,7 +16,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
       MethodDeclaration method1 = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(method1);
@@ -39,7 +39,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
       MethodDeclaration method1 = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(method1);
@@ -67,7 +67,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
       MethodDeclaration method1 = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(method1);
@@ -98,7 +98,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
       MethodDeclaration method1 = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(method1);
@@ -129,7 +129,7 @@ namespace CSharpParserTest
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile("SimpleExpressions.cs");
       Assert.IsTrue(InvokeParser(parser));
-      TypeDeclaration td = parser.Files[0].Namespaces[0].TypeDeclarations[0];
+      TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
       Assert.IsNotNull(td);
       MethodDeclaration method1 = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(method1);

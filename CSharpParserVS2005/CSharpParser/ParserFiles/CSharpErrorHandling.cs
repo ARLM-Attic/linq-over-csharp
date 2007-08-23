@@ -205,6 +205,21 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0400: The type or namespace name '{0}' could not be found in the 
+    /// global namespace (are you missing an assembly reference?)
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0400(Token token, string name)
+    {
+      Error("CS0400", token,
+        string.Format("The type or namespace name '{0}' could not be found in the "+
+        "global namespace (are you missing an assembly reference?)", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0409: A constraint clause has already been specified for type
     /// parameter '{0}'. All of the constraints for a type parameter must be
     /// specified in a single where clause.

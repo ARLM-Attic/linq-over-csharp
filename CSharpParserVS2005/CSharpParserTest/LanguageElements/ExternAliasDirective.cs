@@ -47,7 +47,7 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(file.ExternAliases[0].Name, "Alias1");
       Assert.AreEqual(file.ExternAliases[1].Name, "Alias2");
       Assert.AreEqual(file.ExternAliases[2].Name, "Alias3");
-      NamespaceFragment ns = file.Namespaces[0];
+      NamespaceFragment ns = file.NestedNamespaces[0];
       Assert.AreEqual(ns.ExternAliases.Count, 2);
       Assert.AreEqual(ns.ExternAliases[0].Name, "Alias1");
       Assert.AreEqual(ns.ExternAliases[1].Name, "Alias2");

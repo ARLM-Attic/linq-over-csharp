@@ -11,7 +11,7 @@ namespace CSharpParser.ProjectModel
   /// file or in a namespace.
   /// </summary>
   // ==================================================================================
-  public sealed class UsingClause : LanguageElement, IResolutionRequired
+  public sealed class UsingClause : LanguageElement, IUsesResolutionContext
   {
     #region Private fields
 
@@ -117,7 +117,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region IResolutionRequired implementation
+    #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -127,7 +127,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextInstance">Instance of the context.</param>
     // --------------------------------------------------------------------------------
     public void ResolveTypeReferences(ResolutionContext contextType,
-      IResolutionRequired contextInstance)
+      IUsesResolutionContext contextInstance)
     {
       if (_ReferencedName != null)
       {
