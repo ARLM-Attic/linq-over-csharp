@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
 {
@@ -74,6 +75,16 @@ namespace CSharpParser.Semantics
     public ResolutionNodeBase ParentNode
     {
       get { return _ParentNode; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the root of this node (TypeResolutionTree)
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeBase Root
+    {
+      get { return _ParentNode == null ? this : _ParentNode.Root; }
     }
 
     // --------------------------------------------------------------------------------
@@ -154,6 +165,38 @@ namespace CSharpParser.Semantics
       ResolutionNodeBase child;
       if (_Children.TryGetValue(key, out child)) return child;
       return null;  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds a simple namespace or type within this node.
+    /// </summary>
+    /// <param name="type">Represents the name to be found.</param>
+    /// <returns>
+    /// Child node if found; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeBase FindSimpleNamespaceOrType(TypeReference type)
+    {
+      // --- Check, if the next part of the name can be resolved
+      ResolutionNodeBase node = FindChild(type.Name);
+      if (node == null) return null;
+
+      // --- If the current node is a TypeNameResolutionNode, we must look for the 
+      // --- next TypeResolutionNode.
+      TypeNameResolutionNode nameNode = node as TypeNameResolutionNode;
+      if (nameNode != null)
+      {
+        // --- We are dealing with a type.
+        node = nameNode.FindChild(type.Arguments.Count.ToString());
+        if (node == null)
+        {
+          // --- We found the part name but not the one with correct number of
+          // --- type parameters.
+          return null;
+        }
+      }
+      return node;
     }
 
     // --------------------------------------------------------------------------------

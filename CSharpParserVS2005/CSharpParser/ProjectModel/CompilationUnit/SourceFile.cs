@@ -13,7 +13,6 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class SourceFile: 
     ITypeDeclarationScope,
-    IResolutionContext,
     IUsesResolutionContext
   {
     #region Private fields
@@ -84,6 +83,15 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the name of the scope
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string ScopeName
+    {
+      get { return CompilationUnit.GlobalHierarchyName; }
+    }
+
+    /// <summary>
     /// Gets the external aliases of the file
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -130,6 +138,46 @@ namespace CSharpParser.ProjectModel
     public NamespaceFragmentCollection NestedNamespaces
     {
       get { return _Namespaces; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Looks for the specified simple namespace or type name directly in this
+    /// type declaration scope.
+    /// </summary>
+    /// <param name="type">Type reference representing the name to find.</param>
+    /// <returns>
+    /// Resolution node representing the name found, or null if the name cannot 
+    /// be found.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList FindSimpleName(TypeReference type)
+    {
+      ResolutionNodeList results = new ResolutionNodeList();
+      foreach (TypeResolutionTree tree in 
+        _ParentUnit.GlobalHierarchy.ResolutionTrees.Values)
+      {
+        ResolutionNodeBase node = tree.FindSimpleNamespaceOrType(type);
+        if (node != null) results.Add(node);
+      }
+      return results;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if this declaration scope contains an extern-alias or a using-alias
+    /// declaration with the specified name.
+    /// </summary>
+    /// <param name="name">Alias name to check.</param>
+    /// <param name="foundInScope">Scope where the alias has been found.</param>
+    /// <returns>
+    /// True, if the this scope contains the alias; otherwise, false. If alias found, 
+    /// foundInScope contains that scope declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool ContainsAlias(string name, out ITypeDeclarationScope foundInScope)
+    {
+      return ContainsAlias(this, name, out foundInScope);
     }
 
     // --------------------------------------------------------------------------------
@@ -275,10 +323,24 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Gets the namespace enclosing this resolution context.
     /// </summary>
+    /// <remarks>
+    /// We return null to sign that the enclosing namespace of a source file is
+    /// the global namespace.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public NamespaceFragment EnclosingNamespace
     {
-      get { throw new NotSupportedException("Source file has no enclosing namespace."); }
+      get { return null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator to iterate from the current scope toward the containing source file.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IEnumerable<ITypeDeclarationScope> ScopesToOuter
+    {
+      get { return IterateScopesToOuter(this); }
     }
 
     // --------------------------------------------------------------------------------
@@ -313,14 +375,70 @@ namespace CSharpParser.ProjectModel
     /// <param name="ns">Namespace to start from.</param>
     /// <returns>Current enclosing declaration scope.</returns>
     // --------------------------------------------------------------------------------
-    public IEnumerable<ITypeDeclarationScope> ScopesToOuter(NamespaceFragment ns)
+    public IEnumerable<ITypeDeclarationScope> GetScopesToOuter(NamespaceFragment ns)
     {
       while (ns != null)
       {
         yield return ns;
-        ns = ns.ParentNamespace;
+        ns = ns.EnclosingNamespace;
       }
       yield return this;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterates through the enclosing namespaces to this source file using the 
+    /// specified inner namespace as a starting point.
+    /// </summary>
+    /// <param name="innerScope">Inner declaration scope to start from.</param>
+    /// <returns>Current enclosing declaration scope.</returns>
+    // --------------------------------------------------------------------------------
+    public static IEnumerable<ITypeDeclarationScope> IterateScopesToOuter(
+      ITypeDeclarationScope innerScope)
+    {
+      if (innerScope == null) yield break;
+      ITypeDeclarationScope fileScope = innerScope.EnclosingSourceFile;
+      if (innerScope != fileScope)
+      {
+        while (innerScope != null)
+        {
+          yield return innerScope;
+          innerScope = innerScope.EnclosingNamespace;
+        }
+      }
+      if (fileScope != null) yield return fileScope;
+    }
+
+    #endregion
+
+    #region Static helper methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified declaration scope contains an extern-alias or a 
+    /// using-alias declaration with the specified name.
+    /// </summary>
+    /// <param name="innerScope">Scope to check.</param>
+    /// <param name="name">Alias name to check.</param>
+    /// <param name="foundInScope">Scope where the alias has been found.</param>
+    /// <returns>
+    /// True, if the this scope contains the alias; otherwise, false. If alias found, 
+    /// foundInScope contains that scope declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static bool ContainsAlias(ITypeDeclarationScope innerScope, string name,
+      out ITypeDeclarationScope foundInScope)
+    {
+      foundInScope = null;
+      foreach (ITypeDeclarationScope scope in innerScope.ScopesToOuter)
+      {
+        if (scope.Usings[name] != null || scope.ExternAliases[name] != null)
+        {
+          foundInScope = scope;
+          return true;
+        }
+      }
+      return false;
     }
 
     #endregion

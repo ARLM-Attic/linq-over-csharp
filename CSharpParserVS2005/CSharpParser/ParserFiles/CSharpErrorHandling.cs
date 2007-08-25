@@ -325,6 +325,21 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0576: Namespace '{0}' contains a definition conflicting with alias '{1}'
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    /// <param name="alias">Alias name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0576(Token token, string name, string alias)
+    {
+      Error("CS0576", token,
+        string.Format("Namespace '{0}' contains a definition conflicting with "+
+        "alias '{1}'", name, alias));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0692: Duplicate type parameter '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>

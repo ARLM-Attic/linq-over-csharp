@@ -15,6 +15,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private NamespaceHierarchy _Hierarchy;
+
     #endregion
 
     #region Lifecycle methods

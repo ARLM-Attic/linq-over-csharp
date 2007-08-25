@@ -143,12 +143,14 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Sign that using clause is resolved to a type.
     /// </summary>
-    /// <param name="type">Type this using clause is resolved to.</param>
+    /// <param name="node">Node representing the type.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveToType(ITypeCharacteristics type)
+    public void ResolveToType(TypeResolutionNode node)
     {
       _ResolvedToNamespace = false;
-      _ResolvingType = type;
+      _Resolvers.Clear();
+      _Resolvers.Add(node);
+      _ResolvingType = node.Resolver;
     }
 
     // --------------------------------------------------------------------------------

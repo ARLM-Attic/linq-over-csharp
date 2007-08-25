@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.Properties;
@@ -17,12 +18,11 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class NamespaceFragment: LanguageElement, 
     ITypeDeclarationScope,
-    IResolutionContext,
     IUsesResolutionContext
   {
     #region Private fields
 
-    private readonly NamespaceFragment _ParentNamespace;
+    private readonly NamespaceFragment _ExclosingNamespace;
     private readonly SourceFile _EnclosingFile; 
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly NamespaceFragmentCollection _NestedNamespaces = new NamespaceFragmentCollection();
@@ -56,14 +56,14 @@ namespace CSharpParser.ProjectModel
 
       // --- Store attributes
       Name = name;
-      _ParentNamespace = parentNamespace;
+      _ExclosingNamespace = parentNamespace;
       CompilationUnit unit = Parser.CompilationUnit;
 
-      if (_ParentNamespace != null) 
+      if (_ExclosingNamespace != null) 
       {
         // --- This namespace has a parent, this namespace is a nested 
         // --- namespace of the parent.
-        _ParentNamespace.NestedNamespaces.Add(this);
+        _ExclosingNamespace.NestedNamespaces.Add(this);
       }
       else
       {
@@ -101,20 +101,10 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return _ParentNamespace == null 
+        return _ExclosingNamespace == null 
           ? Name 
-          : _ParentNamespace.FullName + "." + Name;
+          : _ExclosingNamespace.FullName + "." + Name;
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the parent namespace.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public NamespaceFragment ParentNamespace
-    {
-      get { return _ParentNamespace; }
     }
 
     // --------------------------------------------------------------------------------
@@ -129,12 +119,49 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Looks for the specified simple namespace or type name directly in this
+    /// type declaration scope.
+    /// </summary>
+    /// <param name="type">Type reference representing the name to find.</param>
+    /// <returns>
+    /// Resolution node representing the name found, or null if the name cannot 
+    /// be found.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList FindSimpleName(TypeReference type)
+    {
+      if (_ResolverNode == null) return null;
+      ResolutionNodeList results = new ResolutionNodeList();
+      ResolutionNodeBase node = _ResolverNode.FindSimpleNamespaceOrType(type);
+      if (node != null) results.Add(node);
+      return results;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if this declaration scope contains an extern-alias or a using-alias
+    /// declaration with the specified name.
+    /// </summary>
+    /// <param name="name">Alias name to check.</param>
+    /// <param name="foundInScope">Scope where the alias has been found.</param>
+    /// <returns>
+    /// True, if the this scope contains the alias; otherwise, false. If alias found, 
+    /// foundInScope contains that scope declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool ContainsAlias(string name, out ITypeDeclarationScope foundInScope)
+    {
+      return SourceFile.ContainsAlias(this, name, out foundInScope);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this namespace has a parent or not.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool HasParentNamespace
     {
-      get { return _ParentNamespace != null; }
+      get { return _ExclosingNamespace != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -158,6 +185,15 @@ namespace CSharpParser.ProjectModel
     }
 
     // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the scope
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string ScopeName
+    {
+      get { return FullName; }
+    }
+
     /// <summary>
     /// Gets the external aliases used by the namespace
     /// </summary>
@@ -203,7 +239,7 @@ namespace CSharpParser.ProjectModel
     public void SetNamespaceResolvers()
     {
       ResolutionNodeBase resolverNode;
-      if (_ParentNamespace == null)
+      if (_ExclosingNamespace == null)
       {
         // --- This is a top namespace
         resolverNode = Parser.CompilationUnit.SourceResolutionTree;
@@ -211,7 +247,7 @@ namespace CSharpParser.ProjectModel
       else
       {
         // --- This is a nested namespace
-        resolverNode = _ParentNamespace.ResolverNode;
+        resolverNode = _ExclosingNamespace.ResolverNode;
       }
 
       // --- Register the namespace
@@ -240,7 +276,7 @@ namespace CSharpParser.ProjectModel
     public void SetTypeResolvers()
     {
       ResolutionNodeBase resolverNode;
-      if (_ParentNamespace == null)
+      if (_ExclosingNamespace == null)
       {
         // --- This is a top namespace
         resolverNode = Parser.CompilationUnit.SourceResolutionTree;
@@ -248,7 +284,7 @@ namespace CSharpParser.ProjectModel
       else
       {
         // --- This is a nested namespace
-        resolverNode = _ParentNamespace.ResolverNode;
+        resolverNode = _ExclosingNamespace.ResolverNode;
       }
 
       // --- Register the namespace
@@ -331,7 +367,17 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public NamespaceFragment EnclosingNamespace
     {
-      get { return this; }
+      get { return _ExclosingNamespace; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator to iterate from the current scope toward the containing source file.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IEnumerable<ITypeDeclarationScope> ScopesToOuter
+    {
+      get { return SourceFile.IterateScopesToOuter(this); }
     }
 
     // --------------------------------------------------------------------------------

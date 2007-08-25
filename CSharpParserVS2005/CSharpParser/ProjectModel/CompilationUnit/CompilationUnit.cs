@@ -21,7 +21,7 @@ namespace CSharpParser.ProjectModel
     #region Constant values
 
     public const string ThisUnitName = "<this unit>";
-    public const string GlobalHierarchyName = "<global namespace>";
+    public const string GlobalHierarchyName = "global namespace";
 
     #endregion
 
@@ -52,6 +52,7 @@ namespace CSharpParser.ProjectModel
     private SourceResolutionTree _SourceResolutionTree;
     private readonly Dictionary<string, NamespaceHierarchy> _NamespaceHierarchies =
       new Dictionary<string, NamespaceHierarchy>();
+    private NamespaceOrTypeResolver _NamespaceOrTypeResolver;
 
 #if DIAGNOSTICS
 
@@ -559,7 +560,7 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- Semantical parsing
-      SemanticsParser semParser = new SemanticsParser(this);
+      _NamespaceOrTypeResolver = new NamespaceOrTypeResolver(_Parser);
 
       // --- Phase 1: Collect namespace hierarchy information from referenced assemblies
       // --- and namespaces declared by the source code. Set the resolvers for all 
@@ -577,12 +578,30 @@ namespace CSharpParser.ProjectModel
       //semParser.ImportReferences();
       //semParser.ImportExternalReferences();
       // --- Phase 3: Resolve all type references
-      semParser.ResolveTypeReferences();
+      ResolveTypeReferences();
 
       // --- Return the number of errors found
       return _Errors.Count;
     }
 
+
+    #endregion
+
+    #region Resolve type references
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in the related compliation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences()
+    {
+      foreach (SourceFile source in Files)
+      {
+        _CurrentLocation = source;
+        source.ResolveTypeReferences(ResolutionContext.SourceFile, source);
+      }
+    }
 
     #endregion
 
@@ -871,12 +890,12 @@ namespace CSharpParser.ProjectModel
       if (file == null) throw new ArgumentNullException("file");
       if (nsFragment == null)
       {
-        NamespaceOrTypeResolver.
+        _NamespaceOrTypeResolver.
           Resolve(usingClause.ReferencedName,ResolutionContext.SourceFile, file);
       }
       else
       {
-        NamespaceOrTypeResolver.
+        _NamespaceOrTypeResolver.
           Resolve(usingClause.ReferencedName,ResolutionContext.Namespace, nsFragment);
       }
     }
@@ -1313,7 +1332,7 @@ namespace CSharpParser.ProjectModel
         }
 
         // --- Go to the enclosing namespace or file declarations
-        if (fragment != null) fragment = fragment.ParentNamespace;
+        if (fragment != null) fragment = fragment.EnclosingNamespace;
       } while (fragment != null);
 
       // --- Is there any matching alias found?

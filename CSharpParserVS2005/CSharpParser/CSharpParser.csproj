@@ -40,7 +40,7 @@
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
-    <Compile Include="ProjectModel\CompilationUnit\ITypeDeclarationScope.cs" />
+    <Compile Include="Semantics\TypeResolution\ITypeDeclarationScope.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />
     <Compile Include="ProjectModel\CompilationUnit\TokenElement.cs" />
     <Compile Include="ProjectModel\Usages\ElementUsage.cs" />
@@ -234,7 +234,6 @@
     <Compile Include="Semantics\TypeResolution\ResolutionContext.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionNodeList.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionTarget.cs" />
-    <Compile Include="Semantics\SemanticsParser.cs" />
     <Compile Include="ProjectModel\Variables\VariableCategory.cs" />
     <Compile Include="Semantics\TypeResolution\AssemblyResolutionTree.cs" />
     <Compile Include="Semantics\TypeResolution\SourceResolutionTree.cs" />
