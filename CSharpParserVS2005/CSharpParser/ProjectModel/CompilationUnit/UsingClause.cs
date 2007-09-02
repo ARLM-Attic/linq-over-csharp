@@ -21,8 +21,9 @@ namespace CSharpParser.ProjectModel
     // --- Fields related to name resolution
     private readonly ResolutionNodeList _Resolvers = new ResolutionNodeList();
     private bool _IsResolved;
-    private bool _ResolvedToNamespace;
+    private bool _IsResolvedToNamespace;
     private ITypeCharacteristics _ResolvingType;
+    private string _ResolvingNamespace;
 
     #endregion
 
@@ -87,12 +88,32 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if this using clause has been resolved to t namespace.
+    /// Gets the flag indicating if the using clause is resolved or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool ResolvedToNamespace
+    public bool IsResolved
     {
-      get { return _ResolvedToNamespace; }
+      get { return _IsResolved; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this using clause has been resolved to a namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolvedToNamespace
+    {
+      get { return _IsResolvedToNamespace; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this using clause has been resolved to a type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolvedToType
+    {
+      get { return !_IsResolvedToNamespace; }
     }
 
     // --------------------------------------------------------------------------------
@@ -107,12 +128,12 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if the using clause is resolved or not.
+    /// Gets the namespace this using has been resolved to.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsResolved
+    public string ResolvingNamespace
     {
-      get { return _IsResolved; }
+      get { return _ResolvingNamespace; }
     }
 
     #endregion
@@ -141,31 +162,24 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Sign that using clause is resolved to a type.
+    /// Sets the resolvers of this using clause according to the specified node list.
     /// </summary>
-    /// <param name="node">Node representing the type.</param>
+    /// <param name="resolvers">List of resolver nodes.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveToType(TypeResolutionNode node)
+    public void SetResolvers(ResolutionNodeList resolvers)
     {
-      _ResolvedToNamespace = false;
       _Resolvers.Clear();
-      _Resolvers.Add(node);
-      _ResolvingType = node.Resolver;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Sign that using clause is resolved to a namespace.
-    /// </summary>
-    /// <param name="nsNodes">Namespac resolver nodes.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveToNamespace(IEnumerable<NamespaceResolutionNode> nsNodes)
-    {
-      _ResolvedToNamespace = true;
-      _Resolvers.Clear();
-      foreach (NamespaceResolutionNode nsNode in nsNodes)
+      _Resolvers.Merge(resolvers);
+      ResolutionNodeBase resolver = _Resolvers[0];
+      if (resolver is NamespaceResolutionNode)
       {
-        _Resolvers.Add(nsNode);
+        _IsResolvedToNamespace = true;
+        _ResolvingNamespace = resolver.FullName;
+      }
+      else
+      {
+        _IsResolvedToNamespace = false;
+        _ResolvingType = (resolver as TypeResolutionNode).Resolver;
       }
     }
 
@@ -176,7 +190,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void SignResolved()
     {
-      _IsResolved = true;
+      _IsResolved = _Resolvers.Count > 0;
     }
 
     #endregion

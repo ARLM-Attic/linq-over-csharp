@@ -40,7 +40,7 @@ namespace CSharpParserTest.LanguageElements
 
       NamespaceFragment ns1a = ns1.NestedNamespaces[0];
       Assert.IsTrue(ns1a.HasParentNamespace);
-      Assert.AreEqual(ns1a.ParentNamespace, ns1);
+      Assert.AreEqual(ns1a.EnclosingNamespace, ns1);
       Assert.AreEqual(ns1a.Name, "Level1");
       Assert.AreEqual(ns1a.Usings.Count, 1);
       Assert.AreEqual(ns1a.Usings[0].Name, "System.Xml");
@@ -50,7 +50,7 @@ namespace CSharpParserTest.LanguageElements
 
       NamespaceFragment ns1b = ns1.NestedNamespaces[1];
       Assert.IsTrue(ns1b.HasParentNamespace);
-      Assert.AreEqual(ns1b.ParentNamespace, ns1);
+      Assert.AreEqual(ns1b.EnclosingNamespace, ns1);
       Assert.AreEqual(ns1b.Name, "Level1.A");
       Assert.AreEqual(ns1b.Usings.Count, 1);
       Assert.AreEqual(ns1b.NestedNamespaces.Count, 1);

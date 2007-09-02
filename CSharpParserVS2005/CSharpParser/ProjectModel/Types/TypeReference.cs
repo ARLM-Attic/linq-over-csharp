@@ -25,6 +25,7 @@ namespace CSharpParser.ProjectModel
     private ResolutionTarget _Target;
     private ResolutionNodeBase _ResolvingNode;
     private ITypeCharacteristics _ResolvingType;
+    private TypeParameter _ResolvingTypeParameter;
 
     #endregion
 
@@ -43,7 +44,7 @@ namespace CSharpParser.ProjectModel
       Name = token.val;
 
     #if DIAGNOSTICS
-      _Locations.Add(new TypeReferenceLocation(this, CompilationUnit.CurrentLocation));
+      _Locations.Add(new TypeReferenceLocation(this, parser.CompilationUnit.CurrentFile));
     #endif
     }
 
@@ -68,12 +69,37 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type resolving type of this type reference.
+    /// Gets the resolving type of this name.
     /// </summary>
     // --------------------------------------------------------------------------------
     public ITypeCharacteristics ResolvingType
     {
       get { return _ResolvingType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type parameter resolving this name.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeParameter ResolvingTypeParameter
+    {
+      get { return _ResolvingTypeParameter; }
+    } 
+    
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name full name this type is resolved to.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string ResolvingName
+    {
+      get
+      {
+        return (!IsResolved || _ResolvingNode == null)
+                 ? Name
+                 : _ResolvingNode.FullName;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -138,7 +164,7 @@ namespace CSharpParser.ProjectModel
       set 
       { 
         _SubType = value;
-        _SubType._PrefixType = this;
+        if (value != null) _SubType._PrefixType = this;
       }
     }
 
@@ -151,9 +177,11 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return _PrefixType == null 
-          ? null 
-          : _PrefixType.PrefixTypeFullName + "." + _PrefixType.Name;
+        return _PrefixType == null
+                 ? null
+                 : (String.IsNullOrEmpty(_PrefixType.PrefixTypeFullName)
+                      ? _PrefixType.Name
+                      : _PrefixType.PrefixTypeFullName + "." + PrefixType.Name);
       }
     }
 
@@ -176,6 +204,16 @@ namespace CSharpParser.ProjectModel
     public ResolutionTarget Target
     {
       get { return _Target; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolving node of this type reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeBase ResolvingNode
+    {
+      get { return _ResolvingNode; }
     } 
     
     // --------------------------------------------------------------------------------
@@ -595,6 +633,21 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the rightmost part of ths type reference instance.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference RightMostPart
+    {
+      get
+      {
+        TypeReference currentPart = this;
+        while (currentPart.HasSubType) currentPart = currentPart.SubType;
+        return currentPart;        
+      }
+    }
+
     #endregion
 
     #region IUsesResolutionContext implementation
@@ -658,13 +711,16 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToType(Type type)
     {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToSystemType++;
+      }
+#endif
       _Target = ResolutionTarget.Type;
       _ResolvingType = new NetBinaryType(type);
       _ResolvingNode = null;
-#if DIAGNOSTICS
-      _ResolutionCounter++;
-      _ResolvedToSystemType++;
-#endif
     }
 
     // --------------------------------------------------------------------------------
@@ -675,13 +731,17 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToType(TypeResolutionNode node)
     {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToSourceType++;
+      }
+#endif
       _Target = ResolutionTarget.Type;
       _ResolvingNode = node;
       _ResolvingType = node.Resolver;
-#if DIAGNOSTICS
-      _ResolutionCounter++;
-      _ResolvedToSourceType++;
-#endif
+      _ResolvingTypeParameter = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -692,28 +752,81 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToNamespace(ResolutionNodeBase node)
     {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToNamespace++;
+      }
+#endif
       _Target = ResolutionTarget.Namespace;
       _ResolvingNode = node;
       _ResolvingType = null;
-#if DIAGNOSTICS
-      _ResolutionCounter++;
-      _ResolvedToNamespace++;
-#endif
+      _ResolvingTypeParameter = null;
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Resolves this type reference to a namespace hierarchy.
+    /// Resolves this type reference to a generic type parameter
+    /// </summary>
+    /// <param name="param">Type parameter this name is resolved to.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToTypeParameter(TypeParameter param)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToNamespace++;
+      }
+#endif
+      _Target = ResolutionTarget.TypeParameter;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = param;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to a generic method type parameter
+    /// </summary>
+    /// <param name="param">Type parameter this name is resolved to.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToMethodTypeParameter(TypeParameter param)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToNamespace++;
+      }
+#endif
+      _Target = ResolutionTarget.MethodTypeParameter;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = param;
+    }
+
+    #endregion
+
+    #region Iterators
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterates through the parts of the name represented by this instance.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public void ResolveToNamespaceHierarchy()
+    public IEnumerable<TypeReference> NameParts
     {
-      _Target = ResolutionTarget.NamespaceHierarchy;
-      _ResolvingType = null;
-#if DIAGNOSTICS
-      _ResolutionCounter++;
-      _ResolvedToHierarchy++;
-#endif
+      get
+      {
+        TypeReference current = this;
+        while (current != null)
+        {
+          yield return this;
+          current = current.SubType;
+        }
+      }
     }
 
     #endregion

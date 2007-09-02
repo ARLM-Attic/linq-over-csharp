@@ -137,6 +137,20 @@ namespace CSharpParser.Semantics
       get { return this is TypeResolutionNode; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of the type or namespace represented by this node.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual string FullName
+    {
+      get
+      {
+        if (_ParentNode == null) return _Name;
+        return _ParentNode.FullName + "." + _Name;
+      }
+    }
+
     #endregion
 
     #region Public methods
@@ -179,7 +193,7 @@ namespace CSharpParser.Semantics
     public ResolutionNodeBase FindSimpleNamespaceOrType(TypeReference type)
     {
       // --- Check, if the next part of the name can be resolved
-      ResolutionNodeBase node = FindChild(type.Name);
+      ResolutionNodeBase node = FindChild(type.SimpleName);
       if (node == null) return null;
 
       // --- If the current node is a TypeNameResolutionNode, we must look for the 

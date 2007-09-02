@@ -270,6 +270,9 @@
     <None Include="TestFiles\Members\DuplicateCastOperator.cs" />
     <None Include="TestFiles\Members\DuplicateField.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace12.cs" />
     <None Include="TestFiles\Variables\DuplicatedVariable1.cs" />
     <None Include="TestFiles\Variables\DuplicatedVariable2.cs" />
     <None Include="TestFiles\Variables\DuplicatedVariable3.cs" />
@@ -292,9 +295,12 @@
     <None Include="TestFiles\TypeResolution\UsingNamespace1.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace2.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace3.cs" />
-    <Compile Include="TestFiles\TypeResolution\UsingNamespace4.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace7.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace4.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace5.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace6.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace8.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace9.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
     <Compile Include="Visibility\Visibility.cs" />

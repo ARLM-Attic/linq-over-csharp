@@ -20,7 +20,7 @@ namespace CSharpParser
     /// <summary>The name has been resolved to a member of a type declaration.</summary>
     TypeMember,
     /// <summary>The name has been resolved to a type parameter of a member declaration.</summary>
-    MemberTypeParameter,
+    MethodTypeParameter,
     /// <summary>The name has been resolved to a formal parameter of a member declaration.</summary>
     MemberFormalParameter,
     /// <summary>The name has been resolved to a local constant declaration.</summary>

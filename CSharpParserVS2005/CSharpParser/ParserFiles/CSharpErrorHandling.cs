@@ -190,6 +190,22 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0234: The type or namespace name '{0}' does not exist in the namespace 
+    /// '{1}' (are you missing an assembly reference?).
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="nameSpace">Namespace</param>
+    // --------------------------------------------------------------------------------
+    public void Error0234(Token token, string name, string nameSpace)
+    {
+      Error("CS0234", token,
+        string.Format("The type or namespace name '{0}' does not exist in the "+
+        "namespace '{1}' (are you missing an assembly reference?)", name, nameSpace));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0246: The type or namespace name '{0}' could not be found (are  you 
     /// missing a using directive or an assembly reference?)
     /// </summary>
@@ -233,6 +249,21 @@ namespace CSharpParser.ParserFiles
         string.Format("A constraint clause has already been specified for type " +
           "parameter '{0}'. All of the constraints for a type parameter must be " +
           "specified in a single where clause.", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0426: The type name '{0}' does not exist in the type '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="type">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0426(Token token, string name, string type)
+    {
+      Error("CS0426", token,
+        string.Format("The type name '{0}' does not exist in the type '{1}'", 
+        name, type));
     }
 
     // --------------------------------------------------------------------------------

@@ -57,6 +57,13 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the namespace enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    NamespaceFragment DeclaringNamespace { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Iterator to iterate from the current scope toward the containing source file.
     /// </summary>
     // --------------------------------------------------------------------------------

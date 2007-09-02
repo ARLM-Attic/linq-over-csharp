@@ -30,6 +30,7 @@ namespace CSharpParser.ProjectModel
   public abstract class TypeDeclaration: AttributedElement, 
     ITypeParameterOwner,
     ITypeCharacteristics,
+    ITypeParameterScope,
     IResolutionContext
   {
     #region Private fields

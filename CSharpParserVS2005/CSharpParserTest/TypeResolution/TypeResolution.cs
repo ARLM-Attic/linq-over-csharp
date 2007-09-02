@@ -180,5 +180,72 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[0].Code, "CS0400");
       Assert.AreEqual(parser.Errors[1].Code, "CS0400");
     }
+
+    [TestMethod]
+    public void AliasConflictFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace7.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0576");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0576");
+    }
+
+    [TestMethod]
+    public void AliasConflictFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace8.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0576");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0576");
+    }
+
+    [TestMethod]
+    public void AliasConflictFails3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace9.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0576");
+    }
+
+    [TestMethod]
+    public void InvalidAlias2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace10.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0246");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0246");
+    }
+
+    [TestMethod]
+    public void InvalidUsings1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace11.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0138");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0234");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0426");
+    }
+
+    [TestMethod]
+    public void InvalidGlobalNameFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace12.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0431");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0426");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0234");
+    }
   }
 }

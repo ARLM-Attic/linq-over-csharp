@@ -54,17 +54,6 @@ namespace CSharpParser.ProjectModel
       new Dictionary<string, NamespaceHierarchy>();
     private NamespaceOrTypeResolver _NamespaceOrTypeResolver;
 
-#if DIAGNOSTICS
-
-    private static SourceFile _CurrentLocation;
-
-    public static SourceFile CurrentLocation
-    {
-      get { return _CurrentLocation; }
-      set { _CurrentLocation = value; }
-    }
-
-#endif
     #endregion
 
     #region Lifecycle methods
@@ -552,9 +541,6 @@ namespace CSharpParser.ProjectModel
       {
         Scanner scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
         _CurrentFile = file;
-#if DIAGNOSTICS
-        _CurrentLocation = file;
-#endif
         _Parser = new CSharpSyntaxParser(scanner, this, file);
         _Parser.Parse();
       }
@@ -569,15 +555,13 @@ namespace CSharpParser.ProjectModel
       SetNamespaceResolvers();
       SetTypeResolvers();
       
-      // --- Phase 2: Create namspace hierarchies and resolve using clauses in the 
+      // --- Phase 2: Create namespace hierarchies and resolve using clauses in the 
       // --- compilation unit
       ResolveExternAliasClauses();
       ResolveUsingDirectives();
 
-      //// --- Phase 1: Import referenced assemblies into the namespace hierarchy
-      //semParser.ImportReferences();
-      //semParser.ImportExternalReferences();
-      // --- Phase 3: Resolve all type references
+      // --- Phase 3: Resolve base types and check base type validity
+      ResolveBaseTypes();
       ResolveTypeReferences();
 
       // --- Return the number of errors found
@@ -598,7 +582,7 @@ namespace CSharpParser.ProjectModel
     {
       foreach (SourceFile source in Files)
       {
-        _CurrentLocation = source;
+        _CurrentFile = source;
         source.ResolveTypeReferences(ResolutionContext.SourceFile, source);
       }
     }
@@ -735,29 +719,6 @@ namespace CSharpParser.ProjectModel
       }
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Registers a namespace within a namespace hierarchy.
-    /// </summary>
-    /// <param name="hierarchy">Hierarchy</param>
-    /// <param name="ns">Namespace information</param>
-    /// <param name="resolverName">Name of resolver registering the namespace.</param>
-    /// <returns>Node representing the namespace.</returns>
-    // --------------------------------------------------------------------------------
-    //private NamespaceResolutionNode RegisterNamespace(ResolutionNodeBase hierarchy, 
-    //  string ns, string resolverName)
-    //{
-    //  NamespaceResolutionNode nsResolver;
-    //  ResolutionNodeBase conflictingNode;
-    //  if (!hierarchy.RegisterNamespace(ns, out nsResolver, out conflictingNode))
-    //  {
-    //    throw new InvalidOperationException(
-    //      String.Format("Conflict when resolving namespace '{0}' in '{1}'",
-    //                    ns, resolverName));
-    //  }
-    //  return nsResolver;
-    //}
-
     #endregion
 
     #region 'extern alias' resolution
@@ -788,7 +749,7 @@ namespace CSharpParser.ProjectModel
     /// resolved.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    private void ResolveExternAliasClauses(SourceFile file, NamespaceFragment nsFragment)
+    private void ResolveExternAliasClauses(SourceFile file, ITypeDeclarationScope nsFragment)
     {
       if (file == null) throw new ArgumentNullException("file");
 
@@ -888,277 +849,109 @@ namespace CSharpParser.ProjectModel
     {
       if (usingClause == null) throw new ArgumentNullException("usingClause");
       if (file == null) throw new ArgumentNullException("file");
+      NamespaceOrTypeResolverInfo info;
       if (nsFragment == null)
       {
-        _NamespaceOrTypeResolver.
-          Resolve(usingClause.ReferencedName,ResolutionContext.SourceFile, file);
+        info = _NamespaceOrTypeResolver.
+          Resolve(usingClause.ReferencedName,ResolutionContext.SourceFile, file, null);
       }
       else
       {
-        _NamespaceOrTypeResolver.
-          Resolve(usingClause.ReferencedName,ResolutionContext.Namespace, nsFragment);
+        info = _NamespaceOrTypeResolver.
+          Resolve(usingClause.ReferencedName,ResolutionContext.Namespace, nsFragment, null);
+      }
+
+      // --- Exit, if resolution failed.
+      if (!info.IsResolved) return;
+
+      // --- Using directive cannot be resolved to a type
+      if (!usingClause.HasAlias && info.Target == ResolutionTarget.Type)
+      {
+        Parser.Error0138(info.CurrentPart.Token, info.Type.FullName);
+        return;
+      }
+
+      // --- At this point using directive is successfully resolved.
+      usingClause.SetResolvers(info.Results);
+    }
+
+    #endregion
+
+    #region Base type checking methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the base types of all types declared within the compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void ResolveBaseTypes()
+    {
+      foreach (SourceFile file in _Files)
+      {
+        _CurrentFile = file;
+
+        // --- Resolve types declared in the global namespace
+        foreach (TypeDeclaration type in file.TypeDeclarations)
+        {
+          ResolveBaseTypes(type, ResolutionContext.SourceFile, file);
+        }
+
+        // --- Resolve types within nested namespaces
+        foreach(NamespaceFragment ns in file.NestedNamespaces)
+        {
+          ResolveBaseTypes(ns);
+        }
       }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Resolves the specified using directive within the provided namespace.
+    /// Resolves the base types of the specified type declaration and of all nested
+    /// type declarations.
     /// </summary>
-    /// <param name="usingClause">Using directive</param>
-    /// <param name="nsFragment">Namespce to use for resolution</param>
+    /// <param name="type">Type declaration to resolve its base types.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="contextObject">Object representing the current context.</param>
     // --------------------------------------------------------------------------------
-    //public void ResolveUsingDirective(UsingClause usingClause, NamespaceFragment nsFragment)
-    //{
-    //  ResolutionNodeList results;
-    //  TypeReference nextNamePart;
-    //  NamespaceHierarchy hierarchy;
-    //  // --- Resolve using directive
-    //  // --- Step 1: Select the appropriate namespace hierarchy
-    //  if (!ObtainHierarchy(usingClause.ReferencedName, out hierarchy, out nextNamePart))
-    //  {
-    //    // --- Error, when obtaining the hierarchy, name resolution stops.
-    //    return;
-    //  }
+    private void ResolveBaseTypes(TypeDeclaration type, ResolutionContext contextType, 
+      ITypeDeclarationScope contextObject)
+    {
+      foreach (TypeReference baseType in type.BaseTypes)
+      {
+        if (!baseType.IsResolved)
+          _NamespaceOrTypeResolver.Resolve(baseType, contextType, contextObject, type);
+      }
 
-    //  // --- Step 2: Now we have the namespace hierarchy, lets check that this 
-    //  // --- namespace is valid
-    //  TypeReference typeResolutionPart;
-    //  results = ObtainName(nextNamePart, nsFragment, hierarchy, out typeResolutionPart);
-
-    //  // --- Step 3: Check if resolution is type or namespace
-    //  List<NamespaceResolutionNode> nsFound = results.GetNamespaceResolutions();
-    //  List<TypeResolutionNode> typeFound = results.GetTypeResolutions();
-
-    //  if (usingClause.HasAlias)
-    //  {
-    //    // --- We have a using alias directive. If name is fully resolved, it can 
-    //    // --- be either a type or a namespace.
-
-    //    // --- Name is fully resolved?
-    //    if (typeResolutionPart == null)
-    //    {
-    //      if (nsFound.Count > 0 && typeFound.Count == 0)
-    //      {
-    //        // --- At this point we a have a using declaration fully resolved to a namespace. 
-    //        ResolveToNamespace(hierarchy, usingClause, nextNamePart, nsFound);
-    //        return;
-    //      }
-    //      else if (nsFound.Count == 0 && typeFound.Count == 1)
-    //      {
-    //        // --- At this point we have a using declaration fully resolved to a type.
-    //        ResolveToType(usingClause, nextNamePart, typeFound[0].Resolver);
-    //      }
-    //    }
-    //    else
-    //    {
-    //      // --- Name is partially resolved
-    //    }
-    //  }
-    //  else
-    //  {
-    //    // --- We have a using directive. Only full name resolution is acceptable.
-    //    // --- Check if partially resolved
-    //    if (typeResolutionPart != null)
-    //    {
-    //      // --- Name is not fully resolved, we sign this fact.
-    //      Parser.Error0246(typeResolutionPart.Token, typeResolutionPart.Name);
-    //      return;
-    //    }
-
-    //    // --- Name must not be resolved to a type
-    //    if (typeFound.Count > 0)
-    //    {
-    //      Parser.Error0138(nextNamePart.Token, nextNamePart.Name);
-    //      return;
-    //    }
-
-    //    // --- At this point we a have a using declaration fully resolved to a namespace. 
-    //    ResolveToNamespace(hierarchy, usingClause, nextNamePart, nsFound);
-    //  }
-    //}
+      // --- Resolve base types in nested types
+      foreach (TypeDeclaration nestedType in type.NestedTypes)
+      {
+        ResolveBaseTypes(nestedType, contextType, contextObject);
+      }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Selects the hierarchy for the specified type/namespace reference, and returns
-    /// the reference where the name resolution should be carried on.
+    /// Resolves the base types of the specified type declaration within the 
+    /// specified namespace and its nested namespaces.
     /// </summary>
-    /// <param name="type">Type/namespace to resolve</param>
-    /// <param name="hierarchy">Resolving hierarchy</param>
-    /// <param name="nextPart">Type reference for the next point of resolution.</param>
-    /// <returns>
-    /// True, if resolution is OK; otherwise, false.
-    /// </returns>
+    /// <param name="ns">
+    /// Namespace in which the base types of type declarations should be resolved.
+    /// </param>
     // --------------------------------------------------------------------------------
-    //private bool ObtainHierarchy(TypeReference type,
-    //  out NamespaceHierarchy hierarchy, out TypeReference nextPart)
-    //{
-    //  // --- If no namespace hierarchy specifier, use the global namespace hierarchy.
-    //  hierarchy = _GlobalHierarchy;
-    //  nextPart = type;
-    //  if (!type.IsGlobal) return true;
+    private void ResolveBaseTypes(NamespaceFragment ns)
+    {
+      // --- Resolve base types of types declared in this namespace
+      foreach (TypeDeclaration type in ns.TypeDeclarations)
+      {
+        ResolveBaseTypes(type, ResolutionContext.Namespace, ns);
+      }
 
-    //  // --- At this point we have a global namespace specifier
-    //  if (type.Name != "global")
-    //  {
-    //    // --- Check, if we have an 'extern alias' for the namespace hierarchy root
-    //    if (!NamespaceHierarchies.TryGetValue(type.Name, out hierarchy))
-    //    {
-    //      // --- No such namespace hierarchy have been found.
-    //      Parser.Error0432(type.Token, type.Name);
-    //      return false;
-    //    }
-    //  }
-
-    //  // --- Go on with the next part of the name
-    //  nextPart = type.SubType;
-    //  type.ResolveToNamespaceHierarchy();
-    //  return true;
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Obtains the specified namespace within the given hierarchy.
-    /// </summary>
-    /// <param name="type">Type/namespace to resolve</param>
-    /// <param name="fragment">Current namespace fragment.</param>
-    /// <param name="hierarchy">Hierarchy to check for the namespace</param>
-    /// <param name="nextPart">Type reference for the next point of resolution.</param>
-    /// <returns>
-    /// The list of resolver nodes that can resolve the specified namespace
-    /// </returns>
-    /// <remarks>
-    /// If the 'nextPart' returned is the same as 'type' the no namespace part is
-    /// resolved. In other cases 'nextPart' contains the point of the failed namespace
-    /// resolution, while 'nsResolver' the resolver that can be used to continue the
-    /// type resolution.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    //private ResolutionNodeList ObtainName(TypeReference type, 
-    //  NamespaceFragment fragment, NamespaceHierarchy hierarchy, out TypeReference nextPart)
-    //{
-    //  // --- If we are not in the global namespace, we should search only that hierarchy
-    //  // --- from its root.
-    //  if (hierarchy != _GlobalHierarchy)
-    //  {
-    //    return hierarchy.FindName(type, out nextPart);
-    //  }
-
-    //  // --- We are in the global namespce hierarchy. If we are out of any namespace,
-    //  // --- we can find the namespace among the source-declared namespaces or among
-    //  // --- the namespaces of referenced assemblies. If we are within a namespace,
-    //  // --- we go from the current namespace to the top namespace and try to find
-    //  // --- the name.
-
-    //  ResolutionNodeList result = new ResolutionNodeList();
-
-    //  // --- Step 1: Check, if the source code has a definition for the namespace.
-    //  if (fragment != null)
-    //  {
-    //    ResolutionNodeBase nsResolver = null;
-    //    // --- We are within a namespace in the global declaration space
-    //    // --- Check direct children of the current namespace fragment
-    //    if (fragment.ResolverNode.Children.ContainsKey(type.Name))
-    //    {
-    //      nsResolver = fragment.ResolverNode;
-    //    }
-    //    else
-    //    {
-    //      // --- No child namespace with matching name, go up in the namespace 
-    //      // --- hierarchy to check parent namespaces
-    //      fragment = fragment.ParentNamespace;
-    //      while (fragment != null)
-    //      {
-    //        if (fragment.ResolverNode.Children.ContainsKey(type.Name))
-    //        {
-    //          nsResolver = fragment.ResolverNode;
-    //          break;
-    //        }
-    //        fragment = fragment.ParentNamespace;
-    //      }
-    //    }
-    //    if (nsResolver != null)
-    //    {
-    //      TypeReference carryOnPart;
-    //      ResolutionNodeBase sourceNode;
-    //      if (nsResolver.FindName(type, out sourceNode, out carryOnPart) > 0)
-    //      {
-    //        if (carryOnPart == null)
-    //        {
-    //          // --- Name found in the source code, add it to the results
-    //          result.Add(sourceNode);
-    //        }
-    //      }
-    //    }
-    //  }
-
-    //  // --- Step 2: Check, if related assemblies have definition for the namespace
-    //  TypeReference asmCarryOnPart;
-    //  ResolutionNodeList asmResolutionNodes = hierarchy.FindName(type, out asmCarryOnPart);
-    //  if (asmCarryOnPart == null)
-    //  {
-    //    // --- Found the full name in related assemblies. Merge the results with the source
-    //    // --- code results.
-    //    asmResolutionNodes.Merge(result);
-    //    nextPart = null;
-    //    return asmResolutionNodes;
-    //  }
-
-    //  if (!result.IsEmpty)
-    //  {
-    //    // --- We found the name only in the source code
-    //    nextPart = null;
-    //    return result;
-    //  }
-
-    //  // --- At this point no result is found.
-    //  nextPart = asmCarryOnPart;
-    //  return result;
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Signs that a using cluse has been resolved to a namespace.
-    /// </summary>
-    /// <param name="hierarchy">Namespace hierarchy</param>
-    /// <param name="usingClause">Using clause resolved</param>
-    /// <param name="resolvedPart">Part of the type resolved</param>
-    /// <param name="nsFound">Resolvers</param>
-    /// <remarks>
-    /// Imports all types from the namespace into the specified namespace hierarchy.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    //private void ResolveToNamespace(NamespaceHierarchy hierarchy, UsingClause usingClause, 
-    //  TypeReference resolvedPart, IEnumerable<NamespaceResolutionNode> nsFound)
-    //{
-    //  usingClause.ResolveToNamespace(nsFound);
-    //  hierarchy.ImportNamespace(usingClause.ReferencedName.FullName);
-    //  // --- Sign that the type references are resolved.
-    //  while (resolvedPart != null)
-    //  {
-    //    resolvedPart.ResolveToNamespace();
-    //    resolvedPart = resolvedPart.SubType;
-    //  }
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Signs that a using alias clause has been resolved to a type.
-    /// </summary>
-    /// <param name="usingClause">Using clause resolved</param>
-    /// <param name="resolvedPart">Part of the type resolved</param>
-    /// <param name="type">Type the alias is resolved to.</param>
-    // --------------------------------------------------------------------------------
-    //private void ResolveToType(UsingClause usingClause, TypeReference resolvedPart,
-    //  ITypeCharacteristics type)
-    //{
-    //  // --- Sign that the type references are resolved.
-    //  usingClause.ResolveToType(type);
-    //  while (resolvedPart != null)
-    //  {
-    //    resolvedPart.ResolveToNamespace();
-    //    resolvedPart = resolvedPart.SubType;
-    //  }
-    //}
+      // --- Resolve types of nested namespaces
+      foreach (NamespaceFragment nested in ns.NestedNamespaces)
+      {
+        ResolveBaseTypes(nested);
+      }
+    }
 
     #endregion
 
@@ -1190,395 +983,6 @@ namespace CSharpParser.ProjectModel
       {
         _ErrorStream.WriteLine(_ErrorMessageFormat, errorPoint.line, errorPoint.col, description);
       }
-    }
-
-    #endregion
-
-    #region Type resolution methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves a name according to the provided type reference within the context of
-    /// the specified namespace. Retrieves the tree node that resolves the provided 
-    /// name and the part of the type reference that cannot be resolved.
-    /// </summary>
-    /// <param name="type">Namespace containing the type reference.</param>
-    /// <param name="file">Sourcefile containing the type.</param>
-    /// <param name="nsFragment">Namespace containing the type reference.</param>
-    /// <param name="lastResolved">
-    /// Last part of the type reference successfully resolved.
-    /// </param>
-    /// <returns>
-    /// The resolution node representing the type or name resolved. If the resolution 
-    /// cannot be done, returns null.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public ResolutionNodeList ResolveName(TypeReference type, SourceFile file,
-      NamespaceFragment nsFragment, out TypeReference lastResolved)
-    {
-      // --- Check, if the type reference is qualified 
-      if (type.IsGlobal)
-      {
-        // --- Type is qualified. It can be 'global', a using alias reference or a
-        // --- reference to an external alias.
-        if (type.Name == "global")
-        {
-          // --- This is a "global::" qualified type. Resolve the other part of the name 
-          // --- in the global namespace hierarchy
-          return ResolveNameInHierarchy(_GlobalHierarchy, type.SubType, out lastResolved);
-        }
-        else
-        {
-          // --- Go from the inner namespace declaration toward the source file level
-          // --- declarations and search for a matching using or extern alias.
-          return ResolveNameWithAlias(type, file, nsFragment, out lastResolved);
-        }
-      }
-      // --- We search within the global hierarchy using the specified context.
-      return ResolveNameWithinContext(type, file, nsFragment, out lastResolved);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves a name with an unqualifed name using the context provided by the
-    /// given source file and namespace.
-    /// </summary>
-    /// <param name="type">Type to resolve.</param>
-    /// <param name="file">Source file used.</param>
-    /// <param name="fragment">Namespace fragment used.</param>
-    /// <param name="lastResolved">Last part of the name resolved.</param>
-    /// <returns>
-    /// The node containing resolution information about the name.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    private ResolutionNodeList ResolveNameWithinContext(TypeReference type, 
-      SourceFile file, NamespaceFragment fragment, out TypeReference lastResolved)
-    {
-      if (file == null) throw new ArgumentNullException("file");
-      lastResolved = null;
-
-      if (type.SubType == null)
-      {
-        // --- Name is in form: I<A1, ... Ak>
-        
-      }
-      else
-      {
-        // --- Name is in form: N.I<A1, ... Ak>
-      }
-      return null;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves a name with a qualified alias member within the scope of a source file
-    /// and a namespace.
-    /// </summary>
-    /// <param name="type">Type to resolve.</param>
-    /// <param name="file">Source file used.</param>
-    /// <param name="fragment">Namespace fragment used.</param>
-    /// <param name="lastResolved">Last part of the name resolved.</param>
-    /// <returns>
-    /// The node containing resolution information about the name.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    private ResolutionNodeList ResolveNameWithAlias(TypeReference type, SourceFile file, 
-      NamespaceFragment fragment, out TypeReference lastResolved)
-    {
-      if (file == null) throw new ArgumentNullException("file");
-      lastResolved = null;
-      ResolutionNodeList aliasNodes = null;
-
-      // --- Go through from the current namespace toward the enclosing namespace or
-      // --- source file declarations.
-      do
-      {
-        // --- Get the list of using clauses
-        UsingClauseCollection usingAliases;
-        if (fragment == null) usingAliases = file.Usings;
-        else usingAliases = fragment.Usings;
-        UsingClause usingAlias;
-        if ((usingAlias = usingAliases[type.Name]) != null && usingAlias.IsResolved)
-        {
-          // --- Found a matching alias name.
-          if (usingAlias.ReferencedName.IsResolvedToType)
-          {
-            // --- This aliases a type, however, a namespace is expected.
-            Parser.Error0431(type.Token, type.Name);
-            return null;
-          }
-          if (usingAlias.ReferencedName.IsResolvedToNamespace)
-          {
-            // --- We found a namespace and return it
-            aliasNodes = new ResolutionNodeList(usingAlias.Resolvers);
-            break;
-          }
-        }
-
-        // --- We did not found any using alias, let's try the external aliases.
-        // --- Get the list of extern aliases
-        ExternalAliasCollection externAliases;
-        if (fragment == null) externAliases = file.ExternAliases;
-        else externAliases = fragment.ExternAliases;
-        ExternalAlias externAlias;
-        if ((externAlias = externAliases[type.Name]) != null)
-        {
-          // --- Check, if we have a named hierarchy for the extern alias
-          if (externAlias.HasHierarchy)
-          {
-            aliasNodes = new ResolutionNodeList(externAlias.Hierarchy);
-            break;
-          }
-        }
-
-        // --- Go to the enclosing namespace or file declarations
-        if (fragment != null) fragment = fragment.EnclosingNamespace;
-      } while (fragment != null);
-
-      // --- Is there any matching alias found?
-      if (aliasNodes == null || aliasNodes.IsEmpty)
-      {
-        Parser.Error0431(type.Token, type.Name);
-        return null;
-      }
-
-      // --- At this point we have a list of resolution tree nodes to lookup for the 
-      // --- remaining parts of the name.
-      return ResolveNameInForest(aliasNodes, type.SubType, out lastResolved);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves a name represented by a type reference within the specified hierarchy.
-    /// </summary>
-    /// <param name="hierarchy">Hierarchy to resolve the name within.</param>
-    /// <param name="type">Type to resolve.</param>
-    /// <param name="lastResolved">Last part of the type resolved.</param>
-    /// <returns>
-    /// Node representing the successful name resolution, or null, if the name cannot  
-    /// be resolved.
-    /// </returns>
-    /// <remarks>
-    /// Because a hierarchy contains more than one trees, the name can be resolved in 
-    /// more than one trees. If more successful resolutions found, name conflict is
-    /// resolved before returning from this method.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    private ResolutionNodeList ResolveNameInHierarchy(NamespaceHierarchy hierarchy, 
-      TypeReference type, out TypeReference lastResolved)
-    {
-      ResolutionNodeList forestNodes = new ResolutionNodeList(hierarchy);
-      return ResolveNameInForest(forestNodes, type, out lastResolved);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves a name represented by a type reference within the specified forest.
-    /// </summary>
-    /// <param name="forest">Hierarchy to resolve the name within.</param>
-    /// <param name="type">Type to resolve.</param>
-    /// <param name="lastResolved">Last part of the type resolved.</param>
-    /// <returns>
-    /// Node representing the successful name resolution, or null, if the name cannot  
-    /// be resolved.
-    /// </returns>
-    /// <remarks>
-    /// Because a forest contains more than one trees, the name can be resolved in 
-    /// more than one trees. If more successful resolutions found, name conflict is
-    /// resolved before returning from this method.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    private ResolutionNodeList ResolveNameInForest(ResolutionNodeList forest, 
-      TypeReference type, out TypeReference lastResolved)
-    {
-      // --- Init name resolution
-      ResolutionNodeList result = new ResolutionNodeList();
-      lastResolved = type;
-      int maxResolutionLength = 0;
-      foreach (ResolutionNodeBase treeNode in forest)
-      {
-        TypeReference carryOnPart;
-
-        // --- Resolve the name in the current tree
-        ResolutionNodeBase resolvingNode = ResolveNameFromNode(treeNode, type, out carryOnPart);
-        if (resolvingNode == null) continue;
-
-        // --- How far we resolved the node?
-        int depth = resolvingNode.Depth - treeNode.Depth;
-        if (depth == 0) continue;
-
-        // --- This time we could not resolve the name as deep as before, forget
-        // --- about this result.
-        if (depth < maxResolutionLength) continue;
-
-        // --- This time we resolved the name deeper then before. Forget about
-        // --- partial results found before and register only this new result.
-        if (depth > maxResolutionLength)
-        {
-          result.Clear();
-          maxResolutionLength = depth;
-        }
-
-        // --- Add the result found to the list resolution nodes
-        result.Add(resolvingNode);
-        lastResolved = carryOnPart;
-      }
-      return result;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves a name represented by a type reference using the resolution tree node
-    /// specified.
-    /// </summary>
-    /// <param name="node">Resolution tree node to use for resolution.</param>
-    /// <param name="type">Type to reolve.</param>
-    /// <param name="lastResolved">Last part of the type resolved.</param>
-    /// <returns>
-    /// Resolution node representing the part of the type resolved.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    private ResolutionNodeBase ResolveNameFromNode(ResolutionNodeBase node, 
-      TypeReference type, out TypeReference lastResolved)
-    {
-      ResolutionNodeBase currentNode = node;
-      lastResolved = null;
-      ResolutionNodeBase nextPart;
-      do
-      {
-        // --- If the current node is a namespace and is not imported, we 
-        // --- import its types.
-        NamespaceResolutionNode nsNode = currentNode as NamespaceResolutionNode;
-        if (nsNode != null) nsNode.ImportTypes();
-
-        // --- Check, if the next part of the name can be resolved
-        nextPart = currentNode.FindChild(type.Name);
-        if (nextPart == null)
-        {
-          // --- No more parts can be resolved.
-          return null;
-        }
-
-        // --- Name part successfully resolved. If the current node is a TypeNameResolutionNode,
-        // --- we must look for the next TypeResolutionNode.
-        TypeNameResolutionNode nameNode = nextPart as TypeNameResolutionNode;
-        if (nameNode != null)
-        {
-          // --- We are dealing with a type.
-          nextPart = nameNode.FindChild(type.TypeParameterCount.ToString());
-          if (nextPart == null)
-          {
-            // --- We found the part name but not the one with correct number of
-            // --- type parameters.
-            return null;
-          }
-        }
-
-        // --- A this point we succesfully resolved the current part of the name.
-        lastResolved = type;
-        type = type.SubType;
-      } while (type != null);
-
-      return nextPart;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the conflict when more type/namespace names have been found.
-    /// </summary>
-    /// <param name="type">Type to resolve.</param>
-    /// <param name="resolvers">Resolvers of the name.</param>
-    /// <returns>
-    /// The only resolver after conflict handling, or null if the conflict cannot be
-    /// resolved.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    private ResolutionNodeBase ResolveNameConflicts(LanguageElement type, 
-      ResolutionNodeList resolvers)
-    {
-      // --- No resolution found?
-      if (resolvers.Count == 0) return null;
-
-      // --- No conflict?
-      if (resolvers.Count == 1) return resolvers[0];
-
-      // --- In other cases we have a conflict
-      // --- Separate the resolved names into four categories:
-      // --- Category 1: Namespace declarations in referenced assemblies
-      // --- Category 2: Namespace declarations in our source code
-      // --- Category 3: Type declarations in referenced assemblies
-      // --- Category 4: Type declaration in our source code
-      List<NamespaceResolutionNode> nsInAsm = new List<NamespaceResolutionNode>();
-      List<NamespaceResolutionNode> nsInCode = new List<NamespaceResolutionNode>();
-      List<TypeResolutionNode> tyInAsm = new List<TypeResolutionNode>();
-      List<TypeResolutionNode> tyInCode = new List<TypeResolutionNode>();
-      foreach (ResolutionNodeBase item in resolvers)
-      {
-        NamespaceResolutionNode nsNode = item as NamespaceResolutionNode;
-        if (nsNode != null)
-        {
-          if (nsNode.DefinedInSource) nsInCode.Add(nsNode);
-          else nsInAsm.Add(nsNode);
-        }
-        TypeResolutionNode tyNode = item as TypeResolutionNode;
-        if (tyNode != null)
-        {
-          if (tyNode.Resolver.DeclaringUnit is ReferencedCompilation) tyInCode.Add(tyNode);
-          else tyInAsm.Add(tyNode);
-        }
-      }
-
-      // --- Only namespace found?
-      if (nsInCode.Count + nsInAsm.Count > 0 && tyInCode.Count + tyInAsm.Count == 0)
-      {
-        if (nsInCode.Count > 0) return nsInCode[0];
-        return nsInAsm[0];
-      }
-
-      // --- Assembly type/source namespace conflict?
-      if (tyInAsm.Count > 0 && nsInCode.Count > 0)
-      {
-        Parser.Warning0435(type.Token, nsInCode[0].Name,
-          tyInAsm[0].Resolver.DeclaringUnit.Name);
-        return nsInCode[0];
-      }
-
-      // --- Assembly type/source type conflict?
-      if (tyInAsm.Count > 0 && tyInCode.Count > 0)
-      {
-        Parser.Warning0436(type.Token, tyInCode[0].Resolver.FullName,
-          tyInAsm[0].Resolver.DeclaringUnit.Name);
-        return tyInCode[0];
-      }
-
-      // --- Assembly namespace/source type conflict?
-      if (nsInAsm.Count > 0 && tyInCode.Count > 0)
-      {
-        Parser.Warning0437(type.Token, tyInCode[0].Name,
-          nsInAsm[0].Name);
-        return tyInCode[0];
-      }
-
-      // --- Assembly namespace/source namsepace conflict?
-      if (nsInAsm.Count > 0 && nsInCode.Count > 0)
-      {
-        return nsInCode[0];
-      }
-
-      // --- Same type in more than one assembly?
-      if (tyInAsm.Count > 1)
-      {
-        Parser.Error0433(type.Token, type.Name,
-          tyInAsm[0].Resolver.DeclaringUnit.Name,
-          tyInAsm[1].Resolver.DeclaringUnit.Name);
-        return null;
-      }
-
-      // --- If we are here, there is a conflict case we did not handle...
-      throw new InvalidOperationException(
-        String.Format("Name conflict not handled. tyInAsm={0}, tyInCode={1}, "+
-        "nsInAsm={2}, nsInCode={3}",
-        tyInAsm.Count, tyInCode.Count, nsInAsm.Count, nsInCode.Count));
     }
 
     #endregion

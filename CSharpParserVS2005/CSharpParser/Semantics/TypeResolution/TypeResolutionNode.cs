@@ -13,6 +13,8 @@ namespace CSharpParser.Semantics
   // ==================================================================================
   public sealed class TypeNameResolutionNode : ResolutionNodeBase
   {
+    #region Lifecycle methods
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new node with the specified parent and name.
@@ -28,6 +30,27 @@ namespace CSharpParser.Semantics
     {
       if (parentNode == null) throw new ArgumentNullException("parentNode");
     }
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of the type or namespace represented by this node.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string FullName
+    {
+      get
+      {
+        if (ParentNode == null || ParentNode is TypeResolutionTree) return Name;
+        if (ParentNode is NamespaceResolutionNode) return ParentNode.FullName + "." + Name;
+        return ParentNode.FullName + "+" + Name;
+      }
+    }
+
+    #endregion
   }
 
   // ==================================================================================
@@ -63,6 +86,21 @@ namespace CSharpParser.Semantics
       : base(parentNode, type.TypeParameterCount.ToString())
     {
       _Resolver = type;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of the type or namespace represented by this node.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string FullName
+    {
+      get
+      {
+        if (ParentNode == null) return string.Empty;
+        if (Name == "0") return ParentNode.FullName;
+        return ParentNode.FullName +  "<" + "".PadRight(Int32.Parse(Name) - 1, ',') + ">";
+      }
     }
 
     #endregion

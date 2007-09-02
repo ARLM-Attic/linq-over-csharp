@@ -64,6 +64,20 @@ namespace CSharpParser.Semantics
       get { return _DefinedInSource || _TypesAlreadyImported; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of the type or namespace represented by this node.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string FullName
+    {
+      get 
+      {
+        if (ParentNode == null || ParentNode is TypeResolutionTree) return Name;
+        return ParentNode.FullName + "." + Name;
+      }
+    }
+
     #endregion
 
     #region Public methods
@@ -100,6 +114,10 @@ namespace CSharpParser.Semantics
         nameSpace = currentNode.Name + (nameSpace.Length > 0 ? "." : "") + nameSpace;
         currentNode = currentNode.ParentNode;
       }
+
+      // --- If the currentnode refers to a type defined in the source, the namespace
+      // --- is already imported.
+      if (currentNode is SourceResolutionTree) return;
 
       // --- At this point we have the parent node. It must be az AssemblyResolutionTree.
       AssemblyResolutionTree asmTree = currentNode as AssemblyResolutionTree;

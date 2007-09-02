@@ -42,25 +42,45 @@ namespace CSharpParser.Semantics
     /// </summary>
     /// <param name="type">Type reference representing the name to be resolved.</param>
     /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="contextObject">Object representing the current context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     /// <returns>Name resolution information.</returns>
     /// <remarks>
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public  NamespaceOrTypeResolverInfo Resolve(TypeReference type, 
-      ResolutionContext contextType, ITypeDeclarationScope contextObject)
+    public NamespaceOrTypeResolverInfo Resolve(TypeReference type, 
+      ResolutionContext contextType, ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
     {
       // --- Check all inputs
       if (type == null) throw new ArgumentNullException("type");
-      if (contextObject == null) throw new ArgumentNullException("contextObject");
+      if (declarationScope == null) throw new ArgumentNullException("declarationScope");
 
       // --- Create the resolution structure
       NamespaceOrTypeResolverInfo resolutionInfo = 
-        new NamespaceOrTypeResolverInfo(this, type, contextType, contextObject);
+        new NamespaceOrTypeResolverInfo(this, type, contextType, 
+        declarationScope, parameterScope);
 
       // --- Branch: "qualified-alias-member" | "namespace-or-type"
       if (type.IsGlobal) ResolveQualifiedAliasMember(resolutionInfo);
       else ResolveNamespaceOrTypeName(resolutionInfo);
+
+      // --- At this point we resolved 0, 1 or more parts of the name. We go through all
+      // --- resolved parts and resolve type arguments of generic types.
+      foreach (TypeReference typePart in type.NameParts)
+      {
+        if (typePart.IsResolved && typePart.Arguments.Count > 0)
+        {
+          // --- Go through the generic arguments and resolve them
+          foreach (TypeReference argument in typePart.Arguments)
+          {
+            if (!argument.IsResolved) Resolve(argument, contextType, 
+              declarationScope, parameterScope);
+          }
+        }
+      }
+
+      // --- OK, we resolved this type as deep as we can.
       return resolutionInfo;
     }
 
@@ -154,6 +174,77 @@ namespace CSharpParser.Semantics
     private void ResolveNonGlobalAliasMember(NamespaceOrTypeResolverInfo info)
     {
       if (info == null) throw new ArgumentNullException("info");
+      
+      // --- Cycle from the current declaration namespace to the global namespace
+      SourceFile file = info.DeclarationScope.EnclosingSourceFile;
+      NamespaceFragment ns = info.DeclarationScope.DeclaringNamespace;
+      bool errorFound = false;
+      bool resolved = false;
+      foreach (ITypeDeclarationScope scope in file.GetScopesToOuter(ns))
+      {
+        // --- Check, if the current scope contains a using alias with the global name
+        UsingClause usingClause = scope.Usings[info.CurrentPart.SimpleName];
+        if (usingClause != null && usingClause.IsResolved)
+        {
+          if (usingClause.IsResolvedToType)
+          {
+            // --- The name cannot be aliased to a type. Raise an error and go on with 
+            // --- name resolution to find other errors.
+            _Parser.Error0431(info.CurrentPart.Token, info.CurrentPart.Name);
+            errorFound = true;
+          }
+          else
+          {
+            // --- The name is aliased to a namespace.
+          }
+          info.Results.Merge(usingClause.Resolvers);
+          SetResultByResolutionNode(info.CurrentPart, usingClause.Resolvers[0]);
+          resolved = true;
+          break;
+        }
+        // --- Check, if the current scope contains an extern alias with the global name
+        ExternalAlias externAlias = scope.ExternAliases[info.CurrentPart.SimpleName];
+        if (externAlias != null && externAlias.HasHierarchy)
+        {
+          info.Results.Merge(externAlias.Hierarchy);
+          resolved = true;
+          break;
+        }
+      }
+
+      // --- At this point we have 'resolved' with true, if the global name has been
+      // --- successfully resolved.
+      if (!resolved)
+      {
+        _Parser.Error0432(info.CurrentPart.Token, info.CurrentPart.SimpleName);
+        return;
+      }
+
+      // --- Resolve the remaining part of the name within the forest defined by the
+      // --- global name
+
+      info.MoveToNextPart();
+      ResolveNamespaceOrNameInForest(info);
+      if (info.IsResolved)
+      {
+        // --- The remaining partof the name is resolved, however we may have problems with
+        // --- the global name.
+        if (errorFound) info.Target = ResolutionTarget.Unresolved;
+      }
+      else
+      {
+        // --- Give an appropriate message
+        if (info.CurrentPart.PrefixType.ResolvingNode is NamespaceResolutionNode)
+        {
+          _Parser.Error0234(info.CurrentPart.Token, info.CurrentPart.Name, 
+            info.CurrentPart.PrefixType.ResolvingName);
+        }
+        else
+        {
+          _Parser.Error0426(info.CurrentPart.Token, info.CurrentPart.Name,
+            info.CurrentPart.PrefixType.ResolvingName);
+        }
+      }
     }
 
     #endregion
@@ -188,21 +279,18 @@ namespace CSharpParser.Semantics
         // --- Check for generic type parameter
         if (ResolveGenericTypeParameter(info)) return;
         ResolveSimpleNameInScope(info);
-        if (info.IsResolved) return;
-
-        // --- Name cannot be fully resolved according to resolution roles
-        // info.Parser.Error0400(info.CurrentPart.Token, info.CurrentPart.Name);
       }
       else
       {
-        // --- The name in if form of N.I or N.I<A1, ... Ak>
-        
+        // --- The name in if form of N.I or N.I<A1, ..., Ak>. We cut the N from the name
+        // --- and resolve it, later we use that name to look for the I<A1, ..., Ak> part.
+        ResolveCompoundNameInScope(info);
       }
     }
 
     #endregion
 
-    #region ResolveNamespaceOrNameInForest
+    #region ResolveNamespaceOrNameInForest methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -215,7 +303,7 @@ namespace CSharpParser.Semantics
     /// The method modified the resolution information accoding to resolution progress.
     /// </para>
     /// <para>
-    /// Uses the resolution tree nodes in the info.Result container. Results all node
+    /// Uses the resolution tree nodes in the info.Result container. Seraches all nodes
     /// and retrieves the list of nodes that match the resolution. During the 
     /// resolution no extern and using alias definitions are used.
     /// </para>
@@ -223,17 +311,44 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     private void ResolveNamespaceOrNameInForest(NamespaceOrTypeResolverInfo info)
     {
-      // --- Init name resolution
-      ResolutionNodeList result = new ResolutionNodeList();
-      TypeReference lastResolved = info.CurrentPart;
+      TypeReference lastResolved;
+      ResolutionNodeList result;
+      ResolveNamespaceOrNameInForest(info.CurrentPart, info.Results, out result, 
+        out lastResolved);
+      info.CurrentPart = lastResolved;
+      info.SetResultNode(result);
+      info.Evaluate();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves a namespace or type name using the specified resolution tree nodes.
+    /// </summary>
+    /// <param name="type">Type reference representing the name.</param>
+    /// <param name="forestNodes">Nodes to search for the name.</param>
+    /// <param name="result">Results of the name resolution.</param>
+    /// <param name="lastResolved">Last part of the name successfully resolved.</param>
+    /// <remarks>
+    /// <para>
+    /// Searches all nodes and retrieves the list of nodes that match the resolution. 
+    /// During the resolution no extern and using alias definitions are used.
+    /// </para>
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private void ResolveNamespaceOrNameInForest(TypeReference type,
+      ResolutionNodeList forestNodes, out ResolutionNodeList result, 
+      out TypeReference lastResolved)
+    {
+      result = new ResolutionNodeList();
+      lastResolved = type;
       int maxResolutionLength = 0;
-      foreach (ResolutionNodeBase treeNode in info.Results)
+      foreach (ResolutionNodeBase treeNode in forestNodes)
       {
         TypeReference carryOnPart;
 
         // --- Resolve the name in the current tree
-        ResolutionNodeBase resolvingNode = 
-          ResolveNameOrNamespaceInTree(info, treeNode, out carryOnPart);
+        ResolutionNodeBase resolvingNode =
+          ResolveNameOrNamespaceInTree(type, treeNode, out carryOnPart);
         if (resolvingNode == null) continue;
 
         // --- How far we resolved the node?
@@ -256,9 +371,6 @@ namespace CSharpParser.Semantics
         result.Add(resolvingNode);
         lastResolved = carryOnPart;
       }
-      info.CurrentPart = lastResolved;
-      info.SetResultNode(result);
-      info.Evaluate();
     }
 
     #endregion
@@ -269,7 +381,7 @@ namespace CSharpParser.Semantics
     /// <summary>
     /// Resolves a namespace or type name using the resolution tree node specified.
     /// </summary>
-    /// <param name="info">Resolution information</param>
+    /// <param name="type">Type reference representing the name to be found.</param>
     /// <param name="node">
     /// Node representing the tree where name should be resolved.
     /// </param>
@@ -285,11 +397,10 @@ namespace CSharpParser.Semantics
     /// </remarks>
     // --------------------------------------------------------------------------------
     private ResolutionNodeBase ResolveNameOrNamespaceInTree(
-      NamespaceOrTypeResolverInfo info, 
-      ResolutionNodeBase node, 
+      TypeReference type,
+      ResolutionNodeBase node,
       out TypeReference lastResolvedPart)
     {
-      TypeReference type = info.CurrentPart;
       ResolutionNodeBase currentNode = node;
       lastResolvedPart = null;
       ResolutionNodeBase nextNode;
@@ -322,7 +433,7 @@ namespace CSharpParser.Semantics
         }
 
         // --- Name part successfully resolved. 
-        SetResolutionResult(type, nextNode);
+        SetResultByResolutionNode(type, nextNode);
 
         // --- A this point we succesfully resolved the current part of the name.
         lastResolvedPart = type;
@@ -357,7 +468,15 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     private bool ResolveGenericMethodParameter(NamespaceOrTypeResolverInfo info)
     {
-      return false;
+      if (info.ParameterScope as MethodDeclaration == null) return false;
+      TypeParameter typeParam;
+      if (!info.ParameterScope.TypeParameters.TryGetValue(info.CurrentPart.SimpleName, 
+        out typeParam)) return false;
+
+      // --- A this point we resolved the name to a method type parameter
+      info.Target = ResolutionTarget.MethodTypeParameter;
+      info.CurrentPart.ResolveToMethodTypeParameter(typeParam);
+      return true;
     }
 
     #endregion
@@ -384,6 +503,21 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     private static bool ResolveGenericTypeParameter(NamespaceOrTypeResolverInfo info)
     {
+      // --- Exit if the current context does not have generic type arguments
+      if (info.ParameterScope == null) return false;
+
+      ITypeParameterScope scope = info.ParameterScope;
+      while (scope != null)
+      {
+        TypeParameter typeParam;
+        if (scope.TypeParameters.TryGetValue(info.CurrentPart.SimpleName, out typeParam))
+        {
+          info.Target = ResolutionTarget.TypeParameter;
+          info.CurrentPart.ResolveToTypeParameter(typeParam);
+          return true;
+        }
+        scope = scope.DeclaringType;
+      }
       return false;
     }
 
@@ -409,8 +543,8 @@ namespace CSharpParser.Semantics
     private void ResolveSimpleNameInScope(NamespaceOrTypeResolverInfo info)
     {
       // --- Cycle from the current declaration namespace to the global namespace
-      SourceFile file = info.ContextObject.EnclosingSourceFile;
-      NamespaceFragment ns = info.ContextObject.EnclosingNamespace;
+      SourceFile file = info.DeclarationScope.EnclosingSourceFile;
+      NamespaceFragment ns = info.DeclarationScope.DeclaringNamespace;
       foreach (ITypeDeclarationScope scope in file.GetScopesToOuter(ns))
       {
         bool resolved = false;
@@ -431,10 +565,22 @@ namespace CSharpParser.Semantics
           resolved = true;
         }
         // --- Check, if the name is within the imported (using) namespaces.
+        else if (ResolveTypeNameWithUsings(info.CurrentPart, scope, out results))
+        {
+          // --- Exit, if a conflict found and cannot be resolved.
+          if (!ResolveConflict(results, info.CurrentPart)) break;
+
+          // --- The resolved node must be a type for successful name resolution.
+          if (results[0] is TypeResolutionNode)
+          {
+            // --- We found a type and need no more checks.
+            resolved = true;
+          }
+        }
 
         if (resolved)
         {
-          SetResolutionResult(info.CurrentPart, results[0]);
+          SetResultByResolutionNode(info.CurrentPart, results[0]);
           info.SetResultNode(results);
           info.Evaluate();
           if (needsModeCheck) break;
@@ -451,7 +597,7 @@ namespace CSharpParser.Semantics
 
       // --- We are going to check the enclosing scope
       ITypeDeclarationScope scopeToCheck =
-        ((ITypeDeclarationScope)(info.ContextObject.EnclosingNamespace)) ?? file;
+        ((ITypeDeclarationScope)(info.DeclarationScope.EnclosingNamespace)) ?? file;
       ITypeDeclarationScope foundInScope;
 
       // --- Check 1: We found a namespace and any of the enclosing namespaces 
@@ -528,6 +674,110 @@ namespace CSharpParser.Semantics
 
     #endregion
 
+    #region ResolveTypeNameWithUsings method
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves a type represented by the specified type reference within the 
+    /// namespaces imported by the using directives of the current scope.
+    /// </summary>
+    /// <param name="type">Type reference representing the name to be found.</param>
+    /// <param name="scope">Scope used to serarch.</param>
+    /// <param name="results">Contains the nodes representing the type found.</param>
+    /// <returns>
+    /// True, if the name found in namespaces of this scope; otherwise, false.
+    /// </returns>
+    /// <remarks>
+    /// This method looks only for types within the current namespaces.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private bool ResolveTypeNameWithUsings(TypeReference type, ITypeDeclarationScope scope,
+      out ResolutionNodeList results)
+    {
+      // --- We make a list of nodes represented by the set of using clauses.
+      ResolutionNodeList forestNodes = new ResolutionNodeList();
+      foreach (UsingClause usingClause in scope.Usings)
+      {
+        if (usingClause.IsResolved && !usingClause.HasAlias)
+        {
+          forestNodes.Merge(usingClause.Resolvers);
+        }
+      }
+
+      // --- Search the forest of namespaces defined by the using clauses
+      TypeReference lastResolved;
+      ResolveNamespaceOrNameInForest(type, forestNodes, out results, out lastResolved);
+      return results.Count > 0;
+    }
+
+    #endregion
+
+    #region ResolveCompoundNameInScope
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves a compound (N.I form) name in the current scope.
+    /// </summary>
+    /// <param name="info">Resolution information</param>
+    /// <remarks>
+    /// <para>
+    /// This method check for the simple name in the scope from the enclosing 
+    /// namespace to the global namespace.
+    /// </para>
+    /// <para>
+    /// The method modified the resolution information accoding to resolution progress.
+    /// </para>
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private void ResolveCompoundNameInScope(NamespaceOrTypeResolverInfo info)
+    {
+      // --- This name is in N.I<A1, ..., Ak> form. First we resolve the N part, later
+      // --- use it to search for the I<A1, ..., Ak> part.
+
+      // --- Serach for the I<A1, ..., Ak> part
+      TypeReference partI = info.Type.RightMostPart;
+      TypeReference partNLast = partI.PrefixType;
+      try
+      {
+        // --- Cut the 'N' and 'I' part
+        partNLast.SubType = null;
+
+        // --- Resolve the 'N' part
+        ResolveNamespaceOrTypeName(info);
+        if (!info.IsResolved) return;
+
+        // --- At this point 'N' is successfully resolved. Try to resolve 'I' in the 
+        // --- context of 'N'
+        ResolutionNodeList results;
+        TypeReference lastResolved;
+        ResolveNamespaceOrNameInForest(partI, info.Results, out results, out lastResolved);
+        if (results.Count > 0)
+        {
+          info.CurrentPart = lastResolved;
+          info.SetResultNode(results);
+          info.Evaluate();
+          return;
+        }
+        
+        // --- At this point type cannot be resolved. Raise an appropriate error message
+        if (info.Target == ResolutionTarget.Namespace)
+        {
+          _Parser.Error0234(partI.Token, partI.Name, info.Type.FullName);
+        }
+        else
+        {
+          _Parser.Error0426(partI.Token, partI.Name, info.Type.FullName);
+        }
+      }
+      finally
+      {
+        // --- Merge the N and I part again
+        partNLast.SubType = partI;
+      }
+    }
+
+    #endregion
+
     #region Other methods
 
     // --------------------------------------------------------------------------------
@@ -538,7 +788,7 @@ namespace CSharpParser.Semantics
     /// <param name="type">Type reference</param>
     /// <param name="node">Resolver node</param>
     // --------------------------------------------------------------------------------
-    private void SetResolutionResult(TypeReference type, ResolutionNodeBase node)
+    private void SetResultByResolutionNode(TypeReference type, ResolutionNodeBase node)
     {
       if (type == null) throw new ArgumentNullException("type");
       if (node == null) return;
@@ -560,7 +810,8 @@ namespace CSharpParser.Semantics
     /// </summary>
     /// <param name="results">Results of the name resolution.</param>
     /// <param name="typePart">
-    /// Type reference representing the name that should be used in messages.</param>
+    /// Type reference representing the name that should be used in messages.
+    /// </param>
     /// <returns>
     /// True, if there are no conflicts or the conflicts have been resolved;
     /// otherwise, false.
@@ -571,7 +822,7 @@ namespace CSharpParser.Semantics
     /// warning is raised.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    private bool ResolveConflict(ResolutionNodeList results, 
+    public bool ResolveConflict(ResolutionNodeList results, 
       TypeReference typePart)
     {
       // --- No conflict?
@@ -618,7 +869,7 @@ namespace CSharpParser.Semantics
         ResolutionNodeBase winner = tyInCode[0];
         results.Clear();
         results.Add(winner);
-        SetResolutionResult(typePart, winner);
+        SetResultByResolutionNode(typePart, winner);
         return true;
       }
 
@@ -665,7 +916,7 @@ namespace CSharpParser.Semantics
         }
         results.Clear();
         results.Add(winner);
-        SetResolutionResult(typePart, winner);
+        SetResultByResolutionNode(typePart, winner);
         return true;
       }
 
@@ -677,269 +928,285 @@ namespace CSharpParser.Semantics
     }
 
     #endregion
+  }
 
-    #region NamespaceOrTypeResolverInfo
+  #region NamespaceOrTypeResolverInfo
 
-    // ==================================================================================
+  // ==================================================================================
+  /// <summary>
+  /// This class contains all information that is required and used during the 
+  /// resolution of a namespace name or a type name.
+  /// </summary>
+  // ==================================================================================
+  public sealed class NamespaceOrTypeResolverInfo
+  {
+    #region Private fields
+
+    // --- Input fields
+    private readonly NamespaceOrTypeResolver _Resolver;
+    private readonly TypeReference _Type;
+    private readonly ResolutionContext _ContextType;
+    private readonly ITypeDeclarationScope _DeclarationScope;
+    private readonly ITypeParameterScope _ParameterScope;
+
+    // --- Resolution state fields
+    private NamespaceHierarchy _Hierarchy;
+    private TypeReference _CurrentPart;
+    private ResolutionTarget _Target;
+    private readonly ResolutionNodeList _Results = new ResolutionNodeList();
+
+    #endregion
+
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
     /// <summary>
-    /// This class contains all information that is required and used during the 
-    /// resolution of a namespace name or a type name.
+    /// Creates a new instance of this resolution information using the specified type
+    /// and context information.
     /// </summary>
-    // ==================================================================================
-    public sealed class NamespaceOrTypeResolverInfo
+    /// <param name="resolver">Resolver that uses this information.</param>
+    /// <param name="type">Type reference representing the name to be resolved.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    // --------------------------------------------------------------------------------
+    public NamespaceOrTypeResolverInfo(NamespaceOrTypeResolver resolver,
+      TypeReference type, ResolutionContext contextType,
+      ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
     {
-      #region Private fields
+      _Resolver = resolver;
+      _Type = type;
+      _ContextType = contextType;
+      _DeclarationScope = declarationScope;
+      _ParameterScope = parameterScope;
+      _Hierarchy = null;
+      _CurrentPart = type;
+      _Target = ResolutionTarget.Unresolved;
+    }
 
-      // --- Input fields
-      private readonly NamespaceOrTypeResolver _Resolver;
-      private readonly TypeReference _Type;
-      private readonly ResolutionContext _ContextType;
-      private readonly ITypeDeclarationScope _ContextObject;
+    #endregion
 
-      // --- Resolution state fields
-      private NamespaceHierarchy _Hierarchy;
-      private TypeReference _CurrentPart;
-      private ResolutionTarget _Target;
-      private readonly ResolutionNodeList _Results = new ResolutionNodeList();
+    #region Public properties
 
-      #endregion
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type reference representing the name to be resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference Type
+    {
+      get { return _Type; }
+    }
 
-      #region Lifecycle methods
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type of resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionContext ContextType
+    {
+      get { return _ContextType; }
+    }
 
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Creates a new instance of this resolution information using the specified type
-      /// and context information.
-      /// </summary>
-      /// <param name="type">Type reference representing the name to be resolved.</param>
-      /// <param name="contextType">Type of resolution context.</param>
-      /// <param name="contextObject">Object representing the current context.</param>
-      // --------------------------------------------------------------------------------
-      public NamespaceOrTypeResolverInfo(NamespaceOrTypeResolver resolver, 
-        TypeReference type, ResolutionContext contextType,
-        ITypeDeclarationScope contextObject)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current type declaration scope
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ITypeDeclarationScope DeclarationScope
+    {
+      get { return _DeclarationScope; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current type parameter declaration scope
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ITypeParameterScope ParameterScope
+    {
+      get { return _ParameterScope; }
+    } 
+    
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the hierarchy used to resolve the name.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceHierarchy Hierarchy
+    {
+      get { return _Hierarchy; }
+      internal set { _Hierarchy = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the part of the name that is currently under resolution.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference CurrentPart
+    {
+      get { return _CurrentPart; }
+      internal set { _CurrentPart = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the target of the resolution.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionTarget Target
+    {
+      get { return _Target; }
+      internal set { _Target = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the flag indicating that name has been fully resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolved
+    {
+      get { return _Target != ResolutionTarget.Unresolved; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the resolution tree nodes representing the result of resolution.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeList Results
+    {
+      get { return _Results; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parser.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CSharpSyntaxParser Parser
+    {
+      get { return _Type.Parser; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the compliation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public CompilationUnit CompilationUnit
+    {
+      get { return _Type.Parser.CompilationUnit; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if there are any parts to resolve or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasPartsLeft
+    {
+      get { return _Type.SubType != null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolver currently set.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeBase Result
+    {
+      get { return _Results[0]; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the name is resolved to a type within the souce code.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolvedToSourceType
+    {
+      get
       {
-        _Resolver = resolver;
-        _Type = type;
-        _ContextType = contextType;
-        _ContextObject = contextObject;
-        _Hierarchy = null;
-        _CurrentPart = type;
-        _Target = ResolutionTarget.Unresolved;
-      }
-
-      #endregion
-
-      #region Public properties
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the type reference representing the name to be resolved.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public TypeReference Type
-      {
-        get { return _Type; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the type of resolution context.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public ResolutionContext ContextType
-      {
-        get { return _ContextType; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the object representing the current resolution context.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public ITypeDeclarationScope ContextObject
-      {
-        get { return _ContextObject; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets or sets the hierarchy used to resolve the name.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public NamespaceHierarchy Hierarchy
-      {
-        get { return _Hierarchy; }
-        internal set { _Hierarchy = value; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets or sets the part of the name that is currently under resolution.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public TypeReference CurrentPart
-      {
-        get { return _CurrentPart; }
-        internal set { _CurrentPart = value; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets or sets the target of the resolution.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public ResolutionTarget Target
-      {
-        get { return _Target; }
-        internal set { _Target = value; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets or sets the flag indicating that name has been fully resolved.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public bool IsResolved
-      {
-        get { return _Target != ResolutionTarget.Unresolved; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets or sets the resolution tree nodes representing the result of resolution.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public ResolutionNodeList Results
-      {
-        get { return _Results; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the parser.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public CSharpSyntaxParser Parser
-      {
-        get { return _Type.Parser; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the compliation unit.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public CompilationUnit CompilationUnit
-      {
-        get { return _Type.Parser.CompilationUnit; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the flag indicating if there are any parts to resolve or not.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public bool HasPartsLeft
-      {
-        get { return _Type.SubType != null; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Gets the resolver currently set.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public ResolutionNodeBase Result
-      {
-        get { return _Results[0]; }
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Checks, if the name is resolved to a type within the souce code.
-      /// </summary>
-      // --------------------------------------------------------------------------------
-      public bool IsResolvedToSourceType
-      {
-        get
-        {
-          return IsResolved && 
+        return IsResolved &&
+          (
             (
-              (
-                _Target != ResolutionTarget.NamespaceHierarchy &&
-                _Target != ResolutionTarget.Namespace &&
-                _Target == ResolutionTarget.Type
-              ) 
-              || Result.Root == CompilationUnit.SourceResolutionTree
-            );
-        }
-      }
-
-      #endregion
-
-      #region Public methods
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Moves to the next part to resolve.
-      /// </summary>
-      /// <returns>
-      /// True, if move is successful; otherwise, false.
-      /// </returns>
-      // --------------------------------------------------------------------------------
-      public bool MoveToNextPart()
-      {
-        if (_CurrentPart.SubType == null) return false;
-        _CurrentPart = _Type.SubType;
-        return true;
-      }
-
-      #endregion
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Sets the nodes representing resolution results to the collection of nodes
-      /// specified.
-      /// </summary>
-      /// <param name="list">Collection of nodes.</param>
-      // --------------------------------------------------------------------------------
-      public void SetResultNode(IEnumerable<ResolutionNodeBase> list)
-      {
-        _Results.Clear();
-        _Results.Merge(list);
-      }
-
-      // --------------------------------------------------------------------------------
-      /// <summary>
-      /// Evaluates the current state of the resolution.
-      /// </summary>
-      /// <remarks>
-      /// If all name parts are resolved, signs the full resolution. If there are more
-      /// resulting nodes, resolves namespace/type/type ambiguity conflicts.
-      /// </remarks>
-      // --------------------------------------------------------------------------------
-      public void Evaluate()
-      {
-        // --- Evaluate only if type is fully resolved.
-        if (_CurrentPart.SubType != null) return;
-
-        // --- No resolution found?
-        if (_Results.Count == 0)
-        {
-          _Target = ResolutionTarget.Unresolved;
-          return;
-        }
-
-        // --- At this point Result contains all nodes. 
-        _Target = _CurrentPart.Target;
-        if (!_Resolver.ResolveConflict(_Results, _CurrentPart))
-        {
-          _Target = ResolutionTarget.Unresolved;
-        }
+              _Target != ResolutionTarget.NamespaceHierarchy &&
+              _Target != ResolutionTarget.Namespace &&
+              _Target == ResolutionTarget.Type
+            )
+            || Result.Root == CompilationUnit.SourceResolutionTree
+          );
       }
     }
 
     #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Moves to the next part to resolve.
+    /// </summary>
+    /// <returns>
+    /// True, if move is successful; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool MoveToNextPart()
+    {
+      if (_CurrentPart.SubType == null) return false;
+      _CurrentPart = _Type.SubType;
+      return true;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the nodes representing resolution results to the collection of nodes
+    /// specified.
+    /// </summary>
+    /// <param name="list">Collection of nodes.</param>
+    // --------------------------------------------------------------------------------
+    public void SetResultNode(IEnumerable<ResolutionNodeBase> list)
+    {
+      _Results.Clear();
+      _Results.Merge(list);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Evaluates the current state of the resolution.
+    /// </summary>
+    /// <remarks>
+    /// If all name parts are resolved, signs the full resolution. If there are more
+    /// resulting nodes, resolves namespace/type/type ambiguity conflicts.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void Evaluate()
+    {
+      // --- Evaluate only if type is fully resolved.
+      if (_CurrentPart.SubType != null) return;
+
+      // --- No resolution found?
+      if (_Results.Count == 0)
+      {
+        _Target = ResolutionTarget.Unresolved;
+        return;
+      }
+
+      // --- At this point Result contains all nodes. 
+      _Target = _CurrentPart.Target;
+      if (!_Resolver.ResolveConflict(_Results, _CurrentPart))
+      {
+        _Target = ResolutionTarget.Unresolved;
+      }
+    }
+  
+    #endregion
+
   }
+
+  #endregion
 }

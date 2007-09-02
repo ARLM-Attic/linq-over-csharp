@@ -287,10 +287,6 @@ namespace CSharpParser.ProjectModel
     public void ResolveTypeReferences(ResolutionContext contextType,
       IUsesResolutionContext contextInstance)
     {
-      foreach (UsingClause usingClause in _Usings)
-      {
-        usingClause.ResolveTypeReferences(contextType, contextInstance);
-      }
       foreach (AttributeDeclaration attr in _GlobalAttributes)
       {
         attr.ResolveTypeReferences(contextType, contextInstance);
@@ -329,6 +325,16 @@ namespace CSharpParser.ProjectModel
     /// </remarks>
     // --------------------------------------------------------------------------------
     public NamespaceFragment EnclosingNamespace
+    {
+      get { return null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace enclosing this resolution context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceFragment DeclaringNamespace
     {
       get { return null; }
     }

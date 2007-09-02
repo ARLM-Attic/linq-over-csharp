@@ -15,14 +15,15 @@ namespace CSharpParser.ProjectModel
   public class MethodDeclaration : MemberDeclaration, 
     IBlockOwner,
     ITypeParameterOwner,
+    ITypeParameterScope,
     IResolutionContext
   {
     #region Private fields
 
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
     private readonly FormalParameterCollection _FormalParameters = new FormalParameterCollection();
-    private readonly List<TypeParameterConstraint> _ParameterConstraints
-      = new List<TypeParameterConstraint>();
+    private readonly TypeParameterConstraintCollection _ParameterConstraints
+      = new TypeParameterConstraintCollection();
     private readonly StatementCollection _Statements = new StatementCollection(null);
     private bool _HasBody;
     private readonly VariableCollection _Variables = new VariableCollection();
@@ -73,7 +74,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of type parameter constraints belonging to the method.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<TypeParameterConstraint> ParameterConstraints
+    public TypeParameterConstraintCollection ParameterConstraints
     {
       get { return _ParameterConstraints; }
     }
