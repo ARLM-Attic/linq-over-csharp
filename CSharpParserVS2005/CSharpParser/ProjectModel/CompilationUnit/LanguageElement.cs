@@ -15,6 +15,7 @@ namespace CSharpParser.ProjectModel
     private LanguageElement _ContextElement;
     private readonly CSharpSyntaxParser _Parser;
     private string _Name;
+    private bool _IsValid;
     private CommentInfo _Comment;
 
     #endregion
@@ -49,6 +50,7 @@ namespace CSharpParser.ProjectModel
       _Token = token;
       _Name = token.val;
       _Parser = parser;
+      _IsValid = false;
     }
 
     // --------------------------------------------------------------------------------
@@ -184,6 +186,51 @@ namespace CSharpParser.ProjectModel
     public bool HasContextElement
     {
       get { return _ContextElement == null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this language element is valid in its context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsValid
+    {
+      get { return _IsValid; }
+    }
+
+    #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs this language element is valid in its context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void Validate()
+    {
+      _IsValid = true;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the validity of this language element.
+    /// </summary>
+    /// <param name="isValid">True, if the language element is valid.</param>
+    // --------------------------------------------------------------------------------
+    public void Validate(bool isValid)
+    {
+      _IsValid = isValid;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs this language element is invalid in its context.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void Invalidate()
+    {
+      _IsValid = false;
     }
 
     #endregion

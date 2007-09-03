@@ -31,6 +31,19 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared sealed.
+    /// </summary>
+    /// <remarks>
+    /// This method returns true, as structs are always implicitly sealed.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public override bool IsSealed
+    {
+      get { return true; }
+    }
+
     #endregion
 
     #region Overridden methods

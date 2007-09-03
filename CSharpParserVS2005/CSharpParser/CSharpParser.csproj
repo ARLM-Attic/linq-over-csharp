@@ -40,6 +40,7 @@
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
+    <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />
     <Compile Include="Semantics\TypeResolution\ITypeDeclarationScope.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />

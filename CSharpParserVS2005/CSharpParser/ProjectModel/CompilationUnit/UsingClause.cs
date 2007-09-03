@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
@@ -191,6 +190,7 @@ namespace CSharpParser.ProjectModel
     public void SignResolved()
     {
       _IsResolved = _Resolvers.Count > 0;
+      Validate(_IsResolved);
     }
 
     #endregion

@@ -562,6 +562,7 @@ namespace CSharpParser.ProjectModel
 
       // --- Phase 3: Resolve base types and check base type validity
       ResolveBaseTypes();
+      CheckCircularDependency();
       ResolveTypeReferences();
 
       // --- Return the number of errors found
@@ -916,10 +917,21 @@ namespace CSharpParser.ProjectModel
     private void ResolveBaseTypes(TypeDeclaration type, ResolutionContext contextType, 
       ITypeDeclarationScope contextObject)
     {
+      // --- Resolve each base type reference
+      bool firstOnList = true;
       foreach (TypeReference baseType in type.BaseTypes)
       {
+        // --- Resolve the type only, if not resolved yet.
         if (!baseType.IsResolved)
-          _NamespaceOrTypeResolver.Resolve(baseType, contextType, contextObject, type);
+        {
+          NamespaceOrTypeResolverInfo info = _NamespaceOrTypeResolver.
+            Resolve(baseType, contextType, contextObject, type);
+          if (!info.IsResolved) continue;
+        }
+        
+        // --- Check, if the base type is valid in its context.
+        baseType.Validate(CheckBaseType(type, baseType, firstOnList));
+        firstOnList = false;
       }
 
       // --- Resolve base types in nested types
@@ -950,6 +962,186 @@ namespace CSharpParser.ProjectModel
       foreach (NamespaceFragment nested in ns.NestedNamespaces)
       {
         ResolveBaseTypes(nested);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the base type is valid in the context of the specified type 
+    /// declaration.
+    /// </summary>
+    /// <param name="type">Type declaration that inherits from baseType.</param>
+    /// <param name="baseType">Base type to check</param>
+    /// <param name="firstOnList">Indicates if the type is the first on the list.</param>
+    /// <returns>
+    /// True, if base type is valid; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool CheckBaseType(TypeDeclaration type, TypeReference baseType, 
+      bool firstOnList)
+    {
+      TypeReference rightMostPart = baseType.RightMostPart;
+
+      // --- Check 1: The base type cannot be resolved to a type parameter
+      if (rightMostPart.Target == ResolutionTarget.TypeParameter)
+      {
+        Parser.Error0689(baseType.Token, baseType.ResolvingTypeParameter.Name);
+        return false;
+      }
+
+      // --- Check 2: The base type cannot be resolved to a namespace
+      if (rightMostPart.Target == ResolutionTarget.Namespace)
+      {
+        Parser.Error0118(baseType.Token, baseType.FullName, "namespace", "type");
+        return false;
+      }
+
+      // --- Checks for base types of classes
+      if (type.IsClass)
+      {
+        // --- Check 3a: Base types of classes cannot be special classes
+        if (rightMostPart.ResolvingType.TypeObject.Equals(typeof(Array)) ||
+         rightMostPart.ResolvingType.TypeObject.Equals(typeof (Delegate)) ||
+         rightMostPart.ResolvingType.TypeObject.Equals(typeof (Enum)) ||
+         rightMostPart.ResolvingType.TypeObject.Equals(typeof (ValueType))
+        )
+        {
+          Parser.Error0644(baseType.Token, type.Name, rightMostPart.ResolvingType.FullName);
+          return false;
+        }
+
+        // --- Check 3b: Classes cannot have multiple base types
+        if (!firstOnList && !rightMostPart.ResolvingType.IsInterface)
+        {
+          Parser.Error1721(baseType.Token, type.Name, type.BaseTypes[0].FullName,
+                           rightMostPart.ResolvingType.FullName);
+          return false;
+        }
+
+        // --- Check 3c: Base types of classes cannot be sealed types
+        if (rightMostPart.ResolvingType.IsSealed)
+        {
+          Parser.Error0509(baseType.Token, type.Name, rightMostPart.ResolvingType.FullName);
+          return false;
+        }
+      }
+      // --- Checks for base types of structs
+      else if (type.IsStruct)
+      {
+        // --- Check 4a: Only interface types allowed on interface list.
+        if (!rightMostPart.ResolvingType.IsInterface)
+        {
+          Parser.Error0527(baseType.Token, rightMostPart.ResolvingType.FullName);
+          return false;
+        }
+      }
+      // --- Checks for base types of enums
+      else if (type.IsEnum)
+      {
+        // --- Check 5a: Only integral types are allowed in form of keywords.
+        if (baseType.HasSubType ||
+          (
+            baseType.Name != "sbyte" &&
+            baseType.Name != "byte" &&
+            baseType.Name != "short" &&
+            baseType.Name != "ushort" &&
+            baseType.Name != "int" &&
+            baseType.Name != "uint" &&
+            baseType.Name != "long" &&
+            baseType.Name != "ulong"
+          ))
+        {
+          Parser.Error1008(baseType.Token);
+          return false;
+        }
+      }
+      // --- Check base types of interfaces
+      else if (type.IsInterface)
+      {
+        // --- Check 6a: Only interface types allowed on interface list.
+        if (!rightMostPart.ResolvingType.IsInterface)
+        {
+          Parser.Error0527(baseType.Token, rightMostPart.ResolvingType.FullName);
+          return false;
+        }
+      }
+
+      // TODO: Check accessibility
+      return true;
+    }
+
+    #endregion
+
+    #region CircularDependency methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if there are any circular dependencies within the compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckCircularDependency()
+    {
+      foreach (SourceFile file in _Files)
+      {
+        _CurrentFile = file;
+
+        // --- Resolve types declared in the global namespace
+        foreach (TypeDeclaration type in file.TypeDeclarations)
+        {
+          CheckCircularDependency(type);
+        }
+
+        // --- Resolve types within nested namespaces
+        foreach (NamespaceFragment ns in file.NestedNamespaces)
+        {
+          CheckCircularDependency(ns);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the base types of the specified type declaration and of all nested
+    /// type declarations.
+    /// </summary>
+    /// <param name="type">Type declaration to resolve its base types.</param>
+    // --------------------------------------------------------------------------------
+    private void CheckCircularDependency(TypeDeclaration type)
+    {
+      if (!type.IsClass) return;
+      // --- Resolve each base type reference
+      foreach (TypeReference baseType in type.BaseTypes)
+      {
+      }
+
+      // --- Resolve base types in nested types
+      foreach (TypeDeclaration nestedType in type.NestedTypes)
+      {
+        CheckCircularDependency(nestedType);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the base types of the specified type declaration within the 
+    /// specified namespace and its nested namespaces.
+    /// </summary>
+    /// <param name="ns">
+    /// Namespace in which the base types of type declarations should be resolved.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void CheckCircularDependency(NamespaceFragment ns)
+    {
+      // --- Resolve base types of types declared in this namespace
+      foreach (TypeDeclaration type in ns.TypeDeclarations)
+      {
+        CheckCircularDependency(type);
+      }
+
+      // --- Resolve types of nested namespaces
+      foreach (NamespaceFragment nested in ns.NestedNamespaces)
+      {
+        CheckCircularDependency(nested);
       }
     }
 

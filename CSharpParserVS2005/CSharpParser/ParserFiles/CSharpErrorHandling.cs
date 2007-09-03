@@ -144,6 +144,21 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0118: '{0}' is a '{1}' but is used like a '{2}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Construct name</param>
+    /// <param name="construct1">Real construct</param>
+    /// <param name="construct2">Construct used as</param>
+    // --------------------------------------------------------------------------------
+    public void Error0118(Token token, string name, string construct1, string construct2)
+    {
+      Error("CS0118", token,
+        string.Format("'{0}' is a '{1}' but is used like a '{2}'", name, construct1, construct2));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0128: A local variable named '{0}' is already defined in this scope.
     /// </summary>
     /// <param name="localVariable">Local variable already declared</param>
@@ -343,6 +358,33 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0509: '{0}': cannot derive from sealed type '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="sealedName">Name of sealed type</param>
+    // --------------------------------------------------------------------------------
+    public void Error0509(Token token, string name, string sealedName)
+    {
+      Error("CS0509", token,
+        string.Format("'{0}': cannot derive from sealed type '{1}'", name, sealedName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0527: Type '{0}' in interface list is not an interface.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0527(Token token, string name)
+    {
+      Error("CS0527", token,
+        string.Format("Type '{0}' in interface list is not an interface", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0557: Duplicate user-defined conversion in type '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -371,6 +413,33 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0644: '{0}' cannot derive from special class '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="specialName">Special class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0644(Token token, string name, string specialName)
+    {
+      Error("CS0644", token,
+        string.Format("'{0}' cannot derive from special class '{1}'", name, specialName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0689: Cannot derive from '{0}' because it is a type parameter
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0689(Token token, string name)
+    {
+      Error("CS0689", token, 
+        string.Format("Cannot derive from '{0}' because it is a type parameter", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0692: Duplicate type parameter '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -392,6 +461,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS1003", token,
         string.Format("Syntax error, '{0}' expected", missingSymbol));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1008: Type byte, sbyte, short, ushort, int, uint, long, or 
+    /// ulong expected.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error1008(Token token)
+    {
+      Error("CS1008", token, 
+        "Type byte, sbyte, short, ushort, int, uint, long, or ulong expected");
     }
 
     // --------------------------------------------------------------------------------
@@ -489,6 +571,22 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS1576", token, 
         "The line number specified for #line directive is missing or invalid.");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1721: The type '{0}' exists in both '{1}' and '{2}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="type">Conflicting type</param>
+    /// <param name="base1">First base type</param>
+    /// <param name="base2">Second base type</param>
+    // --------------------------------------------------------------------------------
+    public void Error1721(Token token, string type, string base1, string base2)
+    {
+      Error("CS1721", token,
+        string.Format("Class '{0}' cannot have multiple base classes: '{1}' and '{2}'",
+        type, base1, base2));
     }
 
     #endregion

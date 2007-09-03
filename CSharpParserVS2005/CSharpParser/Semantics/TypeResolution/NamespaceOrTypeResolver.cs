@@ -270,14 +270,17 @@ namespace CSharpParser.Semantics
       if (!info.Type.HasSubType)
       {
         // --- The name in if form of I or I<A1, ... Ak>
-        // --- Check for generic method parameter
+        // --- Step 1: Check for generic method parameter
         if (info.Type.Arguments.Count == 0)
         {
           if (ResolveGenericMethodParameter(info)) return;
         }
 
-        // --- Check for generic type parameter
-        if (ResolveGenericTypeParameter(info)) return;
+        // --- Step 2: Check if the name can be resolved using the current type body
+        if (ResolveNameInTypeBody(info)) return;
+
+        // --- Step 3: Try to resolve the name in the current scope with imported 
+        // --- namespaces, using and extern aliases.
         ResolveSimpleNameInScope(info);
       }
       else
@@ -412,7 +415,7 @@ namespace CSharpParser.Semantics
         if (nsNode != null) nsNode.ImportTypes();
 
         // --- Check, if the next part of the name can be resolved
-        nextNode = currentNode.FindChild(type.Name);
+        nextNode = currentNode.FindChild(type.SimpleName);
 
         // --- No more parts can be resolved? Quit in this case.
         if (nextNode == null) return null;
@@ -481,7 +484,7 @@ namespace CSharpParser.Semantics
 
     #endregion
 
-    #region ResolveGenericTypeParameter method
+    #region ResolveNameInTypeBody method
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -501,19 +504,33 @@ namespace CSharpParser.Semantics
     /// </para>
     /// </remarks>
     // --------------------------------------------------------------------------------
-    private static bool ResolveGenericTypeParameter(NamespaceOrTypeResolverInfo info)
+    private bool ResolveNameInTypeBody(NamespaceOrTypeResolverInfo info)
     {
-      // --- Exit if the current context does not have generic type arguments
+      // --- Exit if the current context is not within a type declaration
       if (info.ParameterScope == null) return false;
+      TypeDeclaration scope = info.ParameterScope as TypeDeclaration;
+      if (scope == null) scope = info.ParameterScope.DeclaringType;
+      if (scope == null) return false;
 
-      ITypeParameterScope scope = info.ParameterScope;
+      // --- At this point we are within a type declaration
       while (scope != null)
       {
+        // --- Step 1: Try to resolve as a type parameter
         TypeParameter typeParam;
         if (scope.TypeParameters.TryGetValue(info.CurrentPart.SimpleName, out typeParam))
         {
           info.Target = ResolutionTarget.TypeParameter;
           info.CurrentPart.ResolveToTypeParameter(typeParam);
+          return true;
+        }
+
+        // --- Step 2: Try to resolve name as a nested type
+        ResolutionNodeBase node = scope.ResolverNode.FindChild(info.CurrentPart.SimpleName);
+        if (node != null)
+        {
+          SetResultByResolutionNode(info.CurrentPart, node);
+          info.SetResultNode(node);
+          info.Evaluate();
           return true;
         }
         scope = scope.DeclaringType;
@@ -1173,6 +1190,18 @@ namespace CSharpParser.Semantics
     {
       _Results.Clear();
       _Results.Merge(list);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the node representing resolution result to the specified node.
+    /// </summary>
+    /// <param name="node">Node resolving the name.</param>
+    // --------------------------------------------------------------------------------
+    public void SetResultNode(ResolutionNodeBase node)
+    {
+      _Results.Clear();
+      _Results.Add(node);
     }
 
     // --------------------------------------------------------------------------------

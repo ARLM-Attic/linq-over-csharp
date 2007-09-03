@@ -173,12 +173,40 @@ namespace CSharpParser.Semantics
     /// <returns>
     /// Child node if found; otherwise, null.
     /// </returns>
+    /// <remarks>
+    /// Navigates only one level from this node.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public ResolutionNodeBase FindChild(string key)
     {
       ResolutionNodeBase child;
       if (_Children.TryGetValue(key, out child)) return child;
       return null;  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds the child node having the specified name using the specified compound 
+    /// name.
+    /// </summary>
+    /// <param name="key">Name of the child to be found.</param>
+    /// <returns>
+    /// Child node if found; otherwise, null.
+    /// </returns>
+    /// <remarks>
+    /// Navigates down the from this node as many levels as specified by the compound
+    /// child name.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ResolutionNodeBase FindCompoundChild(string key)
+    {
+      ResolutionNodeBase current = this;
+      string[] nameParts = key.Split('.');
+      for (int i = 0; i < nameParts.Length; i++)
+      {
+        if ((current = current.FindChild(nameParts[i])) == null) return null;
+      }
+      return current;
     }
 
     // --------------------------------------------------------------------------------
@@ -337,132 +365,6 @@ namespace CSharpParser.Semantics
       // --- Create the type resolution node for this type
       return new TypeResolutionNode(namingNode, type);
     }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Registers a namespace node.
-    /// </summary>
-    /// <param name="nameSpace">Namespace to register.</param>
-    /// <param name="node">The node representing the namespace.</param>
-    /// <param name="conflictingNode">Node causing collision.</param>
-    /// <returns>
-    /// True, if the node successfully registered; otherwise, false. False actually 
-    /// means that there is a name collision with a type name.
-    /// </returns>
-    /// <remarks>
-    /// If the namespace node is already registered, does not create any new node. If
-    /// any namespace node is missing, this methods creates that node.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    //public virtual bool RegisterNamespace(string nameSpace, out NamespaceResolutionNode node,
-    //  out ResolutionNodeBase conflictingNode)
-    //{
-    //  string[] parts = nameSpace.Split('.');
-    //  ResolutionNodeBase currentNode = this;
-    //  conflictingNode = null;
-    //  node = null;
-    //  int partIndex = 0;
-
-    //  // --- Search for existing nodes
-    //  while (partIndex < parts.Length)
-    //  {
-    //    ResolutionNodeBase nextNode;
-    //    if ((nextNode = currentNode.FindChild(parts[partIndex])) == null)
-    //    {
-    //      // --- No further part can be found.
-    //      break;
-    //    }
-
-    //    // --- nextNode contains the part found. It can only be a NamespaceResolution
-    //    // --- node. In any other case it is a name collision with a type.
-    //    node = nextNode as NamespaceResolutionNode;
-    //    if (node == null)
-    //    {
-    //      conflictingNode = nextNode;
-    //      return false;
-    //    }
-
-    //    // --- OK, this is a namespace resolution node, so move to the next part.
-    //    currentNode = nextNode;
-    //    partIndex++;
-    //  }
-
-    //  // --- At this point currentNode contains the last part that can be found.
-    //  // --- All the remaining namespace parts should be created.
-    //  while (partIndex < parts.Length)
-    //  {
-    //    node = new NamespaceResolutionNode(currentNode, parts[partIndex++]);
-    //    currentNode = node;
-    //  }
-
-    //  // --- Now the whole namespace is registered.
-    //  return true;
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Finds the name described by the specified type reference instance.
-    /// </summary>
-    /// <param name="type">TypeReference representing the name to find.</param>
-    /// <param name="resolvedNode">
-    /// The node that fully or partially resolved the name.</param>
-    /// <param name="nextPart">Next part of the name that cannot be resolved.</param>
-    /// <returns>
-    /// Number of name fragments successfully resolved.
-    /// </returns>
-    /// <remarks>
-    /// If returns 0, it means that no part of the name could be resolved. If 
-    /// 'nextPart' is null, it means the whole name has been susseccfully resolved.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    //public int FindName(TypeReference type, out ResolutionNodeBase resolvedNode,
-    //  out TypeReference nextPart)
-    //{
-    //  int depth = 0;
-    //  resolvedNode = null;
-    //  ResolutionNodeBase node = this;
-    //  nextPart = type;
-    //  while (nextPart != null && node.Children.TryGetValue(nextPart.Name, out node))
-    //  {
-    //    // --- We resolved the current part
-    //    resolvedNode = node;
-    //    nextPart = nextPart.SubType;
-    //    depth++;
-    //  }
-    //  return depth;
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Registers a type node.
-    /// </summary>
-    /// <param name="type">Type to register.</param>
-    /// <param name="node">The node representing the type.</param>
-    /// <returns>
-    /// True, if the node successfully registered; otherwise, false. False actually 
-    /// means that there is a name collision with a namspace.
-    /// </returns>
-    /// <remarks>
-    /// If the type node is already registered, does not create any new node. Otherwise 
-    /// this methods creates the node.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    //public virtual bool RegisterType(ITypeCharacteristics type, out TypeResolutionNode node)
-    //{
-    //  // --- Search for the type node
-    //  ResolutionNodeBase currentNode;
-    //  if (Children.TryGetValue(type.SimpleName, out currentNode))
-    //  {
-    //    // --- currentNode contains the node found. It can only be a TypeResolution
-    //    // --- node. In any other case it is a name collision with a namespace.
-    //    node = currentNode as TypeResolutionNode;
-    //    return node != null;
-    //  }
-
-    //  // --- Register the new type resolution node
-    //  node = new TypeResolutionNode(this, type);
-    //  return true;
-    //}
 
     #endregion
 

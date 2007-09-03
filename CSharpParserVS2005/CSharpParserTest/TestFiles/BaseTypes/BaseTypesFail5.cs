@@ -1,0 +1,1 @@
+public class A : System.IO.BinaryWriter, System.Text.StringBuilder, System.IO.BinaryReader {}

@@ -385,7 +385,27 @@ namespace CSharpParser.ProjectModel
     {
       while (ns != null)
       {
+        // --- Retrieve the namespace fragment itself
         yield return ns;
+
+        // --- Create implicit namespaces
+        string[] nameParts = ns.Name.Split('.');
+        Stack<string> names= new Stack<string>();
+        string name = ns.EnclosingNamespace == null 
+          ? String.Empty 
+          : ns.EnclosingNamespace.FullName;
+        for (int i = 0; i < nameParts.Length - 1; i++)
+        {
+          if (name != String.Empty) name += ".";
+          name += nameParts[i];
+          names.Push(name);
+        }
+        while (names.Count > 0)
+        {
+          yield return new ImplicitNamespace(names.Pop(), _ParentUnit);
+        }
+
+        // --- Move to the parent fragment
         ns = ns.EnclosingNamespace;
       }
       yield return this;

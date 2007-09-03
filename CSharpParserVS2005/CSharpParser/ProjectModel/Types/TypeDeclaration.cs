@@ -485,7 +485,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsSealed
+    public virtual bool IsSealed
     {
       get { return _IsSealed; }
     }

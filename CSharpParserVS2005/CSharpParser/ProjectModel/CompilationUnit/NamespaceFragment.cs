@@ -22,7 +22,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private readonly NamespaceFragment _ExclosingNamespace;
+    private readonly NamespaceFragment _EnclosingNamespace;
     private readonly SourceFile _EnclosingFile; 
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly NamespaceFragmentCollection _NestedNamespaces = new NamespaceFragmentCollection();
@@ -30,7 +30,7 @@ namespace CSharpParser.ProjectModel
     private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
 
     // --- Fields used for semantics check
-    private NamespaceResolutionNode _ResolverNode;
+    private readonly ResolutionNodeList _Resolvers = new ResolutionNodeList();
 
     #endregion
 
@@ -56,14 +56,14 @@ namespace CSharpParser.ProjectModel
 
       // --- Store attributes
       Name = name;
-      _ExclosingNamespace = parentNamespace;
+      _EnclosingNamespace = parentNamespace;
       CompilationUnit unit = Parser.CompilationUnit;
 
-      if (_ExclosingNamespace != null) 
+      if (_EnclosingNamespace != null) 
       {
         // --- This namespace has a parent, this namespace is a nested 
         // --- namespace of the parent.
-        _ExclosingNamespace.NestedNamespaces.Add(this);
+        _EnclosingNamespace.NestedNamespaces.Add(this);
       }
       else
       {
@@ -101,9 +101,9 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return _ExclosingNamespace == null 
+        return _EnclosingNamespace == null 
           ? Name 
-          : _ExclosingNamespace.FullName + "." + Name;
+          : _EnclosingNamespace.FullName + "." + Name;
       }
     }
 
@@ -130,10 +130,12 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ResolutionNodeList FindSimpleName(TypeReference type)
     {
-      if (_ResolverNode == null) return null;
       ResolutionNodeList results = new ResolutionNodeList();
-      ResolutionNodeBase node = _ResolverNode.FindSimpleNamespaceOrType(type);
-      if (node != null) results.Add(node);
+      foreach (NamespaceResolutionNode resolverNode in _Resolvers)
+      {
+        ResolutionNodeBase node = resolverNode.FindSimpleNamespaceOrType(type);
+        if (node != null) results.Add(node);
+      }
       return results;
     }
 
@@ -161,7 +163,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasParentNamespace
     {
-      get { return _ExclosingNamespace != null; }
+      get { return _EnclosingNamespace != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -220,7 +222,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public NamespaceResolutionNode ResolverNode
     {
-      get { return _ResolverNode; }
+      get { return _Resolvers[0] as NamespaceResolutionNode; }
     }
 
     #endregion
@@ -239,7 +241,7 @@ namespace CSharpParser.ProjectModel
     public void SetNamespaceResolvers()
     {
       ResolutionNodeBase resolverNode;
-      if (_ExclosingNamespace == null)
+      if (_EnclosingNamespace == null)
       {
         // --- This is a top namespace
         resolverNode = Parser.CompilationUnit.SourceResolutionTree;
@@ -247,14 +249,27 @@ namespace CSharpParser.ProjectModel
       else
       {
         // --- This is a nested namespace
-        resolverNode = _ExclosingNamespace.ResolverNode;
+        resolverNode = _EnclosingNamespace.ResolverNode;
       }
 
       // --- Register the namespace
       if (resolverNode != null)
       {
-        _ResolverNode = resolverNode.CreateNamespace(Name);
-        _ResolverNode.SignDefinedInSource();
+        NamespaceResolutionNode nsNode = resolverNode.CreateNamespace(Name);
+        _Resolvers.Add(nsNode);
+        nsNode.SignDefinedInSource();
+
+        // --- Add namespace resolution nodes for trees in other forests
+        foreach (TypeResolutionTree tree in
+          Parser.CompilationUnit.GlobalHierarchy.ResolutionTrees.Values)
+        {
+          if (tree is SourceResolutionTree) continue;
+          ResolutionNodeBase forestNode = tree.FindCompoundChild(FullName);
+          if (forestNode as NamespaceResolutionNode != null)
+          {
+            _Resolvers.Add(forestNode);
+          }
+        }
 
         // --- Set resolvers for nested namespaces
         foreach (NamespaceFragment nested in _NestedNamespaces)
@@ -276,7 +291,7 @@ namespace CSharpParser.ProjectModel
     public void SetTypeResolvers()
     {
       ResolutionNodeBase resolverNode;
-      if (_ExclosingNamespace == null)
+      if (_EnclosingNamespace == null)
       {
         // --- This is a top namespace
         resolverNode = Parser.CompilationUnit.SourceResolutionTree;
@@ -284,7 +299,7 @@ namespace CSharpParser.ProjectModel
       else
       {
         // --- This is a nested namespace
-        resolverNode = _ExclosingNamespace.ResolverNode;
+        resolverNode = _EnclosingNamespace.ResolverNode;
       }
 
       // --- Register the namespace
@@ -367,7 +382,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public NamespaceFragment EnclosingNamespace
     {
-      get { return _ExclosingNamespace; }
+      get { return _EnclosingNamespace; }
     }
 
     // --------------------------------------------------------------------------------

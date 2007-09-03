@@ -18,10 +18,11 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
-    public void RestricterCollection_cs_ErrorFixed()
+    public void RestrictedCollection_cs_ErrorFixed()
     {
       CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
       parser.AddFile(@"Utility\RestrictedCollection.cs");
+      parser.AddFile(@"Utility\IReadOnlySupport.cs");
       bool result = InvokeParser(parser);
       Assert.IsTrue(result);
     }

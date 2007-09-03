@@ -461,7 +461,7 @@ ClassBase<ClassDeclaration cd>
   ClassType<out typeRef>     (. cd.BaseTypes.Add(typeRef); .)
   
   { ","                                                         
-    TypeName<out typeRef>    (. cd.BaseTypes.Add(typeRef); .)
+    ClassType<out typeRef>    (. cd.BaseTypes.Add(typeRef); .)
   }
 .
 
@@ -498,9 +498,9 @@ StructDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
   ident                                            (. sd.Name = t.val; .)
   [ TypeParameterList<sd> ]
   [ ":"                                                     
-  TypeName<out typeRef>                            (. sd.BaseTypes.Add(typeRef); .)
+  ClassType<out typeRef>                           (. sd.BaseTypes.Add(typeRef); .)
   { "," 
-    TypeName<out typeRef>                          (. sd.BaseTypes.Add(typeRef); .)
+    ClassType<out typeRef>                         (. sd.BaseTypes.Add(typeRef); .)
   } ]
   {                                                (. TypeParameterConstraint constraint; .)
     TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
@@ -527,15 +527,19 @@ StructBody<TypeDeclaration td>
 // ------------------------------------------------------------------------------------
 EnumDeclaration<Modifiers m, out TypeDeclaration td>
 =
-  "enum"                      (. 
-                                 m.Check(Modifier.nonClassTypes); 
-                                 EnumDeclaration ed = new EnumDeclaration(t, this);
-                                 td = ed;
-                                 CurrentElement = ed;
-                              .)
-  ident                       (. ed.Name = t.val; .)
-  [ ":"                       (. TypeReference typeRef; .)
-    IntegralType<out typeRef> (. ed.BaseTypes.Add(typeRef); .)
+  "enum"                         (. 
+                                    m.Check(Modifier.nonClassTypes); 
+                                    EnumDeclaration ed = new EnumDeclaration(t, this);
+                                    td = ed;
+                                    CurrentElement = ed;
+                                 .)
+  ident                          (. ed.Name = t.val; .)
+  [ ":"                          (. TypeReference typeRef; .)
+    ( 
+      ClassType<out typeRef>     (. ed.BaseTypes.Add(typeRef); .)
+      |
+      IntegralType<out typeRef>  (. ed.BaseTypes.Add(typeRef); .)
+    )
   ] 
   EnumBody<ed> 
   [ ";" ]                                                       
@@ -947,10 +951,10 @@ InterfaceDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 InterfaceBase<InterfaceDeclaration ifd> 
 =
   ":"                        (. TypeReference typeRef; .)
-  TypeName<out typeRef>      (. ifd.BaseTypes.Add(typeRef); .)
+  ClassType<out typeRef>      (. ifd.BaseTypes.Add(typeRef); .)
   
   { ","                                                         
-    TypeName<out typeRef>    (. ifd.BaseTypes.Add(typeRef); .)
+    ClassType<out typeRef>    (. ifd.BaseTypes.Add(typeRef); .)
   }
 .
 
@@ -1493,13 +1497,14 @@ TypeName<out TypeReference typeRef>
                                             nextType = typeRef.SubType;
                                          .)
   ]                                                
-  [ TypeArgumentList<typeRef.Arguments> ]                                    
+  [ TypeArgumentList<nextType.Arguments> ]                                    
   {
     "." ident                            (. 
                                             nextType.SubType = new TypeReference(t, this);
                                             nextType.SubType.Name = t.val;
+                                            nextType = nextType.SubType;
                                          .)
-    [ TypeArgumentList<typeRef.Arguments> ]        (. nextType = nextType.SubType; .)
+    [ TypeArgumentList<nextType.Arguments> ]   
   }
 .
 
