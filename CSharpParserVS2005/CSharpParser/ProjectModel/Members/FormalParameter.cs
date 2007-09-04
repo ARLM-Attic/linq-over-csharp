@@ -1,3 +1,4 @@
+using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
@@ -148,5 +149,14 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This type represents a collection formal parameter declarations.
+  /// </summary>
+  // ==================================================================================
+  public sealed class FormalParameterCollection : RestrictedCollection<FormalParameter>
+  {
   }
 }

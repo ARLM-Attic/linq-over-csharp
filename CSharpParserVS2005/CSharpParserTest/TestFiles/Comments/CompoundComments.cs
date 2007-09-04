@@ -17,17 +17,6 @@ namespace CSharpParser.ProjectModel
   {
     #region Private Fields
 
-    private readonly SourceFileCollection _Files = new SourceFileCollection();
-    private readonly NamespaceCollection _DeclaredNamespaces = new NamespaceCollection();
-    private readonly TypeDeclarationCollection _DeclaredTypes = new TypeDeclarationCollection();
-    private readonly string _WorkingFolder = string.Empty;
-    private readonly CompilationReferenceCollection _References = new CompilationReferenceCollection();
-    private readonly ExternAliasResolutionCollection _ExternAliasResolutions = new ExternAliasResolutionCollection();
-    private readonly List<string> _ConditionalSymbols = new List<string>();
-
-    private CSharpSyntaxParser _Parser;
-    private SourceFile _CurrentFile;
-
     #endregion
 
     #region Lifecycle methods
@@ -53,15 +42,6 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public CompilationUnit(string workingFolder, bool addCSharpFiles)
     {
-      _ErrorHandler = this;
-      _WorkingFolder = workingFolder;
-      _CurrentFile = null;
-      _ErrorLineOffset = -1;
-      _ErrorFile = null;
-      if (addCSharpFiles)
-      {
-        AddAllFilesFrom(_WorkingFolder);
-      }
     }
 
     #endregion

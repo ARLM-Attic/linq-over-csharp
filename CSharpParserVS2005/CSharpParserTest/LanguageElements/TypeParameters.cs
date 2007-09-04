@@ -19,15 +19,13 @@ namespace CSharpParserTest.LanguageElements
       TypeParameterConstraint con = coList[0];
       Assert.AreEqual(con.Name, "A");
       Assert.AreEqual(con.ParameterType, ParameterConstraintType.Class);
-      Assert.AreEqual(con.Constraints.Count, 1);
-      Assert.AreEqual(con.Constraints[0].Name, "class");
+      Assert.AreEqual(con.Constraints.Count, 0);
       Assert.IsFalse(con.HasNew);
 
       con = coList[1];
       Assert.AreEqual(con.Name, "B");
       Assert.AreEqual(con.ParameterType, ParameterConstraintType.Struct);
-      Assert.AreEqual(con.Constraints.Count, 1);
-      Assert.AreEqual(con.Constraints[0].Name, "struct");
+      Assert.AreEqual(con.Constraints.Count, 0);
       Assert.IsFalse(con.HasNew);
 
       con = coList[2];

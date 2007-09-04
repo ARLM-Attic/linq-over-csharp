@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 internal sealed class MyDupPropClass
 {
   private int _Prop1;

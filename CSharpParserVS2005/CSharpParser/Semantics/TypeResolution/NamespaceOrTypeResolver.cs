@@ -267,11 +267,11 @@ namespace CSharpParser.Semantics
     {
       if (info == null) throw new ArgumentNullException("info");
 
-      if (!info.Type.HasSubType)
+      if (!info.CurrentPart.HasSubType)
       {
         // --- The name in if form of I or I<A1, ... Ak>
         // --- Step 1: Check for generic method parameter
-        if (info.Type.Arguments.Count == 0)
+        if (info.CurrentPart.Arguments.Count == 0)
         {
           if (ResolveGenericMethodParameter(info)) return;
         }
@@ -525,7 +525,8 @@ namespace CSharpParser.Semantics
         }
 
         // --- Step 2: Try to resolve name as a nested type
-        ResolutionNodeBase node = scope.ResolverNode.FindChild(info.CurrentPart.SimpleName);
+        ResolutionNodeBase node = scope.ResolverNode.
+          FindSimpleNamespaceOrType(info.CurrentPart);
         if (node != null)
         {
           SetResultByResolutionNode(info.CurrentPart, node);

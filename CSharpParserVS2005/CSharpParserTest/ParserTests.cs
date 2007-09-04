@@ -12,15 +12,6 @@ namespace CSharpParserTest
   public class ParserTests: ParserTestBed
   {
     [TestMethod]
-    public void BasicTestIsOK()
-    {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
-      parser.AddFile("Parser.cs");
-      parser.AddAssemblyReference("System.Drawing");
-      Assert.IsTrue(InvokeParser(parser));
-    }
-
-    [TestMethod]
     public void GlobalAttributesAreOK()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
@@ -392,6 +383,14 @@ namespace CSharpParserTest
       Assert.IsTrue(md.Statements[3] is UnsafeBlock);
       Assert.IsTrue((md.Statements[3] as UnsafeBlock).Statements[0] is EmptyStatement);
       Assert.AreSame(md.Statements[3], (md.Statements[3] as UnsafeBlock).Statements[0].Parent);
+    }
+
+    [TestMethod]
+    public void ComparisonOperatorIsOK()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile("ComparisonOperator.cs");
+      Assert.IsTrue(InvokeParser(parser));
     }
   }
 }

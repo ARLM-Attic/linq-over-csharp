@@ -177,7 +177,6 @@
     <None Include="LargeTestProjects\CSLA\DataPortal\Client\IDataPortalProxy.cs" />
     <None Include="LargeTestProjects\CSLA\DataPortal\Client\LocalProxy.cs" />
     <None Include="LargeTestProjects\CSLA\DataPortal\Client\RemotingProxy.cs" />
-    <None Include="LargeTestProjects\CSLA\DataPortal\Client\WebServicesProxy.cs" />
     <None Include="LargeTestProjects\CSLA\DataPortal\CriteriaBase.cs" />
     <None Include="LargeTestProjects\CSLA\DataPortal\DataPortalEventArgs.cs" />
     <None Include="LargeTestProjects\CSLA\DataPortal\DataPortalException.cs" />
@@ -283,6 +282,21 @@
     <None Include="TestFiles\BaseTypes\BaseTypesFail10.cs" />
     <None Include="TestFiles\BaseTypes\CircularDependency1.cs" />
     <None Include="TestFiles\BaseTypes\CircularDependency2.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency3.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency4.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency5.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency6.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency7.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency8.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency9.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency10.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency11.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails1.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails2.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails3.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails4.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityOk1.cs" />
+    <Compile Include="TestFiles\ComparisonOperator.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
@@ -315,6 +329,7 @@
     <None Include="TestFiles\TypeResolution\UsingNamespace6.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace8.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace9.cs" />
+    <None Include="TestFiles\TypeResolution\MemberReferences1.cs" />
     <Compile Include="TypeResolution\BaseTypes.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
@@ -338,7 +353,6 @@
     <None Include="TestFiles\GlobalAttributes.cs" />
     <None Include="TestFiles\ExternAliasDirective\ExternAliasesChecked.cs" />
     <None Include="TestFiles\UsingsAndNamespaces\UsingsAndNamespacesOK.cs" />
-    <None Include="TestFiles\Parser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSharpParser\CSharpParser.csproj">

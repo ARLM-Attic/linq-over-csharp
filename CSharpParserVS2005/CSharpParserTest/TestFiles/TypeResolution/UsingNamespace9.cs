@@ -19,7 +19,6 @@ namespace ns1
     {
       using alias = A;
     }
-
   }
 }
 

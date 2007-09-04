@@ -23,6 +23,7 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
       parser.AddFile(@"Utility\RestrictedCollection.cs");
       parser.AddFile(@"Utility\IReadOnlySupport.cs");
+      parser.AddFile(@"Utility\EventArguments.cs");
       bool result = InvokeParser(parser);
       Assert.IsTrue(result);
     }
@@ -34,33 +35,7 @@ namespace CSharpParserTest.LanguageElements
       TypeReference.Locations.Clear();
       TypeReference.ResolutionCounter = 0;
       parser.AddFile(@"ParserFiles\CommentHandler.cs");
-      parser.AddAssemblyReference("CSharpParser", AsmFolder);
-      Assert.IsTrue(InvokeParser(parser));
-      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
-      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
-      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
-    }
-
-    [TestMethod]
-    public void TypeResolutionCounterIsOk2()
-    {
-      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
-      TypeReference.Locations.Clear();
-      TypeReference.ResolutionCounter = 0;
-      parser.AddFile(@"ParserFiles\Modifier.cs");
-      Assert.IsTrue(InvokeParser(parser));
-      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
-      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
-      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
-    }
-
-    [TestMethod]
-    public void TypeResolutionCounterIsOk3()
-    {
-      CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
-      TypeReference.Locations.Clear();
-      TypeReference.ResolutionCounter = 0;
-      parser.AddFile(@"ProjectModel\CompilationUnit\CompilationUnit.cs");
+      parser.AddFile(@"ParserFiles\CSharpErrorHandling.cs");
       parser.AddAssemblyReference("CSharpParser", AsmFolder);
       Assert.IsTrue(InvokeParser(parser));
       Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);

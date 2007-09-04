@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using CSharpParser.ParserFiles;
@@ -63,9 +64,6 @@ namespace CSharpParser.ProjectModel
       new CastOperatorDeclarationCollection();
     private readonly FieldDeclarationCollection _Fields = new FieldDeclarationCollection();
 
-    // --- Fields used by ITypeCharacteristics
-    private ITypeCharacteristics _BaseType;
-
     // --- Fields used for semantics check
     private TypeResolutionNode _ResolverNode;
 
@@ -108,7 +106,12 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public Visibility Visibility
     {
-      get { return _DefaultVisibility ? Visibility.Internal : _DeclaredVisibility; }  
+      get 
+      {
+        return _DefaultVisibility 
+          ? (IsNested ? Visibility.Private : Visibility.Internal) 
+          : _DeclaredVisibility; 
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -242,22 +245,12 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (_BaseTypes.Count != 0)
-        {
-          if (_BaseType == null)
-          {
-            _BaseType = NetBinaryType.Object;
-          }
-        }
+        if (_BaseTypes.Count == 0) return NetBinaryType.Object;
         else
         {
-          if (_BaseType == null)
-          {
-            // TODO: Change it to a type reference
-            throw new NotImplementedException();
-          }
+          if (_BaseTypes[0].ResolvingType.IsClass) return _BaseTypes[0].ResolvingType;
+          else return NetBinaryType.Object;
         }
-        return _BaseType;
       }
     }
 
@@ -283,7 +276,7 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return IsNestedType 
+        return IsNested 
           ? _DeclaringType.FullName + "+" + Name 
           : Name;
       }
@@ -422,7 +415,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedPrivate
     {
-      get { return IsNested && _DeclaredVisibility == ProjectModel.Visibility.Private; }
+      get { return IsNested && Visibility == Visibility.Private; }
     }
 
     /// <summary>
@@ -431,7 +424,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedPublic
     {
-      get { return IsNested && _DeclaredVisibility == ProjectModel.Visibility.Public; }
+      get { return IsNested && IsPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -441,7 +434,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNotPublic
     {
-      get { return (_DeclaredVisibility & ProjectModel.Visibility.Public) != 0; }
+      get { return Visibility != Visibility.Public; }
     }
 
     // --------------------------------------------------------------------------------
@@ -477,7 +470,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsPublic
     {
-      get { return (_DeclaredVisibility & ProjectModel.Visibility.Public) == 0; }
+      get { return Visibility == Visibility.Public; }
     }
 
     // --------------------------------------------------------------------------------
@@ -518,7 +511,8 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return (!IsNested && IsPublic) || (IsNestedPublic && DeclaringType.IsVisible);
+        return (!IsNested && (IsPublic || Visibility == Visibility.Internal)) || 
+          (IsNestedPublic && DeclaringType.IsVisible);
       }
     }
 
@@ -593,16 +587,6 @@ namespace CSharpParser.ProjectModel
     public TypeDeclarationCollection NestedTypes
     {
       get { return _NestedTypes; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type is a nested type or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedType
-    {
-      get { return _DeclaringType != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -936,6 +920,35 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Member type reference resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in the members of this type
+    /// declaration.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void ResolveTypeReferencesInMembers(ResolutionContext contextType,
+      ITypeDeclarationScope declarationScope)
+    {
+      // --- Resolve type argument constraints
+      foreach (TypeParameterConstraint constraint in _ParameterConstraints)
+      {
+        constraint.Resolve(ResolutionContext.TypeDeclaration, declarationScope, this);
+      }
+
+      // --- Resolve types in members
+      foreach (MemberDeclaration member in _Members)
+      {
+        member.Resolve(ResolutionContext.TypeDeclaration, declarationScope, this);
+      }
+    }
+
+    #endregion
+
     #region IResolutionContext implementation
 
     // --------------------------------------------------------------------------------
@@ -977,6 +990,34 @@ namespace CSharpParser.ProjectModel
     public MethodDeclaration EnclosingMethod
     {
       get { throw new NotSupportedException("TypeDeclaration has no enclosing method."); }
+    }
+
+    #endregion
+
+    #region Iterators
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterates through the type declarations this type declaration directly 
+    /// depends on.
+    /// </summary>
+    /// <remarks>
+    /// In the spirit of S17.1.2.1, a type direclty depnds on its direct base types
+    /// and its direct enclosing type (if type is a nested type).
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public IEnumerable<ITypeCharacteristics> DirectlyDependsOn
+    {
+      get
+      {
+        // --- Return direct base types
+        foreach (TypeReference baseType in BaseTypes)
+        {
+          if (baseType.IsValid) yield return baseType.ResolvingType;
+        }
+        // --- Return directly enclosing type
+        if (_DeclaringType != null) yield return _DeclaringType;
+      }
     }
 
     #endregion

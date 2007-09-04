@@ -349,6 +349,26 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references.
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    // --------------------------------------------------------------------------------
+    public virtual void Resolve(ResolutionContext contextType,
+      ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
+    {
+      if (_ResultingType != null)
+      {
+        _ResultingType.Resolve(contextType, declarationScope, 
+          (this is ITypeParameterScope) ? (this as ITypeParameterScope) : parameterScope);
+      }
+    }
+
     #endregion
   }
 

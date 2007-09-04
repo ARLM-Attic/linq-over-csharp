@@ -650,6 +650,51 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Type reference resolution
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this type reference
+    /// </summary>
+    /// <param name="contextType">Type of context where the resolution occurs.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    // --------------------------------------------------------------------------------
+    public void Resolve(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
+    {
+      // --- Do not resolve the type reference more than once
+      if (IsResolved) return;
+
+      // --- Resolve the 'void' type
+      if (IsVoid)
+      {
+        ResolveToType(typeof(void));
+        return;
+      }
+
+      // --- Resolve named types
+      NamespaceOrTypeResolver resolver = new NamespaceOrTypeResolver(Parser);
+      NamespaceOrTypeResolverInfo info = 
+        resolver.Resolve(this, contextType, declarationScope, parameterScope);
+
+      if (info.IsResolved)
+      {
+        // --- We expect a type and not a namespace.
+        if (info.Target == ResolutionTarget.Namespace)
+        {
+          Parser.Error0118(Token, FullName, "namespace", "type");
+          Invalidate();
+          return;
+        }
+      }
+      Validate(info.IsResolved);
+    }
+
+    #endregion
+
     #region IUsesResolutionContext implementation
 
     // --------------------------------------------------------------------------------

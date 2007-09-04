@@ -247,5 +247,15 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS0426");
       Assert.AreEqual(parser.Errors[2].Code, "CS0234");
     }
+
+    [TestMethod]
+    public void NamespaceInsteadOfTypeFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\MemberReferences1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0118");
+    }
   }
 }

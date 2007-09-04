@@ -1388,6 +1388,26 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
 .
 
 // ------------------------------------------------------------------------------------
+// Reference for a type in a relational expression
+// +typeRef: type reference
+// +voidAllowed: indicates if "void" is an acceptable type or not.
+// ------------------------------------------------------------------------------------
+TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
+=                                                    
+  ( PrimitiveType<out typeRef>
+  | ClassType<out typeRef>                                               
+  | "void"                                           (. 
+                                                        typeRef = new TypeReference(t, this); 
+                                                        typeRef.Name = t.val;
+                                                        typeRef.Kind = TypeKind.@void; 
+                                                     .)
+  )
+  [ "?"                                              (. if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
+  ]
+  PointerOrArray<ref typeRef>                        (. if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
+.
+
+// ------------------------------------------------------------------------------------
 // Sets the appropriate flags of a type reference if the declaration shows it is
 // a pointer or array.
 // +typeRef: type reference.
@@ -2280,9 +2300,9 @@ EqlExpr<out BinaryOperator expr> (. expr = null; .)
 // Defines relational and typecheck operators.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
-RelExpr<out BinaryOperator expr> (. expr = null; .)
+RelExpr<out BinaryOperator expr> (. expr = null; BinaryOperator oper = null; .)
 = 
-  ShiftExpr<out expr>     (. BinaryOperator oper = null; .)
+  ShiftExpr<out expr>  
   { 
     (
       "<"                 (. oper = new LessThanOperator(t, this); .)
@@ -2291,7 +2311,7 @@ RelExpr<out BinaryOperator expr> (. expr = null; .)
       | ">="              (. oper = new GreaterThanOrEqualOperator(t, this); .)
     )                     (. oper.LeftOperand = expr; .)
                           (. Expression unExpr; .)
-    Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
     ShiftExpr<out rightExpr>             
                           (. 
                              if (rightExpr == null) 
@@ -2305,13 +2325,13 @@ RelExpr<out BinaryOperator expr> (. expr = null; .)
                              }
                              expr = oper;
                           .)
-    | 
+    |
       (
-        "is"              (. oper = new IsOperator(t, this); .)
+          "is"            (. oper = new IsOperator(t, this); .)
         | "as"            (. oper = new IsOperator(t, this); .)
       )                   (. oper.LeftOperand = expr; .)
                           (. TypeReference typeRef; .)
-      Type<out typeRef, false>
+      TypeInRelExpr<out typeRef, false>
                           (. oper.RightOperand = new TypeOperator(t, typeRef); .)
                           (. expr = oper; .)
   }
@@ -2890,13 +2910,10 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint>
       (
         "class"                    (. constraint.ParameterType = ParameterConstraintType.Class; .)
         | "struct"                 (. constraint.ParameterType = ParameterConstraintType.Struct; .)
-      )                            (.
-                                      typeRef = new TypeReference(t, this);
-                                      typeRef.Name = t.val;
-                                   .)
-      | TypeName<out typeRef>                                   
+      )                            
+      | TypeName<out typeRef>      (. constraint.Constraints.Add(typeRef); .)                             
     )
-                                   (. constraint.Constraints.Add(typeRef); .) 
+                                   
     { 
       IF (la.kind == _comma && Peek(1).kind != _new) "," 
       TypeName<out typeRef>        (. constraint.Constraints.Add(typeRef); .) 

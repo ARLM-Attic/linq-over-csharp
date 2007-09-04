@@ -200,7 +200,6 @@
     <Compile Include="ProjectModel\Members\MemberDeclaration.cs" />
     <Compile Include="ProjectModel\Members\FieldDeclaration.cs" />
     <Compile Include="ProjectModel\Members\FormalParameter.cs" />
-    <Compile Include="ProjectModel\Members\FormalParameterCollection.cs" />
     <Compile Include="ProjectModel\Members\MethodDeclaration.cs" />
     <Compile Include="ProjectModel\Members\PropertyDeclaration.cs" />
     <Compile Include="ProjectModel\Types\ITypeParameterOwner.cs" />

@@ -74,6 +74,22 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0060: Inconsistent accessibility: base class '{0}' is less 
+    /// accessible than class '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="baseName">Base class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0060(Token token, string name, string baseName)
+    {
+      Error("CS0060", token,
+        string.Format("Inconsistent accessibility: base class '{0}' is less " +
+        "accessible than class '{1}'", name, baseName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0101: The namespace '{0}' already contains a definition for '{1}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -201,6 +217,21 @@ namespace CSharpParser.ParserFiles
       Error("CS0138", token,
         string.Format("A using namespace directive can only be applied to namespaces; " +
         "'{0}' is a type not a namespace", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0146: Circular base class dependency involving '{0}' and '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="baseName">Base class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0146(Token token, string name, string baseName)
+    {
+      Error("CS0146", token,
+        string.Format("Circular base class dependency involving '{0}' and '{1}'", 
+        name, baseName));
     }
 
     // --------------------------------------------------------------------------------
@@ -381,6 +412,21 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0527", token,
         string.Format("Type '{0}' in interface list is not an interface", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0529: Circular base class dependency involving '{0}' and '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="baseName">Base class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0529(Token token, string name, string baseName)
+    {
+      Error("CS0529", token,
+        string.Format("Inherited interface '{0}' causes a cycle in the interface " +
+        "hierarchy of '{1}'", name, baseName));
     }
 
     // --------------------------------------------------------------------------------
