@@ -330,6 +330,9 @@
     <None Include="TestFiles\TypeResolution\UsingNamespace8.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace9.cs" />
     <None Include="TestFiles\TypeResolution\MemberReferences1.cs" />
+    <None Include="TestFiles\TypeResolution\ConflictingName1.cs" />
+    <None Include="TestFiles\TypeResolution\AttributeName1.cs" />
+    <None Include="TestFiles\TypeResolution\AttributeName2.cs" />
     <Compile Include="TypeResolution\BaseTypes.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />

@@ -328,7 +328,7 @@ namespace CSharpParserTest
       md = td.Members[3] as MethodDeclaration;
       Assert.IsNotNull(md);
       Assert.AreEqual(md.ResultingType.RightmostName, "IEnumerator");
-      Assert.AreEqual(md.ExplicitName.FullName, "IEnumerable.GetEnumerator");
+      Assert.AreEqual(md.FullName, "IEnumerable.GetEnumerator");
       Assert.AreEqual(md.Name, "GetEnumerator");
       Assert.AreEqual(md.DeclaredVisibility, Visibility.Default);
       Assert.AreEqual(md.FormalParameters.Count, 0);

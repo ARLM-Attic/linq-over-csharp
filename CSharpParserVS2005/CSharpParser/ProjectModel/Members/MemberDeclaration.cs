@@ -17,7 +17,7 @@ namespace CSharpParser.ProjectModel
     private Visibility _DeclaredVisibility;
     private bool _DefaultVisibility;
     private TypeReference _ResultingType;
-    private TypeReference _ExplicitName;
+    protected TypeReference _ExplicitName;
     protected bool _IsNew;
     protected bool _IsUnsafe;
     protected bool _IsStatic;
@@ -114,13 +114,23 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the explicit property name.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference ExplicitName
+    public virtual TypeReference ExplicitName
     {
       get { return _ExplicitName; }
       set
       {
         _ExplicitName = value;
-        Name = _ExplicitName.RightmostName;
+        Name = value.RightmostName;
+        value.RightMostPart.ResolveToName();
+        if (value.HasSubType)
+        {
+          _ExplicitName = value;
+          value.RightMostPart.PrefixType.SubType = null;
+        }
+        else
+        {
+          _ExplicitName = null;
+        }
       }
     }
 
@@ -229,9 +239,11 @@ namespace CSharpParser.ProjectModel
     /// Gets the full name of the member.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string FullName
+    public virtual string FullName
     {
-      get { return _ExplicitName == null ? Name : _ExplicitName.FullName;  }
+      get { return _ExplicitName == null 
+        ? Name 
+        : _ExplicitName.FullName + "." + Name;  }
     }
 
     #endregion
@@ -328,44 +340,26 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references.
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
+    public override void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
-      base.ResolveTypeReferences(contextType, contextInstance);
+      base.ResolveTypeReferences(contextType, declarationScope, parameterScope);
 
       // --- Resolve the return type
       if (_ResultingType != null)
       {
-        _ResultingType.ResolveTypeReferences(contextType, contextInstance);
+        _ResultingType.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
 
       // --- Resolve the explicit name of the member
       if (_ExplicitName != null)
       {
-        _ExplicitName.ResolveTypeReferences(contextType, contextInstance);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves all unresolved type references.
-    /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="declarationScope">Current type declaration context.</param>
-    /// <param name="parameterScope">Current type parameter declaration scope.</param>
-    // --------------------------------------------------------------------------------
-    public virtual void Resolve(ResolutionContext contextType,
-      ITypeDeclarationScope declarationScope,
-      ITypeParameterScope parameterScope)
-    {
-      if (_ResultingType != null)
-      {
-        _ResultingType.Resolve(contextType, declarationScope, 
-          (this is ITypeParameterScope) ? (this as ITypeParameterScope) : parameterScope);
+        _ExplicitName.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
     }
 

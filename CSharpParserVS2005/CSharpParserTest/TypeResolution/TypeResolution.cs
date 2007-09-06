@@ -257,5 +257,35 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors.Count, 1);
       Assert.AreEqual(parser.Errors[0].Code, "CS0118");
     }
+
+    [TestMethod]
+    public void NamespaceConflictResolved1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\ConflictingName1.cs");
+      parser.AddAssemblyReference("System.Data");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void AttributeNameFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\AttributeName1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0246");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0616");
+    }
+
+    [TestMethod]
+    public void AttributeNameFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\AttributeName2.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS1614");
+    }
   }
 }

@@ -26,6 +26,8 @@ namespace CSharpParser
     /// <summary>The name has been resolved to a local constant declaration.</summary>
     LocalConstant,
     /// <summary>The name has been resolved to a local variable declaration.</summary>
-    LocalDeclaration
+    LocalDeclaration,
+    /// <summary>The name has been resolved to a simple name.</summary>
+    Name
   }
 }

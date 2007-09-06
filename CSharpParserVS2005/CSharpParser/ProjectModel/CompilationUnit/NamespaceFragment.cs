@@ -433,26 +433,26 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references in this namespace fragment.
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    /// <remarks>
+    /// Does not resolve type references in using directives and aliases.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    public void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
+    public void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
-      // --- Resolve using claues
-      foreach (UsingClause usingClause in _Usings)
-      {
-        usingClause.ResolveTypeReferences(contextType, contextInstance);
-      }
       // --- Resolve types in this namespace
       foreach (TypeDeclaration type in _TypeDeclarations)
       {
-        type.ResolveTypeReferences(contextType, contextInstance);
+        type.ResolveTypeReferences(ResolutionContext.Namespace, this, parameterScope);
       }
       // --- Resolve references in nseted namespaces
       foreach (NamespaceFragment nameSpace in _NestedNamespaces)
       {
-        nameSpace.ResolveTypeReferences(contextType, contextInstance);
+        nameSpace.ResolveTypeReferences(ResolutionContext.Namespace, this, parameterScope);
       }
     }
 

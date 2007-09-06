@@ -181,11 +181,13 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references.
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
-    public virtual void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
+    public virtual void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
     }
 
@@ -198,15 +200,18 @@ namespace CSharpParser.ProjectModel
     /// Resolves all unresolved type references in the specified statement block.
     /// </summary>
     /// <param name="block">Statement block</param>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
     public static void ResolveTypeReferences(IBlockOwner block, 
-      ResolutionContext contextType, IUsesResolutionContext contextInstance)
+      ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
     {
       foreach (Statement stm in block.Statements)
       {
-        stm.ResolveTypeReferences(contextType, contextInstance);
+        stm.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
     }
 

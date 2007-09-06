@@ -47,6 +47,30 @@ namespace CSharpParser.ProjectModel
       get { return _FormalParameters; }
     }
 
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the explicit property name.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override TypeReference ExplicitName
+    {
+      set { _ExplicitName = value;}
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name of the member.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string FullName
+    {
+      get
+      {
+        return _ExplicitName == null ? "this" : _ExplicitName.FullName + ".this";
+      }
+    }
+
     #endregion
 
     #region Overridden methods
@@ -86,15 +110,18 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references.
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType, IUsesResolutionContext contextInstance)
+    public override void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
-      base.ResolveTypeReferences(contextType, contextInstance);
+      base.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       foreach (FormalParameter param in _FormalParameters)
       {
-        param.ResolveTypeReferences(contextType, contextInstance);
+        param.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
     }
 

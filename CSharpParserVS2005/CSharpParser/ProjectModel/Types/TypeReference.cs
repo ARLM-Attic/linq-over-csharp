@@ -26,6 +26,18 @@ namespace CSharpParser.ProjectModel
     private ResolutionNodeBase _ResolvingNode;
     private ITypeCharacteristics _ResolvingType;
     private TypeParameter _ResolvingTypeParameter;
+    private NamespaceHierarchy _ResolvingHierarchy;
+
+    // --- Fields related to diagnostics
+    private static int _ResolutionCounter;
+    private static int _ResolvedToSystemType;
+    private static int _ResolvedToSourceType;
+    private static int _ResolvedToNamespace;
+    private static int _ResolvedToName;
+    private static int _ResolvedToHierarchy;
+
+    private static readonly List<TypeReferenceLocation> _Locations =
+      new List<TypeReferenceLocation>();
 
     #endregion
 
@@ -42,10 +54,7 @@ namespace CSharpParser.ProjectModel
     {
       _Kind = TypeKind.simple;
       Name = token.val;
-
-    #if DIAGNOSTICS
       _Locations.Add(new TypeReferenceLocation(this, parser.CompilationUnit.CurrentFile));
-    #endif
     }
 
     // --------------------------------------------------------------------------------
@@ -66,6 +75,16 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the resolving hierarchy of this name.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public NamespaceHierarchy ResolvingHierarchy
+    {
+      get { return _ResolvingHierarchy; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -650,323 +669,7 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region Type reference resolution
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves all unresolved type references in this type reference
-    /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="declarationScope">Current type declaration context.</param>
-    /// <param name="parameterScope">Current type parameter declaration scope.</param>
-    // --------------------------------------------------------------------------------
-    public void Resolve(ResolutionContext contextType, 
-      ITypeDeclarationScope declarationScope,
-      ITypeParameterScope parameterScope)
-    {
-      // --- Do not resolve the type reference more than once
-      if (IsResolved) return;
-
-      // --- Resolve the 'void' type
-      if (IsVoid)
-      {
-        ResolveToType(typeof(void));
-        return;
-      }
-
-      // --- Resolve named types
-      NamespaceOrTypeResolver resolver = new NamespaceOrTypeResolver(Parser);
-      NamespaceOrTypeResolverInfo info = 
-        resolver.Resolve(this, contextType, declarationScope, parameterScope);
-
-      if (info.IsResolved)
-      {
-        // --- We expect a type and not a namespace.
-        if (info.Target == ResolutionTarget.Namespace)
-        {
-          Parser.Error0118(Token, FullName, "namespace", "type");
-          Invalidate();
-          return;
-        }
-      }
-      Validate(info.IsResolved);
-    }
-
-    #endregion
-
-    #region IUsesResolutionContext implementation
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves all unresolved type references in this type reference
-    /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
-    {
-      // --- Resolve the type argument types
-      foreach (TypeReference typeReference in _TypeArguments)
-      {
-        typeReference.ResolveTypeReferences(contextType, contextInstance);
-      }
-
-      // --- Do not resolve the type reference again
-      if (IsResolved) return;
-
-      switch (contextType)
-      {
-        case ResolutionContext.SourceFile:
-          ResolveTypeInSourceFile(contextInstance);
-          break;
-        case ResolutionContext.Namespace:
-          ResolveTypeInNamespace(contextInstance);
-          break;
-        case ResolutionContext.TypeDeclaration:
-          ResolveTypeInTypeDeclaration(contextInstance);
-          break;
-        case ResolutionContext.MethodDeclaration:
-          ResolveTypeInMethodDeclaration(contextInstance);
-          break;
-        case ResolutionContext.AccessorDeclaration:
-          ResolveTypeInAccessorDeclaration(contextInstance);
-          break;
-        default:
-          throw new InvalidOperationException("Invalid resolution context detected.");
-      }
-
-      // --- Do not resolve the type reference again
-      if (IsResolved) return;
-
-      _ResolutionCounter++;
-
-      if (_SubType != null)
-      {
-        _SubType.ResolveTypeReferences(contextType, contextInstance);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves this type reference to the specified system type.
-    /// </summary>
-    /// <param name="type">System type.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveToType(Type type)
-    {
-#if DIAGNOSTICS
-      if (_Target == ResolutionTarget.Unresolved)
-      {
-        _ResolutionCounter++;
-        _ResolvedToSystemType++;
-      }
-#endif
-      _Target = ResolutionTarget.Type;
-      _ResolvingType = new NetBinaryType(type);
-      _ResolvingNode = null;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves this type reference to the specified source-declared type.
-    /// </summary>
-    /// <param name="node">Node representing the type.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveToType(TypeResolutionNode node)
-    {
-#if DIAGNOSTICS
-      if (_Target == ResolutionTarget.Unresolved)
-      {
-        _ResolutionCounter++;
-        _ResolvedToSourceType++;
-      }
-#endif
-      _Target = ResolutionTarget.Type;
-      _ResolvingNode = node;
-      _ResolvingType = node.Resolver;
-      _ResolvingTypeParameter = null;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves this type reference to a namespace.
-    /// </summary>
-    /// <param name="node">Node representing the namespace.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveToNamespace(ResolutionNodeBase node)
-    {
-#if DIAGNOSTICS
-      if (_Target == ResolutionTarget.Unresolved)
-      {
-        _ResolutionCounter++;
-        _ResolvedToNamespace++;
-      }
-#endif
-      _Target = ResolutionTarget.Namespace;
-      _ResolvingNode = node;
-      _ResolvingType = null;
-      _ResolvingTypeParameter = null;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves this type reference to a generic type parameter
-    /// </summary>
-    /// <param name="param">Type parameter this name is resolved to.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveToTypeParameter(TypeParameter param)
-    {
-#if DIAGNOSTICS
-      if (_Target == ResolutionTarget.Unresolved)
-      {
-        _ResolutionCounter++;
-        _ResolvedToNamespace++;
-      }
-#endif
-      _Target = ResolutionTarget.TypeParameter;
-      _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingTypeParameter = param;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves this type reference to a generic method type parameter
-    /// </summary>
-    /// <param name="param">Type parameter this name is resolved to.</param>
-    // --------------------------------------------------------------------------------
-    public void ResolveToMethodTypeParameter(TypeParameter param)
-    {
-#if DIAGNOSTICS
-      if (_Target == ResolutionTarget.Unresolved)
-      {
-        _ResolutionCounter++;
-        _ResolvedToNamespace++;
-      }
-#endif
-      _Target = ResolutionTarget.MethodTypeParameter;
-      _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingTypeParameter = param;
-    }
-
-    #endregion
-
-    #region Iterators
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Iterates through the parts of the name represented by this instance.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IEnumerable<TypeReference> NameParts
-    {
-      get
-      {
-        TypeReference current = this;
-        while (current != null)
-        {
-          yield return this;
-          current = current.SubType;
-        }
-      }
-    }
-
-    #endregion
-
-    #region Private type resolution methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the type within a source file.
-    /// </summary>
-    /// <param name="instance">Source file instance.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveTypeInSourceFile(IUsesResolutionContext instance)
-    {
-      SourceFile file = instance as SourceFile;
-      if (file == null)
-      {
-        throw new InvalidOperationException("Source file context expected.");
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the type within a namespace declaration.
-    /// </summary>
-    /// <param name="instance">Namespace declaration instance.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveTypeInNamespace(IUsesResolutionContext instance)
-    {
-      NamespaceFragment nameSpace = instance as NamespaceFragment;
-      if (nameSpace == null)
-      {
-        throw new InvalidOperationException("Namspace context expected.");
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the type within a type declaration.
-    /// </summary>
-    /// <param name="instance">Type declaration instance.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveTypeInTypeDeclaration(IUsesResolutionContext instance)
-    {
-      TypeDeclaration typeDecl = instance as TypeDeclaration;
-      if (typeDecl == null)
-      {
-        throw new InvalidOperationException("Type declaration context expected.");
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the type within an accessor declaration.
-    /// </summary>
-    /// <param name="instance">Accessor declaration instance.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveTypeInAccessorDeclaration(IUsesResolutionContext instance)
-    {
-      AccessorDeclaration accDecl = instance as AccessorDeclaration;
-      if (accDecl == null)
-      {
-        throw new InvalidOperationException("Accessor declaration context expected.");
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the type within a method declaration.
-    /// </summary>
-    /// <param name="instance">Method declaration instance.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveTypeInMethodDeclaration(IUsesResolutionContext instance)
-    {
-      MethodDeclaration methodDecl = instance as MethodDeclaration;
-      if (methodDecl == null)
-      {
-        throw new InvalidOperationException("Method declaration context expected.");
-      }
-    }
-
-    #endregion
-
-    #region Diagnostics region
-
-    #if DIAGNOSTICS
-
-    private static int _ResolutionCounter;
-    private static int _ResolvedToSystemType;
-    private static int _ResolvedToSourceType;
-    private static int _ResolvedToNamespace;
-    private static int _ResolvedToHierarchy;
-
-    private static readonly List<TypeReferenceLocation> _Locations = 
-      new List<TypeReferenceLocation>();
+    #region Properties related to diagnostics
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -988,8 +691,8 @@ namespace CSharpParser.ProjectModel
     {
       get { return _ResolvedToSystemType; }
       set { _ResolvedToSystemType = value; }
-    } 
-    
+    }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the location of type references.
@@ -1035,6 +738,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets the count of references resolved to simple names.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public static int ResolvedToName
+    {
+      get { return _ResolvedToName; }
+      set { _ResolvedToName = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Resets the diagnostic counters.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -1045,11 +759,225 @@ namespace CSharpParser.ProjectModel
       _ResolvedToSourceType = 0;
       _ResolvedToNamespace = 0;
       _ResolvedToHierarchy = 0;
+      _ResolvedToName = 0;
     }
 
-#endif
-    
     #endregion
+
+    #region IUsesResolutionContext implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves all unresolved type references in this type reference
+    /// </summary>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
+    {
+      // --- Do not resolve the type reference more than once
+      if (IsResolved) return;
+
+      // --- Resolve the 'void' type
+      if (IsVoid)
+      {
+        ResolveToType(typeof(void));
+        return;
+      }
+
+      // --- Resolve named types
+      NamespaceOrTypeResolver resolver = new NamespaceOrTypeResolver(Parser);
+      NamespaceOrTypeResolverInfo info =
+        resolver.Resolve(this, contextType, declarationScope, parameterScope);
+
+      if (info.IsResolved)
+      {
+        // --- We expect a type and not a namespace.
+        if (info.Target == ResolutionTarget.Namespace)
+        {
+          Parser.Error0118(Token, FullName, "namespace", "type");
+          Invalidate();
+          return;
+        }
+      }
+      Validate(info.IsResolved);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to the specified system type.
+    /// </summary>
+    /// <param name="type">System type.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToType(Type type)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToSystemType++;
+      }
+#endif
+      _Target = ResolutionTarget.Type;
+      _ResolvingType = new NetBinaryType(type);
+      _ResolvingNode = null;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to the specified source-declared type.
+    /// </summary>
+    /// <param name="node">Node representing the type.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToType(TypeResolutionNode node)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToSourceType++;
+      }
+#endif
+      _Target = ResolutionTarget.Type;
+      _ResolvingNode = node;
+      _ResolvingType = node.Resolver;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+    }
+
+
+    public void ResolveToNamespaceHierarchy(NamespaceHierarchy hierarchy)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToHierarchy++;
+      }
+#endif
+      _Target = ResolutionTarget.NamespaceHierarchy;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to a namespace.
+    /// </summary>
+    /// <param name="node">Node representing the namespace.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToNamespace(ResolutionNodeBase node)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToNamespace++;
+      }
+#endif
+      _Target = ResolutionTarget.Namespace;
+      _ResolvingNode = node;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to a generic type parameter
+    /// </summary>
+    /// <param name="param">Type parameter this name is resolved to.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToTypeParameter(TypeParameter param)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToNamespace++;
+      }
+#endif
+      _Target = ResolutionTarget.TypeParameter;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = param;
+      _ResolvingHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to a generic method type parameter
+    /// </summary>
+    /// <param name="param">Type parameter this name is resolved to.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToMethodTypeParameter(TypeParameter param)
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToNamespace++;
+      }
+#endif
+      _Target = ResolutionTarget.MethodTypeParameter;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = param;
+      _ResolvingHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to a simple name.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void ResolveToName()
+    {
+#if DIAGNOSTICS
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        _ResolutionCounter++;
+        _ResolvedToName++;
+      }
+#endif
+      _Target = ResolutionTarget.Name;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+    }
+
+    #endregion
+
+    #region Iterators
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterates through the parts of the name represented by this instance.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IEnumerable<TypeReference> NameParts
+    {
+      get
+      {
+        TypeReference current = this;
+        while (current != null)
+        {
+          yield return this;
+          current = current.SubType;
+        }
+      }
+    }
+
+    #endregion
+
   }
 
   // ==================================================================================
@@ -1060,33 +988,55 @@ namespace CSharpParser.ProjectModel
   public sealed class TypeReferenceCollection : RestrictedCollection<TypeReference>
   { }
 
-  #region Diagnostics
+  #region TypeReferenceLocation class
 
-  #if DIAGNOSTICS
-
+  // ==================================================================================
+  /// <summary>
+  /// This type represents a location for a type reference.
+  /// </summary>
+  // ==================================================================================
   public class TypeReferenceLocation
   {
+    #region Private fields
+
     private readonly SourceFile _File;
     private readonly TypeReference _Reference;
-    
+
+    #endregion
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new location instance
+    /// </summary>
+    /// <param name="reference">Type reference</param>
+    /// <param name="file">File containing the type reference.</param>
+    // --------------------------------------------------------------------------------
     public TypeReferenceLocation(TypeReference reference, SourceFile file)
     {
       _Reference = reference;
       _File = file;
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the source file declaring the type reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
     public SourceFile File
     {
       get { return _File; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type reference represented by this location
+    /// </summary>
+    // --------------------------------------------------------------------------------
     public TypeReference Reference
     {
       get { return _Reference; }
     }
   }
-
-  #endif
   
   #endregion
 }

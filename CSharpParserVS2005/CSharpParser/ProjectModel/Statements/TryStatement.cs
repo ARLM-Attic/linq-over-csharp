@@ -188,24 +188,26 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references.
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
+    public override void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
-      base.ResolveTypeReferences(contextType, contextInstance);
+      base.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       if (_TryBlock != null)
       {
-        _TryBlock.ResolveTypeReferences(contextType, contextInstance);
+        _TryBlock.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
       if (_FinallyBlock != null)
       {
-        _FinallyBlock.ResolveTypeReferences(contextType, contextInstance);
+        _FinallyBlock.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
       foreach (CatchClause clause in _CatchClauses)
       {
-        clause.ResolveTypeReferences(contextType, contextInstance);
+        clause.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
     }
 

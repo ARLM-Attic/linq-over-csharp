@@ -41,7 +41,7 @@ namespace SampleCompilation
       foreach (Error error in project.Errors)
       {
         Console.WriteLine("--- Error {0}: {1} line: {2}, column: {3}, file: {4}",
-          error.Code, error.Description, error.Line, error.Column, error.File);
+                          error.Code, error.Description, error.Line, error.Column, error.File);
       }
 
       // --- Display warnings
@@ -49,17 +49,17 @@ namespace SampleCompilation
       foreach (Error warning in project.Warnings)
       {
         Console.WriteLine("--- Warning {0}: {1} line: {2}, column: {3}, file: {4}",
-          warning.Code, warning.Description, warning.Line, warning.Column, warning.File);
+                          warning.Code, warning.Description, warning.Line, warning.Column, warning.File);
       }
 
       // --- Display files parsed
       Console.WriteLine();
       Console.WriteLine("{0} files have been parsed.", project.Files.Count);
-      
+
       // --- Display namespaces declared 
       Console.WriteLine();
       Console.WriteLine("{0} namespaces have been declared.", project.DeclaredNamespaces.Count);
-      foreach(Namespace ns in project.DeclaredNamespaces)
+      foreach (Namespace ns in project.DeclaredNamespaces)
       {
         Console.WriteLine("  {0}: with {1} fragments.", ns.Name, ns.Fragments.Count);
       }
@@ -81,6 +81,7 @@ namespace SampleCompilation
       Console.WriteLine("Resolved to source type: {0}", TypeReference.ResolvedToSourceType);
       Console.WriteLine("Resolved to namespace: {0}", TypeReference.ResolvedToNamespace);
       Console.WriteLine("Resolved to hierarchy: {0}", TypeReference.ResolvedToHierarchy);
+      Console.WriteLine("Resolved to simple name: {0}", TypeReference.ResolvedToName);
     }
   }
 }

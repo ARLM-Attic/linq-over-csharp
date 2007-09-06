@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
@@ -84,20 +85,140 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references in this type reference
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
+    public void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
-      if (_TypeReference != null)
+      if (_TypeReference != null) 
       {
-        _TypeReference.ResolveTypeReferences(contextType, contextInstance);
+        ResolveAttributeName(_TypeReference, contextType, declarationScope, parameterScope);
       }
       foreach (AttributeArgument arg in _Arguments)
       {
-        arg.ResolveTypeReferences(contextType, contextInstance);
+        arg.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the type reference of an attribute name
+    /// </summary>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    // --------------------------------------------------------------------------------
+    private void ResolveAttributeName(TypeReference type, ResolutionContext contextType,
+      ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
+    {
+      NamespaceOrTypeResolver resolver = new NamespaceOrTypeResolver(Parser);
+      NamespaceOrTypeResolverInfo info;
+
+      // --- If the rightmost name is verbatim (starting with @), we resolve the name
+      // --- as a type or namespace name, omitting the @ from the name.
+      if (type.RightmostName.StartsWith("@"))
+      {
+        // --- Remove the '@' before name resolution
+        type.RightMostPart.Name = type.RightmostName.Substring(1);
+        try
+        {
+          info = resolver.Resolve(type, contextType, declarationScope, parameterScope);
+          if (!info.IsResolved) return;
+          if (IsAttributeClass(info))
+          {
+            Validate();
+          }
+          else
+          {
+            Parser.Error0616(type.Token, type.FullName);
+            Invalidate();
+          }
+        }
+        finally
+        {
+          // --- Anyway, put back the '@'
+          type.RightMostPart.Name = "@" + type.RightmostName;
+        }
+      }
+      else
+      {
+        // --- We try to resolve the name with and without the 'Attribute' suffix.
+        // --- Type resolution successful if one and only one alternative succeeds.
+
+        // --- Suppress the compiler errors while resolving the attribute name
+        Parser.SuppressErrors = true;
+        bool normalNameResolved;
+        bool suffixedNameResolved;
+        try
+        {
+          // --- First let us try the original name
+          info = resolver.Resolve(type, contextType, declarationScope, parameterScope);
+          normalNameResolved = info.IsResolved && IsAttributeClass(info);
+
+          // --- Let's try the 'Attribute' suffix
+          string oldName = type.RightmostName;
+          type.RightMostPart.Name += "Attribute";
+          try
+          {
+            info = resolver.Resolve(type, contextType, declarationScope, parameterScope);
+            suffixedNameResolved = info.IsResolved && IsAttributeClass(info);
+          }
+          finally
+          {
+            // --- Anyway, we restore the name
+            type.RightMostPart.Name = oldName;
+          }
+        }
+        finally
+        {
+          // Anyway, we allow error messages again
+          Parser.SuppressErrors = false;
+        }
+
+        // --- Now check the result
+        if (normalNameResolved && suffixedNameResolved)
+        {
+          // --- Ambigous resolution
+          Parser.Error1614(type.Token, type.FullName);
+          type.Invalidate();
+        }
+        else if (!normalNameResolved && !suffixedNameResolved)
+        {
+          // --- No name found;
+          Parser.Error0246(type.Token, type.FullName);
+          type.Invalidate();
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the result of name resolution is an System.Attribute derived class.
+    /// </summary>
+    /// <param name="info">Resolution information.</param>
+    /// <returns>
+    /// True, if the type is resolved to a System.Attribute derived type; 
+    /// otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool IsAttributeClass(NamespaceOrTypeResolverInfo info)
+    {
+      if (!info.IsResolved) return false;
+      if (info.Target != ResolutionTarget.Type) return false;
+
+      // --- At this point we have a resolved type. Go through the inheraitance chain to
+      // --- Check if this is an Attribute derived class.
+      ITypeCharacteristics type = info.CurrentPart.ResolvingType;
+      while (type.BaseType != null)
+      {
+        if (type.BaseType.TypeObject == typeof(Attribute)) return true;
+        type = type.BaseType;
+      }
+      return false;
     }
 
     #endregion

@@ -565,8 +565,6 @@ namespace CSharpParser.ProjectModel
       CheckCircularDependency();
 
       // --- Phase 4: Resolve type references belonging to members
-      ResolveMemberTypeReferences();
-
       ResolveTypeReferences();
 
       // --- Return the number of errors found
@@ -587,7 +585,7 @@ namespace CSharpParser.ProjectModel
       foreach (SourceFile source in Files)
       {
         _CurrentFile = source;
-        source.ResolveTypeReferences(ResolutionContext.SourceFile, source);
+        source.ResolveTypeReferences(ResolutionContext.SourceFile, source, null);
       }
     }
 
@@ -1256,82 +1254,6 @@ namespace CSharpParser.ProjectModel
       foreach (NamespaceFragment nested in ns.NestedNamespaces)
       {
         CheckCircularDependency(nested);
-      }
-    }
-
-    #endregion
-
-    #region Member type resolution methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the member type references of all types declared within the 
-    /// compilation unit.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public void ResolveMemberTypeReferences()
-    {
-      foreach (SourceFile file in _Files)
-      {
-        _CurrentFile = file;
-
-        // --- Resolve members of types declared in the global namespace
-        foreach (TypeDeclaration type in file.TypeDeclarations)
-        {
-          ResolveMemberTypeReferences(type, ResolutionContext.SourceFile, file);
-        }
-
-        // --- Resolve members of types within nested namespaces
-        foreach (NamespaceFragment ns in file.NestedNamespaces)
-        {
-          ResolveMemberTypeReferences(ns);
-        }
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the member type references of the specified type declaration and 
-    /// of all nested type declarations.
-    /// </summary>
-    /// <param name="type">
-    /// Type declaration to resolve its member type references.
-    /// </param>
-    /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="contextObject">Object representing the current context.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveMemberTypeReferences(TypeDeclaration type, ResolutionContext contextType,
-      ITypeDeclarationScope contextObject)
-    {
-      type.ResolveTypeReferencesInMembers(contextType, contextObject);
-      // --- Resolve member type references in nested types
-      foreach (TypeDeclaration nestedType in type.NestedTypes)
-      {
-        ResolveMemberTypeReferences(nestedType, contextType, contextObject);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the member type references of the specified type declaration within 
-    /// the specified namespace and its nested namespaces.
-    /// </summary>
-    /// <param name="ns">
-    /// Namespace in which the member type references should be resolved.
-    /// </param>
-    // --------------------------------------------------------------------------------
-    private void ResolveMemberTypeReferences(NamespaceFragment ns)
-    {
-      // --- Resolve member type references of types declared in this namespace
-      foreach (TypeDeclaration type in ns.TypeDeclarations)
-      {
-        ResolveMemberTypeReferences(type, ResolutionContext.Namespace, ns);
-      }
-
-      // --- Resolve membere type references of nested namespaces
-      foreach (NamespaceFragment nested in ns.NestedNamespaces)
-      {
-        ResolveMemberTypeReferences(nested);
       }
     }
 

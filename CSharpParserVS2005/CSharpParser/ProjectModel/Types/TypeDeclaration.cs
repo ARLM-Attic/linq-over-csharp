@@ -10,21 +10,6 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This enumeration defines the visibility options a type declaration can have.
-  /// </summary>
-  // ==================================================================================
-  public enum Visibility
-  {
-    Default = 0,
-    Private,
-    Protected,
-    Public,
-    Internal,
-    ProtectedInternal
-  }
-
-  // ==================================================================================
-  /// <summary>
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
@@ -885,65 +870,36 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves all unresolved type references in this namespace fragment.
     /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextInstance">Instance of the context.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    /// <remarks>
+    /// Base types are not resolved here, sinsce thay are resolved in an earlier phase
+    /// of semantical parsing.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType,
-      IUsesResolutionContext contextInstance)
+    public override void ResolveTypeReferences(ResolutionContext contextType, 
+      ITypeDeclarationScope declarationScope, 
+      ITypeParameterScope parameterScope)
     {
-      base.ResolveTypeReferences(contextType, contextInstance);
-
-      // --- Resolve base types
-      foreach (TypeReference typeReference in _BaseTypes)
-      {
-        typeReference.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
-      }
+      base.ResolveTypeReferences(ResolutionContext.TypeDeclaration, declarationScope, this);
 
       // --- Resolve type argument constraints
       foreach (TypeParameterConstraint constraint in _ParameterConstraints)
       {
-        constraint.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
+        constraint.ResolveTypeReferences(ResolutionContext.TypeDeclaration, declarationScope, this);
       }
 
       // --- Resolve nested type definitions
       foreach (TypeDeclaration nestedType in _NestedTypes)
       {
-        nestedType.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
+        nestedType.ResolveTypeReferences(ResolutionContext.TypeDeclaration, declarationScope, this);
       }
 
       // --- Resolve types in members
       foreach (MemberDeclaration member in _Members)
       {
-        member.ResolveTypeReferences(ResolutionContext.TypeDeclaration, this);
-      }
-    }
-
-    #endregion
-
-    #region Member type reference resolution
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves all unresolved type references in the members of this type
-    /// declaration.
-    /// </summary>
-    /// <param name="contextType">Type of context where the resolution occurs.</param>
-    /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="declarationScope">Current type declaration context.</param>
-    // --------------------------------------------------------------------------------
-    public virtual void ResolveTypeReferencesInMembers(ResolutionContext contextType,
-      ITypeDeclarationScope declarationScope)
-    {
-      // --- Resolve type argument constraints
-      foreach (TypeParameterConstraint constraint in _ParameterConstraints)
-      {
-        constraint.Resolve(ResolutionContext.TypeDeclaration, declarationScope, this);
-      }
-
-      // --- Resolve types in members
-      foreach (MemberDeclaration member in _Members)
-      {
-        member.Resolve(ResolutionContext.TypeDeclaration, declarationScope, this);
+        member.ResolveTypeReferences(ResolutionContext.TypeDeclaration, declarationScope, this);
       }
     }
 
@@ -1195,5 +1151,20 @@ namespace CSharpParser.ProjectModel
         : item.EnclosingNamespace.FullName) 
         + item.FullName;
     }
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This enumeration defines the visibility options a type declaration can have.
+  /// </summary>
+  // ==================================================================================
+  public enum Visibility
+  {
+    Default = 0,
+    Private,
+    Protected,
+    Public,
+    Internal,
+    ProtectedInternal
   }
 }

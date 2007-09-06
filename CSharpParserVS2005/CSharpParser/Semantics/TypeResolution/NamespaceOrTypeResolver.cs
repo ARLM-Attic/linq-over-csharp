@@ -86,6 +86,43 @@ namespace CSharpParser.Semantics
 
     #endregion
 
+    #region ResolveTypeName method
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves the specified name within the given context. Accepts only type names.
+    /// </summary>
+    /// <param name="type">Type reference representing the name to be resolved.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="declarationScope">Current type declaration context.</param>
+    /// <param name="parameterScope">Current type parameter declaration scope.</param>
+    /// <returns>Name resolution information.</returns>
+    /// <remarks>
+    /// If the specified name is a namespace or a type parameter, appropriate error
+    /// is raised.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public NamespaceOrTypeResolverInfo ResolveTypeName(TypeReference type,
+      ResolutionContext contextType, ITypeDeclarationScope declarationScope,
+      ITypeParameterScope parameterScope)
+    {
+      NamespaceOrTypeResolverInfo info =
+        Resolve(type, contextType, declarationScope, parameterScope);
+
+      if (!info.IsResolved) return info;
+      {
+        // --- We expect a type and not a namespace.
+        if (info.Target == ResolutionTarget.Namespace)
+        {
+          _Parser.Error0118(type.Token, type.FullName, "namespace", "type");
+          type.Invalidate();
+        }
+      }
+      return info;
+    }
+
+    #endregion
+
     #region ResolveQualifiedAliasMember method
 
     // --------------------------------------------------------------------------------
@@ -143,6 +180,7 @@ namespace CSharpParser.Semantics
 
       // --- Resolve the remaining parts
       info.Hierarchy = info.CompilationUnit.GlobalHierarchy;
+      info.CurrentPart.ResolveToNamespaceHierarchy(info.CompilationUnit.GlobalHierarchy);
       info.MoveToNextPart();
       info.Results.Merge(info.Hierarchy);
       ResolveNamespaceOrNameInForest(info);
@@ -207,6 +245,7 @@ namespace CSharpParser.Semantics
         if (externAlias != null && externAlias.HasHierarchy)
         {
           info.Results.Merge(externAlias.Hierarchy);
+          info.CurrentPart.ResolveToNamespaceHierarchy(externAlias.Hierarchy);
           resolved = true;
           break;
         }
@@ -873,7 +912,7 @@ namespace CSharpParser.Semantics
       }
 
       // --- Check for potential namespace conflicts
-      // --- Namespace conflict 1:Only namespace found? This means no conflict.
+      // --- Namespace conflict 1: Only namespace found? This means no conflict.
       if (nsInCode.Count + nsInAsm.Count > 0 && tyInCode.Count + tyInAsm.Count == 0)
       {
         return true;
@@ -891,12 +930,24 @@ namespace CSharpParser.Semantics
         return true;
       }
 
+      // --- Namespace conflict 3: Assembly namespace/assembly type conflict?
+      if (nsInAsm.Count > 0 && tyInAsm.Count > 0)
+      {
+        _Parser.Error0434(typePart.Token, nsInAsm[0].FullName, "referenced assembly",
+                           tyInAsm[0].FullName, tyInAsm[0].Resolver.DeclaringUnit.Name);
+        ResolutionNodeBase winner = tyInCode[0];
+        results.Clear();
+        results.Add(winner);
+        SetResultByResolutionNode(typePart, winner);
+        return true;
+      }
+
       // --- Check potential type conflicts
+      // --- At this point tyInCode.Count equals to 0 or 1, because if the source would
+      // --- have defined the same type more than once, we had also detected it.
       // --- Type conflicts can arrive only if we found the type in any assembly.
       if (tyInAsm.Count == 0) return true;
 
-      // --- At this point tyInCode.Count equals to 1, because if the source would
-      // --- have defined the same type more than once, we had also detected it.
       // --- Further we work only with the count visible types in the assembly.
       List<TypeResolutionNode> visibleTypes = new List<TypeResolutionNode>();
       foreach (TypeResolutionNode node in tyInAsm)
@@ -924,13 +975,16 @@ namespace CSharpParser.Semantics
                               tyInAsm[0].Resolver.DeclaringUnit.Name);
           winner = nsInCode[0];
         }
-        else
+        else if (tyInCode.Count > 0)
         {
           // --- Assembly type/source type conflict!
-          // --- Do not forget: at this point tyInCode.Count equals 1!
           _Parser.Warning0436(typePart.Token, tyInCode[0].Resolver.FullName,
                               tyInAsm[0].Resolver.DeclaringUnit.Name);
           winner = tyInCode[0];
+        }
+        else
+        {
+          return true;
         }
         results.Clear();
         results.Add(winner);

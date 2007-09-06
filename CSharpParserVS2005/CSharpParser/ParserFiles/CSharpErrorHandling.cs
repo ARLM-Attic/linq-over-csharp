@@ -10,6 +10,27 @@ namespace CSharpParser.ParserFiles
   // ==================================================================================
   public partial class CSharpSyntaxParser
   {
+    #region Private fields
+
+    private bool _SuppressErrors = false;
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the flag indicating if error emission is suppressed or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool SuppressErrors
+    {
+      get { return _SuppressErrors; }
+      set { _SuppressErrors = value; }
+    }
+
+    #endregion
+
     #region Error handling
 
     // --------------------------------------------------------------------------------
@@ -22,7 +43,10 @@ namespace CSharpParser.ParserFiles
     // --------------------------------------------------------------------------------
     public void Error(string code, Token errorPoint, string description)
     {
-      _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, null);
+      if (!_SuppressErrors)
+      {
+        _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, null);
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -37,7 +61,10 @@ namespace CSharpParser.ParserFiles
     public void Error(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
+      if (!_SuppressErrors)
+      {
+        _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -50,7 +77,10 @@ namespace CSharpParser.ParserFiles
     // --------------------------------------------------------------------------------
     public void Warning(string code, Token errorPoint, string description)
     {
-      _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, null);
+      if (!_SuppressErrors)
+      {
+        _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, null);
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -65,7 +95,10 @@ namespace CSharpParser.ParserFiles
     public void Warning(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, parameters);
+      if (!_SuppressErrors)
+      {
+        _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, parameters);
+      }
     }
 
     #endregion
@@ -459,6 +492,19 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0616: '{0}' is not an attribute class.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0616(Token token, string name)
+    {
+      Error("CS0616", token,
+        string.Format("'{0}' is not an attribute class", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0644: '{0}' cannot derive from special class '{1}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -617,6 +663,21 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS1576", token, 
         "The line number specified for #line directive is missing or invalid.");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1614: '{0}' is ambiguous between '{0}' and '{0}Attribute'; use either 
+    /// '@X' or 'XAttribute'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error1614(Token token, string name)
+    {
+      Error("CS1614", token,
+        string.Format("'{0}' is ambiguous between '{0}' and '{0}Attribute'; " +
+        "use either '@X' or 'XAttribute'", name));
     }
 
     // --------------------------------------------------------------------------------
