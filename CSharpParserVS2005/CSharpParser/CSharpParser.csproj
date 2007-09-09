@@ -206,7 +206,6 @@
     <Compile Include="ProjectModel\Types\TypeParameterConstraint.cs" />
     <Compile Include="ProjectModel\Types\TypeReference.cs" />
     <Compile Include="ProjectModel\Types\ClassDeclaration.cs" />
-    <Compile Include="ProjectModel\Types\ClasslikeTypeDeclaration.cs" />
     <Compile Include="ProjectModel\Types\EnumDeclaration.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ExternalAlias.cs" />
     <Compile Include="ProjectModel\Types\InterfaceDeclaration.cs" />

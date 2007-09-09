@@ -1,6 +1,5 @@
 using System;
 using CSharpParser.ProjectModel;
-using CSharpParser.Semantics;
 
 namespace CSharpParserTest
 {
@@ -18,8 +17,6 @@ namespace CSharpParserTest
 
     public bool InvokeParser(CompilationUnit parser)
     {
-      parser.AddAssemblyReference("mscorlib");
-      parser.AddAssemblyReference("System");
       int errors = parser.Parse();
       Console.WriteLine("{0} errors detected", errors);
       foreach (Error error in parser.Errors)
@@ -28,11 +25,6 @@ namespace CSharpParserTest
           error.Code, error.Description, error.File);
       }
       Console.WriteLine();
-      //parser.GlobalHierarchy.Trace(Console.Out, 0);
-      foreach (NamespaceHierarchy nsh in parser.NamespaceHierarchies.Values)
-      {
-        //nsh.Trace(Console.Out, 0);
-      }
       return errors == 0;
     }
   }

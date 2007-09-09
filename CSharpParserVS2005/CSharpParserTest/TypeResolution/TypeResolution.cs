@@ -249,6 +249,26 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
+    public void InvalidUsings2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace13.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0576");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0576");
+    }
+
+    [TestMethod]
+    public void ValidUsings1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\UsingNamespace14.cs");
+      parser.AddAssemblyReference("System.Data");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
     public void NamespaceInsteadOfTypeFails1()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
@@ -286,6 +306,14 @@ namespace CSharpParserTest.LanguageElements
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 1);
       Assert.AreEqual(parser.Errors[0].Code, "CS1614");
+    }
+
+    [TestMethod]
+    public void TypeofOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\Generics1.cs");
+      Assert.IsTrue(InvokeParser(parser));
     }
   }
 }

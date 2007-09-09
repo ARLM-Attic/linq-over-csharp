@@ -28,16 +28,8 @@ namespace CSharpParser.ProjectModel
     private TypeParameter _ResolvingTypeParameter;
     private NamespaceHierarchy _ResolvingHierarchy;
 
-    // --- Fields related to diagnostics
-    private static int _ResolutionCounter;
-    private static int _ResolvedToSystemType;
-    private static int _ResolvedToSourceType;
-    private static int _ResolvedToNamespace;
-    private static int _ResolvedToName;
-    private static int _ResolvedToHierarchy;
-
-    private static readonly List<TypeReferenceLocation> _Locations =
-      new List<TypeReferenceLocation>();
+    // --- Type reference representing an empty type used in generic parameters
+    private static TypeReference _EmptyType;
 
     #endregion
 
@@ -54,7 +46,15 @@ namespace CSharpParser.ProjectModel
     {
       _Kind = TypeKind.simple;
       Name = token.val;
-      _Locations.Add(new TypeReferenceLocation(this, parser.CompilationUnit.CurrentFile));
+      Parser.CompilationUnit.Locations.
+        Add(new TypeReferenceLocation(this, parser.CompilationUnit.CurrentFile));
+      if (_EmptyType == null)
+      {
+        _EmptyType = this;
+        _EmptyType = new TypeReference(token, parser);
+        _EmptyType.Name = "<EmptyType>";
+        _EmptyType.ResolveToName();
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -75,6 +75,16 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the static instance representing an empty type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public static TypeReference EmptyType
+    {
+      get { return _EmptyType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -257,10 +267,56 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Overrides the name property to use generic arguments
+    /// Gets the generic name of the language element.
     /// </summary>
     // --------------------------------------------------------------------------------
     public override string Name
+    {
+      get
+      {
+        if (_TypeArguments.Count > 0)
+        {
+          StringBuilder sb = new StringBuilder(100);
+          sb.Append(base.Name);
+          sb.Append('<');
+          if (_TypeArguments.Count > 1) 
+            sb.Append(String.Empty.PadRight(_TypeArguments.Count - 1, ','));
+          sb.Append('>');
+          return sb.ToString();
+        }
+        else
+        {
+          return base.Name;
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the element as the CLR uses it after compilation
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string ClrName
+    {
+      get
+      {
+        if (_TypeArguments.Count > 0)
+        {
+          return base.Name + "`" + _TypeArguments.Count;
+        }
+        else
+        {
+          return base.Name;
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the element where the actual type parameters are used.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string ParametrizedName
     {
       get
       {
@@ -273,7 +329,7 @@ namespace CSharpParser.ProjectModel
           foreach (TypeReference paramType in _TypeArguments)
           {
             if (!firstParam) sb.Append(", ");
-            sb.Append(paramType.Name);
+            sb.Append(paramType.ParametrizedName);
             firstParam = false;
           }
           sb.Append('>');
@@ -358,7 +414,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the full name of this type reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string FullName
+    public override string FullName
     {
       get
       {
@@ -602,17 +658,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the simple name of the current member.
-    /// </summary>
-    /// <remarks>The simple name does not contain any adornements.</remarks>
-    // --------------------------------------------------------------------------------
-    public string SimpleName
-    {
-      get { return ShortName; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets type name of this type reference (Name modified with the array or 
     /// pointer modifier).
     /// </summary>
@@ -626,6 +671,7 @@ namespace CSharpParser.ProjectModel
         else return Name;
       }  
     }
+
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -665,101 +711,6 @@ namespace CSharpParser.ProjectModel
         while (currentPart.HasSubType) currentPart = currentPart.SubType;
         return currentPart;        
       }
-    }
-
-    #endregion
-
-    #region Properties related to diagnostics
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the count of references resolved.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static int ResolutionCounter
-    {
-      get { return _ResolutionCounter; }
-      set { _ResolutionCounter = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the count of references resolved to system types.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static int ResolvedToSystemType
-    {
-      get { return _ResolvedToSystemType; }
-      set { _ResolvedToSystemType = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the location of type references.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static List<TypeReferenceLocation> Locations
-    {
-      get { return _Locations; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the count of references resolved to source-declared types.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static int ResolvedToSourceType
-    {
-      get { return _ResolvedToSourceType; }
-      set { _ResolvedToSourceType = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the count of references resolved to a namespace.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static int ResolvedToNamespace
-    {
-      get { return _ResolvedToNamespace; }
-      set { _ResolvedToNamespace = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the count of references resolved to a namespace hierarchy.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static int ResolvedToHierarchy
-    {
-      get { return _ResolvedToHierarchy; }
-      set { _ResolvedToHierarchy = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the count of references resolved to simple names.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static int ResolvedToName
-    {
-      get { return _ResolvedToName; }
-      set { _ResolvedToName = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resets the diagnostic counters.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public static void ResetDiagnosticCounters()
-    {
-      _ResolutionCounter = 0;
-      _ResolvedToSystemType = 0;
-      _ResolvedToSourceType = 0;
-      _ResolvedToNamespace = 0;
-      _ResolvedToHierarchy = 0;
-      _ResolvedToName = 0;
     }
 
     #endregion
@@ -814,13 +765,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToType(Type type)
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToSystemType++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToSystemType++;
       }
-#endif
       _Target = ResolutionTarget.Type;
       _ResolvingType = new NetBinaryType(type);
       _ResolvingNode = null;
@@ -836,13 +785,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToType(TypeResolutionNode node)
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToSourceType++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToSourceType++;
       }
-#endif
       _Target = ResolutionTarget.Type;
       _ResolvingNode = node;
       _ResolvingType = node.Resolver;
@@ -853,13 +800,11 @@ namespace CSharpParser.ProjectModel
 
     public void ResolveToNamespaceHierarchy(NamespaceHierarchy hierarchy)
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToHierarchy++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToHierarchy++;
       }
-#endif
       _Target = ResolutionTarget.NamespaceHierarchy;
       _ResolvingNode = null;
       _ResolvingType = null;
@@ -875,13 +820,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToNamespace(ResolutionNodeBase node)
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToNamespace++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToNamespace++;
       }
-#endif
       _Target = ResolutionTarget.Namespace;
       _ResolvingNode = node;
       _ResolvingType = null;
@@ -897,13 +840,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToTypeParameter(TypeParameter param)
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToNamespace++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToNamespace++;
       }
-#endif
       _Target = ResolutionTarget.TypeParameter;
       _ResolvingNode = null;
       _ResolvingType = null;
@@ -919,13 +860,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToMethodTypeParameter(TypeParameter param)
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToNamespace++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToNamespace++;
       }
-#endif
       _Target = ResolutionTarget.MethodTypeParameter;
       _ResolvingNode = null;
       _ResolvingType = null;
@@ -940,14 +879,26 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveToName()
     {
-#if DIAGNOSTICS
       if (_Target == ResolutionTarget.Unresolved)
       {
-        _ResolutionCounter++;
-        _ResolvedToName++;
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToName++;
       }
-#endif
       _Target = ResolutionTarget.Name;
+      _ResolvingNode = null;
+      _ResolvingType = null;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs this type reference is unresolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void Unresolve()
+    {
+      _Target = ResolutionTarget.Unresolved;
       _ResolvingNode = null;
       _ResolvingType = null;
       _ResolvingTypeParameter = null;
@@ -977,7 +928,6 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
-
   }
 
   // ==================================================================================

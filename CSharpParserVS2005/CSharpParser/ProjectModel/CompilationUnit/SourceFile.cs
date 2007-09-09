@@ -24,7 +24,8 @@ namespace CSharpParser.ProjectModel
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
     private readonly AttributeCollection _GlobalAttributes = new AttributeCollection();
     private readonly NamespaceFragmentCollection _Namespaces = new NamespaceFragmentCollection();
-    private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
+    //private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
+    private readonly List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
     private readonly RegionInfoCollection _Regions = new RegionInfoCollection();
     private readonly CommentInfoCollection _Comments = new CommentInfoCollection();
 
@@ -44,7 +45,6 @@ namespace CSharpParser.ProjectModel
       _ParentUnit = parent;
       _Name = Path.GetFileName(name);
       _Folder = Path.GetDirectoryName(name);
-      _TypeDeclarations.AfterAdd += TypeDeclarationsAfterAdd;
     }
 
     #endregion
@@ -185,7 +185,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type declarations in this project file
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeDeclarationCollection TypeDeclarations
+    public List<TypeDeclaration> TypeDeclarations
     {
       get { return _TypeDeclarations; }
     }
@@ -238,6 +238,22 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a type declaration to the container of types declared in this source 
+    /// file.
+    /// </summary>
+    /// <param name="type">Type to add</param>
+    /// <remarks>
+    /// Type declaration is added to the type container of the compilation unit.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void AddTypeDeclaration(TypeDeclaration type)
+    {
+      _TypeDeclarations.Add(type);
+      _ParentUnit.AddTypeDeclaration(type);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the scope within the file using the specified namespace.
     /// </summary>
     /// <param name="ns">Namespace within the file.</param>
@@ -248,29 +264,6 @@ namespace CSharpParser.ProjectModel
     public ITypeDeclarationScope NamespaceScope(ITypeDeclarationScope ns)
     {
       return ns ?? (ITypeDeclarationScope)this;
-    }
-
-    #endregion
-
-    #region Private methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds the type declaration not only to the file but also to the project.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    // --------------------------------------------------------------------------------
-    void TypeDeclarationsAfterAdd(object sender, ItemedEventArgs<TypeDeclaration> e)
-    {
-      try
-      {
-        _ParentUnit.DeclaredTypes.Add(e.Item);
-      }
-      catch (ArgumentException)
-      {
-        _ParentUnit.Parser.Error0101(e.Item.Token, Name, e.Item.FullName);
-      }
     }
 
     #endregion

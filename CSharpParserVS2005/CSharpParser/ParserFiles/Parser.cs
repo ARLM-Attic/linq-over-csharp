@@ -588,9 +588,15 @@ public partial class CSharpSyntaxParser
 			if (td != null)
 			{
 			  if (parent == null) 
-			    _File.TypeDeclarations.Add(td);
+			  {
+			    _File.AddTypeDeclaration(td);
+			    td.SetSourceFile(_File);
+			  }
 			  else 
+			  {
 			    parent.AddTypeDeclaration(td);
+			    td.SetSourceFile(parent.EnclosingSourceFile);
+			  }
 			}
 			
 		} else SynErr(131);
@@ -2454,8 +2460,8 @@ TypeReference typeRef) {
 			typeRef.Kind = TypeKind.@void; 
 			
 		} else SynErr(176);
-		if (la.kind == 110) {
-			Get();
+		if (IsNullableTypeMark()) {
+			Expect(110);
 			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
 		}
 		PointerOrArray(ref typeRef);
@@ -2465,16 +2471,18 @@ TypeReference typeRef) {
 	void TypeArgumentList(TypeReferenceCollection args) {
 		TypeReference paramType; 
 		Expect(100);
+		paramType = TypeReference.EmptyType; 
 		if (StartOf(12)) {
 			Type(out paramType, false);
-			args.Add(paramType); 
 		}
+		args.Add(paramType); 
 		while (la.kind == 87) {
 			Get();
+			paramType = TypeReference.EmptyType; 
 			if (StartOf(12)) {
 				Type(out paramType, false);
-				args.Add(paramType); 
 			}
+			args.Add(paramType); 
 		}
 		Expect(93);
 	}

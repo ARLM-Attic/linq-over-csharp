@@ -146,9 +146,9 @@ namespace CSharpParser.Collections
     /// <summary>
     /// Adds the specified item to the collection.
     /// </summary>
-    /// <param name="item"></param>
+    /// <param name="item">Item to add to the collection</param>
     // ----------------------------------------------------------------------------------
-    public void Add(TValue item)
+    public virtual void Add(TValue item)
     {
       if (_BeforeAdd != null)
       {

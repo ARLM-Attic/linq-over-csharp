@@ -300,6 +300,36 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0260: Missing partial modifier on declaration of type '{0}'; another 
+    /// partial declaration of this type exists
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0260(Token token, string name)
+    {
+      Error("CS0260", token,
+        string.Format("Missing partial modifier on declaration of type '{0}'; " +
+        "another partial declaration of this type exists", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0261: Partial declarations of '{0}' must be all classes, all 
+    /// structs, or all interfaces
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0261(Token token, string name)
+    {
+      Error("CS0261", token,
+        string.Format("Partial declarations of '{0}' must be all classes, all " +
+        "structs, or all interfaces", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0400: The type or namespace name '{0}' could not be found in the 
     /// global namespace (are you missing an assembly reference?)
     /// </summary>
@@ -445,6 +475,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0527", token,
         string.Format("Type '{0}' in interface list is not an interface", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0528: '{0}' is already listed in interface list.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0528(Token token, string name)
+    {
+      Error("CS0528", token,
+        string.Format("'{0}' is already listed in interface list", name));
     }
 
     // --------------------------------------------------------------------------------

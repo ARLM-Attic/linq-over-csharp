@@ -602,6 +602,7 @@ namespace CSharpParser.Semantics
       // --- Cycle from the current declaration namespace to the global namespace
       SourceFile file = info.DeclarationScope.EnclosingSourceFile;
       NamespaceFragment ns = info.DeclarationScope.DeclaringNamespace;
+      ITypeDeclarationScope scopeToCheck = null;
       foreach (ITypeDeclarationScope scope in file.GetScopesToOuter(ns))
       {
         bool resolved = false;
@@ -613,6 +614,7 @@ namespace CSharpParser.Semantics
         {
           // --- We found the a namespace ot type name but it needs some more checks
           resolved = true;
+          scopeToCheck = scope;
           needsModeCheck = true;
         }
         // --- Check, if the name refers to a using-alias or an extern alias.
@@ -653,8 +655,6 @@ namespace CSharpParser.Semantics
       }
 
       // --- We are going to check the enclosing scope
-      ITypeDeclarationScope scopeToCheck =
-        ((ITypeDeclarationScope)(info.DeclarationScope.EnclosingNamespace)) ?? file;
       ITypeDeclarationScope foundInScope;
 
       // --- Check 1: We found a namespace and any of the enclosing namespaces 
@@ -667,6 +667,7 @@ namespace CSharpParser.Semantics
         {
           _Parser.Error0576(info.CurrentPart.Token, foundInScope.ScopeName, 
             info.CurrentPart.Name);
+          info.Unresolve();
         }
         return;
       }
@@ -681,6 +682,7 @@ namespace CSharpParser.Semantics
         {
           _Parser.Error0576(info.CurrentPart.Token, foundInScope.ScopeName,
             info.CurrentPart.Name);
+          info.Unresolve();
         }
         return;
       }
@@ -1287,7 +1289,18 @@ namespace CSharpParser.Semantics
         _Target = ResolutionTarget.Unresolved;
       }
     }
-  
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs that the name is not resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void Unresolve()
+    {
+      _CurrentPart.Unresolve();
+      _Target = ResolutionTarget.Unresolved;
+    }
+
     #endregion
 
   }

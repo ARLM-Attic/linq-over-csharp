@@ -21,8 +21,10 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
+    private bool _IsPartial;
     protected Visibility _DeclaredVisibility;
     protected bool _DefaultVisibility;
+    private SourceFile _EnclosingSourceFile;
     private NamespaceFragment _EnclosingNamespace;
     private readonly TypeReferenceCollection _BaseTypes = new TypeReferenceCollection();
     private TypeDeclaration _DeclaringType;
@@ -33,7 +35,8 @@ namespace CSharpParser.ProjectModel
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
     private readonly TypeParameterConstraintCollection _ParameterConstraints =
       new TypeParameterConstraintCollection();
-    private readonly TypeDeclarationCollection _NestedTypes = new TypeDeclarationCollection();
+    private readonly List<TypeDeclaration> _NestedTypes = new List<TypeDeclaration>();
+    private readonly List<TypeDeclaration> _Parts = new List<TypeDeclaration>();
 
     // --- Members of the type
     private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
@@ -73,6 +76,52 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the flag indicating if this type declaration has the partial 
+    /// modifier or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPartial
+    {
+      get { return _IsPartial; }
+      set { _IsPartial = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type has parts or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasParts
+    {
+      get { return _Parts.Count > 0; }  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of parts this type defines.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public object PartCount
+    {
+      get { return _Parts.Count == 0 ? 1 : _Parts.Count; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the partitions belonging to this type declaration.
+    /// </summary>
+    /// <remarks>
+    /// Only partial types have partitions. Each partition is a physical fragment of
+    /// the partial type declaration.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public List<TypeDeclaration> Parts
+    {
+      get { return _Parts; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the declared visibility of the type declaration.
@@ -179,10 +228,8 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (IsGenericType)
-        {
+        if (IsGenericType) 
           return String.Format("{0}`{1}", base.Name, _TypeParameters.Count);
-        }
         return base.Name;
       }
     }
@@ -251,19 +298,33 @@ namespace CSharpParser.ProjectModel
     {
       get { return _DeclaringType; }
     }
-
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the full name of this type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string FullName
+    public override string FullName
     {
       get
       {
         return IsNested 
           ? _DeclaringType.FullName + "+" + Name 
           : Name;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the fully qualified name (namespace name and type name) of this type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual string QualifiedName
+    {
+      get
+      {
+        if (_EnclosingNamespace == null) return FullName;
+        return _EnclosingNamespace.FullName + "." + FullName;
       }
     }
 
@@ -289,9 +350,13 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsAbstract
     {
-      get { return _IsAbstract; }
+      get
+      {
+        return _IsAbstract;
+      }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
@@ -306,7 +371,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the name property using generic type parameters.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string ParametrizedName
+    public override string ParametrizedName
     {
       get
       {
@@ -342,6 +407,7 @@ namespace CSharpParser.ProjectModel
       get { return this is ClassDeclaration; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
@@ -519,17 +585,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the simple name of the current member.
-    /// </summary>
-    /// <remarks>The simple name does not contain any adornements.</remarks>
-    // --------------------------------------------------------------------------------
-    public string SimpleName
-    {
-      get { return ShortName; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the flag indicating if this type has a 'new' modifier or not.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -569,7 +624,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of nested types belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeDeclarationCollection NestedTypes
+    public List<TypeDeclaration> NestedTypes
     {
       get { return _NestedTypes; }
     }
@@ -822,6 +877,16 @@ namespace CSharpParser.ProjectModel
       get { return this; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Setsthe source file of this type declaration
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void SetSourceFile(SourceFile file)
+    {
+      _EnclosingSourceFile = file;  
+    }
+
     #endregion
 
     #region ITypeParameterOwner members
@@ -914,7 +979,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public SourceFile EnclosingSourceFile
     {
-      get { throw new NotSupportedException("TypeDeclaration has no enclosing source file."); }
+      get { return _EnclosingSourceFile; }
     }
 
     // --------------------------------------------------------------------------------
@@ -969,7 +1034,10 @@ namespace CSharpParser.ProjectModel
         // --- Return direct base types
         foreach (TypeReference baseType in BaseTypes)
         {
-          if (baseType.IsValid) yield return baseType.ResolvingType;
+          if (baseType.RightMostPart.IsValid)
+          {
+            yield return baseType.RightMostPart.ResolvingType;
+          }
         }
         // --- Return directly enclosing type
         if (_DeclaringType != null) yield return _DeclaringType;
@@ -1141,15 +1209,37 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="item">TypeDeclaration item.</param>
     /// <returns>
-    /// Full name of the type declaration.
+    /// Fully qualified name of the type declaration.
     /// </returns>
     // --------------------------------------------------------------------------------
     protected override string GetKeyOfItem(TypeDeclaration item)
     {
-      return (item.EnclosingNamespace == null 
-        ? String.Empty 
-        : item.EnclosingNamespace.FullName) 
-        + item.FullName;
+      return item.QualifiedName;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds the specified item to the collection.
+    /// </summary>
+    /// <param name="item">Item to add to the collection</param>
+    // ----------------------------------------------------------------------------------
+    public override void Add(TypeDeclaration item)
+    {
+      TypeDeclaration basePartition;
+      if (TryGetValue(GetKeyOfItem(item), out basePartition))
+      {
+        // --- This item is already in the collection. Add it as a partition
+        // --- In a later phase we shall check for duplication.
+        if (basePartition.Parts.Count == 0)
+        {
+          basePartition.Parts.Add(basePartition);
+        }
+        basePartition.Parts.Add(item);
+      }
+      else
+      {
+        base.Add(item);
+      }
     }
   }
 

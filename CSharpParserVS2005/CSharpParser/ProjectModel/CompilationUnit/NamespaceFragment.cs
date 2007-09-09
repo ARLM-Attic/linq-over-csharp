@@ -23,11 +23,12 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private readonly NamespaceFragment _EnclosingNamespace;
-    private readonly SourceFile _EnclosingFile; 
+    private readonly SourceFile _EnclosingSourceFile; 
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly NamespaceFragmentCollection _NestedNamespaces = new NamespaceFragmentCollection();
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
-    private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
+//    private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
+    private readonly List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
 
     // --- Fields used for semantics check
     private readonly ResolutionNodeList _Resolvers = new ResolutionNodeList();
@@ -52,7 +53,7 @@ namespace CSharpParser.ProjectModel
       // --- A namespace must belong to a file.
       if (parentFile == null)
         throw new InvalidOperationException(Resources.ParentFileNotDeclared);
-      _EnclosingFile = parentFile;
+      _EnclosingSourceFile = parentFile;
 
       // --- Store attributes
       Name = name;
@@ -69,7 +70,7 @@ namespace CSharpParser.ProjectModel
       {
         // --- This is a root namespace in the file, we add it to the namespace list
         // --- of the file.
-        _EnclosingFile.NestedNamespaces.Add(this);
+        _EnclosingSourceFile.NestedNamespaces.Add(this);
       }
 
       // --- The namespace is added to the list of CompilationUnit
@@ -97,7 +98,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the full name of this namespace.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string FullName
+    public override string FullName
     {
       get
       {
@@ -210,7 +211,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type declarations in this project file
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeDeclarationCollection TypeDeclarations
+    public List<TypeDeclaration> TypeDeclarations
     {
       get { return _TypeDeclarations; }
     }
@@ -345,20 +346,13 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Adds a new type declaration to this namespace fragment.
     /// </summary>
-    /// <param name="item"></param>
+    /// <param name="item">Type declaration to add</param>
     // --------------------------------------------------------------------------------
     public void AddTypeDeclaration(TypeDeclaration item)
     {
       item.EnclosingNamespace = this;
       _TypeDeclarations.Add(item);
-      try
-      {
-        _EnclosingFile.ParentUnit.DeclaredTypes.Add(item);
-      }
-      catch (ArgumentException)
-      {
-        Parser.Error0101(item.Token, Name, item.FullName);
-      }
+      _EnclosingSourceFile.ParentUnit.AddTypeDeclaration(item);
     }
 
     #endregion
@@ -372,7 +366,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public SourceFile EnclosingSourceFile
     {
-      get { return _EnclosingFile; }
+      get { return _EnclosingSourceFile; }
     }
 
     // --------------------------------------------------------------------------------

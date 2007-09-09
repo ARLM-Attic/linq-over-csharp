@@ -305,30 +305,6 @@ UsingDirective<NamespaceFragment parent>
 .
 
 // ------------------------------------------------------------------------------------
-// "using" directive that is used in conjunction with a files or a namespace.
-// +parent: Parent namespace of the "using" directive. If this parameter is null, 
-//   the directive belongs to the file and not to the specified namespace.
-// ------------------------------------------------------------------------------------
-//UsingDirective<NamespaceFragment parent>
-//=                                                               
-//  "using"                  (. 
-//                              Token token = t;
-//                              string name = String.Empty; 
-//                              TypeReference typeUsed = null;
-//                           .)
-//  [ IF (IsAssignment()) 
-//    ident                  (. name = t.val; .)
-//    "=" ]
-//  TypeName<out typeUsed> 
-//  ";"                      (. 
-//                              UsingClause uc = new UsingClause(token, name, typeUsed);
-//                              CurrentElement = uc;
-//                              if (parent == null) _File.Usings.Add(uc);
-//                              else parent.Usings.Add(uc); 
-//                           .)
-// .
-
-// ------------------------------------------------------------------------------------
 // Global attributes belonging to a file.
 // This element accepts only attributes with "assembly" or "module" scope.
 // ------------------------------------------------------------------------------------
@@ -390,9 +366,15 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
                                                     if (td != null)
                                                     {
                                                       if (parent == null) 
-                                                        _File.TypeDeclarations.Add(td);
+                                                      {
+                                                        _File.AddTypeDeclaration(td);
+                                                        td.SetSourceFile(_File);
+                                                      }
                                                       else 
+                                                      {
                                                         parent.AddTypeDeclaration(td);
+                                                        td.SetSourceFile(parent.EnclosingSourceFile);
+                                                      }
                                                     }
                                                  .)
 .
@@ -1402,7 +1384,8 @@ TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null;
                                                         typeRef.Kind = TypeKind.@void; 
                                                      .)
   )
-  [ "?"                                              (. if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
+  [ IF (IsNullableTypeMark())
+    "?"                                              (. if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
   ]
   PointerOrArray<ref typeRef>                        (. if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
 .
@@ -2878,13 +2861,17 @@ TypeArgumentList<TypeReferenceCollection args>  (. TypeReference paramType; .)
      everywhere. This results in unbound-type-names. In fact this is only
      allowed in typeof statements, see ECMA-334: 14.5.11 and 25.5.
   */
-  "<" 
+  "<"                            (. paramType = TypeReference.EmptyType; .)
   [ 
-    Type<out paramType, false>           (. args.Add(paramType); .) 
-  ] { "," 
-  [ 
-    Type<out paramType, false>           (. args.Add(paramType); .) 
-  ] } ">"
+    Type<out paramType, false>           
+  ]                              (. args.Add(paramType); .) 
+  { 
+    ","                          (. paramType = TypeReference.EmptyType; .)
+    [ 
+      Type<out paramType, false>           
+    ]                            (. args.Add(paramType); .) 
+  } 
+  ">"
 .
 
 // ------------------------------------------------------------------------------------

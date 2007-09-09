@@ -16,9 +16,6 @@ namespace SampleCompilation
   // ==================================================================================
   class Program
   {
-    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
-    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core";
-    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\CSLA";
     private const string CSharpParserFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser";
 
     static void Main(string[] args)
@@ -30,9 +27,6 @@ namespace SampleCompilation
       // --- and measure parse time
       Stopwatch watch = new Stopwatch();
       watch.Start();
-      TypeReference.ResetDiagnosticCounters();
-      project.AddAssemblyReference("mscorlib");
-      project.AddAssemblyReference("System");
       project.Parse();
       watch.Stop();
 
@@ -69,19 +63,20 @@ namespace SampleCompilation
       Console.WriteLine("{0} types have been declared.", project.DeclaredTypes.Count);
       foreach (TypeDeclaration td in project.DeclaredTypes)
       {
-        Console.WriteLine("  {0}: with {1} members.", td.Name, td.Members.Count);
+        Console.WriteLine("  {0}: with {1} members and {2} parts.", 
+          td.Name, td.Members.Count, td.PartCount);
       }
 
       // --- Display parse time
       Console.WriteLine();
       Console.WriteLine("Parsing time: {0} ms", watch.ElapsedMilliseconds);
-      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
-      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
-      Console.WriteLine("Resolved to system type: {0}", TypeReference.ResolvedToSystemType);
-      Console.WriteLine("Resolved to source type: {0}", TypeReference.ResolvedToSourceType);
-      Console.WriteLine("Resolved to namespace: {0}", TypeReference.ResolvedToNamespace);
-      Console.WriteLine("Resolved to hierarchy: {0}", TypeReference.ResolvedToHierarchy);
-      Console.WriteLine("Resolved to simple name: {0}", TypeReference.ResolvedToName);
+      Console.WriteLine("Type references: {0}", project.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", project.ResolutionCounter);
+      Console.WriteLine("Resolved to system type: {0}", project.ResolvedToSystemType);
+      Console.WriteLine("Resolved to source type: {0}", project.ResolvedToSourceType);
+      Console.WriteLine("Resolved to namespace: {0}", project.ResolvedToNamespace);
+      Console.WriteLine("Resolved to hierarchy: {0}", project.ResolvedToHierarchy);
+      Console.WriteLine("Resolved to simple name: {0}", project.ResolvedToName);
     }
   }
 }

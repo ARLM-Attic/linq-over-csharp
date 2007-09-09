@@ -565,6 +565,49 @@ namespace CSharpParser.ParserFiles
       return pt.kind != _lpar;
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token are: ident "="
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsNullableTypeMark()
+    {
+      int peek = Peek(1).kind;
+      return la.kind == _question &&
+             (
+               peek == _and ||
+               peek == _andassgn ||
+               peek == _assgn ||
+               peek == _colon ||
+               peek == _comma ||
+               peek == _divassgn ||
+               peek == _dot ||
+               peek == _eq ||
+               peek == _gt ||
+               peek == _gteq ||
+               peek == _lbrack ||
+               peek == _lpar ||
+               peek == _lshassgn ||
+               peek == _lt ||
+               peek == _ltlt ||
+               peek == _minusassgn ||
+               peek == _modassgn ||
+               peek == _neq ||
+               peek == _orassgn ||
+               peek == _plusassgn ||
+               peek == _question ||
+               peek == _rbrace ||
+               peek == _rbrack ||
+               peek == _rpar ||
+               peek == _scolon ||
+               peek == _timesassgn ||
+               peek == _xorassgn
+             );
+    }
+
     #endregion
   }
 }

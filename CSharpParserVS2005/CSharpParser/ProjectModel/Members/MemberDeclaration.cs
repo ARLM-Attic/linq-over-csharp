@@ -239,7 +239,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the full name of the member.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual string FullName
+    public override string FullName
     {
       get { return _ExplicitName == null 
         ? Name 

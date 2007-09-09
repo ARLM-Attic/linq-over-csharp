@@ -74,10 +74,10 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the short name of this language element.
+    /// Gets the simple (short) name of this language element.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string ShortName
+    public string SimpleName
     {
       get { return _Name; }
     }
@@ -94,8 +94,57 @@ namespace CSharpParser.ProjectModel
     {
       get { return _Name; }
       set { _Name = value; }
-    } 
-    
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the full name (fully qualified name) of the language element.
+    /// </summary>
+    /// <remarks>
+    /// The default implementation retrieves the name but it can be overridden
+    /// by derived language element types.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual string FullName
+    {
+      get { return _Name; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the element as the CLR uses it after compilation
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For example, for generic types the name is like: List`1, Dictionary`2
+    /// </para>
+    /// <para>
+    /// The default implementation retrieves the name but it can be overridden
+    /// by derived language element types.
+    /// </para>
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual string ClrName
+    {
+      get { return _Name; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the element where the actual type parameters are used.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The default implementation retrieves the name but it can be overridden
+    /// by derived language element types.
+    /// </para>
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual string ParametrizedName
+    {
+      get { return _Name; }
+    }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the line number of the language element.

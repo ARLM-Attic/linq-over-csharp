@@ -34,10 +34,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string Name
     {
-      get
-      {
-        return "~" + base.Name;
-      }
+      get { return "~" + base.Name; }
     }
 
     #endregion

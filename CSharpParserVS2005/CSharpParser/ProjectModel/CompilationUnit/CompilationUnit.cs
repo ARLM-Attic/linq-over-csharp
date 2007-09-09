@@ -54,6 +54,16 @@ namespace CSharpParser.ProjectModel
       new Dictionary<string, NamespaceHierarchy>();
     private NamespaceOrTypeResolver _NamespaceOrTypeResolver;
 
+    // --- Diagnostic counters
+    private int _ResolutionCounter;
+    private int _ResolvedToSystemType;
+    private int _ResolvedToSourceType;
+    private int _ResolvedToNamespace;
+    private int _ResolvedToName;
+    private int _ResolvedToHierarchy;
+    private static readonly List<TypeReferenceLocation> _Locations =
+      new List<TypeReferenceLocation>();
+
     #endregion
 
     #region Lifecycle methods
@@ -89,6 +99,8 @@ namespace CSharpParser.ProjectModel
         AddAllFilesFrom(_WorkingFolder);
       }
       _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
+      AddAssemblyReference("mscorlib");
+      AddAssemblyReference("System");
     }
 
     #endregion
@@ -241,6 +253,102 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Properties related to diagnostics
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int ResolutionCounter
+    {
+      get { return _ResolutionCounter; }
+      set { _ResolutionCounter = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved to system types.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int ResolvedToSystemType
+    {
+      get { return _ResolvedToSystemType; }
+      set { _ResolvedToSystemType = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the location of type references.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<TypeReferenceLocation> Locations
+    {
+      get { return _Locations; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved to source-declared types.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int ResolvedToSourceType
+    {
+      get { return _ResolvedToSourceType; }
+      set { _ResolvedToSourceType = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved to a namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int ResolvedToNamespace
+    {
+      get { return _ResolvedToNamespace; }
+      set { _ResolvedToNamespace = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved to a namespace hierarchy.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int ResolvedToHierarchy
+    {
+      get { return _ResolvedToHierarchy; }
+      set { _ResolvedToHierarchy = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the count of references resolved to simple names.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int ResolvedToName
+    {
+      get { return _ResolvedToName; }
+      set { _ResolvedToName = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resets the diagnostic counters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void ResetDiagnosticCounters()
+    {
+      _ResolutionCounter = 0;
+      _ResolvedToSystemType = 0;
+      _ResolvedToSourceType = 0;
+      _ResolvedToNamespace = 0;
+      _ResolvedToHierarchy = 0;
+      _ResolvedToName = 0;
+      _Locations.Clear();
+    }
+
+    #endregion
+
     #region Public methods
 
     // --------------------------------------------------------------------------------
@@ -323,6 +431,21 @@ namespace CSharpParser.ProjectModel
     public void AddAliasedReference(string alias, string name, string path)
     {
       _ReferencedUnits.Add(new ReferencedAssembly(name, path, alias));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a type declaration to the container of types declared in this compilation
+    /// unit.
+    /// </summary>
+    /// <param name="type">Type to add</param>
+    /// <remarks>
+    /// If a type declaration is in the container it is not added again.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    internal void AddTypeDeclaration(TypeDeclaration type)
+    {
+      _DeclaredTypes.Add(type);
     }
 
     // --------------------------------------------------------------------------------
@@ -535,6 +658,7 @@ namespace CSharpParser.ProjectModel
       (_Errors as IList<Error>).Clear();
       _GlobalHierarchy.Clear();
       _NamespaceHierarchies.Clear();
+      ResetDiagnosticCounters();
 
       // --- Syntax parsing
       foreach (SourceFile file in _Files)
@@ -561,11 +685,15 @@ namespace CSharpParser.ProjectModel
       ResolveUsingDirectives();
 
       // --- Phase 3: Resolve base types and check base type validity
+      CheckMultipleDeclaration();
       ResolveBaseTypes();
       CheckCircularDependency();
 
-      // --- Phase 4: Resolve type references belonging to members
+      // --- Phase 4: Resolve all remaining type references
       ResolveTypeReferences();
+
+      // --- Phase 5: Check partial types
+      CheckPartialTypes();
 
       // --- Return the number of errors found
       return _Errors.Count;
@@ -895,14 +1023,16 @@ namespace CSharpParser.ProjectModel
         // --- Resolve types declared in the global namespace
         foreach (TypeDeclaration type in file.TypeDeclarations)
         {
-          ResolveBaseTypes(type, ResolutionContext.SourceFile, file);
+          if (type.Parts.Count == 0)
+            ResolveBaseTypes(type, ResolutionContext.SourceFile, file);
+          else
+            foreach (TypeDeclaration partition in type.Parts)
+              ResolveBaseTypes(partition, ResolutionContext.SourceFile, file);
         }
 
         // --- Resolve types within nested namespaces
         foreach(NamespaceFragment ns in file.NestedNamespaces)
-        {
           ResolveBaseTypes(ns);
-        }
       }
     }
 
@@ -921,8 +1051,10 @@ namespace CSharpParser.ProjectModel
       // --- Resolve each base type reference
       bool typeValid = true;
       bool firstOnList = true;
+      List<string> baseNames = new List<string>();
       foreach (TypeReference baseType in type.BaseTypes)
       {
+        TypeReference baseToCheck = baseType.RightMostPart;
         // --- Resolve the type only, if not resolved yet.
         if (!baseType.IsResolved)
         {
@@ -932,17 +1064,30 @@ namespace CSharpParser.ProjectModel
         }
         
         // --- Check, if the base type is valid in its context.
-        baseType.Validate(CheckBaseType(type, baseType, firstOnList));
-        typeValid &= baseType.IsValid;
+        baseToCheck.Validate(CheckBaseType(type, baseType, firstOnList));
+        typeValid &= baseToCheck.IsValid;
         firstOnList = false;
+
+        // --- Check that interfaces are on the list only once
+        if (baseToCheck.IsValid)
+        {
+          if (baseToCheck.IsInterface && baseNames.Contains(baseToCheck.ResolvingType.FullName))
+          {
+            Parser.Error0528(baseType.Token, baseType.FullName);
+            baseToCheck.Invalidate();
+            typeValid = false;
+          }
+          else
+          {
+            baseNames.Add(baseToCheck.ResolvingType.FullName);
+          }
+        }
       }
       type.Validate(typeValid);
 
       // --- Resolve base types in nested types
       foreach (TypeDeclaration nestedType in type.NestedTypes)
-      {
         ResolveBaseTypes(nestedType, contextType, contextObject);
-      }
     }
 
     // --------------------------------------------------------------------------------
@@ -959,14 +1104,16 @@ namespace CSharpParser.ProjectModel
       // --- Resolve base types of types declared in this namespace
       foreach (TypeDeclaration type in ns.TypeDeclarations)
       {
-        ResolveBaseTypes(type, ResolutionContext.Namespace, ns);
+        if (type.Parts.Count == 0)
+          ResolveBaseTypes(type, ResolutionContext.Namespace, ns);
+        else
+          foreach (TypeDeclaration partition in type.Parts)
+            ResolveBaseTypes(partition, ResolutionContext.Namespace, ns);
       }
 
       // --- Resolve types of nested namespaces
       foreach (NamespaceFragment nested in ns.NestedNamespaces)
-      {
         ResolveBaseTypes(nested);
-      }
     }
 
     // --------------------------------------------------------------------------------
@@ -1254,6 +1401,212 @@ namespace CSharpParser.ProjectModel
       foreach (NamespaceFragment nested in ns.NestedNamespaces)
       {
         CheckCircularDependency(nested);
+      }
+    }
+
+    #endregion
+
+    #region Multiple type declaration checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if there are any types declared more that once
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckMultipleDeclaration()
+    {
+      foreach (TypeDeclaration type in _DeclaredTypes)
+      {
+        // --- Check only, if there are no partitions
+        if (type.Parts.Count == 0) continue;
+
+        // --- Step 1: Check the number of partial and non-partial partitions
+        int partialClassCount = 0;
+        int partialStructCount = 0;
+        int partialIntfCount = 0;
+        foreach (TypeDeclaration partition in type.Parts)
+        {
+          if (partition is ClassDeclaration)
+          {
+            // --- Calculate class declaration counters
+            if (partition.IsPartial) partialClassCount++;
+          }
+          else if (partition is StructDeclaration)
+          {
+            // --- Calculate struct declaration counters
+            if (partition.IsPartial) partialStructCount++;
+          }
+          else if (partition is InterfaceDeclaration)
+          {
+            // --- Calculate interface declaration counters
+            if (partition.IsPartial) partialIntfCount++;
+          }
+        }
+
+        // --- Step 2: Go through all partitions and check for errors
+        bool partialClassFound = false;
+        bool partialStructFound = false;
+        bool partialIntfFound = false;
+        bool anyTypeFound = false;
+
+        foreach (TypeDeclaration partition in type.Parts)
+        {
+          // --- Checks for classes
+          if (partition is ClassDeclaration)
+          {
+            if (partialClassCount > 0)
+            {
+              if (partition.IsPartial) partialClassFound = true;
+              else RaiseMissingPartialModifierError(type, partition);
+            }
+            if (partialClassCount == 0 && anyTypeFound)
+              RaiseMultipleTypeError(type, partition);
+            if (partition.IsPartial && (partialStructFound || partialIntfFound))
+              RaiseMultiplePartialTypeError(type, partition);
+          }
+          // --- Checks for structs
+          else if (partition is StructDeclaration)
+          {
+            if (partialStructCount > 0)
+            {
+              if (partition.IsPartial) partialStructFound = true;
+              else RaiseMissingPartialModifierError(type, partition);
+            }
+            if (partialStructCount == 0 && anyTypeFound)
+              RaiseMultipleTypeError(type, partition);
+            if (partition.IsPartial && (partialClassFound || partialIntfFound))
+              RaiseMultiplePartialTypeError(type, partition);
+          }
+          // --- Checks for interface
+          else if (partition is InterfaceDeclaration)
+          {
+            if (partialIntfCount > 0)
+            {
+              if (partition.IsPartial) partialIntfFound = true;
+              else RaiseMissingPartialModifierError(type, partition);
+            }
+            if (partialIntfCount == 0 && anyTypeFound)
+              RaiseMultipleTypeError(type, partition);
+            if (partition.IsPartial && (partialClassFound || partialStructFound))
+              RaiseMultiplePartialTypeError(type, partition);
+          }
+          // --- Checks for other types
+          else
+          {
+            if (anyTypeFound)
+              RaiseMultipleTypeError(type, partition);
+          }
+          anyTypeFound = true;
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises a compilation error CS0101 for the specified type declaration.
+    /// </summary>
+    /// <param name="type">Erronous type</param>
+    /// <param name="partition">Erronous partition</param>
+    // --------------------------------------------------------------------------------
+    private void RaiseMultipleTypeError(LanguageElement type, TypeDeclaration partition)
+    {
+      _Parser.Error0101(partition.Token,
+        partition.EnclosingNamespace == null
+        ? partition.EnclosingSourceFile.Name
+        : partition.EnclosingNamespace.Name,
+        partition.Name);
+      type.Invalidate();
+      partition.Invalidate();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises a compilation error CS0260 for the specified type declaration.
+    /// </summary>
+    /// <param name="type">Erronous type</param>
+    /// <param name="partition">Erronous partition</param>
+    // --------------------------------------------------------------------------------
+    private void RaiseMissingPartialModifierError(LanguageElement type, 
+      LanguageElement partition)
+    {
+      _Parser.Error0260(partition.Token, partition.Name);
+      type.Invalidate();
+      partition.Invalidate();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises a compilation error CS0261 for the specified type declaration.
+    /// </summary>
+    /// <param name="type">Erronous type</param>
+    /// <param name="partition">Erronous partition</param>
+    // --------------------------------------------------------------------------------
+    private void RaiseMultiplePartialTypeError(LanguageElement type,
+      LanguageElement partition)
+    {
+      _Parser.Error0261(partition.Token, partition.Name);
+      type.Invalidate();
+      partition.Invalidate();
+    }
+
+    #endregion
+
+    #region Partial type declaration checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks partial type declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckPartialTypes()
+    {
+      foreach (TypeDeclaration type in _DeclaredTypes)
+      {
+        // --- Check 1: Partitions must have default accessibility or share the same
+        // --- access specifier.
+
+        // --- Check 2: If one or more parts include the abstract modifier, the type is 
+        // --- abstract, otherwise concrete.
+
+        // --- Check 3: If one or more parts include the sealed modifier, the type is 
+        // --- sealed, otherwise open.
+
+        // --- Check 4: If one or more parts include the static modifier, the type is 
+        // --- static, otherwise open.
+
+        // --- Check 5: a partial class declaration includes a base class specification, 
+        // --- that base class specification shall reference the same type as all other 
+        // --- parts of that partial type that include a base class specification.
+
+        // --- Check 6: The set of interfaces for a type declared in multiple partitions
+        // --- is the union of the interfaces specified on each part. A particular 
+        // --- interface can only be named once on each part, but multiple parts can 
+        // --- name the same base interface(s).
+
+        // --- Check 7: The attributes of a type declared in multiple partitions are determined 
+        // --- by combining, in an unspecified order, the attributes of each of its parts. 
+        // --- If the same attribute is placed on multiple parts, it is equivalent to 
+        // --- specifying that attribute multiple times on the type.
+
+        // --- Check 8: When a partial generic type declaration includes constraints, 
+        // --- the constraints shall agree with all other parts that include constraints. 
+        // --- Specifically, each part that includes constraints shall have constraints for 
+        // --- the same set of type parameters, and for each type parameter, the sets of 
+        // --- primary, secondary, and constructor constraints shall be equivalent. Two 
+        // --- sets of constraints are equivalent if they contain the same members. If no 
+        // --- part of a partial generic type specifies type parameter constraints, the 
+        // --- type parameters are considered unconstrained.
+
+        // --- Check 9: It is a compile-time error to declare the same member in more 
+        // --- than one part of the type, unless that member is a type having the partial 
+        // --- modifier.
+
+        // --- Check 10: If one or more parts of a partial declaration of a nested type 
+        // --- include the new modifier, no warning is issued if the nested type hides
+        // --- an available inherited member.
+
+        // --- Check 11: When the unsafe modifier is used on a partial type declaration, 
+        // --- only that particular part is considered an unsafe context.
       }
     }
 

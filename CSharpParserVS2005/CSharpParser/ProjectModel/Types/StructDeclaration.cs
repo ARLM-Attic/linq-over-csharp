@@ -7,7 +7,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents a C# class declaration
   /// </summary>
   // ==================================================================================
-  public sealed class StructDeclaration: ClasslikeTypeDeclaration
+  public sealed class StructDeclaration: TypeDeclaration
   {
     #region Private fields
 

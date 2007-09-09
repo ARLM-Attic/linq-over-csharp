@@ -13,26 +13,22 @@ namespace CSharpParserTest.LanguageElements
     public void TypeResolutionCounterIsOk4()
     {
       CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
-      TypeReference.Locations.Clear();
-      TypeReference.ResolutionCounter = 0;
       parser.AddFile(@"Utility\StringHelper.cs");
       Assert.IsTrue(InvokeParser(parser));
-      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
-      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
-      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
+      Console.WriteLine("Type references: {0}", parser.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", parser.ResolutionCounter);
+      Assert.AreEqual(parser.ResolutionCounter, parser.Locations.Count);
     }
 
     [TestMethod]
     public void TypeResolutionCounterIsOk5()
     {
       CompilationUnit parser = new CompilationUnit(CSharpParserFolder);
-      TypeReference.Locations.Clear();
-      TypeReference.ResolutionCounter = 0;
       parser.AddFile(@"Properties\Resources.Designer.cs");
       Assert.IsTrue(InvokeParser(parser));
-      Console.WriteLine("Type references: {0}", TypeReference.Locations.Count);
-      Console.WriteLine("Type resolutions: {0}", TypeReference.ResolutionCounter);
-      Assert.AreEqual(TypeReference.ResolutionCounter, TypeReference.Locations.Count);
+      Console.WriteLine("Type references: {0}", parser.Locations.Count);
+      Console.WriteLine("Type resolutions: {0}", parser.ResolutionCounter);
+      Assert.AreEqual(parser.ResolutionCounter, parser.Locations.Count);
     }
   }
 }

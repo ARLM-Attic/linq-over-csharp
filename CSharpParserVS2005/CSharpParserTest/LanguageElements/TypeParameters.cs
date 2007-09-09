@@ -39,7 +39,7 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
       Assert.AreEqual(con.Constraints.Count, 2);
       Assert.AreEqual(con.Constraints[0].Name, "ArrayList");
-      Assert.AreEqual(con.Constraints[1].Name, "IEnumerable<A>");
+      Assert.AreEqual(con.Constraints[1].ParametrizedName, "IEnumerable<A>");
       Assert.AreEqual(con.Constraints[1].Arguments.Count, 1);
       Assert.AreEqual(con.Constraints[1].Arguments[0].Name, "A");
       Assert.IsFalse(con.HasNew);
@@ -56,8 +56,8 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
       Assert.AreEqual(con.Constraints.Count, 3);
       Assert.AreEqual(con.Constraints[0].Name, "ArrayList");
-      Assert.AreEqual(con.Constraints[1].Name, "IEnumerable<B>");
-      Assert.AreEqual(con.Constraints[2].Name, "IEquatable<D>");
+      Assert.AreEqual(con.Constraints[1].ParametrizedName, "IEnumerable<B>");
+      Assert.AreEqual(con.Constraints[2].ParametrizedName, "IEquatable<D>");
       Assert.AreEqual(con.Constraints[1].Arguments.Count, 1);
       Assert.AreEqual(con.Constraints[1].Arguments[0].Name, "B");
       Assert.AreEqual(con.Constraints[2].Arguments.Count, 1);

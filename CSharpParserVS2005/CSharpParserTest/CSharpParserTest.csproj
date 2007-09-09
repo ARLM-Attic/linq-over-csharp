@@ -236,6 +236,7 @@
     <None Include="LargeTestProjects\CSLA\Properties\Resources.Designer.cs" />
     <None Include="LargeTestProjects\CSLA\Properties\Settings.Designer.cs" />
     <Compile Include="ParserTestBed.cs" />
+    <Compile Include="PartialTypes\PartialTypes.cs" />
     <Compile Include="PreprocessorExpressions\PreprocessorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ParserTests.cs" />
@@ -296,7 +297,19 @@
     <None Include="TestFiles\BaseTypes\AccessibilityFails3.cs" />
     <None Include="TestFiles\BaseTypes\AccessibilityFails4.cs" />
     <None Include="TestFiles\BaseTypes\AccessibilityOk1.cs" />
-    <Compile Include="TestFiles\ComparisonOperator.cs" />
+    <None Include="TestFiles\ComparisonOperator.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail11.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType1.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType2.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType3.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType4.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType7.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType5.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType6.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType8.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType9.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType10.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType11.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
@@ -333,6 +346,11 @@
     <None Include="TestFiles\TypeResolution\ConflictingName1.cs" />
     <None Include="TestFiles\TypeResolution\AttributeName1.cs" />
     <None Include="TestFiles\TypeResolution\AttributeName2.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace13.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace14.cs">
+      <SubType>Component</SubType>
+    </None>
+    <None Include="TestFiles\TypeResolution\Generics1.cs" />
     <Compile Include="TypeResolution\BaseTypes.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />

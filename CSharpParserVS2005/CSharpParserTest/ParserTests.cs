@@ -1,4 +1,3 @@
-using CSharpParser;
 using CSharpParser.ParserFiles;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -185,10 +184,10 @@ namespace CSharpParserTest
       Assert.IsTrue(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_Event3");
       Assert.AreEqual(fd.DeclaredVisibility, Visibility.Private);
-      Assert.AreEqual(fd.ResultingType.Name, "MyEvent1<List<int>, List<string>>");
+      Assert.AreEqual(fd.ResultingType.ParametrizedName, "MyEvent1<List<int>, List<string>>");
       Assert.AreEqual(fd.ResultingType.Arguments.Count, 2);
-      Assert.AreEqual(fd.ResultingType.Arguments[0].Name, "List<int>");
-      Assert.AreEqual(fd.ResultingType.Arguments[1].Name, "List<string>");
+      Assert.AreEqual(fd.ResultingType.Arguments[0].ParametrizedName, "List<int>");
+      Assert.AreEqual(fd.ResultingType.Arguments[1].ParametrizedName, "List<string>");
     }
 
     [TestMethod]
