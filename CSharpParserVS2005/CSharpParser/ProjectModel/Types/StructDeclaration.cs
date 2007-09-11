@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -9,10 +10,6 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class StructDeclaration: TypeDeclaration
   {
-    #region Private fields
-
-    #endregion
-
     #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
@@ -44,6 +41,16 @@ namespace CSharpParser.ProjectModel
       get { return true; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the default base type of this type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override ITypeCharacteristics DefaultBaseType
+    {
+      get { return NetBinaryType.ValueType; }
+    }
+
     #endregion
 
     #region Overridden methods
@@ -68,6 +75,16 @@ namespace CSharpParser.ProjectModel
           Parser.Error0106(Token, "protected");
         }
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance with the type of this declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected override TypeDeclaration CreateNewPart()
+    {
+      return new StructDeclaration(Token, Parser);
     }
 
     #endregion

@@ -1,4 +1,3 @@
-using System.Text;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -12,7 +11,6 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private bool _IsStatic;
     private FinalizerDeclaration _Finalizer;
 
     #endregion
@@ -37,16 +35,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if this type has a 'static' modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsStatic
-    {
-      get { return _IsStatic; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the finalizer of this type declarations
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -63,54 +51,6 @@ namespace CSharpParser.ProjectModel
     public bool HasFinalizer
     {
       get { return _Finalizer != null; }
-    }
-
-    #endregion
-
-    #region Overridden methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the properties using the modifiers.
-    /// </summary>
-    /// <param name="mod">Modifier enumeration value.</param>
-    // --------------------------------------------------------------------------------
-    public override void SetModifiers(Modifier mod)
-    {
-      base.SetModifiers(mod);
-      _IsStatic = (mod & Modifier.@static) != 0;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the string representing the modifiers of this class definition.
-    /// </summary>
-    /// <returns>
-    /// String representation of modifiers.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public override string GetModifiersText()
-    {
-      StringBuilder sb = new StringBuilder(base.GetModifiersText());
-      if (IsAbstract)
-      {
-        if (sb.Length > 0) sb.Append(' ');
-        sb.Append("abstract");
-      }
-
-      if (IsSealed)
-      {
-        if (sb.Length > 0) sb.Append(' ');
-        sb.Append("sealed");
-      }
-
-      if (_IsStatic)
-      {
-        if (sb.Length > 0) sb.Append(' ');
-        sb.Append("static");
-      }
-
-      return sb.ToString();
     }
 
     #endregion
@@ -135,6 +75,35 @@ namespace CSharpParser.ProjectModel
       }
       _Finalizer = finalizer;
       return false;
+    }
+
+    #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance with the type of this declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected override TypeDeclaration CreateNewPart()
+    {
+      return new ClassDeclaration(Token, Parser);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Clones this type declaration into a new instance.
+    /// </summary>
+    /// <returns>
+    /// The new cloned instance.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override TypeDeclaration CloneToPart()
+    {
+      ClassDeclaration clone = base.CloneToPart() as ClassDeclaration;
+      clone._Finalizer = _Finalizer;
+      return clone;
     }
 
     #endregion

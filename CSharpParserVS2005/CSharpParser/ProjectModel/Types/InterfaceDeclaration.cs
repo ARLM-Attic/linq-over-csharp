@@ -9,10 +9,6 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class InterfaceDeclaration: TypeDeclaration
   {
-    #region Private fields
-
-    #endregion
-
     #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
@@ -29,7 +25,17 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region Public properties
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance with the type of this declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected override TypeDeclaration CreateNewPart()
+    {
+      return new InterfaceDeclaration(Token, Parser);
+    }
 
     #endregion
   }

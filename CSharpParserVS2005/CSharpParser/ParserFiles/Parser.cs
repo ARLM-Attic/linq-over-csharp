@@ -825,11 +825,11 @@ out TypeDeclaration td) {
 		if (la.kind == 86) {
 			Get();
 			ClassType(out typeRef);
-			sd.BaseTypes.Add(typeRef); 
+			sd.InterfaceList.Add(typeRef); 
 			while (la.kind == 87) {
 				Get();
 				ClassType(out typeRef);
-				sd.BaseTypes.Add(typeRef); 
+				sd.InterfaceList.Add(typeRef); 
 			}
 		}
 		while (la.kind == 1) {
@@ -888,10 +888,10 @@ out TypeDeclaration td) {
 			TypeReference typeRef; 
 			if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 				ClassType(out typeRef);
-				ed.BaseTypes.Add(typeRef); 
+				ed.InterfaceList.Add(typeRef); 
 			} else if (StartOf(7)) {
 				IntegralType(out typeRef);
-				ed.BaseTypes.Add(typeRef); 
+				ed.InterfaceList.Add(typeRef); 
 			} else SynErr(135);
 		}
 		EnumBody(ed);
@@ -945,11 +945,11 @@ out TypeDeclaration td) {
 		Expect(86);
 		TypeReference typeRef; 
 		ClassType(out typeRef);
-		cd.BaseTypes.Add(typeRef); 
+		cd.InterfaceList.Add(typeRef); 
 		while (la.kind == 87) {
 			Get();
 			ClassType(out typeRef);
-			cd.BaseTypes.Add(typeRef); 
+			cd.InterfaceList.Add(typeRef); 
 		}
 	}
 
@@ -1865,11 +1865,11 @@ TypeReference typeRef) {
 		Expect(86);
 		TypeReference typeRef; 
 		ClassType(out typeRef);
-		ifd.BaseTypes.Add(typeRef); 
+		ifd.InterfaceList.Add(typeRef); 
 		while (la.kind == 87) {
 			Get();
 			ClassType(out typeRef);
-			ifd.BaseTypes.Add(typeRef); 
+			ifd.InterfaceList.Add(typeRef); 
 		}
 	}
 

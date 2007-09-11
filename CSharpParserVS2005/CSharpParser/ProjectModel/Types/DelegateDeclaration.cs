@@ -84,5 +84,36 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance with the type of this declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected override TypeDeclaration CreateNewPart()
+    {
+      return new DelegateDeclaration(Token, Parser);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Clones this type declaration into a new instance.
+    /// </summary>
+    /// <returns>
+    /// The new cloned instance.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override TypeDeclaration CloneToPart()
+    {
+      DelegateDeclaration clone = base.CloneToPart() as DelegateDeclaration;
+      clone._ReturnType = _ReturnType;
+      foreach (FormalParameter param in _FormalParameters) 
+        clone._FormalParameters.Add(param);
+      return clone;
+    }
+
+    #endregion
   }
 }

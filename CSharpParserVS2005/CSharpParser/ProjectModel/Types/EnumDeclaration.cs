@@ -45,7 +45,7 @@ namespace CSharpParser.ProjectModel
       get
       {
         return HasBaseType
-                 ? BaseTypes[0].Name
+                 ? InterfaceList[0].Name
                  : string.Empty;
       }
     }
@@ -81,6 +81,35 @@ namespace CSharpParser.ProjectModel
       {
         enumVal.ResolveTypeReferences(contextType, declarationScope, this);
       }
+    }
+
+    #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance with the type of this declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected override TypeDeclaration CreateNewPart()
+    {
+      return new EnumDeclaration(Token, Parser);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Clones this type declaration into a new instance.
+    /// </summary>
+    /// <returns>
+    /// The new cloned instance.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override TypeDeclaration CloneToPart()
+    {
+      EnumDeclaration clone = base.CloneToPart() as EnumDeclaration;
+      foreach (EnumValueDeclaration value in _Values) clone._Values.Add(value);
+      return clone;
     }
 
     #endregion

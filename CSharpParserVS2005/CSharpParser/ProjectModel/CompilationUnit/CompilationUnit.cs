@@ -674,18 +674,31 @@ namespace CSharpParser.ProjectModel
 
       // --- Phase 1: Collect namespace hierarchy information from referenced assemblies
       // --- and namespaces declared by the source code. Set the resolvers for all 
-      // --- namespaces and types.
+      // --- namespaces and types. 
+      // --- Result: After this phase we can resolve all fully qualified namespace and 
+      // --- type names. We are not ready to use aliases or namespaces referenced by 
+      // --- using directives.
       PrepareNamespaceHierarchies();
       SetNamespaceResolvers();
       SetTypeResolvers();
       
-      // --- Phase 2: Create namespace hierarchies and resolve using clauses in the 
-      // --- compilation unit
+      // --- Phase 2: Resolve the extern alias, using alias and using directives in the
+      // --- source code. 
+      // --- Result: After this phase we are able to resolve any namespace and type
+      // --- names that has been properly referenced.
       ResolveExternAliasClauses();
       ResolveUsingDirectives();
 
-      // --- Phase 3: Resolve base types and check base type validity
+      // --- Phase 3: We check if there are any types having the same fully qualified names.
+      // --- Only partial types having the same declaration type (class, struct or interface)
+      // --- are accepted, any other types are ignored. In case of multiple type declarations
+      // --- the first (the parser detected it first) type declaration fragment is propcessed,
+      // --- others are ignored. After multiple types have been checked, the base type names
+      // --- are resolved and checked. Types are checked for circular dependency.
+      // --- Result: Types declared in source code are unambigous, they have their proper
+      // --- place in the object hierarchy and they are free from circular dependencies.
       CheckMultipleDeclaration();
+      ConsolidatePartialTypeDeclarations();
       ResolveBaseTypes();
       CheckCircularDependency();
 
@@ -1052,7 +1065,7 @@ namespace CSharpParser.ProjectModel
       bool typeValid = true;
       bool firstOnList = true;
       List<string> baseNames = new List<string>();
-      foreach (TypeReference baseType in type.BaseTypes)
+      foreach (TypeReference baseType in type.InterfaceList)
       {
         TypeReference baseToCheck = baseType.RightMostPart;
         // --- Resolve the type only, if not resolved yet.
@@ -1062,7 +1075,6 @@ namespace CSharpParser.ProjectModel
             Resolve(baseType, contextType, contextObject, type);
           if (!info.IsResolved) continue;
         }
-        
         // --- Check, if the base type is valid in its context.
         baseToCheck.Validate(CheckBaseType(type, baseType, firstOnList));
         typeValid &= baseToCheck.IsValid;
@@ -1083,7 +1095,9 @@ namespace CSharpParser.ProjectModel
           }
         }
       }
+
       type.Validate(typeValid);
+      type.SeparateBaseClassAndInterfaces();
 
       // --- Resolve base types in nested types
       foreach (TypeDeclaration nestedType in type.NestedTypes)
@@ -1169,7 +1183,7 @@ namespace CSharpParser.ProjectModel
         // --- Check 4b: Classes cannot have multiple base types
         if (!firstOnList && !rightMostPart.ResolvingType.IsInterface)
         {
-          Parser.Error1721(baseType.Token, type.Name, type.BaseTypes[0].FullName,
+          Parser.Error1721(baseType.Token, type.Name, type.InterfaceList[0].FullName,
                            rightMostPart.ResolvingType.FullName);
           return false;
         }
@@ -1552,6 +1566,19 @@ namespace CSharpParser.ProjectModel
     #endregion
 
     #region Partial type declaration checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Consolidates partial type fragments.
+    /// </summary>
+    /// <remarks>
+    /// This consolidates affects only the type declaration part (visibility,
+    /// modifiers, base types and interfaces) but no members.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private void ConsolidatePartialTypeDeclarations()
+    {
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

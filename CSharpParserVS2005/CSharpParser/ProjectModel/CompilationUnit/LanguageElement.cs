@@ -283,5 +283,20 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Overridden members
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this language element.
+    /// </summary>
+    /// <returns>Full name of the language element.</returns>
+    // --------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return FullName;
+    }
+
+    #endregion
   }
 }

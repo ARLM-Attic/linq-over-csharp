@@ -26,6 +26,9 @@ namespace CSharpParser.Semantics
     /// <summary>Represents the System.Object type</summary>
     public static NetBinaryType Object = new NetBinaryType(typeof(Object));
 
+    /// <summary>Represents the System.ValueType type</summary>
+    public static NetBinaryType ValueType = new NetBinaryType(typeof(ValueType));
+
     /// <summary>Represents the System.Boolean type</summary>
     public static NetBinaryType Boolean = new NetBinaryType(typeof(Boolean));
 
