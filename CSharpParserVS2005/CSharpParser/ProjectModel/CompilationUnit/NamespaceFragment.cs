@@ -226,6 +226,20 @@ namespace CSharpParser.ProjectModel
       get { return _Resolvers[0] as NamespaceResolutionNode; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the rightmost part (after the '.' separator) of this namespace.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string RightmostName
+    {
+      get
+      {
+        int pos = Name.IndexOf('.');
+        return pos < 0 ? Name : Name.Substring(pos + 1);
+      }
+    }
+
     #endregion
 
     #region Public methods
@@ -350,8 +364,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddTypeDeclaration(TypeDeclaration item)
     {
-      item.EnclosingNamespace = this;
       _TypeDeclarations.Add(item);
+      item.SetNamespace(this);
+      item.SetSourceFile(_EnclosingSourceFile);
       _EnclosingSourceFile.ParentUnit.AddTypeDeclaration(item);
     }
 

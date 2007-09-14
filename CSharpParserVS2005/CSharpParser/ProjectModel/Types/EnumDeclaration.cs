@@ -21,13 +21,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new enumeration declaration.
+    /// Creates a new enum declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
-    /// <param name="parser">Parser used.</param>
+    /// <param name="parser">Parser instance</param>
+    /// <param name="declaringType">
+    /// Type that declares this type. Null, if this type has no declaring type.
+    /// </param>
     // --------------------------------------------------------------------------------
-    public EnumDeclaration(Token token, CSharpSyntaxParser parser)
-      : base(token, parser)
+    public EnumDeclaration(Token token, CSharpSyntaxParser parser, 
+      TypeDeclaration declaringType)
+      : base(token, parser, declaringType)
     {
     }
 
@@ -45,7 +49,7 @@ namespace CSharpParser.ProjectModel
       get
       {
         return HasBaseType
-                 ? InterfaceList[0].Name
+                 ? BaseTypeReference.Name
                  : string.Empty;
       }
     }
@@ -94,7 +98,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected override TypeDeclaration CreateNewPart()
     {
-      return new EnumDeclaration(Token, Parser);
+      return new EnumDeclaration(Token, Parser, DeclaringType);
     }
 
     // --------------------------------------------------------------------------------

@@ -185,7 +185,7 @@ namespace CSharpParser.Collections
     /// Clears the content of the list.
     /// </summary>
     // ----------------------------------------------------------------------------------
-    void ICollection<T>.Clear()
+    public void Clear()
     {
       CheckReadOnly();
       _Items.Clear();

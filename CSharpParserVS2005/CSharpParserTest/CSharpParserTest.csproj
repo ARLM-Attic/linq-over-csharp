@@ -310,6 +310,17 @@
     <None Include="TestFiles\PartialTypes\PartialType9.cs" />
     <None Include="TestFiles\PartialTypes\PartialType10.cs" />
     <None Include="TestFiles\PartialTypes\PartialType11.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType12.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType13.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail12.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType14.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType15.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType16.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType17.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType18.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType19.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType20.cs" />
+    <Compile Include="TestFiles\PartialTypes\PartialType21.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
@@ -351,10 +362,11 @@
       <SubType>Component</SubType>
     </None>
     <None Include="TestFiles\TypeResolution\Generics1.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidTypeName1.cs" />
     <Compile Include="TypeResolution\BaseTypes.cs" />
     <Compile Include="TypeResolution\TypeResolution.cs" />
     <Compile Include="Variables\Variables.cs" />
-    <Compile Include="Visibility\Visibility.cs" />
+    <Compile Include="Visibility\VisibilityTest.cs" />
     <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />

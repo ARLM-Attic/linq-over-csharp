@@ -144,13 +144,25 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
+    public void BaseTypesFailWithMultipleClasses2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"BaseTypes\BaseTypesFail12.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS1722");
+      Assert.AreEqual(parser.Errors[1].Code, "CS1721");
+    }
+
+    [TestMethod]
     public void CircularDependencyFails1()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency1.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0146");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0146");
     }
 
     [TestMethod]
@@ -159,8 +171,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency2.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0146");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0146");
     }
 
     [TestMethod]
@@ -169,8 +182,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency3.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0146");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0146");
     }
 
     [TestMethod]
@@ -179,8 +193,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency4.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0146");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0146");
     }
 
     [TestMethod]
@@ -189,8 +204,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency5.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0146");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0146");
     }
 
     [TestMethod]
@@ -199,8 +215,10 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency6.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 3);
       Assert.AreEqual(parser.Errors[0].Code, "CS0529");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0529");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0529");
     }
 
     [TestMethod]
@@ -209,8 +227,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency7.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0529");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0529");
     }
 
     [TestMethod]
@@ -219,8 +238,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency8.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0529");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0529");
     }
 
     [TestMethod]
@@ -229,8 +249,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency9.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0529");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0529");
     }
 
     [TestMethod]
@@ -239,8 +260,9 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\CircularDependency10.cs");
       Assert.IsFalse(InvokeParser(parser));
-      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0529");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0529");
     }
 
     [TestMethod]

@@ -330,6 +330,36 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0262: Partial declarations of '{0}' have conflicting accessibility
+    ///  modifiers.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0262(Token token, string name)
+    {
+      Error("CS0262", token,
+        string.Format("Partial declarations of '{0}' have conflicting " +
+        "accessibility modifiers", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0263: Partial declarations of '{0}' must not specify different 
+    /// base classes.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0263(Token token, string name)
+    {
+      Error("CS0263", token,
+        string.Format("Partial declarations of '{0}' must not specify different " +
+        "base classes", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0400: The type or namespace name '{0}' could not be found in the 
     /// global namespace (are you missing an assembly reference?)
     /// </summary>
@@ -725,7 +755,7 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Error CS1721: The type '{0}' exists in both '{1}' and '{2}'.
+    /// Error CS1721: Class '{0}' cannot have multiple base classes: '{1}' and '{2}'
     /// </summary>
     /// <param name="token">Error point</param>
     /// <param name="type">Conflicting type</param>
@@ -737,6 +767,19 @@ namespace CSharpParser.ParserFiles
       Error("CS1721", token,
         string.Format("Class '{0}' cannot have multiple base classes: '{1}' and '{2}'",
         type, base1, base2));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1721: Base class '{0}' must come before any interfaces.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="type">Conflicting type</param>
+    // --------------------------------------------------------------------------------
+    public void Error1722(Token token, string type)
+    {
+      Error("CS1722", token,
+        string.Format("Base class '{0}' must come before any interfaces", type));
     }
 
     #endregion

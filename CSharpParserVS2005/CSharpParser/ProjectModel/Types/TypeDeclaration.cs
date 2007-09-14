@@ -40,6 +40,7 @@ namespace CSharpParser.ProjectModel
     // --- Fields describing the main characteristics of the type
     private TypeDeclaration _DeclaringType;
     private ITypeCharacteristics _BaseType;
+    private TypeReference _BaseTypeReference;
     private readonly List<TypeReference> _InterfaceList = new List<TypeReference>();
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
     private readonly TypeParameterConstraintCollection _ParameterConstraints =
@@ -79,10 +80,15 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance</param>
+    /// <param name="declaringType">
+    /// Type that declares this type. Null, if this type has no declaring type.
+    /// </param>
     // --------------------------------------------------------------------------------
-    protected TypeDeclaration(Token token, CSharpSyntaxParser parser)
+    protected TypeDeclaration(Token token, CSharpSyntaxParser parser, 
+      TypeDeclaration declaringType)
       : base(token, parser)
     {
+      _DeclaringType = declaringType;
       _Members.BeforeAdd += BeforeAddMembers;
     }
 
@@ -190,7 +196,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the number of parts this type defines.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public object PartCount
+    public int PartCount
     {
       get { return _Parts.Count == 0 ? 1 : _Parts.Count; }
     }
@@ -277,7 +283,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasBaseType
     {
-      get { return _InterfaceList.Count > 0; }  
+      get { return _BaseType != null; }  
     }
 
     // --------------------------------------------------------------------------------
@@ -336,12 +342,19 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ITypeCharacteristics BaseType
     {
-      get
-      {
-        return _BaseType;
-      }
+      get { return _BaseType; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type reference representing the base type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference BaseTypeReference
+    {
+      get { return _BaseTypeReference; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the default base type of this type declaration.
@@ -645,12 +658,6 @@ namespace CSharpParser.ProjectModel
     public TypeDeclaration DeclaringType
     {
       get { return _DeclaringType; }
-      set
-      {
-        if (_DeclaringType == value) return;
-        _DeclaringType = value;
-        _DeclaringType.NestedTypes.Add(this);
-      }
     }
 
     // --------------------------------------------------------------------------------
@@ -893,23 +900,21 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void SetSourceFile(SourceFile file)
     {
-      _EnclosingSourceFile = file;  
+      _EnclosingSourceFile = file;
+      foreach (TypeDeclaration nested in _NestedTypes)
+        nested.SetSourceFile(file);
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Separates the base class and interfaces of this type declaration
+    /// Setsthe source file of this type declaration
     /// </summary>
     // --------------------------------------------------------------------------------
-    public void SeparateBaseClassAndInterfaces()
+    public void SetNamespace(NamespaceFragment ns)
     {
-      if (_InterfaceList.Count > 0 && _InterfaceList[0].IsResolvedToType &&
-        _InterfaceList[0].ResolvingType.IsClass)
-      {
-        // --- The first element on the interface list is a class type.
-        _BaseType = _InterfaceList[0].ResolvingType;
-        _InterfaceList.RemoveAt(0);
-      }
+      _EnclosingNamespace = ns;
+      foreach (TypeDeclaration nested in _NestedTypes)
+        nested.SetNamespace(ns);
     }
 
     // --------------------------------------------------------------------------------
@@ -927,6 +932,9 @@ namespace CSharpParser.ProjectModel
       clone._ConsolidatedDeclaration = this;
 
       // --- Copy the properties of this instance to the new instance
+      clone.ContextElement = ContextElement;
+      clone.Comment = Comment;
+      clone.Validate(); 
       clone._DeclaredVisibility = _DeclaredVisibility;
       clone._IsAbstract = _IsAbstract;
       clone._IsNew = _IsNew;
@@ -938,6 +946,8 @@ namespace CSharpParser.ProjectModel
       clone._EnclosingNamespace = _EnclosingNamespace;
       clone._DeclaringType = _DeclaringType;
       clone._BaseType = _BaseType;
+      clone._BaseTypeReference = _BaseTypeReference;
+      foreach (AttributeDeclaration attr in Attributes) clone.Attributes.Add(attr);
       foreach (TypeReference type in _InterfaceList) clone._InterfaceList.Add(type);
       foreach (TypeParameter par in _TypeParameters) clone._TypeParameters.Add(par);
       foreach (TypeParameterConstraint con in _ParameterConstraints) 
@@ -956,6 +966,94 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     // --------------------------------------------------------------------------------
     protected abstract TypeDeclaration CreateNewPart();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Consolidates partial type fragments of this type definition.
+    /// </summary>
+    /// <remarks>
+    /// This consolidates affects only the type declaration part (visibility,
+    /// modifiers, base types and interfaces) but no members.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void ConsolidateDeclarationParts()
+    {
+      // --- Non-partial types do not need consolidation
+      if (PartCount == 1) return;
+
+      // --- Create a list of interface names used
+      List<string> interfaces = new List<string>();
+      foreach (TypeReference intf in _InterfaceList)
+        if (intf.IsValid) interfaces.Add(intf.ResolvingType.FullName);
+
+      Attributes.Clear();
+      foreach (TypeDeclaration part in _Parts)
+      {
+        // --- Do not consolidate invalid parts
+        if (!part.IsValid) continue;
+
+        // --- Step 1: Partitions must have default accessibility or share the same
+        // --- access specifier.
+        if (!part.HasDefaultVisibility) _DeclaredVisibility = part._DeclaredVisibility;
+
+        // --- Step 2: If one or more parts include the abstract modifier, the type is 
+        // --- abstract, otherwise concrete.
+        if (part.IsAbstract) _IsAbstract = true;
+
+        // --- Step 3: If one or more parts include the sealed modifier, the type is 
+        // --- sealed, otherwise open.
+        if (part.IsSealed) _IsSealed = true;
+
+        // --- Step 4: If one or more parts include the static modifier, the type is 
+        // --- static, otherwise open.
+        if (part.IsStatic) _IsStatic = true;
+
+        // --- Step 5: a partial class declaration includes a base class specification, 
+        // --- that base class specification shall reference the same type as all other 
+        // --- parts of that partial type that include a base class specification.
+        if (part.HasBaseType)
+        {
+          if (HasBaseType && _BaseType.FullName != part.BaseType.FullName)
+          {
+            Parser.Error0263(part.BaseTypeReference.Token, Name);
+            part.Invalidate();
+          }
+          else
+          {
+            _BaseType = part.BaseType;
+            _BaseTypeReference = part.BaseTypeReference;
+          }
+        }
+
+        // --- Step 6: The set of interfaces for a type declared in multiple partitions
+        // --- is the union of the interfaces specified on each part. A particular 
+        // --- interface can only be named once on each part, but multiple parts can 
+        // --- name the same base interface(s).
+        foreach (TypeReference intf in part.InterfaceList)
+        {
+          if (!intf.IsValid) continue;
+          if (!interfaces.Contains(intf.ResolvingType.FullName))
+          {
+            interfaces.Add(intf.ResolvingType.FullName);
+            _InterfaceList.Add(intf);
+          }
+        }
+
+        // --- Step 7: The attributes of a type declared in multiple partitions are determined 
+        // --- by combining, in an unspecified order, the attributes of each of its parts. 
+        // --- If the same attribute is placed on multiple parts, it is equivalent to 
+        // --- specifying that attribute multiple times on the type.
+        foreach (AttributeDeclaration attr in part.Attributes)
+        {
+          Attributes.Add(attr);
+        }
+
+      }
+
+      // --- Step 8: When the unsafe modifier is used on a partial type declaration, 
+      // --- only that particular part is considered an unsafe context.
+      _IsUnsafe = false;
+    }
 
     #endregion
 
@@ -995,6 +1093,22 @@ namespace CSharpParser.ProjectModel
       {
         Parser.Error0409(constraint.Token, constraint.Name);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a nested type declaration to this type.
+    /// </summary>
+    /// <param name="type">Type to add</param>
+    /// <remarks>
+    /// Type declaration is added to the type container of the compilation unit.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void AddTypeDeclaration(TypeDeclaration type)
+    {
+      if (type == null) return;
+      _NestedTypes.Add(type);
+      Parser.CompilationUnit.AddTypeDeclaration(type);
     }
 
     #endregion
@@ -1060,7 +1174,6 @@ namespace CSharpParser.ProjectModel
     public NamespaceFragment EnclosingNamespace
     {
       get { return _EnclosingNamespace; }
-      set { _EnclosingNamespace = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -1113,6 +1226,285 @@ namespace CSharpParser.ProjectModel
         // --- Return directly enclosing type
         if (_DeclaringType != null) yield return _DeclaringType;
       }
+    }
+
+    #endregion
+
+    #region Methods related to base type checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the base declaration of this type declaration conforms with the
+    /// C# language specification.
+    /// </summary>
+    /// <remarks>
+    /// Validates or invalidates the base class or interfaces of the type and the
+    /// type declaration itself. Raises the appropriate compiler messages.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void CheckBaseTypeSemantics()
+    {
+      SeparateBaseClassAndInterfaces();
+      if (HasBaseType)
+        _BaseTypeReference.Validate(CheckBaseType());
+      CheckBaseInterfaces();
+      Validate();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Separates the base class and interfaces of this type declaration
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void SeparateBaseClassAndInterfaces()
+    {
+      if (_InterfaceList.Count > 0 && _InterfaceList[0].RightMostPart.IsResolvedToType &&
+        !_InterfaceList[0].RightMostPart.ResolvingType.IsInterface)
+      {
+        // --- The first element on the interface list is a class type.
+        _BaseTypeReference = _InterfaceList[0];
+        _BaseType = _InterfaceList[0].RightMostPart.ResolvingType;
+        _InterfaceList.RemoveAt(0);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the type specified as a base type can be the base type of this 
+    /// declaration.
+    /// </summary>
+    /// <returns>
+    /// True, if the base type is correct; otherwise, false.
+    /// </returns>
+    /// <remarks>
+    /// Raises the appropriate compiler error messages.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool CheckBaseType()
+    {
+      // --- No base type: it is OK
+      if (_BaseType == null) return true;
+      bool isOk = CheckBaseTypeAccessibility(_BaseTypeReference.RightMostPart);
+
+      // --- Checks for base types of classes
+      if (IsClass)
+      {
+        // --- Check 4a: Base types of classes cannot be special classes
+        if (_BaseType.TypeObject.Equals(typeof(Array)) ||
+         _BaseType.TypeObject.Equals(typeof(Delegate)) ||
+         _BaseType.TypeObject.Equals(typeof(Enum)) ||
+         _BaseType.TypeObject.Equals(typeof(ValueType))
+        )
+        {
+          Parser.Error0644(_BaseTypeReference.Token, Name, _BaseType.FullName);
+          return false;
+        }
+
+        // --- Check 4c: Base types of classes cannot be sealed types
+        if (_BaseType.IsSealed)
+        {
+          Parser.Error0509(_BaseTypeReference.Token, Name, _BaseType.FullName);
+          return false;
+        }
+      }
+      // --- Checks for base types of structs
+      else if (IsStruct)
+      {
+        // --- Check 5a: Only interface types allowed on interface list.
+        if (!_BaseType.IsInterface)
+        {
+          Parser.Error0527(_BaseTypeReference.Token, _BaseType.FullName);
+          return false;
+        }
+      }
+      // --- Checks for base types of enums
+      else if (IsEnum)
+      {
+        // --- Check 6a: Only integral types are allowed in form of keywords.
+        if (_BaseTypeReference.HasSubType ||
+          (
+            _BaseTypeReference.Name != "sbyte" &&
+            _BaseTypeReference.Name != "byte" &&
+            _BaseTypeReference.Name != "short" &&
+            _BaseTypeReference.Name != "ushort" &&
+            _BaseTypeReference.Name != "int" &&
+            _BaseTypeReference.Name != "uint" &&
+            _BaseTypeReference.Name != "long" &&
+            _BaseTypeReference.Name != "ulong"
+          ))
+        {
+          Parser.Error1008(_BaseTypeReference.Token);
+          return false;
+        }
+      }
+      // --- Check base types of interfaces
+      else if (IsInterface)
+      {
+        // --- Check 7a: Only interface types allowed on interface list.
+        Parser.Error0527(_BaseTypeReference.Token, _BaseType.FullName);
+        return false;
+      }
+
+      return isOk;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the intrfaces specified are correct interfaces of this declaration.
+    /// </summary>
+    /// <returns>
+    /// True, if the base interface list is correct; otherwise, false.
+    /// </returns>
+    /// <remarks>
+    /// Raises the appropriate compiler error messages.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool CheckBaseInterfaces()
+    {
+      bool allIsOk = true;
+      List<string> baseNames = new List<string>();
+      TypeReference classToName = _BaseTypeReference;
+      foreach (TypeReference type in _InterfaceList)
+      {
+        bool isOk = true;
+        if (type.RightMostPart.IsResolved)
+        {
+          if (IsTypeParamOrNamespace(type)) isOk = false;
+          else
+          {
+            // --- Only interfaces are allowed on the interface list
+            if (!type.RightMostPart.ResolvingType.IsInterface)
+            {
+              if (IsClass)
+              {
+                if (classToName == null)
+                {
+                  Parser.Error1722(type.Token, type.Name);
+                  classToName = type;
+                }
+                else
+                {
+                  Parser.Error1721(type.Token, type.Name, classToName.FullName, type.FullName);
+                }
+              }
+              else Parser.Error0527(type.Token, type.FullName);
+              isOk = false;
+            }
+            else
+            {
+              // --- Interfaces can be only once on the list
+              if (baseNames.Contains(type.RightMostPart.ResolvingType.FullName))
+              {
+                Parser.Error0528(type.Token, type.FullName);
+                isOk = false;
+              }
+              else baseNames.Add(type.RightMostPart.ResolvingType.FullName);
+            }
+          }
+        }
+        type.Validate(isOk);
+        allIsOk &= isOk;
+      }
+      return allIsOk;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified type is resolved to a type parameter or a namespace.
+    /// </summary>
+    /// <param name="type">Type to check</param>
+    /// <returns>
+    /// True, if the type is resolved as a type parameter or a namespace.
+    /// </returns>
+    /// <remarks>
+    /// Raises the appropriate compiler error messages.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private bool IsTypeParamOrNamespace(TypeReference type)
+    {
+      TypeReference rightMostPart = type.RightMostPart;
+
+      if (rightMostPart.Target == ResolutionTarget.TypeParameter)
+      {
+        Parser.Error0689(type.Token, type.ResolvingTypeParameter.Name);
+        return true;
+      }
+      if (rightMostPart.Target == ResolutionTarget.Namespace)
+      {
+        Parser.Error0118(type.Token, type.FullName, "namespace", "type");
+        return true;
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the base type is accessible in the context of the specified type 
+    /// declaration.
+    /// </summary>
+    /// <param name="baseType">Base type to check</param>
+    /// <returns>
+    /// True, if base type is accessible; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool CheckBaseTypeAccessibility(TypeReference baseType)
+    {
+      // --- Base interfaces can have any accessibility
+      if (baseType.IsInterface) return true;
+
+      // --- Is the base type a referenced type?
+      TypeDeclaration baseDecl = baseType.ResolvingType as TypeDeclaration;
+
+      if (baseDecl != null)
+      {
+        // --- This type has been declared in the source code
+        if (
+             (IsPublic && baseDecl.IsNotPublic) ||
+             (Visibility == Visibility.Protected &&
+               (
+                 baseDecl.Visibility == Visibility.Private ||
+                 baseDecl.Visibility == Visibility.Protected
+               )
+             ) ||
+             (Visibility == Visibility.Internal &&
+               (
+                 baseDecl.Visibility == Visibility.Private ||
+                 baseDecl.Visibility == Visibility.Protected
+               )
+             ) ||
+             (Visibility == Visibility.ProtectedInternal &&
+               (
+                 baseDecl.Visibility == Visibility.Private ||
+                 baseDecl.Visibility == Visibility.Internal ||
+                 baseDecl.Visibility == Visibility.Protected
+               )
+             )
+           )
+        {
+          Parser.Error0060(Token, baseType.FullName, Name);
+          return false;
+        }
+      }
+      else
+      {
+        // --- This type is referenced from an assembly, can be used only if it is
+        // --- visible from outside.
+        return baseType.ResolvingType.IsVisible;
+      }
+      return true;
+    }
+
+    #endregion
+
+    #region Methods to check type declaration
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if type declaration matches with the declaration rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckTypeDeclaration()
+    {
     }
 
     #endregion

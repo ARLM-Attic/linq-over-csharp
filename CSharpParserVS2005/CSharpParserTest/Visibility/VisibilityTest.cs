@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace CSharpParserTest.LanguageElements
 {
   [TestClass]
-  public class Visibility : ParserTestBed
+  public class VisibilityTest : ParserTestBed
   {
     [TestMethod]
     public void InvalidAccessCombinationFails1()

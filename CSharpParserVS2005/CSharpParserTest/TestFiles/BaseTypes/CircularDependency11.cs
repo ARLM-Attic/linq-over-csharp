@@ -3,3 +3,11 @@ class A
 {
   class B : A { }
 }
+
+class Master
+{
+  class A
+  {
+    class B : A { }
+  }
+}

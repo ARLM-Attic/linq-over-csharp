@@ -365,16 +365,8 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
       TypeDeclaration<attrs, null, m, out td>    (.
                                                     if (td != null)
                                                     {
-                                                      if (parent == null) 
-                                                      {
-                                                        _File.AddTypeDeclaration(td);
-                                                        td.SetSourceFile(_File);
-                                                      }
-                                                      else 
-                                                      {
-                                                        parent.AddTypeDeclaration(td);
-                                                        td.SetSourceFile(parent.EnclosingSourceFile);
-                                                      }
+                                                      if (parent == null) _File.AddTypeDeclaration(td);
+                                                      else parent.AddTypeDeclaration(td);
                                                     }
                                                  .)
 .
@@ -393,16 +385,15 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
       "partial"                                      (. isPartial = true; .)
     ]
     ( 
-      ClassDeclaration<m, isPartial, out td> |                                                           
-      StructDeclaration<m, isPartial, out td> |                                                           
-      InterfaceDeclaration<m, isPartial, out td>                                                           
+      ClassDeclaration<m, parentType, isPartial, out td> |                                                           
+      StructDeclaration<m, parentType, isPartial, out td> |                                                           
+      InterfaceDeclaration<m, parentType, isPartial, out td>                                                           
     )                                                          
-    | EnumDeclaration<m, out td> 
-    | DelegateDeclaration<m, out td>
+    | EnumDeclaration<m, parentType, out td> 
+    | DelegateDeclaration<m, parentType, out td>
   )                                                  (. 
                                                         if (td != null)
                                                         {
-                                                          td.DeclaringType = parentType;
                                                           td.SetModifiers(m.Value); 
                                                           td.AssignAttributes(attrs);
                                                         }
@@ -412,14 +403,16 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
 // ------------------------------------------------------------------------------------
 // Class declaration in the file or within a namespace.
 // +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
 // +partial: flag indicating if this is a partial type definition or not.
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-ClassDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
+ClassDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
+  out TypeDeclaration td>
 =
   "class"                                            (. 
                                                         m.Check(Modifier.classes); 
-                                                        ClassDeclaration cd = new ClassDeclaration(t, this);
+                                                        ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
                                                         cd.IsPartial = isPartial;
                                                         td = cd;
                                                         CurrentElement = cd;
@@ -440,10 +433,10 @@ ClassDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 ClassBase<ClassDeclaration cd>                                  
 =
   ":"                        (. TypeReference typeRef; .)
-  ClassType<out typeRef>     (. cd.BaseTypes.Add(typeRef); .)
+  ClassType<out typeRef>     (. cd.InterfaceList.Add(typeRef); .)
   
   { ","                                                         
-    ClassType<out typeRef>    (. cd.BaseTypes.Add(typeRef); .)
+    ClassType<out typeRef>    (. cd.InterfaceList.Add(typeRef); .)
   }
 .
 
@@ -464,14 +457,16 @@ ClassBody<TypeDeclaration td>
 // ------------------------------------------------------------------------------------
 // Structure declaration within a file a namespace.
 // +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
 // +partial: flag indicating if this is a partial type definition or not.
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-StructDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
+StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
+  out TypeDeclaration td>
 =
   "struct"                                         (. 
                                                       m.Check(Modifier.nonClassTypes); 
-                                                      StructDeclaration sd = new StructDeclaration(t, this);
+                                                      StructDeclaration sd = new StructDeclaration(t, this, parentType);
                                                       td = sd;
                                                       CurrentElement = sd;
                                                       sd.IsPartial = isPartial;
@@ -480,9 +475,9 @@ StructDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
   ident                                            (. sd.Name = t.val; .)
   [ TypeParameterList<sd> ]
   [ ":"                                                     
-  ClassType<out typeRef>                           (. sd.BaseTypes.Add(typeRef); .)
+  ClassType<out typeRef>                           (. sd.InterfaceList.Add(typeRef); .)
   { "," 
-    ClassType<out typeRef>                         (. sd.BaseTypes.Add(typeRef); .)
+    ClassType<out typeRef>                         (. sd.InterfaceList.Add(typeRef); .)
   } ]
   {                                                (. TypeParameterConstraint constraint; .)
     TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
@@ -506,21 +501,24 @@ StructBody<TypeDeclaration td>
 
 // ------------------------------------------------------------------------------------
 // Enumerated type declaration within a file or a namespace
+// +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
+// +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-EnumDeclaration<Modifiers m, out TypeDeclaration td>
+EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
 =
   "enum"                         (. 
                                     m.Check(Modifier.nonClassTypes); 
-                                    EnumDeclaration ed = new EnumDeclaration(t, this);
+                                    EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
                                     td = ed;
                                     CurrentElement = ed;
                                  .)
   ident                          (. ed.Name = t.val; .)
   [ ":"                          (. TypeReference typeRef; .)
     ( 
-      ClassType<out typeRef>     (. ed.BaseTypes.Add(typeRef); .)
+      ClassType<out typeRef>     (. ed.InterfaceList.Add(typeRef); .)
       |
-      IntegralType<out typeRef>  (. ed.BaseTypes.Add(typeRef); .)
+      IntegralType<out typeRef>  (. ed.InterfaceList.Add(typeRef); .)
     )
   ] 
   EnumBody<ed> 
@@ -564,13 +562,14 @@ EnumMemberDeclaration<EnumDeclaration ed>
 // ------------------------------------------------------------------------------------
 // Delegate type declaration within a file a namespace.
 // +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-DelegateDeclaration<Modifiers m, out TypeDeclaration td>
+DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
 =
   "delegate"                                       (. 
                                                       m.Check(Modifier.nonClassTypes); 
-                                                      DelegateDeclaration dd = new DelegateDeclaration(t, this);
+                                                      DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
                                                       td = dd;
                                                       CurrentElement = dd;
                                                       TypeReference returnType;
@@ -636,8 +635,8 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       | IndexerDeclaration<attrs, m, typeRef, null, td>
     )
   | CastOperatorDeclaration<attrs, m, td>
-  |                                              (. TypeDeclaration nestedType; .)
-    TypeDeclaration<attrs, td, m, out nestedType>
+  |                                               (. TypeDeclaration nestedType; .)
+    TypeDeclaration<attrs, td, m, out nestedType> (. td.AddTypeDeclaration(nestedType); .)
   )
 .
 
@@ -904,14 +903,16 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
 // ------------------------------------------------------------------------------------
 // Declaration of an interface.
 // +modifiers: Set of modifiers belonging to the member.
+// +parentType: Parent type declaration
 // +isPartial: indicates partial modifier.
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
-InterfaceDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
+InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
+  out TypeDeclaration td>
 =
   "interface"       (. 
                        m.Check(Modifier.nonClassTypes); 
-                       InterfaceDeclaration ifd = new InterfaceDeclaration(t, this);
+                       InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
                        CurrentElement = ifd;
                        td = ifd;
                        ifd.IsPartial = isPartial;
@@ -933,10 +934,10 @@ InterfaceDeclaration<Modifiers m, bool isPartial, out TypeDeclaration td>
 InterfaceBase<InterfaceDeclaration ifd> 
 =
   ":"                        (. TypeReference typeRef; .)
-  ClassType<out typeRef>      (. ifd.BaseTypes.Add(typeRef); .)
+  ClassType<out typeRef>      (. ifd.InterfaceList.Add(typeRef); .)
   
   { ","                                                         
-    ClassType<out typeRef>    (. ifd.BaseTypes.Add(typeRef); .)
+    ClassType<out typeRef>    (. ifd.InterfaceList.Add(typeRef); .)
   }
 .
 

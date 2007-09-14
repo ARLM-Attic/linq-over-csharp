@@ -315,5 +315,15 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"TypeResolution\Generics1.cs");
       Assert.IsTrue(InvokeParser(parser));
     }
+
+    [TestMethod]
+    public void InvalidTypeNameFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\InvalidTypeName1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0101");
+    }
   }
 }

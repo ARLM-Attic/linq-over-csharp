@@ -250,6 +250,7 @@ namespace CSharpParser.ProjectModel
     {
       _TypeDeclarations.Add(type);
       _ParentUnit.AddTypeDeclaration(type);
+      type.SetSourceFile(this);
     }
 
     // --------------------------------------------------------------------------------

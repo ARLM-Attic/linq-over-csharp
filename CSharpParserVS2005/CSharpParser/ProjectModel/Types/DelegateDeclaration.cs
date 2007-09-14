@@ -21,13 +21,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new delegate type declaration.
+    /// Creates a new delegate declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance</param>
+    /// <param name="declaringType">
+    /// Type that declares this type. Null, if this type has no declaring type.
+    /// </param>
     // --------------------------------------------------------------------------------
-    public DelegateDeclaration(Token token, CSharpSyntaxParser parser)
-      : base(token, parser)
+    public DelegateDeclaration(Token token, CSharpSyntaxParser parser, 
+      TypeDeclaration declaringType)
+      : base(token, parser, declaringType)
     {
     }
 
@@ -94,7 +98,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected override TypeDeclaration CreateNewPart()
     {
-      return new DelegateDeclaration(Token, Parser);
+      return new DelegateDeclaration(Token, Parser, DeclaringType);
     }
 
     // --------------------------------------------------------------------------------

@@ -13,13 +13,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new class declaration.
+    /// Creates a new interface declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance</param>
+    /// <param name="declaringType">
+    /// Type that declares this type. Null, if this type has no declaring type.
+    /// </param>
     // --------------------------------------------------------------------------------
-    public InterfaceDeclaration(Token token, CSharpSyntaxParser parser)
-      : base(token, parser)
+    public InterfaceDeclaration(Token token, CSharpSyntaxParser parser, 
+      TypeDeclaration declaringType)
+      : base(token, parser, declaringType)
     {
     }
 
@@ -34,7 +38,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected override TypeDeclaration CreateNewPart()
     {
-      return new InterfaceDeclaration(Token, Parser);
+      return new InterfaceDeclaration(Token, Parser, DeclaringType);
     }
 
     #endregion

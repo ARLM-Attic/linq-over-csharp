@@ -587,16 +587,8 @@ public partial class CSharpSyntaxParser
 			TypeDeclaration(attrs, null, m, out td);
 			if (td != null)
 			{
-			  if (parent == null) 
-			  {
-			    _File.AddTypeDeclaration(td);
-			    td.SetSourceFile(_File);
-			  }
-			  else 
-			  {
-			    parent.AddTypeDeclaration(td);
-			    td.SetSourceFile(parent.EnclosingSourceFile);
-			  }
+			  if (parent == null) _File.AddTypeDeclaration(td);
+			  else parent.AddTypeDeclaration(td);
 			}
 			
 		} else SynErr(131);
@@ -761,30 +753,30 @@ out TypeDeclaration td) {
 				isPartial = true; 
 			}
 			if (la.kind == 16) {
-				ClassDeclaration(m, isPartial, out td);
+				ClassDeclaration(m, parentType, isPartial, out td);
 			} else if (la.kind == 66) {
-				StructDeclaration(m, isPartial, out td);
+				StructDeclaration(m, parentType, isPartial, out td);
 			} else if (la.kind == 40) {
-				InterfaceDeclaration(m, isPartial, out td);
+				InterfaceDeclaration(m, parentType, isPartial, out td);
 			} else SynErr(133);
 		} else if (la.kind == 25) {
-			EnumDeclaration(m, out td);
+			EnumDeclaration(m, parentType, out td);
 		} else if (la.kind == 21) {
-			DelegateDeclaration(m, out td);
+			DelegateDeclaration(m, parentType, out td);
 		} else SynErr(134);
 		if (td != null)
 		{
-		  td.DeclaringType = parentType;
 		  td.SetModifiers(m.Value); 
 		  td.AssignAttributes(attrs);
 		}
 		
 	}
 
-	void ClassDeclaration(Modifiers m, bool isPartial, out TypeDeclaration td) {
+	void ClassDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
+out TypeDeclaration td) {
 		Expect(16);
 		m.Check(Modifier.classes); 
-		ClassDeclaration cd = new ClassDeclaration(t, this);
+		ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
 		cd.IsPartial = isPartial;
 		td = cd;
 		CurrentElement = cd;
@@ -808,10 +800,11 @@ out TypeDeclaration td) {
 		}
 	}
 
-	void StructDeclaration(Modifiers m, bool isPartial, out TypeDeclaration td) {
+	void StructDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
+out TypeDeclaration td) {
 		Expect(66);
 		m.Check(Modifier.nonClassTypes); 
-		StructDeclaration sd = new StructDeclaration(t, this);
+		StructDeclaration sd = new StructDeclaration(t, this, parentType);
 		td = sd;
 		CurrentElement = sd;
 		sd.IsPartial = isPartial;
@@ -843,10 +836,11 @@ out TypeDeclaration td) {
 		}
 	}
 
-	void InterfaceDeclaration(Modifiers m, bool isPartial, out TypeDeclaration td) {
+	void InterfaceDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
+out TypeDeclaration td) {
 		Expect(40);
 		m.Check(Modifier.nonClassTypes); 
-		InterfaceDeclaration ifd = new InterfaceDeclaration(t, this);
+		InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
 		CurrentElement = ifd;
 		td = ifd;
 		ifd.IsPartial = isPartial;
@@ -874,10 +868,10 @@ out TypeDeclaration td) {
 		}
 	}
 
-	void EnumDeclaration(Modifiers m, out TypeDeclaration td) {
+	void EnumDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td) {
 		Expect(25);
 		m.Check(Modifier.nonClassTypes); 
-		EnumDeclaration ed = new EnumDeclaration(t, this);
+		EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
 		td = ed;
 		CurrentElement = ed;
 		
@@ -900,10 +894,10 @@ out TypeDeclaration td) {
 		}
 	}
 
-	void DelegateDeclaration(Modifiers m, out TypeDeclaration td) {
+	void DelegateDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td) {
 		Expect(21);
 		m.Check(Modifier.nonClassTypes); 
-		DelegateDeclaration dd = new DelegateDeclaration(t, this);
+		DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
 		td = dd;
 		CurrentElement = dd;
 		TypeReference returnType;
@@ -1101,6 +1095,7 @@ out TypeDeclaration td) {
 		} else if (StartOf(13)) {
 			TypeDeclaration nestedType; 
 			TypeDeclaration(attrs, td, m, out nestedType);
+			td.AddTypeDeclaration(nestedType); 
 		} else SynErr(143);
 	}
 

@@ -14,13 +14,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new class declaration.
+    /// Creates a new struct declaration.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance</param>
+    /// <param name="declaringType">
+    /// Type that declares this type. Null, if this type has no declaring type.
+    /// </param>
     // --------------------------------------------------------------------------------
-    public StructDeclaration(Token token, CSharpSyntaxParser parser)
-      : base(token, parser)
+    public StructDeclaration(Token token, CSharpSyntaxParser parser, 
+      TypeDeclaration declaringType) : base(token, parser, declaringType)
     {
     }
 
@@ -84,7 +87,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected override TypeDeclaration CreateNewPart()
     {
-      return new StructDeclaration(Token, Parser);
+      return new StructDeclaration(Token, Parser, DeclaringType);
     }
 
     #endregion

@@ -692,20 +692,23 @@ namespace CSharpParser.ProjectModel
       // --- Phase 3: We check if there are any types having the same fully qualified names.
       // --- Only partial types having the same declaration type (class, struct or interface)
       // --- are accepted, any other types are ignored. In case of multiple type declarations
-      // --- the first (the parser detected it first) type declaration fragment is propcessed,
+      // --- the first (the parser detected it first) type declaration fragment is processed,
       // --- others are ignored. After multiple types have been checked, the base type names
       // --- are resolved and checked. Types are checked for circular dependency.
       // --- Result: Types declared in source code are unambigous, they have their proper
       // --- place in the object hierarchy and they are free from circular dependencies.
-      CheckMultipleDeclaration();
+      CheckMultipleAndPartialDeclaration();
+      ResolveAndCheckBaseTypes();
       ConsolidatePartialTypeDeclarations();
-      ResolveBaseTypes();
       CheckCircularDependency();
 
-      // --- Phase 4: Resolve all remaining type references
+      // --- Phase 4: Check type declarations
+      CheckTypeDeclarations();
+
+      // --- Phase 5: Resolve all remaining type references
       ResolveTypeReferences();
 
-      // --- Phase 5: Check partial types
+      // --- Phase 6: Check partial types
       CheckPartialTypes();
 
       // --- Return the number of errors found
@@ -1027,7 +1030,7 @@ namespace CSharpParser.ProjectModel
     /// Resolves the base types of all types declared within the compilation unit.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public void ResolveBaseTypes()
+    public void ResolveAndCheckBaseTypes()
     {
       foreach (SourceFile file in _Files)
       {
@@ -1036,72 +1039,13 @@ namespace CSharpParser.ProjectModel
         // --- Resolve types declared in the global namespace
         foreach (TypeDeclaration type in file.TypeDeclarations)
         {
-          if (type.Parts.Count == 0)
-            ResolveBaseTypes(type, ResolutionContext.SourceFile, file);
-          else
-            foreach (TypeDeclaration partition in type.Parts)
-              ResolveBaseTypes(partition, ResolutionContext.SourceFile, file);
+          ResolveAndCheckBaseType(type, ResolutionContext.SourceFile, file);
         }
 
         // --- Resolve types within nested namespaces
         foreach(NamespaceFragment ns in file.NestedNamespaces)
-          ResolveBaseTypes(ns);
+          ResolveBaseTypeInNamespace(ns);
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the base types of the specified type declaration and of all nested
-    /// type declarations.
-    /// </summary>
-    /// <param name="type">Type declaration to resolve its base types.</param>
-    /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="contextObject">Object representing the current context.</param>
-    // --------------------------------------------------------------------------------
-    private void ResolveBaseTypes(TypeDeclaration type, ResolutionContext contextType, 
-      ITypeDeclarationScope contextObject)
-    {
-      // --- Resolve each base type reference
-      bool typeValid = true;
-      bool firstOnList = true;
-      List<string> baseNames = new List<string>();
-      foreach (TypeReference baseType in type.InterfaceList)
-      {
-        TypeReference baseToCheck = baseType.RightMostPart;
-        // --- Resolve the type only, if not resolved yet.
-        if (!baseType.IsResolved)
-        {
-          NamespaceOrTypeResolverInfo info = _NamespaceOrTypeResolver.
-            Resolve(baseType, contextType, contextObject, type);
-          if (!info.IsResolved) continue;
-        }
-        // --- Check, if the base type is valid in its context.
-        baseToCheck.Validate(CheckBaseType(type, baseType, firstOnList));
-        typeValid &= baseToCheck.IsValid;
-        firstOnList = false;
-
-        // --- Check that interfaces are on the list only once
-        if (baseToCheck.IsValid)
-        {
-          if (baseToCheck.IsInterface && baseNames.Contains(baseToCheck.ResolvingType.FullName))
-          {
-            Parser.Error0528(baseType.Token, baseType.FullName);
-            baseToCheck.Invalidate();
-            typeValid = false;
-          }
-          else
-          {
-            baseNames.Add(baseToCheck.ResolvingType.FullName);
-          }
-        }
-      }
-
-      type.Validate(typeValid);
-      type.SeparateBaseClassAndInterfaces();
-
-      // --- Resolve base types in nested types
-      foreach (TypeDeclaration nestedType in type.NestedTypes)
-        ResolveBaseTypes(nestedType, contextType, contextObject);
     }
 
     // --------------------------------------------------------------------------------
@@ -1113,187 +1057,47 @@ namespace CSharpParser.ProjectModel
     /// Namespace in which the base types of type declarations should be resolved.
     /// </param>
     // --------------------------------------------------------------------------------
-    private void ResolveBaseTypes(NamespaceFragment ns)
+    private void ResolveBaseTypeInNamespace(NamespaceFragment ns)
     {
       // --- Resolve base types of types declared in this namespace
       foreach (TypeDeclaration type in ns.TypeDeclarations)
       {
-        if (type.Parts.Count == 0)
-          ResolveBaseTypes(type, ResolutionContext.Namespace, ns);
-        else
-          foreach (TypeDeclaration partition in type.Parts)
-            ResolveBaseTypes(partition, ResolutionContext.Namespace, ns);
+        ResolveAndCheckBaseType(type, ResolutionContext.Namespace, ns);
       }
 
       // --- Resolve types of nested namespaces
       foreach (NamespaceFragment nested in ns.NestedNamespaces)
-        ResolveBaseTypes(nested);
+        ResolveBaseTypeInNamespace(nested);
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Checks if the base type is valid in the context of the specified type 
-    /// declaration.
+    /// Resolves the base types of the specified type declaration partition.
     /// </summary>
-    /// <param name="type">Type declaration that inherits from baseType.</param>
-    /// <param name="baseType">Base type to check</param>
-    /// <param name="firstOnList">Indicates if the type is the first on the list.</param>
-    /// <returns>
-    /// True, if base type is valid; otherwise, false.
-    /// </returns>
+    /// <param name="type">Type declaration to resolve its base types.</param>
+    /// <param name="contextType">Type of resolution context.</param>
+    /// <param name="contextObject">Object representing the current context.</param>
     // --------------------------------------------------------------------------------
-    private bool CheckBaseType(TypeDeclaration type, TypeReference baseType, 
-      bool firstOnList)
+    private void ResolveAndCheckBaseType(TypeDeclaration type,
+      ResolutionContext contextType,
+      ITypeDeclarationScope contextObject)
     {
-      TypeReference rightMostPart = baseType.RightMostPart;
-      bool isOk;
-
-      // --- Check 1: The base type cannot be resolved to a type parameter
-      if (rightMostPart.Target == ResolutionTarget.TypeParameter)
+      // --- Resolve each base type reference
+      foreach (TypeReference baseType in type.InterfaceList)
       {
-        Parser.Error0689(baseType.Token, baseType.ResolvingTypeParameter.Name);
-        return false;
-      }
-
-      // --- Check 2: The base type cannot be resolved to a namespace
-      if (rightMostPart.Target == ResolutionTarget.Namespace)
-      {
-        Parser.Error0118(baseType.Token, baseType.FullName, "namespace", "type");
-        return false;
-      }
-
-      // --- Check 3: Check if base types is at least as accessible as the type
-      // --- Even if we found accessibility issue, we go on with checks.
-      isOk = CheckBaseTypeAccessibility(type, rightMostPart);
-
-      // --- Checks for base types of classes
-      if (type.IsClass)
-      {
-        // --- Check 4a: Base types of classes cannot be special classes
-        if (rightMostPart.ResolvingType.TypeObject.Equals(typeof(Array)) ||
-         rightMostPart.ResolvingType.TypeObject.Equals(typeof (Delegate)) ||
-         rightMostPart.ResolvingType.TypeObject.Equals(typeof (Enum)) ||
-         rightMostPart.ResolvingType.TypeObject.Equals(typeof (ValueType))
-        )
+        // --- Resolve the type only, if not resolved yet.
+        if (!baseType.IsResolved)
         {
-          Parser.Error0644(baseType.Token, type.Name, rightMostPart.ResolvingType.FullName);
-          return false;
-        }
-
-        // --- Check 4b: Classes cannot have multiple base types
-        if (!firstOnList && !rightMostPart.ResolvingType.IsInterface)
-        {
-          Parser.Error1721(baseType.Token, type.Name, type.InterfaceList[0].FullName,
-                           rightMostPart.ResolvingType.FullName);
-          return false;
-        }
-
-        // --- Check 4c: Base types of classes cannot be sealed types
-        if (rightMostPart.ResolvingType.IsSealed)
-        {
-          Parser.Error0509(baseType.Token, type.Name, rightMostPart.ResolvingType.FullName);
-          return false;
+          NamespaceOrTypeResolverInfo info = _NamespaceOrTypeResolver.
+            Resolve(baseType, contextType, contextObject, type);
+          if (!info.IsResolved) continue;
         }
       }
-      // --- Checks for base types of structs
-      else if (type.IsStruct)
-      {
-        // --- Check 5a: Only interface types allowed on interface list.
-        if (!rightMostPart.ResolvingType.IsInterface)
-        {
-          Parser.Error0527(baseType.Token, rightMostPart.ResolvingType.FullName);
-          return false;
-        }
-      }
-      // --- Checks for base types of enums
-      else if (type.IsEnum)
-      {
-        // --- Check 6a: Only integral types are allowed in form of keywords.
-        if (baseType.HasSubType ||
-          (
-            baseType.Name != "sbyte" &&
-            baseType.Name != "byte" &&
-            baseType.Name != "short" &&
-            baseType.Name != "ushort" &&
-            baseType.Name != "int" &&
-            baseType.Name != "uint" &&
-            baseType.Name != "long" &&
-            baseType.Name != "ulong"
-          ))
-        {
-          Parser.Error1008(baseType.Token);
-          return false;
-        }
-      }
-      // --- Check base types of interfaces
-      else if (type.IsInterface)
-      {
-        // --- Check 7a: Only interface types allowed on interface list.
-        if (!rightMostPart.ResolvingType.IsInterface)
-        {
-          Parser.Error0527(baseType.Token, rightMostPart.ResolvingType.FullName);
-          return false;
-        }
-      }
-      return isOk;
-    }
+      type.CheckBaseTypeSemantics();
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks if the base type is accessible in the context of the specified type 
-    /// declaration.
-    /// </summary>
-    /// <param name="type">Type declaration that inherits from baseType.</param>
-    /// <param name="baseType">Base type to check</param>
-    /// <returns>
-    /// True, if base type is accessible; otherwise, false.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    private bool CheckBaseTypeAccessibility(TypeDeclaration type, TypeReference baseType)
-    {
-      // --- Base interfaces can have any accessibility
-      if (baseType.IsInterface) return true;
-
-      // --- Is the base type a referenced type?
-      TypeDeclaration baseDecl = baseType.ResolvingType as TypeDeclaration;
-
-      if (baseDecl != null)
-      {
-        // --- This type has been declared in the source code
-        if (
-             (type.IsPublic && baseDecl.IsNotPublic) ||
-             (type.Visibility == Visibility.Protected &&
-               (
-                 baseDecl.Visibility == Visibility.Private ||
-                 baseDecl.Visibility == Visibility.Protected
-               )
-             ) ||
-             (type.Visibility == Visibility.Internal &&
-               (
-                 baseDecl.Visibility == Visibility.Private ||
-                 baseDecl.Visibility == Visibility.Protected
-               )
-             ) ||
-             (type.Visibility == Visibility.ProtectedInternal &&
-               (
-                 baseDecl.Visibility == Visibility.Private ||
-                 baseDecl.Visibility == Visibility.Internal ||
-                 baseDecl.Visibility == Visibility.Protected
-               )
-             ) 
-           )
-        {
-          Parser.Error0060(type.Token, baseType.FullName, type.Name);
-          return false;
-        }
-      }
-      else
-      {
-        // --- This type is referenced from an assembly, can be used only if it is
-        // --- visible from outside.
-        return baseType.ResolvingType.IsVisible;
-      }
-      return true;
+      // --- Resolve base types in nested types
+      foreach (TypeDeclaration nestedType in type.NestedTypes)
+        ResolveAndCheckBaseType(nestedType, contextType, contextObject);
     }
 
     #endregion
@@ -1307,21 +1111,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CheckCircularDependency()
     {
-      foreach (SourceFile file in _Files)
+      foreach (TypeDeclaration type in _DeclaredTypes)
       {
-        _CurrentFile = file;
-
-        // --- Resolve types declared in the global namespace
-        foreach (TypeDeclaration type in file.TypeDeclarations)
-        {
-          CheckCircularDependency(type);
-        }
-
-        // --- Resolve types within nested namespaces
-        foreach (NamespaceFragment ns in file.NestedNamespaces)
-        {
-          CheckCircularDependency(ns);
-        }
+        CheckCircularDependency(type);
       }
     }
 
@@ -1365,11 +1157,11 @@ namespace CSharpParser.ProjectModel
             // --- We found a circular reference
             if (type.IsClass)
             {
-              Parser.Error0146(type.Token, type.Name, toCheck.FullName);
+              Parser.Error0146(type.Token, type.Name, toCheck.Name);
             }
             else
             {
-              Parser.Error0529(type.Token, type.Name, toCheck.FullName);
+              Parser.Error0529(type.Token, type.Name, toCheck.Name);
             }
             type.Invalidate();
             circuitFound = true;
@@ -1386,36 +1178,6 @@ namespace CSharpParser.ProjectModel
           }
         }
       }
-
-      // --- Check circular dependencies in nested types
-      foreach (TypeDeclaration nestedType in type.NestedTypes)
-      {
-        CheckCircularDependency(nestedType);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves the base types of the specified type declaration within the 
-    /// specified namespace and its nested namespaces.
-    /// </summary>
-    /// <param name="ns">
-    /// Namespace in which the base types of type declarations should be resolved.
-    /// </param>
-    // --------------------------------------------------------------------------------
-    private void CheckCircularDependency(NamespaceFragment ns)
-    {
-      // --- Check circular dependencies in types declared within this namespace
-      foreach (TypeDeclaration type in ns.TypeDeclarations)
-      {
-        CheckCircularDependency(type);
-      }
-
-      // --- Check circular dependencies within nested namespaces
-      foreach (NamespaceFragment nested in ns.NestedNamespaces)
-      {
-        CheckCircularDependency(nested);
-      }
     }
 
     #endregion
@@ -1427,7 +1189,7 @@ namespace CSharpParser.ProjectModel
     /// Checks if there are any types declared more that once
     /// </summary>
     // --------------------------------------------------------------------------------
-    private void CheckMultipleDeclaration()
+    private void CheckMultipleAndPartialDeclaration()
     {
       foreach (TypeDeclaration type in _DeclaredTypes)
       {
@@ -1462,12 +1224,27 @@ namespace CSharpParser.ProjectModel
         bool partialStructFound = false;
         bool partialIntfFound = false;
         bool anyTypeFound = false;
+        Visibility classAccess = Visibility.Default;
+        Visibility structAccess = Visibility.Default;
+        Visibility intfAccess = Visibility.Default;
+        bool classAccessConflictFound = false;
+        bool structAccessConflictFound = false;
+        bool intfAccessConflictFound = false;
+        bool classMixed = false;
+        bool structMixed = false;
+        bool intfMixed = false;
 
+        // --- We go through each type declaration part and check for:
+        // --- Check 1: Missing 'partial' modifier
+        // --- Check 2: Defining the same partial type as different declarations 
+        // ---   (e.g. mixed structs, classes or interfaces)
+        // --- Check 3: Incompatible access modifiers
         foreach (TypeDeclaration partition in type.Parts)
         {
           // --- Checks for classes
           if (partition is ClassDeclaration)
           {
+            // --- Check partial declaration
             if (partialClassCount > 0)
             {
               if (partition.IsPartial) partialClassFound = true;
@@ -1476,11 +1253,27 @@ namespace CSharpParser.ProjectModel
             if (partialClassCount == 0 && anyTypeFound)
               RaiseMultipleTypeError(type, partition);
             if (partition.IsPartial && (partialStructFound || partialIntfFound))
-              RaiseMultiplePartialTypeError(type, partition);
+              if (!classMixed)
+              {
+                RaiseMultiplePartialTypeError(type, partition);
+                classMixed = true;
+              }
+
+            // --- Check for access compatibility
+            if (!partition.HasDefaultVisibility)
+            {
+              if (classAccess != Visibility.Default && classAccess != partition.Visibility)
+              {
+                if (!classAccessConflictFound) RaiseIncompatibleAccessorError(type, partition);
+                classAccessConflictFound = true;
+              }
+              else classAccess = partition.Visibility;
+            }
           }
           // --- Checks for structs
           else if (partition is StructDeclaration)
           {
+            // --- Check partial declaration
             if (partialStructCount > 0)
             {
               if (partition.IsPartial) partialStructFound = true;
@@ -1489,11 +1282,27 @@ namespace CSharpParser.ProjectModel
             if (partialStructCount == 0 && anyTypeFound)
               RaiseMultipleTypeError(type, partition);
             if (partition.IsPartial && (partialClassFound || partialIntfFound))
-              RaiseMultiplePartialTypeError(type, partition);
+              if (!structMixed)
+              {
+                RaiseMultiplePartialTypeError(type, partition);
+                structMixed = true;
+              }
+
+            // --- Check for access compatibility
+            if (!partition.HasDefaultVisibility)
+            {
+              if (structAccess != Visibility.Default && structAccess != partition.Visibility)
+              {
+                if (!structAccessConflictFound) RaiseIncompatibleAccessorError(type, partition);
+                structAccessConflictFound = true;
+              }
+              else structAccess = partition.Visibility;
+            }
           }
-          // --- Checks for interface
+          // --- Checks for interfaces
           else if (partition is InterfaceDeclaration)
           {
+            // --- Check partial declaration
             if (partialIntfCount > 0)
             {
               if (partition.IsPartial) partialIntfFound = true;
@@ -1502,7 +1311,22 @@ namespace CSharpParser.ProjectModel
             if (partialIntfCount == 0 && anyTypeFound)
               RaiseMultipleTypeError(type, partition);
             if (partition.IsPartial && (partialClassFound || partialStructFound))
-              RaiseMultiplePartialTypeError(type, partition);
+              if (!intfMixed)
+              {
+                RaiseMultiplePartialTypeError(type, partition);
+                intfMixed = true;
+              }
+
+            // --- Check for access compatibility
+            if (!partition.HasDefaultVisibility)
+            {
+              if (intfAccess != Visibility.Default && intfAccess != partition.Visibility)
+              {
+                if (!intfAccessConflictFound) RaiseIncompatibleAccessorError(type, partition);
+                intfAccessConflictFound = true;
+              }
+              else intfAccess = partition.Visibility;
+            }
           }
           // --- Checks for other types
           else
@@ -1563,6 +1387,21 @@ namespace CSharpParser.ProjectModel
       partition.Invalidate();
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises a compilation error CS0261 for the specified type declaration.
+    /// </summary>
+    /// <param name="type">Erronous type</param>
+    /// <param name="partition">Erronous partition</param>
+    // --------------------------------------------------------------------------------
+    private void RaiseIncompatibleAccessorError(LanguageElement type,
+      LanguageElement partition)
+    {
+      _Parser.Error0262(partition.Token, partition.Name);
+      type.Invalidate();
+      partition.Invalidate();
+    }
+
     #endregion
 
     #region Partial type declaration checks
@@ -1578,6 +1417,10 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private void ConsolidatePartialTypeDeclarations()
     {
+      foreach (TypeDeclaration type in _DeclaredTypes)
+      {
+        type.ConsolidateDeclarationParts();
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -1589,26 +1432,6 @@ namespace CSharpParser.ProjectModel
     {
       foreach (TypeDeclaration type in _DeclaredTypes)
       {
-        // --- Check 1: Partitions must have default accessibility or share the same
-        // --- access specifier.
-
-        // --- Check 2: If one or more parts include the abstract modifier, the type is 
-        // --- abstract, otherwise concrete.
-
-        // --- Check 3: If one or more parts include the sealed modifier, the type is 
-        // --- sealed, otherwise open.
-
-        // --- Check 4: If one or more parts include the static modifier, the type is 
-        // --- static, otherwise open.
-
-        // --- Check 5: a partial class declaration includes a base class specification, 
-        // --- that base class specification shall reference the same type as all other 
-        // --- parts of that partial type that include a base class specification.
-
-        // --- Check 6: The set of interfaces for a type declared in multiple partitions
-        // --- is the union of the interfaces specified on each part. A particular 
-        // --- interface can only be named once on each part, but multiple parts can 
-        // --- name the same base interface(s).
 
         // --- Check 7: The attributes of a type declared in multiple partitions are determined 
         // --- by combining, in an unspecified order, the attributes of each of its parts. 
@@ -1632,8 +1455,23 @@ namespace CSharpParser.ProjectModel
         // --- include the new modifier, no warning is issued if the nested type hides
         // --- an available inherited member.
 
-        // --- Check 11: When the unsafe modifier is used on a partial type declaration, 
-        // --- only that particular part is considered an unsafe context.
+      }
+    }
+
+    #endregion
+
+    #region Type declaration checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if type declaration matches with the declaration rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckTypeDeclarations()
+    {
+      foreach (TypeDeclaration type in _DeclaredTypes)
+      {
+        type.CheckTypeDeclaration();
       }
     }
 
