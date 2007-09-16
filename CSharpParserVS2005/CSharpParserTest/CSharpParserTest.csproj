@@ -89,6 +89,7 @@
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
     <Compile Include="LanguageElements\Members.cs" />
     <Compile Include="LanguageElements\Pragmas.cs" />
+    <Compile Include="LanguageElements\TypeDeclarations.cs" />
     <Compile Include="LanguageElements\TypeParameters.cs" />
     <Compile Include="LanguageElements\UsingsAndNamespaces.cs" />
     <Compile Include="LargeTestProjects.cs" />
@@ -236,10 +237,13 @@
     <None Include="LargeTestProjects\CSLA\Properties\Resources.Designer.cs" />
     <None Include="LargeTestProjects\CSLA\Properties\Settings.Designer.cs" />
     <Compile Include="ParserTestBed.cs" />
-    <Compile Include="PartialTypes\PartialTypes.cs" />
-    <Compile Include="PreprocessorExpressions\PreprocessorTest.cs" />
+    <Compile Include="LanguageElements\PartialTypes.cs" />
+    <Compile Include="LanguageElements\PreprocessorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ParserTests.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration3.cs">
+      <SubType>Code</SubType>
+    </None>
     <None Include="TestFiles\MethodDeclarations.cs" />
     <None Include="TestFiles\CastOperatorDeclarations.cs" />
     <None Include="TestFiles\PropertyDeclarations.cs" />
@@ -320,7 +324,20 @@
     <None Include="TestFiles\PartialTypes\PartialType18.cs" />
     <None Include="TestFiles\PartialTypes\PartialType19.cs" />
     <None Include="TestFiles\PartialTypes\PartialType20.cs" />
-    <Compile Include="TestFiles\PartialTypes\PartialType21.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration1.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType21.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration2.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail13.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration4.cs" />
+    <None Include="TestFiles\InterfaceDeclaration\InterfaceDeclaration1.cs" />
+    <None Include="TestFiles\DelegateDeclaration\DelegateDeclaration1.cs" />
+    <None Include="TestFiles\EnumDeclaration\EnumDeclaration1.cs" />
+    <None Include="TestFiles\EnumDeclaration\EnumDeclaration2.cs" />
+    <None Include="TestFiles\DelegateDeclaration\DelegateDeclaration2.cs" />
+    <None Include="TestFiles\InterfaceDeclaration\InterfaceDeclaration2.cs" />
+    <None Include="TestFiles\DuplicateModifiers.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
@@ -363,10 +380,12 @@
     </None>
     <None Include="TestFiles\TypeResolution\Generics1.cs" />
     <None Include="TestFiles\TypeResolution\InvalidTypeName1.cs" />
-    <Compile Include="TypeResolution\BaseTypes.cs" />
-    <Compile Include="TypeResolution\TypeResolution.cs" />
-    <Compile Include="Variables\Variables.cs" />
-    <Compile Include="Visibility\VisibilityTest.cs" />
+    <Compile Include="LanguageElements\BaseTypes.cs" />
+    <Compile Include="LanguageElements\TypeResolution.cs" />
+    <Compile Include="LanguageElements\Variables.cs" />
+    <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <None Include="TestFiles\StructDeclaration\StructDeclaration2.cs" />
+    <None Include="TestFiles\StructDeclaration\StructDeclaration1.cs" />
     <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />

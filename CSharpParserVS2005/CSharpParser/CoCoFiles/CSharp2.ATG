@@ -411,7 +411,6 @@ ClassDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   out TypeDeclaration td>
 =
   "class"                                            (. 
-                                                        m.Check(Modifier.classes); 
                                                         ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
                                                         cd.IsPartial = isPartial;
                                                         td = cd;
@@ -465,7 +464,6 @@ StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   out TypeDeclaration td>
 =
   "struct"                                         (. 
-                                                      m.Check(Modifier.nonClassTypes); 
                                                       StructDeclaration sd = new StructDeclaration(t, this, parentType);
                                                       td = sd;
                                                       CurrentElement = sd;
@@ -508,7 +506,6 @@ StructBody<TypeDeclaration td>
 EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
 =
   "enum"                         (. 
-                                    m.Check(Modifier.nonClassTypes); 
                                     EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
                                     td = ed;
                                     CurrentElement = ed;
@@ -568,7 +565,6 @@ EnumMemberDeclaration<EnumDeclaration ed>
 DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
 =
   "delegate"                                       (. 
-                                                      m.Check(Modifier.nonClassTypes); 
                                                       DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
                                                       td = dd;
                                                       CurrentElement = dd;
@@ -647,7 +643,7 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
 ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
-=                                    (. m.Check(Modifier.constants); .)
+=                                    
   "const"                            (. TypeReference typeRef; .)
   Type<out typeRef, false>          
   SingleConstMember<attrs, m, td, typeRef>
@@ -707,7 +703,7 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
 ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
-= (. m.Check(Modifier.constructors | Modifier.staticConstr); .)
+= 
     ident                   (. 
                                ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
                                CurrentElement = cd;
@@ -740,7 +736,6 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeReference memberRef, TypeDeclaration td>
 =                 (. 
-                     m.Check(Modifier.propEvntMeths);
                      if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "property type must not be void"); }
                      PropertyDeclaration pd = new PropertyDeclaration(t, td);
                      CurrentElement = pd;
@@ -765,7 +760,6 @@ PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
 IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeReference memberRef, TypeDeclaration td>
 =                 (. 
-                     m.Check(Modifier.indexers);
                      if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
                      IndexerDeclaration ind = new IndexerDeclaration(t, td);
                      CurrentElement = ind;
@@ -800,7 +794,6 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
 MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeReference memberRef, TypeDeclaration td, bool allowBody>
 =                                                   (. 
-                                                       m.Check(Modifier.propEvntMeths);
                                                        MethodDeclaration md = new MethodDeclaration(t, td);
                                                        CurrentElement = md;
                                                        md.SetModifiers(m.Value);
@@ -832,8 +825,6 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
 // ------------------------------------------------------------------------------------
 CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
 =                                       (. 
-                                           m.Check(Modifier.operators);
-                                           m.CheckMust(Modifier.operatorsMust);
                                            CastOperatorDeclaration cod = new CastOperatorDeclaration(t, td);
                                            CurrentElement = cod;
                                            cod.SetModifiers(m.Value);
@@ -866,8 +857,6 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
 OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeDeclaration td>
 =                                  (. 
-                                      m.Check(Modifier.operators);
-                                      m.CheckMust(Modifier.operatorsMust);
                                       if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "operator not allowed on void"); } 
                                       OperatorDeclaration od = new OperatorDeclaration(t, td);
                                       CurrentElement = od;
@@ -911,7 +900,6 @@ InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   out TypeDeclaration td>
 =
   "interface"       (. 
-                       m.Check(Modifier.nonClassTypes); 
                        InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
                        CurrentElement = ifd;
                        td = ifd;
@@ -973,7 +961,6 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
         "{" InterfaceAccessors<prop> "}"
       )
     | (. 
-         m.Check(Modifier.indexers);
          if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
          IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
          CurrentElement =ind;
@@ -1133,7 +1120,7 @@ AccessorDeclarations<PropertyDeclaration prop>
           AccessorDeclaration accessor = null;
        .)
 = { Attributes<attrs> }               (. Modifiers am = new Modifiers(this); .)
-  ModifierList<am>                    (. am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); .)
+  ModifierList<am>                    
   ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
                                       (. CurrentElement = accessor; .)
   | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
@@ -1149,7 +1136,7 @@ AccessorDeclarations<PropertyDeclaration prop>
                                       .)
   [                                   (. attrs = new AttributeCollection(); .)                               
     { Attributes<attrs> }             (. am = new Modifiers(this); .)
-    ModifierList<am>                  (. am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); .)
+    ModifierList<am>                  
     ( IF ("get".Equals(la.val)) ident (. 
                                          if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
                                          accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
@@ -1333,20 +1320,20 @@ AttributeArguments<AttributeDeclaration attr>
 ModifierList<Modifiers m>
 =
 {
-  "new"                            (. m.Add(Modifier.@new); .)
-  | "public"                       (. m.Add(Modifier.@public); .)
-  | "protected"                    (. m.Add(Modifier.@protected); .)
-  | "internal"                     (. m.Add(Modifier.@internal); .)
-  | "private"                      (. m.Add(Modifier.@private); .)
-  | "unsafe"                       (. m.Add(Modifier.@unsafe); .)
-  | "static"                       (. m.Add(Modifier.@static); .)
-  | "readonly"                     (. m.Add(Modifier.@readonly); .)
-  | "volatile"                     (. m.Add(Modifier.@volatile); .)
-  | "virtual"                      (. m.Add(Modifier.@virtual); .)
-  | "sealed"                       (. m.Add(Modifier.@sealed); .)
-  | "override"                     (. m.Add(Modifier.@override); .)
-  | "abstract"                     (. m.Add(Modifier.@abstract); .)
-  | "extern"                       (. m.Add(Modifier.@extern); .)
+  "new"                            (. m.Add(Modifier.@new, t); .)
+  | "public"                       (. m.Add(Modifier.@public, t); .)
+  | "protected"                    (. m.Add(Modifier.@protected, t); .)
+  | "internal"                     (. m.Add(Modifier.@internal, t); .)
+  | "private"                      (. m.Add(Modifier.@private, t); .)
+  | "unsafe"                       (. m.Add(Modifier.@unsafe, t); .)
+  | "static"                       (. m.Add(Modifier.@static, t); .)
+  | "readonly"                     (. m.Add(Modifier.@readonly, t); .)
+  | "volatile"                     (. m.Add(Modifier.@volatile, t); .)
+  | "virtual"                      (. m.Add(Modifier.@virtual, t); .)
+  | "sealed"                       (. m.Add(Modifier.@sealed, t); .)
+  | "override"                     (. m.Add(Modifier.@override, t); .)
+  | "abstract"                     (. m.Add(Modifier.@abstract, t); .)
+  | "extern"                       (. m.Add(Modifier.@extern, t); .)
 }
 .
 
@@ -2760,7 +2747,6 @@ ArrayIndexer<ArrayIndexerOperator indexer>
 FieldMemberDeclarators<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
   TypeReference typeRef, bool isEvent, Modifier toCheck>
 =            (. 
-                m.Check(toCheck);
                 if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "field type must not be void"); } 
              .)
   SingleFieldMember<attrs, m, td, typeRef, isEvent>

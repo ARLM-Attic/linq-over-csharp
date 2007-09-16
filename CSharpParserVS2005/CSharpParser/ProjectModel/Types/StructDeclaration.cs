@@ -90,6 +90,17 @@ namespace CSharpParser.ProjectModel
       return new StructDeclaration(Token, Parser, DeclaringType);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if type declaration matches with the declaration rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckTypeDeclaration()
+    {
+      base.CheckTypeDeclaration();
+      CheckUnallowedNonClassModifiers();
+    }
+
     #endregion
   }
 }

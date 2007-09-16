@@ -1,4 +1,5 @@
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -107,6 +108,38 @@ namespace CSharpParser.ProjectModel
       ClassDeclaration clone = base.CloneToPart() as ClassDeclaration;
       clone._Finalizer = _Finalizer;
       return clone;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if type declaration matches with the declaration rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckTypeDeclaration()
+    {
+      base.CheckTypeDeclaration();
+
+      // --- Abstract classes cannot be sealed or static
+      if (IsAbstract && (IsStatic || IsSealed)) Parser.Error0418(Token, Name);
+
+      // --- Check static classes
+      if (IsStatic)
+      {
+        // --- Static classes cannot be sealed
+        if (IsSealed) Parser.Error0441(Token, Name);
+
+        // --- Static clases must derive from System.Object
+        if (BaseType != null && !BaseType.Equals(NetBinaryType.Object))
+        {
+          Parser.Error0713(Token, Name, BaseType.Name);
+        }
+
+        // --- Static classes must not have interface list
+        if (InterfaceList.Count > 0)
+        {
+          Parser.Error0714(InterfaceList[0].Token, Name);
+        }
+      }
     }
 
     #endregion

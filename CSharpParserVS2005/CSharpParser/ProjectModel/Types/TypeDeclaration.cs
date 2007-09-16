@@ -21,6 +21,9 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
+    // --- Holds the declared modifiers, even not allowed fot the type
+    protected Modifier _DeclaredModifier;
+
     // --- Holds the information about the explicitly declared visibility.
     protected Visibility _DeclaredVisibility;
 
@@ -832,6 +835,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public virtual void SetModifiers(Modifier mod)
     {
+      // --- Store modifiers for later check
+      _DeclaredModifier = mod;
+
       // --- Set visibility
       Modifier visOnly = mod & Modifier.VisibilityAccessors;
       if (visOnly == 0) _DeclaredVisibility = Visibility.Default;
@@ -1053,6 +1059,59 @@ namespace CSharpParser.ProjectModel
       // --- Step 8: When the unsafe modifier is used on a partial type declaration, 
       // --- only that particular part is considered an unsafe context.
       _IsUnsafe = false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if there are any unallowed modifiers on this type declaration.
+    /// </summary>
+    /// <remarks>
+    /// Derived classes should check other unallowed modifiers related to their
+    /// classification.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void CheckUnallowedModifiers()
+    {
+      // --- "extern" is not allowed on types
+      if ((_DeclaredModifier & Modifier.@extern) != 0)
+        Parser.Error0106(Token, "extern");
+
+      // --- "readonly" is not allowed on types
+      if ((_DeclaredModifier & Modifier.@readonly) != 0)
+        Parser.Error0106(Token, "readonly");
+
+      // --- "new" modifier is allowed only on nested types.
+      if (IsNew && !IsNested) Parser.Error1530(Token);
+
+      CheckVolatileAndOverride();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if there are any unallowed modifiers on this non-class type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckUnallowedNonClassModifiers()
+    {
+      // --- "abstract", "static" and "sealed" is not allowed on non-class types
+      if (IsAbstract) Parser.Error0106(Token, "abstract");
+      if (IsStatic) Parser.Error0106(Token, "static");
+      if ((_DeclaredModifier & Modifier.@sealed) != 0) Parser.Error0106(Token, "sealed");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if unallowed "volatile" and "override" modifiers are used on this 
+    /// type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected virtual void CheckVolatileAndOverride()
+    {
+      // --- "volatile" is not allowed on types
+      if ((_DeclaredModifier & Modifier.@volatile) != 0) Parser.Error0116(Token);
+
+      // --- "override" is not allowed on types
+      if ((_DeclaredModifier & Modifier.@volatile) != 0) Parser.Error0116(Token);
     }
 
     #endregion
@@ -1289,7 +1348,7 @@ namespace CSharpParser.ProjectModel
       // --- Checks for base types of classes
       if (IsClass)
       {
-        // --- Check 4a: Base types of classes cannot be special classes
+        // --- Base types of classes cannot be special classes
         if (_BaseType.TypeObject.Equals(typeof(Array)) ||
          _BaseType.TypeObject.Equals(typeof(Delegate)) ||
          _BaseType.TypeObject.Equals(typeof(Enum)) ||
@@ -1300,17 +1359,24 @@ namespace CSharpParser.ProjectModel
           return false;
         }
 
-        // --- Check 4c: Base types of classes cannot be sealed types
+        // --- Base types of classes cannot be sealed types
         if (_BaseType.IsSealed)
         {
           Parser.Error0509(_BaseTypeReference.Token, Name, _BaseType.FullName);
+          return false;
+        }
+
+        // --- Base types cannot be static
+        if (_BaseType.IsStatic)
+        {
+          Parser.Error0709(_BaseTypeReference.Token, Name, _BaseType.FullName);
           return false;
         }
       }
       // --- Checks for base types of structs
       else if (IsStruct)
       {
-        // --- Check 5a: Only interface types allowed on interface list.
+        // --- Only interface types allowed on interface list.
         if (!_BaseType.IsInterface)
         {
           Parser.Error0527(_BaseTypeReference.Token, _BaseType.FullName);
@@ -1320,7 +1386,7 @@ namespace CSharpParser.ProjectModel
       // --- Checks for base types of enums
       else if (IsEnum)
       {
-        // --- Check 6a: Only integral types are allowed in form of keywords.
+        // --- Only integral types are allowed in form of keywords.
         if (_BaseTypeReference.HasSubType ||
           (
             _BaseTypeReference.Name != "sbyte" &&
@@ -1340,7 +1406,7 @@ namespace CSharpParser.ProjectModel
       // --- Check base types of interfaces
       else if (IsInterface)
       {
-        // --- Check 7a: Only interface types allowed on interface list.
+        // --- Only interface types allowed on interface list.
         Parser.Error0527(_BaseTypeReference.Token, _BaseType.FullName);
         return false;
       }
@@ -1503,8 +1569,9 @@ namespace CSharpParser.ProjectModel
     /// Checks if type declaration matches with the declaration rules.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public void CheckTypeDeclaration()
+    public virtual void CheckTypeDeclaration()
     {
+      CheckUnallowedModifiers();
     }
 
     #endregion

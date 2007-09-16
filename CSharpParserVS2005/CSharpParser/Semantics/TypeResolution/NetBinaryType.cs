@@ -348,6 +348,16 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether the Type is declared static.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsStatic
+    {
+      get { return _TypeObject.IsAbstract && _TypeObject.IsSealed; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------

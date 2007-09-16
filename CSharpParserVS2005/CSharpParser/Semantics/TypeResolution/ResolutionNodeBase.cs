@@ -220,25 +220,7 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ResolutionNodeBase FindSimpleNamespaceOrType(TypeReference type)
     {
-      // --- Check, if the next part of the name can be resolved
-      ResolutionNodeBase node = FindChild(type.SimpleName);
-      if (node == null) return null;
-
-      // --- If the current node is a TypeNameResolutionNode, we must look for the 
-      // --- next TypeResolutionNode.
-      TypeNameResolutionNode nameNode = node as TypeNameResolutionNode;
-      if (nameNode != null)
-      {
-        // --- We are dealing with a type.
-        node = nameNode.FindChild(type.Arguments.Count.ToString());
-        if (node == null)
-        {
-          // --- We found the part name but not the one with correct number of
-          // --- type parameters.
-          return null;
-        }
-      }
-      return node;
+      return FindChild(type.ClrName);
     }
 
     // --------------------------------------------------------------------------------
@@ -335,35 +317,13 @@ namespace CSharpParser.Semantics
     {
       // --- Search for the type node
       ResolutionNodeBase currentNode;
-      TypeNameResolutionNode namingNode;
-      if ((currentNode = FindChild(type.SimpleName)) != null)
+      if ((currentNode = FindChild(type.Name)) != null)
       {
         // --- currentNode contains the node found. It can only be a TypeNameResolution
         // --- node. In any other case it is a name collision with a namespace.
-        namingNode = currentNode as TypeNameResolutionNode;
-        if (namingNode == null) return null;
+        return currentNode as TypeResolutionNode;
       }
-      else 
-      {
-        namingNode = new TypeNameResolutionNode(this, type.SimpleName);
-        return new TypeResolutionNode(namingNode, type);
-      }
-
-      // --- At this point we have the naming node, lets check for the type node
-      if ((currentNode = currentNode.FindChild(type.TypeParameterCount.ToString())) != null)
-      {
-        TypeResolutionNode resultNode = currentNode as TypeResolutionNode;
-
-        // --- Node at this position must be a TypeResolutionNode
-        if (resultNode == null)
-        {
-          throw new InvalidOperationException("Typeresolution node missing.");
-        }
-        return resultNode;
-      }
-
-      // --- Create the type resolution node for this type
-      return new TypeResolutionNode(namingNode, type);
+      return new TypeResolutionNode(this, type);
     }
 
     #endregion

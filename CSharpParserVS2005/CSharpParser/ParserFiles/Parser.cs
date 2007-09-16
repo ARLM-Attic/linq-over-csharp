@@ -671,72 +671,72 @@ public partial class CSharpSyntaxParser
 			switch (la.kind) {
 			case 46: {
 				Get();
-				m.Add(Modifier.@new); 
+				m.Add(Modifier.@new, t); 
 				break;
 			}
 			case 55: {
 				Get();
-				m.Add(Modifier.@public); 
+				m.Add(Modifier.@public, t); 
 				break;
 			}
 			case 54: {
 				Get();
-				m.Add(Modifier.@protected); 
+				m.Add(Modifier.@protected, t); 
 				break;
 			}
 			case 41: {
 				Get();
-				m.Add(Modifier.@internal); 
+				m.Add(Modifier.@internal, t); 
 				break;
 			}
 			case 53: {
 				Get();
-				m.Add(Modifier.@private); 
+				m.Add(Modifier.@private, t); 
 				break;
 			}
 			case 76: {
 				Get();
-				m.Add(Modifier.@unsafe); 
+				m.Add(Modifier.@unsafe, t); 
 				break;
 			}
 			case 64: {
 				Get();
-				m.Add(Modifier.@static); 
+				m.Add(Modifier.@static, t); 
 				break;
 			}
 			case 56: {
 				Get();
-				m.Add(Modifier.@readonly); 
+				m.Add(Modifier.@readonly, t); 
 				break;
 			}
 			case 81: {
 				Get();
-				m.Add(Modifier.@volatile); 
+				m.Add(Modifier.@volatile, t); 
 				break;
 			}
 			case 79: {
 				Get();
-				m.Add(Modifier.@virtual); 
+				m.Add(Modifier.@virtual, t); 
 				break;
 			}
 			case 60: {
 				Get();
-				m.Add(Modifier.@sealed); 
+				m.Add(Modifier.@sealed, t); 
 				break;
 			}
 			case 51: {
 				Get();
-				m.Add(Modifier.@override); 
+				m.Add(Modifier.@override, t); 
 				break;
 			}
 			case 6: {
 				Get();
-				m.Add(Modifier.@abstract); 
+				m.Add(Modifier.@abstract, t); 
 				break;
 			}
 			case 28: {
 				Get();
-				m.Add(Modifier.@extern); 
+				m.Add(Modifier.@extern, t); 
 				break;
 			}
 			}
@@ -775,7 +775,6 @@ out TypeDeclaration td) {
 	void ClassDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
 out TypeDeclaration td) {
 		Expect(16);
-		m.Check(Modifier.classes); 
 		ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
 		cd.IsPartial = isPartial;
 		td = cd;
@@ -803,7 +802,6 @@ out TypeDeclaration td) {
 	void StructDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
 out TypeDeclaration td) {
 		Expect(66);
-		m.Check(Modifier.nonClassTypes); 
 		StructDeclaration sd = new StructDeclaration(t, this, parentType);
 		td = sd;
 		CurrentElement = sd;
@@ -839,7 +837,6 @@ out TypeDeclaration td) {
 	void InterfaceDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
 out TypeDeclaration td) {
 		Expect(40);
-		m.Check(Modifier.nonClassTypes); 
 		InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
 		CurrentElement = ifd;
 		td = ifd;
@@ -870,7 +867,6 @@ out TypeDeclaration td) {
 
 	void EnumDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td) {
 		Expect(25);
-		m.Check(Modifier.nonClassTypes); 
 		EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
 		td = ed;
 		CurrentElement = ed;
@@ -896,7 +892,6 @@ out TypeDeclaration td) {
 
 	void DelegateDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td) {
 		Expect(21);
-		m.Check(Modifier.nonClassTypes); 
 		DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
 		td = dd;
 		CurrentElement = dd;
@@ -1302,7 +1297,6 @@ out TypeDeclaration td) {
 	}
 
 	void ConstMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
-		m.Check(Modifier.constants); 
 		Expect(17);
 		TypeReference typeRef; 
 		Type(out typeRef, false);
@@ -1336,7 +1330,6 @@ out TypeDeclaration td) {
 	}
 
 	void ConstructorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
-		m.Check(Modifier.constructors | Modifier.staticConstr); 
 		Expect(1);
 		ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
 		CurrentElement = cd;
@@ -1378,8 +1371,6 @@ out TypeDeclaration td) {
 
 	void OperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeDeclaration td) {
-		m.Check(Modifier.operators);
-		m.CheckMust(Modifier.operatorsMust);
 		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "operator not allowed on void"); } 
 		OperatorDeclaration od = new OperatorDeclaration(t, td);
 		CurrentElement = od;
@@ -1426,7 +1417,6 @@ TypeDeclaration td) {
 
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
 TypeReference typeRef, bool isEvent, Modifier toCheck) {
-		m.Check(toCheck);
 		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "field type must not be void"); } 
 		
 		SingleFieldMember(attrs, m, td, typeRef, isEvent);
@@ -1469,7 +1459,6 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 
 	void PropertyDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
-		m.Check(Modifier.propEvntMeths);
 		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "property type must not be void"); }
 		PropertyDeclaration pd = new PropertyDeclaration(t, td);
 		CurrentElement = pd;
@@ -1486,7 +1475,6 @@ TypeReference memberRef, TypeDeclaration td) {
 
 	void IndexerDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
-		m.Check(Modifier.indexers);
 		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
 		IndexerDeclaration ind = new IndexerDeclaration(t, td);
 		CurrentElement = ind;
@@ -1515,7 +1503,6 @@ TypeReference memberRef, TypeDeclaration td) {
 
 	void MethodDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td, bool allowBody) {
-		m.Check(Modifier.propEvntMeths);
 		MethodDeclaration md = new MethodDeclaration(t, td);
 		CurrentElement = md;
 		md.SetModifiers(m.Value);
@@ -1549,8 +1536,6 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 	}
 
 	void CastOperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
-		m.Check(Modifier.operators);
-		m.CheckMust(Modifier.operatorsMust);
 		CastOperatorDeclaration cod = new CastOperatorDeclaration(t, td);
 		CurrentElement = cod;
 		cod.SetModifiers(m.Value);
@@ -1680,7 +1665,6 @@ TypeReference typeRef) {
 		}
 		Modifiers am = new Modifiers(this); 
 		ModifierList(am);
-		am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); 
 		if ("get".Equals(la.val)) {
 			Expect(1);
 			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); 
@@ -1710,7 +1694,6 @@ TypeReference typeRef) {
 			}
 			am = new Modifiers(this); 
 			ModifierList(am);
-			am.Check(Modifier.accessorsPossib1, Modifier.accessorsPossib2); 
 			if ("get".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
@@ -1900,7 +1883,6 @@ TypeReference typeRef) {
 					Expect(111);
 				} else SynErr(165);
 			} else if (la.kind == 68) {
-				m.Check(Modifier.indexers);
 				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
 				IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
 				CurrentElement =ind;

@@ -221,7 +221,7 @@ namespace CSharpParser.Semantics
       foreach (ITypeDeclarationScope scope in file.GetScopesToOuter(ns))
       {
         // --- Check, if the current scope contains a using alias with the global name
-        UsingClause usingClause = scope.Usings[info.CurrentPart.SimpleName];
+        UsingClause usingClause = scope.Usings[info.CurrentPart.Name];
         if (usingClause != null && usingClause.IsResolved)
         {
           if (usingClause.IsResolvedToType)
@@ -241,7 +241,7 @@ namespace CSharpParser.Semantics
           break;
         }
         // --- Check, if the current scope contains an extern alias with the global name
-        ExternalAlias externAlias = scope.ExternAliases[info.CurrentPart.SimpleName];
+        ExternalAlias externAlias = scope.ExternAliases[info.CurrentPart.Name];
         if (externAlias != null && externAlias.HasHierarchy)
         {
           info.Results.Merge(externAlias.Hierarchy);
@@ -255,7 +255,7 @@ namespace CSharpParser.Semantics
       // --- successfully resolved.
       if (!resolved)
       {
-        _Parser.Error0432(info.CurrentPart.Token, info.CurrentPart.SimpleName);
+        _Parser.Error0432(info.CurrentPart.Token, info.CurrentPart.Name);
         return;
       }
 
@@ -454,25 +454,10 @@ namespace CSharpParser.Semantics
         if (nsNode != null) nsNode.ImportTypes();
 
         // --- Check, if the next part of the name can be resolved
-        nextNode = currentNode.FindChild(type.SimpleName);
+        nextNode = currentNode.FindChild(type.ClrName);
 
         // --- No more parts can be resolved? Quit in this case.
         if (nextNode == null) return null;
-
-        // --- If the current node is a TypeNameResolutionNode, we must look for the 
-        // --- next TypeResolutionNode.
-        TypeNameResolutionNode nameNode = nextNode as TypeNameResolutionNode;
-        if (nameNode != null)
-        {
-          // --- We are dealing with a type.
-          nextNode = nameNode.FindChild(type.Arguments.Count.ToString());
-          if (nextNode == null)
-          {
-            // --- We found the part name but not the one with correct number of
-            // --- type parameters.
-            return null;
-          }
-        }
 
         // --- Name part successfully resolved. 
         SetResultByResolutionNode(type, nextNode);
@@ -512,7 +497,7 @@ namespace CSharpParser.Semantics
     {
       if (info.ParameterScope as MethodDeclaration == null) return false;
       TypeParameter typeParam;
-      if (!info.ParameterScope.TypeParameters.TryGetValue(info.CurrentPart.SimpleName, 
+      if (!info.ParameterScope.TypeParameters.TryGetValue(info.CurrentPart.Name, 
         out typeParam)) return false;
 
       // --- A this point we resolved the name to a method type parameter
@@ -556,7 +541,7 @@ namespace CSharpParser.Semantics
       {
         // --- Step 1: Try to resolve as a type parameter
         TypeParameter typeParam;
-        if (scope.TypeParameters.TryGetValue(info.CurrentPart.SimpleName, out typeParam))
+        if (scope.TypeParameters.TryGetValue(info.CurrentPart.Name, out typeParam))
         {
           info.Target = ResolutionTarget.TypeParameter;
           info.CurrentPart.ResolveToTypeParameter(typeParam);

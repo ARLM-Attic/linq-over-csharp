@@ -118,6 +118,34 @@ namespace CSharpParser.ProjectModel
       return clone;
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if unallowed "volatile" and "override" modifiers are used on this 
+    /// type declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected override void CheckVolatileAndOverride()
+    {
+      // --- "volatile" is not allowed on types
+      if ((_DeclaredModifier & Modifier.@volatile) != 0) 
+        Parser.Error0106(Token, "volatile");
+
+      // --- "override" is not allowed on types
+      if ((_DeclaredModifier & Modifier.@volatile) != 0) 
+        Parser.Error0106(Token, "override");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if type declaration matches with the declaration rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckTypeDeclaration()
+    {
+      base.CheckTypeDeclaration();
+      CheckUnallowedNonClassModifiers();
+    }
+
     #endregion
   }
 }

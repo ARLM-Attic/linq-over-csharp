@@ -193,6 +193,19 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0116: A namespace does not directly contain members such as fields 
+    /// or methods.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0116(Token token)
+    {
+      Error("CS0116", token, 
+        "A namespace does not directly contain members such as fields or methods");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0118: '{0}' is a '{1}' but is used like a '{2}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -392,6 +405,19 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0418: '{0}': an abstract class cannot be sealed or static.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Missing alias</param>
+    // --------------------------------------------------------------------------------
+    public void Error0418(Token token, string name)
+    {
+      Error("CS0418", token,
+        string.Format("'{0}': an abstract class cannot be sealed or static", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0426: The type name '{0}' does not exist in the type '{1}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -478,6 +504,20 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0434", token, string.Format("The namespace '{0}' in '{1}' conflicts "+
         "with the type '{2}' in '{3}'", nameSpace, location1, type, location2));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0441: '{0}': a class cannot be both static and sealed.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Missing alias</param>
+    // --------------------------------------------------------------------------------
+    public void Error0441(Token token, string name)
+    {
+      Error("CS0441", token,
+        string.Format("'{0}': a class cannot be both static and sealed",
+        name));
     }
 
     // --------------------------------------------------------------------------------
@@ -617,6 +657,49 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0709: '{0}': cannot derive from static class '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    /// <param name="baseName">Base class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0709(Token token, string name, string baseName)
+    {
+      Error("CS0709", token,
+        string.Format("'{0}': cannot derive from static class '{1}'", name, baseName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0713: Static class '{0}' cannot derive from type '{1}'. Static classes
+    /// must derive from object.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    /// <param name="baseName">Base class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0713(Token token, string name, string baseName)
+    {
+      Error("CS0713", token,
+        string.Format("Static class '{0}' cannot derive from type '{1}'. Static classes "+
+        "must derive from object.", name, baseName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0714: '{0}': static classes cannot implement interfaces
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0714(Token token, string name)
+    {
+      Error("CS0714", token,
+        string.Format("'{0}': static classes cannot implement interfaces", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS1003: Syntax error, '{0}' expected.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -626,6 +709,18 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS1003", token,
         string.Format("Syntax error, '{0}' expected", missingSymbol));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1004: Duplicate '{0}' modifier.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="modifier">Modifier symbol</param>
+    // --------------------------------------------------------------------------------
+    public void Error1004(Token token, string modifier)
+    {
+      Error("CS1004", token, string.Format("Duplicate '{0}' modifier", modifier));
     }
 
     // --------------------------------------------------------------------------------
@@ -724,6 +819,17 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS1527", token, "Namespace elements cannot be explicitly declared as " +
         "private, protected, or protected internal");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1530: Keyword new not allowed on namespace elements.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error1530(Token token)
+    {
+      Error("CS1530", token, "Keyword new not allowed on namespace elements");
     }
 
     // --------------------------------------------------------------------------------

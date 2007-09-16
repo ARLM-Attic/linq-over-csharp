@@ -39,12 +39,6 @@ namespace CSharpParser.ParserFiles
     VisibilityAccessors = @public | @protected | @internal | @private,
     ProtectedInternal = @protected | @internal,
 
-    // --- Modifiers applicable for classes
-    classes = VisibilityAccessors | @new | @unsafe | @abstract | @sealed | @static,
-
-    // --- Modifiers applicable for non-class types
-    nonClassTypes = VisibilityAccessors | @new | @unsafe,
-
     // --- Modifiers applicable for constants
     constants = VisibilityAccessors | @new ,
 
@@ -73,9 +67,6 @@ namespace CSharpParser.ParserFiles
     // --- Modifiers applicable for static constructors
     staticConstr = @extern | @static,
 
-    // --- Mandatory modifiers for static constructors
-    staticConstrMust = @static,
-
     // --- Modifiers applicable for destructors
     destructors = @extern | @unsafe,
     all = 0x3fff
@@ -92,7 +83,7 @@ namespace CSharpParser.ParserFiles
     #region Private fields
 
     private Modifier _Value = Modifier.none;
-    private CSharpSyntaxParser _Parser;
+    private readonly CSharpSyntaxParser _Parser;
 
     #endregion
 
@@ -136,22 +127,12 @@ namespace CSharpParser.ParserFiles
     /// Adds a modifier to the existing set of modifiers.
     /// </summary>
     /// <param name="m">Modifier to add.</param>
+    /// <param name="token">Token representing the modifier</param>
     // --------------------------------------------------------------------------------
-    public void Add(Modifier m)
+    public void Add(Modifier m, Token token)
     {
       if ((_Value & m) == 0) _Value |= m;
-      else _Parser.Error("UNDEF", new Token(), "modifier " + m + " already defined");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a set of modifiers to the existing set of modifiers.
-    /// </summary>
-    /// <param name="m">Modifiers to add.</param>
-    // --------------------------------------------------------------------------------
-    public void Add(Modifiers m)
-    {
-      Add(m._Value);
+      else _Parser.Error1004(token, m.ToString().ToLower());
     }
 
     // --------------------------------------------------------------------------------
@@ -162,63 +143,6 @@ namespace CSharpParser.ParserFiles
     public bool IsNone
     {
       get { return _Value == Modifier.none; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks, if the current set of modifiers has only the allowed modifiers and
-    /// no others.
-    /// </summary>
-    /// <param name="allowed">The set of allowed modifiers.</param>
-    // --------------------------------------------------------------------------------
-    public void Check(Modifier allowed)
-    {
-      Modifier wrong = _Value & (allowed ^ Modifier.all);
-      if (wrong != Modifier.none)
-        _Parser.Error("UNDEF", new Token(), "modifier(s) " + wrong + " not allowed here");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks, if the current set of modifiers has only the allowed modifiers and
-    /// no others. There are two set of allowed modifiers, the current set can contain
-    /// either the first set or the second one but cannot contain modifiers from both
-    /// sets.
-    /// </summary>
-    /// <param name="allowEither">First set of modifiers</param>
-    /// <param name="allowOr">Second set of modifiers.</param>
-    /// <remarks>The two set of allowed modifiers cannot overlap each other.</remarks>
-    // --------------------------------------------------------------------------------
-    public void Check(Modifier allowEither, Modifier allowOr)
-    {
-      Modifier wrong = _Value & ((allowEither | allowOr) ^ Modifier.all);
-      if ((allowEither & allowOr) != Modifier.none)
-      {
-        _Parser.Error("UNDEF", new Token(), "modifiers provided must not overlap");
-      }
-      else if (wrong != Modifier.none)
-      {
-        _Parser.Error("UNDEF", new Token(), "modifier(s) " + wrong + " not allowed here");
-      }
-      else if (((_Value & allowEither) != Modifier.none) && ((_Value & allowOr) != Modifier.none))
-      {
-        _Parser.Error("UNDEF", new Token(), "modifier(s) may either be " + allowEither + " or " + allowOr);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks if the current set of modifiers has all the specified modifiers.
-    /// </summary>
-    /// <param name="mustHave">Modifiers that the current value must have.</param>
-    // --------------------------------------------------------------------------------
-    public void CheckMust(Modifier mustHave)
-    {
-      Modifier missing = (_Value & mustHave) ^ mustHave;
-      if (missing != Modifier.none)
-      {
-        _Parser.Error("UNDEF", new Token(), "modifier(s) " + missing + " must be applied here");
-      }
     }
 
     // --------------------------------------------------------------------------------

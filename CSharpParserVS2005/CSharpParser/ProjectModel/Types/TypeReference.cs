@@ -618,6 +618,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether the Type is declared static.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsStatic
+    {
+      get { return ResolvingType.IsStatic; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------

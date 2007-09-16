@@ -155,6 +155,18 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
+    public void StaticClassWithBaseTypesFail()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"BaseTypes\BaseTypesFail13.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0709");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0713");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0714");
+    }
+
+    [TestMethod]
     public void CircularDependencyFails1()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);

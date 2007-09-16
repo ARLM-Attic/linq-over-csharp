@@ -391,5 +391,19 @@ namespace CSharpParserTest
       parser.AddFile("ComparisonOperator.cs");
       Assert.IsTrue(InvokeParser(parser));
     }
+
+    [TestMethod]
+    public void DuplicateModifiersDiscovered()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile("DuplicateModifiers.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 15);
+      for (int i = 0; i < 14; i++)
+      {
+        Assert.AreEqual(parser.Errors[i].Code, "CS1004");
+      }
+      Assert.AreEqual(parser.Errors[14].Code, "CS0106");
+    }
   }
 }
