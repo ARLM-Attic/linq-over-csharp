@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 using CSharpParser.Collections;
@@ -10,11 +11,158 @@ namespace CSharpParser.ProjectModel
   /// This enumeration defines the usable parameter constraint types.
   /// </summary>
   // ==================================================================================
-  public enum ParameterConstraintType
+  public enum ConstraintClassification
   {
     Class,
     Struct,
+    New,
     Type
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a constraint element on the type parameter constraint list.
+  /// </summary>
+  // ==================================================================================
+  public sealed class ConstraintElement : LanguageElement
+  {
+    #region Private fields
+
+    private readonly ConstraintClassification _Classification;
+    private readonly TypeReference _Type;
+
+    #endregion
+
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a constraint representing a "class", "struct" or "new()" constraint.
+    /// </summary>
+    /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
+    /// <param name="classification">Type of constraint.</param>
+    // --------------------------------------------------------------------------------
+    public ConstraintElement(Token token, CSharpSyntaxParser parser, 
+      ConstraintClassification classification) : base(token, parser)
+    {
+      _Classification = classification;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a constraint representing a type constraint.
+    /// </summary>
+    /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
+    /// <param name="type">Type of the constraint.</param>
+    // --------------------------------------------------------------------------------
+    public ConstraintElement(Token token, CSharpSyntaxParser parser, TypeReference type)
+      : base(token, parser)
+    {
+      _Classification = ConstraintClassification.Type;
+      _Type = type;
+    }
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the classification of the constraint.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ConstraintClassification Classification
+    {
+      get { return _Classification; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type represented by this constraint
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference Type
+    {
+      get { return _Type; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this constraint element is a "class".
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsClass
+    {
+      get { return _Classification == ConstraintClassification.Class;  }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this constraint element is a "struct".
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsStruct
+    {
+      get { return _Classification == ConstraintClassification.Struct; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this constraint element is a type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsType
+    {
+      get { return _Classification == ConstraintClassification.Type; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this constraint element is a "class" or 
+    /// "struct" element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsClassOrStruct
+    {
+      get
+      {
+        return _Classification == ConstraintClassification.Class
+               || _Classification == ConstraintClassification.Struct;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this constraint element is a primary element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPrimary
+    {
+      get
+      {
+        if (IsClassOrStruct) return true;
+        if (IsType &&
+          _Type.RightMostPart.IsResolvedToType && 
+          (_Type.RightMostPart.ResolvingType.IsClass ||
+          _Type.RightMostPart.ResolvingType.TypeObject.Equals(typeof(Enum)))
+          ) return true;
+        return false;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this constraint element is a constructor element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNew
+    {
+      get { return _Classification == ConstraintClassification.New; }
+    }
+
+    #endregion
   }
 
   // ==================================================================================
@@ -27,9 +175,12 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private ParameterConstraintType _ParameterType;
-    private readonly List<TypeReference> _Constraints = new List<TypeReference>();
-    private bool _HasNew;
+    private readonly List<ConstraintElement> _Constraints =
+      new List<ConstraintElement>();
+    private ConstraintElement _Primary;
+    private readonly List<ConstraintElement> _SecondaryConstraints = 
+      new List<ConstraintElement>();
+    private ConstraintElement _NewConstraint;
 
     #endregion
 
@@ -49,38 +200,118 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    #region Public methods
+    #region Public properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type of parameter constraint.
+    /// Gets the primary constraint element
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ParameterConstraintType ParameterType
+    public ConstraintElement Primary
     {
-      get { return _ParameterType; }
-      set { _ParameterType = value; }
+      get { return _Primary; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the flag indicating if the parameter has a new() constraint.
+    /// Gets the flag indicating if there is any primary constraint element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasPrimary
+    {
+      get { return _Primary != null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of secondary constraint element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<ConstraintElement> SecondaryConstraints
+    {
+      get { return _SecondaryConstraints; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if there is any secondary constraint element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasSecondary
+    {
+      get { return _SecondaryConstraints.Count > 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the constructor constraint element
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ConstraintElement NewConstraint
+    {
+      get { return _NewConstraint; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if there is any constructor constraint element.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool HasNew
     {
-      get { return _HasNew; }
-      set { _HasNew = value; }
+      get { return _NewConstraint != null; }
+    }
+
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the iterator for all constraint elements.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<ConstraintElement> Constraints
+    {
+      get { return _Constraints; }
+    }
+
+    #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new element to this constraint.
+    /// </summary>
+    /// <param name="element">Element to add.</param>
+    // --------------------------------------------------------------------------------
+    public void AddConstraintElement(ConstraintElement element)
+    {
+      _Constraints.Add(element);
+      _SecondaryConstraints.Add(element);
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type references of the constraint.
+    /// Separates constraint elements into primary,secondary and constructor elements.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<TypeReference> Constraints
+    public void SeparateConstraintElements()
     {
-      get { return _Constraints; }
+      // --- Check for primary constraint
+      if (_SecondaryConstraints.Count == 0) return;
+      if (_SecondaryConstraints[0].IsPrimary)
+      {
+        _Primary = _SecondaryConstraints[0];
+        _SecondaryConstraints.RemoveAt(0);
+      }
+
+      // --- Check for constructor constraint
+      if (_SecondaryConstraints.Count == 0) return;
+      int lastIndex = _SecondaryConstraints.Count - 1;
+      if (_SecondaryConstraints[lastIndex].IsNew)
+      {
+        _NewConstraint = _SecondaryConstraints[lastIndex];
+        _SecondaryConstraints.RemoveAt(lastIndex);
+      }
     }
 
     #endregion
@@ -99,9 +330,10 @@ namespace CSharpParser.ProjectModel
       ITypeDeclarationScope declarationScope, 
       ITypeParameterScope parameterScope)
     {
-      foreach (TypeReference typeReference in _Constraints)
+      foreach (ConstraintElement constraint in _Constraints)
       {
-        typeReference.ResolveTypeReferences(contextType, declarationScope, parameterScope);
+        if (constraint.Classification == ConstraintClassification.Type)
+        constraint.Type.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       }
     }
 

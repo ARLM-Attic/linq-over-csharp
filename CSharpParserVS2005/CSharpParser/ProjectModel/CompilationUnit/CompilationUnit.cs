@@ -702,11 +702,11 @@ namespace CSharpParser.ProjectModel
       ConsolidatePartialTypeDeclarations();
       CheckCircularDependency();
 
-      // --- Phase 4: Check type declarations
+      // --- Phase 4: Resolve all remaining type references and check type declarations
+      ResolveTypeReferences();
       CheckTypeDeclarations();
 
       // --- Phase 5: Resolve all remaining type references
-      ResolveTypeReferences();
 
       // --- Phase 6: Check partial types
       CheckPartialTypes();
@@ -1472,6 +1472,7 @@ namespace CSharpParser.ProjectModel
       foreach (TypeDeclaration type in _DeclaredTypes)
       {
         type.CheckTypeDeclaration();
+        type.CheckConstraintDeclarations();
       }
     }
 

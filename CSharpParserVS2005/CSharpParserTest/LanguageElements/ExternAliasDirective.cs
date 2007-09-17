@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,6 +17,11 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[0].Code, "CS0430");
       Assert.AreEqual(parser.Errors[1].Code, "CS0430");
       Assert.AreEqual(parser.Errors[2].Code, "CS0430");
+      foreach (ExternalAlias alias in parser.Files[0].ExternAliases)
+      {
+        Console.WriteLine("{0}: ({1}, {2}), ({3}, {4})",
+          alias.Name, alias.StartLine, alias.StartColumn, alias.EndLine, alias.EndColumn);
+      }
     }
 
     [TestMethod]

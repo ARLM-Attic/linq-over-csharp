@@ -46,8 +46,8 @@ namespace CSharpParser.ProjectModel
     private TypeReference _BaseTypeReference;
     private readonly List<TypeReference> _InterfaceList = new List<TypeReference>();
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
-    private readonly TypeParameterConstraintCollection _ParameterConstraints =
-      new TypeParameterConstraintCollection();
+    private readonly List<TypeParameterConstraint> _ParameterConstraints =
+      new List<TypeParameterConstraint>();
 
     // --- Fields describing partial type specific information
     private TypeDeclaration _ConsolidatedDeclaration;
@@ -233,7 +233,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type parameter constraints belonging to this type
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeParameterConstraintCollection ParameterConstraints
+    public List<TypeParameterConstraint> ParameterConstraints
     {
       get { return _ParameterConstraints; }
     }
@@ -1144,14 +1144,23 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddTypeParameterConstraint(TypeParameterConstraint constraint)
     {
-      try
+      TypeParameter param;
+      
+      // --- Type parameter must exist for the constraint
+      if (!_TypeParameters.TryGetValue(constraint.Name, out param))
       {
-        _ParameterConstraints.Add(constraint);
+        Parser.Error0699(constraint.Token, ParametrizedName, constraint.Name);
       }
-      catch (ArgumentException)
+      else
       {
-        Parser.Error0409(constraint.Token, constraint.Name);
+        // --- One type parameter can have only one constraint.
+        if (param.Constraint != null)
+        {
+          Parser.Error0409(constraint.Token, constraint.Name);
+        }
+        else param.AssignConstraint(constraint);
       }
+      _ParameterConstraints.Add(constraint);
     }
 
     // --------------------------------------------------------------------------------
@@ -1574,6 +1583,97 @@ namespace CSharpParser.ProjectModel
       CheckUnallowedModifiers();
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if constraint declarations of generic types are OK.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckConstraintDeclarations()
+    {
+      // --- Only generic types have constraints
+      if (!IsGenericTypeDefinition) return;
+
+      // --- Check each constraint declaration individually
+      foreach (TypeParameterConstraint constraint in _ParameterConstraints)
+      {
+        // --- Separate constraints to primary, secondary and constructor parts
+        constraint.SeparateConstraintElements();
+        
+        // --- Check primary constraints
+        if (constraint.HasPrimary && constraint.Primary.IsType && 
+          constraint.Primary.Type.RightMostPart.IsResolvedToType)
+        {
+          // --- Constraint cannot be System.Array, System.Delegate, System.Enum or
+          // --- System.ValueType or System.Object
+          object typeObject = 
+            constraint.Primary.Type.RightMostPart.ResolvingType.TypeObject;
+          if (typeObject.Equals(typeof(object)) ||
+            typeObject.Equals(typeof(Array)) ||
+            typeObject.Equals(typeof(Delegate)) ||
+            typeObject.Equals(typeof(Enum)) ||
+            typeObject.Equals(typeof(ValueType)))
+          {
+            Parser.Error0702(constraint.Primary.Token, constraint.Primary.Type.FullName);
+          }
+        }
+
+        // --- Go through the secondary elements and check for unallowed constarint types
+        foreach (ConstraintElement element in constraint.SecondaryConstraints)
+        {
+          // --- Class or struct cannot be secondary constraints
+          if (element.IsClassOrStruct)
+          {
+            Parser.Error0449(element.Token);
+            element.Invalidate();
+          }
+
+          // --- "new()" cannot be used with "struct"
+          if (constraint.HasPrimary && 
+            constraint.Primary.Classification == ConstraintClassification.Struct &&
+            element.IsNew)
+          {
+            Parser.Error0451(element.Token);
+            element.Invalidate();
+          }
+
+          // --- "new()" must be the last element
+          if (element.IsNew)
+          {
+            Parser.Error0401(element.Token);
+            element.Invalidate();
+          }
+
+          // --- Check for interface types
+          if (element.IsType && element.Type.RightMostPart.IsResolvedToType)
+          {
+            if (element.Type.RightMostPart.ResolvingType.IsClass)
+            {
+              // --- Classes cannot be secondary constraints
+              Parser.Error0406(element.Token, element.Type.FullName);
+              element.Invalidate();
+            }
+            else if (!element.Type.RightMostPart.ResolvingType.IsInterface)
+            {
+              // --- Non-interface types cannot be secondary constraints
+              Parser.Error0701(element.Token, element.Type.FullName);
+              element.Invalidate();
+            }
+          }
+
+        }
+
+        // --- Check the closing "new()" constraint
+        // --- "new()" cannot be used with "struct"
+        if (constraint.HasPrimary &&
+          constraint.Primary.Classification == ConstraintClassification.Struct &&
+          constraint.HasNew)
+        {
+          Parser.Error0451(constraint.NewConstraint.Token);
+          constraint.NewConstraint.Invalidate();
+        }
+      }
+    }
+
     #endregion
 
     #region Private members
@@ -1723,6 +1823,7 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
   }
 
   #region TypeDeclarationCollection class

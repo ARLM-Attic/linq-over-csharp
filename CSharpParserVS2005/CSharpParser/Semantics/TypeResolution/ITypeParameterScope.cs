@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
@@ -25,7 +26,7 @@ namespace CSharpParser.Semantics
     /// Gets the type parameter constraints belonging to this scope.
     /// </summary>
     // --------------------------------------------------------------------------------
-    TypeParameterConstraintCollection ParameterConstraints { get; }
+    List<TypeParameterConstraint> ParameterConstraints { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

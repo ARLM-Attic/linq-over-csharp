@@ -496,6 +496,7 @@ public partial class CSharpSyntaxParser
 		else parent.ExternAliases.Add(externAlias); 
 		
 		Expect(114);
+		externAlias.Terminate(t); 
 	}
 
 	void UsingDirective(NamespaceFragment parent) {
@@ -516,6 +517,7 @@ public partial class CSharpSyntaxParser
 		CurrentElement = uc;
 		if (parent == null) _File.Usings.Add(uc);
 		else parent.Usings.Add(uc); 
+		uc.Terminate(t);
 		
 	}
 
@@ -545,6 +547,7 @@ public partial class CSharpSyntaxParser
 			Get();
 		}
 		Expect(112);
+		attr.Terminate(t); 
 	}
 
 	void NamespaceMemberDeclaration(NamespaceFragment parent, SourceFile file) {
@@ -572,8 +575,10 @@ public partial class CSharpSyntaxParser
 				NamespaceMemberDeclaration(ns, _File);
 			}
 			Expect(111);
+			ns.Terminate(t); 
 			if (la.kind == 114) {
 				Get();
+				ns.Terminate(t); 
 			}
 		} else if (StartOf(2)) {
 			Modifiers m = new Modifiers(this); 
@@ -634,6 +639,7 @@ public partial class CSharpSyntaxParser
 		if (la.kind == 98) {
 			AttributeArguments(attr);
 		}
+		attr.Terminate(t); 
 	}
 
 	void Attributes(AttributeCollection attrs) {
@@ -768,6 +774,7 @@ out TypeDeclaration td) {
 		{
 		  td.SetModifiers(m.Value); 
 		  td.AssignAttributes(attrs);
+		  td.Terminate(t);
 		}
 		
 	}
@@ -885,8 +892,10 @@ out TypeDeclaration td) {
 			} else SynErr(135);
 		}
 		EnumBody(ed);
+		ed.Terminate(t); 
 		if (la.kind == 114) {
 			Get();
+			ed.Terminate(t); 
 		}
 	}
 
@@ -953,39 +962,43 @@ out TypeDeclaration td) {
 		
 		Expect(86);
 		TypeReference typeRef; 
-		constraint.ParameterType = ParameterConstraintType.Type;
+		ConstraintElement element = null;
 		
-		if (la.kind == 1 || la.kind == 16 || la.kind == 66) {
-			if (la.kind == 16 || la.kind == 66) {
-				if (la.kind == 16) {
-					Get();
-					constraint.ParameterType = ParameterConstraintType.Class; 
-				} else if (la.kind == 66) {
-					Get();
-					constraint.ParameterType = ParameterConstraintType.Struct; 
-				} else SynErr(136);
-			} else {
-				TypeName(out typeRef);
-				constraint.Constraints.Add(typeRef); 
-			}
-			while (la.kind == _comma && Peek(1).kind != _new) {
-				Expect(87);
-				TypeName(out typeRef);
-				constraint.Constraints.Add(typeRef); 
-			}
-			if (la.kind == 87) {
-				Get();
-				Expect(46);
-				Expect(98);
-				Expect(113);
-				constraint.HasNew = true; 
-			}
+		if (la.kind == 16) {
+			Get();
+			element = new ConstraintElement(t, this, ConstraintClassification.Class); 
+		} else if (la.kind == 66) {
+			Get();
+			element = new ConstraintElement(t, this, ConstraintClassification.Struct); 
 		} else if (la.kind == 46) {
 			Get();
+			element = new ConstraintElement(t, this, ConstraintClassification.New); 
 			Expect(98);
 			Expect(113);
-			constraint.HasNew = true; 
-		} else SynErr(137);
+		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
+			ClassType(out typeRef);
+			element = new ConstraintElement(t, this, typeRef); 
+		} else SynErr(136);
+		constraint.AddConstraintElement(element); 
+		while (la.kind == 87) {
+			Get();
+			if (la.kind == 16) {
+				Get();
+				element = new ConstraintElement(t, this, ConstraintClassification.Class); 
+			} else if (la.kind == 66) {
+				Get();
+				element = new ConstraintElement(t, this, ConstraintClassification.Struct); 
+			} else if (la.kind == 46) {
+				Get();
+				element = new ConstraintElement(t, this, ConstraintClassification.New); 
+				Expect(98);
+				Expect(113);
+			} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
+				ClassType(out typeRef);
+				element = new ConstraintElement(t, this, typeRef); 
+			} else SynErr(137);
+			constraint.AddConstraintElement(element); 
+		}
 	}
 
 	void ClassBody(TypeDeclaration td) {
@@ -1015,6 +1028,7 @@ out TypeDeclaration td) {
 				Get();
 				typeRef = new TypeReference(t, this, typeof(string)); 
 			}
+			typeRef.Terminate(t); 
 		} else SynErr(138);
 	}
 
@@ -1037,7 +1051,9 @@ out TypeDeclaration td) {
 			} else if (la.kind == 114) {
 				Get();
 			} else SynErr(139);
+			dd.Terminate(t);
 			td.Members.Add(dd); 
+			
 		} else SynErr(140);
 	}
 
@@ -1144,6 +1160,7 @@ out TypeDeclaration td) {
 		}
 		default: SynErr(144); break;
 		}
+		typeRef.Terminate(t); 
 	}
 
 	void EnumBody(EnumDeclaration ed) {
@@ -1180,6 +1197,7 @@ out TypeDeclaration td) {
 		}
 		ev.AssignAttributes(attrs);
 		ed.Values.Add(ev);
+		ev.Terminate(t);
 		
 	}
 
@@ -1219,6 +1237,7 @@ out TypeDeclaration td) {
 				Expression falseExpr; 
 				Expression(out falseExpr);
 				condExpr.FalseExpression = falseExpr; 
+				condExpr.Terminate(t); 
 			}
 		} else SynErr(147);
 	}
@@ -1242,6 +1261,7 @@ out TypeDeclaration td) {
 		}
 		PointerOrArray(ref typeRef);
 		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
+		typeRef.Terminate(t); 
 	}
 
 	void FormalParameterList(FormalParameterCollection pars) {
@@ -1270,6 +1290,7 @@ out TypeDeclaration td) {
 			fp.Name = t.val; 
 			fp.Type = typeRef;
 			pars.Add(fp);
+			fp.Terminate(t);
 			
 			if (la.kind == 87) {
 				Get();
@@ -1284,6 +1305,8 @@ out TypeDeclaration td) {
 			fp.Name = t.val; 
 			fp.Type = typeRef; 
 			pars.Add(fp); 
+			fp.Terminate(t);
+			
 		} else SynErr(149);
 	}
 
@@ -1326,6 +1349,7 @@ out TypeDeclaration td) {
 			td.Members.Add(ep); 
 			EventAccessorDeclarations(ep);
 			Expect(111);
+			ep.Terminate(t); 
 		} else SynErr(150);
 	}
 
@@ -1367,6 +1391,8 @@ out TypeDeclaration td) {
 			Get();
 		} else SynErr(152);
 		td.Members.Add(cd); 
+		cd.Terminate(t);
+		
 	}
 
 	void OperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
@@ -1413,6 +1439,8 @@ TypeDeclaration td) {
 			Get();
 		} else SynErr(154);
 		td.Members.Add(od); 
+		od.Terminate(t);
+		
 	}
 
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
@@ -1471,6 +1499,8 @@ TypeReference memberRef, TypeDeclaration td) {
 		AccessorDeclarations(pd);
 		Expect(111);
 		td.Members.Add(pd); 
+		pd.Terminate(t);
+		
 	}
 
 	void IndexerDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
@@ -1499,6 +1529,8 @@ TypeReference memberRef, TypeDeclaration td) {
 		AccessorDeclarations(ind);
 		Expect(111);
 		td.Members.Add(ind); 
+		ind.Terminate(t);
+		
 	}
 
 	void MethodDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
@@ -1533,6 +1565,8 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			md.HasBody = false; 
 		} else SynErr(155);
 		td.Members.Add(md); 
+		md.Terminate(t);
+		
 	}
 
 	void CastOperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
@@ -1568,6 +1602,8 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			Get();
 		} else SynErr(157);
 		td.Members.Add(cod); 
+		cod.Terminate(t);
+		
 	}
 
 	void SingleConstMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
@@ -1586,6 +1622,8 @@ TypeReference typeRef) {
 		Expression expr; 
 		Expression(out expr);
 		cd.Expression = expr; 
+		cd.Terminate(t);
+		
 	}
 
 	void EventAccessorDeclarations(EventPropertyDeclaration prop) {
@@ -1608,6 +1646,7 @@ TypeReference typeRef) {
 			Error("UNDEF", la, "add or remove expected"); 
 		} else SynErr(158);
 		Block(accessor);
+		accessor.Terminate(t);
 		accessor.HasBody = true;
 		accessor.AssignAttributes(attrs); 
 		
@@ -1633,6 +1672,7 @@ TypeReference typeRef) {
 				Error("UNDEF", la, "add or remove expected"); 
 			} else SynErr(159);
 			Block(accessor);
+			accessor.Terminate(t);
 			accessor.HasBody = true;
 			accessor.AssignAttributes(attrs); 
 			
@@ -1654,6 +1694,8 @@ TypeReference typeRef) {
 		Expression(out expr);
 		arg.Expression = expr; 
 		if (argList != null) argList.Add(arg); 
+		arg.Terminate(t);
+		
 	}
 
 	void AccessorDeclarations(PropertyDeclaration prop) {
@@ -1684,6 +1726,7 @@ TypeReference typeRef) {
 			Get();
 			accessor.HasBody = false; 
 		} else SynErr(161);
+		accessor.Terminate(t);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs);
 		
@@ -1717,6 +1760,7 @@ TypeReference typeRef) {
 				Get();
 				accessor.HasBody = false; 
 			} else SynErr(163);
+			accessor.Terminate(t);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs);
 			
@@ -1881,6 +1925,7 @@ TypeReference typeRef) {
 					Get();
 					InterfaceAccessors(prop);
 					Expect(111);
+					prop.Terminate(t); 
 				} else SynErr(165);
 			} else if (la.kind == 68) {
 				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
@@ -1898,6 +1943,7 @@ TypeReference typeRef) {
 				Expect(96);
 				InterfaceAccessors(ind);
 				Expect(111);
+				ind.Terminate(t); 
 			} else SynErr(166);
 		} else if (la.kind == 26) {
 			InterfaceEventDeclaration(attrs, m, ifd);
@@ -1924,7 +1970,9 @@ TypeReference typeRef) {
 			Error("UNDEF", la, "set or get expected"); 
 		} else SynErr(168);
 		Expect(114);
+		accessor.Terminate(t);
 		accessor.AssignAttributes(attrs); 
+		
 		if (la.kind == 1 || la.kind == 97) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 97) {
@@ -1947,7 +1995,9 @@ TypeReference typeRef) {
 				Error("UNDEF", la, "set or get expected"); 
 			} else SynErr(169);
 			Expect(114);
+			accessor.Terminate(t);
 			accessor.AssignAttributes(attrs); 
+			
 		}
 	}
 
@@ -1966,6 +2016,8 @@ TypeReference typeRef) {
 		
 		Expect(114);
 		ifd.Members.Add(fd); 
+		fd.Terminate(t);
+		
 	}
 
 	void LocalVariableDeclaration(IBlockOwner block) {
@@ -2003,9 +2055,12 @@ TypeReference typeRef) {
 				Expression(out expr);
 				saIn.Expression = expr; 
 				Expect(112);
+				saIn.Terminate(t); 
 			} else SynErr(170);
 		}
 		block.Add(loc.Variable); 
+		loc.Terminate(t);
+		
 	}
 
 	void VariableInitializer(out Initializer init) {
@@ -2013,11 +2068,11 @@ TypeReference typeRef) {
 		if (StartOf(21)) {
 			Expression(out expr);
 			SimpleInitializer sin = new SimpleInitializer(t, this, expr); 
-			init = sin; 
+			init = sin; sin.Terminate(t); 
 		} else if (la.kind == 96) {
 			ArrayInitializer arrInit; 
 			ArrayInitializer(out arrInit);
-			init = arrInit;
+			init = arrInit; 
 		} else SynErr(171);
 	}
 
@@ -2038,6 +2093,7 @@ TypeReference typeRef) {
 			}
 		}
 		Expect(111);
+		init.Terminate(t); 
 	}
 
 	void Keyword() {
@@ -2370,6 +2426,8 @@ TypeReference typeRef) {
 			Expression(out expr);
 			arg.Expression = expr; 
 			attr.Arguments.Add(arg); 
+			arg.Terminate(t);
+			
 			while (la.kind == 87) {
 				Get();
 				arg = new AttributeArgument(t, this); 
@@ -2384,6 +2442,8 @@ TypeReference typeRef) {
 				Expression(out expr);
 				arg.Expression = expr; 
 				attr.Arguments.Add(arg); 
+				arg.Terminate(t);
+				
 			}
 		}
 		Expect(113);
@@ -2393,18 +2453,21 @@ TypeReference typeRef) {
 		typeRef = null; 
 		if (StartOf(7)) {
 			IntegralType(out typeRef);
-		} else if (la.kind == 32) {
-			Get();
-			typeRef = new TypeReference(t, this, typeof(float)); 
-		} else if (la.kind == 23) {
-			Get();
-			typeRef = new TypeReference(t, this, typeof(double)); 
-		} else if (la.kind == 19) {
-			Get();
-			typeRef = new TypeReference(t, this, typeof(decimal)); 
-		} else if (la.kind == 9) {
-			Get();
-			typeRef = new TypeReference(t, this, typeof(bool)); 
+		} else if (StartOf(22)) {
+			if (la.kind == 32) {
+				Get();
+				typeRef = new TypeReference(t, this, typeof(float)); 
+			} else if (la.kind == 23) {
+				Get();
+				typeRef = new TypeReference(t, this, typeof(double)); 
+			} else if (la.kind == 19) {
+				Get();
+				typeRef = new TypeReference(t, this, typeof(decimal)); 
+			} else {
+				Get();
+				typeRef = new TypeReference(t, this, typeof(bool)); 
+			}
+			typeRef.Terminate(t); 
 		} else SynErr(174);
 	}
 
@@ -2443,6 +2506,7 @@ TypeReference typeRef) {
 		}
 		PointerOrArray(ref typeRef);
 		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
+		typeRef.Terminate(t); 
 	}
 
 	void TypeArgumentList(TypeReferenceCollection args) {
@@ -2474,7 +2538,7 @@ TypeReference typeRef) {
 		} else if (IsLocalVarDecl()) {
 			LocalVariableDeclaration(block);
 			Expect(114);
-		} else if (StartOf(22)) {
+		} else if (StartOf(23)) {
 			EmbeddedStatement(block);
 		} else SynErr(177);
 	}
@@ -2492,6 +2556,8 @@ TypeReference typeRef) {
 		Expression(out expr);
 		cs.Expression = expr; 
 		if (block != null) block.Add(cs); 
+		cs.Terminate(t);
+		
 		while (la.kind == 87) {
 			Get();
 			cs = new ConstStatement(t, this, block); 
@@ -2501,6 +2567,8 @@ TypeReference typeRef) {
 			Expression(out expr);
 			cs.Expression = expr; 
 			if (block != null) block.Add(cs); 
+			cs.Terminate(t);
+			
 		}
 		Expect(114);
 	}
@@ -2576,6 +2644,7 @@ TypeReference typeRef) {
 		if (block != null) block.Add(cb);
 		
 		Block(cb);
+		cb.Terminate(t); 
 	}
 
 	void UncheckedBlock(IBlockOwner block) {
@@ -2585,6 +2654,7 @@ TypeReference typeRef) {
 		if (block != null) block.Add(ucb);
 		
 		Block(ucb);
+		ucb.Terminate(t); 
 	}
 
 	void UnsafeBlock(IBlockOwner block) {
@@ -2594,6 +2664,7 @@ TypeReference typeRef) {
 		if (block != null) block.Add(usb);
 		
 		Block(usb);
+		usb.Terminate(t); 
 	}
 
 	void StatementExpression(IBlockOwner block) {
@@ -2603,7 +2674,7 @@ TypeReference typeRef) {
 		ExpressionStatement es = new ExpressionStatement(t, this, block); 
 		CurrentElement = es; 
 		es.Expression = expr; 
-		if (StartOf(23)) {
+		if (StartOf(24)) {
 			AssignmentOperator asgn; 
 			AssignmentOperator(out asgn);
 			es.Expression = asgn; 
@@ -2615,6 +2686,7 @@ TypeReference typeRef) {
 			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
 		} else SynErr(180);
 		if (block != null) block.Add(es); 
+		es.Terminate(t); 
 	}
 
 	void IfStatement(IBlockOwner block) {
@@ -2629,11 +2701,14 @@ TypeReference typeRef) {
 		Expect(113);
 		ifs.CreateThenBlock(t); 
 		EmbeddedStatement(ifs.ThenStatements);
+		ifs.ThenStatements.Terminate(t); 
 		if (la.kind == 24) {
 			Get();
 			ifs.CreateElseBlock(t); 
 			EmbeddedStatement(ifs.ElseStatements);
+			ifs.ElseStatements.Terminate(t); 
 		}
+		ifs.Terminate(t); 
 	}
 
 	void SwitchStatement(IBlockOwner block) {
@@ -2651,6 +2726,8 @@ TypeReference typeRef) {
 		}
 		Expect(111);
 		if (block != null) block.Add(sws); 
+		sws.Terminate(t);
+		
 	}
 
 	void WhileStatement(IBlockOwner block) {
@@ -2664,6 +2741,7 @@ TypeReference typeRef) {
 		whs.Condition = expr; 
 		Expect(113);
 		EmbeddedStatement(whs);
+		whs.Terminate(t); 
 	}
 
 	void DoWhileStatement(IBlockOwner block) {
@@ -2679,6 +2757,7 @@ TypeReference typeRef) {
 		whs.Condition = expr; 
 		Expect(113);
 		Expect(114);
+		whs.Terminate(t); 
 	}
 
 	void ForStatement(IBlockOwner block) {
@@ -2687,7 +2766,7 @@ TypeReference typeRef) {
 		CurrentElement = fs; 
 		Expect(98);
 		if (block != null) block.Add(fs); 
-		if (StartOf(24)) {
+		if (StartOf(25)) {
 			fs.CreateInitializerBlock(t); 
 			ForInitializer(fs);
 		}
@@ -2704,6 +2783,7 @@ TypeReference typeRef) {
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
+		fs.Terminate(t); 
 	}
 
 	void ForEachStatement(IBlockOwner block) {
@@ -2724,6 +2804,7 @@ TypeReference typeRef) {
 		Expect(113);
 		fes.Add(fes.Variable); 
 		EmbeddedStatement(fes);
+		fes.Terminate(t); 
 	}
 
 	void BreakStatement(IBlockOwner block) {
@@ -2732,6 +2813,7 @@ TypeReference typeRef) {
 		BreakStatement bs = new BreakStatement(t, this, block); 
 		CurrentElement = bs; 
 		if (block != null) block.Add(bs); 
+		bs.Terminate(t); 
 	}
 
 	void ContinueStatement(IBlockOwner block) {
@@ -2740,6 +2822,7 @@ TypeReference typeRef) {
 		ContinueStatement cs = new ContinueStatement(t, this, block); 
 		CurrentElement = cs; 
 		if (block != null) block.Add(cs); 
+		cs.Terminate(t); 
 	}
 
 	void GotoStatement(IBlockOwner block) {
@@ -2760,6 +2843,7 @@ TypeReference typeRef) {
 			gs.Name = t.val; 
 		} else SynErr(181);
 		Expect(114);
+		gs.Terminate(t); 
 	}
 
 	void ReturnStatement(IBlockOwner block) {
@@ -2773,6 +2857,7 @@ TypeReference typeRef) {
 		}
 		Expect(114);
 		if (block != null) block.Add(yrs); 
+		yrs.Terminate(t); 
 	}
 
 	void ThrowStatement(IBlockOwner block) {
@@ -2786,6 +2871,7 @@ TypeReference typeRef) {
 		}
 		Expect(114);
 		if (block != null) block.Add(ts); 
+		ts.Terminate(t); 
 	}
 
 	void TryFinallyBlock(IBlockOwner block) {
@@ -2802,12 +2888,15 @@ TypeReference typeRef) {
 				Get();
 				ts.CreateFinallyBlock(t); 
 				Block(ts.FinallyBlock);
+				ts.FinallyBlock.Terminate(t); 
 			}
 		} else if (la.kind == 30) {
 			Get();
 			ts.CreateFinallyBlock(t); 
 			Block(ts.FinallyBlock);
+			ts.FinallyBlock.Terminate(t); 
 		} else SynErr(182);
+		ts.Terminate(t); 
 	}
 
 	void LockStatement(IBlockOwner block) {
@@ -2821,6 +2910,7 @@ TypeReference typeRef) {
 		ls.Expression = expr; 
 		Expect(113);
 		EmbeddedStatement(ls);
+		ls.Terminate(t); 
 	}
 
 	void UsingStatement(IBlockOwner block) {
@@ -2839,6 +2929,7 @@ TypeReference typeRef) {
 		} else SynErr(183);
 		Expect(113);
 		EmbeddedStatement(us);
+		us.Terminate(t); 
 	}
 
 	void YieldReturnStatement(IBlockOwner block) {
@@ -2849,6 +2940,7 @@ TypeReference typeRef) {
 		CurrentElement = yrs; 
 		yrs.Expression = expr; 
 		if (block != null) block.Add(yrs); 
+		yrs.Terminate(t); 
 	}
 
 	void YieldBreakStatement(IBlockOwner block) {
@@ -2856,6 +2948,7 @@ TypeReference typeRef) {
 		YieldBreakStatement ybs = new YieldBreakStatement(t, this, block); 
 		CurrentElement = ybs; 
 		if (block != null) block.Add(ybs); 
+		ybs.Terminate(t); 
 	}
 
 	void FixedStatement(IBlockOwner block) {
@@ -2889,6 +2982,7 @@ TypeReference typeRef) {
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
+		fs.Terminate(t); 
 	}
 
 	void SwitchSection(SwitchStatement sws) {
@@ -2910,6 +3004,7 @@ TypeReference typeRef) {
 		while (IsNoSwitchLabelOrRBrace()) {
 			Statement(section);
 		}
+		sws.Terminate(t); 
 	}
 
 	void ForInitializer(ForStatement fs) {
@@ -2950,6 +3045,7 @@ TypeReference typeRef) {
 			}
 			Expect(113);
 			Block(cc);
+			cc.Terminate(t); 
 			if (la.kind == 13) {
 				CatchClauses(tryStm);
 			}
@@ -3005,9 +3101,9 @@ TypeReference typeRef) {
 			case 98: {
 				Get();
 				TypeReference typeRef; 
+				TypeCastOperator tcOp = new TypeCastOperator(t, this); 
 				Type(out typeRef, false);
 				Expect(113);
-				TypeCastOperator tcOp = new TypeCastOperator(t, this); 
 				tcOp.Type = typeRef; 
 				unOp = tcOp; 
 				break;
@@ -3022,8 +3118,9 @@ TypeReference typeRef) {
 			  unOp.Operand = unaryExpr;
 			  expr = unOp;
 			}
+			unOp.Terminate(t);
 			
-		} else if (StartOf(25)) {
+		} else if (StartOf(26)) {
 			Primary(out expr);
 		} else SynErr(187);
 	}
@@ -3126,6 +3223,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3151,6 +3249,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3176,6 +3275,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3201,6 +3301,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3226,6 +3327,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3251,6 +3353,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3282,6 +3385,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3289,8 +3393,8 @@ TypeReference typeRef) {
 	void RelExpr(out BinaryOperator expr) {
 		expr = null; BinaryOperator oper = null; 
 		ShiftExpr(out expr);
-		while (StartOf(26)) {
-			if (StartOf(27)) {
+		while (StartOf(27)) {
+			if (StartOf(28)) {
 				if (la.kind == 100) {
 					Get();
 					oper = new LessThanOperator(t, this); 
@@ -3319,6 +3423,7 @@ TypeReference typeRef) {
 				  rightExpr.LeftOperand = unExpr;
 				}
 				expr = oper;
+				oper.Terminate(t);
 				
 			} else {
 				if (la.kind == 42) {
@@ -3333,6 +3438,7 @@ TypeReference typeRef) {
 				TypeInRelExpr(out typeRef, false);
 				oper.RightOperand = new TypeOperator(t, typeRef); 
 				expr = oper; 
+				oper.Terminate(t); 
 			}
 		}
 	}
@@ -3365,6 +3471,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3396,6 +3503,7 @@ TypeReference typeRef) {
 			  rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
+			oper.Terminate(t);
 			
 		}
 	}
@@ -3420,6 +3528,7 @@ TypeReference typeRef) {
 			Unary(out unExpr);
 			oper.RightOperand = unExpr; 
 			expr = oper; 
+			oper.Terminate(t); 
 		}
 	}
 
@@ -3493,7 +3602,7 @@ TypeReference typeRef) {
 		default: SynErr(194); break;
 		}
 		Expression curExpr = innerExpr; 
-		while (StartOf(28)) {
+		while (StartOf(29)) {
 			switch (la.kind) {
 			case 95: {
 				Get();
@@ -3540,6 +3649,7 @@ TypeReference typeRef) {
 				break;
 			}
 			}
+			curExpr.Terminate(t); 
 		}
 		expr = curExpr; 
 	}
@@ -3674,6 +3784,7 @@ TypeReference typeRef) {
 		if (IsGeneric()) {
 			TypeArgumentList(pml.TypeArguments);
 		}
+		pml.Terminate(t); 
 	}
 
 	void NamedLiteral(out Expression expr) {
@@ -3691,6 +3802,7 @@ TypeReference typeRef) {
 		if (IsGeneric()) {
 			TypeArgumentList(nl.TypeArguments);
 		}
+		nl.Terminate(t); 
 	}
 
 	void BaseNamedLiteral(out Expression expr) {
@@ -3703,6 +3815,7 @@ TypeReference typeRef) {
 		if (IsGeneric()) {
 			TypeArgumentList(bnl.TypeArguments);
 		}
+		bnl.Terminate(t); 
 	}
 
 	void BaseIndexerOperator(out Expression expr) {
@@ -3718,6 +3831,7 @@ TypeReference typeRef) {
 			bio.Indexes.Add(indexExpr); 
 		}
 		Expect(112);
+		bio.Terminate(t); 
 	}
 
 	void NewOperator(out Expression expr) {
@@ -3766,6 +3880,7 @@ TypeReference typeRef) {
 			ArrayInitializer(out arrayInit);
 			nop.Initializer = arrayInit; 
 		} else SynErr(197);
+		nop.Terminate(t); 
 	}
 
 	void TypeOfOperator(out Expression expr) {
@@ -3777,6 +3892,7 @@ TypeReference typeRef) {
 		Type(out typeRef, true);
 		top.Type = typeRef; 
 		Expect(113);
+		top.Terminate(t); 
 	}
 
 	void CheckedOperator(out Expression expr) {
@@ -3788,6 +3904,7 @@ TypeReference typeRef) {
 		Expression(out innerExpr);
 		cop.Operand = innerExpr; 
 		Expect(113);
+		cop.Terminate(t); 
 	}
 
 	void UncheckedOperator(out Expression expr) {
@@ -3799,6 +3916,7 @@ TypeReference typeRef) {
 		Expression(out innerExpr);
 		uop.Operand = innerExpr; 
 		Expect(113);
+		uop.Terminate(t); 
 	}
 
 	void DefaultOperator(out Expression expr) {
@@ -3810,6 +3928,7 @@ TypeReference typeRef) {
 		Primary(out innerExpr);
 		dop.Operand = innerExpr; 
 		Expect(113);
+		dop.Terminate(t); 
 	}
 
 	void AnonymousDelegate(out Expression expr) {
@@ -3832,6 +3951,7 @@ TypeReference typeRef) {
 		}
 		Block(adop);
 		expr = adop; 
+		adop.Terminate(t); 
 	}
 
 	void SizeOfOperator(out Expression expr) {
@@ -3843,6 +3963,7 @@ TypeReference typeRef) {
 		Type(out typeRef, true);
 		sop.Type = typeRef; 
 		Expect(113);
+		sop.Terminate(t); 
 	}
 
 	void SimpleNamedLiteral(out NamedLiteral expr) {
@@ -3851,6 +3972,7 @@ TypeReference typeRef) {
 		if (IsGeneric()) {
 			TypeArgumentList(expr.TypeArguments);
 		}
+		expr.Terminate(t); 
 	}
 
 	void ArrayIndexer(ArrayIndexerOperator indexer) {
@@ -3882,6 +4004,7 @@ TypeReference typeRef) {
 		param.Type = typeRef; 
 		Expect(1);
 		param.Name = t.val; 
+		param.Terminate(t); 
 	}
 
 	void SingleFieldMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
@@ -3902,6 +4025,7 @@ TypeReference typeRef, bool isEvent) {
 			fd.Initializer = init; 
 		}
 		td.Members.Add(fd); 
+		fd.Terminate(t); 
 	}
 
 	void TypeParameter(out TypeParameter tp) {
@@ -3975,6 +4099,7 @@ TypeReference typeRef, bool isEvent) {
 		{x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
+		{x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,x,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,T,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,T,T, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,T,x,x, x,T,x,x, x,x,x,T, x,x,x,T, T,x,x,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, T,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x},

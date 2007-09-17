@@ -388,6 +388,32 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0401: The new() constraint must be the last constraint specified.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0401(Token token)
+    {
+      Error("CS0401", token,
+        "The new() constraint must be the last constraint specified");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0406: The class type constraint '{0}' must come before any other 
+    /// constraints.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Special class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0406(Token token, string name)
+    {
+      Error("CS0406", token, string.Format("The class type constraint '{0}' must " +
+        "come before any other constraints", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0409: A constraint clause has already been specified for type
     /// parameter '{0}'. All of the constraints for a type parameter must be
     /// specified in a single where clause.
@@ -518,6 +544,32 @@ namespace CSharpParser.ParserFiles
       Error("CS0441", token,
         string.Format("'{0}': a class cannot be both static and sealed",
         name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0449: The 'class' or 'struct' constraint must come before any other 
+    /// constraints.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0449(Token token)
+    {
+      Error("CS0449", token, 
+        "The 'class' or 'struct' constraint must come before any other constraints");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0451: The 'new()' constraint cannot be used with the 'struct' 
+    /// constraint.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0451(Token token)
+    {
+      Error("CS0451", token,
+        "The 'new()' constraint cannot be used with the 'struct' constraint");
     }
 
     // --------------------------------------------------------------------------------
@@ -653,6 +705,48 @@ namespace CSharpParser.ParserFiles
     public void Error0692(Token token, string name)
     {
       Error("CS0692", token, string.Format("Duplicate type parameter '{0}'", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0699: '{0}' does not define type parameter '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="paramName">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0699(Token token, string name, string paramName)
+    {
+      Error("CS0699", token, 
+        string.Format("'{0}' does not define type parameter '{1}'", name, paramName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0701: '{0}' is not a valid constraint. A type used as a constraint
+    /// must be an interface, a non-sealed class or a type parameter.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0701(Token token, string name)
+    {
+      Error("CS0701", token,
+        string.Format("'{0}' is not a valid constraint. A type used as a constraint " +
+        "must be an interface, a non-sealed class or a type parameter.", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0702: TConstraint cannot be special class '{0}'
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Special class name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0702(Token token, string name)
+    {
+      Error("CS0702", token,
+        string.Format("Constraint cannot be special class '{0}'", name));
     }
 
     // --------------------------------------------------------------------------------

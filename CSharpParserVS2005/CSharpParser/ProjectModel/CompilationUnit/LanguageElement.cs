@@ -17,6 +17,7 @@ namespace CSharpParser.ProjectModel
     private string _Name;
     private bool _IsValid;
     private CommentInfo _Comment;
+    private Token _TerminatingToken;
 
     #endregion
 
@@ -31,8 +32,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="contextElement">Contex of this language element.</param>
     // --------------------------------------------------------------------------------
     protected LanguageElement(Token token, LanguageElement contextElement)
-      :
-      this (token, contextElement.Parser)
+      : this (token, contextElement.Parser)
     {
       _ContextElement = contextElement;
     }
@@ -48,6 +48,7 @@ namespace CSharpParser.ProjectModel
     protected LanguageElement(Token token, CSharpSyntaxParser parser)
     {
       _Token = token;
+      _TerminatingToken = token;
       _Name = token.val;
       _Parser = parser;
       _IsValid = false;
@@ -157,6 +158,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the ending line number of the language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int EndLine
+    {
+      get { return _TerminatingToken.line; }  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the column number of the language element.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -167,12 +178,32 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the ending column number of the language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int EndColumn
+    {
+      get { return _TerminatingToken.col + _TerminatingToken.val.Length - 1; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the start position of the language element.
     /// </summary>
     // --------------------------------------------------------------------------------
     public int StartPosition
     {
       get { return _Token.pos; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the ending position of the language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int EndPosition
+    {
+      get { return _TerminatingToken.pos + _TerminatingToken.val.Length - 1; }
     }
 
     // --------------------------------------------------------------------------------
@@ -195,6 +226,16 @@ namespace CSharpParser.ProjectModel
       get { return _Token; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the terminating token of this language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public Token TerminatingToken
+    {
+      get { return _TerminatingToken; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the comment belonging to this language element.
@@ -280,6 +321,17 @@ namespace CSharpParser.ProjectModel
     public void Invalidate()
     {
       _IsValid = false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Marks the termination of this language element.
+    /// </summary>
+    /// <param name="token">Terminating token</param>
+    // --------------------------------------------------------------------------------
+    public void Terminate(Token token)
+    {
+      _TerminatingToken = token;
     }
 
     #endregion

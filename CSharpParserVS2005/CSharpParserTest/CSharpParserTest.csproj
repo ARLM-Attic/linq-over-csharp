@@ -384,6 +384,12 @@
     <Compile Include="LanguageElements\TypeResolution.cs" />
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails5.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails4.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails3.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails2.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails1.cs" />
+    <None Include="TestFiles\TypeParameters\MissingTypeParameter.cs" />
     <None Include="TestFiles\StructDeclaration\StructDeclaration2.cs" />
     <None Include="TestFiles\StructDeclaration\StructDeclaration1.cs" />
     <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />

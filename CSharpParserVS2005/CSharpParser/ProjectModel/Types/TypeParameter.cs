@@ -10,6 +10,14 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class TypeParameter : AttributedElement
   {
+    #region Private fields
+
+    private TypeParameterConstraint _Constraint;
+
+    #endregion
+
+    #region Lifecycle methods
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a type parameter according to the info provided by the
@@ -21,6 +29,37 @@ namespace CSharpParser.ProjectModel
     public TypeParameter(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the constraint related to this type parameter
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeParameterConstraint Constraint
+    {
+      get { return _Constraint; }
+    }
+
+    #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Assigns a constraint to this type parameter.
+    /// </summary>
+    /// <param name="constraint">Constraint of this type parameter</param>
+    // --------------------------------------------------------------------------------
+    public void AssignConstraint(TypeParameterConstraint constraint)
+    {
+      _Constraint = constraint;
+    }
+
+    #endregion
   }
 
   // ==================================================================================

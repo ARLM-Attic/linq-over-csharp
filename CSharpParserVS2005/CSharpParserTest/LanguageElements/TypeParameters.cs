@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,55 +14,51 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"TypeParameters\TypeParamConstraintsAreOk.cs");
       Assert.IsTrue(InvokeParser(parser));
       TypeDeclaration td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[0];
-      TypeParameterConstraintCollection coList = td.ParameterConstraints;
+      List <TypeParameterConstraint> coList = td.ParameterConstraints;
       Assert.AreEqual(coList.Count, 6);
 
       TypeParameterConstraint con = coList[0];
       Assert.AreEqual(con.Name, "A");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Class);
-      Assert.AreEqual(con.Constraints.Count, 0);
+      Assert.AreEqual(con.Constraints.Count, 1);
+      Assert.AreEqual(con.Primary.Classification, ConstraintClassification.Class);
       Assert.IsFalse(con.HasNew);
 
       con = coList[1];
       Assert.AreEqual(con.Name, "B");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Struct);
-      Assert.AreEqual(con.Constraints.Count, 0);
+      Assert.AreEqual(con.Constraints.Count, 1);
+      Assert.AreEqual(con.Primary.Classification, ConstraintClassification.Struct);
       Assert.IsFalse(con.HasNew);
 
       con = coList[2];
       Assert.AreEqual(con.Name, "C");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 0);
+      Assert.AreEqual(con.Constraints.Count, 1);
       Assert.IsTrue(con.HasNew);
 
       con = coList[3];
       Assert.AreEqual(con.Name, "D");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
       Assert.AreEqual(con.Constraints.Count, 2);
-      Assert.AreEqual(con.Constraints[0].Name, "ArrayList");
-      Assert.AreEqual(con.Constraints[1].ParametrizedName, "IEnumerable<A>");
-      Assert.AreEqual(con.Constraints[1].Arguments.Count, 1);
-      Assert.AreEqual(con.Constraints[1].Arguments[0].Name, "A");
+      Assert.AreEqual(con.Constraints[0].Type.Name, "ArrayList");
+      Assert.AreEqual(con.Constraints[1].Type.ParametrizedName, "IEnumerable<A>");
+      Assert.AreEqual(con.Constraints[1].Type.Arguments.Count, 1);
+      Assert.AreEqual(con.Constraints[1].Type.Arguments[0].Name, "A");
       Assert.IsFalse(con.HasNew);
 
       con = coList[4];
       Assert.AreEqual(con.Name, "E");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 1);
-      Assert.AreEqual(con.Constraints[0].Name, "D");
+      Assert.AreEqual(con.Constraints.Count, 2);
+      Assert.AreEqual(con.Constraints[0].Type.Name, "D");
       Assert.IsTrue(con.HasNew);
 
       con = coList[5];
       Assert.AreEqual(con.Name, "F");
-      Assert.AreEqual(con.ParameterType, ParameterConstraintType.Type);
-      Assert.AreEqual(con.Constraints.Count, 3);
-      Assert.AreEqual(con.Constraints[0].Name, "ArrayList");
-      Assert.AreEqual(con.Constraints[1].ParametrizedName, "IEnumerable<B>");
-      Assert.AreEqual(con.Constraints[2].ParametrizedName, "IEquatable<D>");
-      Assert.AreEqual(con.Constraints[1].Arguments.Count, 1);
-      Assert.AreEqual(con.Constraints[1].Arguments[0].Name, "B");
-      Assert.AreEqual(con.Constraints[2].Arguments.Count, 1);
-      Assert.AreEqual(con.Constraints[2].Arguments[0].Name, "D");
+      Assert.AreEqual(con.Constraints.Count, 4);
+      Assert.AreEqual(con.Constraints[0].Type.Name, "ArrayList");
+      Assert.AreEqual(con.Constraints[1].Type.ParametrizedName, "IEnumerable<B>");
+      Assert.AreEqual(con.Constraints[2].Type.ParametrizedName, "IEquatable<D>");
+      Assert.AreEqual(con.Constraints[1].Type.Arguments.Count, 1);
+      Assert.AreEqual(con.Constraints[1].Type.Arguments[0].Name, "B");
+      Assert.AreEqual(con.Constraints[2].Type.Arguments.Count, 1);
+      Assert.AreEqual(con.Constraints[2].Type.Arguments[0].Name, "D");
       Assert.IsTrue(con.HasNew);
     }
 
@@ -86,6 +83,90 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors.Count, 2);
       Assert.AreEqual(parser.Errors[0].Code, "CS0409");
       Assert.AreEqual(parser.Errors[1].Code, "CS0409");
+    }
+
+    [TestMethod]
+    public void MissingTypeParametersFail()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\MissingTypeParameter.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0699");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0699");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0699");
+    }
+
+    [TestMethod]
+    public void ConstraintFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0449");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0449");
+    }
+
+    [TestMethod]
+    public void ConstraintFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails2.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 9);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0401");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0401");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0451");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0401");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0451");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0401");
+      Assert.AreEqual(parser.Errors[6].Code, "CS0451");
+      Assert.AreEqual(parser.Errors[7].Code, "CS0401");
+      Assert.AreEqual(parser.Errors[8].Code, "CS0401");
+    }
+
+    [TestMethod]
+    public void ConstraintFails3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails3.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 5);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0702");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0702");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0702");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0702");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0702");
+    }
+
+    [TestMethod]
+    public void ConstraintFails4()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails4.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 6);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0406");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0406");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0406");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0406");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0406");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0406");
+    }
+
+    [TestMethod]
+    public void ConstraintFails5()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails5.cs");
+      parser.AddAssemblyReference("System.Drawing");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 4);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0701");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0701");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0701");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0701");
     }
   }
 }
