@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.Collections;
@@ -261,6 +260,33 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Makes an array type from the current type with the specified rank.
+    /// </summary>
+    /// <param name="rank">Rank of array type to be created</param>
+    /// <returns>
+    /// Array type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakeArrayType(int rank)
+    {
+      return new ArrayType(this, rank);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes a pointer type from the current type with the specified rank.
+    /// </summary>
+    /// <returns>
+    /// Pointer type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakePointerType()
+    {
+      return new PointerType(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the number of type parameters.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -298,9 +324,9 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (IsGenericType) 
-          return String.Format("{0}`{1}", base.Name, _TypeParameters.Count);
-        return base.Name;
+        return (IsGenericType) 
+          ? String.Format("{0}`{1}", base.Name, _TypeParameters.Count)
+          : base.Name;
       }
     }
 
@@ -316,6 +342,30 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the number of dimensions of an array type.
+    /// </summary>
+    /// <returns>Number of array dimensions.</returns>
+    // --------------------------------------------------------------------------------
+    public int GetArrayRank()
+    {
+      throw new ArgumentException("Type is not an array.");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the element type of this type.
+    /// </summary>
+    /// <returns>
+    /// Element type for a pointer, reference or array; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics GetElementType()
+    {
+      return null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     /// <remarks>Always returns false.</remarks>
@@ -325,6 +375,7 @@ namespace CSharpParser.ProjectModel
       get { return false; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
@@ -392,21 +443,7 @@ namespace CSharpParser.ProjectModel
       {
         return IsNested 
           ? _DeclaringType.FullName + "+" + Name 
-          : Name;
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the fully qualified name (namespace name and type name) of this type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public virtual string QualifiedName
-    {
-      get
-      {
-        if (_EnclosingNamespace == null) return FullName;
-        return _EnclosingNamespace.FullName + "." + FullName;
+          : (_EnclosingNamespace == null ? Name : _EnclosingNamespace + "." + Name);
       }
     }
 
@@ -432,7 +469,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsArray
     {
-      get { throw new NotImplementedException(); }
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -623,22 +660,6 @@ namespace CSharpParser.ProjectModel
       {
         return (!IsNested && (IsPublic || Visibility == Visibility.Internal)) || 
           (IsNestedPublic && DeclaringType.IsVisible);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a MemberTypes value indicating that this member is a type or a nested 
-    /// type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public MemberTypes MemberType
-    {
-      get 
-      {
-        return IsNested
-                 ? MemberTypes.TypeInfo | MemberTypes.NestedType
-                 : MemberTypes.TypeInfo;
       }
     }
 
@@ -1598,79 +1619,48 @@ namespace CSharpParser.ProjectModel
       {
         // --- Separate constraints to primary, secondary and constructor parts
         constraint.SeparateConstraintElements();
-        
-        // --- Check primary constraints
-        if (constraint.HasPrimary && constraint.Primary.IsType && 
-          constraint.Primary.Type.RightMostPart.IsResolvedToType)
-        {
-          // --- Constraint cannot be System.Array, System.Delegate, System.Enum or
-          // --- System.ValueType or System.Object
-          object typeObject = 
-            constraint.Primary.Type.RightMostPart.ResolvingType.TypeObject;
-          if (typeObject.Equals(typeof(object)) ||
-            typeObject.Equals(typeof(Array)) ||
-            typeObject.Equals(typeof(Delegate)) ||
-            typeObject.Equals(typeof(Enum)) ||
-            typeObject.Equals(typeof(ValueType)))
-          {
-            Parser.Error0702(constraint.Primary.Token, constraint.Primary.Type.FullName);
-          }
-        }
+        constraint.CheckClassConstraint();
+        constraint.CheckNewWithStruct();
 
-        // --- Go through the secondary elements and check for unallowed constarint types
+        // --- Go through the secondary elements and check for unallowed constraint types
+        List<string> names = new List<string>();
         foreach (ConstraintElement element in constraint.SecondaryConstraints)
         {
-          // --- Class or struct cannot be secondary constraints
-          if (element.IsClassOrStruct)
-          {
-            Parser.Error0449(element.Token);
-            element.Invalidate();
-          }
+          constraint.CheckSecondaryElement(element);
 
-          // --- "new()" cannot be used with "struct"
-          if (constraint.HasPrimary && 
-            constraint.Primary.Classification == ConstraintClassification.Struct &&
-            element.IsNew)
-          {
-            Parser.Error0451(element.Token);
-            element.Invalidate();
-          }
-
-          // --- "new()" must be the last element
-          if (element.IsNew)
-          {
-            Parser.Error0401(element.Token);
-            element.Invalidate();
-          }
-
-          // --- Check for interface types
+          // --- Check for interface constraint duplication 
           if (element.IsType && element.Type.RightMostPart.IsResolvedToType)
           {
-            if (element.Type.RightMostPart.ResolvingType.IsClass)
+            ITypeCharacteristics resolvingType = element.Type.RightMostPart.ResolvingType;
+            if (resolvingType.IsInterface)
             {
-              // --- Classes cannot be secondary constraints
-              Parser.Error0406(element.Token, element.Type.FullName);
-              element.Invalidate();
-            }
-            else if (!element.Type.RightMostPart.ResolvingType.IsInterface)
-            {
-              // --- Non-interface types cannot be secondary constraints
-              Parser.Error0701(element.Token, element.Type.FullName);
-              element.Invalidate();
+              // --- Check for constraint duplication 
+              if (names.Contains(resolvingType.FullName))
+              {
+                Parser.Error0405(element.Token, resolvingType.FullName, constraint.Name);
+                element.Invalidate();
+              }
+              else names.Add(resolvingType.FullName);
             }
           }
 
+          // --- Check for type parameter uniqueness
+          if (element.IsType && element.Type.IsResolvedToTypeParameter)
+          {
+            if (names.Contains(element.Type.Name))
+            {
+              Parser.Error0405(element.Token, element.Type.Name, constraint.Name);
+              element.Invalidate();
+            }
+            else names.Add(element.Type.Name);
+          }
         }
+      }
 
-        // --- Check the closing "new()" constraint
-        // --- "new()" cannot be used with "struct"
-        if (constraint.HasPrimary &&
-          constraint.Primary.Classification == ConstraintClassification.Struct &&
-          constraint.HasNew)
-        {
-          Parser.Error0451(constraint.NewConstraint.Token);
-          constraint.NewConstraint.Invalidate();
-        }
+      // --- Check type parameter dependency rules
+      foreach (TypeParameter typeParameter in _TypeParameters)
+      {
+        typeParameter.CheckDependency(_TypeParameters);
       }
     }
 
@@ -1847,7 +1837,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     protected override string GetKeyOfItem(TypeDeclaration item)
     {
-      return item.QualifiedName;
+      return item.FullName;
     }
 
     // ----------------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
@@ -10,7 +9,7 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a base type on the ancestor list of a type.
+  /// This type represents a reference to a type or namespace name part.
   /// </summary>
   // ==================================================================================
   public class TypeReference : LanguageElement, IUsesResolutionContext, ITypeCharacteristics
@@ -20,7 +19,8 @@ namespace CSharpParser.ProjectModel
     private bool _IsGlobal;
     private TypeReference _PrefixType;
     private TypeReference _SubType;
-    private TypeKind _Kind;
+    private bool _IsVoid;
+    private readonly List<TypeModifier> _TypeModifiers = new List<TypeModifier>();
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
     private ResolutionTarget _Target;
     private ResolutionNodeBase _ResolvingNode;
@@ -44,7 +44,6 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public TypeReference(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
-      _Kind = TypeKind.simple;
       Name = token.val;
       Parser.CompilationUnit.Locations.
         Add(new TypeReferenceLocation(this, parser.CompilationUnit.CurrentFile));
@@ -76,6 +75,16 @@ namespace CSharpParser.ProjectModel
 
     #region Public properties
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type modifiers belonging to this reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<TypeModifier> TypeModifiers
+    {
+      get { return _TypeModifiers; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the static instance representing an empty type.
@@ -153,6 +162,20 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the flag indicating if this type reference is resolved to a type parameter.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsResolvedToTypeParameter
+    {
+      get
+      {
+        return _Target == ResolutionTarget.TypeParameter ||
+          _Target == ResolutionTarget.MethodTypeParameter;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type reference is resolved to a namespace.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -213,18 +236,7 @@ namespace CSharpParser.ProjectModel
                       : _PrefixType.PrefixTypeFullName + "." + PrefixType.Name);
       }
     }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the kind of this type reference.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public TypeKind Kind
-    {
-      get { return _Kind; }
-      set { _Kind = value; }
-    }
-
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the resolution target.
@@ -364,6 +376,30 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the number of dimensions of an array type.
+    /// </summary>
+    /// <returns>Number of array dimensions.</returns>
+    // --------------------------------------------------------------------------------
+    public int GetArrayRank()
+    {
+      return _ResolvingType.GetArrayRank();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the element type of this type.
+    /// </summary>
+    /// <returns>
+    /// Element type for a pointer, reference or array; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics GetElementType()
+    {
+      return _ResolvingType.GetElementType();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     /// <remarks>Always returns false.</remarks>
@@ -373,6 +409,7 @@ namespace CSharpParser.ProjectModel
       get { return false; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
@@ -458,7 +495,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsArray
     {
-      get { return ResolvingType.IsArray; }
+      get { return _TypeModifiers.Count > 0 && _TypeModifiers[0] is ArrayModifier; }
     }
 
     // --------------------------------------------------------------------------------
@@ -501,6 +538,33 @@ namespace CSharpParser.ProjectModel
     public bool IsGenericTypeDefinition
     {
       get { return ResolvingType.IsGenericTypeDefinition; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes an array type from the current type with the specified rank.
+    /// </summary>
+    /// <param name="rank">Rank of array type to be created</param>
+    /// <returns>
+    /// Array type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakeArrayType(int rank)
+    {
+      return _ResolvingType.MakeArrayType(rank);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes a pointer type from the current type with the specified rank.
+    /// </summary>
+    /// <returns>
+    /// Pointer type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakePointerType()
+    {
+      return _ResolvingType.MakePointerType();
     }
 
     // --------------------------------------------------------------------------------
@@ -583,7 +647,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsPointer
     {
-      get { return ResolvingType.IsPointer; }
+      get { return _TypeModifiers.Count > 0 && _TypeModifiers[0] is PointerModifier; }
     }
 
     // --------------------------------------------------------------------------------
@@ -657,17 +721,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a MemberTypes value indicating that this member is a type or a nested 
-    /// type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public MemberTypes MemberType
-    {
-      get { return ResolvingType.MemberType; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets type name of this type reference (Name modified with the array or 
     /// pointer modifier).
     /// </summary>
@@ -676,12 +729,22 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if(_Kind == TypeKind.array) return Name + "[]";
-        else if (_Kind == TypeKind.pointer) return Name + "*";
-        else return Name;
+        string pointerMods = String.Empty;
+        string arrayMods = string.Empty;
+
+        foreach (TypeModifier typeMod in _TypeModifiers)
+        {
+          ArrayModifier array = typeMod as ArrayModifier;
+          PointerModifier pointer = typeMod as PointerModifier;
+          if (pointer != null && arrayMods.Length == 0) pointerMods += "*";
+          else if (array != null)
+          {
+            arrayMods = "[" + String.Empty.PadLeft(array.Rank, ',') + "]" + arrayMods;
+          }
+        }
+        return Name + pointerMods + arrayMods;
       }  
     }
-
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -690,7 +753,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsVoid
     {
-      get { return _Kind == TypeKind.@void; }
+      //get { return _Kind == TypeKind.@void; }
+      get { return _IsVoid; }
+      internal set { _IsVoid = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -807,7 +872,12 @@ namespace CSharpParser.ProjectModel
       _ResolvingHierarchy = null;
     }
 
-
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to the specified namespace hierarchy.
+    /// </summary>
+    /// <param name="hierarchy">Namespace hierarchy.</param>
+    // --------------------------------------------------------------------------------
     public void ResolveToNamespaceHierarchy(NamespaceHierarchy hierarchy)
     {
       if (_Target == ResolutionTarget.Unresolved)
@@ -917,6 +987,45 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Constructed type handling
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Builds up a constructed type defined by the type modifiers.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void BuildConstructedType()
+    {
+      int ptrIndex = 0;
+      ITypeCharacteristics type = _ResolvingType;
+      if (type == null) return;
+
+      // --- Create pointer types
+      while (ptrIndex < _TypeModifiers.Count && _TypeModifiers[ptrIndex] is PointerModifier)
+      {
+        type = type.MakePointerType();
+        ptrIndex++;
+      }
+
+      // --- Create array types from right to left
+      int arrIndex = _TypeModifiers.Count - 1;
+      while (arrIndex >= ptrIndex)
+      {
+        ArrayModifier array = _TypeModifiers[arrIndex] as ArrayModifier;
+        if (array == null)
+        {
+          // TODO: Sign error!
+        }
+        else
+        {
+          type = type.MakeArrayType(array.Rank);
+        }
+      }
+      _ResolvingType = type;
+    }
+
+    #endregion
+
     #region Iterators
 
     // --------------------------------------------------------------------------------
@@ -939,6 +1048,50 @@ namespace CSharpParser.ProjectModel
 
     #endregion
   }
+
+  #region TypeModifier and related classes
+
+  // ==================================================================================
+  /// <summary>
+  /// This abstract class represents a common type modifier (array, pointer, etc.)
+  /// </summary>
+  // ==================================================================================
+  public abstract class TypeModifier { }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a pointer modifier
+  /// </summary>
+  // ==================================================================================
+  public sealed class PointerModifier : TypeModifier { }
+
+  public sealed class ArrayModifier : TypeModifier
+  {
+    private readonly int _Rank;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an array modifier with the specified rank.
+    /// </summary>
+    /// <param name="rank">Rank of the array.</param>
+    // --------------------------------------------------------------------------------
+    public ArrayModifier(int rank)
+    {
+      _Rank = rank;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the rank of the array.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int Rank
+    {
+      get { return _Rank; }
+    }
+  }
+
+  #endregion
 
   // ==================================================================================
   /// <summary>

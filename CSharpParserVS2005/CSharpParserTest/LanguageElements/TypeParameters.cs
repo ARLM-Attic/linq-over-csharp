@@ -118,10 +118,10 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[0].Code, "CS0401");
       Assert.AreEqual(parser.Errors[1].Code, "CS0401");
       Assert.AreEqual(parser.Errors[2].Code, "CS0451");
-      Assert.AreEqual(parser.Errors[3].Code, "CS0401");
-      Assert.AreEqual(parser.Errors[4].Code, "CS0451");
-      Assert.AreEqual(parser.Errors[5].Code, "CS0401");
-      Assert.AreEqual(parser.Errors[6].Code, "CS0451");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0451");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0401");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0451");
+      Assert.AreEqual(parser.Errors[6].Code, "CS0401");
       Assert.AreEqual(parser.Errors[7].Code, "CS0401");
       Assert.AreEqual(parser.Errors[8].Code, "CS0401");
     }
@@ -167,6 +167,65 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS0701");
       Assert.AreEqual(parser.Errors[2].Code, "CS0701");
       Assert.AreEqual(parser.Errors[3].Code, "CS0701");
+    }
+
+    [TestMethod]
+    public void ConstraintFails6()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails6.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 6);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0405");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0405");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0405");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0405");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0405");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0405");
+    }
+
+    [TestMethod]
+    public void ConstraintFails7()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails7.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0701");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0701");
+    }
+
+    [TestMethod]
+    public void ConstraintFails8()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails8.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0454");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0454");
+    }
+
+    [TestMethod]
+    public void ConstraintFails9()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails9.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0456");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0456");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0456");
+    }
+
+    [TestMethod]
+    public void ConstraintFails10()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeParameters\ConstraintFails10.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0455");
     }
   }
 }

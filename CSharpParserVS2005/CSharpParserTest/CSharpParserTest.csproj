@@ -384,6 +384,11 @@
     <Compile Include="LanguageElements\TypeResolution.cs" />
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails10.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails9.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails8.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails7.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails6.cs" />
     <None Include="TestFiles\TypeParameters\ConstraintFails5.cs" />
     <None Include="TestFiles\TypeParameters\ConstraintFails4.cs" />
     <None Include="TestFiles\TypeParameters\ConstraintFails3.cs" />

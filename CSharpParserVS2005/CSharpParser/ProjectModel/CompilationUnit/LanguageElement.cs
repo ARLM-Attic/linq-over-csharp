@@ -51,7 +51,7 @@ namespace CSharpParser.ProjectModel
       _TerminatingToken = token;
       _Name = token.val;
       _Parser = parser;
-      _IsValid = false;
+      _IsValid = true;
     }
 
     // --------------------------------------------------------------------------------

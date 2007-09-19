@@ -705,6 +705,8 @@ namespace CSharpParser.ProjectModel
       // --- Phase 4: Resolve all remaining type references and check type declarations
       ResolveTypeReferences();
       CheckTypeDeclarations();
+      CheckMemberDeclaration();
+      CheckConstraintDeclarations();
 
       // --- Phase 5: Resolve all remaining type references
 
@@ -1472,6 +1474,31 @@ namespace CSharpParser.ProjectModel
       foreach (TypeDeclaration type in _DeclaredTypes)
       {
         type.CheckTypeDeclaration();
+      }
+    }
+
+    #endregion
+
+    #region Member declaration checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the members of type declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckMemberDeclaration()
+    {
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the constraint declarations within type declarations
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckConstraintDeclarations()
+    {
+      foreach (TypeDeclaration type in _DeclaredTypes)
+      {
         type.CheckConstraintDeclarations();
       }
     }

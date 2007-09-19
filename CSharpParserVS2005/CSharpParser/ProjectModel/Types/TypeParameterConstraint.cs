@@ -181,6 +181,7 @@ namespace CSharpParser.ProjectModel
     private readonly List<ConstraintElement> _SecondaryConstraints = 
       new List<ConstraintElement>();
     private ConstraintElement _NewConstraint;
+    private TypeParameter _OwnerParameter;
 
     #endregion
 
@@ -262,7 +263,6 @@ namespace CSharpParser.ProjectModel
       get { return _NewConstraint != null; }
     }
 
-
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the iterator for all constraint elements.
@@ -273,9 +273,30 @@ namespace CSharpParser.ProjectModel
       get { return _Constraints; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type parameter owning this constraint.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeParameter OwnerParameter
+    {
+      get { return _OwnerParameter; }
+    }
+
     #endregion
 
     #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the owner parameter of this constraint.
+    /// </summary>
+    /// <param name="owner">Owner type parameter.</param>
+    // --------------------------------------------------------------------------------
+    public void AssignOwnerParameter(TypeParameter owner)
+    {
+      _OwnerParameter = owner;
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -314,6 +335,100 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if this constraint is valid, it does not uses special classes.
+    /// </summary>
+    /// <remarks>
+    /// Constraint cannot be System.Array, System.Delegate, System.Enum, 
+    /// System.ValueType or System.Object
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void CheckClassConstraint()
+    {
+      if (HasPrimary && Primary.IsType && Primary.Type.RightMostPart.IsResolvedToType)
+      {
+        ITypeCharacteristics resolvingType = Primary.Type.RightMostPart.ResolvingType;
+        object typeObject = resolvingType.TypeObject;
+        if (typeObject.Equals(typeof(object)) ||
+          typeObject.Equals(typeof(Array)) ||
+          typeObject.Equals(typeof(Delegate)) ||
+          typeObject.Equals(typeof(Enum)) ||
+          typeObject.Equals(typeof(ValueType)))
+        {
+          Parser.Error0702(Primary.Token, Primary.Type.FullName);
+          Invalidate();
+        }
+        else if (resolvingType.IsClass && resolvingType.IsSealed)
+        {
+          Parser.Error0701(Primary.Token, Primary.Type.FullName);
+          Invalidate();
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if "new()" is used with "struct".
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckNewWithStruct()
+    {
+      if (HasPrimary && Primary.IsStruct && HasNew)
+      {
+        Parser.Error0451(NewConstraint.Token);
+        NewConstraint.Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified secondary element confomrs with the basic rules.
+    /// </summary>
+    /// <param name="element">Elementto check.</param>
+    // --------------------------------------------------------------------------------
+    public void CheckSecondaryElement(ConstraintElement element)
+    {
+      // --- Class or struct cannot be secondary constraints
+      if (element.IsClassOrStruct)
+      {
+        Parser.Error0449(element.Token);
+        element.Invalidate();
+      }
+
+      // --- "new()" cannot be used with "struct"
+      if (HasPrimary && Primary.IsStruct && element.IsNew)
+      {
+        Parser.Error0451(element.Token);
+        element.Invalidate();
+      }
+
+      // --- "new()" must be the last element
+      if (element.IsNew)
+      {
+        Parser.Error0401(element.Token);
+        element.Invalidate();
+      }
+
+      // --- Check for interface types
+      if (element.IsType && element.Type.RightMostPart.IsResolvedToType)
+      {
+        ITypeCharacteristics resolvingType = element.Type.RightMostPart.ResolvingType;
+        if (resolvingType.IsClass)
+        {
+          // --- Classes cannot be secondary constraints
+          Parser.Error0406(element.Token, element.Type.FullName);
+          element.Invalidate();
+        }
+        else if (!resolvingType.IsInterface)
+        {
+          // --- Non-interface types cannot be secondary constraints
+          Parser.Error0701(element.Token, element.Type.FullName);
+          element.Invalidate();
+        }
+      }
+    }
+
     #endregion
 
     #region IUsesResolutionContext implementation
@@ -340,6 +455,8 @@ namespace CSharpParser.ProjectModel
     #endregion
   }
 
+  #region TypeParameterConstraintCollection
+
   // ==================================================================================
   /// <summary>
   /// This class represents a list of type parameter constraint that can be indexed 
@@ -363,4 +480,6 @@ namespace CSharpParser.ProjectModel
       return item.Name;
     }
   }
+
+  #endregion
 }

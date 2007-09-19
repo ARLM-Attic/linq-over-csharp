@@ -976,8 +976,9 @@ out TypeDeclaration td) {
 			Expect(98);
 			Expect(113);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
+			Token elemToken = t; 
 			ClassType(out typeRef);
-			element = new ConstraintElement(t, this, typeRef); 
+			element = new ConstraintElement(elemToken, this, typeRef); 
 		} else SynErr(136);
 		constraint.AddConstraintElement(element); 
 		while (la.kind == 87) {
@@ -994,8 +995,9 @@ out TypeDeclaration td) {
 				Expect(98);
 				Expect(113);
 			} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
+				Token elemToken = t; 
 				ClassType(out typeRef);
-				element = new ConstraintElement(t, this, typeRef); 
+				element = new ConstraintElement(elemToken, this, typeRef); 
 			} else SynErr(137);
 			constraint.AddConstraintElement(element); 
 		}
@@ -1252,15 +1254,16 @@ out TypeDeclaration td) {
 			Get();
 			typeRef = new TypeReference(t, this); 
 			typeRef.Name = t.val;
-			typeRef.Kind = TypeKind.@void; 
+			// typeRef.Kind = TypeKind.@void; 
+			typeRef.IsVoid = true; 
 			
 		} else SynErr(148);
 		if (la.kind == 110) {
 			Get();
-			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
+			if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
 		}
 		PointerOrArray(ref typeRef);
-		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
+		if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
 		typeRef.Terminate(t); 
 	}
 
@@ -1300,7 +1303,7 @@ out TypeDeclaration td) {
 			Get();
 			fp.HasParams = true; 
 			Type(out typeRef, false);
-			if (typeRef.Kind != TypeKind.array) { Error("UNDEF", la, "params argument must be an array"); } 
+			if (!typeRef.IsArray) { Error("UNDEF", la, "params argument must be an array"); } 
 			Expect(1);
 			fp.Name = t.val; 
 			fp.Type = typeRef; 
@@ -1397,7 +1400,7 @@ out TypeDeclaration td) {
 
 	void OperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeDeclaration td) {
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "operator not allowed on void"); } 
+		if (typeRef.IsVoid) { Error("UNDEF", la, "operator not allowed on void"); } 
 		OperatorDeclaration od = new OperatorDeclaration(t, td);
 		CurrentElement = od;
 		od.SetModifiers(m.Value);
@@ -1445,7 +1448,7 @@ TypeDeclaration td) {
 
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
 TypeReference typeRef, bool isEvent, Modifier toCheck) {
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "field type must not be void"); } 
+		if (typeRef.IsVoid) { Error("UNDEF", la, "field type must not be void"); } 
 		
 		SingleFieldMember(attrs, m, td, typeRef, isEvent);
 		while (la.kind == 87) {
@@ -1487,7 +1490,7 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 
 	void PropertyDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "property type must not be void"); }
+		if (typeRef.IsVoid) { Error("UNDEF", la, "property type must not be void"); }
 		PropertyDeclaration pd = new PropertyDeclaration(t, td);
 		CurrentElement = pd;
 		pd.SetModifiers(m.Value);
@@ -1505,7 +1508,7 @@ TypeReference memberRef, TypeDeclaration td) {
 
 	void IndexerDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
 TypeReference memberRef, TypeDeclaration td) {
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
+		if (typeRef.IsVoid) { Error("UNDEF", la, "indexer type must not be void"); }
 		IndexerDeclaration ind = new IndexerDeclaration(t, td);
 		CurrentElement = ind;
 		ind.SetModifiers(m.Value);
@@ -1584,7 +1587,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else SynErr(156);
 		Expect(49);
 		Type(out typeRef, false);
-		if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "cast type must not be void"); } 
+		if (typeRef.IsVoid) { Error("UNDEF", la, "cast type must not be void"); } 
 		cod.ResultingType = typeRef;
 		cod.Name = typeRef.RightmostName;
 		
@@ -1928,7 +1931,7 @@ TypeReference typeRef) {
 					prop.Terminate(t); 
 				} else SynErr(165);
 			} else if (la.kind == 68) {
-				if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "indexer type must not be void"); }
+				if (typeRef.IsVoid) { Error("UNDEF", la, "indexer type must not be void"); }
 				IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
 				CurrentElement =ind;
 				ind.SetModifiers(m.Value);
@@ -2475,14 +2478,16 @@ TypeReference typeRef) {
 		while (IsPointerOrDims()) {
 			if (la.kind == 116) {
 				Get();
-				typeRef.Kind = TypeKind.pointer; 
+				typeRef.TypeModifiers.Add(new PointerModifier()); 
 			} else if (la.kind == 97) {
 				Get();
+				int rank = 1; 
 				while (la.kind == 87) {
 					Get();
+					rank++; 
 				}
 				Expect(112);
-				typeRef.Kind = TypeKind.array; 
+				typeRef.TypeModifiers.Add(new ArrayModifier(rank)); 
 			} else SynErr(175);
 		}
 	}
@@ -2497,15 +2502,16 @@ TypeReference typeRef) {
 			Get();
 			typeRef = new TypeReference(t, this); 
 			typeRef.Name = t.val;
-			typeRef.Kind = TypeKind.@void; 
+			//typeRef.Kind = TypeKind.@void; 
+			typeRef.IsVoid = true; 
 			
 		} else SynErr(176);
 		if (IsNullableTypeMark()) {
 			Expect(110);
-			if (typeRef.Kind == TypeKind.@void) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
+			if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
 		}
 		PointerOrArray(ref typeRef);
-		if (typeRef.Kind == TypeKind.@void && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
+		if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
 		typeRef.Terminate(t); 
 	}
 
@@ -2959,7 +2965,7 @@ TypeReference typeRef) {
 		Expect(98);
 		TypeReference typeRef; 
 		Type(out typeRef, false);
-		if (typeRef.Kind != TypeKind.pointer) Error("UNDEF", la, "can only fix pointer types"); 
+		if (!typeRef.IsPointer) Error("UNDEF", la, "can only fix pointer types"); 
 		ValueAssignmentStatement vas = new ValueAssignmentStatement(t, this, block); 
 		CurrentElement = vas; 
 		Expect(1);

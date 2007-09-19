@@ -118,7 +118,7 @@ namespace CSharpParserTest
       DelegateDeclaration dd = td as DelegateDeclaration;
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "NewDelegate");
-      Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
+      Assert.IsTrue(dd.ReturnType.IsVoid);
 
       td = parser.Files[0].NestedNamespaces[0].TypeDeclarations[1];
       Assert.AreEqual(td.NestedTypes.Count, 3);
@@ -127,7 +127,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "MyEvent1`2");
       Assert.AreEqual(dd.DeclaredVisibility, Visibility.Private);
-      Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
+      Assert.IsTrue(dd.ReturnType.IsVoid);
       Assert.AreEqual(dd.TypeParameters.Count, 2);
       Assert.AreEqual(dd.TypeParameters[0].Name, "T");
       Assert.AreEqual(dd.TypeParameters[1].Name, "U");
@@ -136,7 +136,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(dd);
       Assert.AreEqual(dd.Name, "MyEvent2");
       Assert.AreEqual(dd.DeclaredVisibility, Visibility.Protected);
-      Assert.AreEqual(dd.ReturnType.Kind, TypeKind.@void);
+      Assert.IsTrue(dd.ReturnType.IsVoid);
       Assert.AreEqual(dd.TypeParameters.Count, 0);
 
       dd = td.NestedTypes[2] as DelegateDeclaration;
@@ -290,7 +290,7 @@ namespace CSharpParserTest
 
       MethodDeclaration md = td.Members[0] as MethodDeclaration;
       Assert.IsNotNull(md);
-      Assert.AreEqual(md.ResultingType.Kind, TypeKind.@void);
+      Assert.IsTrue(md.ResultingType.IsVoid);
       Assert.AreEqual(md.Name, "SimpleMethod");
       Assert.AreEqual(md.DeclaredVisibility, Visibility.Public);
       Assert.IsTrue(md.IsStatic);

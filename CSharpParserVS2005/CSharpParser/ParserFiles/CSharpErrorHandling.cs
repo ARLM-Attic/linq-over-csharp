@@ -400,6 +400,21 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0405: Duplicate constraint '{0}' for type parameter '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    /// <param name="constraint">Constraint name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0405(Token token, string name, string constraint)
+    {
+      Error("CS0405", token,
+        string.Format("Duplicate constraint '{0}' for type parameter '{1}'", 
+        name, constraint));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0406: The class type constraint '{0}' must come before any other 
     /// constraints.
     /// </summary>
@@ -570,6 +585,54 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0451", token,
         "The 'new()' constraint cannot be used with the 'struct' constraint");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0454: Circular constraint dependency involving '{0}' and '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name1">First name</param>
+    /// <param name="name2">Second name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0454(Token token, string name1, string name2)
+    {
+      Error("CS0454", token,
+        string.Format("Circular constraint dependency involving '{0}' and '{1}'",
+        name1, name2));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0455: Type parameter '{0}' inherits conflicting constraints '{1}' 
+    /// and '{2}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name1">First name</param>
+    /// <param name="name2">Second name</param>
+    /// <param name="name3">Third name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0455(Token token, string name1, string name2, string name3)
+    {
+      Error("CS0455", token, 
+        string.Format("Type parameter '{0}' inherits conflicting constraints '{1}' " +
+        "and '{2}'",
+        name1, name2, name3));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0456: Circular constraint dependency involving '{0}' and '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name1">First name</param>
+    /// <param name="name2">Second name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0456(Token token, string name1, string name2)
+    {
+      Error("CS0456", token, "Type parameter '{0}' has the 'struct' constraint so " +
+        "'{0}' cannot be used as a constraint for '{1}'",
+        name1, name2);
     }
 
     // --------------------------------------------------------------------------------

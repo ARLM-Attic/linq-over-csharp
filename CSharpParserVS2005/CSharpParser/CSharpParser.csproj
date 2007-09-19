@@ -42,6 +42,9 @@
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />
+    <Compile Include="ProjectModel\Types\ArrayType.cs" />
+    <Compile Include="ProjectModel\Types\ConstructedType.cs" />
+    <Compile Include="ProjectModel\Types\PointerType.cs" />
     <Compile Include="Semantics\TypeResolution\ITypeDeclarationScope.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />
     <Compile Include="ProjectModel\CompilationUnit\TokenElement.cs" />
@@ -58,7 +61,6 @@
     <Compile Include="ParserFiles\PPExpressions\PPExpression.cs" />
     <Compile Include="ParserFiles\PPExpressions\Scanner.cs" />
     <Compile Include="ParserFiles\Scanner.cs" />
-    <Compile Include="ParserFiles\TypeKind.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedAssembly.cs" />
     <Compile Include="ProjectModel\CompilationUnit\AttributeArgument.cs" />
     <Compile Include="ProjectModel\CompilationUnit\AttributeDeclaration.cs" />

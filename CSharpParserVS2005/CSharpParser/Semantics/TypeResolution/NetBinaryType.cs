@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
@@ -18,6 +17,7 @@ namespace CSharpParser.Semantics
     private readonly ReferencedUnit _AssemblyRef;
     private readonly ITypeCharacteristics _BaseType;
     private readonly ITypeCharacteristics _DeclaringType;
+    private readonly ITypeCharacteristics _ElementType;
 
     #endregion
 
@@ -96,11 +96,39 @@ namespace CSharpParser.Semantics
       _DeclaringType = typeObject.DeclaringType == null
                          ? null
                          : new NetBinaryType(typeObject.DeclaringType);
+      if (typeObject.HasElementType)
+      {
+        _ElementType = new NetBinaryType(typeObject.GetElementType());
+      }
     }
 
     #endregion
 
     #region ITypeCharacteristics implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of dimensions of an array type.
+    /// </summary>
+    /// <returns>Number of array dimensions.</returns>
+    // --------------------------------------------------------------------------------
+    public int GetArrayRank()
+    {
+      return _TypeObject.GetArrayRank();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the element type of this type.
+    /// </summary>
+    /// <returns>
+    /// Element type for a pointer, reference or array; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics GetElementType()
+    {
+      return _ElementType;
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -113,6 +141,7 @@ namespace CSharpParser.Semantics
       get { return true; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
@@ -231,6 +260,34 @@ namespace CSharpParser.Semantics
     public bool IsGenericTypeDefinition
     {
       get { return _TypeObject.IsGenericTypeDefinition; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes an array type from the current type with the specified rank.
+    /// </summary>
+    /// <param name="rank">Rank of array type to be created</param>
+    /// <returns>
+    /// Array type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakeArrayType(int rank)
+    {
+      if (rank == 1) return new NetBinaryType(_TypeObject.MakeArrayType());
+      return new NetBinaryType(_TypeObject.MakeArrayType(rank));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes a pointer type from the current type with the specified rank.
+    /// </summary>
+    /// <returns>
+    /// Pointer type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakePointerType()
+    {
+      return new NetBinaryType(_TypeObject.MakePointerType());
     }
 
     // --------------------------------------------------------------------------------
@@ -383,17 +440,6 @@ namespace CSharpParser.Semantics
     public bool IsVisible
     {
       get { return _TypeObject.IsVisible; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a MemberTypes value indicating that this member is a type or a nested 
-    /// type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public MemberTypes MemberType
-    {
-      get { return _TypeObject.MemberType; }
     }
 
     // --------------------------------------------------------------------------------

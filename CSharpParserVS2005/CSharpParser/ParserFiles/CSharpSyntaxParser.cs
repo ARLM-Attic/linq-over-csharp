@@ -364,6 +364,20 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Lookahead method to check if the next tokens represent pointer:
+    /// "*"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsPointer()
+    {
+      return la.kind == _times;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Lookahead method to check if the next tokens represent pointer or dimensions:
     /// "*" | "[" ("," | "]")
     /// </summary>
