@@ -739,7 +739,7 @@ namespace CSharpParser.ProjectModel
           if (pointer != null && arrayMods.Length == 0) pointerMods += "*";
           else if (array != null)
           {
-            arrayMods = "[" + String.Empty.PadLeft(array.Rank, ',') + "]" + arrayMods;
+            arrayMods = "[" + String.Empty.PadLeft(array.Rank-1, ',') + "]" + arrayMods;
           }
         }
         return Name + pointerMods + arrayMods;
@@ -850,6 +850,7 @@ namespace CSharpParser.ProjectModel
       _ResolvingNode = null;
       _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
+      BuildConstructedType();
     }
 
     // --------------------------------------------------------------------------------
@@ -870,6 +871,7 @@ namespace CSharpParser.ProjectModel
       _ResolvingType = node.Resolver;
       _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
+      BuildConstructedType();
     }
 
     // --------------------------------------------------------------------------------
@@ -994,13 +996,13 @@ namespace CSharpParser.ProjectModel
     /// Builds up a constructed type defined by the type modifiers.
     /// </summary>
     // --------------------------------------------------------------------------------
-    private void BuildConstructedType()
+    internal void BuildConstructedType()
     {
-      int ptrIndex = 0;
-      ITypeCharacteristics type = _ResolvingType;
-      if (type == null) return;
+      if (_ResolvingType == null || _TypeModifiers.Count == 0) return;
 
       // --- Create pointer types
+      ITypeCharacteristics type = _ResolvingType;
+      int ptrIndex = 0;
       while (ptrIndex < _TypeModifiers.Count && _TypeModifiers[ptrIndex] is PointerModifier)
       {
         type = type.MakePointerType();
@@ -1020,6 +1022,7 @@ namespace CSharpParser.ProjectModel
         {
           type = type.MakeArrayType(array.Rank);
         }
+        arrIndex--;
       }
       _ResolvingType = type;
     }

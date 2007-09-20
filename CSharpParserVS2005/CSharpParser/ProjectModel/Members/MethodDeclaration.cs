@@ -148,12 +148,12 @@ namespace CSharpParser.ProjectModel
             sb.Append(par.Kind.ToString().ToLower());
             sb.Append(' ');
           }
-          //if (par.Type.RightMostPart.IsResolvedToType)
-          //{
-          //  sb.Append(par.Type.RightMostPart.ResolvingType.FullName);
-          //}
-          //else 
-          sb.Append(par.Type.FullName);
+          if (par.Type.RightMostPart.IsResolvedToType)
+          {
+            sb.Append(par.Type.RightMostPart.ResolvingType.FullName);
+          }
+          else 
+            sb.Append(par.Type.FullName);
           isFirst = false;
         }
         sb.Append(')');

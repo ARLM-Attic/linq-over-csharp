@@ -1054,7 +1054,7 @@ out TypeDeclaration td) {
 				Get();
 			} else SynErr(139);
 			dd.Terminate(t);
-			td.Members.Add(dd); 
+			td.AddMember(dd); 
 			
 		} else SynErr(140);
 	}
@@ -1262,8 +1262,9 @@ out TypeDeclaration td) {
 			Get();
 			if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
 		}
-		PointerOrArray(ref typeRef);
+		PointerOrArray(typeRef);
 		if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
+		typeRef.BuildConstructedType(); 
 		typeRef.Terminate(t); 
 	}
 
@@ -1349,7 +1350,7 @@ out TypeDeclaration td) {
 			CurrentElement = ep; 
 			ep.ResultingType = typeRef; 
 			ep.ExplicitName = memberRef; 
-			td.Members.Add(ep); 
+			td.AddMember(ep); 
 			EventAccessorDeclarations(ep);
 			Expect(111);
 			ep.Terminate(t); 
@@ -1393,7 +1394,7 @@ out TypeDeclaration td) {
 		} else if (la.kind == 114) {
 			Get();
 		} else SynErr(152);
-		td.Members.Add(cd); 
+		td.AddMember(cd); 
 		cd.Terminate(t);
 		
 	}
@@ -1441,7 +1442,7 @@ TypeDeclaration td) {
 		} else if (la.kind == 114) {
 			Get();
 		} else SynErr(154);
-		td.Members.Add(od); 
+		td.AddMember(od); 
 		od.Terminate(t);
 		
 	}
@@ -1501,7 +1502,7 @@ TypeReference memberRef, TypeDeclaration td) {
 		Expect(96);
 		AccessorDeclarations(pd);
 		Expect(111);
-		td.Members.Add(pd); 
+		td.AddMember(pd); 
 		pd.Terminate(t);
 		
 	}
@@ -1531,7 +1532,7 @@ TypeReference memberRef, TypeDeclaration td) {
 		Expect(96);
 		AccessorDeclarations(ind);
 		Expect(111);
-		td.Members.Add(ind); 
+		td.AddMember(ind); 
 		ind.Terminate(t);
 		
 	}
@@ -1567,7 +1568,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			Get();
 			md.HasBody = false; 
 		} else SynErr(155);
-		td.Members.Add(md); 
+		td.AddMember(md); 
 		md.Terminate(t);
 		
 	}
@@ -1604,7 +1605,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else if (la.kind == 114) {
 			Get();
 		} else SynErr(157);
-		td.Members.Add(cod); 
+		td.AddMember(cod); 
 		cod.Terminate(t);
 		
 	}
@@ -1621,7 +1622,7 @@ TypeReference typeRef) {
 		cd.Name = t.val;
 		
 		Expect(85);
-		td.Members.Add(cd); 
+		td.AddMember(cd); 
 		Expression expr; 
 		Expression(out expr);
 		cd.Expression = expr; 
@@ -1920,7 +1921,7 @@ TypeReference typeRef) {
 				} else if (la.kind == 96) {
 					PropertyDeclaration prop = new PropertyDeclaration(t, ifd); 
 					CurrentElement = prop; 
-					ifd.Members.Add(prop); 
+					ifd.AddMember(prop); 
 					prop.ResultingType = typeRef; 
 					prop.ExplicitName = memberRef; 
 					prop.AssignAttributes(attrs); 
@@ -2018,7 +2019,7 @@ TypeReference typeRef) {
 		fd.IsEvent = true;
 		
 		Expect(114);
-		ifd.Members.Add(fd); 
+		ifd.AddMember(fd); 
 		fd.Terminate(t);
 		
 	}
@@ -2474,7 +2475,7 @@ TypeReference typeRef) {
 		} else SynErr(174);
 	}
 
-	void PointerOrArray(ref TypeReference typeRef) {
+	void PointerOrArray(TypeReference typeRef) {
 		while (IsPointerOrDims()) {
 			if (la.kind == 116) {
 				Get();
@@ -2510,8 +2511,9 @@ TypeReference typeRef) {
 			Expect(110);
 			if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } 
 		}
-		PointerOrArray(ref typeRef);
+		PointerOrArray(typeRef);
 		if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
+		typeRef.BuildConstructedType(); 
 		typeRef.Terminate(t); 
 	}
 
@@ -4030,7 +4032,7 @@ TypeReference typeRef, bool isEvent) {
 			VariableInitializer(out init);
 			fd.Initializer = init; 
 		}
-		td.Members.Add(fd); 
+		td.AddMember(fd); 
 		fd.Terminate(t); 
 	}
 

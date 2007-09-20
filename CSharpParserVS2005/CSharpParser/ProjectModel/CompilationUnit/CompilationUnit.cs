@@ -1488,11 +1488,16 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckMemberDeclaration()
     {
+      foreach (TypeDeclaration type in _DeclaredTypes)
+      {
+        type.ClassifyMembers();
+        type.CheckFields();
+      }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Checks the constraint declarations within type declarations
+    /// Checks the constraint declarations related to type declarations.
     /// </summary>
     // --------------------------------------------------------------------------------
     private void CheckConstraintDeclarations()

@@ -56,7 +56,9 @@ namespace CSharpParser.ProjectModel
     private readonly List<TypeDeclaration> _NestedTypes = new List<TypeDeclaration>();
 
     // --- Members of the type
-    private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
+    //private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
+    private readonly List<MemberDeclaration> _Members = new List<MemberDeclaration>();
+    private readonly List<MemberDeclaration> _MemberCandidates = new List<MemberDeclaration>();
     private readonly ConstDeclarationCollection _Consts = new ConstDeclarationCollection();
     private readonly ConstructorDeclarationCollection _Constructors = new ConstructorDeclarationCollection();
     private readonly EventPropertyDeclarationCollection _EventProperties = 
@@ -91,7 +93,7 @@ namespace CSharpParser.ProjectModel
       : base(token, parser)
     {
       _DeclaringType = declaringType;
-      _Members.BeforeAdd += BeforeAddMembers;
+      //_Members.BeforeAdd += BeforeAddMembers;
     }
 
     #endregion
@@ -810,6 +812,17 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a new member to the type declaration.
+    /// </summary>
+    /// <param name="member">Member to add to the type declaration.</param>
+    // --------------------------------------------------------------------------------
+    public void AddMember(MemberDeclaration member)
+    {
+      _MemberCandidates.Add(member);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Sets the resolver during the semantic parsing.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -905,7 +918,8 @@ namespace CSharpParser.ProjectModel
     /// Gets the members belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public MemberDeclarationCollection Members
+    public List<MemberDeclaration> Members
+    //public MemberDeclarationCollection Members
     {
       get { return _Members; }
     }
@@ -922,7 +936,7 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Setsthe source file of this type declaration
+    /// Sets the source file of this type declaration
     /// </summary>
     // --------------------------------------------------------------------------------
     public void SetSourceFile(SourceFile file)
@@ -980,7 +994,8 @@ namespace CSharpParser.ProjectModel
       foreach (TypeParameterConstraint con in _ParameterConstraints) 
         clone._ParameterConstraints.Add(con);
       foreach (TypeDeclaration type in _NestedTypes) clone._NestedTypes.Add(type);
-      foreach (MemberDeclaration member in _Members) clone._Members.Add(member);
+      foreach (MemberDeclaration member in _MemberCandidates) 
+        clone._MemberCandidates.Add(member);
       clone._ResolverNode = _ResolverNode;
 
       // --- Retrieve this new instance
@@ -1235,7 +1250,7 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- Resolve types in members
-      foreach (MemberDeclaration member in _Members)
+      foreach (MemberDeclaration member in _MemberCandidates)
       {
         member.ResolveTypeReferences(ResolutionContext.TypeDeclaration, declarationScope, this);
       }
@@ -1664,156 +1679,267 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if a member with the specified name already exists or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void ClassifyMembers()
+    {
+      foreach (MemberDeclaration member in _MemberCandidates)
+      {
+        // --- Check, if member is a constant
+        ConstDeclaration constDecl = member as ConstDeclaration;
+        if (constDecl != null && AddConstant(constDecl)) continue;
+
+        // --- Check, if member is a field
+        FieldDeclaration fieldDecl = member as FieldDeclaration;
+        if (fieldDecl != null && AddField(fieldDecl)) continue;
+
+        // --- Check, if member is a constructor
+        ConstructorDeclaration ctorDecl = member as ConstructorDeclaration;
+        if (ctorDecl != null && AddCtor(ctorDecl)) continue;
+
+        // --- Check, if member is an event property
+        EventPropertyDeclaration evPropDecl = member as EventPropertyDeclaration;
+        if (evPropDecl != null && AddEventProperty(evPropDecl)) continue;
+
+        // --- Check, if member is an indexer property
+        IndexerDeclaration indDecl = member as IndexerDeclaration;
+        if (indDecl != null && AddIndexer(indDecl)) continue;
+
+        // --- Check, if member is a property
+        PropertyDeclaration propDecl = member as PropertyDeclaration;
+        if (propDecl != null && AddProperty(propDecl)) continue;
+
+        // --- Check, if member is an operator declaration
+        OperatorDeclaration operDecl = member as OperatorDeclaration;
+        if (operDecl != null && AddOperator(operDecl)) continue;
+
+        // --- Check, if member is a cast operator declaration
+        CastOperatorDeclaration castDecl = member as CastOperatorDeclaration;
+        if (castDecl != null && AddCastOperator(castDecl)) continue;
+
+        // --- Check, if member is a method
+        MethodDeclaration methodDecl = member as MethodDeclaration;
+        if (methodDecl != null && AddMethod(methodDecl)) continue;
+
+        // --- Check for finalizer
+        FinalizerDeclaration finDecl = member as FinalizerDeclaration;
+        ClassDeclaration thisClass = this as ClassDeclaration;
+        if (finDecl != null && thisClass != null &&
+          thisClass.HasAlreadyFinalizer(finDecl)) continue;
+
+        // --- Add member to the other members
+        if (_Members.Contains(member))
+        {
+          Parser.Error0101(member.Token, Name, member.Signature);
+        }
+        else _Members.Add(member);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the field declarations of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckFields()
+    {
+      foreach (FieldDeclaration field in _Fields)
+      {
+        // --- "extern" is not allowed on types
+        if ((_DeclaredModifier & Modifier.@extern) != 0)
+          Parser.Error0106(Token, "extern");
+        
+      }
+    }
+
     #endregion
 
     #region Private members
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Checks if a member with the specified name already exists or not.
+    /// Adds a candidate constant declaration to the members.
     /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
     // --------------------------------------------------------------------------------
-    void BeforeAddMembers(object sender, ItemedCancelEventArgs<MemberDeclaration> e)
+    private bool AddConstant(ConstDeclaration decl)
     {
-      // --- Check, if member is a constant
-      ConstDeclaration constDecl = e.Item as ConstDeclaration;
-      if (constDecl != null)
+      if (_Consts.Contains(decl))
       {
-        if (_Consts.Contains(constDecl))
-        {
-          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Consts.Add(constDecl);
+        Parser.Error0102(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _Consts.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is a field
-      FieldDeclaration fieldDecl = e.Item as FieldDeclaration;
-      if (fieldDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate field declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddField(FieldDeclaration decl)
+    {
+      if (_Fields.Contains(decl))
       {
-        if (_Fields.Contains(fieldDecl))
-        {
-          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Fields.Add(fieldDecl);
+        Parser.Error0102(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _Fields.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is a constructor
-      ConstructorDeclaration ctorDecl = e.Item as ConstructorDeclaration;
-      if (ctorDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate constructor declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddCtor(ConstructorDeclaration decl)
+    {
+      if (_Constructors.Contains(decl))
       {
-        if (_Constructors.Contains(ctorDecl))
-        {
-          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Constructors.Add(ctorDecl);
+        Parser.Error0111(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _Constructors.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is an event property
-      EventPropertyDeclaration evPropDecl = e.Item as EventPropertyDeclaration;
-      if (evPropDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate event property declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddEventProperty(EventPropertyDeclaration decl)
+    {
+      if (_EventProperties.Contains(decl))
       {
-        if (_EventProperties.Contains(evPropDecl))
-        {
-          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _EventProperties.Add(evPropDecl);
+        Parser.Error0102(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _EventProperties.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is an indexer property
-      IndexerDeclaration indDecl = e.Item as IndexerDeclaration;
-      if (indDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate indexer declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddIndexer(IndexerDeclaration decl)
+    {
+      if (_Indexers.Contains(decl))
       {
-        if (_Indexers.Contains(indDecl))
-        {
-          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Indexers.Add(indDecl);
+        Parser.Error0111(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _Indexers.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is a property
-      PropertyDeclaration propDecl = e.Item as PropertyDeclaration;
-      if (propDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate property declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddProperty(PropertyDeclaration decl)
+    {
+      if (_Properties.Contains(decl))
       {
-        if (_Properties.Contains(propDecl))
-        {
-          Parser.Error0102(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Properties.Add(propDecl);
+        Parser.Error0102(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _Properties.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is an operator declaration
-      OperatorDeclaration operDecl = e.Item as OperatorDeclaration;
-      if (operDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate operator declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddOperator(OperatorDeclaration decl)
+    {
+      if (_Operators.Contains(decl))
       {
-        if (_Operators.Contains(operDecl))
-        {
-          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Operators.Add(operDecl);
+        Parser.Error0111(decl.Token, Name, decl.Signature);
+        return true;
       }
+      _Operators.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is a cast operator declaration
-      CastOperatorDeclaration castDecl = e.Item as CastOperatorDeclaration;
-      if (castDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate cast operator declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddCastOperator(CastOperatorDeclaration decl)
+    {
+      if (_CastOperators.Contains(decl))
       {
-        if (_CastOperators.Contains(castDecl))
-        {
-          Parser.Error0557(e.Item.Token, Name);
-          e.Cancel = true;
-          return;
-        }
-        else _CastOperators.Add(castDecl);
+        Parser.Error0557(decl.Token, Name);
+        return true;
       }
+      _CastOperators.Add(decl);
+      return false;
+    }
 
-      // --- Check, if member is a method
-      MethodDeclaration methodDecl = e.Item as MethodDeclaration;
-      if (methodDecl != null)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a candidate method declaration to the members.
+    /// </summary>
+    /// <param name="decl">Declaration instance.</param>
+    /// <returns>
+    /// True, if en error has been raised during the add operation.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool AddMethod(MethodDeclaration decl)
+    {
+      if (_Methods.Contains(decl))
       {
-        if (_Methods.Contains(methodDecl))
-        {
-          Parser.Error0111(e.Item.Token, Name, e.Item.Signature);
-          e.Cancel = true;
-          return;
-        }
-        else _Methods.Add(methodDecl);
+        Parser.Error0111(decl.Token, Name, decl.Signature);
+        return true;
       }
-
-      // --- Check for finalizer
-      FinalizerDeclaration finDecl = e.Item as FinalizerDeclaration;
-      ClassDeclaration thisClass = this as ClassDeclaration;
-      if (finDecl != null && thisClass != null)
-      {
-        if (thisClass.HasAlreadyFinalizer(finDecl))
-        {
-          e.Cancel = true;
-          return;
-        }
-      }
-
-      // --- Add member to the other members
-      if (_Members.Contains(e.Item))
-      {
-        Parser.Error0101(e.Item.Token, Name, e.Item.Signature);
-        e.Cancel = true;
-      }
+      _Methods.Add(decl);
+      return false;
     }
 
     #endregion
-
   }
 
   #region TypeDeclarationCollection class

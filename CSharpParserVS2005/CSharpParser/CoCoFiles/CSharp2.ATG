@@ -607,7 +607,7 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
   Block<dd> | ";" 
   )             (. 
                    dd.Terminate(t);
-                   td.Members.Add(dd); 
+                   td.AddMember(dd); 
                 .)
 .
 
@@ -677,7 +677,7 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
                                 cd.ResultingType = typeRef;
                                 cd.Name = t.val;
                              .)
-  "="                        (. td.Members.Add(cd); .)
+  "="                        (. td.AddMember(cd); .)
                              (. Expression expr; .)
   Expression<out expr>       (. 
                                 cd.Expression = expr; 
@@ -702,7 +702,7 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
                                  (. CurrentElement = ep; .)
                                  (. ep.ResultingType = typeRef; .) 
                                  (. ep.ExplicitName = memberRef; .)
-                                 (. td.Members.Add(ep); .)
+                                 (. td.AddMember(ep); .)
     EventAccessorDeclarations<ep>
     "}"                          (. ep.Terminate(t); .)
   )
@@ -734,7 +734,7 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
       ) "("
     [ Argument<null> { "," Argument<null> } ] ")"
     ] ( Block<cd> | ";" )   (. 
-                               td.Members.Add(cd); 
+                               td.AddMember(cd); 
                                cd.Terminate(t);
                             .)
 .
@@ -761,7 +761,7 @@ PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
   "{" 
      AccessorDeclarations<pd> 
   "}"             (. 
-                     td.Members.Add(pd); 
+                     td.AddMember(pd); 
                      pd.Terminate(t);
                   .)
 .
@@ -797,7 +797,7 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
   "{" 
       AccessorDeclarations<ind> 
   "}"             (. 
-                     td.Members.Add(ind); 
+                     td.AddMember(ind); 
                      ind.Terminate(t);
                   .)
 .
@@ -835,7 +835,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
                                                     .)
     | ";"                                           (. md.HasBody = false; .)
   )                                                 (. 
-                                                       td.Members.Add(md); 
+                                                       td.AddMember(md); 
                                                        md.Terminate(t);
                                                     .)
 .
@@ -868,7 +868,7 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       ident                             (. fp.Name = t.val; .)
     ")"                                 (. cod.FormalParameters.Add(fp); .)
     ( Block<cod> | ";" )                (. 
-                                           td.Members.Add(cod); 
+                                           td.AddMember(cod); 
                                            cod.Terminate(t);
                                         .)
 .
@@ -913,7 +913,7 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
   |                                (. if ((op & Operator.unary) == 0) Error("UNDEF", la, "too few operands for binary operator"); .)
   ) ")"
   ( Block<od> | ";" )              (. 
-                                      td.Members.Add(od); 
+                                      td.AddMember(od); 
                                       od.Terminate(t);
                                    .)
 .
@@ -982,7 +982,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
       | // --- Interface property
         (. PropertyDeclaration prop = new PropertyDeclaration(t, ifd); .)
         (. CurrentElement = prop; .)
-        (. ifd.Members.Add(prop); .)
+        (. ifd.AddMember(prop); .)
         (. prop.ResultingType = typeRef; .)
         (. prop.ExplicitName = memberRef; .)
         (. prop.AssignAttributes(attrs); .)
@@ -1025,7 +1025,7 @@ InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDecla
            fd.IsEvent = true;
         .)
   ";"   (. 
-           ifd.Members.Add(fd); 
+           ifd.AddMember(fd); 
            fd.Terminate(t);
         .)
 .
@@ -1413,7 +1413,8 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
   )
   [ "?"                                              (. if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
   ]
-  PointerOrArray<ref typeRef>                        (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
+  PointerOrArray<typeRef>                            (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
+                                                     (. typeRef.BuildConstructedType(); .)
                                                      (. typeRef.Terminate(t); .)
 .
 
@@ -1436,7 +1437,8 @@ TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null;
   [ IF (IsNullableTypeMark())
     "?"                                              (. if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
   ]
-  PointerOrArray<ref typeRef>                        (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
+  PointerOrArray<typeRef>                            (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
+                                                     (. typeRef.BuildConstructedType(); .)
                                                      (. typeRef.Terminate(t); .)
 .
 
@@ -1445,7 +1447,7 @@ TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null;
 // a pointer or array.
 // +typeRef: type reference.
 // ------------------------------------------------------------------------------------
-PointerOrArray<ref TypeReference typeRef>
+PointerOrArray<TypeReference typeRef>
 =
   { IF (IsPointerOrDims())
     ( "*"                   (. typeRef.TypeModifiers.Add(new PointerModifier()); .)  
@@ -2879,7 +2881,7 @@ SingleFieldMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
                              .)
   [ "="                      (. Initializer init; .)
     VariableInitializer<out init> (. fd.Initializer = init; .) 
-  ]                          (. td.Members.Add(fd); .) 
+  ]                          (. td.AddMember(fd); .) 
                              (. fd.Terminate(t); .)
 .
 

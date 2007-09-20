@@ -836,6 +836,7 @@ namespace CSharpParser.Semantics
     {
       if (type == null) throw new ArgumentNullException("type");
       if (node == null) return;
+      if (type.ResolvingNode == node) return;
 
       // --- At this point the specified type part is resolved.
       if (node.IsNamespace)

@@ -88,6 +88,7 @@
     <Compile Include="LanguageElements\Comments.cs" />
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
     <Compile Include="LanguageElements\Members.cs" />
+    <Compile Include="LanguageElements\Overloading.cs" />
     <Compile Include="LanguageElements\Pragmas.cs" />
     <Compile Include="LanguageElements\TypeDeclarations.cs" />
     <Compile Include="LanguageElements\TypeParameters.cs" />
@@ -338,6 +339,8 @@
     <None Include="TestFiles\DelegateDeclaration\DelegateDeclaration2.cs" />
     <None Include="TestFiles\InterfaceDeclaration\InterfaceDeclaration2.cs" />
     <None Include="TestFiles\DuplicateModifiers.cs" />
+    <None Include="TestFiles\Overloading\Overloading1.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration1.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
