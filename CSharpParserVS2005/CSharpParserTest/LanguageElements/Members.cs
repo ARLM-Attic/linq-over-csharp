@@ -114,5 +114,52 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[0].Code, "CS0102");
       Assert.AreEqual(parser.Errors[1].Code, "CS0102");
     }
+
+    [TestMethod]
+    public void FieldDeclarationFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 5);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0681");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0678");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0678");
+    }
+
+    [TestMethod]
+    public void FieldAccessibilityOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration2.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void FieldAccessibilityOk2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration4.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void FieldAccessibilityFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration3.cs");
+      Assert.IsFalse(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void FieldAccessibilityOk3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration5.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
   }
 }

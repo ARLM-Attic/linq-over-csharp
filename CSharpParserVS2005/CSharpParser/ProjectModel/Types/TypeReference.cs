@@ -27,6 +27,7 @@ namespace CSharpParser.ProjectModel
     private ITypeCharacteristics _ResolvingType;
     private TypeParameter _ResolvingTypeParameter;
     private NamespaceHierarchy _ResolvingHierarchy;
+    private bool _ConstructedTypeBuilt;
 
     // --- Type reference representing an empty type used in generic parameters
     private static TypeReference _EmptyType;
@@ -54,6 +55,7 @@ namespace CSharpParser.ProjectModel
         _EmptyType.Name = "<EmptyType>";
         _EmptyType.ResolveToName();
       }
+      _ConstructedTypeBuilt = false;
     }
 
     // --------------------------------------------------------------------------------
@@ -400,6 +402,20 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the types directly nested into this type.
+    /// </summary>
+    /// <returns>
+    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
+    /// dictionary is retrieved if there is no nested type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    {
+      return _ResolvingType.GetNestedTypes();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     /// <remarks>Always returns false.</remarks>
@@ -417,6 +433,16 @@ namespace CSharpParser.ProjectModel
     public ReferencedUnit DeclaringUnit
     {
       get { return ResolvingType.DeclaringUnit; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsUnmanagedType
+    {
+      get { return ResolvingType.IsUnmanagedType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -850,7 +876,29 @@ namespace CSharpParser.ProjectModel
       _ResolvingNode = null;
       _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
-      BuildConstructedType();
+      Parser.CompilationUnit.AddTypeToFix(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves this type reference to the specified abstract type.
+    /// </summary>
+    /// <param name="type">System type.</param>
+    // --------------------------------------------------------------------------------
+    public void ResolveToType(ITypeCharacteristics type)
+    {
+      if (_Target == ResolutionTarget.Unresolved)
+      {
+        Parser.CompilationUnit.ResolutionCounter++;
+        Parser.CompilationUnit.ResolvedToSystemType++;
+      }
+      _Target = ResolutionTarget.Type;
+      _ResolvingType = type;
+      TypeDeclaration typeDecl = type as TypeDeclaration;
+      _ResolvingNode = (typeDecl != null) ? null : typeDecl.ResolverNode;
+      _ResolvingTypeParameter = null;
+      _ResolvingHierarchy = null;
+      Parser.CompilationUnit.AddTypeToFix(this);
     }
 
     // --------------------------------------------------------------------------------
@@ -871,7 +919,7 @@ namespace CSharpParser.ProjectModel
       _ResolvingType = node.Resolver;
       _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
-      BuildConstructedType();
+      Parser.CompilationUnit.AddTypeToFix(this);
     }
 
     // --------------------------------------------------------------------------------
@@ -998,13 +1046,20 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     internal void BuildConstructedType()
     {
+      if (_ConstructedTypeBuilt) return;
       if (_ResolvingType == null || _TypeModifiers.Count == 0) return;
 
       // --- Create pointer types
+      _ConstructedTypeBuilt = true;
       ITypeCharacteristics type = _ResolvingType;
       int ptrIndex = 0;
       while (ptrIndex < _TypeModifiers.Count && _TypeModifiers[ptrIndex] is PointerModifier)
       {
+        if (!type.IsUnmanagedType)
+        {
+          Parser.Error0208(Token, type.FullName);
+          return;
+        }
         type = type.MakePointerType();
         ptrIndex++;
       }

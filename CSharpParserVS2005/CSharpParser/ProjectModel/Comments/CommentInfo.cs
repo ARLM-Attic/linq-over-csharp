@@ -50,7 +50,7 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the line where #endregion directive starts.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public int EndLine
+    public new int EndLine
     {
       get { return _EndLine; }
     }
@@ -60,7 +60,7 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the column where #endregion directive starts.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public int EndColumn
+    public new int EndColumn
     {
       get { return _EndColumn; }
     }

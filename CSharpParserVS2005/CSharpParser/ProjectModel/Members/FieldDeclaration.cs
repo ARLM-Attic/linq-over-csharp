@@ -122,6 +122,66 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckSemantics()
+    {
+      // --- "extern" is not allowed on fields
+      if ((_DeclaredModifier & Modifier.@extern) != 0)
+      {
+        Parser.Error0106(Token, "extern");
+        Invalidate();        
+      }
+
+      // --- "override" is not allowed on fields
+      if ((_DeclaredModifier & Modifier.@override) != 0)
+      {
+        Parser.Error0106(Token, "override");
+        Invalidate();
+      }
+
+      // --- "abstract" is not allowed on fields
+      if ((_DeclaredModifier & Modifier.@abstract) != 0)
+      {
+        Parser.Error0681(Token);
+        Invalidate();
+      }
+
+      // --- Field can be "readonly" or "volatile" but not both
+      if ((_DeclaredModifier & Modifier.@readonly) != 0 &&
+        (_DeclaredModifier & Modifier.@volatile) != 0)
+      {
+        Parser.Error0678(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Go further only if field type has been resolved
+      if (!ResultingType.IsResolvedToType)
+      {
+        Invalidate();
+        return;
+      }
+
+      // --- Check, if the type of the field is at least as accessible as the field.
+      //Visibility memberVisibility = DeclaringType.GetMemberAccessibility(Visibility);
+      //ITypeCharacteristics memberType = ResultingType.ResolvingType;
+      //if (memberVisibility == Visibility.Public && memberType.IsNotPublic ||
+      //  memberVisibility == Visibility.Internal && !memberType.IsVisible
+      //  )
+      //{
+      //  // --- Field type is less accessible than the field itself
+      //  Parser.Error0052(Token, QualifiedName, ResultingType.FullName);
+      //  Invalidate();
+      //}
+    }
+
+    #endregion
   }
 
   // ==================================================================================

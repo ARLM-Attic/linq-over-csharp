@@ -1,4 +1,4 @@
-using System.Reflection;
+using System.Collections.Generic;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
@@ -31,6 +31,17 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the types directly nested into this type.
+    /// </summary>
+    /// <returns>
+    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
+    /// dictionary is retrieved if there is no nested type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    Dictionary<string, ITypeCharacteristics> GetNestedTypes();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -42,6 +53,13 @@ namespace CSharpParser.Semantics
     /// </summary>
     // --------------------------------------------------------------------------------
     ReferencedUnit DeclaringUnit { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    bool IsUnmanagedType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

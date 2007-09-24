@@ -1264,7 +1264,7 @@ out TypeDeclaration td) {
 		}
 		PointerOrArray(typeRef);
 		if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
-		typeRef.BuildConstructedType(); 
+		CompilationUnit.AddTypeToFix(typeRef); 
 		typeRef.Terminate(t); 
 	}
 
@@ -2513,7 +2513,7 @@ TypeReference typeRef) {
 		}
 		PointerOrArray(typeRef);
 		if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } 
-		typeRef.BuildConstructedType(); 
+		CompilationUnit.AddTypeToFix(typeRef); 
 		typeRef.Terminate(t); 
 	}
 

@@ -1414,7 +1414,7 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
   [ "?"                                              (. if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
   ]
   PointerOrArray<typeRef>                            (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
-                                                     (. typeRef.BuildConstructedType(); .)
+                                                     (. CompilationUnit.AddTypeToFix(typeRef); .)
                                                      (. typeRef.Terminate(t); .)
 .
 
@@ -1438,7 +1438,7 @@ TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null;
     "?"                                              (. if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
   ]
   PointerOrArray<typeRef>                            (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
-                                                     (. typeRef.BuildConstructedType(); .)
+                                                     (. CompilationUnit.AddTypeToFix(typeRef); .)
                                                      (. typeRef.Terminate(t); .)
 .
 

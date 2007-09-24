@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
@@ -63,6 +64,20 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the types directly nested into this type.
+    /// </summary>
+    /// <returns>
+    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
+    /// dictionary is retrieved if there is no nested type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    {
+      return new Dictionary<string, ITypeCharacteristics>();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -80,6 +95,13 @@ namespace CSharpParser.ProjectModel
     {
       get { return _ElementType.DeclaringUnit; }
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public abstract bool IsUnmanagedType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

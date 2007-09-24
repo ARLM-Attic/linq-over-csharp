@@ -13,11 +13,14 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private readonly TypeDeclaration _DeclaringType;
-    private Visibility _DeclaredVisibility;
-    private bool _DefaultVisibility;
-    private TypeReference _ResultingType;
-    protected TypeReference _ExplicitName;
+    // --- Holds the declared modifiers, even not allowed for the type
+    protected Modifier _DeclaredModifier;
+
+    // --- Holds the information about the explicitly declared visibility.
+    protected Visibility _DeclaredVisibility;
+
+    // --- Modifier flags used by this declaration. True value indicates the modifier
+    // --- is used.
     protected bool _IsNew;
     protected bool _IsUnsafe;
     protected bool _IsStatic;
@@ -28,6 +31,11 @@ namespace CSharpParser.ProjectModel
     protected bool _IsExtern;
     protected bool _IsReadOnly;
     protected bool _IsVolatile;
+
+    // --- Fields describing the main characteristics of the member
+    private readonly TypeDeclaration _DeclaringType;
+    private TypeReference _ResultingType;
+    protected TypeReference _ExplicitName;
 
     #endregion
 
@@ -79,7 +87,7 @@ namespace CSharpParser.ProjectModel
     public Visibility Visibility
     {
       get {
-        return _DefaultVisibility
+        return HasDefaultVisibility
                  ? (_DeclaringType.IsClass || _DeclaringType.IsStruct
                       ? Visibility.Private
                       : Visibility.Public)
@@ -95,8 +103,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasDefaultVisibility
     {
-      get { return _DefaultVisibility; }
+      get { return _DeclaredVisibility == Visibility.Default; }
     }
+
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -246,6 +255,16 @@ namespace CSharpParser.ProjectModel
         : _ExplicitName.FullName + "." + Name;  }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the qualified name of this member.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string QualifiedName
+    {
+      get { return _DeclaringType.Name + "." + FullName; }
+    }
+
     #endregion
 
     #region Public methods 
@@ -258,6 +277,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void SetModifiers(Modifier mod)
     {
+      // --- Store modifiers for later check
+      _DeclaredModifier = mod;
+
       // --- Set visibility
       Modifier visOnly = mod & Modifier.VisibilityAccessors;
       if (visOnly == 0) _DeclaredVisibility = Visibility.Default;
@@ -271,7 +293,6 @@ namespace CSharpParser.ProjectModel
         // --- An invalid combination of access modifiers is used
         Parser.Error0107(Token);
       }
-      _DefaultVisibility = _DeclaredVisibility == Visibility.Default;
 
       // --- Set other modifiers
       _IsNew = (mod & Modifier.@new) != 0;
@@ -300,7 +321,7 @@ namespace CSharpParser.ProjectModel
       else if (_DeclaringType.IsInterface || _DeclaringType.IsEnum)
       {
         // --- Interface and enum members cannot have visibility modifiers.
-        if (!_DefaultVisibility)
+        if (!HasDefaultVisibility)
         {
           Parser.Error0106(Token, _DeclaredVisibility.ToString().ToLower());
         }

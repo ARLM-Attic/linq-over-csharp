@@ -20,7 +20,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    // --- Holds the declared modifiers, even not allowed fot the type
+    // --- Holds the declared modifiers, even not allowed for the type
     protected Modifier _DeclaredModifier;
 
     // --- Holds the information about the explicitly declared visibility.
@@ -54,10 +54,10 @@ namespace CSharpParser.ProjectModel
 
     // --- Types declared within this type declaration
     private readonly List<TypeDeclaration> _NestedTypes = new List<TypeDeclaration>();
+    private Dictionary<string, ITypeCharacteristics> _NestedTypeDictionary;
 
     // --- Members of the type
-    //private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
-    private readonly List<MemberDeclaration> _Members = new List<MemberDeclaration>();
+    private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
     private readonly List<MemberDeclaration> _MemberCandidates = new List<MemberDeclaration>();
     private readonly ConstDeclarationCollection _Consts = new ConstDeclarationCollection();
     private readonly ConstructorDeclarationCollection _Constructors = new ConstructorDeclarationCollection();
@@ -93,7 +93,6 @@ namespace CSharpParser.ProjectModel
       : base(token, parser)
     {
       _DeclaringType = declaringType;
-      //_Members.BeforeAdd += BeforeAddMembers;
     }
 
     #endregion
@@ -339,7 +338,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     string ITypeCharacteristics.Namespace
     {
-      get { return _EnclosingNamespace.FullName; }
+      get { return _EnclosingNamespace == null ? String.Empty : FullName; }
     }
 
     // --------------------------------------------------------------------------------
@@ -368,6 +367,26 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the types directly nested into this type.
+    /// </summary>
+    /// <returns>
+    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
+    /// dictionary is retrieved if there is no nested type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    {
+      if (_NestedTypeDictionary == null)
+      {
+        _NestedTypeDictionary = new Dictionary<string, ITypeCharacteristics>();
+        foreach (TypeDeclaration nested in _NestedTypes)
+          _NestedTypeDictionary.Add(nested.ClrName, nested);
+      }
+      return _NestedTypeDictionary;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     /// <remarks>Always returns false.</remarks>
@@ -385,6 +404,42 @@ namespace CSharpParser.ProjectModel
     public ReferencedUnit DeclaringUnit
     {
       get { return Parser.CompilationUnit.ThisUnit; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsUnmanagedType
+    {
+      get
+      {
+        // --- Only non-generic structures can be unmanaged.
+        if (!IsStruct || IsGenericType) return false;
+
+        if (_Members.Count == 0)
+        {
+          // --- If the type members has not been classified, we use the candidate members
+          foreach (MemberDeclaration member in _MemberCandidates)
+          {
+            FieldDeclaration fi = member as FieldDeclaration;
+            if (fi == null) continue;
+            if (!fi.IsValid || !fi.ResultingType.IsResolvedToType) return false;
+            if (!fi.ResultingType.ResolvingType.IsUnmanagedType) return false;
+          }
+        }
+        else
+        {
+          // --- Members are already classified, we use the fields.
+          foreach (FieldDeclaration fi in _Fields)
+          {
+            if (!fi.IsValid || !fi.ResultingType.IsResolvedToType) return false;
+            if (!fi.ResultingType.ResolvingType.IsUnmanagedType) return false;
+          }
+        }
+        return true;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -564,7 +619,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsNestedAssembly
     {
-      get { return IsNested && _DeclaredVisibility == ProjectModel.Visibility.Internal; }
+      get { return IsNested && _DeclaredVisibility == Visibility.Internal; }
     }
 
     // --------------------------------------------------------------------------------
@@ -660,8 +715,7 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return (!IsNested && (IsPublic || Visibility == Visibility.Internal)) || 
-          (IsNestedPublic && DeclaringType.IsVisible);
+        return (!IsNested && IsPublic) || (IsNestedPublic && DeclaringType.IsVisible);
       }
     }
 
@@ -918,8 +972,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the members belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<MemberDeclaration> Members
-    //public MemberDeclarationCollection Members
+    public MemberDeclarationCollection Members
     {
       get { return _Members; }
     }
@@ -1563,46 +1616,9 @@ namespace CSharpParser.ProjectModel
       // --- Base interfaces can have any accessibility
       if (baseType.IsInterface) return true;
 
-      // --- Is the base type a referenced type?
-      TypeDeclaration baseDecl = baseType.ResolvingType as TypeDeclaration;
-
-      if (baseDecl != null)
-      {
-        // --- This type has been declared in the source code
-        if (
-             (IsPublic && baseDecl.IsNotPublic) ||
-             (Visibility == Visibility.Protected &&
-               (
-                 baseDecl.Visibility == Visibility.Private ||
-                 baseDecl.Visibility == Visibility.Protected
-               )
-             ) ||
-             (Visibility == Visibility.Internal &&
-               (
-                 baseDecl.Visibility == Visibility.Private ||
-                 baseDecl.Visibility == Visibility.Protected
-               )
-             ) ||
-             (Visibility == Visibility.ProtectedInternal &&
-               (
-                 baseDecl.Visibility == Visibility.Private ||
-                 baseDecl.Visibility == Visibility.Internal ||
-                 baseDecl.Visibility == Visibility.Protected
-               )
-             )
-           )
-        {
-          Parser.Error0060(Token, baseType.FullName, Name);
-          return false;
-        }
-      }
-      else
-      {
-        // --- This type is referenced from an assembly, can be used only if it is
-        // --- visible from outside.
-        return baseType.ResolvingType.IsVisible;
-      }
-      return true;
+      if (CheckAccessibility(Visibility, baseType)) return true;
+      Parser.Error0060(Token, baseType.FullName, Name);
+      return false;
     }
 
     #endregion
@@ -1748,11 +1764,281 @@ namespace CSharpParser.ProjectModel
     {
       foreach (FieldDeclaration field in _Fields)
       {
-        // --- "extern" is not allowed on types
-        if ((_DeclaredModifier & Modifier.@extern) != 0)
-          Parser.Error0106(Token, "extern");
-        
+        field.CheckSemantics();
       }
+    }
+
+    #endregion
+
+    #region Methods related to accessibility check
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the specified type can be accessed from the scope of this type
+    /// declaration.
+    /// </summary>
+    /// <param name="otherType">Other type to check for accessibility.</param>
+    /// <returns>
+    /// True, if the other type can be accessed from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool CanAccessType(ITypeCharacteristics otherType)
+    {
+      return CanAccessType(otherType, false);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the specified type can be accessed from the scope of this type
+    /// declaration.
+    /// </summary>
+    /// <param name="otherType">Other type to check for accessibility.</param>
+    /// <param name="fromBase">
+    /// Indicates that we want to access the type from the base type declaration part
+    /// of this type.
+    /// </param>
+    /// <returns>
+    /// True, if the other type can be accessed from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool CanAccessType(ITypeCharacteristics otherType, bool fromBase)
+    {
+      TypeDeclaration otherDecl = otherType as TypeDeclaration;
+      if (otherDecl == null)
+      {
+        // --- This type is within a referenced unit
+        return otherType.IsVisible;
+      }
+
+      // --- The other type is a type declaration.
+      // --- If that is a top-level type, that can be accessed from here.
+      if (!otherDecl.IsNested) return true;
+
+      // --- Other type is a nested type. Its declaring type must be accessible from
+      // --- this type.
+      if (!CanAccessType(otherDecl.DeclaringType)) return false;
+
+      // --- Ok, the declaring type of the other type can be accessed.
+      // --- If the other type is public or internal or protected internal, it is accessible.
+      if (otherDecl.Visibility == Visibility.Public || 
+        otherDecl.Visibility == Visibility.Internal ||
+        otherDecl.Visibility == Visibility.ProtectedInternal) 
+        return true;
+
+      // --- If other type is protected, it can be accessed from the base type declaration
+      // --- part of this type, or can be accessed if this type derives from the other type.
+      if (otherDecl.Visibility == Visibility.Protected)
+      {
+        if (fromBase) return true;
+        return SameOrInheritsFrom(otherDecl);
+      }
+
+      // --- The other type is private. Access is allowed only from its declaring type.
+      return _DeclaringType.FullName == otherDecl.FullName;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if a member of the specified type with the provided visibility can be 
+    /// accessed from the scope of this type declaration.
+    /// </summary>
+    /// <param name="otherType">Other type to check for accessibility.</param>
+    /// <param name="memberVisibility">Visibility of the member.</param>
+    /// <returns>
+    /// True, if the member of the other type can be accessed from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool CanAccessMemberOfType(ITypeCharacteristics otherType, 
+      Visibility memberVisibility)
+    {
+      // --- The other type must be accessible to access its member.
+      if (!CanAccessType(otherType)) return false;
+      
+      // --- If the member of the other type is public or internal or protected 
+      // --- internal, it is accessible.
+      if (memberVisibility == Visibility.Public ||
+        memberVisibility == Visibility.Internal ||
+        memberVisibility == Visibility.ProtectedInternal)
+        return true;
+
+      // --- If member is protected, access is permitted only if this class is 
+      // --- the same where the member is declared, or derives from it.
+      if (memberVisibility == Visibility.Protected)
+      {
+        return SameOrInheritsFrom(otherType);
+      }
+
+      // --- The other type is private. Access is allowed only from its declaring type.
+      return _DeclaringType.FullName == otherType.FullName;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if this type can be accessed from outside of the compilation unit.
+    /// </summary>
+    /// <returns>
+    /// True, if this type can be accessed from outside; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool AccessibleFromUniverse()
+    {
+      if (!IsNested) return IsPublic;
+      if (!_DeclaringType.AccessibleFromUniverse()) return false;
+      return Visibility != Visibility.Private && Visibility != Visibility.Internal;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if a member of this type with the specified visibility can be accessed 
+    /// outside of the compilation unit.
+    /// </summary>
+    /// <returns>
+    /// True, if this type can be accessed from outside; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool MemberIsAccessibleFromUniverse(Visibility memberVisibility)
+    {
+      if (!AccessibleFromUniverse()) return false;
+      return memberVisibility != Visibility.Private && 
+        memberVisibility != Visibility.Internal;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if this type declaration is within the program text of the other
+    /// type declaration.
+    /// </summary>
+    /// <param name="otherType">Other type used to check.</param>
+    /// <returns>
+    /// True, if this type equals with the other type or this type is declared within 
+    /// the declaration body of other type. Otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool IsWithinTypeOf(TypeDeclaration otherType)
+    {
+      if (otherType == null) return false;
+
+      TypeDeclaration current = this;
+      do
+      {
+        if (current.FullName == otherType.FullName) return true;
+        current = current.DeclaringType;
+      } while (current != null);
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if this type declaration inherits from the other type declaration.
+    /// </summary>
+    /// <param name="otherType">Other type used to check.</param>
+    /// <returns>
+    /// True, if this type inherits the other type; otherwise, false. If the two
+    /// types are equal, this method returns true.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public bool SameOrInheritsFrom(ITypeCharacteristics otherType)
+    {
+      if (otherType == null) return false;
+      ITypeCharacteristics current = this; 
+      while (current != null)
+      {
+        if (BaseType.FullName == otherType.FullName) return true;
+        current = BaseType;
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified type is at least as accessible as the provided base
+    /// visibility.
+    /// </summary>
+    /// <param name="baseVisibility">Visibility to use as a base.</param>
+    /// <param name="type">Reference to a type to check the visibility</param>
+    /// <returns>
+    /// True, if the specified type is at least as visible as the base; 
+    /// otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool CheckAccessibility(Visibility baseVisibility, TypeReference type)
+    {
+      // --- Get the base type in case of constructed types
+      ITypeCharacteristics baseType = type.ResolvingType;
+      while (baseType.HasElementType) baseType = baseType.GetElementType();
+
+      // --- Is the base type a referenced type?
+      TypeDeclaration baseDecl = baseType as TypeDeclaration;
+
+      if (baseDecl != null)
+      {
+        // --- This type has been declared in the source code
+        if (
+             (baseVisibility == Visibility.Public && baseDecl.IsNotPublic) ||
+             (baseVisibility == Visibility.Protected &&
+               (
+                 baseDecl.Visibility == Visibility.Private ||
+                 baseDecl.Visibility == Visibility.Protected
+               )
+             ) ||
+             (baseVisibility == Visibility.Internal &&
+               (
+                 baseDecl.Visibility == Visibility.Private ||
+                 baseDecl.Visibility == Visibility.Protected
+               )
+             ) ||
+             (baseVisibility == Visibility.ProtectedInternal &&
+               (
+                 baseDecl.Visibility == Visibility.Private ||
+                 baseDecl.Visibility == Visibility.Internal ||
+                 baseDecl.Visibility == Visibility.Protected
+               )
+             )
+           )
+        {
+          return false;
+        }
+      }
+      else
+      {
+        // --- This type is referenced from an assembly, can be used only if it is
+        // --- visible from outside.
+        return type.ResolvingType.IsVisible;
+      }
+      return true;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the accessibility level of a type member having the specified member
+    /// visibility.
+    /// </summary>
+    /// <param name="memberVisibility">Visibility of the member.</param>
+    /// <returns>Member accessibility from outside of the type.</returns>
+    // --------------------------------------------------------------------------------
+    public Visibility GetMemberAccessibility(Visibility memberVisibility)
+    {
+      // --- Get the outside visibility of this type
+      Visibility baseVisibility = Visibility;
+      if (DeclaringType != null)
+      {
+        baseVisibility = DeclaringType.GetMemberAccessibility(Visibility);
+      }
+
+      // --- If type is not public or its member is not public, accessibility is not public.
+      if (baseVisibility == Visibility.Private ||
+          memberVisibility == Visibility.Private)
+        return Visibility.Private;
+
+      // --- If type is internal, accessibility is internal.
+      if (baseVisibility == Visibility.Internal) return Visibility.Internal;
+
+      // --- If type is public, public and protected members are public;
+      // --- internal and proetcted internal members are internal.
+      return
+        memberVisibility == Visibility.Public || memberVisibility == Visibility.Protected
+          ? Visibility.Public
+          : Visibility.Internal;
     }
 
     #endregion

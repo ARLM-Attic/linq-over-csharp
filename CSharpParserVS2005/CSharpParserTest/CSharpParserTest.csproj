@@ -22,6 +22,7 @@
     <Optimize>false</Optimize>
     <OutputPath>.\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>false</DebugSymbols>
@@ -341,6 +342,10 @@
     <None Include="TestFiles\DuplicateModifiers.cs" />
     <None Include="TestFiles\Overloading\Overloading1.cs" />
     <None Include="TestFiles\Members\FieldDeclaration1.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration2.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration3.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration4.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration5.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
@@ -387,6 +392,10 @@
     <Compile Include="LanguageElements\TypeResolution.cs" />
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <None Include="TestFiles\TypeResolution\ResolveThroughInheritance.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedType3.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedType2.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedType1.cs" />
     <None Include="TestFiles\TypeParameters\ConstraintFails10.cs" />
     <None Include="TestFiles\TypeParameters\ConstraintFails9.cs" />
     <None Include="TestFiles\TypeParameters\ConstraintFails8.cs" />

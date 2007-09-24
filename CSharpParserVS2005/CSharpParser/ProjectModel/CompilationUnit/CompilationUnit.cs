@@ -54,6 +54,9 @@ namespace CSharpParser.ProjectModel
       new Dictionary<string, NamespaceHierarchy>();
     private NamespaceOrTypeResolver _NamespaceOrTypeResolver;
 
+    // --- Types to check and fix (arrays, pointers, generic types)
+    private readonly List<TypeReference> _TypesToFix = new List<TypeReference>();
+
     // --- Diagnostic counters
     private int _ResolutionCounter;
     private int _ResolvedToSystemType;
@@ -533,6 +536,20 @@ namespace CSharpParser.ProjectModel
         : PPEvaluationStatus.False;
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a type to the list of type to fix.
+    /// </summary>
+    /// <param name="type"></param>
+    // --------------------------------------------------------------------------------
+    public void AddTypeToFix(TypeReference type)
+    {
+      if (type.TypeModifiers.Count > 0 || type.Arguments.Count > 0)
+      {
+        _TypesToFix.Add(type);
+      }
+    }
+
     #endregion
 
     #region ICompilationErrorHandler implementation
@@ -705,6 +722,7 @@ namespace CSharpParser.ProjectModel
       // --- Phase 4: Resolve all remaining type references and check type declarations
       ResolveTypeReferences();
       CheckTypeDeclarations();
+      BuildConstructedTypes();
       CheckMemberDeclaration();
       CheckConstraintDeclarations();
 
@@ -1490,8 +1508,22 @@ namespace CSharpParser.ProjectModel
     {
       foreach (TypeDeclaration type in _DeclaredTypes)
       {
+        _CurrentFile = type.EnclosingSourceFile;
         type.ClassifyMembers();
         type.CheckFields();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Builds up constracted (array and pointer) types.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void BuildConstructedTypes()
+    {
+      foreach (TypeReference typeRef in _TypesToFix)
+      {
+        typeRef.BuildConstructedType();
       }
     }
 
@@ -1504,6 +1536,7 @@ namespace CSharpParser.ProjectModel
     {
       foreach (TypeDeclaration type in _DeclaredTypes)
       {
+        _CurrentFile = type.EnclosingSourceFile;
         type.CheckConstraintDeclarations();
       }
     }

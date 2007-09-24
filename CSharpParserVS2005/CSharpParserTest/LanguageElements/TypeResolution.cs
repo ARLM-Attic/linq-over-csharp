@@ -325,5 +325,87 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors.Count, 1);
       Assert.AreEqual(parser.Errors[0].Code, "CS0101");
     }
+
+    [TestMethod]
+    public void ConstructedTypesAreOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\ConstructedType1.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      FieldDeclaration f = parser.DeclaredTypes[0].Fields[0];
+      ITypeCharacteristics type = f.ResultingType.ResolvingType;
+      Assert.AreEqual(type.FullName, "System.Byte[,,][,][]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte[,,][,]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte[,,]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte");
+      Assert.IsFalse(type.HasElementType);
+
+      f = parser.DeclaredTypes[0].Fields[1];
+      type = f.ResultingType.ResolvingType;
+      Assert.AreEqual(type.FullName, "System.Byte**[,,][,][]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte**[,,][,]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte**[,,]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte**");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte*");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "System.Byte");
+      Assert.IsFalse(type.HasElementType);
+    }
+
+    [TestMethod]
+    public void ConstructedTypesAreOk2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\ConstructedType2.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      FieldDeclaration f = parser.DeclaredTypes[0].Fields[0];
+      ITypeCharacteristics type = f.ResultingType.ResolvingType;
+      Assert.AreEqual(type.FullName, "MyStruct[,,][,][]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "MyStruct[,,][,]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "MyStruct[,,]");
+      Assert.IsTrue(type.HasElementType);
+      type = type.GetElementType();
+      Assert.AreEqual(type.FullName, "MyStruct");
+      Assert.IsFalse(type.HasElementType);
+    }
+
+    [TestMethod]
+    public void ConstructedPointersFail1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\ConstructedType3.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0208");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0208");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0208");
+    }
+
+    [TestMethod]
+    public void ResolutionThroughInheritanceOk()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"TypeResolution\ResolveThroughInheritance.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
   }
 }

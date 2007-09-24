@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParser.Semantics
@@ -18,6 +20,7 @@ namespace CSharpParser.Semantics
     private readonly ITypeCharacteristics _BaseType;
     private readonly ITypeCharacteristics _DeclaringType;
     private readonly ITypeCharacteristics _ElementType;
+    private Dictionary<string, ITypeCharacteristics> _NestedTypeDictionary;
 
     #endregion
 
@@ -132,6 +135,28 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the types directly nested into this type.
+    /// </summary>
+    /// <returns>
+    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
+    /// dictionary is retrieved if there is no nested type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    {
+      if (_NestedTypeDictionary == null)
+      {
+        Type[] nestedTypes =
+          _TypeObject.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic);
+        _NestedTypeDictionary = new Dictionary<string, ITypeCharacteristics>();
+        foreach(Type type in nestedTypes)
+          _NestedTypeDictionary.Add(type.Name, new NetBinaryType(type));
+      }
+      return _NestedTypeDictionary;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     /// <remarks>Always returns true.</remarks>
@@ -149,6 +174,44 @@ namespace CSharpParser.Semantics
     public ReferencedUnit DeclaringUnit
     {
       get { return _AssemblyRef; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsUnmanagedType
+    {
+      get
+      {
+        if (IsPointer || IsEnum) return true;
+        if (IsInterface || IsClass || IsGenericType) return false;
+        // --- Check for native unmanaged types
+        if (_TypeObject == typeof (bool) ||
+          _TypeObject == typeof (byte) ||
+          _TypeObject == typeof (sbyte) ||
+          _TypeObject == typeof (short) ||
+          _TypeObject == typeof (ushort) ||
+          _TypeObject == typeof (int) ||
+          _TypeObject == typeof (uint) ||
+          _TypeObject == typeof (long) ||
+          _TypeObject == typeof (ulong) ||
+          _TypeObject == typeof (char) ||
+          _TypeObject == typeof (float) ||
+          _TypeObject == typeof (double) ||
+          _TypeObject == typeof (decimal)) 
+          return true;
+
+        // --- At this point we have a non-generic struct
+        foreach (FieldInfo fi in _TypeObject.GetFields(
+          BindingFlags.Public|BindingFlags.NonPublic|
+          BindingFlags.Instance|BindingFlags.Static))
+        {
+          if (!new NetBinaryType(fi.FieldType).IsUnmanagedType) return false;
+        }
+        return true;
+      }
     }
 
     // --------------------------------------------------------------------------------

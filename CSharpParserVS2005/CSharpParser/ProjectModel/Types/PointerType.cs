@@ -56,6 +56,16 @@ namespace CSharpParser.ProjectModel
       get { return GetElementType().Name + "*"; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool IsUnmanagedType
+    {
+      get { return true; }
+    }
+
     #endregion
   }
 }

@@ -45,6 +45,8 @@
     <Compile Include="ProjectModel\Types\ArrayType.cs" />
     <Compile Include="ProjectModel\Types\ConstructedType.cs" />
     <Compile Include="ProjectModel\Types\PointerType.cs" />
+    <Compile Include="Semantics\Accessibility\AccessDomainElement.cs" />
+    <Compile Include="Semantics\Accessibility\AccessibilityDomain.cs" />
     <Compile Include="Semantics\TypeResolution\ITypeDeclarationScope.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />
     <Compile Include="ProjectModel\CompilationUnit\TokenElement.cs" />

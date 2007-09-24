@@ -548,7 +548,7 @@ namespace CSharpParser.Semantics
           return true;
         }
 
-        // --- Step 2: Try to resolve name as a nested type
+        // --- Step 2: Try to resolve name as a direct nested type
         ResolutionNodeBase node = scope.ResolverNode.
           FindSimpleNamespaceOrType(info.CurrentPart);
         if (node != null)
@@ -558,6 +558,25 @@ namespace CSharpParser.Semantics
           info.Evaluate();
           return true;
         }
+
+        // --- Step 3: Try to resolve name as a nested type in any of the base types
+        ITypeCharacteristics baseScope = scope.BaseType;
+        while (baseScope != null)
+        {
+          Dictionary<string, ITypeCharacteristics> dict = baseScope.GetNestedTypes();
+          ITypeCharacteristics typeFound;
+          if (dict.TryGetValue(info.CurrentPart.ClrName, out typeFound))
+          {
+            // --- We found the type
+            info.CurrentPart.ResolveToType(typeFound);
+            info.Target = ResolutionTarget.Type;
+            return true;
+          }
+          // --- Go to the next base type
+          baseScope = baseScope.BaseType;
+        }
+
+        // --- We did not manage to resolve the name yet, lets go to an outer scope
         scope = scope.DeclaringType;
       }
       return false;
@@ -597,7 +616,7 @@ namespace CSharpParser.Semantics
         ResolutionNodeList results = scope.FindSimpleName(info.CurrentPart);
         if (results.Count > 0)
         {
-          // --- We found the a namespace ot type name but it needs some more checks
+          // --- We found the a namespace or type name but it needs some more checks
           resolved = true;
           scopeToCheck = scope;
           needsModeCheck = true;
@@ -659,8 +678,7 @@ namespace CSharpParser.Semantics
 
       // --- Check 2: We found a visible non-generic type and any of the enclosing
       // --- namespaces contains an alias with the name found.
-      else if (info.Target == ResolutionTarget.Type 
-        && info.CurrentPart.ResolvingType.IsVisible)
+      else if (info.Target == ResolutionTarget.Type)
       {
         if (info.CurrentPart.Arguments.Count == 0 
           && scopeToCheck.ContainsAlias(info.CurrentPart.Name, out foundInScope))

@@ -107,6 +107,22 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0052: Inconsistent accessibility: field type '{0}' is less accessible 
+    /// than field '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="field">filed name</param>
+    /// <param name="type">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0052(Token token, string field, string type)
+    {
+      Error("CS0060", token,
+        string.Format("Inconsistent accessibility: field type '{0}' is less " +
+        "accessible than field '{1}'", type, field));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0060: Inconsistent accessibility: base class '{0}' is less 
     /// accessible than class '{1}'.
     /// </summary>
@@ -278,6 +294,21 @@ namespace CSharpParser.ParserFiles
       Error("CS0146", token,
         string.Format("Circular base class dependency involving '{0}' and '{1}'", 
         name, baseName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0208: Cannot take the address of, get the size of, or declare a 
+    /// pointer to a managed type ('{0}').
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Mismatched name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0208(Token token, string name)
+    {
+      Error("CS0208", token,
+        string.Format("Cannot take the address of, get the size of, or declare a " +
+        "pointer to a managed type ('{0}')", name));
     }
 
     // --------------------------------------------------------------------------------
@@ -743,6 +774,32 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0644", token,
         string.Format("'{0}' cannot derive from special class '{1}'", name, specialName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0678: '{0}': a field cannot be both volatile and readonly.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Field name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0678(Token token, string name)
+    {
+      Error("CS0678", token,
+        string.Format("'{0}': a field cannot be both volatile and readonly", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0681: The modifier 'abstract' is not valid on fields. Try using a 
+    /// property instead.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0681(Token token)
+    {
+      Error("CS0681", token, "The modifier 'abstract' is not valid on fields. " +
+      "Try using a property instead.");
     }
 
     // --------------------------------------------------------------------------------
