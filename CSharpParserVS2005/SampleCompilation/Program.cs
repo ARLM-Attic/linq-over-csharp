@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using CSharpParser.ProjectModel;
 
 namespace SampleCompilation
@@ -78,34 +79,6 @@ namespace SampleCompilation
       Console.WriteLine("Resolved to hierarchy: {0}", project.ResolvedToHierarchy);
       Console.WriteLine("Resolved to simple name: {0}", project.ResolvedToName);
       Console.WriteLine();
-      //Type type = typeof(int**[][,][, , ,]);
-      //Console.WriteLine("HasElementType: {0}", type.HasElementType);
-      //int indent = 0;
-      //Console.WriteLine(type);
-      //while (type.HasElementType)
-      //{
-      //  type = type.GetElementType();
-      //  Console.WriteLine("{0}{1}, {2}", String.Empty.PadRight(indent * 2), type,
-      //                    type.Namespace);
-      //  indent++;
-      //}
-
-      //Type basicType = typeof(int);
-      //basicType = basicType.MakePointerType();
-      //basicType = basicType.MakePointerType();
-      //basicType = basicType.MakeArrayType(4);
-      //basicType = basicType.MakeArrayType(2);
-      //basicType = basicType.MakeArrayType();
-      //type = basicType;
-      //indent = 0;
-      //Console.WriteLine(type);
-      //while (type.HasElementType)
-      //{
-      //  type = type.GetElementType();
-      //  Console.WriteLine("{0}{1}, {2}", String.Empty.PadRight(indent * 2), type,
-      //                    type.Namespace);
-      //  indent++;
-      //}
     }
   }
 }

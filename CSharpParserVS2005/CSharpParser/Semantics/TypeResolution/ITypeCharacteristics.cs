@@ -42,6 +42,16 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the underlying type of an enum type.
+    /// </summary>
+    /// <remarks>
+    /// Throws an exception, if the underlying type is not an enum type.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    ITypeCharacteristics GetUnderlyingEnumType();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------

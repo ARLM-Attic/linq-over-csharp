@@ -387,6 +387,22 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the underlying type of an enum type.
+    /// </summary>
+    /// <remarks>
+    /// Throws an exception, if the underlying type is not an enum type.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics GetUnderlyingEnumType()
+    {
+      EnumDeclaration enumDecl = this as EnumDeclaration;
+      if (enumDecl == null)
+        throw new InvalidOperationException("Underlying type is not an enum.");
+      return enumDecl.BaseType;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     /// <remarks>Always returns false.</remarks>
@@ -1755,16 +1771,11 @@ namespace CSharpParser.ProjectModel
       }
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks the field declarations of the type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public void CheckFields()
+    public void CheckMembers()
     {
-      foreach (FieldDeclaration field in _Fields)
+      foreach (MemberDeclaration member in _Members)
       {
-        field.CheckSemantics();
+        member.CheckSemantics();
       }
     }
 
@@ -1874,37 +1885,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Checks if this type can be accessed from outside of the compilation unit.
-    /// </summary>
-    /// <returns>
-    /// True, if this type can be accessed from outside; otherwise, false.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public bool AccessibleFromUniverse()
-    {
-      if (!IsNested) return IsPublic;
-      if (!_DeclaringType.AccessibleFromUniverse()) return false;
-      return Visibility != Visibility.Private && Visibility != Visibility.Internal;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks if a member of this type with the specified visibility can be accessed 
-    /// outside of the compilation unit.
-    /// </summary>
-    /// <returns>
-    /// True, if this type can be accessed from outside; otherwise, false.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public bool MemberIsAccessibleFromUniverse(Visibility memberVisibility)
-    {
-      if (!AccessibleFromUniverse()) return false;
-      return memberVisibility != Visibility.Private && 
-        memberVisibility != Visibility.Internal;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Checks, if this type declaration is within the program text of the other
     /// type declaration.
     /// </summary>
@@ -2006,39 +1986,6 @@ namespace CSharpParser.ProjectModel
         return type.ResolvingType.IsVisible;
       }
       return true;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the accessibility level of a type member having the specified member
-    /// visibility.
-    /// </summary>
-    /// <param name="memberVisibility">Visibility of the member.</param>
-    /// <returns>Member accessibility from outside of the type.</returns>
-    // --------------------------------------------------------------------------------
-    public Visibility GetMemberAccessibility(Visibility memberVisibility)
-    {
-      // --- Get the outside visibility of this type
-      Visibility baseVisibility = Visibility;
-      if (DeclaringType != null)
-      {
-        baseVisibility = DeclaringType.GetMemberAccessibility(Visibility);
-      }
-
-      // --- If type is not public or its member is not public, accessibility is not public.
-      if (baseVisibility == Visibility.Private ||
-          memberVisibility == Visibility.Private)
-        return Visibility.Private;
-
-      // --- If type is internal, accessibility is internal.
-      if (baseVisibility == Visibility.Internal) return Visibility.Internal;
-
-      // --- If type is public, public and protected members are public;
-      // --- internal and proetcted internal members are internal.
-      return
-        memberVisibility == Visibility.Public || memberVisibility == Visibility.Protected
-          ? Visibility.Public
-          : Visibility.Internal;
     }
 
     #endregion
@@ -2223,6 +2170,54 @@ namespace CSharpParser.ProjectModel
       }
       _Methods.Add(decl);
       return false;
+    }
+
+    #endregion
+
+    #region Static methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the first type is the same as the second one or inherits from the 
+    /// second one.
+    /// </summary>
+    /// <param name="type">Type to check.</param>
+    /// <param name="otherType">Other type used to check.</param>
+    /// <returns>
+    /// True, if the first type inherits the other type; otherwise, false. If the two
+    /// types are equal, this method returns true.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static bool IsSameOrInheritsFrom(ITypeCharacteristics type, 
+      ITypeCharacteristics otherType)
+    {
+      if (otherType == null) return false;
+      while (type != null)
+      {
+        if (type.FullName == otherType.FullName) return true;
+        type = type.BaseType;
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the root element type of a constructed type.
+    /// </summary>
+    /// <param name="type">Type to get the root element type for.</param>
+    /// <returns>
+    /// Root element type.
+    /// </returns>
+    /// <remarks>
+    /// Theroot element type is the type that has no more element types. For example,
+    /// in case of byte**[][,,], the root element type is byte.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public static ITypeCharacteristics GetRootElementType(ITypeCharacteristics type)
+    {
+      if (type == null) return null;
+      while (type.HasElementType) type = type.GetElementType();
+      return type;
     }
 
     #endregion

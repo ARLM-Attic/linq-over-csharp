@@ -385,6 +385,43 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics of the specified member.
+    /// </summary>
+    /// <remarks>
+    /// This implementation only checks, if the type of the member is at least as
+    /// accessible as the member itself.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual void CheckSemantics()
+    {
+      // --- Only those members are checked that have a non-void resolved resulting type.
+      if (_ResultingType == null || !_ResultingType.IsResolved ||
+        _ResultingType.IsVoid) return;
+
+      // --- If types are resolved to type parameters, no accessibility checks are 
+      // --- performed.
+      if (_ResultingType.IsResolvedToTypeParameter) return;
+
+      // --- This member should have been resolved to a type and not to something else
+      if (!_ResultingType.IsResolvedToType)
+      {
+        Invalidate();
+        return;
+      }
+
+      // --- Check, if the type of the member is at least as accessible as the field.
+      AccessibilityDomain memberDomain = new AccessibilityDomain(DeclaringType, Visibility);
+      AccessibilityDomain typeDomain = new AccessibilityDomain(ResultingType.ResolvingType);
+      if (!typeDomain.IsAtLeastAsAccessibleAs(memberDomain))
+      {
+        // --- Field type is less accessible than the field itself
+        Parser.Error0052(Token, QualifiedName, ResultingType.FullName);
+        Invalidate();
+      }
+    }
   }
 
   // ==================================================================================

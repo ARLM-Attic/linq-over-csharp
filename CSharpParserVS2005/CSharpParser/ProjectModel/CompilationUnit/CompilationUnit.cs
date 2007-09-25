@@ -723,8 +723,8 @@ namespace CSharpParser.ProjectModel
       ResolveTypeReferences();
       CheckTypeDeclarations();
       BuildConstructedTypes();
+      CheckTypeConstraintDeclarations();
       CheckMemberDeclaration();
-      CheckConstraintDeclarations();
 
       // --- Phase 5: Resolve all remaining type references
 
@@ -1510,7 +1510,7 @@ namespace CSharpParser.ProjectModel
       {
         _CurrentFile = type.EnclosingSourceFile;
         type.ClassifyMembers();
-        type.CheckFields();
+        type.CheckMembers();
       }
     }
 
@@ -1532,7 +1532,7 @@ namespace CSharpParser.ProjectModel
     /// Checks the constraint declarations related to type declarations.
     /// </summary>
     // --------------------------------------------------------------------------------
-    private void CheckConstraintDeclarations()
+    private void CheckTypeConstraintDeclarations()
     {
       foreach (TypeDeclaration type in _DeclaredTypes)
       {

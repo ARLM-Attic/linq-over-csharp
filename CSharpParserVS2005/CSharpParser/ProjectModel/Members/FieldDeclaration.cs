@@ -130,8 +130,10 @@ namespace CSharpParser.ProjectModel
     /// Checks the semantics for the specified field declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public void CheckSemantics()
+    public override void CheckSemantics()
     {
+      base.CheckSemantics();
+
       // --- "extern" is not allowed on fields
       if ((_DeclaredModifier & Modifier.@extern) != 0)
       {
@@ -162,23 +164,69 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- Go further only if field type has been resolved
-      if (!ResultingType.IsResolvedToType)
+      if (!ResultingType.IsResolvedToType && !ResultingType.IsResolvedToTypeParameter)
       {
         Invalidate();
-        return;
       }
 
-      // --- Check, if the type of the field is at least as accessible as the field.
-      //Visibility memberVisibility = DeclaringType.GetMemberAccessibility(Visibility);
-      //ITypeCharacteristics memberType = ResultingType.ResolvingType;
-      //if (memberVisibility == Visibility.Public && memberType.IsNotPublic ||
-      //  memberVisibility == Visibility.Internal && !memberType.IsVisible
-      //  )
-      //{
-      //  // --- Field type is less accessible than the field itself
-      //  Parser.Error0052(Token, QualifiedName, ResultingType.FullName);
-      //  Invalidate();
-      //}
+      // --- In case if invalidity we finish the check.
+      if (!IsValid) return;
+
+      // --- Check the resulting type of volatile fields
+      if (IsVolatile)
+      {
+        // --- A type-parameter that is known to be a reference type;
+        if (ResultingType.IsResolvedToTypeParameter)
+        {
+          TypeParameter param = ResultingType.ResolvingTypeParameter;
+          if (param.HasConstraint && param.Constraint.HasPrimary) 
+          {
+            if (param.Constraint.Primary.IsClass ||
+            (param.Constraint.Primary.IsType && 
+            param.Constraint.Primary.Type.RightMostPart.IsClass))
+              return;
+          }
+
+          // --- Type parameter is unconstrained or not a reference type.
+          Parser.Error0677(ResultingType.Token, QualifiedName, ResultingType.FullName);
+          return;
+        }
+
+        ITypeCharacteristics fieldType = ResultingType.ResolvingType;
+
+        // --- Resulting type must be one of the followings:
+        // --- A reference type;
+        if (fieldType.IsClass) return;
+
+        // --- The type byte, sbyte, short, ushort, int, uint, char, float, or bool;
+        if (fieldType.TypeObject.Equals(typeof(byte)) ||
+            fieldType.TypeObject.Equals(typeof(sbyte)) ||
+            fieldType.TypeObject.Equals(typeof(short)) ||
+            fieldType.TypeObject.Equals(typeof(ushort)) ||            
+            fieldType.TypeObject.Equals(typeof(int)) ||
+            fieldType.TypeObject.Equals(typeof(uint)) ||
+            fieldType.TypeObject.Equals(typeof(char)) ||
+            fieldType.TypeObject.Equals(typeof(float)) ||
+            fieldType.TypeObject.Equals(typeof(bool)))
+          return;
+
+        // --- An enum-type having an enum base type of byte, sbyte, short, 
+        // --- ushort, int, or uint.
+        if (fieldType.IsEnum)
+        {
+          ITypeCharacteristics ulType = fieldType.GetUnderlyingEnumType();
+        if (ulType.TypeObject.Equals(typeof(byte)) ||
+            ulType.TypeObject.Equals(typeof(sbyte)) ||
+            ulType.TypeObject.Equals(typeof(short)) ||
+            ulType.TypeObject.Equals(typeof(ushort)) ||            
+            ulType.TypeObject.Equals(typeof(int)) ||
+            ulType.TypeObject.Equals(typeof(uint)))
+          return;
+        }
+
+        // --- Volatile filed is an unallowed type
+        Parser.Error0677(ResultingType.Token, QualifiedName, ResultingType.FullName);
+      }
     }
 
     #endregion

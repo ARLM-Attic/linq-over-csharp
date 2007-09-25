@@ -778,6 +778,21 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0677: '{0}': a volatile field cannot be of the type '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    /// <param name="typeName">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0677(Token token, string name, string typeName)
+    {
+      Error("CS0677", token,
+        string.Format("'{0}': a volatile field cannot be of the type '{1}'", 
+        name, typeName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0678: '{0}': a field cannot be both volatile and readonly.
     /// </summary>
     /// <param name="token">Error point</param>
