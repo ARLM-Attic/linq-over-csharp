@@ -15,7 +15,7 @@ namespace CSharpParserTest.TestFiles
       return source;
     }
 
-    private abstract T AbstractMethod<T, U, V>(U par1, V par2);
+    protected abstract T AbstractMethod<T, U, V>(U par1, V par2);
 
     #region IEnumerable Members
 

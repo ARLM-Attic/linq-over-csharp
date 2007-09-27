@@ -209,6 +209,36 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0112: A static member '{0}' cannot be marked as override, virtual, 
+    /// or abstract.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Mismatched name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0112(Token token, string name)
+    {
+      Error("CS0112", token,
+        string.Format("A static member '{0}' cannot be marked as override, virtual, " +
+        "or abstract", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0113: A static member '{0}' cannot be marked as override, virtual, 
+    /// or abstract.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Mismatched name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0113(Token token, string name)
+    {
+      Error("CS0113", token,
+        string.Format("A member '{0}' marked as override cannot be marked as " +
+        "new or virtual", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0116: A namespace does not directly contain members such as fields 
     /// or methods.
     /// </summary>
@@ -298,6 +328,18 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0180: '{0}' cannot be both extern and abstract.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0180(Token token, string name)
+    {
+      Error("CS0180", token, "'{0}' cannot be both extern and abstract", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0208: Cannot take the address of, get the size of, or declare a 
     /// pointer to a managed type ('{0}').
     /// </summary>
@@ -325,6 +367,19 @@ namespace CSharpParser.ParserFiles
       Error("CS0234", token,
         string.Format("The type or namespace name '{0}' does not exist in the "+
         "namespace '{1}' (are you missing an assembly reference?)", name, nameSpace));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0238: '{0}' cannot be both extern and abstract.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0238(Token token, string name)
+    {
+      Error("CS0238", token, "'{0}' cannot be sealed because it is not " +
+        "an override", name);
     }
 
     // --------------------------------------------------------------------------------
@@ -400,6 +455,19 @@ namespace CSharpParser.ParserFiles
       Error("CS0263", token,
         string.Format("Partial declarations of '{0}' must not specify different " +
         "base classes", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0283: The type '{0}' cannot be declared const.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0283(Token token, string name)
+    {
+      Error("CS0283", token,
+        string.Format("The type '{0}' cannot be declared const", name));
     }
 
     // --------------------------------------------------------------------------------
@@ -668,6 +736,30 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0502: '{0}' cannot be both abstract and sealed.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0502(Token token, string name)
+    {
+      Error("CS0502", token, "'{0}' cannot be both abstract and sealed", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0503: The abstract method '{0}' cannot be marked virtual.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0503(Token token, string name)
+    {
+      Error("CS0503", token, "The abstract method '{0}' cannot be marked virtual", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0509: '{0}': cannot derive from sealed type '{1}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -723,6 +815,20 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0542: '{0}': member names cannot be the same as their enclosing type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0542(Token token, string name)
+    {
+      Error("CS0542", token,
+        string.Format("'{0}': member names cannot be the same as their enclosing type", 
+        name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0557: Duplicate user-defined conversion in type '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -732,6 +838,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0557", token,
         string.Format("Duplicate user-defined conversion in type '{0}'", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0573: '{0}': cannot have instance field initializers in structs.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0573(Token token, string name)
+    {
+      Error("CS0573", token,
+        string.Format("'{0}': cannot have instance field initializers in structs", name));
     }
 
     // --------------------------------------------------------------------------------
@@ -760,6 +879,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0616", token,
         string.Format("'{0}' is not an attribute class", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0621: '{0}': virtual or abstract members cannot be private.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0621(Token token, string name)
+    {
+      Error("CS0621", token,
+        "'{0}': virtual or abstract members cannot be private", name);
     }
 
     // --------------------------------------------------------------------------------
@@ -840,6 +972,20 @@ namespace CSharpParser.ParserFiles
     public void Error0692(Token token, string name)
     {
       Error("CS0692", token, string.Format("Duplicate type parameter '{0}'", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0694: Type parameter '{0}' has the same name as the containing type, 
+    /// or method.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0694(Token token, string name)
+    {
+      Error("CS0694", token, "Type parameter '{0}' has the same name as the " +
+        "containing type, or method", name);
     }
 
     // --------------------------------------------------------------------------------
@@ -925,6 +1071,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0714", token,
         string.Format("'{0}': static classes cannot implement interfaces", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0723: Cannot declare variable of static type '{0}'
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0723(Token token, string name)
+    {
+      Error("CS0723", token,
+        string.Format("Cannot declare variable of static type '{0}'", name));
     }
 
     // --------------------------------------------------------------------------------

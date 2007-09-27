@@ -89,6 +89,7 @@
     <Compile Include="LanguageElements\Comments.cs" />
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
     <Compile Include="LanguageElements\Members.cs" />
+    <Compile Include="LanguageElements\Methods.cs" />
     <Compile Include="LanguageElements\Overloading.cs" />
     <Compile Include="LanguageElements\Pragmas.cs" />
     <Compile Include="LanguageElements\TypeDeclarations.cs" />
@@ -359,6 +360,15 @@
     <None Include="TestFiles\Members\FieldDeclaration16.cs" />
     <None Include="TestFiles\Members\FieldDeclaration17.cs" />
     <None Include="TestFiles\Members\FieldDeclaration18.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration19.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration5.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration6.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration20.cs" />
+    <None Include="TestFiles\Members\ConstDeclaration1.cs" />
+    <None Include="TestFiles\Members\ConstDeclaration2.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration1.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration2.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration3.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />

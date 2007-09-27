@@ -156,5 +156,35 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[5].Code, "CS0106");
       Assert.AreEqual(parser.Errors[6].Code, "CS0106");
     }
+
+    [TestMethod]
+    public void MemberWithEnclosingNameFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"ClassDeclaration\ClassDeclaration5.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 9);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0542");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0542");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0542");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0542");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0101");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0101");
+      Assert.AreEqual(parser.Errors[6].Code, "CS0101");
+      Assert.AreEqual(parser.Errors[7].Code, "CS0542");
+      Assert.AreEqual(parser.Errors[8].Code, "CS0542");
+    }
+
+    [TestMethod]
+    public void TypeParameterWithInvalidNameFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"ClassDeclaration\ClassDeclaration6.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0102");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0694");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0102");
+    }
   }
 }

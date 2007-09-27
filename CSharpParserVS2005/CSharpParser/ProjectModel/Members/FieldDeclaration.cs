@@ -163,8 +163,18 @@ namespace CSharpParser.ProjectModel
         Invalidate();
       }
 
+      // --- Struct fields are not allowed to have initializers
+      if (DeclaringType.IsStruct && HasInitializer)
+      {
+        Parser.Error0573(Token, QualifiedName);
+        Invalidate();
+      }
+
+      TypeReference typeRef = ResultingType.RightMostPart;
+      if (typeRef == null) return;
+
       // --- Go further only if field type has been resolved
-      if (!ResultingType.IsResolvedToType && !ResultingType.IsResolvedToTypeParameter)
+      if (!typeRef.IsResolvedToType && !typeRef.IsResolvedToTypeParameter)
       {
         Invalidate();
       }
@@ -172,13 +182,20 @@ namespace CSharpParser.ProjectModel
       // --- In case if invalidity we finish the check.
       if (!IsValid) return;
 
+      // --- Field declarations cannot have static types
+      if (typeRef.IsResolvedToType && 
+        typeRef.ResolvingType.IsStatic)
+      {
+        Parser.Error0723(Token, ResultingType.FullName);
+      }
+
       // --- Check the resulting type of volatile fields
       if (IsVolatile)
       {
         // --- A type-parameter that is known to be a reference type;
-        if (ResultingType.IsResolvedToTypeParameter)
+        if (typeRef.IsResolvedToTypeParameter)
         {
-          TypeParameter param = ResultingType.ResolvingTypeParameter;
+          TypeParameter param = typeRef.ResolvingTypeParameter;
           if (param.HasConstraint && param.Constraint.HasPrimary) 
           {
             if (param.Constraint.Primary.IsClass ||
@@ -192,7 +209,7 @@ namespace CSharpParser.ProjectModel
           return;
         }
 
-        ITypeCharacteristics fieldType = ResultingType.ResolvingType;
+        ITypeCharacteristics fieldType = typeRef.ResolvingType;
 
         // --- Resulting type must be one of the followings:
         // --- A reference type;

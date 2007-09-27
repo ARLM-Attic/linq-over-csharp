@@ -342,6 +342,71 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      base.CheckSemantics();
+
+      // --- Static types cannot be abstract, override or virtual at the same time.
+      if (IsStatic && (IsAbstract || IsOverride || IsVirtual))
+      {
+        Parser.Error0112(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Either virtual or override modifier is allowed.
+      if (IsVirtual && IsOverride)
+      {
+        Parser.Error0113(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Abstract method cannot be virtual
+      if (IsAbstract && IsVirtual)
+      {
+        Parser.Error0503(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Abstract method cannot be sealed
+      if (IsAbstract && IsSealed)
+      {
+        Parser.Error0502(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Abstract method cannot be extern
+      if (IsAbstract && IsExtern)
+      {
+        Parser.Error0180(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Only override classes can be sealed
+      if (IsSealed && !IsOverride)
+      {
+        Parser.Error0238(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Private methods must not have abstract, virtual or override modifiers.
+      if (Visibility == Visibility.Private &&
+        (IsAbstract || IsVirtual || IsOverride))
+      {
+        Parser.Error0621(Token, QualifiedName);
+        Invalidate();
+      }
+    }
+
+    #endregion
+
   }
 
   // ==================================================================================

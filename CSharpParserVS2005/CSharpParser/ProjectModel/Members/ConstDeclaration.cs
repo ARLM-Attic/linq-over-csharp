@@ -70,6 +70,108 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      base.CheckSemantics();
+
+      // --- "abstract" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@abstract) != 0)
+      {
+        Parser.Error0681(Token);
+        Invalidate();
+      }
+
+      // --- "readonly" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@readonly) != 0)
+      {
+        Parser.Error0106(Token, "readonly");
+        Invalidate();
+      }
+
+      // --- "volatile" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@volatile) != 0)
+      {
+        Parser.Error0106(Token, "volatile");
+        Invalidate();
+      }
+
+      // --- "virtual" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@virtual) != 0)
+      {
+        Parser.Error0106(Token, "virtual");
+        Invalidate();
+      }
+
+      // --- "sealed" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@sealed) != 0)
+      {
+        Parser.Error0106(Token, "sealed");
+        Invalidate();
+      }
+
+      // --- "override" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@override) != 0)
+      {
+        Parser.Error0106(Token, "override");
+        Invalidate();
+      }
+
+      // --- "extern" is not allowed on constants
+      if ((_DeclaredModifier & Modifier.@extern) != 0)
+      {
+        Parser.Error0106(Token, "extern");
+        Invalidate();
+      }
+
+      TypeReference typeRef = ResultingType.RightMostPart;
+      if (typeRef == null) return;
+
+      // --- Go further only if field type has been resolved
+      if (!typeRef.IsResolvedToType && !typeRef.IsResolvedToTypeParameter)
+      {
+        Invalidate();
+      }
+
+      // --- In case if invalidity we finish the check.
+      if (!IsValid) return;
+
+      ITypeCharacteristics constType = typeRef.ResolvingType;
+
+      // --- Resulting type must be one of the followings:
+      // --- A reference type or an enum;
+      if (constType.IsClass || constType.IsEnum) return;
+
+      // --- The type byte, sbyte, short, ushort, int, uint, long, ulong, char, float, 
+      // --- double, decimal, string or bool;
+      if (constType.TypeObject.Equals(typeof(byte)) ||
+          constType.TypeObject.Equals(typeof(sbyte)) ||
+          constType.TypeObject.Equals(typeof(short)) ||
+          constType.TypeObject.Equals(typeof(ushort)) ||
+          constType.TypeObject.Equals(typeof(int)) ||
+          constType.TypeObject.Equals(typeof(uint)) ||
+          constType.TypeObject.Equals(typeof(long)) ||
+          constType.TypeObject.Equals(typeof(ulong)) ||
+          constType.TypeObject.Equals(typeof(char)) ||
+          constType.TypeObject.Equals(typeof(float)) ||
+          constType.TypeObject.Equals(typeof(double)) ||
+          constType.TypeObject.Equals(typeof(decimal)) ||
+          constType.TypeObject.Equals(typeof(string)) ||
+          constType.TypeObject.Equals(typeof(bool)))
+        return;
+
+      // --- Const has an invalid type
+      Parser.Error0283(Token, constType.FullName);
+    }
+
+    #endregion
   }
 
   // ==================================================================================

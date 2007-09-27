@@ -1370,7 +1370,7 @@ namespace CSharpParser.ProjectModel
     {
       _Parser.Error0101(partition.Token,
         partition.EnclosingNamespace == null
-        ? partition.EnclosingSourceFile.Name
+        ? GlobalHierarchyName
         : partition.EnclosingNamespace.Name,
         partition.Name);
       type.Invalidate();
@@ -1511,6 +1511,7 @@ namespace CSharpParser.ProjectModel
         _CurrentFile = type.EnclosingSourceFile;
         type.ClassifyMembers();
         type.CheckMembers();
+        type.CheckTypeParameters();
       }
     }
 

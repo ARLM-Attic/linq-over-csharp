@@ -58,6 +58,8 @@ namespace CSharpParser.ProjectModel
 
     // --- Members of the type
     private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
+    private readonly Dictionary<string, MemberDeclaration> _MemberIndex = 
+      new Dictionary<string, MemberDeclaration>();
     private readonly List<MemberDeclaration> _MemberCandidates = new List<MemberDeclaration>();
     private readonly ConstDeclarationCollection _Consts = new ConstDeclarationCollection();
     private readonly ConstructorDeclarationCollection _Constructors = new ConstructorDeclarationCollection();
@@ -1280,6 +1282,13 @@ namespace CSharpParser.ProjectModel
     public void AddTypeDeclaration(TypeDeclaration type)
     {
       if (type == null) return;
+
+      // --- Nested type must have a name different from the enclosing type
+      if (type.SimpleName == SimpleName)
+      {
+        Parser.Error0542(type.Token, Name);
+        type.Invalidate();
+      }
       _NestedTypes.Add(type);
       Parser.CompilationUnit.AddTypeDeclaration(type);
     }
@@ -1720,6 +1729,14 @@ namespace CSharpParser.ProjectModel
     {
       foreach (MemberDeclaration member in _MemberCandidates)
       {
+        // --- Check, if member has a different name than its enclosing type.
+        // --- Only constructors, finalizers and cast operators can have the same name.
+        if (member.SimpleName == SimpleName && !(member is ConstructorDeclaration)
+          && !(member is FinalizerDeclaration) && !(member is CastOperatorDeclaration))
+        {
+          Parser.Error0542(member.Token, member.Name);
+        }
+
         // --- Check, if member is a constant
         ConstDeclaration constDecl = member as ConstDeclaration;
         if (constDecl != null && AddConstant(constDecl)) continue;
@@ -1762,6 +1779,12 @@ namespace CSharpParser.ProjectModel
         if (finDecl != null && thisClass != null &&
           thisClass.HasAlreadyFinalizer(finDecl)) continue;
 
+        // --- Add the name to the member index
+        if (!_MemberIndex.ContainsKey(member.SimpleName))
+        {
+          _MemberIndex.Add(member.SimpleName, member);
+        }
+
         // --- Add member to the other members
         if (_Members.Contains(member))
         {
@@ -1771,11 +1794,39 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if a member declarations conform with the language specification rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
     public void CheckMembers()
     {
       foreach (MemberDeclaration member in _Members)
       {
         member.CheckSemantics();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if a type parameter declarations conform with the language 
+    /// specification rules.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public void CheckTypeParameters()
+    {
+      foreach (TypeParameter param in _TypeParameters)
+      {
+        // --- Type parameters shall not have the name of the enclosing type or the name
+        // --- of any member.
+        if (param.SimpleName == SimpleName)
+        {
+          Parser.Error0694(param.Token, param.SimpleName);
+        }
+        else if (_MemberIndex.ContainsKey(param.SimpleName))
+        {
+          Parser.Error0102(param.Token, ParametrizedName, param.SimpleName);
+        }
       }
     }
 

@@ -1,4 +1,3 @@
-using CSharpParser.ParserFiles;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -310,7 +309,7 @@ namespace CSharpParserTest
       Assert.IsNotNull(md);
       Assert.AreEqual(md.ResultingType.RightmostName, "T");
       Assert.AreEqual(md.Name, "AbstractMethod");
-      Assert.AreEqual(md.DeclaredVisibility, Visibility.Private);
+      Assert.AreEqual(md.DeclaredVisibility, Visibility.Protected);
       Assert.IsTrue(md.IsAbstract);
       Assert.AreEqual(md.FormalParameters.Count, 2);
       fp = md.FormalParameters[0];

@@ -22,12 +22,16 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public enum ProgramScope
     {
-      /// <summary>Access domain is empty. The type cannor be accessed.</summary>
+      /// <summary>Access domain is empty. The type cannot be accessed.</summary>
       None,
 
       /// <summary>Type or member can be accessed only from the enclosing type.</summary>
       Private,
-      
+
+      /// <summary>
+      /// Type can be accessed from within its declaring type and from inheritors 
+      /// within the declaration type.
+      /// </summary>
       PrivatePlusInheritors,
       
       /// <summary>

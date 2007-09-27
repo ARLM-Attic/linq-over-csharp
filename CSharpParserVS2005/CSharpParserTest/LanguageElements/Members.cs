@@ -302,5 +302,52 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS0677");
       Assert.AreEqual(parser.Errors[2].Code, "CS0677");
     }
+
+    [TestMethod]
+    public void StructFieldInitializerFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration19.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0573");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0573");
+    }
+
+    [TestMethod]
+    public void StaticFieldTypeFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration20.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0723");
+    }
+
+    [TestMethod]
+    public void InvalidConstModifierFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\ConstDeclaration1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 7);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[6].Code, "CS0681");
+    }
+
+    [TestMethod]
+    public void InvalidConstTypesFails()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\ConstDeclaration2.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0283");
+    }
   }
 }
