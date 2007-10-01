@@ -386,20 +386,34 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Semantic checks
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Checks the semantics of the specified member.
     /// </summary>
-    /// <remarks>
-    /// This implementation only checks, if the type of the member is at least as
-    /// accessible as the member itself.
-    /// </remarks>
     // --------------------------------------------------------------------------------
     public virtual void CheckSemantics()
     {
+      CheckGeneralMemberSemantics();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the general semantics of this member.
+    /// </summary>
+    /// <remarks>
+    /// This implementation only checks, if the type of the member is at least as
+    /// accessible as the member itself.
+    /// Derived types should use this method to check the general semantics and then
+    /// they can check member-specific semantics.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void CheckGeneralMemberSemantics()
+    {
       if (_ResultingType == null) return;
       TypeReference typeRef = _ResultingType.RightMostPart;
-      
+
       // --- Only those members are checked that have a non-void resolved resulting type.
       if (typeRef == null || !typeRef.IsResolved || typeRef.IsVoid) return;
 
@@ -424,6 +438,69 @@ namespace CSharpParser.ProjectModel
         Invalidate();
       }
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if modifier combinations are valid according to the method rules.
+    /// </summary>
+    /// <remarks>
+    /// This method is used to check not only the method but property semantics.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public void CheckMethodModifiers()
+    {
+      // --- Static methods cannot be abstract, override or virtual at the same time.
+      if (IsStatic && (IsAbstract || IsOverride || IsVirtual))
+      {
+        Parser.Error0112(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Either virtual or override modifier is allowed.
+      if (IsVirtual && IsOverride)
+      {
+        Parser.Error0113(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Abstract method cannot be virtual
+      if (IsAbstract && IsVirtual)
+      {
+        Parser.Error0503(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Abstract method cannot be sealed
+      if (IsAbstract && IsSealed)
+      {
+        Parser.Error0502(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Abstract method cannot be extern
+      if (IsAbstract && IsExtern)
+      {
+        Parser.Error0180(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Only override classes can be sealed
+      if (IsSealed && !IsOverride)
+      {
+        Parser.Error0238(Token, QualifiedName);
+        Invalidate();
+      }
+
+      // --- Private methods must not have abstract, virtual or override modifiers.
+      if (Visibility == Visibility.Private &&
+        (IsAbstract || IsVirtual || IsOverride))
+      {
+        Parser.Error0621(Token, QualifiedName);
+        Invalidate();
+      }
+    }
+
+    #endregion
   }
 
   // ==================================================================================

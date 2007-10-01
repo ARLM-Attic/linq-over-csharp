@@ -79,6 +79,37 @@ namespace CSharpParser.ProjectModel
       set { _Setter = value; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the method signature reserved by the "get" accessor
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string ReservedGetSignature
+    {
+      get
+      {
+        return string.Format("get_{0}()", SimpleName);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the method signature reserved by the "set" accessor
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string ReservedSetSignature
+    {
+      get
+      {
+        string typeName = ResultingType.RightMostPart.IsResolvedToType
+                            ? ResultingType.RightMostPart.ResolvingType.FullName
+                            : (ResultingType.RightMostPart.IsResolvedToTypeParameter
+                                 ? ResultingType.RightMostPart.ResolvingTypeParameter.Name
+                                 : "");
+        return string.Format("set_{0}({1})", SimpleName, typeName);
+      }
+    }
+
     #endregion
 
     #region IUsesResolutionContext implementation
@@ -103,6 +134,32 @@ namespace CSharpParser.ProjectModel
       if (_Setter != null)
       {
         _Setter.ResolveTypeReferences(contextType, declarationScope, parameterScope);
+      }
+    }
+
+    #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      CheckGeneralMemberSemantics();
+      CheckMethodModifiers();
+
+      // --- Check for the reserved method names (get_<Property>, set_<Property>)
+      TypeReference type = ResultingType.RightMostPart;
+      if (IsValid && (type.IsResolvedToType || type.IsResolvedToTypeParameter))
+      {
+        MethodDeclaration method;
+        if (DeclaringType.Methods.TryGetValue(ReservedGetSignature, out method))
+          Parser.Error0111(method.Token, ParametrizedName, method.Signature);
+        if (DeclaringType.Methods.TryGetValue(ReservedSetSignature, out method))
+          Parser.Error0111(method.Token, ParametrizedName, method.Signature);
       }
     }
 

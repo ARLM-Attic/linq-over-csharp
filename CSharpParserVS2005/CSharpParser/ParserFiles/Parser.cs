@@ -1361,7 +1361,7 @@ out TypeDeclaration td) {
 		Expect(1);
 		ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
 		CurrentElement = cd;
-		cd.Name = t.val;
+		// cd.Name = t.val;
 		cd.SetModifiers(m.Value);
 		cd.AssignAttributes(attrs);
 		
@@ -1381,10 +1381,10 @@ out TypeDeclaration td) {
 			} else SynErr(151);
 			Expect(98);
 			if (StartOf(18)) {
-				Argument(null);
+				Argument(cd.BaseArguments);
 				while (la.kind == 87) {
 					Get();
-					Argument(null);
+					Argument(cd.BaseArguments);
 				}
 			}
 			Expect(113);

@@ -26,6 +26,7 @@ namespace CSharpParser.ProjectModel
     private readonly ExternalAliasCollection _ExternAliases = new ExternalAliasCollection();
     private readonly string _Name;
     private readonly CompilationUnit _ParentUnit;
+    private readonly List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
 
     #endregion
 
@@ -89,6 +90,16 @@ namespace CSharpParser.ProjectModel
       {
         throw new NotSupportedException("Implicit namespace does not support NestedNamespaces.");
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type declarations in this project file
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<TypeDeclaration> TypeDeclarations
+    {
+      get { return _TypeDeclarations; }
     }
 
     // --------------------------------------------------------------------------------

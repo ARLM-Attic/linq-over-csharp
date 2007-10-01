@@ -719,7 +719,6 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
     ident                   (. 
                                ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
                                CurrentElement = cd;
-                               cd.Name = t.val;
                                cd.SetModifiers(m.Value);
                                cd.AssignAttributes(attrs);
                             .)
@@ -732,7 +731,7 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
       ":" ( "base"          (. cd.HasBase = true; .)
       | "this"              (. cd.HasThis = true; .)
       ) "("
-    [ Argument<null> { "," Argument<null> } ] ")"
+    [ Argument<cd.BaseArguments> { "," Argument<cd.BaseArguments> } ] ")"
     ] ( Block<cd> | ";" )   (. 
                                td.AddMember(cd); 
                                cd.Terminate(t);

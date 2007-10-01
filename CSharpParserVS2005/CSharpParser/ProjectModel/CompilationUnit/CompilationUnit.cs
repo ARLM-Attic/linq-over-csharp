@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.ParserFiles.PPExpressions;
+using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 using CSharpParser.Semantics;
 using Scanner=CSharpParser.ParserFiles.Scanner;
@@ -30,7 +31,7 @@ namespace CSharpParser.ProjectModel
     private readonly SourceFileCollection _Files = new SourceFileCollection();
     private readonly NamespaceCollection _DeclaredNamespaces = new NamespaceCollection();
     private readonly TypeDeclarationCollection _DeclaredTypes = new TypeDeclarationCollection();
-    private readonly string _WorkingFolder = string.Empty;
+    private string _WorkingFolder = string.Empty;
     private readonly ReferencedUnitCollection _ReferencedUnits = new ReferencedUnitCollection();
     private readonly List<string> _ConditionalSymbols = new List<string>();
 
@@ -77,7 +78,8 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="workingFolder">Folder used as the working folder</param>
     // --------------------------------------------------------------------------------
-    public CompilationUnit(string workingFolder): this(workingFolder, false)
+    public CompilationUnit(string workingFolder)
+      : this(workingFolder, false)
     {
     }
 
@@ -104,6 +106,25 @@ namespace CSharpParser.ProjectModel
       _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
       AddAssemblyReference("mscorlib");
       AddAssemblyReference("System");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a project parser using the specified content provider.
+    /// </summary>
+    /// <param name="content">Project content provider.</param>
+    // --------------------------------------------------------------------------------
+    public CompilationUnit(IProjectContentProvider content)
+    {
+      _ErrorHandler = this;
+      _CurrentFile = null;
+      _ErrorLineOffset = -1;
+      _ErrorFile = null;
+      _WorkingFolder = content.WorkingFolder;
+      _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
+      AddAssemblyReference("mscorlib");
+      AddAssemblyReference("System");
+      content.CollectProjectItems(this);
     }
 
     #endregion
@@ -359,11 +380,25 @@ namespace CSharpParser.ProjectModel
     /// Adds a file to the project.
     /// </summary>
     /// <param name="fileName">File to add to the project.</param>
+    /// <remarks>
+    /// File name is relative to the working folder.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public void AddFile(string fileName)
     {
       string fullName = Path.Combine(_WorkingFolder, fileName);
         _Files.Add(new SourceFile(fullName, this));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a file to the project using full file name.
+    /// </summary>
+    /// <param name="fileName">File to add to the project.</param>
+    // --------------------------------------------------------------------------------
+    public void AddFileWithFullName(string fileName)
+    {
+      _Files.Add(new SourceFile(fileName, this));  
     }
 
     // --------------------------------------------------------------------------------
@@ -1506,9 +1541,8 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckMemberDeclaration()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
+      foreach (TypeDeclaration type in TypesInSource)
       {
-        _CurrentFile = type.EnclosingSourceFile;
         type.ClassifyMembers();
         type.CheckMembers();
         type.CheckTypeParameters();
@@ -1535,9 +1569,8 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckTypeConstraintDeclarations()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
+      foreach (TypeDeclaration type in TypesInSource)
       {
-        _CurrentFile = type.EnclosingSourceFile;
         type.CheckConstraintDeclarations();
       }
     }
@@ -1572,6 +1605,72 @@ namespace CSharpParser.ProjectModel
       {
         _ErrorStream.WriteLine(_ErrorMessageFormat, errorPoint.line, errorPoint.col, description);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator to go through each type declared in the source code.
+    /// </summary>
+    /// <remarks>
+    /// The iterator goes through all the source files and type declaration parts
+    /// within the source files.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private IEnumerable<TypeDeclaration> TypesInSource
+    {
+      get
+      {
+        foreach (SourceFile file in Files)
+        {
+          _CurrentFile = file;
+          foreach (TypeDeclaration type in GetTypesInDeclarationScope(file)) 
+            yield return type;
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator to go through each type declared within the specified declaration 
+    /// scope.
+    /// </summary>
+    /// <param name="scope">Declaration scope.</param>
+    /// <returns>
+    /// Iterator of types.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private IEnumerable<TypeDeclaration> GetTypesInDeclarationScope(
+      ITypeDeclarationScope scope)
+    {
+      // --- Retrieve types declared within the scope 
+      foreach (TypeDeclaration type in scope.TypeDeclarations)
+        foreach (TypeDeclaration toReturn in GetTypesInType(type))
+          yield return toReturn;
+
+      // --- Retrieve types declared within a namespace fragment of this scope
+      foreach (NamespaceFragment nestedNs in scope.NestedNamespaces)
+        foreach (TypeDeclaration toReturn in GetTypesInDeclarationScope(nestedNs))
+          yield return toReturn;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Iterator to go through each nested type within a type declaration.
+    /// </summary>
+    /// <param name="type">Type declaration.</param>
+    /// <returns>
+    /// Iterator of types.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private IEnumerable<TypeDeclaration> GetTypesInType(TypeDeclaration type)
+    {
+      // --- Return the type itself
+      yield return type;
+
+      // --- Iterate through this type's nested types recursively
+      foreach (TypeDeclaration nestedType in type.NestedTypes)
+        foreach (TypeDeclaration toReturn in GetTypesInType(nestedType))
+          yield return toReturn;
     }
 
     #endregion

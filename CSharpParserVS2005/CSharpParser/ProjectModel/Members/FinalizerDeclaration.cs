@@ -38,5 +38,83 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      CheckGeneralMemberSemantics();
+
+      // --- "new" modifier is not allowed on a destructor declaration.
+      if (IsNew)
+      {
+        Parser.Error0106(Token, "new");
+        Invalidate();
+      }
+
+      // --- "readonly" modifier is not allowed on a destructor declaration.
+      if (IsReadOnly)
+      {
+        Parser.Error0106(Token, "readonly");
+        Invalidate();
+      }
+
+      // --- "volatile" modifier is not allowed on a destructor declaration.
+      if (IsVolatile)
+      {
+        Parser.Error0106(Token, "volatile");
+        Invalidate();
+      }
+
+      // --- "virtual" modifier is not allowed on a destructor declaration.
+      if (IsVirtual)
+      {
+        Parser.Error0106(Token, "virtual");
+        Invalidate();
+      }
+
+      // --- "sealed" modifier is not allowed on a destructor declaration.
+      if (IsSealed)
+      {
+        Parser.Error0106(Token, "sealed");
+        Invalidate();
+      }
+
+      // --- "override" modifier is not allowed on a destructor declaration.
+      if (IsOverride)
+      {
+        Parser.Error0106(Token, "override");
+        Invalidate();
+      }
+
+      // --- "abstract" modifier is not allowed on a destructor declaration.
+      if (IsAbstract)
+      {
+        Parser.Error0106(Token, "abstract");
+        Invalidate();
+      }
+
+      // --- "static" modifier is not allowed on a destructor declaration.
+      if (IsStatic)
+      {
+        Parser.Error0106(Token, "static");
+        Invalidate();
+      }
+
+      // --- Access modifiers are not allowed
+      if (!HasDefaultVisibility)
+      {
+        Parser.Error0106(Token, DeclaredVisibility.ToString().ToLower());
+        Invalidate();
+      }
+    }
+
+    #endregion
+
   }
 }

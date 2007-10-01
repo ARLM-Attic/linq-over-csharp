@@ -2,7 +2,7 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a reference to a compiation unit.
+  /// This type represents a reference to a compilation unit.
   /// </summary>
   // ==================================================================================
   public sealed class ReferencedCompilation : ReferencedUnit

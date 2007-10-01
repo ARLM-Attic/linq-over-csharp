@@ -122,37 +122,57 @@ namespace CSharpParser.ProjectModel
         sb.Append(FullName);
         if (_TypeParameters.Count != 0)
         {
-          sb.Append('<');
-          isFirst = true;
-          foreach (TypeParameter par in _TypeParameters)
-          {
-            if (!isFirst)
-            {
-              sb.Append(", ");
-            }
-            sb.Append(par.Name);
-            isFirst = false;
-          }
-          sb.Append('>');
+          sb.Append('`');
+          sb.Append(_TypeParameters.Count);
         }
         sb.Append('(');
         isFirst = true;
         foreach (FormalParameter par in _FormalParameters)
         {
-          if (!isFirst)
-          {
-            sb.Append(", ");
-          }
+          if (!isFirst) sb.Append(", ");
           if (par.Kind != FormalParameterKind.In)
           {
             sb.Append(par.Kind.ToString().ToLower());
             sb.Append(' ');
           }
           if (par.Type.RightMostPart.IsResolvedToType)
-          {
             sb.Append(par.Type.RightMostPart.ResolvingType.FullName);
-          }
           else 
+            sb.Append(par.Type.FullName);
+          isFirst = false;
+        }
+        sb.Append(')');
+        return sb.ToString();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the signature of this method used to overload check.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string SignatureForOverload
+    {
+      get
+      {
+        StringBuilder sb = new StringBuilder(100);
+        bool isFirst;
+        sb.Append(FullName);
+        if (_TypeParameters.Count != 0)
+        {
+          sb.Append('`');
+          sb.Append(_TypeParameters.Count);
+        }
+        sb.Append('(');
+        isFirst = true;
+        foreach (FormalParameter par in _FormalParameters)
+        {
+          if (!isFirst) sb.Append(", ");
+          if (par.Kind != FormalParameterKind.In)
+            sb.Append("outref ");
+          if (par.Type.RightMostPart.IsResolvedToType)
+            sb.Append(par.Type.RightMostPart.ResolvingType.FullName);
+          else
             sb.Append(par.Type.FullName);
           isFirst = false;
         }
@@ -352,61 +372,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override void CheckSemantics()
     {
-      base.CheckSemantics();
-
-      // --- Static types cannot be abstract, override or virtual at the same time.
-      if (IsStatic && (IsAbstract || IsOverride || IsVirtual))
-      {
-        Parser.Error0112(Token, QualifiedName);
-        Invalidate();
-      }
-
-      // --- Either virtual or override modifier is allowed.
-      if (IsVirtual && IsOverride)
-      {
-        Parser.Error0113(Token, QualifiedName);
-        Invalidate();
-      }
-
-      // --- Abstract method cannot be virtual
-      if (IsAbstract && IsVirtual)
-      {
-        Parser.Error0503(Token, QualifiedName);
-        Invalidate();
-      }
-
-      // --- Abstract method cannot be sealed
-      if (IsAbstract && IsSealed)
-      {
-        Parser.Error0502(Token, QualifiedName);
-        Invalidate();
-      }
-
-      // --- Abstract method cannot be extern
-      if (IsAbstract && IsExtern)
-      {
-        Parser.Error0180(Token, QualifiedName);
-        Invalidate();
-      }
-
-      // --- Only override classes can be sealed
-      if (IsSealed && !IsOverride)
-      {
-        Parser.Error0238(Token, QualifiedName);
-        Invalidate();
-      }
-
-      // --- Private methods must not have abstract, virtual or override modifiers.
-      if (Visibility == Visibility.Private &&
-        (IsAbstract || IsVirtual || IsOverride))
-      {
-        Parser.Error0621(Token, QualifiedName);
-        Invalidate();
-      }
+      CheckGeneralMemberSemantics();
+      CheckMethodModifiers();
     }
 
     #endregion
-
   }
 
   // ==================================================================================

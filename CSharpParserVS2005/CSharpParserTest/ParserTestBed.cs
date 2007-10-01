@@ -1,4 +1,5 @@
 using System;
+using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParserTest
@@ -10,7 +11,7 @@ namespace CSharpParserTest
 
     public bool InvokeParser(string fileName)
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      CompilationUnit parser = new CompilationUnit(new EmptyProject(WorkingFolder));
       parser.AddFile(fileName);
       return InvokeParser(parser);
     }

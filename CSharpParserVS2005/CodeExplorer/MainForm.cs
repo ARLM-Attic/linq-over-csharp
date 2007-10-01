@@ -48,7 +48,7 @@ namespace CSharpParser.CodeExplorer
       if (FolderDialog.ShowDialog() != DialogResult.OK) return;
 
       // --- Creates a compilation unit for the selected folder.
-      CompilationUnit unit = new CompilationUnit(FolderDialog.SelectedPath, true);
+      CompilationUnit unit = new CompilationUnit(FolderDialog.SelectedPath);
       StatusLabel.Text = "Parsing project in " + FolderDialog.SelectedPath;
       StatusStrip.Update();
       Cursor = Cursors.WaitCursor;
@@ -67,7 +67,10 @@ namespace CSharpParser.CodeExplorer
           StatusLabel.Text = String.Format("{0} erros found during parse.", unit.Errors.Count);
         }
       }
-      catch (SystemException) { }
+      catch (SystemException ex)
+      {
+        StatusLabel.Text = ex.Message;
+      }
       finally
       {
         Cursor = Cursors.Default;

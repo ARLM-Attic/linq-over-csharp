@@ -43,6 +43,13 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the type declarations in this project file
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    List<TypeDeclaration> TypeDeclarations { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the source file enclosing this resolution context.
     /// </summary>
     // --------------------------------------------------------------------------------

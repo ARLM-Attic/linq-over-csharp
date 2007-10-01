@@ -369,6 +369,15 @@
     <None Include="TestFiles\Methods\MethodDeclaration1.cs" />
     <None Include="TestFiles\Methods\MethodDeclaration2.cs" />
     <None Include="TestFiles\Methods\MethodDeclaration3.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration4.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration1.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration2.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration3.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration4.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration5.cs" />
+    <None Include="TestFiles\Methods\FinalizerDeclaration1.cs" />
+    <None Include="TestFiles\Methods\FinalizerDeclaration2.cs" />
+    <None Include="TestFiles\Methods\ReservedName1.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />

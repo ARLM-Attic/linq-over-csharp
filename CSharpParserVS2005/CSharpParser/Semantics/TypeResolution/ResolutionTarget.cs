@@ -1,4 +1,4 @@
-namespace CSharpParser
+namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>

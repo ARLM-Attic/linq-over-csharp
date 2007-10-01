@@ -24,7 +24,6 @@ namespace CSharpParser.ProjectModel
     private readonly UsingClauseCollection _Usings = new UsingClauseCollection();
     private readonly AttributeCollection _GlobalAttributes = new AttributeCollection();
     private readonly NamespaceFragmentCollection _Namespaces = new NamespaceFragmentCollection();
-    //private readonly TypeDeclarationCollection _TypeDeclarations = new TypeDeclarationCollection();
     private readonly List<TypeDeclaration> _TypeDeclarations = new List<TypeDeclaration>();
     private readonly RegionInfoCollection _Regions = new RegionInfoCollection();
     private readonly CommentInfoCollection _Comments = new CommentInfoCollection();

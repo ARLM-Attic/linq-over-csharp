@@ -1097,7 +1097,8 @@ namespace CSharpParser.ProjectModel
       // --- Create a list of interface names used
       List<string> interfaces = new List<string>();
       foreach (TypeReference intf in _InterfaceList)
-        if (intf.IsValid) interfaces.Add(intf.ResolvingType.FullName);
+        if (intf.IsValid && intf.IsResolvedToType) 
+          interfaces.Add(intf.ResolvingType.FullName);
 
       Attributes.Clear();
       foreach (TypeDeclaration part in _Parts)
@@ -1144,7 +1145,7 @@ namespace CSharpParser.ProjectModel
         // --- name the same base interface(s).
         foreach (TypeReference intf in part.InterfaceList)
         {
-          if (!intf.IsValid) continue;
+          if (!intf.IsValid || !intf.IsResolvedToType) continue;
           if (!interfaces.Contains(intf.ResolvingType.FullName))
           {
             interfaces.Add(intf.ResolvingType.FullName);
@@ -1801,9 +1802,24 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CheckMembers()
     {
+      // --- Check semantics for each member
       foreach (MemberDeclaration member in _Members)
       {
         member.CheckSemantics();
+      }
+
+      // --- Check if there are no methods which differ solely by ref and out in their
+      // --- signature
+      Dictionary<string, int> methodIndex = new Dictionary<string, int>();
+      foreach (MethodDeclaration method in _Methods)
+      {
+        string signature = method.SignatureForOverload;
+        if (methodIndex.ContainsKey(signature))
+        {
+          Parser.Error0663(method.Token, method.ParametrizedName);
+          method.Invalidate();
+        }
+        else methodIndex.Add(signature, 0);
       }
     }
 

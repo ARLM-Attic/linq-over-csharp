@@ -280,6 +280,18 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0132: '{0}': a static constructor must be parameterless.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Mismatched name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0132(Token token, string name)
+    {
+      Error("CS0132", token,"'{0}': a static constructor must be parameterless", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0136: A local variable named '{0}' cannot be declared in this scope
     /// because it would give a different meaning to '{0}', which is already used
     /// in a '{1}' scope to denote something else.
@@ -774,6 +786,19 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0515: '{0}': access modifiers are not allowed on static constructors.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Method name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0515(Token token, string name)
+    {
+      Error("CS0515", token,
+        "'{0}': access modifiers are not allowed on static constructors", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0527: Type '{0}' in interface list is not an interface.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -906,6 +931,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0644", token,
         string.Format("'{0}' cannot derive from special class '{1}'", name, specialName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0663: '{0}': virtual or abstract members cannot be private.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0663(Token token, string name)
+    {
+      Error("CS0663", token,
+        "'{0}' cannot define overloaded methods that differ only on ref and out", name);
     }
 
     // --------------------------------------------------------------------------------

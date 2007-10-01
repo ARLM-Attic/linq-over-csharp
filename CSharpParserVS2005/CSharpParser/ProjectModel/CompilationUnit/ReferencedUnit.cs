@@ -58,18 +58,5 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class ReferencedUnitCollection : RestrictedCollection<ReferencedUnit>
   {
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Defines the key to be used for indexing.
-    /// </summary>
-    /// <param name="item">ReferencedUnit item.</param>
-    /// <returns>
-    /// Name of the compilation reference.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    //protected override string GetKeyOfItem(ReferencedUnit item)
-    //{
-    //  return item.Name;
-    //}
   }
 }
