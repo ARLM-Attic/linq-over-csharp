@@ -260,7 +260,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the qualified name of this member.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string QualifiedName
+    public virtual string QualifiedName
     {
       get { return _DeclaringType.Name + "." + FullName; }
     }
@@ -318,7 +318,8 @@ namespace CSharpParser.ProjectModel
           Parser.Error0106(Token, "protected");
         }
       }
-      else if (_DeclaringType.IsInterface || _DeclaringType.IsEnum)
+      else if (!(this is AccessorDeclaration) &&
+        _DeclaringType.IsInterface || _DeclaringType.IsEnum)
       {
         // --- Interface and enum members cannot have visibility modifiers.
         if (!HasDefaultVisibility)
@@ -496,6 +497,180 @@ namespace CSharpParser.ProjectModel
         (IsAbstract || IsVirtual || IsOverride))
       {
         Parser.Error0621(Token, QualifiedName);
+        Invalidate();
+      }
+    }
+
+    #endregion
+
+    #region Protected semantic check methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "extern" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void ExternNotAllowed()
+    {
+      if (IsExtern)
+      {
+        Parser.Error0106(Token, "extern");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "override" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void OverrideNotAllowed()
+    {
+      if (IsOverride)
+      {
+        Parser.Error0106(Token, "override");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "static" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void StaticNotAllowed()
+    {
+      if (IsStatic)
+      {
+        Parser.Error0106(Token, "static");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "new" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void NewNotAllowed()
+    {
+      if (IsNew)
+      {
+        Parser.Error0106(Token, "new");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "readonly" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void ReadOnlyNotAllowed()
+    {
+      if (IsReadOnly)
+      {
+        Parser.Error0106(Token, "readonly");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "volatile" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void VolatileNotAllowed()
+    {
+      if (IsVolatile)
+      {
+        Parser.Error0106(Token, "volatile");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "virtual" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void VirtualNotAllowed()
+    {
+      if (IsVirtual)
+      {
+        Parser.Error0106(Token, "virtual");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "sealed" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0106 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void SealedNotAllowed()
+    {
+      if (IsSealed)
+      {
+        Parser.Error0106(Token, "sealed");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "abstract" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0681 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void AbstractNotAllowed()
+    {
+      if (IsAbstract)
+      {
+        Parser.Error0106(Token, "abstract");
+        Invalidate();
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the unallowed "abstract" modifier is used for this member.
+    /// </summary>
+    /// <remarks>
+    /// Raises a CS0681 if modifier found, the member is invalidated.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    protected void AbstractNotAllowedWith0681()
+    {
+      if (IsAbstract)
+      {
+        Parser.Error0681(Token);
         Invalidate();
       }
     }

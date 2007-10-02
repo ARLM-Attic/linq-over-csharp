@@ -1361,7 +1361,6 @@ out TypeDeclaration td) {
 		Expect(1);
 		ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
 		CurrentElement = cd;
-		// cd.Name = t.val;
 		cd.SetModifiers(m.Value);
 		cd.AssignAttributes(attrs);
 		
@@ -1637,13 +1636,15 @@ TypeReference typeRef) {
 		while (la.kind == 97) {
 			Attributes(attrs);
 		}
+		Modifiers am = new Modifiers(this); 
+		ModifierList(am);
 		if ("add".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType); 
+			accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); 
 			CurrentElement = accessor; 
 		} else if ("remove".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType); 
+			accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop); 
 			CurrentElement = accessor; 
 		} else if (la.kind == 1) {
 			Get();
@@ -1652,23 +1653,26 @@ TypeReference typeRef) {
 		Block(accessor);
 		accessor.Terminate(t);
 		accessor.HasBody = true;
+		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs); 
 		
-		if (la.kind == 1 || la.kind == 97) {
+		if (StartOf(19)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 97) {
 				Attributes(attrs);
 			}
+			am = new Modifiers(this); 
+			ModifierList(am);
 			if ("add".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
-				accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType);
+				accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if ("remove".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
-				accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType);
+				accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if (la.kind == 1) {
@@ -1678,6 +1682,7 @@ TypeReference typeRef) {
 			Block(accessor);
 			accessor.Terminate(t);
 			accessor.HasBody = true;
+			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs); 
 			
 		}
@@ -1713,11 +1718,11 @@ TypeReference typeRef) {
 		ModifierList(am);
 		if ("get".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); 
+			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); 
 			CurrentElement = accessor; 
 		} else if ("set".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); 
+			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); 
 			CurrentElement = accessor; 
 		} else if (la.kind == 1) {
 			Get();
@@ -1744,13 +1749,13 @@ TypeReference typeRef) {
 			if ("get".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-				accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
+				accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-				accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType);
+				accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if (la.kind == 1) {
@@ -1961,13 +1966,15 @@ TypeReference typeRef) {
 		while (la.kind == 97) {
 			Attributes(attrs);
 		}
+		Modifiers am = new Modifiers(this); 
+		ModifierList(am);
 		if ("get".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); 
+			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); 
 			CurrentElement = accessor; 
 		} else if ("set".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType); 
+			accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop); 
 			CurrentElement = accessor; 
 		} else if (la.kind == 1) {
 			Get();
@@ -1975,23 +1982,26 @@ TypeReference typeRef) {
 		} else SynErr(168);
 		Expect(114);
 		accessor.Terminate(t);
+		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs); 
 		
-		if (la.kind == 1 || la.kind == 97) {
+		if (StartOf(19)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 97) {
 				Attributes(attrs);
 			}
+			am = new Modifiers(this); 
+			ModifierList(am);
 			if ("get".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-				accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
+				accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
 				if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-				accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType);
+				accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if (la.kind == 1) {
@@ -2000,6 +2010,7 @@ TypeReference typeRef) {
 			} else SynErr(169);
 			Expect(114);
 			accessor.Terminate(t);
+			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs); 
 			
 		}

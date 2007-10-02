@@ -31,7 +31,7 @@ namespace CSharpParser.ProjectModel
     private readonly SourceFileCollection _Files = new SourceFileCollection();
     private readonly NamespaceCollection _DeclaredNamespaces = new NamespaceCollection();
     private readonly TypeDeclarationCollection _DeclaredTypes = new TypeDeclarationCollection();
-    private string _WorkingFolder = string.Empty;
+    private readonly string _WorkingFolder = string.Empty;
     private readonly ReferencedUnitCollection _ReferencedUnits = new ReferencedUnitCollection();
     private readonly List<string> _ConditionalSymbols = new List<string>();
 

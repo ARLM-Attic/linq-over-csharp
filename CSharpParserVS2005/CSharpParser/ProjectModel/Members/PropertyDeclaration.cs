@@ -161,6 +161,62 @@ namespace CSharpParser.ProjectModel
         if (DeclaringType.Methods.TryGetValue(ReservedSetSignature, out method))
           Parser.Error0111(method.Token, ParametrizedName, method.Signature);
       }
+
+      // --- Check accessor modifiers
+      if (_Getter != null) _Getter.CheckSemantics();
+      if (_Setter != null) _Setter.CheckSemantics();
+
+      // --- Check accessibility modifiers
+      bool bothAccessorsExists = _Getter != null && _Setter != null;
+      bool getHasModifier = _Getter != null && !_Getter.HasDefaultVisibility;
+      bool setHasModifier = _Setter != null && !_Setter.HasDefaultVisibility;
+      if (IsOverride)
+      {
+        // --- For a property or indexer that includes an override modifier, the 
+        // --- accessor-modifier of an accessor shall match the accessor-modifier, 
+        // --- if any, of the accessor being overridden.
+      }
+      else
+      {
+        // --- For a property or indexer that has no override modifier, an accessor-modifier 
+        // --- is permitted only if the property or indexer has both a get and set accessor, 
+        // --- and then is permitted only on one of those accessors.
+        if (getHasModifier && !bothAccessorsExists)
+          Parser.Error0276(_Getter.Token, QualifiedName);
+        else if (setHasModifier && !bothAccessorsExists)
+          Parser.Error0276(_Setter.Token, QualifiedName);
+        else if (getHasModifier && setHasModifier)
+          Parser.Error0274(Token, QualifiedName);
+      }
+
+      // --- The accessor-modifier shall declare an accessibility that is strictly more 
+      // --- restrictive than the declared accessibility of the property or indexer itself.
+      AccessorDeclaration toCheck = null;
+      if (getHasModifier && !setHasModifier) toCheck = _Getter;
+      if (setHasModifier && !getHasModifier) toCheck = _Setter;
+      if (!DeclaringType.IsInterface && toCheck != null)
+      {
+        bool moreRestrictive = false;
+        switch (Visibility)
+        {
+          case Visibility.Public:
+            moreRestrictive = toCheck.Visibility != Visibility.Public;
+            break;
+          case Visibility.ProtectedInternal:
+            moreRestrictive = toCheck.Visibility == Visibility.Internal ||
+                              toCheck.Visibility == Visibility.Protected ||
+                              toCheck.Visibility == Visibility.Private;
+            break;
+          case Visibility.Internal:
+          case Visibility.Protected:
+            moreRestrictive = toCheck.Visibility == Visibility.Private;
+            break;
+        }
+        if (!moreRestrictive)
+        {
+          Parser.Error0273(toCheck.Token, toCheck.QualifiedName, QualifiedName);
+        }
+      }
     }
 
     #endregion

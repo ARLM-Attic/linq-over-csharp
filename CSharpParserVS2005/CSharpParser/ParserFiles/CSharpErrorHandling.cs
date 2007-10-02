@@ -471,6 +471,67 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0273: The accessibility modifier of the '{0}' accessor must be more 
+    /// restrictive than the property or indexer '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="prop">Property name</param>
+    /// <param name="name">Accessor name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0273(Token token, string prop, string name)
+    {
+      Error("CS0273", token,
+        "The accessibility modifier of the '{0}' accessor must be more restrictive " +
+        "than the property or indexer '{1}'", name, prop);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0274: Cannot specify accessibility modifiers for both accessors of 
+    /// the property or indexer '{0}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Accessor name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0274(Token token, string name)
+    {
+      Error("CS0274", token,
+        "Cannot specify accessibility modifiers for both accessors of the property" +
+        " or indexer '{0}'", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0275: '{0}': accessibility modifiers may not be used on accessors in 
+    /// an interface.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Accessor name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0275(Token token, string name)
+    {
+      Error("CS0275", token,
+        "'{0}': accessibility modifiers may not be used on accessors in an interface", 
+        name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0276: '{0}': accessibility modifiers on accessors may only be used if 
+    /// the property or indexer has both a get and a set accessor.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Accessor name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0276(Token token, string name)
+    {
+      Error("CS0276", token,
+        "'{0}': accessibility modifiers on accessors may only be used if the " +
+        "property or indexer has both a get and a set accessor", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0283: The type '{0}' cannot be declared const.
     /// </summary>
     /// <param name="token">Error point</param>

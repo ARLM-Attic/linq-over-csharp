@@ -1162,9 +1162,9 @@ AccessorDeclarations<PropertyDeclaration prop>
        .)
 = { Attributes<attrs> }               (. Modifiers am = new Modifiers(this); .)
   ModifierList<am>                    
-  ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
+  ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                       (. CurrentElement = accessor; .)
-  | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
+  | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                       (. CurrentElement = accessor; .)
   | ident                             (. Error("UNDEF", la, "set or get expected"); .)
   ) 
@@ -1181,12 +1181,12 @@ AccessorDeclarations<PropertyDeclaration prop>
     ModifierList<am>                  
     ( IF ("get".Equals(la.val)) ident (. 
                                          if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-                                         accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
+                                         accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
                                          CurrentElement = accessor;
                                       .)
     | IF ("set".Equals(la.val)) ident (. 
                                          if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-                                         accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType);
+                                         accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
                                          CurrentElement = accessor;
                                       .)
     | ident                           (. Error("UNDEF", la, "set or get expected"); .)
@@ -1211,28 +1211,31 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
           AttributeCollection attrs = new AttributeCollection();
           AccessorDeclaration accessor = null;
        .)
-= { Attributes<attrs> }
-  ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType); .)
+= { Attributes<attrs> }                   (. Modifiers am = new Modifiers(this); .)
+  ModifierList<am>                    
+  ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                           (. CurrentElement = accessor; .)
-  | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType); .)
+  | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                           (. CurrentElement = accessor; .)
   | ident                                 (. Error("UNDEF", la, "add or remove expected"); .)
   ) 
   Block<accessor>                         (. 
                                              accessor.Terminate(t);
                                              accessor.HasBody = true;
+                                             accessor.SetModifiers(am.Value); 
                                              accessor.AssignAttributes(attrs); 
                                           .)
   [                                       (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs> }    
+    { Attributes<attrs> }                 (. am = new Modifiers(this); .)
+    ModifierList<am>                      
     ( IF ("add".Equals(la.val)) ident     (. 
                                              if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
-                                             accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType);
+                                             accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
                                              CurrentElement = accessor;
                                           .)
     | IF ("remove".Equals(la.val)) ident  (. 
                                              if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
-                                             accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType);
+                                             accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
                                              CurrentElement = accessor;
                                           .)
     | ident                               (. Error("UNDEF", la, "add or remove expected"); .)
@@ -1240,6 +1243,7 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
     Block<accessor>                       (. 
                                              accessor.Terminate(t);
                                              accessor.HasBody = true;
+                                             accessor.SetModifiers(am.Value); 
                                              accessor.AssignAttributes(attrs); 
                                           .)
   ]
@@ -1254,31 +1258,35 @@ InterfaceAccessors<PropertyDeclaration prop>
           AttributeCollection attrs = new AttributeCollection();
           AccessorDeclaration accessor = null;
        .)
-= { Attributes<attrs> }
-  ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType); .)
+= { Attributes<attrs> }                 (. Modifiers am = new Modifiers(this); .)
+  ModifierList<am>                    
+  ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                         (. CurrentElement = accessor; .)
-  | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType); .)
+  | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                         (. CurrentElement = accessor; .)
   | ident                               (. Error("UNDEF", la, "set or get expected"); .)
   ) ";"                                 (. 
                                            accessor.Terminate(t);
+                                           accessor.SetModifiers(am.Value); 
                                            accessor.AssignAttributes(attrs); 
                                         .)
   [                                     (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs> }    
+    { Attributes<attrs> }               (. am = new Modifiers(this); .)
+    ModifierList<am>                    
     ( IF ("get".Equals(la.val)) ident   (. 
                                            if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-                                           accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType);
+                                           accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
                                            CurrentElement = accessor;
                                         .)
     | IF ("set".Equals(la.val)) ident   (. 
                                            if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-                                           accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType);
+                                           accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
                                            CurrentElement = accessor;
                                         .)
     | ident                             (. Error("UNDEF", la, "set or get expected"); .)
     ) ";"                               (. 
                                            accessor.Terminate(t);
+                                           accessor.SetModifiers(am.Value); 
                                            accessor.AssignAttributes(attrs); 
                                         .)
   ]

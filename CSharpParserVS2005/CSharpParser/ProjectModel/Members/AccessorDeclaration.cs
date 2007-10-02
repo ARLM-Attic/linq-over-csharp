@@ -14,6 +14,7 @@ namespace CSharpParser.ProjectModel
     #region Private fields
 
     private bool _HasBody;
+    private readonly MemberDeclaration _DeclaringMember;
     private readonly StatementCollection _Statements = new StatementCollection(null);
     private readonly VariableCollection _Variables = new VariableCollection();
     private readonly List<IBlockOwner> _ChildBlocks = new List<IBlockOwner>();
@@ -28,15 +29,18 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="declaringType">Type declaring this member.</param>
+    /// <param name="declaringMember">Member declaring this accessor</param>
     // --------------------------------------------------------------------------------
-    public AccessorDeclaration(Token token, TypeDeclaration declaringType)
+    public AccessorDeclaration(Token token, TypeDeclaration declaringType, 
+      MemberDeclaration declaringMember)
       : base(token, declaringType)
     {
+      _DeclaringMember = declaringMember;
     }
 
     #endregion
 
-    #region Public methods
+    #region Public properties and methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -57,6 +61,26 @@ namespace CSharpParser.ProjectModel
     public StatementCollection Statements
     {
       get { return _Statements; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the member declaring this accessor.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public MemberDeclaration DeclaringMember
+    {
+      get { return _DeclaringMember; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the qualified name of this member.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string QualifiedName
+    {
+      get { return DeclaringMember.QualifiedName + "." + Name; }
     }
 
     #endregion
@@ -149,6 +173,34 @@ namespace CSharpParser.ProjectModel
       base.ResolveTypeReferences(contextType, declarationScope, parameterScope);
       Statement.ResolveTypeReferences(this, ResolutionContext.AccessorDeclaration, 
         declarationScope, parameterScope);
+    }
+
+    #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      NewNotAllowed();
+      StaticNotAllowed();
+      ReadOnlyNotAllowed();
+      VolatileNotAllowed();
+      VirtualNotAllowed();
+      SealedNotAllowed();
+      OverrideNotAllowed();
+      AbstractNotAllowed();
+      ExternNotAllowed();
+
+      // --- Accessibility modifiers cannot be used
+      if (DeclaringType.IsInterface && !HasDefaultVisibility)
+      {
+        Parser.Error0275(Token, QualifiedName);
+      }
     }
 
     #endregion

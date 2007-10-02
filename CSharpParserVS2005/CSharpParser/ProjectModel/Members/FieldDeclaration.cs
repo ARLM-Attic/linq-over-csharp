@@ -133,31 +133,12 @@ namespace CSharpParser.ProjectModel
     public override void CheckSemantics()
     {
       base.CheckSemantics();
-
-      // --- "extern" is not allowed on fields
-      if ((_DeclaredModifier & Modifier.@extern) != 0)
-      {
-        Parser.Error0106(Token, "extern");
-        Invalidate();        
-      }
-
-      // --- "override" is not allowed on fields
-      if ((_DeclaredModifier & Modifier.@override) != 0)
-      {
-        Parser.Error0106(Token, "override");
-        Invalidate();
-      }
-
-      // --- "abstract" is not allowed on fields
-      if ((_DeclaredModifier & Modifier.@abstract) != 0)
-      {
-        Parser.Error0681(Token);
-        Invalidate();
-      }
+      ExternNotAllowed();
+      OverrideNotAllowed();
+      AbstractNotAllowedWith0681();
 
       // --- Field can be "readonly" or "volatile" but not both
-      if ((_DeclaredModifier & Modifier.@readonly) != 0 &&
-        (_DeclaredModifier & Modifier.@volatile) != 0)
+      if (IsReadOnly && IsVolatile)
       {
         Parser.Error0678(Token, QualifiedName);
         Invalidate();

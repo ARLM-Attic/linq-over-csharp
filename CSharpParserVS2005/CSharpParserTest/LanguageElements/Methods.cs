@@ -160,5 +160,156 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[2].Code, "CS0111");
       Assert.AreEqual(parser.Errors[3].Code, "CS0111");
     }
+
+    [TestMethod]
+    public void InvalidPropertyModifiersFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0112");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0112");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0113");
+    }
+
+    [TestMethod]
+    public void InvalidPropertyModifiersFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration2.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 5);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0112");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0503");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0502");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0238");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0180");
+    }
+
+    [TestMethod]
+    public void InvalidPropertyModifiersFails3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration3.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0621");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0621");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0621");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration4.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 18);
+      for (int i = 0; i < 18; i++)
+      {
+        Assert.AreEqual(parser.Errors[i].Code, "CS0106");
+      }
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration5.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 5);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0275");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0275");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0275");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0275");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0275");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration6.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0276");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0276");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0274");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails4()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration7.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0273");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails5()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration8.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 4);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0273");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails6()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration9.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 4);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0273");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails7()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration10.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0273");
+    }
+
+    [TestMethod]
+    public void InvalidAccessorModifiersFails8()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\PropertyDeclaration11.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 5);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0273");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0273");
+    }
+
+    [TestMethod]
+    public void InvalidIndexerModifiersFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\IndexerDeclaration1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0113");
+    }
+
   }
 }

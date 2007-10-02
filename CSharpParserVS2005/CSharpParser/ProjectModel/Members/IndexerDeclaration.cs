@@ -126,6 +126,28 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      CheckGeneralMemberSemantics();
+
+      // --- Indexers cannot be static
+      if (IsStatic) StaticNotAllowed();
+      else
+      {
+        CheckMethodModifiers();
+      }
+    }
+
+    #endregion
+
   }
 
   // ==================================================================================

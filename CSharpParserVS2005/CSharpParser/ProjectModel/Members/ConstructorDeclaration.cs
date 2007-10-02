@@ -105,55 +105,13 @@ namespace CSharpParser.ProjectModel
     public override void CheckSemantics()
     {
       CheckGeneralMemberSemantics();
-
-      // --- "new" modifier is not allowed on a constructor declaration.
-      if (IsNew)
-      {
-        Parser.Error0106(Token, "new");
-        Invalidate();
-      }
-
-      // --- "readonly" modifier is not allowed on a constructor declaration.
-      if (IsReadOnly)
-      {
-        Parser.Error0106(Token, "readonly");
-        Invalidate();
-      }
-
-      // --- "volatile" modifier is not allowed on a constructor declaration.
-      if (IsVolatile)
-      {
-        Parser.Error0106(Token, "volatile");
-        Invalidate();
-      }
-
-      // --- "virtual" modifier is not allowed on a constructor declaration.
-      if (IsVirtual)
-      {
-        Parser.Error0106(Token, "virtual");
-        Invalidate();
-      }
-
-      // --- "sealed" modifier is not allowed on a constructor declaration.
-      if (IsSealed)
-      {
-        Parser.Error0106(Token, "sealed");
-        Invalidate();
-      }
-    
-      // --- "override" modifier is not allowed on a constructor declaration.
-      if (IsOverride)
-      {
-        Parser.Error0106(Token, "override");
-        Invalidate();
-      }
-
-      // --- "abstract" modifier is not allowed on a constructor declaration.
-      if (IsAbstract)
-      {
-        Parser.Error0106(Token, "abstract");
-        Invalidate();
-      }
+      NewNotAllowed();
+      ReadOnlyNotAllowed();
+      VolatileNotAllowed();
+      VirtualNotAllowed();
+      SealedNotAllowed();
+      OverrideNotAllowed();
+      AbstractNotAllowed();
 
       // --- Check static constructor semantics
       if (IsStatic)
