@@ -144,10 +144,27 @@ namespace CSharpParser.ProjectModel
       {
         CheckMethodModifiers();
       }
+
+      // --- Indexers must have at least one parameter
+      if (_FormalParameters.Count == 0) Parser.Error1551(Token);
+
+      // --- Indexers cannot have "ref" or "out" parameter modifiers.
+      foreach (FormalParameter param in _FormalParameters)
+      {
+        if (param.Kind != FormalParameterKind.In) Parser.Error0631(Token);
+      }
+
+      // --- No more checks, if the resulting type is not resolved.
+      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+
+      // --- Indexer cannot return void
+      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      {
+        Parser.Error0620(Token);
+      }
     }
 
     #endregion
-
   }
 
   // ==================================================================================

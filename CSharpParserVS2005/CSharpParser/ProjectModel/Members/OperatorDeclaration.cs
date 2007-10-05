@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
 
@@ -66,7 +67,18 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsUnary
     {
-      get { return FormalParameters.Count == 1; }
+      get
+      {
+        return 
+          ((_Operator == Operator.plus || _Operator == Operator.minus) 
+            && FormalParameters.Count == 1) ||
+          _Operator == Operator.not || 
+          _Operator == Operator.tilde || 
+          _Operator == Operator.dec || 
+          _Operator == Operator.inc || 
+          _Operator == Operator.@true || 
+          _Operator == Operator.@false;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -76,7 +88,94 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsBinary
     {
-      get { return FormalParameters.Count == 2; }
+      get { return !IsUnary; }
+    }
+
+    #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      CheckGeneralMemberSemantics();
+
+      AbstractNotAllowed();
+      VirtualNotAllowed();
+      OverrideNotAllowed();
+      SealedNotAllowed();
+      ReadOnlyNotAllowed();
+      VolatileNotAllowed();
+      NewNotAllowed();
+
+      // --- Only "public static" declaration is allowed.
+      if (!HasDefaultVisibility && DeclaredVisibility != Visibility.Public)
+      {
+        Parser.Error0106(Token, Visibility.ToString().ToLower()); 
+      }
+      if (DeclaredVisibility != Visibility.Public || !IsStatic)
+      {
+        Parser.Error0558(Token, Signature);
+        Invalidate();
+      }
+
+      // --- Operators cannot have "ref" or "out" parameter modifiers.
+      foreach (FormalParameter param in FormalParameters)
+      {
+        if (param.Kind != FormalParameterKind.In) Parser.Error0631(Token);
+      }
+
+      // --- No more checks, if the resulting type is not resolved.
+      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+
+      // --- Operator cannot return void
+      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      {
+        Parser.Error0590(Token);
+        Invalidate();
+      }
+
+      // --- Check unary operators
+      if (IsUnary)
+        CheckUnaryOperator();
+      else
+        CheckBinaryOperator();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the unary operator definition is correct.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckUnaryOperator()
+    {
+      // --- Unary operator must have exactly one formal parameter.
+      if (FormalParameters.Count != 1)
+      {
+        Parser.Error1535(Token, Name);
+        Invalidate();
+        return;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the binary operator definition is correct.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckBinaryOperator()
+    {
+      // --- Binary operator must have exactly two formal parameter.
+      if (FormalParameters.Count != 2)
+      {
+        Parser.Error1534(Token, Name);
+        Invalidate();
+        return;
+      }
     }
 
     #endregion

@@ -20,12 +20,13 @@ namespace CSharpParser.ProjectModel
     private TypeReference _PrefixType;
     private TypeReference _SubType;
     private bool _IsVoid;
+    private bool _IsNullable;
     private readonly List<TypeModifier> _TypeModifiers = new List<TypeModifier>();
     private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
     private ResolutionTarget _Target;
     private ResolutionNodeBase _ResolvingNode;
     private ITypeCharacteristics _ResolvingType;
-    private TypeParameter _ResolvingTypeParameter;
+    //private TypeParameter _ResolvingTypeParameter;
     private NamespaceHierarchy _ResolvingHierarchy;
     private bool _ConstructedTypeBuilt;
 
@@ -124,7 +125,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public TypeParameter ResolvingTypeParameter
     {
-      get { return _ResolvingTypeParameter; }
+      get { return _ResolvingType as TypeParameter; }
     } 
     
     // --------------------------------------------------------------------------------
@@ -374,6 +375,19 @@ namespace CSharpParser.ProjectModel
     public object TypeObject
     {
       get { return this; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if a type is open or not.
+    /// </summary>
+    /// <remarks>
+    /// A type is open, if directly or indireclty references to a type parametes.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsOpenType
+    {
+      get { return IsResolvedToTypeParameter; }
     }
 
     // --------------------------------------------------------------------------------
@@ -787,12 +801,22 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the flag indicating if this is a nullable type or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNullable
+    {
+      get { return _IsNullable; }
+      internal set { _IsNullable = value;}
+    } 
+    
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating if this is a void type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsVoid
     {
-      //get { return _Kind == TypeKind.@void; }
       get { return _IsVoid; }
       internal set { _IsVoid = value; }
     }
@@ -887,7 +911,6 @@ namespace CSharpParser.ProjectModel
       _Target = ResolutionTarget.Type;
       _ResolvingType = new NetBinaryType(type);
       _ResolvingNode = null;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
       Parser.CompilationUnit.AddTypeToFix(this);
     }
@@ -909,7 +932,6 @@ namespace CSharpParser.ProjectModel
       _ResolvingType = type;
       TypeDeclaration typeDecl = type as TypeDeclaration;
       _ResolvingNode = (typeDecl != null) ? null : typeDecl.ResolverNode;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
       Parser.CompilationUnit.AddTypeToFix(this);
     }
@@ -930,7 +952,6 @@ namespace CSharpParser.ProjectModel
       _Target = ResolutionTarget.Type;
       _ResolvingNode = node;
       _ResolvingType = node.Resolver;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
       Parser.CompilationUnit.AddTypeToFix(this);
     }
@@ -951,7 +972,6 @@ namespace CSharpParser.ProjectModel
       _Target = ResolutionTarget.NamespaceHierarchy;
       _ResolvingNode = null;
       _ResolvingType = null;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
     }
 
@@ -971,7 +991,6 @@ namespace CSharpParser.ProjectModel
       _Target = ResolutionTarget.Namespace;
       _ResolvingNode = node;
       _ResolvingType = null;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
     }
 
@@ -990,8 +1009,7 @@ namespace CSharpParser.ProjectModel
       }
       _Target = ResolutionTarget.TypeParameter;
       _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingTypeParameter = param;
+      _ResolvingType = param;
       _ResolvingHierarchy = null;
     }
 
@@ -1010,8 +1028,7 @@ namespace CSharpParser.ProjectModel
       }
       _Target = ResolutionTarget.MethodTypeParameter;
       _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingTypeParameter = param;
+      _ResolvingType = param;
       _ResolvingHierarchy = null;
     }
 
@@ -1030,7 +1047,6 @@ namespace CSharpParser.ProjectModel
       _Target = ResolutionTarget.Name;
       _ResolvingNode = null;
       _ResolvingType = null;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
     }
 
@@ -1044,7 +1060,6 @@ namespace CSharpParser.ProjectModel
       _Target = ResolutionTarget.Unresolved;
       _ResolvingNode = null;
       _ResolvingType = null;
-      _ResolvingTypeParameter = null;
       _ResolvingHierarchy = null;
     }
 
@@ -1062,8 +1077,30 @@ namespace CSharpParser.ProjectModel
       if (_ConstructedTypeBuilt) return;
       if (_ResolvingType == null || _TypeModifiers.Count == 0) return;
 
-      // --- Create pointer types
       _ConstructedTypeBuilt = true;
+      
+      // --- Create the generic types
+      if (IsNullable)
+      {
+        _ResolvingType = new NullableType(_ResolvingType);
+      }
+      else if (IsGenericType)
+      {
+        List<ITypeCharacteristics> typeParams = new List<ITypeCharacteristics>();
+        bool isValid = true;
+        foreach (TypeReference paramType in _TypeArguments)
+        {
+          isValid &= paramType.IsValid;
+          if (isValid)
+          {
+            typeParams.Add(paramType);
+          }
+        }
+        if (isValid)
+          _ResolvingType = new GenericType(_ResolvingType, typeParams);
+      }
+
+      // --- Create pointer types
       ITypeCharacteristics type = _ResolvingType;
       int ptrIndex = 0;
       while (ptrIndex < _TypeModifiers.Count && _TypeModifiers[ptrIndex] is PointerModifier)

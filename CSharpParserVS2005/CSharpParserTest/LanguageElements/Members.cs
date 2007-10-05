@@ -325,6 +325,16 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
+    public void FieldCannotBeVoid()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Members\FieldDeclaration21.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0670");
+    }
+
+    [TestMethod]
     public void InvalidConstModifierFails()
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);

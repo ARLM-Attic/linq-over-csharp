@@ -390,6 +390,17 @@
     <None Include="TestFiles\Methods\PropertyDeclaration9.cs" />
     <None Include="TestFiles\Methods\PropertyDeclaration10.cs" />
     <None Include="TestFiles\Methods\PropertyDeclaration11.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration2.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration3.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration4.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration1.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration5.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration21.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration2.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration12.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration3.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration4.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration5.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
@@ -436,6 +447,7 @@
     <Compile Include="LanguageElements\TypeResolution.cs" />
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <None Include="TestFiles\TypeResolution\NullableType1.cs" />
     <None Include="TestFiles\TypeResolution\ResolveThroughInheritance.cs" />
     <None Include="TestFiles\TypeResolution\ConstructedType3.cs" />
     <None Include="TestFiles\TypeResolution\ConstructedType2.cs" />

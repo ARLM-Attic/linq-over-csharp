@@ -749,7 +749,6 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeReference memberRef, TypeDeclaration td>
 =                 (. 
-                     if (typeRef.IsVoid) { Error("UNDEF", la, "property type must not be void"); }
                      PropertyDeclaration pd = new PropertyDeclaration(t, td);
                      CurrentElement = pd;
                      pd.SetModifiers(m.Value);
@@ -776,7 +775,6 @@ PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
 IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeReference memberRef, TypeDeclaration td>
 =                 (. 
-                     if (typeRef.IsVoid) { Error("UNDEF", la, "indexer type must not be void"); }
                      IndexerDeclaration ind = new IndexerDeclaration(t, td);
                      CurrentElement = ind;
                      ind.SetModifiers(m.Value);
@@ -792,7 +790,7 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
                      }
                      ind.ResultingType = typeRef;
                   .)
-  "this" "[" FormalParameterList<ind.FormalParameters> "]" 
+  "this" "[" [ FormalParameterList<ind.FormalParameters> ] "]" 
   "{" 
       AccessorDeclarations<ind> 
   "}"             (. 
@@ -858,7 +856,6 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       | "explicit"                      (. cod.IsExplicit = true; .)
     ) "operator"                        
     Type<out typeRef, false>            (. 
-                                           if (typeRef.IsVoid) { Error("UNDEF", la, "cast type must not be void"); } 
                                            cod.ResultingType = typeRef;
                                            cod.Name = typeRef.RightmostName;
                                         .)
@@ -882,7 +879,6 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
 OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
   TypeDeclaration td>
 =                                  (. 
-                                      if (typeRef.IsVoid) { Error("UNDEF", la, "operator not allowed on void"); } 
                                       OperatorDeclaration od = new OperatorDeclaration(t, td);
                                       CurrentElement = od;
                                       od.SetModifiers(m.Value);
@@ -892,25 +888,9 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                    .)
   "operator" 
   OverloadableOp<out op>           (. od.Operator = op; .)
-  "("                              (. 
-                                      od.Name = op.ToString(); 
-                                      FormalParameter fp = new FormalParameter(t, this);
-                                      TypeReference parType;
-                                         .)
-  Type<out parType, false>         (. fp.Type = parType; .)
-  ident                            (. 
-                                      fp.Name = t.val; 
-                                      od.FormalParameters.Add(fp);
-                                   .)
-  ( ","                            (. fp = new FormalParameter(t, this); .)
-    Type<out parType, false>       (. fp.Type = parType; .)
-    ident                          (. 
-                                      fp.Name = t.val; 
-                                      od.FormalParameters.Add(fp);
-                                   .)                                         
-                                   (. if ((op & Operator.binary) == 0) Error("UNDEF", la, "too many operands for unary operator"); .)
-  |                                (. if ((op & Operator.unary) == 0) Error("UNDEF", la, "too few operands for binary operator"); .)
-  ) ")"
+  "("                              (. od.Name = op.ToString(); .)
+    [ FormalParameterList<od.FormalParameters> ]
+  ")"
   ( Block<od> | ";" )              (. 
                                       td.AddMember(od); 
                                       od.Terminate(t);
@@ -989,7 +969,6 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
         "{" InterfaceAccessors<prop> "}" (. prop.Terminate(t); .)
       )
     | (. 
-         if (typeRef.IsVoid) { Error("UNDEF", la, "indexer type must not be void"); }
          IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
          CurrentElement =ind;
          ind.SetModifiers(m.Value);
@@ -997,7 +976,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
          ind.Name = "";
          ind.ResultingType = typeRef;
       .)
-      "this" "[" FormalParameterList<ind.FormalParameters> "]" 
+      "this" "[" [ FormalParameterList<ind.FormalParameters> ] "]" 
       "{" InterfaceAccessors<ind> "}" (. ind.Terminate(t); .)
     )
   | InterfaceEventDeclaration<attrs, m, ifd>
@@ -1414,14 +1393,12 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
   | "void"                                           (. 
                                                         typeRef = new TypeReference(t, this); 
                                                         typeRef.Name = t.val;
-                                                        // typeRef.Kind = TypeKind.@void; 
                                                         typeRef.IsVoid = true; 
                                                      .)
   )
-  [ "?"                                              (. if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
+  [ "?"                                              (. typeRef.IsNullable = true; .)                                              
   ]
-  PointerOrArray<typeRef>                            (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
-                                                     (. CompilationUnit.AddTypeToFix(typeRef); .)
+  PointerOrArray<typeRef>                            (. CompilationUnit.AddTypeToFix(typeRef); .)
                                                      (. typeRef.Terminate(t); .)
 .
 
@@ -1437,15 +1414,13 @@ TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null;
   | "void"                                           (. 
                                                         typeRef = new TypeReference(t, this); 
                                                         typeRef.Name = t.val;
-                                                        //typeRef.Kind = TypeKind.@void; 
                                                         typeRef.IsVoid = true; 
                                                      .)
   )
   [ IF (IsNullableTypeMark())
-    "?"                                              (. if (typeRef.IsVoid) { Error("UNDEF", la, "Unexpected token ?, void must not be nullable."); } .)
+    "?"                                              
   ]
-  PointerOrArray<typeRef>                            (. if (typeRef.IsVoid && !voidAllowed) { Error("UNDEF", la, "type expected, void found, maybe you mean void*"); } .)
-                                                     (. CompilationUnit.AddTypeToFix(typeRef); .)
+  PointerOrArray<typeRef>                            (. CompilationUnit.AddTypeToFix(typeRef); .)
                                                      (. typeRef.Terminate(t); .)
 .
 
@@ -2859,9 +2834,7 @@ ArrayIndexer<ArrayIndexerOperator indexer>
 // ------------------------------------------------------------------------------------
 FieldMemberDeclarators<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
   TypeReference typeRef, bool isEvent, Modifier toCheck>
-=            (. 
-                if (typeRef.IsVoid) { Error("UNDEF", la, "field type must not be void"); } 
-             .)
+= 
   SingleFieldMember<attrs, m, td, typeRef, isEvent>
   { "," SingleFieldMember<attrs, m, td, typeRef, isEvent> }
 .

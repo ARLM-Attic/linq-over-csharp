@@ -345,6 +345,19 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the flag indicating if a type is open or not.
+    /// </summary>
+    /// <remarks>
+    /// A type is open, if directly or indireclty references to a type parametes.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsOpenType
+    {
+      get { return _TypeParameters.Count > 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the number of dimensions of an array type.
     /// </summary>
     /// <returns>Number of array dimensions.</returns>

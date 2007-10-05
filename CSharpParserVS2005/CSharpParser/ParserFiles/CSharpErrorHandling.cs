@@ -915,6 +915,18 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0547: '{0}' is not an attribute class.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0547(Token token, string name)
+    {
+      Error("CS0547", token, "'{0}': property or indexer cannot have void type", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0557: Duplicate user-defined conversion in type '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -924,6 +936,19 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0557", token,
         string.Format("Duplicate user-defined conversion in type '{0}'", name));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0558: User-defined operator '{0}' must be declared static and public.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0558(Token token, string name)
+    {
+      Error("CS0558", token, 
+        "User-defined operator '{0}' must be declared static and public", name);
     }
 
     // --------------------------------------------------------------------------------
@@ -956,6 +981,17 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0590: User-defined operators cannot return void
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0590(Token token)
+    {
+      Error("CS0590", token, "User-defined operators cannot return void");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0616: '{0}' is not an attribute class.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -969,6 +1005,17 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0620: Indexers cannot have void type
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0620(Token token)
+    {
+      Error("CS0620", token, "Indexers cannot have void type");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0621: '{0}': virtual or abstract members cannot be private.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -976,8 +1023,18 @@ namespace CSharpParser.ParserFiles
     // --------------------------------------------------------------------------------
     public void Error0621(Token token, string name)
     {
-      Error("CS0621", token,
-        "'{0}': virtual or abstract members cannot be private", name);
+      Error("CS0621", token, "ref and out are not valid in this context", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0631: ref and out are not valid in this context.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0631(Token token)
+    {
+      Error("CS0631", token, "ref and out are not valid in this context");
     }
 
     // --------------------------------------------------------------------------------
@@ -1005,6 +1062,17 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0663", token,
         "'{0}' cannot define overloaded methods that differ only on ref and out", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0670: Field cannot have void type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0670(Token token)
+    {
+      Error("CS0670", token, "Field cannot have void type");
     }
 
     // --------------------------------------------------------------------------------
@@ -1317,6 +1385,43 @@ namespace CSharpParser.ParserFiles
     public void Error1530(Token token)
     {
       Error("CS1530", token, "Keyword new not allowed on namespace elements");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1534: Overloaded binary operator '{0}' takes two parameters.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error1534(Token token, string name)
+    {
+      Error("CS1534", token, 
+        "Overloaded binary operator '{0}' takes two parameters", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1535: Overloaded unary operator '{0}' takes one parameter.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error1535(Token token, string name)
+    {
+      Error("CS1535", token,
+        "Overloaded unary operator '{0}' takes one parameter", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1551: Indexers must have at least one parameter
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error1551(Token token)
+    {
+      Error("CS1551", token, "Indexers must have at least one parameter");
     }
 
     // --------------------------------------------------------------------------------

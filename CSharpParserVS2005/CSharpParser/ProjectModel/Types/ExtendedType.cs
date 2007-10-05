@@ -9,34 +9,23 @@ namespace CSharpParser.ProjectModel
   /// This type represents a type constructed from a declaration in the source code.
   /// </summary>
   /// <remarks>
-  /// Types are constructed by using the "*" pointer construction or the
-  /// "[]" or "[,...,]" array construction.
+  /// Types are constructed by using the "*" pointer construction, the
+  /// "[]" or "[,...,]" array construction or generic construction.
   /// </remarks>
   // ==================================================================================
-  public abstract class ConstructedType : ITypeCharacteristics
+  public abstract class ExtendedType : ITypeCharacteristics
   {
-    #region Private fields
-
-    private readonly ITypeCharacteristics _ElementType;
-
-    #endregion
-
-    #region Lifecycle methods
+    #region ITypeCharacteristics Implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a constructed type from the specified element type.
+    /// Gets the flag indicating if a type is open or not.
     /// </summary>
-    /// <param name="elementType">Element type instance.</param>
+    /// <remarks>
+    /// A type is open, if directly or indireclty references to a type parametes.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    protected ConstructedType(ITypeCharacteristics elementType)
-    {
-      _ElementType = elementType;
-    }
-
-    #endregion
-
-    #region ITypeCharacteristics Implementation
+    public abstract bool IsOpenType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -57,9 +46,9 @@ namespace CSharpParser.ProjectModel
     /// Element type for a pointer, reference or array; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics GetElementType()
+    public virtual ITypeCharacteristics GetElementType()
     {
-      return _ElementType;
+      throw new InvalidOperationException("This type has no element type.");
     }
 
     // --------------------------------------------------------------------------------
@@ -94,27 +83,24 @@ namespace CSharpParser.ProjectModel
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsRuntimeType
-    {
-      get { return _ElementType.IsRuntimeType; }
-    }
+    public abstract bool IsRuntimeType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ReferencedUnit DeclaringUnit
-    {
-      get { return _ElementType.DeclaringUnit; }
-    }
+    public abstract ReferencedUnit DeclaringUnit { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsUnmanagedType { get; }
+    public virtual bool IsUnmanagedType 
+    { 
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -149,10 +135,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public string FullName
     {
-      get
-      {
-        return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
-      }
+      get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
     }
 
     // --------------------------------------------------------------------------------
@@ -165,10 +148,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types always have element type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool HasElementType
-    {
-      get { return true; }
-    }
+    public abstract bool HasElementType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -178,10 +158,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types are never abstract.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsAbstract
-    {
-      get { return false; }
-    }
+    public abstract bool IsAbstract { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -199,10 +176,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types are never classes.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsClass
-    {
-      get { return false; }
-    }
+    public abstract bool IsClass { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -225,10 +199,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types are never generic.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsGenericType
-    {
-      get { return false; }
-    }
+    public abstract bool IsGenericType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -239,10 +210,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types are never generic definitions.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsGenericTypeDefinition
-    {
-      get { return false; }
-    }
+    public abstract bool IsGenericTypeDefinition { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -279,10 +247,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types never have type parameters.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public int TypeParameterCount
-    {
-      get { return 0; }
-    }
+    public abstract int TypeParameterCount { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -293,10 +258,7 @@ namespace CSharpParser.ProjectModel
     /// Constructed types are never interfaces.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsInterface
-    {
-      get { return false; }
-    }
+    public abstract bool IsInterface { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -348,10 +310,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsNotPublic
-    {
-      get { return _ElementType.IsNotPublic; }
-    }
+    public abstract bool IsNotPublic { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -375,10 +334,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsPublic
-    {
-      get { return _ElementType.IsPublic; }
-    }
+    public abstract bool IsPublic { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -388,30 +344,21 @@ namespace CSharpParser.ProjectModel
     /// Constructed types are always sealed.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsSealed
-    {
-      get { return true; }
-    }
+    public abstract bool IsSealed { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared static.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsStatic
-    {
-      get { return false; }
-    }
+    public abstract bool IsStatic { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsValueType
-    {
-      get { return false; }
-    }
+    public abstract bool IsValueType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -427,10 +374,7 @@ namespace CSharpParser.ProjectModel
     /// interface of a component assembly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsVisible
-    {
-      get { return _ElementType.IsVisible; }
-    }
+    public abstract bool IsVisible { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -438,10 +382,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <remarks>The simple name does not contain any adornements.</remarks>
     // --------------------------------------------------------------------------------
-    public string SimpleName
-    {
-      get { return _ElementType.SimpleName; }
-    }
+    public abstract string SimpleName { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -455,10 +396,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string Namespace
-    {
-      get { return _ElementType.Namespace; }
-    }
+    public abstract string Namespace { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -8,7 +8,7 @@ namespace CSharpParser.ProjectModel
   /// source code.
   /// </summary>
   // ==================================================================================
-  public sealed class PointerType : ConstructedType
+  public sealed class PointerType : SimpleExtendedType
   {
     #region Lifecycle methods
 

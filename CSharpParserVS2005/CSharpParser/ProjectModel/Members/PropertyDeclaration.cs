@@ -217,6 +217,15 @@ namespace CSharpParser.ProjectModel
           Parser.Error0273(toCheck.Token, toCheck.QualifiedName, QualifiedName);
         }
       }
+
+      // --- No more checks, if the resulting type is not resolved.
+      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+
+      // --- Property cannot return void
+      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      {
+        Parser.Error0547(Token, Name);
+      }
     }
 
     #endregion

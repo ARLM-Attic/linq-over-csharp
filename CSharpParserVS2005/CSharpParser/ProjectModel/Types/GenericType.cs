@@ -1,16 +1,133 @@
+using System;
 using System.Collections.Generic;
-using CSharpParser.ProjectModel;
+using CSharpParser.Semantics;
 
-namespace CSharpParser.Semantics
+namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This interface defines the characteristic of a type that can be either a .NET
-  /// type or a type declared in a compilation unit.
+  /// This type represents an array type constructed from a declaration in the 
+  /// source code.
   /// </summary>
   // ==================================================================================
-  public interface ITypeCharacteristics
+  public class GenericType : ExtendedType
   {
+    #region Private fields
+
+    private readonly ITypeCharacteristics _ConstructingType;
+    private readonly List<ITypeCharacteristics> _TypeParameters;
+
+    #endregion
+
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates constructed generic type from the specified construction type with the
+    /// given type parameters.
+    /// </summary>
+    /// <param name="constructingType">Type the generic type is constructed from.</param>
+    /// <param name="typeParameters">Type parameters of this generic type.</param>
+    // --------------------------------------------------------------------------------
+    public GenericType(ITypeCharacteristics constructingType,
+      IEnumerable<ITypeCharacteristics> typeParameters)
+    {
+      _ConstructingType = constructingType;
+      _TypeParameters = new List<ITypeCharacteristics>(typeParameters);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates constructed generic type from the specified construction type with the
+    /// given type parameter.
+    /// </summary>
+    /// <param name="constructingType">Type the generic type is constructed from.</param>
+    /// <param name="parameter">Single type parameter.</param>
+    // --------------------------------------------------------------------------------
+    public GenericType(ITypeCharacteristics constructingType, ITypeCharacteristics
+      parameter)
+    {
+      if (!parameter.IsValueType)
+      {
+        throw new InvalidOperationException("Valuetype expected.");
+      }
+      _ConstructingType = constructingType;
+      _TypeParameters = new List<ITypeCharacteristics>();
+      _TypeParameters.Add(parameter);
+    }
+
+    #endregion
+
+    #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the factory type of this generic type
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics ConstructingType
+    {
+      get { return _ConstructingType; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of type parameters
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<ITypeCharacteristics> TypeParameters
+    {
+      get { return _TypeParameters; }
+    }
+
+    #endregion
+
+    #region Overridden methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is an array.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool IsArray
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a pointer.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool IsPointer
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool IsUnmanagedType
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the current member.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string Name
+    {
+      get
+      {
+        if (_TypeParameters.Count == 0) return _ConstructingType.Name;
+        return string.Format("{0}`{1}", _ConstructingType.Name, _TypeParameters.Count);
+      }
+    }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if a type is open or not.
@@ -19,95 +136,35 @@ namespace CSharpParser.Semantics
     /// A type is open, if directly or indireclty references to a type parametes.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsOpenType { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the number of dimensions of an array type.
-    /// </summary>
-    /// <returns>Number of array dimensions.</returns>
-    // --------------------------------------------------------------------------------
-    int GetArrayRank();
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the element type of this type.
-    /// </summary>
-    /// <returns>
-    /// Element type for a pointer, reference or array; otherwise, null.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    ITypeCharacteristics GetElementType();
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the types directly nested into this type.
-    /// </summary>
-    /// <returns>
-    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
-    /// dictionary is retrieved if there is no nested type.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    Dictionary<string, ITypeCharacteristics> GetNestedTypes();
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the underlying type of an enum type.
-    /// </summary>
-    /// <remarks>
-    /// Throws an exception, if the underlying type is not an enum type.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    ITypeCharacteristics GetUnderlyingEnumType();
+    public override bool IsOpenType
+    {
+      get
+      {
+        foreach (ITypeCharacteristics param in _TypeParameters)
+          if (param.IsOpenType) return true;
+        return false;
+      }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsRuntimeType { get; }
+    public override bool IsRuntimeType
+    {
+      get { return _ConstructingType.IsRuntimeType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    ReferencedUnit DeclaringUnit { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsUnmanagedType { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the base type of this type.
-    /// </summary>
-    /// <remarks>
-    /// If there is no explicit base type for this type, a corresponding reference to
-    /// System.Object should be returned.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    ITypeCharacteristics BaseType { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type that declares the current nested type.
-    /// </summary>
-    /// <remarks>
-    /// If there is no declaring type, null should be returned.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    ITypeCharacteristics DeclaringType { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the fully qualified name of the type, including the namespace of the type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    string FullName { get; }
+    public override ReferencedUnit DeclaringUnit
+    {
+      get { return _ConstructingType.DeclaringUnit; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -115,167 +172,147 @@ namespace CSharpParser.Semantics
     /// another type; that is, whether the current Type is an array, a pointer, or is 
     /// passed by reference.
     /// </summary>
+    /// <remarks>
+    /// Constructed types always have element type.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool HasElementType { get; }
+    public override bool HasElementType
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
+    /// <remarks>
+    /// Constructed types are never abstract.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsAbstract { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is an array.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsArray { get; }
+    public override bool IsAbstract
+    {
+      get { return _ConstructingType.IsAbstract; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a class; that is, not a value 
     /// type or interface.
     /// </summary>
+    /// <remarks>
+    /// Constructed types are never classes.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsClass { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the current Type represents an enumeration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsEnum { get; }
+    public override bool IsClass
+    {
+      get { return _ConstructingType.IsClass; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current type is a generic type.
     /// </summary>
+    /// <remarks>
+    /// Constructed types are never generic.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsGenericType { get; }
+    public override bool IsGenericType
+    {
+      get { return true; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents a generic type 
     /// definition, from which other generic types can be constructed.
     /// </summary>
+    /// <remarks>
+    /// Constructed types are never generic definitions.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsGenericTypeDefinition { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Makes an array type from the current type with the specified rank.
-    /// </summary>
-    /// <param name="rank">Rank of array type to be created</param>
-    /// <returns>
-    /// Array type created from this type.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    ITypeCharacteristics MakeArrayType(int rank);
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Makes a pointer type from the current type with the specified rank.
-    /// </summary>
-    /// <returns>
-    /// Pointer type created from this type.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    ITypeCharacteristics MakePointerType();
+    public override bool IsGenericTypeDefinition
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the number of type parameters.
     /// </summary>
+    /// <remarks>
+    /// Constructed types never have type parameters.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    int TypeParameterCount { get; }
+    public override int TypeParameterCount
+    {
+      get { return _TypeParameters.Count; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an interface; that is, not a 
     /// class or a value type.
     /// </summary>
+    /// <remarks>
+    /// Constructed types are never interfaces.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsInterface { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the current Type object represents a type 
-    /// whose definition is nested inside the definition of another type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNested { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and visible only within 
-    /// its own assembly.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNestedAssembly { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and declared private.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNestedPrivate { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether a class is nested and declared public.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNestedPublic { get; }
+    public override bool IsInterface
+    {
+      get { return _ConstructingType.IsInterface; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsNotPublic { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is a pointer.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsPointer { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is one of the primitive types.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsPrimitive { get; }
+    public override bool IsNotPublic
+    {
+      get { return _ConstructingType.IsNotPublic; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsPublic { get; }
+    public override bool IsPublic
+    {
+      get { return _ConstructingType.IsNotPublic; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
+    /// <remarks>
+    /// Constructed types are always sealed.
+    /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsSealed { get; }
+    public override bool IsSealed
+    {
+      get { return _ConstructingType.IsSealed; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared static.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsStatic { get; }
+    public override bool IsStatic
+    {
+      get { return _ConstructingType.IsStatic; }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    bool IsValueType { get; }
+    public override bool IsValueType
+    {
+      get { return _ConstructingType.IsValueType; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -291,7 +328,10 @@ namespace CSharpParser.Semantics
     /// interface of a component assembly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    bool IsVisible { get; }
+    public override bool IsVisible
+    {
+      get { return _ConstructingType.IsVisible; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -299,27 +339,21 @@ namespace CSharpParser.Semantics
     /// </summary>
     /// <remarks>The simple name does not contain any adornements.</remarks>
     // --------------------------------------------------------------------------------
-    string SimpleName { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the current member.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    string Name { get; }
+    public override string SimpleName
+    {
+      get { return _ConstructingType.SimpleName; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string Namespace { get; }
+    public override string Namespace
+    {
+      get { return _ConstructingType.Namespace; }
+    }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the object carrying detailed information about this type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-     object TypeObject { get; }
+    #endregion
   }
 }

@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -8,7 +10,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a type parameter used in generic constructions.
   /// </summary>
   // ==================================================================================
-  public sealed class TypeParameter : AttributedElement
+  public sealed class TypeParameter : AttributedElement, ITypeCharacteristics 
   {
     #region Private fields
 
@@ -52,6 +54,413 @@ namespace CSharpParser.ProjectModel
     public bool HasConstraint
     {
       get { return _Constraint != null; }  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if a type is open or not.
+    /// </summary>
+    /// <remarks>
+    /// A type is open, if directly or indireclty references to a type parametes.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsOpenType
+    {
+      get { return true; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of dimensions of an array type.
+    /// </summary>
+    /// <returns>Number of array dimensions.</returns>
+    // --------------------------------------------------------------------------------
+    public int GetArrayRank()
+    {
+      return 0;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the element type of this type.
+    /// </summary>
+    /// <returns>
+    /// Element type for a pointer, reference or array; otherwise, null.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics GetElementType()
+    {
+      return null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the types directly nested into this type.
+    /// </summary>
+    /// <returns>
+    /// Dictionary of nested types keyed by the CLR names of the nested types. Empty
+    /// dictionary is retrieved if there is no nested type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    {
+      return new Dictionary<string, ITypeCharacteristics>();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the underlying type of an enum type.
+    /// </summary>
+    /// <remarks>
+    /// Throws an exception, if the underlying type is not an enum type.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics GetUnderlyingEnumType()
+    {
+      return null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsRuntimeType
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reference unit where the type is defined.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public ReferencedUnit DeclaringUnit
+    {
+      get { return Parser.CompilationUnit.ThisUnit; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsUnmanagedType
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type of this type.
+    /// </summary>
+    /// <remarks>
+    /// If there is no explicit base type for this type, a corresponding reference to
+    /// System.Object should be returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics BaseType
+    {
+      get { return null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type that declares the current nested type.
+    /// </summary>
+    /// <remarks>
+    /// If there is no declaring type, null should be returned.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics DeclaringType
+    {
+      get { return null; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type encompasses or refers to 
+    /// another type; that is, whether the current Type is an array, a pointer, or is 
+    /// passed by reference.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasElementType
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is abstract and must be overridden.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsAbstract
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is an array.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsArray
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a class; that is, not a value 
+    /// type or interface.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsClass
+    {
+      get 
+      {
+        return !HasConstraint ||
+               (Constraint.HasPrimary && (Constraint.Primary.IsClass ||
+               Constraint.Primary.IsType && Constraint.Primary.Type.IsClass));
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type represents an enumeration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsEnum
+    {
+      get 
+      {
+        return HasConstraint && Constraint.HasPrimary &&
+               Constraint.Primary.IsType && Constraint.Primary.Type.IsEnum;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current type is a generic type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsGenericType
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type represents a generic type 
+    /// definition, from which other generic types can be constructed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsGenericTypeDefinition
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes an array type from the current type with the specified rank.
+    /// </summary>
+    /// <param name="rank">Rank of array type to be created</param>
+    /// <returns>
+    /// Array type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakeArrayType(int rank)
+    {
+      return new ArrayType(this, rank);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Makes a pointer type from the current type with the specified rank.
+    /// </summary>
+    /// <returns>
+    /// Pointer type created from this type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public ITypeCharacteristics MakePointerType()
+    {
+      return new PointerType(this);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of type parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public int TypeParameterCount
+    {
+      get { return 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is an interface; that is, not a 
+    /// class or a value type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsInterface
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current Type object represents a type 
+    /// whose definition is nested inside the definition of another type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNested
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is nested and visible only within 
+    /// its own assembly.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedAssembly
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is nested and declared private.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedPrivate
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a class is nested and declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNestedPublic
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is not declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsNotPublic
+    {
+      get { return true; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a pointer.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPointer
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is one of the primitive types.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPrimitive
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared public.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsPublic
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared sealed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsSealed
+    {
+      get { return true; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is declared static.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsStatic
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type is a value type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsValueType
+    {
+      get
+      {
+        return HasConstraint && Constraint.HasPrimary && (Constraint.Primary.IsStruct ||
+               Constraint.Primary.IsType && Constraint.Primary.Type.IsStatic);
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the Type can be accessed by code outside the 
+    /// assembly.
+    /// </summary>
+    /// <value>
+    /// true if the current Type is a public type or a public nested type such that 
+    /// all the enclosing types are public; otherwise, false.
+    /// </value>
+    /// <remarks>
+    /// Use this property to determine whether a type is part of the public 
+    /// interface of a component assembly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsVisible
+    {
+      get { return false; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the namespace of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Namespace
+    {
+      get { return string.Empty; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the object carrying detailed information about this type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public object TypeObject
+    {
+      get { return this; }
     }
 
     #endregion

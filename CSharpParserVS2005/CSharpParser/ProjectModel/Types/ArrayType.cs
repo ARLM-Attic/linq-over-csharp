@@ -8,7 +8,7 @@ namespace CSharpParser.ProjectModel
   /// source code.
   /// </summary>
   // ==================================================================================
-  public sealed class ArrayType : ConstructedType
+  public sealed class ArrayType : SimpleExtendedType
   {
     #region Private fields
 

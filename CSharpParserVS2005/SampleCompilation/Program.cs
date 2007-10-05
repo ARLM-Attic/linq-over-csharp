@@ -1,7 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Reflection;
-using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 
 namespace SampleCompilation

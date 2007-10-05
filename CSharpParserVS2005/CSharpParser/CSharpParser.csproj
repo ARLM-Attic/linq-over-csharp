@@ -46,8 +46,11 @@
     <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />
     <Compile Include="ProjectModel\Types\ArrayType.cs" />
-    <Compile Include="ProjectModel\Types\ConstructedType.cs" />
+    <Compile Include="ProjectModel\Types\ExtendedType.cs" />
+    <Compile Include="ProjectModel\Types\GenericType.cs" />
+    <Compile Include="ProjectModel\Types\NullableType.cs" />
     <Compile Include="ProjectModel\Types\PointerType.cs" />
+    <Compile Include="ProjectModel\Types\SimpleExtendedType.cs" />
     <Compile Include="Semantics\Accessibility\AccessibilityDomain.cs" />
     <Compile Include="Semantics\TypeResolution\ITypeDeclarationScope.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />

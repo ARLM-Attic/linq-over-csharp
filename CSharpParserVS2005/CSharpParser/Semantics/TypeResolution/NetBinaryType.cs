@@ -74,6 +74,9 @@ namespace CSharpParser.Semantics
     /// <summary>Represents the System.String type</summary>
     public static NetBinaryType String = new NetBinaryType(typeof(String));
 
+    /// <summary>Represents the INullable{T} type</summary>
+    public static NetBinaryType Nullable = new NetBinaryType(typeof(Nullable<>));
+
     #endregion
 
     #region Lifecycle methods
@@ -110,6 +113,18 @@ namespace CSharpParser.Semantics
     #region ITypeCharacteristics implementation
 
     // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if a type is open or not.
+    /// </summary>
+    /// <remarks>
+    /// A type is open, if directly or indireclty references to a type parametes.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public bool IsOpenType
+    {
+      get { return IsGenericTypeDefinition; }
+    }
+
     /// <summary>
     /// Gets the number of dimensions of an array type.
     /// </summary>

@@ -225,6 +225,15 @@ namespace CSharpParser.ProjectModel
         // --- Volatile filed is an unallowed type
         Parser.Error0677(ResultingType.Token, QualifiedName, ResultingType.FullName);
       }
+
+      // --- No more checks, if the resulting type is not resolved.
+      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+
+      // --- Field cannot have void type.
+      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      {
+        Parser.Error0670(Token);
+      }
     }
 
     #endregion
