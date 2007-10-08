@@ -11,23 +11,60 @@ namespace CSharpParser.ProjectModel
   /// <summary>
   /// This type represents a reference to a type or namespace name part.
   /// </summary>
+  /// <remarks>
+  /// <para>
+  /// A TypeReference instance represents a whole type, type parameter or namespace or
+  /// a part of a compound type or namespace. For example, "int", "System" or "T" can
+  /// be instances of a TypeReference. 
+  /// </para>
+  /// <para>
+  /// Compound names cover more TypeReference instances that are bidirectionally 
+  /// linked to each other through the Prefix and Suffix properties. Form example,
+  /// "System.IO.BinaryReader" is represented by three TypeReference instances:
+  /// "System" -> "IO" -> "BinaryReader".
+  /// </para>
+  /// </remarks>
   // ==================================================================================
-  public class TypeReference : LanguageElement, IUsesResolutionContext, ITypeCharacteristics
+  public class TypeReference : TypeBase, 
+    IUsesResolutionContext, 
+    ITypeAbstraction
   {
     #region Private fields
 
-    private bool _IsGlobal;
-    private TypeReference _PrefixType;
-    private TypeReference _SubType;
+    /// <summary>Closed with the "::" global scope operator?</summary>
+    private bool _IsGlobalScope;
+
+    /// <summary>Prefix type reference (backward link)</summary>
+    private TypeReference _Prefix;
+
+    /// <summary>Suffix type reference (forward link)</summary>
+    private TypeReference _Suffix;
+
+    /// <summary>Resolved to void?</summary>
     private bool _IsVoid;
+
+    /// <summary>Declared as nullable with "?" operator?</summary>
     private bool _IsNullable;
+
+    /// <summary>Pointer and/or array modifiers attached to the type reference</summary>
     private readonly List<TypeModifier> _TypeModifiers = new List<TypeModifier>();
-    private readonly TypeReferenceCollection _TypeArguments = new TypeReferenceCollection();
+
+    /// <summary>Arguments attached to generic types</summary>
+    private readonly TypeReferenceCollection _Arguments = new TypeReferenceCollection();
+
+    /// <summary>Target of the resolution</summary>
     private ResolutionTarget _Target;
-    private ResolutionNodeBase _ResolvingNode;
-    private ITypeCharacteristics _ResolvingType;
-    //private TypeParameter _ResolvingTypeParameter;
-    private NamespaceHierarchy _ResolvingHierarchy;
+
+    /// <summary>Type/Type parameter representing this reference</summary>
+    private ITypeAbstraction _TypeInstance;
+
+    /// <summary>Node in the resolution tree that resolved this reference.</summary>
+    private ResolutionNodeBase _ResolverNode;
+
+    /// <summary>Hierarchy representing this reference</summary>
+    private NamespaceHierarchy _ResolverHierarchy;
+
+    /// <summary>Indicatesif constructed type has already been built</summary>
     private bool _ConstructedTypeBuilt;
 
     // --- Type reference representing an empty type used in generic parameters
@@ -43,6 +80,10 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser used by this language element.</param>
+    /// <remarks>
+    /// This constructor is used for type references that cannot be resolved at the 
+    /// time of their creation.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public TypeReference(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
@@ -67,6 +108,10 @@ namespace CSharpParser.ProjectModel
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser used by this language element.</param>
     /// <param name="type">Type this reference is resolved to.</param>
+    /// <remarks>
+    /// This constructor is used for type references that can be immediatelly resolved 
+    /// at the time of their creation.
+    /// </remarks>
     // --------------------------------------------------------------------------------
     public TypeReference(Token token, CSharpSyntaxParser parser, Type type)
       : this(token, parser)
@@ -83,7 +128,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type modifiers belonging to this reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<TypeModifier> TypeModifiers
+    internal List<TypeModifier> TypeModifiers
     {
       get { return _TypeModifiers; }
     } 
@@ -103,9 +148,9 @@ namespace CSharpParser.ProjectModel
     /// Gets the resolving hierarchy of this name.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public NamespaceHierarchy ResolvingHierarchy
+    public NamespaceHierarchy ResolverHierarchy
     {
-      get { return _ResolvingHierarchy; }
+      get { return _ResolverHierarchy; }
     }
 
     // --------------------------------------------------------------------------------
@@ -113,9 +158,15 @@ namespace CSharpParser.ProjectModel
     /// Gets the resolving type of this name.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics ResolvingType
+    public ITypeAbstraction TypeInstance
     {
-      get { return _ResolvingType; }
+      get
+      {
+        if (!IsResolvedToType)
+          throw new InvalidOperationException(
+            "This reference is not resolved to a type or type parameter.");
+        return _TypeInstance;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -125,7 +176,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public TypeParameter ResolvingTypeParameter
     {
-      get { return _ResolvingType as TypeParameter; }
+      get { return _TypeInstance as TypeParameter; }
     } 
     
     // --------------------------------------------------------------------------------
@@ -137,9 +188,9 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return (!IsResolved || _ResolvingNode == null)
+        return (!IsResolved || _ResolverNode == null)
                  ? Name
-                 : _ResolvingNode.FullName;
+                 : _ResolverNode.FullName;
       }
     }
 
@@ -192,10 +243,10 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the flag indicating if subtype is referenced from "global::".
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsGlobal
+    public bool IsGlobalScope
     {
-      get { return _IsGlobal; }
-      set { _IsGlobal = value; }
+      get { return _IsGlobalScope; }
+      set { _IsGlobalScope = value; }
     }
 
     // --------------------------------------------------------------------------------
@@ -203,43 +254,26 @@ namespace CSharpParser.ProjectModel
     /// Gets the prefix type of this type reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference PrefixType
+    public TypeReference Prefix
     {
-      get { return _PrefixType; }
+      get { return _Prefix; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the direct subtype of this type reference.
+    /// Gets or sets the direct suffix of this type reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference SubType
+    public TypeReference Suffix
     {
-      get { return _SubType; }
+      get { return _Suffix; }
       set 
       { 
-        _SubType = value;
-        if (value != null) _SubType._PrefixType = this;
+        _Suffix = value;
+        if (value != null) _Suffix._Prefix = this;
       }
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the full name of the prefix type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public string PrefixTypeFullName
-    {
-      get
-      {
-        return _PrefixType == null
-                 ? null
-                 : (String.IsNullOrEmpty(_PrefixType.PrefixTypeFullName)
-                      ? _PrefixType.Name
-                      : _PrefixType.PrefixTypeFullName + "." + PrefixType.Name);
-      }
-    }
-    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the resolution target.
@@ -255,9 +289,9 @@ namespace CSharpParser.ProjectModel
     /// Gets the resolving node of this type reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ResolutionNodeBase ResolvingNode
+    public ResolutionNodeBase ResolverNode
     {
-      get { return _ResolvingNode; }
+      get { return _ResolverNode; }
     } 
     
     // --------------------------------------------------------------------------------
@@ -267,17 +301,17 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public TypeReferenceCollection Arguments
     {
-      get { return _TypeArguments; }
+      get { return _Arguments; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the flag indicating if this reference has a subtype or not.
+    /// Gets or sets the flag indicating if this reference has a suffix or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool HasSubType
+    public bool HasSuffix
     {
-      get { return _SubType != null; }
+      get { return _Suffix != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -289,13 +323,13 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (_TypeArguments.Count > 0)
+        if (_Arguments.Count > 0)
         {
           StringBuilder sb = new StringBuilder(100);
           sb.Append(base.Name);
           sb.Append('<');
-          if (_TypeArguments.Count > 1) 
-            sb.Append(String.Empty.PadRight(_TypeArguments.Count - 1, ','));
+          if (_Arguments.Count > 1) 
+            sb.Append(String.Empty.PadRight(_Arguments.Count - 1, ','));
           sb.Append('>');
           return sb.ToString();
         }
@@ -315,9 +349,9 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (_TypeArguments.Count > 0)
+        if (_Arguments.Count > 0)
         {
-          return base.Name + "`" + _TypeArguments.Count;
+          return base.Name + "`" + _Arguments.Count;
         }
         else
         {
@@ -328,53 +362,15 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the element where the actual type parameters are used.
+    /// Gets the namespace of the type after it has been resolved.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public override string ParametrizedName
+    public override string Namespace
     {
       get
       {
-        if (_TypeArguments.Count > 0)
-        {
-          StringBuilder sb = new StringBuilder(100);
-          sb.Append(base.Name);
-          sb.Append('<');
-          bool firstParam = true;
-          foreach (TypeReference paramType in _TypeArguments)
-          {
-            if (!firstParam) sb.Append(", ");
-            sb.Append(paramType.ParametrizedName);
-            firstParam = false;
-          }
-          sb.Append('>');
-          return sb.ToString();
-        }
-        else
-        {
-          return base.Name;
-        }
+        return TypeInstance.Namespace;
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the namespace of the type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public string Namespace
-    {
-      get { return ResolvingType.Namespace; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the object carrying detailed information about this type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public object TypeObject
-    {
-      get { return this; }
     }
 
     // --------------------------------------------------------------------------------
@@ -385,7 +381,7 @@ namespace CSharpParser.ProjectModel
     /// A type is open, if directly or indireclty references to a type parametes.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsOpenType
+    public override bool IsOpenType
     {
       get { return IsResolvedToTypeParameter; }
     }
@@ -396,9 +392,9 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <returns>Number of array dimensions.</returns>
     // --------------------------------------------------------------------------------
-    public int GetArrayRank()
+    public override int GetArrayRank()
     {
-      return _ResolvingType.GetArrayRank();
+      return TypeInstance.GetArrayRank();
     }
 
     // --------------------------------------------------------------------------------
@@ -409,11 +405,22 @@ namespace CSharpParser.ProjectModel
     /// Element type for a pointer, reference or array; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics GetElementType()
+    public override ITypeAbstraction GetElementType()
     {
-      return _ResolvingType.GetElementType();
+      return TypeInstance.GetElementType();
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an enumerable representing the generic type arguments.
+    /// </summary>
+    /// <returns>Enumerable representing the types.</returns>
+    // --------------------------------------------------------------------------------
+    protected override IEnumerable<ITypeAbstraction> GetArguments()
+    {
+      foreach (TypeReference typeRef in _Arguments) yield return typeRef;
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the types directly nested into this type.
@@ -423,9 +430,9 @@ namespace CSharpParser.ProjectModel
     /// dictionary is retrieved if there is no nested type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    public override Dictionary<string, ITypeAbstraction> GetNestedTypes()
     {
-      return _ResolvingType.GetNestedTypes();
+      return TypeInstance.GetNestedTypes();
     }
 
     // --------------------------------------------------------------------------------
@@ -436,20 +443,9 @@ namespace CSharpParser.ProjectModel
     /// Throws an exception, if the underlying type is not an enum type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics GetUnderlyingEnumType()
+    public override ITypeAbstraction GetUnderlyingEnumType()
     {
-      return _ResolvingType.GetUnderlyingEnumType();
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type is .NET runtime type or not
-    /// </summary>
-    /// <remarks>Always returns false.</remarks>
-    // --------------------------------------------------------------------------------
-    public bool IsRuntimeType
-    {
-      get { return false; }
+      return TypeInstance.GetUnderlyingEnumType();
     }
 
     // --------------------------------------------------------------------------------
@@ -457,9 +453,9 @@ namespace CSharpParser.ProjectModel
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ReferencedUnit DeclaringUnit
+    public override ReferencedUnit DeclaringUnit
     {
-      get { return ResolvingType.DeclaringUnit; }
+      get { return TypeInstance.DeclaringUnit; }
     }
 
     // --------------------------------------------------------------------------------
@@ -467,9 +463,9 @@ namespace CSharpParser.ProjectModel
     /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsUnmanagedType
+    public override bool IsUnmanagedType
     {
-      get { return ResolvingType.IsUnmanagedType; }
+      get { return TypeInstance.IsUnmanagedType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -481,9 +477,9 @@ namespace CSharpParser.ProjectModel
     /// System.Object should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics BaseType
+    public override ITypeAbstraction BaseType
     {
-      get { return ResolvingType.BaseType; }
+      get { return TypeInstance.BaseType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -494,9 +490,9 @@ namespace CSharpParser.ProjectModel
     /// If there is no declaring type, null should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics DeclaringType
+    public override ITypeAbstraction DeclaringType
     {
-      get { return ResolvingType.DeclaringType; }
+      get { return TypeInstance.DeclaringType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -508,14 +504,12 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (HasSubType)
-        {
-          return string.Format("{0}{1}{2}", TypeName, IsGlobal ? "::" : ".", _SubType.FullName);
-        }
+        if (HasSuffix)
+          return string.Format("{0}{1}{2}", TypeName, IsGlobalScope 
+            ? "::" 
+            : ".", _Suffix.FullName);
         else
-        {
           return TypeName;
-        }
       }
     }
 
@@ -526,9 +520,9 @@ namespace CSharpParser.ProjectModel
     /// passed by reference.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool HasElementType
+    public override bool HasElementType
     {
-      get { return ResolvingType.HasElementType; }
+      get { return TypeInstance.HasElementType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -536,9 +530,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsAbstract
+    public override bool IsAbstract
     {
-      get { return ResolvingType.IsAbstract; }
+      get { return TypeInstance.IsAbstract; }
     }
 
     // --------------------------------------------------------------------------------
@@ -546,7 +540,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsArray
+    public override bool IsArray
     {
       get { return _TypeModifiers.Count > 0 && _TypeModifiers[0] is ArrayModifier; }
     }
@@ -557,9 +551,9 @@ namespace CSharpParser.ProjectModel
     /// type or interface.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsClass
+    public override bool IsClass
     {
-      get { return ResolvingType.IsClass; }
+      get { return TypeInstance.IsClass; }
     }
 
     // --------------------------------------------------------------------------------
@@ -567,9 +561,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsEnum
+    public override bool IsEnum
     {
-      get { return ResolvingType.IsEnum; }
+      get { return TypeInstance.IsEnum; }
     }
 
     // --------------------------------------------------------------------------------
@@ -577,9 +571,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the current type is a generic type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsGenericType
+    public override bool IsGenericType
     {
-      get { return ResolvingType.IsGenericType; }
+      get { return TypeInstance.IsGenericType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -588,9 +582,9 @@ namespace CSharpParser.ProjectModel
     /// definition, from which other generic types can be constructed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsGenericTypeDefinition
+    public override bool IsGenericTypeDefinition
     {
-      get { return ResolvingType.IsGenericTypeDefinition; }
+      get { return TypeInstance.IsGenericTypeDefinition; }
     }
 
     // --------------------------------------------------------------------------------
@@ -602,9 +596,9 @@ namespace CSharpParser.ProjectModel
     /// Array type created from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics MakeArrayType(int rank)
+    public override ITypeAbstraction MakeArrayType(int rank)
     {
-      return _ResolvingType.MakeArrayType(rank);
+      return TypeInstance.MakeArrayType(rank);
     }
 
     // --------------------------------------------------------------------------------
@@ -615,9 +609,9 @@ namespace CSharpParser.ProjectModel
     /// Pointer type created from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics MakePointerType()
+    public override ITypeAbstraction MakePointerType()
     {
-      return _ResolvingType.MakePointerType();
+      return TypeInstance.MakePointerType();
     }
 
     // --------------------------------------------------------------------------------
@@ -625,9 +619,13 @@ namespace CSharpParser.ProjectModel
     /// Gets the number of type parameters.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public int TypeParameterCount
+    public override int TypeParameterCount
     {
-      get { return _ResolvingType.TypeParameterCount; }
+      get
+      {
+        if (_TypeInstance == null) return 0;
+        return _TypeInstance.TypeParameterCount;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -636,9 +634,9 @@ namespace CSharpParser.ProjectModel
     /// class or a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsInterface
+    public override bool IsInterface
     {
-      get { return ResolvingType.IsInterface; }
+      get { return TypeInstance.IsInterface; }
     }
 
     // --------------------------------------------------------------------------------
@@ -647,40 +645,9 @@ namespace CSharpParser.ProjectModel
     /// whose definition is nested inside the definition of another type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsNested
+    public override bool IsNested
     {
-      get { return ResolvingType.IsNested; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and visible only within 
-    /// its own assembly.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedAssembly
-    {
-      get { return ResolvingType.IsNestedAssembly; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and declared private.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedPrivate
-    {
-      get { return ResolvingType.IsNestedPrivate; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether a class is nested and declared public.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedPublic
-    {
-      get { return ResolvingType.IsNestedPublic; }
+      get { return TypeInstance.IsNested; }
     }
 
     // --------------------------------------------------------------------------------
@@ -688,9 +655,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsNotPublic
+    public override bool IsNotPublic
     {
-      get { return ResolvingType.IsNotPublic; }
+      get { return TypeInstance.IsNotPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -698,19 +665,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is a pointer.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsPointer
+    public override bool IsPointer
     {
       get { return _TypeModifiers.Count > 0 && _TypeModifiers[0] is PointerModifier; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is one of the primitive types.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsPrimitive
-    {
-      get { return ResolvingType.IsPrimitive; }
     }
 
     // --------------------------------------------------------------------------------
@@ -718,9 +675,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsPublic
+    public override bool IsPublic
     {
-      get { return ResolvingType.IsPublic; }
+      get { return TypeInstance.IsPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -728,9 +685,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsSealed
+    public override bool IsSealed
     {
-      get { return ResolvingType.IsSealed; }
+      get { return TypeInstance.IsSealed; }
     }
 
     // --------------------------------------------------------------------------------
@@ -738,9 +695,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared static.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsStatic
+    public override bool IsStatic
     {
-      get { return ResolvingType.IsStatic; }
+      get { return TypeInstance.IsStatic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -748,9 +705,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsValueType
+    public override bool IsValueType
     {
-      get { return ResolvingType.IsValueType; }
+      get { return TypeInstance.IsValueType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -767,9 +724,9 @@ namespace CSharpParser.ProjectModel
     /// interface of a component assembly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsVisible
+    public override bool IsVisible
     {
-      get { return ResolvingType.IsVisible; }
+      get { return TypeInstance.IsVisible; }
     }
 
     // --------------------------------------------------------------------------------
@@ -823,32 +780,47 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Retrieves the name of the rightmost part of the type.
+    /// Gets the rightmost part of ths type reference instance.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string RightmostName
+    public TypeReference Tail
     {
       get
       {
         TypeReference currentPart = this;
-        while (currentPart.HasSubType) currentPart = currentPart.SubType;
-        return currentPart.Name;
+        while (currentPart.HasSuffix) currentPart = currentPart.Suffix;
+        return currentPart;        
       }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the rightmost part of ths type reference instance.
+    /// Retrieves the name of the rightmost part of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeReference RightMostPart
+    public string TailName
     {
-      get
-      {
-        TypeReference currentPart = this;
-        while (currentPart.HasSubType) currentPart = currentPart.SubType;
-        return currentPart;        
-      }
+      get { return Tail.Name; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if tail is resolved to a type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool TailIsType
+    {
+      get { return Tail.IsResolvedToType;  }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if tail is resolved to a type parameter.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool TailIsTypeParameter
+    {
+      get { return Tail.IsResolvedToTypeParameter; }
     }
 
     #endregion
@@ -863,7 +835,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="declarationScope">Current type declaration context.</param>
     /// <param name="parameterScope">Current type parameter declaration scope.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveTypeReferences(ResolutionContext contextType, 
+    public override void ResolveTypeReferences(ResolutionContext contextType, 
       ITypeDeclarationScope declarationScope, 
       ITypeParameterScope parameterScope)
     {
@@ -909,10 +881,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToSystemType++;
       }
       _Target = ResolutionTarget.Type;
-      _ResolvingType = new NetBinaryType(type);
-      _ResolvingNode = null;
-      _ResolvingHierarchy = null;
-      Parser.CompilationUnit.AddTypeToFix(this);
+      _TypeInstance = new NetBinaryType(type);
+      _ResolverNode = null;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -921,7 +892,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="type">System type.</param>
     // --------------------------------------------------------------------------------
-    public void ResolveToType(ITypeCharacteristics type)
+    public void ResolveToType(ITypeAbstraction type)
     {
       if (_Target == ResolutionTarget.Unresolved)
       {
@@ -929,11 +900,10 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToSystemType++;
       }
       _Target = ResolutionTarget.Type;
-      _ResolvingType = type;
+      _TypeInstance = type;
       TypeDeclaration typeDecl = type as TypeDeclaration;
-      _ResolvingNode = (typeDecl != null) ? null : typeDecl.ResolverNode;
-      _ResolvingHierarchy = null;
-      Parser.CompilationUnit.AddTypeToFix(this);
+      _ResolverNode = (typeDecl != null) ? null : typeDecl.ResolverNode;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -950,10 +920,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToSourceType++;
       }
       _Target = ResolutionTarget.Type;
-      _ResolvingNode = node;
-      _ResolvingType = node.Resolver;
-      _ResolvingHierarchy = null;
-      Parser.CompilationUnit.AddTypeToFix(this);
+      _ResolverNode = node;
+      _TypeInstance = node.Resolver;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -970,9 +939,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToHierarchy++;
       }
       _Target = ResolutionTarget.NamespaceHierarchy;
-      _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingHierarchy = null;
+      _ResolverNode = null;
+      _TypeInstance = null;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -989,9 +958,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToNamespace++;
       }
       _Target = ResolutionTarget.Namespace;
-      _ResolvingNode = node;
-      _ResolvingType = null;
-      _ResolvingHierarchy = null;
+      _ResolverNode = node;
+      _TypeInstance = null;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -1008,9 +977,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToNamespace++;
       }
       _Target = ResolutionTarget.TypeParameter;
-      _ResolvingNode = null;
-      _ResolvingType = param;
-      _ResolvingHierarchy = null;
+      _ResolverNode = null;
+      _TypeInstance = param;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -1027,9 +996,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToNamespace++;
       }
       _Target = ResolutionTarget.MethodTypeParameter;
-      _ResolvingNode = null;
-      _ResolvingType = param;
-      _ResolvingHierarchy = null;
+      _ResolverNode = null;
+      _TypeInstance = param;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -1045,9 +1014,9 @@ namespace CSharpParser.ProjectModel
         Parser.CompilationUnit.ResolvedToName++;
       }
       _Target = ResolutionTarget.Name;
-      _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingHierarchy = null;
+      _ResolverNode = null;
+      _TypeInstance = null;
+      _ResolverHierarchy = null;
     }
 
     // --------------------------------------------------------------------------------
@@ -1058,9 +1027,9 @@ namespace CSharpParser.ProjectModel
     public void Unresolve()
     {
       _Target = ResolutionTarget.Unresolved;
-      _ResolvingNode = null;
-      _ResolvingType = null;
-      _ResolvingHierarchy = null;
+      _ResolverNode = null;
+      _TypeInstance = null;
+      _ResolverHierarchy = null;
     }
 
     #endregion
@@ -1075,33 +1044,18 @@ namespace CSharpParser.ProjectModel
     internal void BuildConstructedType()
     {
       if (_ConstructedTypeBuilt) return;
-      if (_ResolvingType == null || _TypeModifiers.Count == 0) return;
+      if (_TypeInstance == null) return;
 
       _ConstructedTypeBuilt = true;
       
-      // --- Create the generic types
+      // --- Create the nullable type
       if (IsNullable)
       {
-        _ResolvingType = new NullableType(_ResolvingType);
-      }
-      else if (IsGenericType)
-      {
-        List<ITypeCharacteristics> typeParams = new List<ITypeCharacteristics>();
-        bool isValid = true;
-        foreach (TypeReference paramType in _TypeArguments)
-        {
-          isValid &= paramType.IsValid;
-          if (isValid)
-          {
-            typeParams.Add(paramType);
-          }
-        }
-        if (isValid)
-          _ResolvingType = new GenericType(_ResolvingType, typeParams);
+        _TypeInstance = new NullableType(_TypeInstance);
       }
 
       // --- Create pointer types
-      ITypeCharacteristics type = _ResolvingType;
+      ITypeAbstraction type = _TypeInstance;
       int ptrIndex = 0;
       while (ptrIndex < _TypeModifiers.Count && _TypeModifiers[ptrIndex] is PointerModifier)
       {
@@ -1129,7 +1083,7 @@ namespace CSharpParser.ProjectModel
         }
         arrIndex--;
       }
-      _ResolvingType = type;
+      _TypeInstance = type;
     }
 
     #endregion
@@ -1149,7 +1103,7 @@ namespace CSharpParser.ProjectModel
         while (current != null)
         {
           yield return this;
-          current = current.SubType;
+          current = current.Suffix;
         }
       }
     }

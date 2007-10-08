@@ -62,7 +62,7 @@ namespace CSharpParser.Semantics
         declarationScope, parameterScope);
 
       // --- Branch: "qualified-alias-member" | "namespace-or-type"
-      if (type.IsGlobal) ResolveQualifiedAliasMember(resolutionInfo);
+      if (type.IsGlobalScope) ResolveQualifiedAliasMember(resolutionInfo);
       else ResolveNamespaceOrTypeName(resolutionInfo);
 
       // --- At this point we resolved 0, 1 or more parts of the name. We go through all
@@ -141,9 +141,9 @@ namespace CSharpParser.Semantics
       if (info == null) throw new ArgumentNullException("info");
 
       // --- Actually this should not happen, as the parser checks this situation...
-      if (!info.Type.HasSubType)
+      if (!info.Type.HasSuffix)
       {
-        throw new InvalidOperationException("Global name must have SubType.");
+        throw new InvalidOperationException("Global name must have Suffix.");
       }
       if (info.Type.Name == "global")
       {
@@ -273,15 +273,15 @@ namespace CSharpParser.Semantics
       else
       {
         // --- Give an appropriate message
-        if (info.CurrentPart.PrefixType.ResolvingNode is NamespaceResolutionNode)
+        if (info.CurrentPart.Prefix.ResolverNode is NamespaceResolutionNode)
         {
           _Parser.Error0234(info.CurrentPart.Token, info.CurrentPart.Name, 
-            info.CurrentPart.PrefixType.ResolvingName);
+            info.CurrentPart.Prefix.ResolvingName);
         }
         else
         {
           _Parser.Error0426(info.CurrentPart.Token, info.CurrentPart.Name,
-            info.CurrentPart.PrefixType.ResolvingName);
+            info.CurrentPart.Prefix.ResolvingName);
         }
       }
     }
@@ -306,7 +306,7 @@ namespace CSharpParser.Semantics
     {
       if (info == null) throw new ArgumentNullException("info");
 
-      if (!info.CurrentPart.HasSubType)
+      if (!info.CurrentPart.HasSuffix)
       {
         // --- The name in if form of I or I<A1, ... Ak>
         // --- Step 1: Check for generic method parameter
@@ -465,7 +465,7 @@ namespace CSharpParser.Semantics
         // --- A this point we succesfully resolved the current part of the name.
         lastResolvedPart = type;
         currentNode = nextNode;
-        type = type.SubType;
+        type = type.Suffix;
       } while (type != null);
 
       return nextNode;
@@ -560,11 +560,11 @@ namespace CSharpParser.Semantics
         }
 
         // --- Step 3: Try to resolve name as a nested type in any of the base types
-        ITypeCharacteristics baseScope = scope.BaseType;
+        ITypeAbstraction baseScope = scope.BaseType;
         while (baseScope != null)
         {
-          Dictionary<string, ITypeCharacteristics> dict = baseScope.GetNestedTypes();
-          ITypeCharacteristics typeFound;
+          Dictionary<string, ITypeAbstraction> dict = baseScope.GetNestedTypes();
+          ITypeAbstraction typeFound;
           if (dict.TryGetValue(info.CurrentPart.ClrName, out typeFound))
           {
             // --- We found the type
@@ -797,12 +797,12 @@ namespace CSharpParser.Semantics
       // --- use it to search for the I<A1, ..., Ak> part.
 
       // --- Serach for the I<A1, ..., Ak> part
-      TypeReference partI = info.Type.RightMostPart;
-      TypeReference partNLast = partI.PrefixType;
+      TypeReference partI = info.Type.Tail;
+      TypeReference partNLast = partI.Prefix;
       try
       {
         // --- Cut the 'N' and 'I' part
-        partNLast.SubType = null;
+        partNLast.Suffix = null;
 
         // --- Resolve the 'N' part
         ResolveNamespaceOrTypeName(info);
@@ -834,7 +834,7 @@ namespace CSharpParser.Semantics
       finally
       {
         // --- Merge the N and I part again
-        partNLast.SubType = partI;
+        partNLast.Suffix = partI;
       }
     }
 
@@ -854,7 +854,7 @@ namespace CSharpParser.Semantics
     {
       if (type == null) throw new ArgumentNullException("type");
       if (node == null) return;
-      if (type.ResolvingNode == node) return;
+      if (type.ResolverNode == node) return;
 
       // --- At this point the specified type part is resolved.
       if (node.IsNamespace)
@@ -1187,7 +1187,7 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool HasPartsLeft
     {
-      get { return _Type.SubType != null; }
+      get { return _Type.Suffix != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -1235,8 +1235,8 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool MoveToNextPart()
     {
-      if (_CurrentPart.SubType == null) return false;
-      _CurrentPart = _Type.SubType;
+      if (_CurrentPart.Suffix == null) return false;
+      _CurrentPart = _Type.Suffix;
       return true;
     }
 
@@ -1277,7 +1277,7 @@ namespace CSharpParser.Semantics
     public void Evaluate()
     {
       // --- Evaluate only if type is fully resolved.
-      if (_CurrentPart.SubType != null) return;
+      if (_CurrentPart.Suffix != null) return;
 
       // --- No resolution found?
       if (_Results.Count == 0)

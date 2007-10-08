@@ -1,3 +1,5 @@
+using CSharpParser.Semantics;
+
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================

@@ -11,7 +11,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private bool _IsGlobal;
+    private bool _IsGlobalScope;
 
     #endregion
 
@@ -37,10 +37,10 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the flag indicating if this name is global or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsGlobal
+    public bool IsGlobalScope
     {
-      get { return _IsGlobal; }
-      set { _IsGlobal = value; }
+      get { return _IsGlobalScope; }
+      set { _IsGlobalScope = value; }
     }
 
     #endregion

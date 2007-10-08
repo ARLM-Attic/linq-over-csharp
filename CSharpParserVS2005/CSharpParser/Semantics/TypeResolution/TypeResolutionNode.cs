@@ -15,7 +15,7 @@ namespace CSharpParser.Semantics
   {
     #region Private fields
 
-    private ITypeCharacteristics _Resolver;
+    private ITypeAbstraction _Resolver;
 
     #endregion
 
@@ -31,7 +31,7 @@ namespace CSharpParser.Semantics
     /// The parent can be null (the node has no parent), name cannot be null or empty.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public TypeResolutionNode(ResolutionNodeBase parentNode, ITypeCharacteristics type)
+    public TypeResolutionNode(ResolutionNodeBase parentNode, ITypeAbstraction type)
       : base(parentNode, type.Name)
     {
       _Resolver = type;
@@ -61,7 +61,7 @@ namespace CSharpParser.Semantics
     /// Gets the first resolvers for this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics Resolver
+    public ITypeAbstraction Resolver
     {
       get { return _Resolver; }
       set { _Resolver = value; }

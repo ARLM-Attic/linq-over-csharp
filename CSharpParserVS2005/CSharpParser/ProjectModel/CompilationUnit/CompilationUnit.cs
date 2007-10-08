@@ -579,7 +579,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddTypeToFix(TypeReference type)
     {
-      if (type.TypeModifiers.Count > 0 || type.Arguments.Count > 0)
+      if (type.TypeModifiers.Count > 0 || type.Arguments.Count > 0 ||type.IsNullable)
       {
         _TypesToFix.Add(type);
       }
@@ -756,8 +756,8 @@ namespace CSharpParser.ProjectModel
 
       // --- Phase 4: Resolve all remaining type references and check type declarations
       ResolveTypeReferences();
-      CheckTypeDeclarations();
       BuildConstructedTypes();
+      CheckTypeDeclarations();
       CheckTypeConstraintDeclarations();
       CheckMemberDeclaration();
 
@@ -1112,7 +1112,7 @@ namespace CSharpParser.ProjectModel
     /// Namespace in which the base types of type declarations should be resolved.
     /// </param>
     // --------------------------------------------------------------------------------
-    private void ResolveBaseTypeInNamespace(NamespaceFragment ns)
+    private void ResolveBaseTypeInNamespace(ITypeDeclarationScope ns)
     {
       // --- Resolve base types of types declared in this namespace
       foreach (TypeDeclaration type in ns.TypeDeclarations)
@@ -1200,7 +1200,7 @@ namespace CSharpParser.ProjectModel
         TypeDeclaration toCheck = typeQueue.Dequeue();
 
         // --- Queue the base types of this type
-        foreach (ITypeCharacteristics dependsOn in toCheck.DirectlyDependsOn)
+        foreach (ITypeAbstraction dependsOn in toCheck.DirectlyDependsOn)
         {
           // --- We check only typed declared within the source, because binary
           // --- types cannot cause circular dependency.

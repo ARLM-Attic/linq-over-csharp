@@ -21,7 +21,7 @@ namespace CSharpParser.ProjectModel
     private readonly ResolutionNodeList _Resolvers = new ResolutionNodeList();
     private bool _IsResolved;
     private bool _IsResolvedToNamespace;
-    private ITypeCharacteristics _ResolvingType;
+    private ITypeAbstraction _ResolvingType;
     private string _ResolvingNamespace;
 
     #endregion
@@ -120,7 +120,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type this using alias has been resolved to.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics ResolvingType
+    public ITypeAbstraction ResolvingType
     {
       get { return _ResolvingType; }
     }

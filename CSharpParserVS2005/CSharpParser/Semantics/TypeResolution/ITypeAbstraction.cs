@@ -9,7 +9,7 @@ namespace CSharpParser.Semantics
   /// type or a type declared in a compilation unit.
   /// </summary>
   // ==================================================================================
-  public interface ITypeCharacteristics
+  public interface ITypeAbstraction
   {
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -37,7 +37,24 @@ namespace CSharpParser.Semantics
     /// Element type for a pointer, reference or array; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics GetElementType();
+    ITypeAbstraction GetElementType();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a list representing the generic arguments of a type.
+    /// </summary>
+    /// <returns>
+    /// Arguments of a generic typeor generic type declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    List<ITypeAbstraction> GetGenericArguments();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating, if the current type is a generic type parameter.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    bool IsGenericParameter { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -48,7 +65,7 @@ namespace CSharpParser.Semantics
     /// dictionary is retrieved if there is no nested type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    Dictionary<string, ITypeCharacteristics> GetNestedTypes();
+    Dictionary<string, ITypeAbstraction> GetNestedTypes();
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -58,7 +75,7 @@ namespace CSharpParser.Semantics
     /// Throws an exception, if the underlying type is not an enum type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics GetUnderlyingEnumType();
+    ITypeAbstraction GetUnderlyingEnumType();
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -90,7 +107,7 @@ namespace CSharpParser.Semantics
     /// System.Object should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics BaseType { get; }
+    ITypeAbstraction BaseType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -100,7 +117,7 @@ namespace CSharpParser.Semantics
     /// If there is no declaring type, null should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics DeclaringType { get; }
+    ITypeAbstraction DeclaringType { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -171,7 +188,7 @@ namespace CSharpParser.Semantics
     /// Array type created from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics MakeArrayType(int rank);
+    ITypeAbstraction MakeArrayType(int rank);
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -181,7 +198,7 @@ namespace CSharpParser.Semantics
     /// Pointer type created from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics MakePointerType();
+    ITypeAbstraction MakePointerType();
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -208,28 +225,6 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether the Type is nested and visible only within 
-    /// its own assembly.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNestedAssembly { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and declared private.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNestedPrivate { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether a class is nested and declared public.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsNestedPublic { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -241,13 +236,6 @@ namespace CSharpParser.Semantics
     /// </summary>
     // --------------------------------------------------------------------------------
     bool IsPointer { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is one of the primitive types.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    bool IsPrimitive { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -303,7 +291,14 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the current member.
+    /// Gets the parametrized name of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    string ParametrizedName { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
     string Name { get; }
@@ -314,12 +309,5 @@ namespace CSharpParser.Semantics
     /// </summary>
     // --------------------------------------------------------------------------------
     string Namespace { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the object carrying detailed information about this type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-     object TypeObject { get; }
   }
 }

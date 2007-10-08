@@ -401,6 +401,12 @@
     <None Include="TestFiles\Methods\OperatorDeclaration3.cs" />
     <None Include="TestFiles\Methods\OperatorDeclaration4.cs" />
     <None Include="TestFiles\Methods\OperatorDeclaration5.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration6.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration7.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration8.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration9.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration10.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration11.cs" />
     <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />

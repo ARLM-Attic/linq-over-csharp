@@ -151,7 +151,7 @@ namespace CSharpParser.ProjectModel
         Invalidate();
       }
 
-      TypeReference typeRef = ResultingType.RightMostPart;
+      TypeReference typeRef = ResultingType.Tail;
       if (typeRef == null) return;
 
       // --- Go further only if field type has been resolved
@@ -165,7 +165,7 @@ namespace CSharpParser.ProjectModel
 
       // --- Field declarations cannot have static types
       if (typeRef.IsResolvedToType && 
-        typeRef.ResolvingType.IsStatic)
+        typeRef.TypeInstance.IsStatic)
       {
         Parser.Error0723(Token, ResultingType.FullName);
       }
@@ -181,7 +181,7 @@ namespace CSharpParser.ProjectModel
           {
             if (param.Constraint.Primary.IsClass ||
             (param.Constraint.Primary.IsType && 
-            param.Constraint.Primary.Type.RightMostPart.IsClass))
+            param.Constraint.Primary.Type.Tail.IsClass))
               return;
           }
 
@@ -190,35 +190,35 @@ namespace CSharpParser.ProjectModel
           return;
         }
 
-        ITypeCharacteristics fieldType = typeRef.ResolvingType;
+        ITypeAbstraction fieldType = typeRef.TypeInstance;
 
         // --- Resulting type must be one of the followings:
         // --- A reference type;
         if (fieldType.IsClass) return;
 
         // --- The type byte, sbyte, short, ushort, int, uint, char, float, or bool;
-        if (fieldType.TypeObject.Equals(typeof(byte)) ||
-            fieldType.TypeObject.Equals(typeof(sbyte)) ||
-            fieldType.TypeObject.Equals(typeof(short)) ||
-            fieldType.TypeObject.Equals(typeof(ushort)) ||            
-            fieldType.TypeObject.Equals(typeof(int)) ||
-            fieldType.TypeObject.Equals(typeof(uint)) ||
-            fieldType.TypeObject.Equals(typeof(char)) ||
-            fieldType.TypeObject.Equals(typeof(float)) ||
-            fieldType.TypeObject.Equals(typeof(bool)))
+        if (TypeBase.IsSame(fieldType, typeof(byte)) ||
+            TypeBase.IsSame(fieldType, typeof(sbyte)) ||
+            TypeBase.IsSame(fieldType, typeof(short)) ||
+            TypeBase.IsSame(fieldType, typeof(ushort)) ||
+            TypeBase.IsSame(fieldType, typeof(int)) ||
+            TypeBase.IsSame(fieldType, typeof(uint)) ||
+            TypeBase.IsSame(fieldType, typeof(char)) ||
+            TypeBase.IsSame(fieldType, typeof(float)) ||
+            TypeBase.IsSame(fieldType, typeof(bool)))
           return;
 
         // --- An enum-type having an enum base type of byte, sbyte, short, 
         // --- ushort, int, or uint.
         if (fieldType.IsEnum)
         {
-          ITypeCharacteristics ulType = fieldType.GetUnderlyingEnumType();
-        if (ulType.TypeObject.Equals(typeof(byte)) ||
-            ulType.TypeObject.Equals(typeof(sbyte)) ||
-            ulType.TypeObject.Equals(typeof(short)) ||
-            ulType.TypeObject.Equals(typeof(ushort)) ||            
-            ulType.TypeObject.Equals(typeof(int)) ||
-            ulType.TypeObject.Equals(typeof(uint)))
+          ITypeAbstraction ulType = fieldType.GetUnderlyingEnumType();
+          if (TypeBase.IsSame(ulType, typeof(byte)) ||
+            TypeBase.IsSame(ulType, typeof(sbyte)) ||
+            TypeBase.IsSame(ulType, typeof(short)) ||
+            TypeBase.IsSame(ulType, typeof(ushort)) ||
+            TypeBase.IsSame(ulType, typeof(int)) ||
+            TypeBase.IsSame(ulType, typeof(uint)))
           return;
         }
 
@@ -227,10 +227,10 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- No more checks, if the resulting type is not resolved.
-      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+      if (!ResultingType.TailIsType) return;
 
       // --- Field cannot have void type.
-      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      if (TypeBase.IsSame(ResultingType.Tail.TypeInstance, typeof(void)))
       {
         Parser.Error0670(Token);
       }

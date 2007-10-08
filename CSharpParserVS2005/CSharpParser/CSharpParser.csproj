@@ -51,6 +51,7 @@
     <Compile Include="ProjectModel\Types\NullableType.cs" />
     <Compile Include="ProjectModel\Types\PointerType.cs" />
     <Compile Include="ProjectModel\Types\SimpleExtendedType.cs" />
+    <Compile Include="ProjectModel\Types\TypeBase.cs" />
     <Compile Include="Semantics\Accessibility\AccessibilityDomain.cs" />
     <Compile Include="Semantics\TypeResolution\ITypeDeclarationScope.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedCompilation.cs" />
@@ -236,7 +237,7 @@
     <Compile Include="Semantics\TypeResolution\NamespaceOrTypeResolver.cs" />
     <Compile Include="Semantics\TypeResolution\NamespaceResolutionNode.cs" />
     <Compile Include="Semantics\TypeResolution\ResolutionNodeBase.cs" />
-    <Compile Include="Semantics\TypeResolution\ITypeCharacteristics.cs" />
+    <Compile Include="Semantics\TypeResolution\ITypeAbstraction.cs" />
     <Compile Include="Semantics\TypeResolution\NetBinaryType.cs" />
     <Compile Include="Semantics\TypeResolution\IUsesResolutionContext.cs" />
     <Compile Include="Semantics\TypeResolution\NamespaceHierarchy.cs" />

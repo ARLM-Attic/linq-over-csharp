@@ -101,10 +101,10 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        string typeName = ResultingType.RightMostPart.IsResolvedToType
-                            ? ResultingType.RightMostPart.ResolvingType.FullName
-                            : (ResultingType.RightMostPart.IsResolvedToTypeParameter
-                                 ? ResultingType.RightMostPart.ResolvingTypeParameter.Name
+        string typeName = ResultingType.TailIsType
+                            ? ResultingType.Tail.TypeInstance.FullName
+                            : (ResultingType.TailIsTypeParameter
+                                 ? ResultingType.Tail.ResolvingTypeParameter.Name
                                  : "");
         return string.Format("set_{0}({1})", SimpleName, typeName);
       }
@@ -152,7 +152,7 @@ namespace CSharpParser.ProjectModel
       CheckMethodModifiers();
 
       // --- Check for the reserved method names (get_<Property>, set_<Property>)
-      TypeReference type = ResultingType.RightMostPart;
+      TypeReference type = ResultingType.Tail;
       if (IsValid && (type.IsResolvedToType || type.IsResolvedToTypeParameter))
       {
         MethodDeclaration method;
@@ -219,10 +219,10 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- No more checks, if the resulting type is not resolved.
-      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+      if (!ResultingType.TailIsType) return;
 
       // --- Property cannot return void
-      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      if (TypeBase.IsSame(ResultingType.Tail.TypeInstance, typeof(void)))
       {
         Parser.Error0547(Token, Name);
       }

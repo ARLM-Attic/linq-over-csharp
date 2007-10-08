@@ -24,7 +24,7 @@ namespace CSharpParserTest
 
       // int x = 6;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.TailName, "int");
       Assert.AreEqual(decl1.Name, "x");
       Assert.IsNotNull(decl1.Variable.Initializer);
       SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
@@ -47,7 +47,7 @@ namespace CSharpParserTest
 
       // int y = x = 8;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.TailName, "int");
       Assert.AreEqual(decl1.Name, "y");
       Assert.IsNotNull(decl1.Variable.Initializer);
       SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
@@ -75,7 +75,7 @@ namespace CSharpParserTest
 
       // int a1 = 2*3*4;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.TailName, "int");
       Assert.AreEqual(decl1.Name, "a1");
       Assert.IsNotNull(decl1.Variable.Initializer);
       SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
@@ -106,7 +106,7 @@ namespace CSharpParserTest
 
       // int a2 = 2 + 3 + 4;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.TailName, "int");
       Assert.AreEqual(decl1.Name, "a2");
       Assert.IsNotNull(decl1.Variable.Initializer);
       SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;
@@ -137,7 +137,7 @@ namespace CSharpParserTest
 
       // int a3 = 2 + 3 * 4 + 5;
       Assert.IsNotNull(decl1);
-      Assert.AreEqual(decl1.Variable.ResultingType.RightmostName, "int");
+      Assert.AreEqual(decl1.Variable.ResultingType.TailName, "int");
       Assert.AreEqual(decl1.Name, "a3");
       Assert.IsNotNull(decl1.Variable.Initializer);
       SimpleInitializer sin = decl1.Variable.Initializer as SimpleInitializer;

@@ -144,9 +144,9 @@ namespace CSharpParser.ProjectModel
       {
         if (IsClassOrStruct) return true;
         if (IsType &&
-          _Type.RightMostPart.IsResolvedToType && 
-          (_Type.RightMostPart.ResolvingType.IsClass ||
-          _Type.RightMostPart.ResolvingType.TypeObject.Equals(typeof(Enum)))
+          _Type.TailIsType && 
+          (_Type.Tail.TypeInstance.IsClass ||
+          TypeBase.IsSame(_Type.Tail.TypeInstance, typeof(Enum)))
           ) return true;
         return false;
       }
@@ -346,15 +346,15 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void CheckClassConstraint()
     {
-      if (HasPrimary && Primary.IsType && Primary.Type.RightMostPart.IsResolvedToType)
+      if (HasPrimary && Primary.IsType && Primary.Type.TailIsType)
       {
-        ITypeCharacteristics resolvingType = Primary.Type.RightMostPart.ResolvingType;
-        object typeObject = resolvingType.TypeObject;
-        if (typeObject.Equals(typeof(object)) ||
-          typeObject.Equals(typeof(Array)) ||
-          typeObject.Equals(typeof(Delegate)) ||
-          typeObject.Equals(typeof(Enum)) ||
-          typeObject.Equals(typeof(ValueType)))
+        ITypeAbstraction resolvingType = Primary.Type.Tail.TypeInstance;
+        //object typeObject = resolvingType.TypeObject;
+        if (TypeBase.IsSame(resolvingType, typeof(object)) ||
+          TypeBase.IsSame(resolvingType, typeof(Array)) ||
+          TypeBase.IsSame(resolvingType, typeof(Delegate)) ||
+          TypeBase.IsSame(resolvingType, typeof(Enum)) ||
+          TypeBase.IsSame(resolvingType, typeof(ValueType)))
         {
           Parser.Error0702(Primary.Token, Primary.Type.FullName);
           Invalidate();
@@ -411,9 +411,9 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- Check for interface types
-      if (element.IsType && element.Type.RightMostPart.IsResolvedToType)
+      if (element.IsType && element.Type.TailIsType)
       {
-        ITypeCharacteristics resolvingType = element.Type.RightMostPart.ResolvingType;
+        ITypeAbstraction resolvingType = element.Type.Tail.TypeInstance;
         if (resolvingType.IsClass)
         {
           // --- Classes cannot be secondary constraints

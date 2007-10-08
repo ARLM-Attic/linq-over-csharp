@@ -155,10 +155,10 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- No more checks, if the resulting type is not resolved.
-      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+      if (!ResultingType.TailIsType) return;
 
       // --- Indexer cannot return void
-      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      if (TypeBase.IsSame(ResultingType.Tail.TypeInstance, typeof(void)))
       {
         Parser.Error0620(Token);
       }

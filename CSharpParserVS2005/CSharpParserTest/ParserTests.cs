@@ -242,12 +242,12 @@ namespace CSharpParserTest
 
       FormalParameter fp = ind.FormalParameters[0];
       Assert.AreEqual(fp.Name, "index1");
-      Assert.AreEqual(fp.Type.RightmostName, "int");
+      Assert.AreEqual(fp.Type.TailName, "int");
       Assert.AreEqual(fp.Kind, FormalParameterKind.In);
 
       fp = ind.FormalParameters[1];
       Assert.AreEqual(fp.Name, "index2");
-      Assert.AreEqual(fp.Type.RightmostName, "string");
+      Assert.AreEqual(fp.Type.TailName, "string");
       Assert.AreEqual(fp.Kind, FormalParameterKind.In);
 
       ind = td.Members[7] as IndexerDeclaration;
@@ -258,12 +258,12 @@ namespace CSharpParserTest
 
       fp = ind.FormalParameters[0];
       Assert.AreEqual(fp.Name, "index1");
-      Assert.AreEqual(fp.Type.RightmostName, "int");
+      Assert.AreEqual(fp.Type.TailName, "int");
       Assert.AreEqual(fp.Kind, FormalParameterKind.In);
 
       fp = ind.FormalParameters[1];
       Assert.AreEqual(fp.Name, "index2");
-      Assert.AreEqual(fp.Type.RightmostName, "string");
+      Assert.AreEqual(fp.Type.TailName, "string");
       Assert.AreEqual(fp.Kind, FormalParameterKind.In);
 
       pd = td.Members[8] as PropertyDeclaration;
@@ -297,27 +297,27 @@ namespace CSharpParserTest
 
       md = td.Members[1] as MethodDeclaration;
       Assert.IsNotNull(md);
-      Assert.AreEqual(md.ResultingType.RightmostName, "string");
+      Assert.AreEqual(md.ResultingType.TailName, "string");
       Assert.AreEqual(md.Name, "ReverseString");
       Assert.AreEqual(md.DeclaredVisibility, Visibility.Protected);
       Assert.AreEqual(md.FormalParameters.Count, 1);
       FormalParameter fp = md.FormalParameters[0];
       Assert.AreEqual(fp.Name, "source");
-      Assert.AreEqual(fp.Type.RightmostName, "string");
+      Assert.AreEqual(fp.Type.TailName, "string");
 
       md = td.Members[2] as MethodDeclaration;
       Assert.IsNotNull(md);
-      Assert.AreEqual(md.ResultingType.RightmostName, "T");
+      Assert.AreEqual(md.ResultingType.TailName, "T");
       Assert.AreEqual(md.Name, "AbstractMethod");
       Assert.AreEqual(md.DeclaredVisibility, Visibility.Protected);
       Assert.IsTrue(md.IsAbstract);
       Assert.AreEqual(md.FormalParameters.Count, 2);
       fp = md.FormalParameters[0];
       Assert.AreEqual(fp.Name, "par1");
-      Assert.AreEqual(fp.Type.RightmostName, "U");
+      Assert.AreEqual(fp.Type.TailName, "U");
       fp = md.FormalParameters[1];
       Assert.AreEqual(fp.Name, "par2");
-      Assert.AreEqual(fp.Type.RightmostName, "V");
+      Assert.AreEqual(fp.Type.TailName, "V");
       Assert.AreEqual(md.TypeParameters.Count, 3);
       Assert.AreEqual(md.TypeParameters[0].Name, "T");
       Assert.AreEqual(md.TypeParameters[1].Name, "U");
@@ -325,7 +325,7 @@ namespace CSharpParserTest
 
       md = td.Members[3] as MethodDeclaration;
       Assert.IsNotNull(md);
-      Assert.AreEqual(md.ResultingType.RightmostName, "IEnumerator");
+      Assert.AreEqual(md.ResultingType.TailName, "IEnumerator");
       Assert.AreEqual(md.FullName, "IEnumerable.GetEnumerator");
       Assert.AreEqual(md.Name, "GetEnumerator");
       Assert.AreEqual(md.DeclaredVisibility, Visibility.Default);
@@ -344,7 +344,7 @@ namespace CSharpParserTest
       CastOperatorDeclaration md = td.Members[0] as CastOperatorDeclaration;
       Assert.IsNotNull(md);
       Assert.IsTrue(md.IsImplicit);
-      Assert.AreEqual(md.ResultingType.RightmostName, "int");
+      Assert.AreEqual(md.ResultingType.TailName, "int");
       Assert.AreEqual(md.FormalParameters.Count, 1);
       FormalParameter fp = md.FormalParameters[0];
       Assert.AreEqual(fp.Name, "dec");
@@ -353,7 +353,7 @@ namespace CSharpParserTest
       md = td.Members[1] as CastOperatorDeclaration;
       Assert.IsNotNull(md);
       Assert.IsTrue(md.IsExplicit);
-      Assert.AreEqual(md.ResultingType.RightmostName, "CastOperatorDeclaration");
+      Assert.AreEqual(md.ResultingType.TailName, "CastOperatorDeclaration");
       Assert.AreEqual(md.FormalParameters.Count, 1);
       fp = md.FormalParameters[0];
       Assert.AreEqual(fp.Name, "value");

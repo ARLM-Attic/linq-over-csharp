@@ -14,8 +14,8 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
-    private readonly ITypeCharacteristics _ConstructingType;
-    private readonly List<ITypeCharacteristics> _TypeParameters;
+    private readonly ITypeAbstraction _ConstructingType;
+    private readonly List<ITypeAbstraction> _TypeParameters;
 
     #endregion
 
@@ -29,11 +29,11 @@ namespace CSharpParser.ProjectModel
     /// <param name="constructingType">Type the generic type is constructed from.</param>
     /// <param name="typeParameters">Type parameters of this generic type.</param>
     // --------------------------------------------------------------------------------
-    public GenericType(ITypeCharacteristics constructingType,
-      IEnumerable<ITypeCharacteristics> typeParameters)
+    public GenericType(ITypeAbstraction constructingType,
+      IEnumerable<ITypeAbstraction> typeParameters)
     {
       _ConstructingType = constructingType;
-      _TypeParameters = new List<ITypeCharacteristics>(typeParameters);
+      _TypeParameters = new List<ITypeAbstraction>(typeParameters);
     }
 
     // --------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="constructingType">Type the generic type is constructed from.</param>
     /// <param name="parameter">Single type parameter.</param>
     // --------------------------------------------------------------------------------
-    public GenericType(ITypeCharacteristics constructingType, ITypeCharacteristics
+    public GenericType(ITypeAbstraction constructingType, ITypeAbstraction
       parameter)
     {
       if (!parameter.IsValueType)
@@ -52,7 +52,7 @@ namespace CSharpParser.ProjectModel
         throw new InvalidOperationException("Valuetype expected.");
       }
       _ConstructingType = constructingType;
-      _TypeParameters = new List<ITypeCharacteristics>();
+      _TypeParameters = new List<ITypeAbstraction>();
       _TypeParameters.Add(parameter);
     }
 
@@ -65,7 +65,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the factory type of this generic type
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics ConstructingType
+    public ITypeAbstraction ConstructingType
     {
       get { return _ConstructingType; }
     }
@@ -75,7 +75,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of type parameters
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<ITypeCharacteristics> TypeParameters
+    public List<ITypeAbstraction> TypeParameters
     {
       get { return _TypeParameters; }
     }
@@ -123,8 +123,9 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (_TypeParameters.Count == 0) return _ConstructingType.Name;
-        return string.Format("{0}`{1}", _ConstructingType.Name, _TypeParameters.Count);
+        if (_TypeParameters.Count == 0) return _ConstructingType.SimpleName;
+        return string.Format("{0}`{1}", _ConstructingType.SimpleName, 
+          _TypeParameters.Count);
       }
     }
 
@@ -140,7 +141,7 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        foreach (ITypeCharacteristics param in _TypeParameters)
+        foreach (ITypeAbstraction param in _TypeParameters)
           if (param.IsOpenType) return true;
         return false;
       }
@@ -354,6 +355,30 @@ namespace CSharpParser.ProjectModel
       get { return _ConstructingType.Namespace; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parametrized name of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string ParametrizedName
+    {
+      get { return TypeBase.GetParametrizedName(this); }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a list representing the generic arguments of a type.
+    /// </summary>
+    /// <returns>
+    /// Arguments of a generic typeor generic type declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override List<ITypeAbstraction> GetGenericArguments()
+    {
+      return _TypeParameters;
+    }
+
     #endregion
+
   }
 }

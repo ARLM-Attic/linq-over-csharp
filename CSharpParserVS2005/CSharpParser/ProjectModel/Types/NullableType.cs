@@ -18,7 +18,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="structType">Nullable type</param>
     // --------------------------------------------------------------------------------
-    public NullableType(ITypeCharacteristics structType): 
+    public NullableType(ITypeAbstraction structType): 
       base(NetBinaryType.Nullable, structType)
     {
     }

@@ -313,7 +313,7 @@ namespace CSharpParser.Semantics
     /// </para>
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public virtual TypeResolutionNode CreateType(ITypeCharacteristics type)
+    public virtual TypeResolutionNode CreateType(ITypeAbstraction type)
     {
       // --- Search for the type node
       ResolutionNodeBase currentNode;

@@ -49,7 +49,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the default base type of this type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public override ITypeCharacteristics DefaultBaseType
+    public override ITypeAbstraction DefaultBaseType
     {
       get { return NetBinaryType.ValueType; }
     }

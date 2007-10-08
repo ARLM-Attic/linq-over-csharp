@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
@@ -25,7 +26,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="elementType">Element type instance.</param>
     /// <param name="rank">Array rank</param>
     // --------------------------------------------------------------------------------
-    public ArrayType(ITypeCharacteristics elementType, int rank)
+    public ArrayType(ITypeAbstraction elementType, int rank)
       : base(elementType)
     {
       _Rank = rank;
@@ -89,6 +90,33 @@ namespace CSharpParser.ProjectModel
       get { return false; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parametrized name of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string ParametrizedName
+    {
+      get
+      {
+        return TypeBase.GetParametrizedName(this) + 
+          "[" + string.Empty.PadRight(_Rank - 1, ',') + "]";
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a list representing the generic arguments of a type.
+    /// </summary>
+    /// <returns>
+    /// Arguments of a generic typeor generic type declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override List<ITypeAbstraction> GetGenericArguments()
+    {
+      return NetBinaryType.EmptyTypes;
+    }
+    
     #endregion
   }
 }

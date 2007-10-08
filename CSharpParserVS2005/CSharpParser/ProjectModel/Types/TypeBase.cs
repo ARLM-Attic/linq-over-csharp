@@ -1,21 +1,44 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
+using CSharpParser.ParserFiles;
 using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a type constructed from a declaration in the source code.
+  /// This abstract type represents a type declaration.
   /// </summary>
-  /// <remarks>
-  /// Types are constructed by using the "*" pointer construction, the
-  /// "[]" or "[,...,]" array construction or generic construction.
-  /// </remarks>
   // ==================================================================================
-  public abstract class ExtendedType : ITypeAbstraction
+  public abstract class TypeBase : AttributedElement,
+    ITypeAbstraction
   {
-    #region ITypeAbstraction Implementation
+    #region Private fields
+
+    private List<ITypeAbstraction> _GenericArguments;
+    private static readonly Dictionary<string, ITypeAbstraction> NoNestedTypes =
+      new Dictionary<string, ITypeAbstraction>();
+
+    #endregion
+
+    #region Lifecycle methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new type presentation instance.
+    /// </summary>
+    /// <param name="token">Token providing position information.</param>
+    /// <param name="parser">Parser used by this language element.</param>
+    // --------------------------------------------------------------------------------
+    protected TypeBase(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
+    {
+    }
+
+    #endregion
+
+    #region ITypeAbstraction methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -48,7 +71,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public virtual ITypeAbstraction GetElementType()
     {
-      throw new InvalidOperationException("This type has no element type.");
+      return null;
     }
 
     // --------------------------------------------------------------------------------
@@ -59,7 +82,20 @@ namespace CSharpParser.ProjectModel
     /// Arguments of a generic typeor generic type declaration.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public abstract List<ITypeAbstraction> GetGenericArguments();
+    public virtual List<ITypeAbstraction> GetGenericArguments()
+    {
+      if (_GenericArguments == null)
+      {
+        _GenericArguments = new List<ITypeAbstraction>();
+        IEnumerable<ITypeAbstraction> args = GetArguments();
+        if (args != null)
+        {
+          foreach (ITypeAbstraction typeParam in args) 
+            _GenericArguments.Add(typeParam);
+        }
+      }
+      return _GenericArguments;
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -68,7 +104,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public virtual bool IsGenericParameter
     {
-      get { return false;} 
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -80,9 +116,9 @@ namespace CSharpParser.ProjectModel
     /// dictionary is retrieved if there is no nested type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, ITypeAbstraction> GetNestedTypes()
+    public virtual Dictionary<string, ITypeAbstraction> GetNestedTypes()
     {
-      return new Dictionary<string, ITypeAbstraction>();
+      return NoNestedTypes;
     }
 
     // --------------------------------------------------------------------------------
@@ -93,9 +129,9 @@ namespace CSharpParser.ProjectModel
     /// Throws an exception, if the underlying type is not an enum type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeAbstraction GetUnderlyingEnumType()
+    public virtual ITypeAbstraction GetUnderlyingEnumType()
     {
-      throw new InvalidOperationException("Underlying type is not an enum.");
+      return null;
     }
 
     // --------------------------------------------------------------------------------
@@ -103,22 +139,28 @@ namespace CSharpParser.ProjectModel
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsRuntimeType { get; }
+    public virtual bool IsRuntimeType
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract ReferencedUnit DeclaringUnit { get; }
+    public virtual ReferencedUnit DeclaringUnit
+    {
+      get { return Parser.CompilationUnit.ThisUnit; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual bool IsUnmanagedType 
-    { 
+    public virtual bool IsUnmanagedType
+    {
       get { return false; }
     }
 
@@ -127,10 +169,11 @@ namespace CSharpParser.ProjectModel
     /// Gets the base type of this type.
     /// </summary>
     /// <remarks>
-    /// Constructed types never have base type
+    /// If there is no explicit base type for this type, a corresponding reference to
+    /// System.Object should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeAbstraction BaseType
+    public virtual ITypeAbstraction BaseType
     {
       get { return null; }
     }
@@ -140,22 +183,12 @@ namespace CSharpParser.ProjectModel
     /// Gets the type that declares the current nested type.
     /// </summary>
     /// <remarks>
-    /// Constructed types never have declaring type
+    /// If there is no declaring type, null should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeAbstraction DeclaringType
+    public virtual ITypeAbstraction DeclaringType
     {
       get { return null; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the fully qualified name of the type, including the namespace of the type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public string FullName
-    {
-      get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
     }
 
     // --------------------------------------------------------------------------------
@@ -164,37 +197,37 @@ namespace CSharpParser.ProjectModel
     /// another type; that is, whether the current Type is an array, a pointer, or is 
     /// passed by reference.
     /// </summary>
-    /// <remarks>
-    /// Constructed types always have element type.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool HasElementType { get; }
+    public virtual bool HasElementType
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never abstract.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsAbstract { get; }
+    public virtual bool IsAbstract
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsArray { get; }
+    public virtual bool IsArray
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a class; that is, not a value 
     /// type or interface.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never classes.
-    /// </remarks>
     // --------------------------------------------------------------------------------
     public abstract bool IsClass { get; }
 
@@ -202,35 +235,29 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never enums.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsEnum
+    public abstract bool IsEnum { get; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current type is a generic type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual bool IsGenericType
     {
       get { return false; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether the current type is a generic type.
-    /// </summary>
-    /// <remarks>
-    /// Constructed types are never generic.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public abstract bool IsGenericType { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a value indicating whether the current Type represents a generic type 
     /// definition, from which other generic types can be constructed.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never generic definitions.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsGenericTypeDefinition { get; }
+    public virtual bool IsGenericTypeDefinition
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -241,7 +268,7 @@ namespace CSharpParser.ProjectModel
     /// Array type created from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ITypeAbstraction MakeArrayType(int rank)
+    public virtual ITypeAbstraction MakeArrayType(int rank)
     {
       return new ArrayType(this, rank);
     }
@@ -254,7 +281,7 @@ namespace CSharpParser.ProjectModel
     /// Pointer type created from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public ITypeAbstraction MakePointerType()
+    public virtual ITypeAbstraction MakePointerType()
     {
       return new PointerType(this);
     }
@@ -263,20 +290,17 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Gets the number of type parameters.
     /// </summary>
-    /// <remarks>
-    /// Constructed types never have type parameters.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract int TypeParameterCount { get; }
+    public virtual int TypeParameterCount
+    {
+      get { return 0; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an interface; that is, not a 
     /// class or a value type.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never interfaces.
-    /// </remarks>
     // --------------------------------------------------------------------------------
     public abstract bool IsInterface { get; }
 
@@ -285,14 +309,8 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the current Type object represents a type 
     /// whose definition is nested inside the definition of another type.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never nested.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsNested
-    {
-      get { return false; }
-    }
+    public abstract bool IsNested { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -306,7 +324,10 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is a pointer.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsPointer { get; }
+    public virtual bool IsPointer
+    {
+      get { return false; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -319,9 +340,6 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are always sealed.
-    /// </remarks>
     // --------------------------------------------------------------------------------
     public abstract bool IsSealed { get; }
 
@@ -357,32 +375,141 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the simple name of the current member.
+    /// Gets the namespace of the type.
     /// </summary>
-    /// <remarks>The simple name does not contain any adornements.</remarks>
     // --------------------------------------------------------------------------------
-    public abstract string SimpleName { get; }
+    public abstract string Namespace { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the parametrized name of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract string ParametrizedName { get; }
+    public override string ParametrizedName
+    {
+      get { return GetParametrizedName(this); }
+    }
+
+    #endregion
+
+    #region Virtual methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the current member.
+    /// Gets an enumerable representing the generic type arguments.
     /// </summary>
+    /// <returns>Enumerable representing the types.</returns>
     // --------------------------------------------------------------------------------
-    public abstract string Name { get; }
+    protected virtual IEnumerable<ITypeAbstraction> GetArguments()
+    {
+      return null;  
+    }
+
+    #endregion
+
+    #region Static methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the namespace of the type.
+    /// Checks, if the first type is the same as the second one or inherits from the 
+    /// second one.
     /// </summary>
+    /// <param name="type">Type to check.</param>
+    /// <param name="otherType">Other type used to check.</param>
+    /// <returns>
+    /// True, if the first type inherits the other type; otherwise, false. If the two
+    /// types are equal, this method returns true.
+    /// </returns>
     // --------------------------------------------------------------------------------
-    public abstract string Namespace { get; }
+    public static bool IsSameOrInheritsFrom(ITypeAbstraction type, 
+                                            ITypeAbstraction otherType)
+    {
+      if (otherType == null) return false;
+      while (type != null)
+      {
+        if (type.FullName == otherType.FullName) return true;
+        type = type.BaseType;
+      }
+      return false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the root element type of a constructed type.
+    /// </summary>
+    /// <param name="type">Type to get the root element type for.</param>
+    /// <returns>
+    /// Root element type.
+    /// </returns>
+    /// <remarks>
+    /// Theroot element type is the type that has no more element types. For example,
+    /// in case of byte**[][,,], the root element type is byte.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public static ITypeAbstraction GetRootElementType(ITypeAbstraction type)
+    {
+      if (type == null) return null;
+      while (type.HasElementType) type = type.GetElementType();
+      return type;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Check is the specified types are the same or not.
+    /// </summary>
+    /// <param name="type">First type</param>
+    /// <param name="otherType">Second type</param>
+    /// <returns>
+    /// True, if the types are the same; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static bool IsSame(ITypeAbstraction type, ITypeAbstraction otherType)
+    {
+      return (type.Namespace == otherType.Namespace &&
+        type.ParametrizedName == otherType.ParametrizedName);  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Check is the specified types are the same or not.
+    /// </summary>
+    /// <param name="type">First type</param>
+    /// <param name="otherType">Second type</param>
+    /// <returns>
+    /// True, if the types are the same; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static bool IsSame(ITypeAbstraction type, Type otherType)
+    {
+      return IsSame(type, new NetBinaryType(otherType));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gtes the parametrized name of the specified type.
+    /// </summary>
+    /// <param name="type">Type specification.</param>
+    /// <returns>
+    /// String representation of the parametrized name of the type.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static string GetParametrizedName(ITypeAbstraction type)
+    {
+      StringBuilder sb = new StringBuilder(type.SimpleName);
+      if (type.TypeParameterCount > 0)
+      {
+        sb.Append('<');
+        bool isFirst = true;
+        foreach (ITypeAbstraction param in type.GetGenericArguments())
+        {
+          if (!isFirst) sb.Append(", ");
+          isFirst = false;
+          sb.Append(param.ParametrizedName);
+        }
+        sb.Append('>');
+      }
+      return sb.ToString();
+    }
 
     #endregion
   }

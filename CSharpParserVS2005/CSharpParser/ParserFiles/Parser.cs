@@ -607,11 +607,11 @@ public partial class CSharpSyntaxParser
 		
 		if (la.kind == 91) {
 			Get();
-			typeRef.IsGlobal = true; 
+			typeRef.IsGlobalScope = true; 
 			Expect(1);
-			typeRef.SubType = new TypeReference(t, this);
-			typeRef.SubType.Name = t.val; 
-			nextType = typeRef.SubType;
+			typeRef.Suffix = new TypeReference(t, this);
+			typeRef.Suffix.Name = t.val; 
+			nextType = typeRef.Suffix;
 			
 		}
 		if (la.kind == 100) {
@@ -620,9 +620,9 @@ public partial class CSharpSyntaxParser
 		while (la.kind == 90) {
 			Get();
 			Expect(1);
-			nextType.SubType = new TypeReference(t, this);
-			nextType.SubType.Name = t.val;
-			nextType = nextType.SubType;
+			nextType.Suffix = new TypeReference(t, this);
+			nextType.Suffix.Name = t.val;
+			nextType = nextType.Suffix;
 			
 			if (la.kind == 100) {
 				TypeArgumentList(nextType.Arguments);
@@ -1441,11 +1441,11 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 		
 		if (la.kind == 91) {
 			Get();
-			typeRef.IsGlobal = true; 
+			typeRef.IsGlobalScope = true; 
 			Expect(1);
-			typeRef.SubType = new TypeReference(t, this);
-			typeRef.SubType.Name = t.val; 
-			nextType = typeRef.SubType;
+			typeRef.Suffix = new TypeReference(t, this);
+			typeRef.Suffix.Name = t.val; 
+			nextType = typeRef.Suffix;
 			
 		}
 		if (la.kind == _lt && IsPartOfMemberName()) {
@@ -1454,9 +1454,9 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 		while (la.kind == _dot && Peek(1).kind == _ident) {
 			Expect(90);
 			Expect(1);
-			nextType.SubType = new TypeReference(t, this);
-			nextType.SubType.Name = t.val;
-			nextType = nextType.SubType;
+			nextType.Suffix = new TypeReference(t, this);
+			nextType.Suffix.Name = t.val;
+			nextType = nextType.Suffix;
 			
 			if (la.kind == _lt && IsPartOfMemberName()) {
 				TypeArgumentList(typeRef.Arguments);
@@ -1564,7 +1564,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		Expect(49);
 		Type(out typeRef, false);
 		cod.ResultingType = typeRef;
-		cod.Name = typeRef.RightmostName;
+		cod.Name = typeRef.TailName;
 		
 		Expect(98);
 		FormalParameter fp = new FormalParameter(t, this);
@@ -1752,7 +1752,7 @@ TypeReference typeRef) {
 	}
 
 	void OverloadableOp(out Operator op) {
-		op = Operator.plus; 
+		op = Operator.Plus; 
 		switch (la.kind) {
 		case 108: {
 			Get();
@@ -1760,107 +1760,107 @@ TypeReference typeRef) {
 		}
 		case 102: {
 			Get();
-			op = Operator.minus; 
+			op = Operator.Minus; 
 			break;
 		}
 		case 106: {
 			Get();
-			op = Operator.not; 
+			op = Operator.Not; 
 			break;
 		}
 		case 115: {
 			Get();
-			op = Operator.tilde; 
+			op = Operator.BitwiseNot; 
 			break;
 		}
 		case 95: {
 			Get();
-			op = Operator.inc; 
+			op = Operator.Increment; 
 			break;
 		}
 		case 88: {
 			Get();
-			op = Operator.dec; 
+			op = Operator.Decrement; 
 			break;
 		}
 		case 70: {
 			Get();
-			op = Operator.@true; 
+			op = Operator.True; 
 			break;
 		}
 		case 29: {
 			Get();
-			op = Operator.@false; 
+			op = Operator.False; 
 			break;
 		}
 		case 116: {
 			Get();
-			op = Operator.times; 
+			op = Operator.Multiply; 
 			break;
 		}
 		case 127: {
 			Get();
-			op = Operator.div; 
+			op = Operator.Divide; 
 			break;
 		}
 		case 128: {
 			Get();
-			op = Operator.mod; 
+			op = Operator.Modulus; 
 			break;
 		}
 		case 83: {
 			Get();
-			op = Operator.and; 
+			op = Operator.BitwiseAnd; 
 			break;
 		}
 		case 124: {
 			Get();
-			op = Operator.or; 
+			op = Operator.BitwiseOr; 
 			break;
 		}
 		case 125: {
 			Get();
-			op = Operator.xor; 
+			op = Operator.BitwiseXor; 
 			break;
 		}
 		case 101: {
 			Get();
-			op = Operator.lshift; 
+			op = Operator.LeftShift; 
 			break;
 		}
 		case 92: {
 			Get();
-			op = Operator.eq; 
+			op = Operator.Equal; 
 			break;
 		}
 		case 105: {
 			Get();
-			op = Operator.neq; 
+			op = Operator.NotEqual; 
 			break;
 		}
 		case 93: {
 			Get();
-			op = Operator.gt; 
+			op = Operator.GreaterThan; 
 			if (la.kind == 93) {
 				if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); 
 				Get();
-				op = Operator.rshift; 
+				op = Operator.RightShift; 
 			}
 			break;
 		}
 		case 100: {
 			Get();
-			op = Operator.lt; 
+			op = Operator.LessThan; 
 			break;
 		}
 		case 94: {
 			Get();
-			op = Operator.gte; 
+			op = Operator.GreaterThanOrEqual; 
 			break;
 		}
 		case 126: {
 			Get();
-			op = Operator.lte; 
+			op = Operator.LessThanOrEqual; 
 			break;
 		}
 		default: SynErr(163); break;
@@ -3787,7 +3787,7 @@ TypeReference typeRef) {
 		nl.Name = t.val; 
 		if (la.kind == 91) {
 			Get();
-			nl.IsGlobal = true; 
+			nl.IsGlobalScope = true; 
 			Expect(1);
 			nl.Name = t.val; 
 		}

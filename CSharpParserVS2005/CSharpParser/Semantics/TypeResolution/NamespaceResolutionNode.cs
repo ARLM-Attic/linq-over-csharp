@@ -149,7 +149,7 @@ namespace CSharpParser.Semantics
     /// If the type is a nested type, first imports its declaring type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public TypeResolutionNode ImportTypeToHierarchy(ITypeCharacteristics type)
+    public TypeResolutionNode ImportTypeToHierarchy(ITypeAbstraction type)
     {
       if (type.DeclaringType == null)
       {
@@ -175,7 +175,7 @@ namespace CSharpParser.Semantics
     /// <returns>Type resolution node of the specified type.</returns>
     // --------------------------------------------------------------------------------
     public TypeResolutionNode ImportType(ResolutionNodeBase resolverRoot, 
-      ITypeCharacteristics type)
+      ITypeAbstraction type)
     {
       // --- This is a type not nested in any type. Register it for the root resolver node.
       TypeResolutionNode resolver;

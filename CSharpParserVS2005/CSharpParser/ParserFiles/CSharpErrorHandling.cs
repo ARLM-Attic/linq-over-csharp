@@ -367,6 +367,34 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0215: The return type of operator True or False must be bool.
+    /// constraints.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0215(Token token)
+    {
+      Error("CS0215", token, "The return type of operator True or False must be bool");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0216: The operator '{0}' requires a matching operator '{1}' to also 
+    /// be defined.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="opName">Operator name</param>
+    /// <param name="opPair">Missing operator name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0216(Token token, string opName, string opPair)
+    {
+      Error("CS0216", token, 
+        "The operator '{0}' requires a matching operator '{1}' to also be defined",
+        opName, opPair);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0234: The type or namespace name '{0}' does not exist in the namespace 
     /// '{1}' (are you missing an assembly reference?).
     /// </summary>
@@ -735,6 +763,20 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0448: The return type for ++ or -- operator must be the containing 
+    /// type or derived from the containing type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0448(Token token)
+    {
+      Error("CS0448", token,
+        "The return type for ++ or -- operator must be the containing type or " +
+        "derived from the containing type");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0449: The 'class' or 'struct' constraint must come before any other 
     /// constraints.
     /// </summary>
@@ -949,6 +991,44 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS0558", token, 
         "User-defined operator '{0}' must be declared static and public", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0559: The parameter type for ++ or -- operator must be the 
+    /// containing type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0559(Token token)
+    {
+      Error("CS0559", token,
+        "The parameter type for ++ or -- operator must be the containing type");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0562: The parameter of a unary operator must be the containing type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0562(Token token)
+    {
+      Error("CS0562", token, 
+        "The parameter of a unary operator must be the containing type");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0563: One of the parameters of a binary operator must be the 
+    /// containing type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0563(Token token)
+    {
+      Error("CS0563", token,
+        "One of the parameters of a binary operator must be the containing type");
     }
 
     // --------------------------------------------------------------------------------

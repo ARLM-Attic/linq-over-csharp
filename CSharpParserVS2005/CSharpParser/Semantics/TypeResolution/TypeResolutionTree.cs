@@ -79,7 +79,7 @@ namespace CSharpParser.Semantics
     /// If the type is a nested type, first imports its declaring type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    //public TypeResolutionNode ImportTypeToHierarchy(ITypeCharacteristics type)
+    //public TypeResolutionNode ImportTypeToHierarchy(ITypeAbstraction type)
     //{
     //  if (type.DeclaringType == null)
     //  {

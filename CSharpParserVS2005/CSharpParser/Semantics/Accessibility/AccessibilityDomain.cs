@@ -63,8 +63,8 @@ namespace CSharpParser.Semantics
     #region Private fields
 
     private ProgramScope _Scope;
-    private ITypeCharacteristics _ScopingType;
-    private readonly ITypeCharacteristics _OwnerType;
+    private ITypeAbstraction _ScopingType;
+    private readonly ITypeAbstraction _OwnerType;
 
     #endregion
 
@@ -78,7 +78,7 @@ namespace CSharpParser.Semantics
     /// <param name="parentType">Parent type instance.</param>
     /// <param name="memberVisibility">Visibility of the member.</param>
     // --------------------------------------------------------------------------------
-    public AccessibilityDomain(ITypeCharacteristics parentType, Visibility memberVisibility)
+    public AccessibilityDomain(ITypeAbstraction parentType, Visibility memberVisibility)
     {
       AccessibilityDomain parent = new AccessibilityDomain(parentType);
       Combine(parent, memberVisibility);
@@ -90,11 +90,11 @@ namespace CSharpParser.Semantics
     /// </summary>
     /// <param name="type">Type instance.</param>
     // --------------------------------------------------------------------------------
-    public AccessibilityDomain(ITypeCharacteristics type)
+    public AccessibilityDomain(ITypeAbstraction type)
     {
       _OwnerType = type;
       TypeDeclaration typeDecl = 
-        TypeDeclaration.GetRootElementType(type) as TypeDeclaration;
+        TypeBase.GetRootElementType(type) as TypeDeclaration;
       if (typeDecl == null)
       {
         // --- Type comes from a referenced assembly
@@ -125,7 +125,7 @@ namespace CSharpParser.Semantics
     /// <param name="scope">Scope of the domain.</param>
     /// <param name="scopingType">Scoping type of the domain.</param>
     // --------------------------------------------------------------------------------
-    private AccessibilityDomain(ProgramScope scope, ITypeCharacteristics scopingType)
+    private AccessibilityDomain(ProgramScope scope, ITypeAbstraction scopingType)
     {
       _Scope = scope;
       _ScopingType = scopingType;
@@ -150,7 +150,7 @@ namespace CSharpParser.Semantics
     /// Gets the scoping typeof this accessibility domain.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics ScopingType
+    public ITypeAbstraction ScopingType
     {
       get { return _ScopingType; }
     }
@@ -160,7 +160,7 @@ namespace CSharpParser.Semantics
     /// Gets the type owning this accessibility domain.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics OwnerType
+    public ITypeAbstraction OwnerType
     {
       get { return _OwnerType; }
     }
@@ -201,7 +201,7 @@ namespace CSharpParser.Semantics
 
       // --- If the other scoping type is a derived type of this domain's type,
       // --- this is "at least as accessible", otherwise, not.
-      return TypeDeclaration.IsSameOrInheritsFrom(other._ScopingType, _ScopingType);
+      return TypeBase.IsSameOrInheritsFrom(other._ScopingType, _ScopingType);
     }
 
     #endregion
@@ -297,7 +297,7 @@ namespace CSharpParser.Semantics
       {
         // --- We must combine the inheritors of the owner type with the inheritors
         // --- of the scoping type.
-        if (TypeDeclaration.IsSameOrInheritsFrom(other._ScopingType, _ScopingType))
+        if (TypeBase.IsSameOrInheritsFrom(other._ScopingType, _ScopingType))
         {
           // --- Nested type derives from the declaring type
           _ScopingType = other._ScopingType;

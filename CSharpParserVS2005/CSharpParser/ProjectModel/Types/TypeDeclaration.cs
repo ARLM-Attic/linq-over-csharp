@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using CSharpParser.ParserFiles;
 using CSharpParser.Collections;
 using CSharpParser.Semantics;
@@ -12,9 +11,9 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeDeclaration: AttributedElement, 
+  public abstract class TypeDeclaration: TypeBase, 
     ITypeParameterOwner,
-    ITypeCharacteristics,
+    ITypeAbstraction,
     ITypeParameterScope,
     IResolutionContext
   {
@@ -41,7 +40,7 @@ namespace CSharpParser.ProjectModel
 
     // --- Fields describing the main characteristics of the type
     private TypeDeclaration _DeclaringType;
-    private ITypeCharacteristics _BaseType;
+    private ITypeAbstraction _BaseType;
     private TypeReference _BaseTypeReference;
     private readonly List<TypeReference> _InterfaceList = new List<TypeReference>();
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
@@ -54,7 +53,7 @@ namespace CSharpParser.ProjectModel
 
     // --- Types declared within this type declaration
     private readonly List<TypeDeclaration> _NestedTypes = new List<TypeDeclaration>();
-    private Dictionary<string, ITypeCharacteristics> _NestedTypeDictionary;
+    private Dictionary<string, ITypeAbstraction> _NestedTypeDictionary;
 
     // --- Members of the type
     private readonly MemberDeclarationCollection _Members = new MemberDeclarationCollection();
@@ -136,7 +135,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsAbstract
+    public override bool IsAbstract
     {
       get
       {
@@ -171,7 +170,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual bool IsSealed
+    public override bool IsSealed
     {
       get { return _IsSealed; }
     }
@@ -181,7 +180,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the flag indicating if this type has a 'static' modifier or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsStatic
+    public override bool IsStatic
     {
       get { return _IsStatic; }
     }
@@ -245,7 +244,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the flag indicating if this type is a generic type or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsGenericType
+    public override bool IsGenericType
     {
       get { return _TypeParameters.Count > 0; }
     }
@@ -256,36 +255,9 @@ namespace CSharpParser.ProjectModel
     /// definition, from which other generic types can be constructed.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsGenericTypeDefinition
+    public override bool IsGenericTypeDefinition
     {
       get { return _TypeParameters.Count > 0; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Makes an array type from the current type with the specified rank.
-    /// </summary>
-    /// <param name="rank">Rank of array type to be created</param>
-    /// <returns>
-    /// Array type created from this type.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public ITypeCharacteristics MakeArrayType(int rank)
-    {
-      return new ArrayType(this, rank);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Makes a pointer type from the current type with the specified rank.
-    /// </summary>
-    /// <returns>
-    /// Pointer type created from this type.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public ITypeCharacteristics MakePointerType()
-    {
-      return new PointerType(this);
     }
 
     // --------------------------------------------------------------------------------
@@ -293,7 +265,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the number of type parameters.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public int TypeParameterCount
+    public override int TypeParameterCount
     {
       get { return _TypeParameters.Count; }
     }
@@ -338,7 +310,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string ITypeCharacteristics.Namespace
+    public override string Namespace
     {
       get { return _EnclosingNamespace == null ? String.Empty : FullName; }
     }
@@ -351,34 +323,21 @@ namespace CSharpParser.ProjectModel
     /// A type is open, if directly or indireclty references to a type parametes.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsOpenType
+    public override bool IsOpenType
     {
       get { return _TypeParameters.Count > 0; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the number of dimensions of an array type.
+    /// Gets an enumerable representing the generic type arguments.
     /// </summary>
-    /// <returns>Number of array dimensions.</returns>
+    /// <returns>Enumerable representing the types.</returns>
     // --------------------------------------------------------------------------------
-    public int GetArrayRank()
+    protected override IEnumerable<ITypeAbstraction> GetArguments()
     {
-      throw new ArgumentException("Type is not an array.");
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the element type of this type.
-    /// </summary>
-    /// <returns>
-    /// Element type for a pointer, reference or array; otherwise, null.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public ITypeCharacteristics GetElementType()
-    {
-      return null;
-    }
+      foreach (TypeParameter typeRef in _TypeParameters) yield return typeRef;
+    } 
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -389,11 +348,11 @@ namespace CSharpParser.ProjectModel
     /// dictionary is retrieved if there is no nested type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, ITypeCharacteristics> GetNestedTypes()
+    public override Dictionary<string, ITypeAbstraction> GetNestedTypes()
     {
       if (_NestedTypeDictionary == null)
       {
-        _NestedTypeDictionary = new Dictionary<string, ITypeCharacteristics>();
+        _NestedTypeDictionary = new Dictionary<string, ITypeAbstraction>();
         foreach (TypeDeclaration nested in _NestedTypes)
           _NestedTypeDictionary.Add(nested.ClrName, nested);
       }
@@ -408,7 +367,7 @@ namespace CSharpParser.ProjectModel
     /// Throws an exception, if the underlying type is not an enum type.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics GetUnderlyingEnumType()
+    public override ITypeAbstraction GetUnderlyingEnumType()
     {
       EnumDeclaration enumDecl = this as EnumDeclaration;
       if (enumDecl == null)
@@ -418,31 +377,10 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the flag indicating if this type is .NET runtime type or not
-    /// </summary>
-    /// <remarks>Always returns false.</remarks>
-    // --------------------------------------------------------------------------------
-    public bool IsRuntimeType
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the reference unit where the type is defined.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ReferencedUnit DeclaringUnit
-    {
-      get { return Parser.CompilationUnit.ThisUnit; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsUnmanagedType
+    public override bool IsUnmanagedType
     {
       get
       {
@@ -457,7 +395,7 @@ namespace CSharpParser.ProjectModel
             FieldDeclaration fi = member as FieldDeclaration;
             if (fi == null) continue;
             if (!fi.IsValid || !fi.ResultingType.IsResolvedToType) return false;
-            if (!fi.ResultingType.ResolvingType.IsUnmanagedType) return false;
+            if (!fi.ResultingType.TypeInstance.IsUnmanagedType) return false;
           }
         }
         else
@@ -466,7 +404,7 @@ namespace CSharpParser.ProjectModel
           foreach (FieldDeclaration fi in _Fields)
           {
             if (!fi.IsValid || !fi.ResultingType.IsResolvedToType) return false;
-            if (!fi.ResultingType.ResolvingType.IsUnmanagedType) return false;
+            if (!fi.ResultingType.TypeInstance.IsUnmanagedType) return false;
           }
         }
         return true;
@@ -482,7 +420,7 @@ namespace CSharpParser.ProjectModel
     /// System.Object should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public ITypeCharacteristics BaseType
+    public override ITypeAbstraction BaseType
     {
       get { return _BaseType; }
     }
@@ -502,7 +440,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the default base type of this type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual ITypeCharacteristics DefaultBaseType
+    public virtual ITypeAbstraction DefaultBaseType
     {
       get { return NetBinaryType.Object; }
     }
@@ -515,7 +453,7 @@ namespace CSharpParser.ProjectModel
     /// If there is no declaring type, null should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    ITypeCharacteristics ITypeCharacteristics.DeclaringType
+    ITypeAbstraction ITypeAbstraction.DeclaringType
     {
       get { return _DeclaringType; }
     }
@@ -537,66 +475,10 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether the current Type encompasses or refers to 
-    /// another type; that is, whether the current Type is an array, a pointer, or is 
-    /// passed by reference.
-    /// </summary>
-    /// <remarks>
-    /// Always returns false, because a type declaration never has an element type.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public bool HasElementType
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is an array.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsArray
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name property using generic type parameters.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public override string ParametrizedName
-    {
-      get
-      {
-        if (IsGenericType)
-        {
-          StringBuilder sb = new StringBuilder(100);
-          sb.Append(base.Name);
-          sb.Append('<');
-          bool firstParam = true;
-          foreach (TypeParameter param in _TypeParameters)
-          {
-            if (!firstParam) sb.Append(", ");
-            sb.Append(param.Name);
-            firstParam = false;
-          }
-          sb.Append('>');
-          return sb.ToString();
-        }
-        else
-        {
-          return Name;
-        }
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the flag indicating if this type is a class or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsClass
+    public override bool IsClass
     {
       get { return this is ClassDeclaration; }
     }
@@ -606,7 +488,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsEnum
+    public override bool IsEnum
     {
       get { return this is EnumDeclaration; }
     }
@@ -626,7 +508,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the flag indicating if this type is an interface or not.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsInterface
+    public override bool IsInterface
     {
       get { return this is InterfaceDeclaration; }
     }
@@ -637,39 +519,9 @@ namespace CSharpParser.ProjectModel
     /// whose definition is nested inside the definition of another type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsNested
+    public override bool IsNested
     {
       get { return _DeclaringType != null; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and visible only within 
-    /// its own assembly.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedAssembly
-    {
-      get { return IsNested && _DeclaredVisibility == Visibility.Internal; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is nested and declared private.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedPrivate
-    {
-      get { return IsNested && Visibility == Visibility.Private; }
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether a class is nested and declared public.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNestedPublic
-    {
-      get { return IsNested && IsPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -677,35 +529,9 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsNotPublic
+    public override bool IsNotPublic
     {
       get { return Visibility != Visibility.Public; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is a pointer.
-    /// </summary>
-    /// <remarks>
-    /// Always returns false.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public bool IsPointer
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is one of the primitive types.
-    /// </summary>
-    /// <remarks>
-    /// Always returns false.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public bool IsPrimitive
-    {
-      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -713,7 +539,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsPublic
+    public override bool IsPublic
     {
       get { return Visibility == Visibility.Public; }
     }
@@ -723,7 +549,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public bool IsValueType
+    public override bool IsValueType
     {
       get { return IsStruct || IsEnum; }
     }
@@ -742,11 +568,11 @@ namespace CSharpParser.ProjectModel
     /// interface of a component assembly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public bool IsVisible
+    public override bool IsVisible
     {
       get
       {
-        return (!IsNested && IsPublic) || (IsNestedPublic && DeclaringType.IsVisible);
+        return (!IsNested && IsPublic) || (IsNested && IsPublic && DeclaringType.IsVisible);
       }
     }
 
@@ -766,7 +592,7 @@ namespace CSharpParser.ProjectModel
     /// Gets or sets the parent of this type declaration
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeDeclaration DeclaringType
+    public new TypeDeclaration DeclaringType
     {
       get { return _DeclaringType; }
     }
@@ -1010,16 +836,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the object carrying detailed information about this type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public object TypeObject
-    {
-      get { return this; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Sets the source file of this type declaration
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -1111,7 +927,7 @@ namespace CSharpParser.ProjectModel
       List<string> interfaces = new List<string>();
       foreach (TypeReference intf in _InterfaceList)
         if (intf.IsValid && intf.IsResolvedToType) 
-          interfaces.Add(intf.ResolvingType.FullName);
+          interfaces.Add(intf.TypeInstance.FullName);
 
       Attributes.Clear();
       foreach (TypeDeclaration part in _Parts)
@@ -1159,9 +975,9 @@ namespace CSharpParser.ProjectModel
         foreach (TypeReference intf in part.InterfaceList)
         {
           if (!intf.IsValid || !intf.IsResolvedToType) continue;
-          if (!interfaces.Contains(intf.ResolvingType.FullName))
+          if (!interfaces.Contains(intf.TypeInstance.FullName))
           {
-            interfaces.Add(intf.ResolvingType.FullName);
+            interfaces.Add(intf.TypeInstance.FullName);
             _InterfaceList.Add(intf);
           }
         }
@@ -1406,7 +1222,7 @@ namespace CSharpParser.ProjectModel
     /// and its direct enclosing type (if type is a nested type).
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public IEnumerable<ITypeCharacteristics> DirectlyDependsOn
+    public IEnumerable<ITypeAbstraction> DirectlyDependsOn
     {
       get
       {
@@ -1414,9 +1230,9 @@ namespace CSharpParser.ProjectModel
         if (_BaseType != null) yield return _BaseType;
         foreach (TypeReference baseType in InterfaceList)
         {
-          if (baseType.RightMostPart.IsValid)
+          if (baseType.Tail.IsResolvedToType)
           {
-            yield return baseType.RightMostPart.ResolvingType;
+            yield return baseType.Tail.TypeInstance;
           }
         }
         // --- Return directly enclosing type
@@ -1454,12 +1270,12 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public void SeparateBaseClassAndInterfaces()
     {
-      if (_InterfaceList.Count > 0 && _InterfaceList[0].RightMostPart.IsResolvedToType &&
-        !_InterfaceList[0].RightMostPart.ResolvingType.IsInterface)
+      if (_InterfaceList.Count > 0 && _InterfaceList[0].TailIsType &&
+        !_InterfaceList[0].Tail.TypeInstance.IsInterface)
       {
         // --- The first element on the interface list is a class type.
         _BaseTypeReference = _InterfaceList[0];
-        _BaseType = _InterfaceList[0].RightMostPart.ResolvingType;
+        _BaseType = _InterfaceList[0].Tail.TypeInstance;
         _InterfaceList.RemoveAt(0);
       }
     }
@@ -1480,16 +1296,16 @@ namespace CSharpParser.ProjectModel
     {
       // --- No base type: it is OK
       if (_BaseType == null) return true;
-      bool isOk = CheckBaseTypeAccessibility(_BaseTypeReference.RightMostPart);
+      bool isOk = CheckBaseTypeAccessibility(_BaseTypeReference.Tail);
 
       // --- Checks for base types of classes
       if (IsClass)
       {
         // --- Base types of classes cannot be special classes
-        if (_BaseType.TypeObject.Equals(typeof(Array)) ||
-         _BaseType.TypeObject.Equals(typeof(Delegate)) ||
-         _BaseType.TypeObject.Equals(typeof(Enum)) ||
-         _BaseType.TypeObject.Equals(typeof(ValueType))
+        if (IsSame(_BaseType, typeof(Array)) ||
+         IsSame(_BaseType, typeof(Delegate)) ||
+         IsSame(_BaseType, typeof(Enum)) ||
+         IsSame(_BaseType, typeof(ValueType))
         )
         {
           Parser.Error0644(_BaseTypeReference.Token, Name, _BaseType.FullName);
@@ -1524,7 +1340,7 @@ namespace CSharpParser.ProjectModel
       else if (IsEnum)
       {
         // --- Only integral types are allowed in form of keywords.
-        if (_BaseTypeReference.HasSubType ||
+        if (_BaseTypeReference.HasSuffix ||
           (
             _BaseTypeReference.Name != "sbyte" &&
             _BaseTypeReference.Name != "byte" &&
@@ -1570,13 +1386,13 @@ namespace CSharpParser.ProjectModel
       foreach (TypeReference type in _InterfaceList)
       {
         bool isOk = true;
-        if (type.RightMostPart.IsResolved)
+        if (type.Tail.IsResolved)
         {
           if (IsTypeParamOrNamespace(type)) isOk = false;
           else
           {
             // --- Only interfaces are allowed on the interface list
-            if (!type.RightMostPart.ResolvingType.IsInterface)
+            if (!type.Tail.TypeInstance.IsInterface)
             {
               if (IsClass)
               {
@@ -1596,12 +1412,12 @@ namespace CSharpParser.ProjectModel
             else
             {
               // --- Interfaces can be only once on the list
-              if (baseNames.Contains(type.RightMostPart.ResolvingType.FullName))
+              if (baseNames.Contains(type.Tail.TypeInstance.FullName))
               {
                 Parser.Error0528(type.Token, type.FullName);
                 isOk = false;
               }
-              else baseNames.Add(type.RightMostPart.ResolvingType.FullName);
+              else baseNames.Add(type.Tail.TypeInstance.FullName);
             }
           }
         }
@@ -1625,7 +1441,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private bool IsTypeParamOrNamespace(TypeReference type)
     {
-      TypeReference rightMostPart = type.RightMostPart;
+      TypeReference rightMostPart = type.Tail;
 
       if (rightMostPart.Target == ResolutionTarget.TypeParameter)
       {
@@ -1699,9 +1515,9 @@ namespace CSharpParser.ProjectModel
           constraint.CheckSecondaryElement(element);
 
           // --- Check for interface constraint duplication 
-          if (element.IsType && element.Type.RightMostPart.IsResolvedToType)
+          if (element.IsType && element.Type.TailIsType)
           {
-            ITypeCharacteristics resolvingType = element.Type.RightMostPart.ResolvingType;
+            ITypeAbstraction resolvingType = element.Type.Tail.TypeInstance;
             if (resolvingType.IsInterface)
             {
               // --- Check for constraint duplication 
@@ -1821,8 +1637,19 @@ namespace CSharpParser.ProjectModel
         member.CheckSemantics();
       }
 
-      // --- Check if there are no methods which differ solely by ref and out in their
-      // --- signature
+      // --- Check semantics for correlation of members
+      CheckSignatures();
+      CheckOperatorPairs();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Check if there are no methods which differ solely by ref and out in their
+    /// signature.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckSignatures()
+    {
       Dictionary<string, int> methodIndex = new Dictionary<string, int>();
       foreach (MethodDeclaration method in _Methods)
       {
@@ -1834,6 +1661,80 @@ namespace CSharpParser.ProjectModel
         }
         else methodIndex.Add(signature, 0);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks,if the type has matching operator pairs.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckOperatorPairs()
+    {
+      foreach (OperatorDeclaration oper in _Operators)
+      {
+        if (oper.Operator == Operator.True)
+        {
+          if (!HasMatchingOperator(Operator.False, oper))
+            Parser.Error0216(oper.Token, oper.Signature, "false");
+        }
+        else if (oper.Operator == Operator.False)
+        {
+          if (!HasMatchingOperator(Operator.True, oper))
+            Parser.Error0216(oper.Token, oper.Signature, "true");
+        }
+        else if (oper.Operator == Operator.Equal)
+        {
+          if (!HasMatchingOperator(Operator.NotEqual, oper))
+            Parser.Error0216(oper.Token, oper.Signature, "!=");
+        }
+        else if (oper.Operator == Operator.NotEqual)
+        {
+          if (!HasMatchingOperator(Operator.Equal, oper))
+            Parser.Error0216(oper.Token, oper.Signature, "==");
+        }
+        else if (oper.Operator == Operator.LessThan)
+        {
+          if (!HasMatchingOperator(Operator.GreaterThan, oper))
+            Parser.Error0216(oper.Token, oper.Signature, ">");
+        }
+        else if (oper.Operator == Operator.GreaterThan)
+        {
+          if (!HasMatchingOperator(Operator.LessThan, oper))
+            Parser.Error0216(oper.Token, oper.Signature, "<");
+        }
+        else if (oper.Operator == Operator.LessThanOrEqual)
+        {
+          if (!HasMatchingOperator(Operator.GreaterThanOrEqual, oper))
+            Parser.Error0216(oper.Token, oper.Signature, ">=");
+        }
+        else if (oper.Operator == Operator.GreaterThanOrEqual)
+        {
+          if (!HasMatchingOperator(Operator.LessThanOrEqual, oper))
+            Parser.Error0216(oper.Token, oper.Signature, "<=");
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if there is an operator with the specified kind matching with the 
+    /// provided signature.
+    /// </summary>
+    /// <param name="operToFind">Kind of operator to find</param>
+    /// <param name="oper">Operator representing the signatures</param>
+    /// <returns>
+    /// True, if there is a matching operator; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool HasMatchingOperator(Operator operToFind, OperatorDeclaration oper)
+    {
+      foreach (OperatorDeclaration operDecl in _Operators)
+      {
+        if (operDecl.Operator == operToFind && 
+          operDecl.PairingSignature == oper.PairingSignature)
+          return true;
+      }
+      return false;
     }
 
     // --------------------------------------------------------------------------------
@@ -1873,7 +1774,7 @@ namespace CSharpParser.ProjectModel
     /// True, if the other type can be accessed from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public bool CanAccessType(ITypeCharacteristics otherType)
+    public bool CanAccessType(ITypeAbstraction otherType)
     {
       return CanAccessType(otherType, false);
     }
@@ -1892,7 +1793,7 @@ namespace CSharpParser.ProjectModel
     /// True, if the other type can be accessed from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public bool CanAccessType(ITypeCharacteristics otherType, bool fromBase)
+    public bool CanAccessType(ITypeAbstraction otherType, bool fromBase)
     {
       TypeDeclaration otherDecl = otherType as TypeDeclaration;
       if (otherDecl == null)
@@ -1939,7 +1840,7 @@ namespace CSharpParser.ProjectModel
     /// True, if the member of the other type can be accessed from this type.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public bool CanAccessMemberOfType(ITypeCharacteristics otherType, 
+    public bool CanAccessMemberOfType(ITypeAbstraction otherType, 
       Visibility memberVisibility)
     {
       // --- The other type must be accessible to access its member.
@@ -1997,10 +1898,10 @@ namespace CSharpParser.ProjectModel
     /// types are equal, this method returns true.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public bool SameOrInheritsFrom(ITypeCharacteristics otherType)
+    public bool SameOrInheritsFrom(ITypeAbstraction otherType)
     {
       if (otherType == null) return false;
-      ITypeCharacteristics current = this; 
+      ITypeAbstraction current = this; 
       while (current != null)
       {
         if (BaseType.FullName == otherType.FullName) return true;
@@ -2024,7 +1925,7 @@ namespace CSharpParser.ProjectModel
     private bool CheckAccessibility(Visibility baseVisibility, TypeReference type)
     {
       // --- Get the base type in case of constructed types
-      ITypeCharacteristics baseType = type.ResolvingType;
+      ITypeAbstraction baseType = type.TypeInstance;
       while (baseType.HasElementType) baseType = baseType.GetElementType();
 
       // --- Is the base type a referenced type?
@@ -2063,7 +1964,7 @@ namespace CSharpParser.ProjectModel
       {
         // --- This type is referenced from an assembly, can be used only if it is
         // --- visible from outside.
-        return type.ResolvingType.IsVisible;
+        return type.TypeInstance.IsVisible;
       }
       return true;
     }
@@ -2250,54 +2151,6 @@ namespace CSharpParser.ProjectModel
       }
       _Methods.Add(decl);
       return false;
-    }
-
-    #endregion
-
-    #region Static methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks, if the first type is the same as the second one or inherits from the 
-    /// second one.
-    /// </summary>
-    /// <param name="type">Type to check.</param>
-    /// <param name="otherType">Other type used to check.</param>
-    /// <returns>
-    /// True, if the first type inherits the other type; otherwise, false. If the two
-    /// types are equal, this method returns true.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    public static bool IsSameOrInheritsFrom(ITypeCharacteristics type, 
-      ITypeCharacteristics otherType)
-    {
-      if (otherType == null) return false;
-      while (type != null)
-      {
-        if (type.FullName == otherType.FullName) return true;
-        type = type.BaseType;
-      }
-      return false;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the root element type of a constructed type.
-    /// </summary>
-    /// <param name="type">Type to get the root element type for.</param>
-    /// <returns>
-    /// Root element type.
-    /// </returns>
-    /// <remarks>
-    /// Theroot element type is the type that has no more element types. For example,
-    /// in case of byte**[][,,], the root element type is byte.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public static ITypeCharacteristics GetRootElementType(ITypeCharacteristics type)
-    {
-      if (type == null) return null;
-      while (type.HasElementType) type = type.GetElementType();
-      return type;
     }
 
     #endregion

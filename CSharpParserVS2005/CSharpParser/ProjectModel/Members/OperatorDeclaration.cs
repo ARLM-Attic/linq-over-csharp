@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -70,14 +73,14 @@ namespace CSharpParser.ProjectModel
       get
       {
         return 
-          ((_Operator == Operator.plus || _Operator == Operator.minus) 
+          ((_Operator == Operator.Plus || _Operator == Operator.Minus) 
             && FormalParameters.Count == 1) ||
-          _Operator == Operator.not || 
-          _Operator == Operator.tilde || 
-          _Operator == Operator.dec || 
-          _Operator == Operator.inc || 
-          _Operator == Operator.@true || 
-          _Operator == Operator.@false;
+          _Operator == Operator.Not || 
+          _Operator == Operator.BitwiseNot || 
+          _Operator == Operator.Decrement || 
+          _Operator == Operator.Increment || 
+          _Operator == Operator.True || 
+          _Operator == Operator.False;
       }
     }
 
@@ -91,7 +94,29 @@ namespace CSharpParser.ProjectModel
       get { return !IsUnary; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the signature to test for pairing operators.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string PairingSignature
+    {
+      get
+      {
+        StringBuilder sb = new StringBuilder();
+        foreach (FormalParameter param in FormalParameters)
+        {
+          if (!param.Type.IsResolvedToType) continue;
+          if (sb.Length > 0) sb.Append(", ");
+          sb.Append(param.Type.ParametrizedName);
+        }
+        return sb.ToString();
+      }
+    }
+
     #endregion
+
+    
 
     #region Semantic checks
 
@@ -130,10 +155,10 @@ namespace CSharpParser.ProjectModel
       }
 
       // --- No more checks, if the resulting type is not resolved.
-      if (!ResultingType.RightMostPart.IsResolvedToType) return;
+      if (!ResultingType.TailIsType) return;
 
       // --- Operator cannot return void
-      if (ResultingType.RightMostPart.ResolvingType.TypeObject == typeof(void))
+      if (TypeBase.IsSame(ResultingType.Tail.TypeInstance, typeof(void)))
       {
         Parser.Error0590(Token);
         Invalidate();
@@ -160,6 +185,34 @@ namespace CSharpParser.ProjectModel
         Invalidate();
         return;
       }
+
+      // --- No more check, if the type is not resolved.
+      if (!FormalParameters[0].Type.IsResolvedToType) return;
+
+      // --- Parameter type must be the containing type or its Nullable version.
+      ITypeAbstraction unaryArg = FormalParameters[0].Type.TypeInstance;
+      if (!CheckContainingType(unaryArg))
+      {
+        Parser.Error0562(Token);
+      }
+
+      if (_Operator == Operator.Increment || _Operator == Operator.Decrement)
+      {
+        // --- Return type must be the containing type or its derived type.
+        if (!TypeBase.IsSameOrInheritsFrom(ResultingType.Tail.TypeInstance,
+          unaryArg))
+        {
+          Parser.Error0448(Token);
+        }
+      }
+      else if (_Operator == Operator.True || _Operator == Operator.False)
+      {
+        // --- Return type must be bool
+        if (!TypeBase.IsSame(ResultingType.Tail.TypeInstance, typeof(bool)))
+        {
+          Parser.Error0215(Token);
+        }
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -176,6 +229,46 @@ namespace CSharpParser.ProjectModel
         Invalidate();
         return;
       }
+
+      // --- No more check, if the types are not resolved.
+      if (!FormalParameters[0].Type.IsResolvedToType) return;
+      if (!FormalParameters[1].Type.IsResolvedToType) return;
+
+      // --- 
+      if (_Operator == Operator.LeftShift || _Operator == Operator.RightShift)
+      {
+        // --- Shift operators must have the enclosing type as their first parameter
+        // --- and int as their second parameter.
+      }
+      else
+      {
+        // --- Non-shift operators must have either the first or the second parameter
+        // --- the same as their containing type.
+        bool firstOk = CheckContainingType(FormalParameters[0].Type.TypeInstance);
+        bool secondOk = CheckContainingType(FormalParameters[1].Type.TypeInstance);
+        if (!firstOk && !secondOk)
+        {
+          Parser.Error0563(Token);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if the type of the parameter matches with the containing type.
+    /// </summary>
+    /// <returns>
+    /// True, if the type of the parameter is the containing type or its nullable 
+    /// version; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private bool CheckContainingType(ITypeAbstraction param)
+    {
+      if (param == DeclaringType) return true;
+      if (!TypeBase.IsSame(param, typeof(Nullable<>)) && !(param is NullableType)) 
+        return false;
+      List<ITypeAbstraction> typeArguments = param.GetGenericArguments();
+      return typeArguments.Count == 1 && typeArguments[0] == DeclaringType;
     }
 
     #endregion

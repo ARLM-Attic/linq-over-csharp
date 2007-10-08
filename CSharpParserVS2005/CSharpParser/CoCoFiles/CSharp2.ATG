@@ -857,7 +857,7 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
     ) "operator"                        
     Type<out typeRef, false>            (. 
                                            cod.ResultingType = typeRef;
-                                           cod.Name = typeRef.RightmostName;
+                                           cod.Name = typeRef.TailName;
                                         .)
     "("                                 (. FormalParameter fp = new FormalParameter(t, this);.)
       Type<out typeRef, false>          (. fp.Type = typeRef; .)
@@ -1498,11 +1498,11 @@ MemberName<out TypeReference typeRef>
                                             TypeReference nextType = typeRef;
                                          .)
   [ 
-    "::"                                 (. typeRef.IsGlobal = true; .)
+    "::"                                 (. typeRef.IsGlobalScope = true; .)
     ident                                (. 
-                                            typeRef.SubType = new TypeReference(t, this);
-                                            typeRef.SubType.Name = t.val; 
-                                            nextType = typeRef.SubType;
+                                            typeRef.Suffix = new TypeReference(t, this);
+                                            typeRef.Suffix.Name = t.val; 
+                                            nextType = typeRef.Suffix;
                                          .)
   ]
   [ 
@@ -1511,9 +1511,9 @@ MemberName<out TypeReference typeRef>
   ]
   { IF (la.kind == _dot && Peek(1).kind == _ident)
       "." ident                          (. 
-                                            nextType.SubType = new TypeReference(t, this);
-                                            nextType.SubType.Name = t.val;
-                                            nextType = nextType.SubType;
+                                            nextType.Suffix = new TypeReference(t, this);
+                                            nextType.Suffix.Name = t.val;
+                                            nextType = nextType.Suffix;
                                          .)
     [ 
       IF (la.kind == _lt && IsPartOfMemberName()) 
@@ -1534,19 +1534,19 @@ TypeName<out TypeReference typeRef>
                                             TypeReference nextType = typeRef;
                                          .)
   [ 
-    "::"                                 (. typeRef.IsGlobal = true; .)
+    "::"                                 (. typeRef.IsGlobalScope = true; .)
     ident                                (. 
-                                            typeRef.SubType = new TypeReference(t, this);
-                                            typeRef.SubType.Name = t.val; 
-                                            nextType = typeRef.SubType;
+                                            typeRef.Suffix = new TypeReference(t, this);
+                                            typeRef.Suffix.Name = t.val; 
+                                            nextType = typeRef.Suffix;
                                          .)
   ]                                                
   [ TypeArgumentList<nextType.Arguments> ]                                    
   {
     "." ident                            (. 
-                                            nextType.SubType = new TypeReference(t, this);
-                                            nextType.SubType.Name = t.val;
-                                            nextType = nextType.SubType;
+                                            nextType.Suffix = new TypeReference(t, this);
+                                            nextType.Suffix.Name = t.val;
+                                            nextType = nextType.Suffix;
                                          .)
     [ TypeArgumentList<nextType.Arguments> ]   
   }
@@ -2617,7 +2617,7 @@ NamedLiteral<out Expression expr>  (. expr = null; .)
   ident        (. NamedLiteral nl = new NamedLiteral(t, this); .)
                (. expr = nl; .)
                (. nl.Name = t.val; .)
-  [ "::"       (. nl.IsGlobal = true; .)
+  [ "::"       (. nl.IsGlobalScope = true; .)
     ident      (. nl.Name = t.val; .)
   ] 
   [ IF (IsGeneric()) TypeArgumentList<nl.TypeArguments> ]
@@ -2869,32 +2869,32 @@ SingleFieldMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
 // Defines the operators that can be overloaded.
 // +op: overloaddable operator.
 // ------------------------------------------------------------------------------------
-OverloadableOp<out Operator op> (. op = Operator.plus; .)
+OverloadableOp<out Operator op> (. op = Operator.Plus; .)
 =                          
     "+"                                     
-  | "-"                         (. op = Operator.minus; .)
-  | "!"                         (. op = Operator.not; .)
-  | "~"                         (. op = Operator.tilde; .)
-  | "++"                        (. op = Operator.inc; .)
-  | "--"                        (. op = Operator.dec; .)
-  | "true"                      (. op = Operator.@true; .)
-  | "false"                     (. op = Operator.@false; .)
-  | "*"                         (. op = Operator.times; .)
-  | "/"                         (. op = Operator.div; .)
-  | "%"                         (. op = Operator.mod; .)
-  | "&"                         (. op = Operator.and; .)
-  | "|"                         (. op = Operator.or; .)
-  | "^"                         (. op = Operator.xor; .)
-  | "<<"                        (. op = Operator.lshift; .)
-  | "=="                        (. op = Operator.eq; .)
-  | "!="                        (. op = Operator.neq; .)
-  | ">"                         (. op = Operator.gt; .)
+  | "-"                         (. op = Operator.Minus; .)
+  | "!"                         (. op = Operator.Not; .)
+  | "~"                         (. op = Operator.BitwiseNot; .)
+  | "++"                        (. op = Operator.Increment; .)
+  | "--"                        (. op = Operator.Decrement; .)
+  | "true"                      (. op = Operator.True; .)
+  | "false"                     (. op = Operator.False; .)
+  | "*"                         (. op = Operator.Multiply; .)
+  | "/"                         (. op = Operator.Divide; .)
+  | "%"                         (. op = Operator.Modulus; .)
+  | "&"                         (. op = Operator.BitwiseAnd; .)
+  | "|"                         (. op = Operator.BitwiseOr; .)
+  | "^"                         (. op = Operator.BitwiseXor; .)
+  | "<<"                        (. op = Operator.LeftShift; .)
+  | "=="                        (. op = Operator.Equal; .)
+  | "!="                        (. op = Operator.NotEqual; .)
+  | ">"                         (. op = Operator.GreaterThan; .)
         [                       (. if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); .)
-          ">"                   (. op = Operator.rshift; .)
+          ">"                   (. op = Operator.RightShift; .)
         ]
-  | "<"                         (. op = Operator.lt; .)
-  | ">="                        (. op = Operator.gte; .)
-  | "<="                        (. op = Operator.lte; .)
+  | "<"                         (. op = Operator.LessThan; .)
+  | ">="                        (. op = Operator.GreaterThanOrEqual; .)
+  | "<="                        (. op = Operator.LessThanOrEqual; .)
 .
 
 // ------------------------------------------------------------------------------------

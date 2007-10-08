@@ -120,10 +120,10 @@ namespace CSharpParser.ProjectModel
 
       // --- If the rightmost name is verbatim (starting with @), we resolve the name
       // --- as a type or namespace name, omitting the @ from the name.
-      if (type.RightmostName.StartsWith("@"))
+      if (type.TailName.StartsWith("@"))
       {
         // --- Remove the '@' before name resolution
-        type.RightMostPart.Name = type.RightmostName.Substring(1);
+        type.Tail.Name = type.TailName.Substring(1);
         try
         {
           info = resolver.Resolve(type, contextType, declarationScope, parameterScope);
@@ -141,7 +141,7 @@ namespace CSharpParser.ProjectModel
         finally
         {
           // --- Anyway, put back the '@'
-          type.RightMostPart.Name = "@" + type.RightmostName;
+          type.Tail.Name = "@" + type.TailName;
         }
       }
       else
@@ -160,8 +160,8 @@ namespace CSharpParser.ProjectModel
           normalNameResolved = info.IsResolved && IsAttributeClass(info);
 
           // --- Let's try the 'Attribute' suffix
-          string oldName = type.RightmostName;
-          type.RightMostPart.Name += "Attribute";
+          string oldName = type.TailName;
+          type.Tail.Name += "Attribute";
           try
           {
             info = resolver.Resolve(type, contextType, declarationScope, parameterScope);
@@ -170,7 +170,7 @@ namespace CSharpParser.ProjectModel
           finally
           {
             // --- Anyway, we restore the name
-            type.RightMostPart.Name = oldName;
+            type.Tail.Name = oldName;
           }
         }
         finally
@@ -212,10 +212,10 @@ namespace CSharpParser.ProjectModel
 
       // --- At this point we have a resolved type. Go through the inheraitance chain to
       // --- Check if this is an Attribute derived class.
-      ITypeCharacteristics type = info.CurrentPart.ResolvingType;
+      ITypeAbstraction type = info.CurrentPart.TypeInstance;
       while (type.BaseType != null)
       {
-        if (type.BaseType.TypeObject == typeof(Attribute)) return true;
+        if (TypeBase.IsSame(type.BaseType, typeof(Attribute))) return true;
         type = type.BaseType;
       }
       return false;

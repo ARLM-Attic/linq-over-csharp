@@ -13,7 +13,7 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields 
 
-    private readonly ITypeCharacteristics _ElementType;
+    private readonly ITypeAbstraction _ElementType;
 
     #endregion
 
@@ -25,7 +25,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="elementType">Element type instance.</param>
     // --------------------------------------------------------------------------------
-    protected SimpleExtendedType(ITypeCharacteristics elementType)
+    protected SimpleExtendedType(ITypeAbstraction elementType)
     {
       if (elementType == null) throw new ArgumentNullException("elementType");
       _ElementType = elementType;
@@ -265,7 +265,7 @@ namespace CSharpParser.ProjectModel
     /// Element type for a pointer, reference or array; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public override ITypeCharacteristics GetElementType()
+    public override ITypeAbstraction GetElementType()
     {
       return _ElementType;
     }

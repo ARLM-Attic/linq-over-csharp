@@ -438,5 +438,78 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS1534");
       Assert.AreEqual(parser.Errors[2].Code, "CS1534");
     }
+
+    [TestMethod]
+    public void OperatorDeclarationFails5()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\OperatorDeclaration6.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0562");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0562");
+    }
+
+    [TestMethod]
+    public void OperatorDeclarationFails6()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\OperatorDeclaration7.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 6);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0448");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0448");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0448");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0448");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0448");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0448");
+    }
+
+    [TestMethod]
+    public void OperatorDeclarationFails7()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\OperatorDeclaration8.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 4);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0215");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0215");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0215");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0215");
+    }
+
+    [TestMethod]
+    public void OperatorDeclarationFails8()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\OperatorDeclaration9.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0216");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0216");
+    }
+
+    [TestMethod]
+    public void OperatorDeclarationFails9()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\OperatorDeclaration10.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0563");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0563");
+    }
+
+    [TestMethod]
+    public void OperatorDeclarationFails10()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\OperatorDeclaration11.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0216");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0216");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0216");
+    }
   }
 }

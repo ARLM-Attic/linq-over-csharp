@@ -129,12 +129,12 @@ namespace CSharpParser.ProjectModel
       set
       {
         _ExplicitName = value;
-        Name = value.RightmostName;
-        value.RightMostPart.ResolveToName();
-        if (value.HasSubType)
+        Name = value.TailName;
+        value.Tail.ResolveToName();
+        if (value.HasSuffix)
         {
           _ExplicitName = value;
-          value.RightMostPart.PrefixType.SubType = null;
+          value.Tail.Prefix.Suffix = null;
         }
         else
         {
@@ -413,7 +413,7 @@ namespace CSharpParser.ProjectModel
     public void CheckGeneralMemberSemantics()
     {
       if (_ResultingType == null) return;
-      TypeReference typeRef = _ResultingType.RightMostPart;
+      TypeReference typeRef = _ResultingType.Tail;
 
       // --- Only those members are checked that have a non-void resolved resulting type.
       if (typeRef == null || !typeRef.IsResolved || typeRef.IsVoid) return;
@@ -431,7 +431,7 @@ namespace CSharpParser.ProjectModel
 
       // --- Check, if the type of the member is at least as accessible as the field.
       AccessibilityDomain memberDomain = new AccessibilityDomain(DeclaringType, Visibility);
-      AccessibilityDomain typeDomain = new AccessibilityDomain(typeRef.ResolvingType);
+      AccessibilityDomain typeDomain = new AccessibilityDomain(typeRef.TypeInstance);
       if (!typeDomain.IsAtLeastAsAccessibleAs(memberDomain))
       {
         // --- Field type is less accessible than the field itself

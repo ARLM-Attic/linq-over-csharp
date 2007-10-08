@@ -131,7 +131,7 @@ namespace CSharpParser.ProjectModel
         Invalidate();
       }
 
-      TypeReference typeRef = ResultingType.RightMostPart;
+      TypeReference typeRef = ResultingType.Tail;
       if (typeRef == null) return;
 
       // --- Go further only if field type has been resolved
@@ -143,7 +143,7 @@ namespace CSharpParser.ProjectModel
       // --- In case if invalidity we finish the check.
       if (!IsValid) return;
 
-      ITypeCharacteristics constType = typeRef.ResolvingType;
+      ITypeAbstraction constType = typeRef.TypeInstance;
 
       // --- Resulting type must be one of the followings:
       // --- A reference type or an enum;
@@ -151,20 +151,20 @@ namespace CSharpParser.ProjectModel
 
       // --- The type byte, sbyte, short, ushort, int, uint, long, ulong, char, float, 
       // --- double, decimal, string or bool;
-      if (constType.TypeObject.Equals(typeof(byte)) ||
-          constType.TypeObject.Equals(typeof(sbyte)) ||
-          constType.TypeObject.Equals(typeof(short)) ||
-          constType.TypeObject.Equals(typeof(ushort)) ||
-          constType.TypeObject.Equals(typeof(int)) ||
-          constType.TypeObject.Equals(typeof(uint)) ||
-          constType.TypeObject.Equals(typeof(long)) ||
-          constType.TypeObject.Equals(typeof(ulong)) ||
-          constType.TypeObject.Equals(typeof(char)) ||
-          constType.TypeObject.Equals(typeof(float)) ||
-          constType.TypeObject.Equals(typeof(double)) ||
-          constType.TypeObject.Equals(typeof(decimal)) ||
-          constType.TypeObject.Equals(typeof(string)) ||
-          constType.TypeObject.Equals(typeof(bool)))
+      if (TypeBase.IsSame(constType, typeof(byte)) ||
+          TypeBase.IsSame(constType, typeof(sbyte)) ||
+          TypeBase.IsSame(constType, typeof(short)) ||
+          TypeBase.IsSame(constType, typeof(ushort)) ||
+          TypeBase.IsSame(constType, typeof(int)) ||
+          TypeBase.IsSame(constType, typeof(uint)) ||
+          TypeBase.IsSame(constType, typeof(long)) ||
+          TypeBase.IsSame(constType, typeof(ulong)) ||
+          TypeBase.IsSame(constType, typeof(char)) ||
+          TypeBase.IsSame(constType, typeof(float)) ||
+          TypeBase.IsSame(constType, typeof(double)) ||
+          TypeBase.IsSame(constType, typeof(decimal)) ||
+          TypeBase.IsSame(constType, typeof(string)) ||
+          TypeBase.IsSame(constType, typeof(bool)))
         return;
 
       // --- Const has an invalid type

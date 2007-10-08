@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
@@ -18,7 +19,7 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="elementType">Element type instance.</param>
     // --------------------------------------------------------------------------------
-    public PointerType(ITypeCharacteristics elementType) : base(elementType)
+    public PointerType(ITypeAbstraction elementType) : base(elementType)
     {
     }
 
@@ -64,6 +65,29 @@ namespace CSharpParser.ProjectModel
     public override bool IsUnmanagedType
     {
       get { return true; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parametrized name of the type.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string ParametrizedName
+    {
+      get { return TypeBase.GetParametrizedName(this) + "*"; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a list representing the generic arguments of a type.
+    /// </summary>
+    /// <returns>
+    /// Arguments of a generic typeor generic type declaration.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public override List<ITypeAbstraction> GetGenericArguments()
+    {
+      return NetBinaryType.EmptyTypes;
     }
 
     #endregion

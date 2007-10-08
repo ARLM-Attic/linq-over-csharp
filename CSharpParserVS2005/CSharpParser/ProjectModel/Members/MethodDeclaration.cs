@@ -135,9 +135,16 @@ namespace CSharpParser.ProjectModel
             sb.Append(par.Kind.ToString().ToLower());
             sb.Append(' ');
           }
-          if (par.Type.RightMostPart.IsResolvedToType)
-            sb.Append(par.Type.RightMostPart.ResolvingType.FullName);
-          else 
+          if (par.Type.TailIsType)
+          {
+            if (!String.IsNullOrEmpty(par.Type.Tail.TypeInstance.Namespace))
+            {
+              sb.Append(par.Type.Tail.TypeInstance.Namespace);
+              sb.Append(".");
+            }
+            sb.Append(par.Type.Tail.TypeInstance.ParametrizedName);
+          }
+          else
             sb.Append(par.Type.FullName);
           isFirst = false;
         }
@@ -170,8 +177,8 @@ namespace CSharpParser.ProjectModel
           if (!isFirst) sb.Append(", ");
           if (par.Kind != FormalParameterKind.In)
             sb.Append("outref ");
-          if (par.Type.RightMostPart.IsResolvedToType)
-            sb.Append(par.Type.RightMostPart.ResolvingType.FullName);
+          if (par.Type.TailIsType)
+            sb.Append(par.Type.Tail.TypeInstance.FullName);
           else
             sb.Append(par.Type.FullName);
           isFirst = false;
