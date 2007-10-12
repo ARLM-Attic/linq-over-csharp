@@ -1,3 +1,4 @@
+using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -6,7 +7,7 @@ namespace CSharpParserTest
   [TestClass]
   public class LargeTestProjects: ParserTestBed
   {
-    const string CSharpParserFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser";
+    const string CSharpParserFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser\CSharpParser.csproj";
     const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
     const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core";
     const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\CSLA";
@@ -47,7 +48,8 @@ namespace CSharpParserTest
     [TestMethod]
     public void CSharpParserIsOK()
     {
-      CompilationUnit parser = new CompilationUnit(CSharpParserFolder, true);
+      CSharpProjectContent content = new CSharpProjectContent(CSharpParserFile);
+      CompilationUnit parser = new CompilationUnit(content);
       Assert.IsTrue(InvokeParser(parser));
     }
   }

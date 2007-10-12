@@ -34,7 +34,6 @@
       System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("No project loaded.");
       this.MainStrip = new System.Windows.Forms.MenuStrip();
       this.FileMenu = new System.Windows.Forms.ToolStripMenuItem();
-      this.OpenProjectFolderItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
       this.ExitItem = new System.Windows.Forms.ToolStripMenuItem();
       this.SplitContainer = new System.Windows.Forms.SplitContainer();
@@ -45,9 +44,10 @@
       this.NamespaceTabView = new System.Windows.Forms.TabPage();
       this.NamespaceTreeView = new System.Windows.Forms.TreeView();
       this.PropertiyGrid = new System.Windows.Forms.PropertyGrid();
-      this.FolderDialog = new System.Windows.Forms.FolderBrowserDialog();
       this.StatusStrip = new System.Windows.Forms.StatusStrip();
       this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+      this.OpenProjectFileItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.FileDialog = new System.Windows.Forms.OpenFileDialog();
       this.MainStrip.SuspendLayout();
       this.SplitContainer.Panel1.SuspendLayout();
       this.SplitContainer.Panel2.SuspendLayout();
@@ -71,19 +71,12 @@
       // FileMenu
       // 
       this.FileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.OpenProjectFolderItem,
+            this.OpenProjectFileItem,
             this.toolStripMenuItem1,
             this.ExitItem});
       this.FileMenu.Name = "FileMenu";
       this.FileMenu.Size = new System.Drawing.Size(44, 24);
       this.FileMenu.Text = "&File";
-      // 
-      // OpenProjectFolderItem
-      // 
-      this.OpenProjectFolderItem.Name = "OpenProjectFolderItem";
-      this.OpenProjectFolderItem.Size = new System.Drawing.Size(223, 24);
-      this.OpenProjectFolderItem.Text = "&Open Project Folder ...";
-      this.OpenProjectFolderItem.Click += new System.EventHandler(this.OpenProjectFolderItem_Click);
       // 
       // toolStripMenuItem1
       // 
@@ -209,12 +202,6 @@
       this.PropertiyGrid.Size = new System.Drawing.Size(337, 477);
       this.PropertiyGrid.TabIndex = 0;
       // 
-      // FolderDialog
-      // 
-      this.FolderDialog.Description = "Select the folder of C# project";
-      this.FolderDialog.SelectedPath = "C:\\Work\\LINQOverCSharp\\CSharpParserVS2005\\CSharpParser";
-      this.FolderDialog.ShowNewFolderButton = false;
-      // 
       // StatusStrip
       // 
       this.StatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -229,6 +216,18 @@
       // 
       this.StatusLabel.Name = "StatusLabel";
       this.StatusLabel.Size = new System.Drawing.Size(0, 17);
+      // 
+      // OpenProjectFileItem
+      // 
+      this.OpenProjectFileItem.Name = "OpenProjectFileItem";
+      this.OpenProjectFileItem.Size = new System.Drawing.Size(223, 24);
+      this.OpenProjectFileItem.Text = "Open Project File...";
+      this.OpenProjectFileItem.Click += new System.EventHandler(this.OpenProjectFileItem_Click);
+      // 
+      // FileDialog
+      // 
+      this.FileDialog.FileName = "C:\\Work\\LINQOverCSharp\\CSharpParserVS2005\\CSharpParser\\CSharpParser.csproj";
+      this.FileDialog.Filter = "C# project files (*.csproj)|*.csproj";
       // 
       // MainForm
       // 
@@ -262,7 +261,6 @@
 
     private System.Windows.Forms.MenuStrip MainStrip;
     private System.Windows.Forms.ToolStripMenuItem FileMenu;
-    private System.Windows.Forms.ToolStripMenuItem OpenProjectFolderItem;
     private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
     private System.Windows.Forms.ToolStripMenuItem ExitItem;
     private System.Windows.Forms.SplitContainer SplitContainer;
@@ -271,11 +269,12 @@
     private System.Windows.Forms.TabPage NamespaceTabView;
     private System.Windows.Forms.TreeView FileTreeView;
     private System.Windows.Forms.TreeView NamespaceTreeView;
-    private System.Windows.Forms.FolderBrowserDialog FolderDialog;
     private System.Windows.Forms.ImageList SmallImages;
     private System.Windows.Forms.StatusStrip StatusStrip;
     private System.Windows.Forms.ToolStripStatusLabel StatusLabel;
     private System.Windows.Forms.PropertyGrid PropertiyGrid;
+    private System.Windows.Forms.ToolStripMenuItem OpenProjectFileItem;
+    private System.Windows.Forms.OpenFileDialog FileDialog;
   }
 }
 

@@ -383,6 +383,39 @@ namespace CSharpParser.ProjectModel
       CheckMethodModifiers();
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the common semantics for overloadable and user cast operators.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    protected void CheckCommonOperatorSemantics()
+    {
+      AbstractNotAllowed();
+      VirtualNotAllowed();
+      OverrideNotAllowed();
+      SealedNotAllowed();
+      ReadOnlyNotAllowed();
+      VolatileNotAllowed();
+      NewNotAllowed();
+
+      // --- Only "public static" declaration is allowed.
+      if (!HasDefaultVisibility && DeclaredVisibility != Visibility.Public)
+      {
+        Parser.Error0106(Token, Visibility.ToString().ToLower());
+      }
+      if (DeclaredVisibility != Visibility.Public || !IsStatic)
+      {
+        Parser.Error0558(Token, Signature);
+        Invalidate();
+      }
+
+      // --- Operators cannot have "ref" or "out" parameter modifiers.
+      foreach (FormalParameter param in FormalParameters)
+      {
+        if (param.Kind != FormalParameterKind.In) Parser.Error0631(Token);
+      }
+    }
+
     #endregion
   }
 

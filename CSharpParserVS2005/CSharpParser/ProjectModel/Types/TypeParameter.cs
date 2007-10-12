@@ -338,7 +338,24 @@ namespace CSharpParser.ProjectModel
       return false;
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of interfaces implemented by this type.
+    /// </summary>
+    /// <returns>
+    /// List ofinterfaces implemented by this type.
+    /// </returns>
+    /// <remarks>
+    /// Retrieves all interfaces implemented by directly or indirectly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public override Dictionary<string, ITypeAbstraction> GetInterfaces()
+    {
+      return NetBinaryType.EmptyTypeDictionary;
+    }
+
     #endregion
+
   }
 
   // ==================================================================================

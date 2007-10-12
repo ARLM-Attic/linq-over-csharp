@@ -43,6 +43,7 @@ namespace CSharpParser.ProjectModel
     private ITypeAbstraction _BaseType;
     private TypeReference _BaseTypeReference;
     private readonly List<TypeReference> _InterfaceList = new List<TypeReference>();
+    private readonly Dictionary<string, ITypeAbstraction> _InterfaceDictionary;
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
     private readonly List<TypeParameterConstraint> _ParameterConstraints =
       new List<TypeParameterConstraint>();
@@ -337,7 +338,23 @@ namespace CSharpParser.ProjectModel
     protected override IEnumerable<ITypeAbstraction> GetArguments()
     {
       foreach (TypeParameter typeRef in _TypeParameters) yield return typeRef;
-    } 
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of interfaces implemented by this type.
+    /// </summary>
+    /// <returns>
+    /// List ofinterfaces implemented by this type.
+    /// </returns>
+    /// <remarks>
+    /// Retrieves all interfaces implemented by directly or indirectly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public override Dictionary<string, ITypeAbstraction> GetInterfaces()
+    {
+      throw new NotImplementedException();
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

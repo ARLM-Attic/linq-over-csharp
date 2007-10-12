@@ -969,6 +969,45 @@ namespace CSharpParser.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0552: '{0}': user-defined conversion to/from interface.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Member name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0552(Token token, string name)
+    {
+      Error("CS0552", token, "'{0}': user-defined conversion to/from interface", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0555: User-defined operator cannot take an object of the enclosing 
+    /// type and convert to an object of the enclosing type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0555(Token token)
+    {
+      Error("CS0555", token,
+        "User-defined operator cannot take an object of the enclosing type and " +
+        "convert to an object of the enclosing type");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0556: User-defined conversion must convert to or from the enclosing 
+    /// type.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0556(Token token)
+    {
+      Error("CS0556", token,
+        "User-defined conversion must convert to or from the enclosing type");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0557: Duplicate user-defined conversion in type '{0}'.
     /// </summary>
     /// <param name="token">Error point</param>
@@ -1491,6 +1530,18 @@ namespace CSharpParser.ParserFiles
     {
       Error("CS1535", token,
         "Overloaded unary operator '{0}' takes one parameter", name);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1547: Keyword '{0}' cannot be used in this context.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="name">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error1547(Token token, string name)
+    {
+      Error("CS1547", token, "Keyword '{0}' cannot be used in this context", name);
     }
 
     // --------------------------------------------------------------------------------

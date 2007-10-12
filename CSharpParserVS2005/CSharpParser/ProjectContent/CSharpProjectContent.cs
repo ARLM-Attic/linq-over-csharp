@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Xml;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParser.ProjectContent
@@ -13,11 +15,12 @@ namespace CSharpParser.ProjectContent
   /// project.
   /// </remarks>
   // ==================================================================================
-  public class FolderContent : IProjectContentProvider
+  public class CSharpProjectContent: IProjectContentProvider
   {
     #region Private fields
 
     private readonly string _WorkingFolder;
+    private readonly string _ProjectFile;
 
     #endregion
 
@@ -25,22 +28,19 @@ namespace CSharpParser.ProjectContent
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new instance using the specified working directory.
+    /// Creates a new instance of the content provider.
     /// </summary>
-    /// <param name="workingFolder">Working directory.</param>
-    /// <remarks>
-    /// The project content is created from the .cs files in the working directory
-    /// and its nested folders.
-    /// </remarks>
+    /// <param name="projectFile">Name of the project file.</param>
     // --------------------------------------------------------------------------------
-    public FolderContent(string workingFolder)
+    public CSharpProjectContent(string projectFile)
     {
-      _WorkingFolder = workingFolder;
+      _ProjectFile = projectFile;
+      _WorkingFolder = Path.GetDirectoryName(projectFile);
     }
 
     #endregion
 
-    #region IProjectContentProvider implementation
+    #region Public Properties
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -58,35 +58,29 @@ namespace CSharpParser.ProjectContent
     /// </summary>
     /// <param name="compilationUnit">CompilationUnit to fill up.</param>
     // --------------------------------------------------------------------------------
-    public virtual void CollectProjectItems(CompilationUnit compilationUnit)
+    public void CollectProjectItems(CompilationUnit compilationUnit)
     {
-      AddAllFilesFrom(_WorkingFolder, compilationUnit);
-    }
+      // --- Open the .csproj file as an XML document
+      XmlDocument csProj = new XmlDocument();
+      csProj.Load(_ProjectFile);
 
-    #endregion
-
-    #region Private methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds all .cs file in the specified folder and its subfolders to this project.
-    /// </summary>
-    /// <param name="path"></param>
-    // --------------------------------------------------------------------------------
-    public void AddAllFilesFrom(string path, CompilationUnit unit)
-    {
-      DirectoryInfo dir = new DirectoryInfo(path);
-      
-      // --- Add files in this folder
-      foreach (FileInfo file in dir.GetFiles("*.cs"))
+      // --- Obtain the files from the project
+      foreach (XmlNode node in csProj.DocumentElement.ChildNodes)
       {
-        unit.AddFileWithFullName(file.FullName);
-      }
-
-      // --- Add files in subfolders
-      foreach (DirectoryInfo subDir in dir.GetDirectories())
-      {
-        AddAllFilesFrom(subDir.FullName, unit);
+        if (node.LocalName != "ItemGroup") continue;
+        foreach (XmlNode subNode in node.ChildNodes)
+        {
+          if (subNode.LocalName == "Reference")
+          {
+            string file = subNode.Attributes["Include"].Value;
+            compilationUnit.AddAssemblyReference(file);
+          }
+          else if (subNode.LocalName == "Compile")
+          {
+            string file = subNode.Attributes["Include"].Value;
+            compilationUnit.AddFile(file);
+          }
+        }
       }
     }
 

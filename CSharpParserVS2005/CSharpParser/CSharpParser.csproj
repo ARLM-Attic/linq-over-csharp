@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
+    <Compile Include="ProjectContent\CSharpProjectContent.cs" />
     <Compile Include="ProjectContent\EmptyProject.cs" />
     <Compile Include="ProjectContent\FolderContent.cs" />
     <Compile Include="ProjectContent\IProjectContentProvider.cs" />

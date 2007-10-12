@@ -379,6 +379,5 @@ namespace CSharpParser.ProjectModel
     }
 
     #endregion
-
   }
 }

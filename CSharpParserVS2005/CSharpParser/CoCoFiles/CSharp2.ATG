@@ -859,10 +859,9 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
                                            cod.ResultingType = typeRef;
                                            cod.Name = typeRef.TailName;
                                         .)
-    "("                                 (. FormalParameter fp = new FormalParameter(t, this);.)
-      Type<out typeRef, false>          (. fp.Type = typeRef; .)
-      ident                             (. fp.Name = t.val; .)
-    ")"                                 (. cod.FormalParameters.Add(fp); .)
+    "("                                 
+      [ FormalParameterList<cod.FormalParameters> ]   
+    ")"                                 
     ( Block<cod> | ";" )                (. 
                                            td.AddMember(cod); 
                                            cod.Terminate(t);

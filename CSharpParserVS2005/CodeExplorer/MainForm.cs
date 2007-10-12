@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 using CSharpParser.CodeExplorer.TreeNodes;
 using System.Reflection;
@@ -40,16 +41,34 @@ namespace CSharpParser.CodeExplorer
 
     // ----------------------------------------------------------------------------------
     /// <summary>
-    /// Openc a new C# project.
+    /// Quits the application.
     /// </summary>
     // ----------------------------------------------------------------------------------
-    private void OpenProjectFolderItem_Click(object sender, EventArgs e)
+    private void ExitItem_Click(object sender, EventArgs e)
     {
-      if (FolderDialog.ShowDialog() != DialogResult.OK) return;
+      Close();
+    }
+
+    private void OpenProjectFileItem_Click(object sender, EventArgs e)
+    {
+      if (FileDialog.ShowDialog() != DialogResult.OK) return;
 
       // --- Creates a compilation unit for the selected folder.
-      CompilationUnit unit = new CompilationUnit(FolderDialog.SelectedPath);
-      StatusLabel.Text = "Parsing project in " + FolderDialog.SelectedPath;
+      CSharpProjectContent content = new CSharpProjectContent(FileDialog.FileName);
+      CompilationUnit unit = new CompilationUnit(content);
+      ParseAndShowCompilation(unit);
+    }
+
+    #region Private methods
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Parses the specified compilation unit.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    private void ParseAndShowCompilation(CompilationUnit unit)
+    {
+      StatusLabel.Text = "Parsing project in " + unit.WorkingFolder;
       StatusStrip.Update();
       Cursor = Cursors.WaitCursor;
       try
@@ -76,20 +95,12 @@ namespace CSharpParser.CodeExplorer
         Cursor = Cursors.Default;
         StatusStrip.Update();
       }
-      
+
       // --- Updates the views through the controllers
-      _FileTreeController.SetCompilationUnit(unit, FolderDialog.SelectedPath);
-      _NamespaceTreeController.SetCompilationUnit(unit, FolderDialog.SelectedPath);
+      _FileTreeController.SetCompilationUnit(unit);
+      _NamespaceTreeController.SetCompilationUnit(unit);
     }
 
-    // ----------------------------------------------------------------------------------
-    /// <summary>
-    /// Quits the application.
-    /// </summary>
-    // ----------------------------------------------------------------------------------
-    private void ExitItem_Click(object sender, EventArgs e)
-    {
-      Close();
-    }
+    #endregion
   }
 }

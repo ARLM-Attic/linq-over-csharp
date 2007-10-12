@@ -51,6 +51,19 @@ namespace CSharpParser.Semantics
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the list of interfaces implemented by this type.
+    /// </summary>
+    /// <returns>
+    /// List ofinterfaces implemented by this type.
+    /// </returns>
+    /// <remarks>
+    /// Retrieves all interfaces implemented by directly or indirectly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    Dictionary<string, ITypeAbstraction> GetInterfaces();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating, if the current type is a generic type parameter.
     /// </summary>
     // --------------------------------------------------------------------------------

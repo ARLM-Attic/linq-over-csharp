@@ -103,12 +103,11 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     /// Sets the compilation unit and reloads the compilation unit structure.
     /// </summary>
     /// <param name="unit">Compilation unit</param>
-    /// <param name="workingFolder">Root working folder of the unit.</param>
     // --------------------------------------------------------------------------------
-    public void SetCompilationUnit(CompilationUnit unit, string workingFolder)
+    public void SetCompilationUnit(CompilationUnit unit)
     {
       _CompilationUnit = unit;
-      _WorkingFolder = workingFolder;
+      _WorkingFolder = unit.WorkingFolder;
       InitTree();
     }
 

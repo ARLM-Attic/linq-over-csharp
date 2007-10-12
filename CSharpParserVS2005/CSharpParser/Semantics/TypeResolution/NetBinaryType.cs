@@ -22,6 +22,7 @@ namespace CSharpParser.Semantics
     private readonly ITypeAbstraction _ElementType;
     private List<ITypeAbstraction> _GenericArguments;
     private Dictionary<string, ITypeAbstraction> _NestedTypeDictionary;
+    private Dictionary<string, ITypeAbstraction> _InterfacesDictionary;
 
     #endregion
 
@@ -81,6 +82,10 @@ namespace CSharpParser.Semantics
     /// <summary>Represents an empty array of types.</summary>
     public static readonly List<ITypeAbstraction> EmptyTypes = 
       new List<ITypeAbstraction>();
+
+    /// <summary>Represents an empty dictionary of types.</summary>
+    public static readonly Dictionary<string, ITypeAbstraction> EmptyTypeDictionary =
+       new Dictionary<string, ITypeAbstraction>();
 
     #endregion
 
@@ -153,6 +158,7 @@ namespace CSharpParser.Semantics
       return _ElementType;
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a list representing the generic arguments of a type.
     /// </summary>
@@ -172,6 +178,32 @@ namespace CSharpParser.Semantics
         }
       }
       return _GenericArguments;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of interfaces implemented by this type.
+    /// </summary>
+    /// <returns>
+    /// List ofinterfaces implemented by this type.
+    /// </returns>
+    /// <remarks>
+    /// Retrieves all interfaces implemented by directly or indirectly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public Dictionary<string, ITypeAbstraction> GetInterfaces()
+    {
+      if (_InterfacesDictionary == null)
+      {
+        _InterfacesDictionary = new Dictionary<string, ITypeAbstraction>();
+        Type[] interfaces = _TypeObject.GetInterfaces();
+        foreach (Type type in interfaces)
+        {
+          NetBinaryType nbType = new NetBinaryType(type);
+          _InterfacesDictionary.Add(nbType.ParametrizedName, nbType);
+        }
+      }
+      return _InterfacesDictionary;
     }
 
     // --------------------------------------------------------------------------------
@@ -619,6 +651,17 @@ namespace CSharpParser.Semantics
     public override int GetHashCode()
     {
       return _TypeObject.GetHashCode();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this type.
+    /// </summary>
+    /// <returns></returns>
+    // --------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return FullName;
     }
 
     #endregion

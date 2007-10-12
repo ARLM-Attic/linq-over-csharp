@@ -63,6 +63,22 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the list of interfaces implemented by this type.
+    /// </summary>
+    /// <returns>
+    /// List ofinterfaces implemented by this type.
+    /// </returns>
+    /// <remarks>
+    /// Retrieves all interfaces implemented by directly or indirectly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual Dictionary<string, ITypeAbstraction> GetInterfaces()
+    {
+      return NetBinaryType.EmptyTypeDictionary;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating, if the current type is a generic type parameter.
     /// </summary>
     // --------------------------------------------------------------------------------

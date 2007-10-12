@@ -1567,13 +1567,10 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		cod.Name = typeRef.TailName;
 		
 		Expect(98);
-		FormalParameter fp = new FormalParameter(t, this);
-		Type(out typeRef, false);
-		fp.Type = typeRef; 
-		Expect(1);
-		fp.Name = t.val; 
+		if (StartOf(8)) {
+			FormalParameterList(cod.FormalParameters);
+		}
 		Expect(113);
-		cod.FormalParameters.Add(fp); 
 		if (la.kind == 96) {
 			Block(cod);
 		} else if (la.kind == 114) {

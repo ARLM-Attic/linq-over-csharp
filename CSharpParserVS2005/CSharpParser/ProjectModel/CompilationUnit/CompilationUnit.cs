@@ -133,6 +133,16 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the working folder of this compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string WorkingFolder
+    {
+      get { return _WorkingFolder; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the reference for this compilation unit.
     /// </summary>
     // --------------------------------------------------------------------------------

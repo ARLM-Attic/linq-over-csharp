@@ -99,6 +99,19 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the list of interfaces implemented by this type.
+    /// </summary>
+    /// <returns>
+    /// List ofinterfaces implemented by this type.
+    /// </returns>
+    /// <remarks>
+    /// Retrieves all interfaces implemented by directly or indirectly.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public abstract Dictionary<string, ITypeAbstraction> GetInterfaces();
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the flag indicating, if the current type is a generic type parameter.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -509,6 +522,257 @@ namespace CSharpParser.ProjectModel
         sb.Append('>');
       }
       return sb.ToString();
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the non-nullable equivalent of the specified type.
+    /// </summary>
+    /// <param name="type">Type to obtaint its non-nullable equivalent for.</param>
+    /// <returns>
+    /// The inner element type, if the input type is nullable; otherwise the input 
+    /// type itself.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static ITypeAbstraction GetNonNullableElement(ITypeAbstraction type)
+    {
+      NullableType nullable = type as NullableType;
+      if (nullable != null || type.FullName == typeof(Nullable<>).FullName)
+        return type.GetGenericArguments()[0];
+      return type;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks, if there is an implicit conversion from a source type to a destinaion 
+    /// type.
+    /// </summary>
+    /// <param name="fromType">Source type</param>
+    /// <param name="toType">Destination type</param>
+    /// <returns>
+    /// True, if there is an implicit conversion from the source type to the 
+    /// destination type; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static bool HasImplicitConversion(ITypeAbstraction fromType,
+      ITypeAbstraction toType)
+    {
+      // --- Check for implicit identity conversion
+      if (IsSame(fromType, toType)) return true;
+
+      // --- Check for implicit numeric conversions
+      if (IsSame(fromType, typeof(sbyte)) && HasImplicitFromSByte(toType)) 
+        return true;
+      if (IsSame(fromType, typeof(byte)) && HasImplicitFromByte(toType))
+        return true;
+      if (IsSame(fromType, typeof(short)) && HasImplicitFromShort(toType))
+        return true;
+      if (IsSame(fromType, typeof(ushort)) && HasImplicitFromUShort(toType))
+        return true;
+      if (IsSame(fromType, typeof(int)) && HasImplicitFromInt(toType))
+        return true;
+      if (IsSame(fromType, typeof(uint)) && HasImplicitFromUInt(toType))
+        return true;
+      if (IsSame(fromType, typeof(long)) && HasImplicitFromLong(toType))
+        return true;
+      if (IsSame(fromType, typeof(ulong)) && HasImplicitFromULong(toType))
+        return true;
+      if (IsSame(fromType, typeof(char)) && HasImplicitFromChar(toType))
+        return true;
+      if (IsSame(fromType, typeof(float)) && IsSame(toType, typeof(double)))
+        return true;
+
+      // --- Check for implicit reference type to object
+      if (!fromType.IsValueType && IsSame(toType, typeof(object))) 
+        return true;
+      
+      // --- Implicit conversion from class to class through inheritance
+      if (fromType.IsClass && toType.IsClass && IsSameOrInheritsFrom(fromType, toType)) 
+        return true;
+
+      // --- Implicit conversion from interface to interface through inheritance
+      if (fromType.IsInterface && toType.IsInterface && 
+        IsSameOrInheritsFrom(fromType, toType)) 
+        return true;
+
+      // --- No implicit conversion exists
+      return false;  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if SByte can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromSByte(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof (short)) ||
+        IsSame(type, typeof (int)) ||
+        IsSame(type, typeof (long)) ||
+        IsSame(type, typeof (float)) ||
+        IsSame(type, typeof (double)) ||
+        IsSame(type, typeof (decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if Byte can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromByte(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(short)) ||
+        IsSame(type, typeof(ushort)) ||
+        IsSame(type, typeof(int)) ||
+        IsSame(type, typeof(uint)) ||
+        IsSame(type, typeof(long)) ||
+        IsSame(type, typeof(ulong)) ||
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if Int16 can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromShort(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(int)) ||
+        IsSame(type, typeof(long)) ||
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if UInt16 can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromUShort(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(int)) ||
+        IsSame(type, typeof(uint)) ||
+        IsSame(type, typeof(long)) ||
+        IsSame(type, typeof(ulong)) ||
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if int can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromInt(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(long)) ||
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if UInt32 can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromUInt(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(long)) ||
+        IsSame(type, typeof(ulong)) ||
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if long can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromLong(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if UInt64 can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromULong(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if char can be implicitly converted to the provided type.
+    /// </summary>
+    /// <param name="type">Destination type.</param>
+    /// <returns>
+    /// True, if implicit conversion is supported; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    private static bool HasImplicitFromChar(ITypeAbstraction type)
+    {
+      return
+        IsSame(type, typeof(ushort)) ||
+        IsSame(type, typeof(int)) ||
+        IsSame(type, typeof(uint)) ||
+        IsSame(type, typeof(long)) ||
+        IsSame(type, typeof(ulong)) ||
+        IsSame(type, typeof(float)) ||
+        IsSame(type, typeof(double)) ||
+        IsSame(type, typeof(decimal));
     }
 
     #endregion

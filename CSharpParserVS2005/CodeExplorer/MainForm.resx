@@ -355,10 +355,10 @@
         AcABAwEAAf8BAAH/AcABAAHAAQMBAQH/AQEB/wHAAQABwAEDBP8BwAEAAcABBwT/AcABAAHAAQ8L
 </value>
   </data>
-  <metadata name="FolderDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>175, 17</value>
-  </metadata>
   <metadata name="StatusStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>453, 17</value>
+  </metadata>
+  <metadata name="FileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>149, 20</value>
   </metadata>
 </root>

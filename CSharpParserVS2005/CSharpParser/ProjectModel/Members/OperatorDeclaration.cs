@@ -116,8 +116,6 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
-    
-
     #region Semantic checks
 
     // --------------------------------------------------------------------------------
@@ -128,31 +126,7 @@ namespace CSharpParser.ProjectModel
     public override void CheckSemantics()
     {
       CheckGeneralMemberSemantics();
-
-      AbstractNotAllowed();
-      VirtualNotAllowed();
-      OverrideNotAllowed();
-      SealedNotAllowed();
-      ReadOnlyNotAllowed();
-      VolatileNotAllowed();
-      NewNotAllowed();
-
-      // --- Only "public static" declaration is allowed.
-      if (!HasDefaultVisibility && DeclaredVisibility != Visibility.Public)
-      {
-        Parser.Error0106(Token, Visibility.ToString().ToLower()); 
-      }
-      if (DeclaredVisibility != Visibility.Public || !IsStatic)
-      {
-        Parser.Error0558(Token, Signature);
-        Invalidate();
-      }
-
-      // --- Operators cannot have "ref" or "out" parameter modifiers.
-      foreach (FormalParameter param in FormalParameters)
-      {
-        if (param.Kind != FormalParameterKind.In) Parser.Error0631(Token);
-      }
+      CheckCommonOperatorSemantics();
 
       // --- No more checks, if the resulting type is not resolved.
       if (!ResultingType.TailIsType) return;
@@ -164,7 +138,7 @@ namespace CSharpParser.ProjectModel
         Invalidate();
       }
 
-      // --- Check unary operators
+      // --- Check operator specific rules
       if (IsUnary)
         CheckUnaryOperator();
       else

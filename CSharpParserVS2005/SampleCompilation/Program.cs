@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 
 namespace SampleCompilation
@@ -17,12 +19,13 @@ namespace SampleCompilation
   class Program
   {
     private const string CSharpParserFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser";
-    //private const string CSharpParserFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CodeExplorer";
+    private const string CSharpParserProjectFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser\CSharpParser.csproj";
 
     static void Main(string[] args)
     {
       // --- Create a compilation unit with all .cs source files in the specified folder
-      CompilationUnit project = new CompilationUnit(CSharpParserFolder, true);
+      CSharpProjectContent content = new CSharpProjectContent(CSharpParserProjectFile);
+      CompilationUnit project = new CompilationUnit(content);
 
       // --- Parse the project and measure parse time
       Stopwatch watch = new Stopwatch();

@@ -1,5 +1,7 @@
+using System.Text;
 using CSharpParser.Collections;
 using CSharpParser.ParserFiles;
+using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
@@ -69,7 +71,95 @@ namespace CSharpParser.ProjectModel
       get { return !_IsExplicit; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the signature of this cast operator
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string OperatorSignature
+    {
+      get
+      {
+        StringBuilder sb = new StringBuilder();
+        if (ResultingType.IsResolvedToType)
+          sb.Append(ResultingType.ParametrizedName);
+        else
+          sb.Append(ResultingType.Name);
+        sb.Append("(");
+        if (FormalParameters.Count > 0)
+        {
+          if (FormalParameters[0].Type.IsResolvedToType)
+            sb.Append(FormalParameters[0].Type.ParametrizedName);
+          else
+            sb.Append(FormalParameters[0].Type.Name);
+        }
+        sb.Append(")");
+        return sb.ToString();
+      }
+    }
+
     #endregion
+
+    #region Semantic checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the semantics for the specified field declaration.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override void CheckSemantics()
+    {
+      CheckGeneralMemberSemantics();
+      CheckCommonOperatorSemantics();
+
+      // --- No more checks, if the resulting type is not resolved.
+      if (!ResultingType.TailIsType) return;
+
+      // --- Operator cannot cast to void
+      if (TypeBase.IsSame(ResultingType.Tail.TypeInstance, typeof(void)))
+      {
+        Parser.Error1547(Token, "void");
+        Invalidate();
+      }
+
+      // --- Cast operator is an unary operator, must have exactly one parameter
+      if (FormalParameters.Count != 1)
+      {
+        Parser.Error1535(Token, Name);
+        Invalidate();
+        return;
+      }
+
+      // --- Obtain the non-nullable equivalents of the input and output types
+      ITypeAbstraction resultType =
+        TypeBase.GetNonNullableElement(ResultingType.Tail.TypeInstance);
+      ITypeAbstraction inputType = 
+        TypeBase.GetNonNullableElement(FormalParameters[0].Type.TypeInstance);
+
+      // --- At least one of the elements must be the enclosing type.
+      if (!TypeBase.IsSame(resultType, DeclaringType) &&
+        !TypeBase.IsSame(inputType, DeclaringType))
+      {
+        Parser.Error0556(Token);
+        return;
+      }
+
+      // --- Input and output types must be different
+      if (TypeBase.IsSame(resultType, inputType))
+      {
+        Parser.Error0555(Token);
+        return;
+      }
+
+      // --- Nor the input neither the result type cannot be interfaces.
+      if (resultType.IsInterface || inputType.IsInterface)
+      {
+        Parser.Error0552(Token, Signature);
+      }
+    }
+
+    #endregion
+
   }
 
   // ==================================================================================

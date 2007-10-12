@@ -511,5 +511,108 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS0216");
       Assert.AreEqual(parser.Errors[2].Code, "CS0216");
     }
+
+    [TestMethod]
+    public void CastOpDeclarationFails1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration1.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 1);
+      Assert.AreEqual(parser.Errors[0].Code, "CS1547");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration2.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 9);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[6].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[7].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[8].Code, "CS0558");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration3.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 9);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[3].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[4].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[5].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[6].Code, "CS0558");
+      Assert.AreEqual(parser.Errors[7].Code, "CS0106");
+      Assert.AreEqual(parser.Errors[8].Code, "CS0558");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails4()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration4.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0631");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0631");
+      Assert.AreEqual(parser.Errors[2].Code, "CS0631");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails5()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration5.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 3);
+      Assert.AreEqual(parser.Errors[0].Code, "CS1535");
+      Assert.AreEqual(parser.Errors[1].Code, "CS1535");
+      Assert.AreEqual(parser.Errors[2].Code, "CS1535");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails6()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration6.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0556");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0556");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails7()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration7.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0555");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0555");
+    }
+
+    [TestMethod]
+    public void CastOpDeclarationFails8()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"Methods\CastOpDeclaration8.cs");
+      Assert.IsFalse(InvokeParser(parser));
+      Assert.AreEqual(parser.Errors.Count, 2);
+      Assert.AreEqual(parser.Errors[0].Code, "CS0552");
+      Assert.AreEqual(parser.Errors[1].Code, "CS0552");
+    }
   }
 }
