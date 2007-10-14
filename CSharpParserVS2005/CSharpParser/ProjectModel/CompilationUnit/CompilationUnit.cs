@@ -28,6 +28,7 @@ namespace CSharpParser.ProjectModel
 
     #region Private Fields
 
+    private readonly IProjectContentProvider _ProjectContent;
     private readonly SourceFileCollection _Files = new SourceFileCollection();
     private readonly NamespaceCollection _DeclaredNamespaces = new NamespaceCollection();
     private readonly TypeDeclarationCollection _DeclaredTypes = new TypeDeclarationCollection();
@@ -65,7 +66,7 @@ namespace CSharpParser.ProjectModel
     private int _ResolvedToNamespace;
     private int _ResolvedToName;
     private int _ResolvedToHierarchy;
-    private static readonly List<TypeReferenceLocation> _Locations =
+    private readonly List<TypeReferenceLocation> _Locations =
       new List<TypeReferenceLocation>();
 
     #endregion
@@ -79,8 +80,15 @@ namespace CSharpParser.ProjectModel
     /// <param name="workingFolder">Folder used as the working folder</param>
     // --------------------------------------------------------------------------------
     public CompilationUnit(string workingFolder)
-      : this(workingFolder, false)
     {
+      _ErrorHandler = this;
+      _WorkingFolder = workingFolder;
+      _CurrentFile = null;
+      _ErrorLineOffset = -1;
+      _ErrorFile = null;
+      _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
+      AddAssemblyReference("mscorlib");
+      AddAssemblyReference("System");
     }
 
     // --------------------------------------------------------------------------------
@@ -92,20 +100,13 @@ namespace CSharpParser.ProjectModel
     /// If true, all C# files are added to the project.
     /// </param>
     // --------------------------------------------------------------------------------
-    public CompilationUnit(string workingFolder, bool addCSharpFiles)
+    public CompilationUnit(string workingFolder, bool addCSharpFiles):
+      this(workingFolder)
     {
-      _ErrorHandler = this;
-      _WorkingFolder = workingFolder;
-      _CurrentFile = null;
-      _ErrorLineOffset = -1;
-      _ErrorFile = null;
       if (addCSharpFiles)
       {
         AddAllFilesFrom(_WorkingFolder);
       }
-      _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
-      AddAssemblyReference("mscorlib");
-      AddAssemblyReference("System");
     }
 
     // --------------------------------------------------------------------------------
@@ -114,22 +115,41 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     /// <param name="content">Project content provider.</param>
     // --------------------------------------------------------------------------------
-    public CompilationUnit(IProjectContentProvider content)
+    public CompilationUnit(IProjectContentProvider content):
+      this(content.WorkingFolder)
     {
-      _ErrorHandler = this;
-      _CurrentFile = null;
-      _ErrorLineOffset = -1;
-      _ErrorFile = null;
-      _WorkingFolder = content.WorkingFolder;
-      _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
-      AddAssemblyReference("mscorlib");
-      AddAssemblyReference("System");
+      _ProjectContent = content;
       content.CollectProjectItems(this);
     }
 
     #endregion
 
     #region Public properties
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the compilation unit.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Name
+    {
+      get
+      {
+        return _ProjectContent == null
+                 ? _WorkingFolder
+                 : _ProjectContent.Name;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the object responsible for collecting project content information.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public IProjectContentProvider ProjectContent
+    {
+      get { return _ProjectContent; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -383,6 +403,58 @@ namespace CSharpParser.ProjectModel
 
     #endregion
 
+    #region Public events
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This event is called before any parser initialization occurres.
+    /// </summary>
+    /// <remarks>
+    /// Subcribers of this event can add their own initialization code.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public event EventHandler<ParseCancelEventArgs> BeforeInitParse;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This event is called after any parser initialization finished.
+    /// </summary>
+    /// <remarks>
+    /// Subcribers of this event can add their own initialization code.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public event EventHandler<ParseCancelEventArgs> AfterInitParse;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This event is called before a referenced unit is parsed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public event EventHandler<ParseReferencedUnitEventArgs> BeforeParseReferencedUnit;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This event is called after a referenced unit is parsed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public event EventHandler<ParseReferencedUnitEventArgs> AfterParseReferencedUnit;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This event is called before a source file is parsed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public event EventHandler<ParseFileEventArgs> BeforeParseFile;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// This event is called after a source file is parsed.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public event EventHandler<ParseFileEventArgs> AfterParseFile;
+
+    #endregion
+
     #region Public methods
 
     // --------------------------------------------------------------------------------
@@ -430,6 +502,18 @@ namespace CSharpParser.ProjectModel
       {
         AddAllFilesFrom(subDir.FullName);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a new project reference to the C# project.
+    /// </summary>
+    /// <param name="unit">Compilation unit representing the project.</param>
+    /// <param name="name">Name of the project to add.</param>
+    // --------------------------------------------------------------------------------
+    public void AddProjectReference(CompilationUnit unit, string name)
+    {
+      _ReferencedUnits.Add(new ReferencedCompilation(unit, name));
     }
 
     // --------------------------------------------------------------------------------
@@ -716,19 +800,57 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public int Parse()
     {
-      // --- Init parsing
+      // --- Notify subscribers (BeforeInitParse event)
+      bool cancelled = false;
+      OnBeforeInitParse(ref cancelled);
+      if (cancelled) return -1;
+
+      // --- Initialization 
       (_Errors as IList<Error>).Clear();
       _GlobalHierarchy.Clear();
       _NamespaceHierarchies.Clear();
       ResetDiagnosticCounters();
+
+      // --- Notify subscribers (AfterInitParse event)
+      OnAfterInitParse(ref cancelled);
+      if (cancelled) return -1;
+
+      // --- First we compile all referenced projects.
+      foreach (ReferencedUnit unit in _ReferencedUnits)
+      {
+        ReferencedCompilation compilation = unit as ReferencedCompilation;
+        if (compilation != null)
+        {
+          CompilationUnit refUnit = compilation.CompilationUnit;
+          
+          // --- Notify subscribers (BeforeParseReferencedUnit event)
+          OnBeforeParseReferencedUnit(refUnit, ref cancelled);
+          if (cancelled) return -1;
+
+          refUnit.Parse();
+
+          // --- Notify subscribers (AfterParseReferencedUnit event)
+          OnAfterParseReferencedUnit(refUnit, ref cancelled);
+          if (cancelled) return -1;
+        }
+      }
 
       // --- Syntax parsing
       foreach (SourceFile file in _Files)
       {
         Scanner scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
         _CurrentFile = file;
+
+        // --- Notify subscribers (BeforeParseFile event)
+        OnBeforeParseFile(file, ref cancelled);
+        if (cancelled) return -1;
+
         _Parser = new CSharpSyntaxParser(scanner, this, file);
         _Parser.Parse();
+
+        // --- Notify subscribers (AfterParseFile event)
+        OnAfterParseFile(file, ref cancelled);
+        if (cancelled) return -1;
       }
 
       // --- Semantical parsing
@@ -778,6 +900,128 @@ namespace CSharpParser.ProjectModel
 
       // --- Return the number of errors found
       return _Errors.Count;
+    }
+
+    #endregion
+
+    #region Private event fire methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Fires the BeforeInitParse event
+    /// </summary>
+    /// <param name="cancelled">
+    /// True value indicates that parsing is about to cancel.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void OnBeforeInitParse(ref bool cancelled)
+    {
+      if (BeforeInitParse != null)
+      {
+        ParseCancelEventArgs args = new ParseCancelEventArgs(this);
+        BeforeInitParse.Invoke(this, args);
+        cancelled = args.Cancel;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Fires the AfterInitParse event
+    /// </summary>
+    /// <param name="cancelled">
+    /// True value indicates that parsing is about to cancel.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void OnAfterInitParse(ref bool cancelled)
+    {
+      if (AfterInitParse != null)
+      {
+        ParseCancelEventArgs args = new ParseCancelEventArgs(this);
+        AfterInitParse.Invoke(this, args);
+        cancelled = args.Cancel;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Fires the BeforeParseReferenceUnit event
+    /// </summary>
+    /// <param name="refUnit">Reference unit parsed</param>
+    /// <param name="cancelled">
+    /// True value indicates that parsing is about to cancel.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void OnBeforeParseReferencedUnit(CompilationUnit refUnit,
+      ref bool cancelled)
+    {
+      if (BeforeParseReferencedUnit != null)
+      {
+        ParseReferencedUnitEventArgs args =
+          new ParseReferencedUnitEventArgs(refUnit, this);
+        BeforeParseReferencedUnit.Invoke(this, args);
+        cancelled = args.Cancel;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Fires the AfterParseReferenceUnit event
+    /// </summary>
+    /// <param name="refUnit">Reference unit parsed</param>
+    /// <param name="cancelled">
+    /// True value indicates that parsing is about to cancel.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void OnAfterParseReferencedUnit(CompilationUnit refUnit, 
+      ref bool cancelled)
+    {
+      if (AfterParseReferencedUnit != null)
+      {
+        ParseReferencedUnitEventArgs args = 
+          new ParseReferencedUnitEventArgs(this, refUnit);
+        AfterParseReferencedUnit.Invoke(this, args);
+        cancelled = args.Cancel;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Fires the BeforeParseFile event
+    /// </summary>
+    /// <param name="file">Source file about to parse</param>
+    /// <param name="cancelled">
+    /// True value indicates that parsing is about to cancel.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void OnBeforeParseFile(SourceFile file,
+      ref bool cancelled)
+    {
+      if (BeforeParseFile != null)
+      {
+        ParseFileEventArgs args = new ParseFileEventArgs(this, file);
+        BeforeParseFile.Invoke(this, args);
+        cancelled = args.Cancel;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Fires the AfterParseFile event
+    /// </summary>
+    /// <param name="file">Source file parsed</param>
+    /// <param name="cancelled">
+    /// True value indicates that parsing is about to cancel.
+    /// </param>
+    // --------------------------------------------------------------------------------
+    private void OnAfterParseFile(SourceFile file,
+      ref bool cancelled)
+    {
+      if (AfterParseFile != null)
+      {
+        ParseFileEventArgs args = new ParseFileEventArgs(this, file);
+        AfterParseFile.Invoke(this, args);
+        cancelled = args.Cancel;
+      }
     }
 
     #endregion
@@ -837,42 +1081,59 @@ namespace CSharpParser.ProjectModel
       // --- Go through all referenced assemblies, skip ohter kind of referencies.
       foreach (ReferencedUnit reference in ReferencedUnits)
       {
-        ReferencedAssembly asmRef = reference as ReferencedAssembly;
-        if (asmRef == null) continue;
-
-        // --- Check, if this assembly has already been loaded into a resolution tree
-        string treeName = asmRef.Assembly.FullName;
-        AssemblyResolutionTree tree;
-        if (!importedAssemblies.TryGetValue(treeName, out tree))
-        {
-          // --- Create and load the assembly
-          tree = new AssemblyResolutionTree(asmRef.Assembly);
-          importedAssemblies.Add(treeName, tree);
-        }
-
-        // --- At this point we have the assembly loaded.
-        // --- Decide in which namespace hierarchy should this assembly be put.
+        TypeResolutionTree resolutionTree;
         NamespaceHierarchy hierarchy;
-        if (String.IsNullOrEmpty(asmRef.Alias))
+        string treeName;
+
+        ReferencedAssembly asmRef = reference as ReferencedAssembly;
+        if (asmRef != null)
         {
-          // --- Put information into the global namespace hierarchy
-          hierarchy = _GlobalHierarchy;
+          // --- This reference is a referenced assembly.
+          // --- Check, if this assembly has already been loaded into a resolution tree
+          treeName = asmRef.Assembly.FullName;
+          AssemblyResolutionTree tree;
+          if (!importedAssemblies.TryGetValue(treeName, out tree))
+          {
+            // --- Create and load the assembly
+            tree = new AssemblyResolutionTree(asmRef.Assembly);
+            importedAssemblies.Add(treeName, tree);
+          }
+
+          // --- At this point we have the assembly loaded.
+          // --- Decide in which namespace hierarchy should this assembly be put.
+          if (String.IsNullOrEmpty(asmRef.Alias))
+          {
+            // --- Put information into the global namespace hierarchy
+            hierarchy = _GlobalHierarchy;
+          }
+          else
+          {
+            // --- Put information into a named hierarchy
+            if (!NamespaceHierarchies.TryGetValue(asmRef.Alias, out hierarchy))
+            {
+              hierarchy = new NamespaceHierarchy();
+              NamespaceHierarchies.Add(asmRef.Alias, hierarchy);
+            }
+          }
+          resolutionTree = tree;
         }
         else
         {
-          // --- Put information into a named hierarchy
-          if (!NamespaceHierarchies.TryGetValue(asmRef.Alias, out hierarchy))
-          {
-            hierarchy = new NamespaceHierarchy();
-            NamespaceHierarchies.Add(asmRef.Alias, hierarchy);
-          }
+          ReferencedCompilation compilation = reference as ReferencedCompilation;
+          if (compilation == null) continue;
+
+          // --- This reference is a compilation unit. This unit has to be compiled before
+          // --- so we can use its type resolution tree.
+          hierarchy = _GlobalHierarchy;
+          resolutionTree = compilation.CompilationUnit._SourceResolutionTree;
+          treeName = compilation.Name;
         }
 
         // --- Now we have the hierarchy where the resolution tree should be added.
         // --- Check for duplication before add.
         if (!hierarchy.ContainsTree(treeName))
         {
-          hierarchy.AddTree(treeName, tree);
+          hierarchy.AddTree(treeName, resolutionTree);
         }
       }
 
@@ -1495,8 +1756,8 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckPartialTypes()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
-      {
+      //foreach (TypeDeclaration type in _DeclaredTypes)
+      //{
 
         // --- Check 7: The attributes of a type declared in multiple partitions are determined 
         // --- by combining, in an unspecified order, the attributes of each of its parts. 
@@ -1520,7 +1781,7 @@ namespace CSharpParser.ProjectModel
         // --- include the new modifier, no warning is issued if the nested type hides
         // --- an available inherited member.
 
-      }
+      //}
     }
 
     #endregion

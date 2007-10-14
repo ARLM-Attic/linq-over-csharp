@@ -1,35 +1,47 @@
-using CSharpParser.ProjectModel;
-
-namespace CSharpParser.ProjectContent
+namespace CSharpParser.CodeExplorer.Entities
 {
   // ==================================================================================
   /// <summary>
-  /// This interface defines the roles of a project content object thatis able to 
-  /// collect C# project information (source files, references, etc.)
+  /// This class represents an entry about the parsing time statistics.
   /// </summary>
   // ==================================================================================
-  public interface IProjectContentProvider
+  public sealed class FileParsingData
   {
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the project.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    string Name { get; }
+    private string _FileName;
+    private double _TimeFromStart;
+    private double _ParseTime;
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the working folder of the project.
+    /// Gets the name of the file.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string WorkingFolder { get; }
+    public string FileName
+    {
+      get { return _FileName; }
+      set { _FileName = value; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the projekt information and fills up the compilation unit accordingly.
+    /// Gets the time ellapsed from the start of parsing.
     /// </summary>
-    /// <param name="compilationUnit">CompilationUnit to fill up.</param>
     // --------------------------------------------------------------------------------
-    void CollectProjectItems(CompilationUnit compilationUnit);
+    public double TimeFromStart
+    {
+      get { return _TimeFromStart; }
+      set { _TimeFromStart = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the time required to parse this file syntactically
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public double ParseTime
+    {
+      get { return _ParseTime; }
+      set { _ParseTime = value; }
+    }
   }
 }

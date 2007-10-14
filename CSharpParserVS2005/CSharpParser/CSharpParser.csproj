@@ -45,6 +45,7 @@
     <Compile Include="ProjectContent\IProjectContentProvider.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
+    <Compile Include="ProjectModel\CompilationUnit\ParseEvents.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />
     <Compile Include="ProjectModel\Types\ArrayType.cs" />
     <Compile Include="ProjectModel\Types\ExtendedType.cs" />
@@ -269,7 +270,6 @@
     <None Include="CoCoFiles\PPExpressions\Parser.frame" />
     <None Include="CoCoFiles\PPExpressions\PPExpr.ATG" />
     <None Include="CoCoFiles\PPExpressions\Scanner.frame" />
-    <None Include="_Diagrams\CSharpProject.cd" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -277,6 +277,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_Diagrams\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -34,8 +34,11 @@
       System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("No project loaded.");
       this.MainStrip = new System.Windows.Forms.MenuStrip();
       this.FileMenu = new System.Windows.Forms.ToolStripMenuItem();
+      this.OpenProjectFileItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
       this.ExitItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.StatisticsMenu = new System.Windows.Forms.ToolStripMenuItem();
+      this.ParsingTimesItems = new System.Windows.Forms.ToolStripMenuItem();
       this.SplitContainer = new System.Windows.Forms.SplitContainer();
       this.ProjectViewTabControl = new System.Windows.Forms.TabControl();
       this.FileTabPage = new System.Windows.Forms.TabPage();
@@ -46,7 +49,6 @@
       this.PropertiyGrid = new System.Windows.Forms.PropertyGrid();
       this.StatusStrip = new System.Windows.Forms.StatusStrip();
       this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-      this.OpenProjectFileItem = new System.Windows.Forms.ToolStripMenuItem();
       this.FileDialog = new System.Windows.Forms.OpenFileDialog();
       this.MainStrip.SuspendLayout();
       this.SplitContainer.Panel1.SuspendLayout();
@@ -61,7 +63,8 @@
       // MainStrip
       // 
       this.MainStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.FileMenu});
+            this.FileMenu,
+            this.StatisticsMenu});
       this.MainStrip.Location = new System.Drawing.Point(0, 0);
       this.MainStrip.Name = "MainStrip";
       this.MainStrip.Size = new System.Drawing.Size(688, 28);
@@ -78,17 +81,39 @@
       this.FileMenu.Size = new System.Drawing.Size(44, 24);
       this.FileMenu.Text = "&File";
       // 
+      // OpenProjectFileItem
+      // 
+      this.OpenProjectFileItem.Name = "OpenProjectFileItem";
+      this.OpenProjectFileItem.Size = new System.Drawing.Size(200, 24);
+      this.OpenProjectFileItem.Text = "Open Project File...";
+      this.OpenProjectFileItem.Click += new System.EventHandler(this.OpenProjectFileItem_Click);
+      // 
       // toolStripMenuItem1
       // 
       this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-      this.toolStripMenuItem1.Size = new System.Drawing.Size(220, 6);
+      this.toolStripMenuItem1.Size = new System.Drawing.Size(197, 6);
       // 
       // ExitItem
       // 
       this.ExitItem.Name = "ExitItem";
-      this.ExitItem.Size = new System.Drawing.Size(223, 24);
+      this.ExitItem.Size = new System.Drawing.Size(200, 24);
       this.ExitItem.Text = "E&xit";
       this.ExitItem.Click += new System.EventHandler(this.ExitItem_Click);
+      // 
+      // StatisticsMenu
+      // 
+      this.StatisticsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ParsingTimesItems});
+      this.StatisticsMenu.Name = "StatisticsMenu";
+      this.StatisticsMenu.Size = new System.Drawing.Size(79, 24);
+      this.StatisticsMenu.Text = "&Statistics";
+      // 
+      // ParsingTimesItems
+      // 
+      this.ParsingTimesItems.Name = "ParsingTimesItems";
+      this.ParsingTimesItems.Size = new System.Drawing.Size(175, 24);
+      this.ParsingTimesItems.Text = "Parsing times...";
+      this.ParsingTimesItems.Click += new System.EventHandler(this.ParsingTimesItems_Click);
       // 
       // SplitContainer
       // 
@@ -217,13 +242,6 @@
       this.StatusLabel.Name = "StatusLabel";
       this.StatusLabel.Size = new System.Drawing.Size(0, 17);
       // 
-      // OpenProjectFileItem
-      // 
-      this.OpenProjectFileItem.Name = "OpenProjectFileItem";
-      this.OpenProjectFileItem.Size = new System.Drawing.Size(223, 24);
-      this.OpenProjectFileItem.Text = "Open Project File...";
-      this.OpenProjectFileItem.Click += new System.EventHandler(this.OpenProjectFileItem_Click);
-      // 
       // FileDialog
       // 
       this.FileDialog.FileName = "C:\\Work\\LINQOverCSharp\\CSharpParserVS2005\\CSharpParser\\CSharpParser.csproj";
@@ -275,6 +293,8 @@
     private System.Windows.Forms.PropertyGrid PropertiyGrid;
     private System.Windows.Forms.ToolStripMenuItem OpenProjectFileItem;
     private System.Windows.Forms.OpenFileDialog FileDialog;
+    private System.Windows.Forms.ToolStripMenuItem StatisticsMenu;
+    private System.Windows.Forms.ToolStripMenuItem ParsingTimesItems;
   }
 }
 

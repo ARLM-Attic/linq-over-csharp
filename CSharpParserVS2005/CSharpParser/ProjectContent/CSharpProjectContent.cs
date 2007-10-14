@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Xml;
 using CSharpParser.ProjectModel;
@@ -44,6 +43,15 @@ namespace CSharpParser.ProjectContent
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the name of the project.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string Name
+    {
+      get { return Path.GetFileName(_ProjectFile); }
+    }
+
+    /// <summary>
     /// Gets the working folder of the project.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -79,6 +87,14 @@ namespace CSharpParser.ProjectContent
           {
             string file = subNode.Attributes["Include"].Value;
             compilationUnit.AddFile(file);
+          }
+          else if (subNode.LocalName == "ProjectReference")
+          {
+            string file = subNode.Attributes["Include"].Value;
+            CSharpProjectContent referencedProject =
+              new CSharpProjectContent(Path.Combine(_WorkingFolder, file));
+            CompilationUnit referencedUnit = new CompilationUnit(referencedProject);
+            compilationUnit.AddProjectReference(referencedUnit, Path.GetFileName(file));
           }
         }
       }

@@ -22,7 +22,7 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     /// </param>
     // --------------------------------------------------------------------------------
     public NamespaceViewRootTreeNode(CompilationUnit unit)
-      : base("C# Project Files")
+      : base(unit.Name + " namespaces")
     {
       _Unit = unit;
       ImageKey = "CSharpProject";
@@ -37,12 +37,25 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     protected override void OnExpandFirstTime()
     {
       base.OnExpandFirstTime();
+
+      // --- Add the list of referenced compilation units to the node
+      foreach (ReferencedUnit refUnit in _Unit.ReferencedUnits)
+      {
+        ReferencedCompilation compilation = refUnit as ReferencedCompilation;
+        if (compilation != null)
+        {
+          Nodes.Add(new NamespaceViewRootTreeNode(compilation.CompilationUnit));
+        }
+      }
+
+      // --- Add namespaces
       foreach (Namespace ns in 
         new SortableCollection<Namespace>(_Unit.DeclaredNamespaces).SortBy("Name"))
       {
         Nodes.Add(new NamespaceTreeNode(ns, _Unit));
       }
 
+      // --- Add global types to the tree
       List<TypeDeclaration> globalTypes = new List<TypeDeclaration>();
       foreach (TypeDeclaration type in _Unit.DeclaredTypes)
       {

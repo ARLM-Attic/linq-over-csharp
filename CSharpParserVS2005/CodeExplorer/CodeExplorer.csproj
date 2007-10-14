@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\FileParsingData.cs" />
     <Compile Include="Entities\FolderData.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -47,11 +48,21 @@
     <Compile Include="MainForm.designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ParsingTimeStatistics.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParsingTimeStatistics.Designer.cs">
+      <DependentUpon>ParsingTimeStatistics.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParsingTimeStatistics.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ParsingTimeStatistics.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -63,6 +74,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Properties\DataSources\CSharpParser.CodeExplorer.Entities.FileParsingData.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

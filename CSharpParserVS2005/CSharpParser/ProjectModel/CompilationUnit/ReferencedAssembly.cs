@@ -39,7 +39,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="name">System assembly name.</param>
     // --------------------------------------------------------------------------------
     public ReferencedAssembly(string name)
-      : this(name, _DotNetSystemFolder, String.Empty)
+      : this(name, String.Empty, String.Empty)
     {
     }
 
@@ -66,8 +66,28 @@ namespace CSharpParser.ProjectModel
     public ReferencedAssembly(string name, string path, string alias)
       : base(name)
     {
-      _Assembly = Assembly.LoadFrom(Path.Combine(path, name + ".dll"));
       _Alias = alias;
+
+      // --- Try to load the assembly in several ways
+      if (String.IsNullOrEmpty(path))
+      {
+        // --- Try to load the assembly with assemblyName
+        try
+        {
+          _Assembly = Assembly.Load(new AssemblyName(name));
+          return;
+        }
+        catch (FileNotFoundException)
+        {
+          // --- This exeption is caught intentionally
+        }
+
+        path = _DotNetSystemFolder;
+      }
+
+      // --- Path is specified, so load the assembly with the specified path
+      if (!name.EndsWith(".dll") && !name.EndsWith(".exe")) name += ".dll";
+      _Assembly = Assembly.LoadFrom(Path.Combine(path, name));
     }
 
     // --------------------------------------------------------------------------------

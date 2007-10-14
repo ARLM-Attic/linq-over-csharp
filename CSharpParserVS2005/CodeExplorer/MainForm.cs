@@ -1,5 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Forms;
+using CSharpParser.CodeExplorer.Entities;
 using CSharpParser.ProjectContent;
 using CSharpParser.ProjectModel;
 using CSharpParser.CodeExplorer.TreeNodes;
@@ -16,6 +19,11 @@ namespace CSharpParser.CodeExplorer
   {
     private FileTreeController _FileTreeController;
     private NamespaceTreeController _NamespaceTreeController;
+    private CompilationUnit _Unit;
+    private Stopwatch _Watch;
+    private readonly BindingList<FileParsingData> _ParsingTimeStats = 
+      new BindingList<FileParsingData>();
+    private FileParsingData _CurrentFileData;
 
     // ----------------------------------------------------------------------------------
     /// <summary>
@@ -49,6 +57,11 @@ namespace CSharpParser.CodeExplorer
       Close();
     }
 
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Opens the specified project file.
+    /// </summary>
+    // ----------------------------------------------------------------------------------
     private void OpenProjectFileItem_Click(object sender, EventArgs e)
     {
       if (FileDialog.ShowDialog() != DialogResult.OK) return;
@@ -68,6 +81,7 @@ namespace CSharpParser.CodeExplorer
     // ----------------------------------------------------------------------------------
     private void ParseAndShowCompilation(CompilationUnit unit)
     {
+      _Unit = null;
       StatusLabel.Text = "Parsing project in " + unit.WorkingFolder;
       StatusStrip.Update();
       Cursor = Cursors.WaitCursor;
@@ -75,7 +89,22 @@ namespace CSharpParser.CodeExplorer
       {
         // --- Parses the compilation unit
         DateTime start = DateTime.Now;
-        unit.Parse();
+
+        // --- Setup events
+        try
+        {
+          unit.AfterInitParse += OnAfterInitParse;
+          unit.BeforeParseFile += OnBeforeParseFile;
+          unit.AfterParseFile += OnAfterParseFile;
+          unit.Parse();
+        }
+        finally
+        {
+          unit.AfterInitParse -= OnAfterInitParse;
+          unit.BeforeParseFile -= OnBeforeParseFile;
+          unit.AfterParseFile -= OnAfterParseFile;
+        }
+
         if (unit.Errors.Count == 0)
         {
           StatusLabel.Text = String.Format("Parsing finished successfuly in {0} ms.",
@@ -99,8 +128,66 @@ namespace CSharpParser.CodeExplorer
       // --- Updates the views through the controllers
       _FileTreeController.SetCompilationUnit(unit);
       _NamespaceTreeController.SetCompilationUnit(unit);
+      _Unit = unit;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Displays the parser time statistics
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    private void ParsingTimesItems_Click(object sender, EventArgs e)
+    {
+      if (_Unit == null)
+      {
+        MessageBox.Show("No successfully compiled unit to show statictics about.", 
+          "No statistics");
+        return;
+      }
+      ParsingTimeStatistics form = new ParsingTimeStatistics(_ParsingTimeStats);
+      form.ShowDialog();
     }
 
     #endregion
+
+    #region Events related to parsing
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Init the parser watch
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    private void OnAfterInitParse(object sender, ParseCancelEventArgs e)
+    {
+      _Watch = new Stopwatch();
+      _Watch.Start();
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Collect start time information for the file
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    private void OnBeforeParseFile(object sender, ParseFileEventArgs e)
+    {
+      _CurrentFileData = new FileParsingData();
+      _CurrentFileData.FileName = e.File.Name;
+      _CurrentFileData.TimeFromStart = _Watch.ElapsedMilliseconds;
+    }
+
+    // ----------------------------------------------------------------------------------
+    /// <summary>
+    /// Collect start time information for the file
+    /// </summary>
+    // ----------------------------------------------------------------------------------
+    private void OnAfterParseFile(object sender, ParseFileEventArgs e)
+    {
+      _CurrentFileData.ParseTime = 
+        _Watch.ElapsedMilliseconds - _CurrentFileData.TimeFromStart;
+      _ParsingTimeStats.Add(_CurrentFileData);
+    }
+
+    #endregion
+
   }
 }

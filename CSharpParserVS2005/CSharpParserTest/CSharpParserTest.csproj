@@ -415,7 +415,7 @@
     <None Include="TestFiles\Methods\CastOpDeclaration6.cs" />
     <None Include="TestFiles\Methods\CastOpDeclaration7.cs" />
     <None Include="TestFiles\Methods\CastOpDeclaration8.cs" />
-    <Compile Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
+    <None Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespace12.cs" />

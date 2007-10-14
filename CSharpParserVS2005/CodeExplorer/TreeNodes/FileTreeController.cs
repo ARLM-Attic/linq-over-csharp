@@ -35,57 +35,7 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     // --------------------------------------------------------------------------------
     protected override OnDemandTreeNode CreateRootNode()
     {
- 	    return new FileViewRootTreeNode(BuildFolderHierarchy());
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Build the folder and file hierarchy according the source files within the
-    /// compliation unit.
-    /// </summary>
-    /// <returns></returns>
-    // --------------------------------------------------------------------------------
-    private FolderData BuildFolderHierarchy()
-    {
-      FolderData rootFolder = new FolderData("Root Project Folder");
-      foreach (SourceFile file in CompilationUnit.Files)
-      {
-        FolderData folder = EnsureFolder(rootFolder, file.Folder);
-        folder.Files.Add(file);
-      }
-      return rootFolder;
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Obtains or creates a tree node representing the specified folder.
-    /// </summary>
-    /// <param name="root">Root folder node</param>
-    /// <param name="folderName">Folder to obtain/create.</param>
-    /// <returns>
-    /// Node represnting the folder.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    private FolderData EnsureFolder(FolderData root, string folderName)
-    {
-      if (folderName == WorkingFolder) return root;
-      string parentFolder = Path.GetDirectoryName(folderName);
-      string subFolder = Path.GetFileName(folderName);
-
-      FolderData parent = EnsureFolder(root, parentFolder);
-      FolderData childFound = null;
-      foreach (FolderData child in parent.Folders)
-      {
-        if (child.FolderName == subFolder)
-        {
-          childFound = child;
-          break;
-        }
-      }
-      if (childFound != null) return childFound;
-      FolderData newFolder = new FolderData(subFolder);
-      parent.Folders.Add(newFolder);
-      return newFolder;
+ 	    return new FileViewRootTreeNode(CompilationUnit);
     }
   }
 }
