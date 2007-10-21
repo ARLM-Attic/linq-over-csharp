@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using CSharpParser.ProjectModel;
 using CSharpParser.Semantics;
 
-namespace CSharpParser.ProjectModel
+namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
@@ -9,8 +10,14 @@ namespace CSharpParser.ProjectModel
   /// source code.
   /// </summary>
   // ==================================================================================
-  public sealed class PointerType : SimpleExtendedType
+  public sealed class ArrayType : SimpleExtendedType
   {
+    #region Private fields
+
+    private readonly int _Rank; 
+
+    #endregion
+
     #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
@@ -18,9 +25,12 @@ namespace CSharpParser.ProjectModel
     /// Creates an array type from the specified element type.
     /// </summary>
     /// <param name="elementType">Element type instance.</param>
+    /// <param name="rank">Array rank</param>
     // --------------------------------------------------------------------------------
-    public PointerType(ITypeAbstraction elementType) : base(elementType)
+    public ArrayType(ITypeAbstraction elementType, int rank)
+      : base(elementType)
     {
+      _Rank = rank;
     }
 
     #endregion
@@ -29,12 +39,23 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the number of dimensions of an array type.
+    /// </summary>
+    /// <returns>Number of array dimensions.</returns>
+    // --------------------------------------------------------------------------------
+    public override int GetArrayRank()
+    {
+      return _Rank;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
     // --------------------------------------------------------------------------------
     public override bool IsArray
     {
-      get { return false; }
+      get { return true; }
     }
 
     // --------------------------------------------------------------------------------
@@ -44,7 +65,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsPointer
     {
-      get { return true; }
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -54,7 +75,10 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string Name
     {
-      get { return GetElementType().Name + "*"; }
+      get
+      {
+        return GetElementType().Name + "[" + string.Empty.PadRight(_Rank - 1, ',') + "]";
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -64,7 +88,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsUnmanagedType
     {
-      get { return true; }
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -74,7 +98,11 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string ParametrizedName
     {
-      get { return TypeBase.GetParametrizedName(this) + "*"; }
+      get
+      {
+        return TypeBase.GetParametrizedName(this) + 
+          "[" + string.Empty.PadRight(_Rank - 1, ',') + "]";
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -89,7 +117,7 @@ namespace CSharpParser.ProjectModel
     {
       return NetBinaryType.EmptyTypes;
     }
-
+    
     #endregion
   }
 }

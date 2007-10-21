@@ -32,11 +32,11 @@ namespace CSharpParserTest.LanguageElements
       Assert.IsNotNull(ci);
       Assert.IsTrue(ci.Comments[0] is LineComment);
       Assert.IsTrue(ci.Comments[0].Text.StartsWith(" ========"));
-      Assert.IsTrue(ci.Comments[1] is XmlComment);
+      Assert.IsTrue(ci.Comments[1] is XmlCommentLine);
       Assert.IsTrue(ci.Comments[1].Text.StartsWith(" <summary>"));
-      Assert.IsTrue(ci.Comments[2] is XmlComment);
+      Assert.IsTrue(ci.Comments[2] is XmlCommentLine);
       Assert.IsTrue(ci.Comments[2].Text.StartsWith(" This class"));
-      Assert.IsTrue(ci.Comments[3] is XmlComment);
+      Assert.IsTrue(ci.Comments[3] is XmlCommentLine);
       Assert.IsTrue(ci.Comments[3].Text.StartsWith(" </summary>"));
       Assert.IsTrue(ci.Comments[4] is LineComment);
       Assert.IsTrue(ci.Comments[4].Text.StartsWith(" ========"));

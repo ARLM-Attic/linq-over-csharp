@@ -78,7 +78,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the simple (short) name of this language element.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string SimpleName
+    public virtual string SimpleName
     {
       get { return _Name; }
     }

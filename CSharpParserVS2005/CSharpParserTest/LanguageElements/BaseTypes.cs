@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -339,6 +340,16 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\AccessibilityOk1.cs");
       Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void ComplexBaseType1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"BaseTypes\ComplexbaseType1.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      Console.WriteLine(parser.DeclaredTypes[0].BaseType.ParametrizedName);
+      Console.WriteLine(parser.DeclaredTypes[2].BaseType.ParametrizedName);
     }
   }
 }

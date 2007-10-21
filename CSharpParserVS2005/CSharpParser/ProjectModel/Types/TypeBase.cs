@@ -463,7 +463,8 @@ namespace CSharpParser.ProjectModel
     {
       if (type == null) return null;
       while (type.HasElementType) type = type.GetElementType();
-      return type;
+      GenericType genType = type as GenericType;
+      return genType == null ? type : genType.ConstructingType;
     }
 
     // --------------------------------------------------------------------------------
@@ -508,7 +509,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public static string GetParametrizedName(ITypeAbstraction type)
     {
-      StringBuilder sb = new StringBuilder(type.SimpleName);
+      StringBuilder sb = new StringBuilder(type.Namespace);
+      if (!string.IsNullOrEmpty(type.Namespace)) sb.Append(".");
+      sb.Append(type.SimpleName);
       if (type.TypeParameterCount > 0)
       {
         sb.Append('<');
@@ -540,6 +543,69 @@ namespace CSharpParser.ProjectModel
       if (nullable != null || type.FullName == typeof(Nullable<>).FullName)
         return type.GetGenericArguments()[0];
       return type;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type of the specified type.
+    /// </summary>
+    /// <param name="type">Type to obtain base type for.</param>
+    /// <returns>
+    /// Base type of the type specified.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    public static ITypeAbstraction GetBaseType(ITypeAbstraction type)
+    {
+      // --- Native .NET binary types handle type parameter substitution of their own.
+      if (type is NetBinaryType) return type.BaseType;
+      return type.BaseType;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Substitues type arguments with concrete types in a type template.
+    /// </summary>
+    /// <param name="typeDef">Declares a generic type and its type arguments.</param>
+    /// <param name="typeArgs">
+    /// Concrete type arguments that should be substituted in the specified type template
+    /// </param>
+    /// <param name="typeTemplate">Type template.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// Concrete type arguments are matched according to the index of the type parameter.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public static ITypeAbstraction SubstituteTypeParameters(ITypeAbstraction typeDef,
+      List<ITypeAbstraction> typeArgs, ITypeAbstraction typeTemplate)
+    {
+      // --- Template is returned if the we do not use a generic type definition.
+      if (!typeDef.IsGenericTypeDefinition) return typeTemplate;
+
+      // --- At least as many type arguments should be provided as many type parameters
+      // --- are in the definition.
+      if (typeArgs.Count < typeDef.TypeParameterCount)
+        throw new InvalidOperationException(
+          String.Format("{0} type arguments have been provided, but {1} is expected",
+          typeArgs.Count, typeDef.TypeParameterCount));
+
+      // --- Create an index addressed by type parameter name.
+      Dictionary<string, ITypeAbstraction> paramIndex = 
+        new Dictionary<string, ITypeAbstraction>();
+      int index = 0;
+      foreach (ITypeAbstraction typeParam in typeDef.GetGenericArguments())
+      {
+        if (!typeParam.IsGenericParameter) continue;
+        if (!paramIndex.ContainsKey(typeParam.Name)) 
+          paramIndex.Add(typeParam.Name, typeArgs[index]);
+        index++;
+      }
+      return SubstituteTypeParameters(paramIndex, typeTemplate);
+    }
+
+    public static ITypeAbstraction SubstituteTypeParameters(
+      Dictionary<string, ITypeAbstraction> typeArgs, ITypeAbstraction typeTemplate)
+    {
+      return typeTemplate;
     }
 
     // --------------------------------------------------------------------------------

@@ -1,21 +1,20 @@
 using System;
-using System.Collections.Generic;
+using CSharpParser.ProjectModel;
 using CSharpParser.Semantics;
 
-namespace CSharpParser.ProjectModel
+namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents an array type constructed from a declaration in the 
-  /// source code.
+  /// This type represents a simple extended types that have their own element types
+  /// like pointers and arrays.
   /// </summary>
   // ==================================================================================
-  public class GenericType : ExtendedType
+  public abstract class SimpleExtendedType : ExtendedType
   {
-    #region Private fields
+    #region Private fields 
 
-    private readonly ITypeAbstraction _ConstructingType;
-    private readonly List<ITypeAbstraction> _TypeParameters;
+    private readonly ITypeAbstraction _ElementType;
 
     #endregion
 
@@ -23,111 +22,19 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates constructed generic type from the specified construction type with the
-    /// given type parameters.
+    /// Creates a constructed type from the specified element type.
     /// </summary>
-    /// <param name="constructingType">Type the generic type is constructed from.</param>
-    /// <param name="typeParameters">Type parameters of this generic type.</param>
+    /// <param name="elementType">Element type instance.</param>
     // --------------------------------------------------------------------------------
-    public GenericType(ITypeAbstraction constructingType,
-      IEnumerable<ITypeAbstraction> typeParameters)
+    protected SimpleExtendedType(ITypeAbstraction elementType)
     {
-      _ConstructingType = constructingType;
-      _TypeParameters = new List<ITypeAbstraction>(typeParameters);
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates constructed generic type from the specified construction type with the
-    /// given type parameter.
-    /// </summary>
-    /// <param name="constructingType">Type the generic type is constructed from.</param>
-    /// <param name="parameter">Single type parameter.</param>
-    // --------------------------------------------------------------------------------
-    public GenericType(ITypeAbstraction constructingType, ITypeAbstraction
-      parameter)
-    {
-      if (!parameter.IsValueType)
-      {
-        throw new InvalidOperationException("Valuetype expected.");
-      }
-      _ConstructingType = constructingType;
-      _TypeParameters = new List<ITypeAbstraction>();
-      _TypeParameters.Add(parameter);
+      if (elementType == null) throw new ArgumentNullException("elementType");
+      _ElementType = elementType;
     }
 
     #endregion
 
-    #region Public properties
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the factory type of this generic type
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public ITypeAbstraction ConstructingType
-    {
-      get { return _ConstructingType; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of type parameters
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public List<ITypeAbstraction> TypeParameters
-    {
-      get { return _TypeParameters; }
-    }
-
-    #endregion
-
-    #region Overridden methods
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is an array.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public override bool IsArray
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is a pointer.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public override bool IsPointer
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public override bool IsUnmanagedType
-    {
-      get { return false; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the current member.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public override string Name
-    {
-      get
-      {
-        if (_TypeParameters.Count == 0) return _ConstructingType.SimpleName;
-        return string.Format("{0}`{1}", _ConstructingType.SimpleName, 
-          _TypeParameters.Count);
-      }
-    }
+    #region Overridden properties and methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -139,12 +46,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsOpenType
     {
-      get
-      {
-        foreach (ITypeAbstraction param in _TypeParameters)
-          if (param.IsOpenType) return true;
-        return false;
-      }
+      get { return  _ElementType.IsOpenType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -154,7 +56,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsRuntimeType
     {
-      get { return _ConstructingType.IsRuntimeType; }
+      get { return _ElementType.IsRuntimeType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -164,7 +66,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override ReferencedUnit DeclaringUnit
     {
-      get { return _ConstructingType.DeclaringUnit; }
+      get { return _ElementType.DeclaringUnit; }
     }
 
     // --------------------------------------------------------------------------------
@@ -179,7 +81,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool HasElementType
     {
-      get { return false; }
+      get { return _ElementType != null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -192,7 +94,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsAbstract
     {
-      get { return _ConstructingType.IsAbstract; }
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -206,7 +108,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsClass
     {
-      get { return _ConstructingType.IsClass; }
+      get { return true; }
     }
 
     // --------------------------------------------------------------------------------
@@ -219,7 +121,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsGenericType
     {
-      get { return true; }
+      get { return _ElementType.IsGenericType; }
     }
 
     // --------------------------------------------------------------------------------
@@ -246,7 +148,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override int TypeParameterCount
     {
-      get { return _TypeParameters.Count; }
+      get { return 0; }
     }
 
     // --------------------------------------------------------------------------------
@@ -260,7 +162,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsInterface
     {
-      get { return _ConstructingType.IsInterface; }
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -270,7 +172,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsNotPublic
     {
-      get { return _ConstructingType.IsNotPublic; }
+      get { return _ElementType.IsNotPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -280,7 +182,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsPublic
     {
-      get { return _ConstructingType.IsNotPublic; }
+      get { return _ElementType.IsPublic; }
     }
 
     // --------------------------------------------------------------------------------
@@ -293,7 +195,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsSealed
     {
-      get { return _ConstructingType.IsSealed; }
+      get { return true; }
     }
 
     // --------------------------------------------------------------------------------
@@ -303,16 +205,17 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsStatic
     {
-      get { return _ConstructingType.IsStatic; }
+      get { return false; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public override bool IsValueType
     {
-      get { return _ConstructingType.IsValueType; }
+      get { return false; }
     }
 
     // --------------------------------------------------------------------------------
@@ -331,7 +234,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override bool IsVisible
     {
-      get { return _ConstructingType.IsVisible; }
+      get { return _ElementType.IsVisible; }
     }
 
     // --------------------------------------------------------------------------------
@@ -342,7 +245,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string SimpleName
     {
-      get { return _ConstructingType.SimpleName; }
+      get { return _ElementType.SimpleName; }
     }
 
     // --------------------------------------------------------------------------------
@@ -352,30 +255,20 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string Namespace
     {
-      get { return _ConstructingType.Namespace; }
+      get { return _ElementType.Namespace; }
     }
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the parametrized name of the type.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public override string ParametrizedName
-    {
-      get { return TypeBase.GetParametrizedName(this); }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a list representing the generic arguments of a type.
+    /// Gets the element type of this type.
     /// </summary>
     /// <returns>
-    /// Arguments of a generic typeor generic type declaration.
+    /// Element type for a pointer, reference or array; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public override List<ITypeAbstraction> GetGenericArguments()
+    public override ITypeAbstraction GetElementType()
     {
-      return _TypeParameters;
+      return _ElementType;
     }
 
     #endregion

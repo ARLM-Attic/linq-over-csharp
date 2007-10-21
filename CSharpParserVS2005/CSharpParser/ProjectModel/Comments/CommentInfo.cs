@@ -143,7 +143,7 @@ namespace CSharpParser.ProjectModel
   /// This class represents a C# XML comment.
   /// </summary>
   // ==================================================================================
-  public sealed class XmlComment : CommentInfo
+  public sealed class XmlCommentLine : CommentInfo
   {
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -155,7 +155,7 @@ namespace CSharpParser.ProjectModel
     /// <param name="endColumn">Ending column.</param>
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
-    public XmlComment(Token token, CSharpSyntaxParser parser, int endLine, 
+    public XmlCommentLine(Token token, CSharpSyntaxParser parser, int endLine, 
       int endColumn, string text)
       : base(token, parser, endLine, endColumn, text)
     {

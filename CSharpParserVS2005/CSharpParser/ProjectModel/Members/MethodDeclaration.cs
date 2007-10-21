@@ -136,14 +136,7 @@ namespace CSharpParser.ProjectModel
             sb.Append(' ');
           }
           if (par.Type.TailIsType)
-          {
-            if (!String.IsNullOrEmpty(par.Type.Tail.TypeInstance.Namespace))
-            {
-              sb.Append(par.Type.Tail.TypeInstance.Namespace);
-              sb.Append(".");
-            }
             sb.Append(par.Type.Tail.TypeInstance.ParametrizedName);
-          }
           else
             sb.Append(par.Type.FullName);
           isFirst = false;

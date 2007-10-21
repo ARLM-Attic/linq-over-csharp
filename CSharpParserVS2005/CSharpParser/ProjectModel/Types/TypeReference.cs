@@ -162,7 +162,7 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        if (!IsResolvedToType)
+        if (!IsResolvedToType && !IsResolvedToTypeParameter)
           throw new InvalidOperationException(
             "This reference is not resolved to a type or type parameter.");
         return _TypeInstance;
@@ -367,12 +367,24 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string Namespace
     {
-      get
-      {
-        return TypeInstance.Namespace;
-      }
+      get { return TypeInstance.Namespace; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the simple (short) name of this language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override string SimpleName
+    {
+      get
+      {
+        if (IsResolvedToType || IsResolvedToTypeParameter)
+          return _TypeInstance.SimpleName;
+        return base.SimpleName;
+      }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if a type is open or not.
@@ -1030,6 +1042,19 @@ namespace CSharpParser.ProjectModel
       _ResolverNode = null;
       _TypeInstance = null;
       _ResolverHierarchy = null;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Changes the instance type to a constructed type with the specified type
+    /// arguments.
+    /// </summary>
+    /// <param name="genericArgs">Generic type arguments.</param>
+    // --------------------------------------------------------------------------------
+    public void ChangeToConstructedType(IEnumerable<ITypeAbstraction> genericArgs)
+    {
+      if (IsResolvedToType)
+        _TypeInstance = new GenericType(_TypeInstance, genericArgs);
     }
 
     #endregion

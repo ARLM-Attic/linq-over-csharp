@@ -1,6 +1,6 @@
 using CSharpParser.Semantics;
 
-namespace CSharpParser.ProjectModel
+namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>

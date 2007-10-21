@@ -1,21 +1,26 @@
-using System;
 using System.Collections.Generic;
+using CSharpParser.ProjectModel;
 using CSharpParser.Semantics;
 
-namespace CSharpParser.ProjectModel
+namespace CSharpParser.Semantics
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a type constructed from a declaration in the source code.
+  /// This type represents an type that is created from an other by cloning.
   /// </summary>
-  /// <remarks>
-  /// Types are constructed by using the "*" pointer construction, the
-  /// "[]" or "[,...,]" array construction or generic construction.
-  /// </remarks>
   // ==================================================================================
-  public abstract class ExtendedType : ITypeAbstraction
+  public sealed class TypeClone : ITypeAbstraction
   {
-    #region ITypeAbstraction Implementation
+    #region Lifecycle methods
+
+    public TypeClone(ITypeAbstraction origType)
+    {
+
+    }
+
+    #endregion
+
+    #region ITypeAbstraction implementation
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -25,20 +30,21 @@ namespace CSharpParser.ProjectModel
     /// A type is open, if directly or indireclty references to a type parametes.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsOpenType { get; }
+    public bool IsOpenType
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the number of dimensions of an array type.
     /// </summary>
     /// <returns>Number of array dimensions.</returns>
     // --------------------------------------------------------------------------------
-    public virtual int GetArrayRank()
+    public int GetArrayRank()
     {
-      throw new ArgumentException("Type is not an array.");
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the element type of this type.
     /// </summary>
@@ -46,12 +52,11 @@ namespace CSharpParser.ProjectModel
     /// Element type for a pointer, reference or array; otherwise, null.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public virtual ITypeAbstraction GetElementType()
+    public ITypeAbstraction GetElementType()
     {
-      throw new InvalidOperationException("This type has no element type.");
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a list representing the generic arguments of a type.
     /// </summary>
@@ -59,9 +64,11 @@ namespace CSharpParser.ProjectModel
     /// Arguments of a generic typeor generic type declaration.
     /// </returns>
     // --------------------------------------------------------------------------------
-    public abstract List<ITypeAbstraction> GetGenericArguments();
+    public List<ITypeAbstraction> GetGenericArguments()
+    {
+      throw new System.NotImplementedException();
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of interfaces implemented by this type.
     /// </summary>
@@ -72,22 +79,20 @@ namespace CSharpParser.ProjectModel
     /// Retrieves all interfaces implemented by directly or indirectly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public virtual Dictionary<string, ITypeAbstraction> GetInterfaces()
+    public Dictionary<string, ITypeAbstraction> GetInterfaces()
     {
-      return NetBinaryType.EmptyTypeDictionary;
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating, if the current type is a generic type parameter.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual bool IsGenericParameter
+    public bool IsGenericParameter
     {
-      get { return false;} 
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the types directly nested into this type.
     /// </summary>
@@ -98,10 +103,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public Dictionary<string, ITypeAbstraction> GetNestedTypes()
     {
-      return new Dictionary<string, ITypeAbstraction>();
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the underlying type of an enum type.
     /// </summary>
@@ -111,144 +115,137 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ITypeAbstraction GetUnderlyingEnumType()
     {
-      throw new InvalidOperationException("Underlying type is not an enum.");
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsRuntimeType { get; }
+    public bool IsRuntimeType
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract ReferencedUnit DeclaringUnit { get; }
+    public ReferencedUnit DeclaringUnit
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is an unmanaged .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual bool IsUnmanagedType 
-    { 
-      get { return false; }
+    public bool IsUnmanagedType
+    {
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the base type of this type.
     /// </summary>
     /// <remarks>
-    /// Constructed types never have base type
+    /// If there is no explicit base type for this type, a corresponding reference to
+    /// System.Object should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
     public ITypeAbstraction BaseType
     {
-      get { return null; }
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the type that declares the current nested type.
     /// </summary>
     /// <remarks>
-    /// Constructed types never have declaring type
+    /// If there is no declaring type, null should be returned.
     /// </remarks>
     // --------------------------------------------------------------------------------
     public ITypeAbstraction DeclaringType
     {
-      get { return null; }
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the fully qualified name of the type, including the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public string FullName
     {
-      get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type encompasses or refers to 
     /// another type; that is, whether the current Type is an array, a pointer, or is 
     /// passed by reference.
     /// </summary>
-    /// <remarks>
-    /// Constructed types always have element type.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool HasElementType { get; }
+    public bool HasElementType
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never abstract.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsAbstract { get; }
+    public bool IsAbstract
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsArray { get; }
+    public bool IsArray
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a class; that is, not a value 
     /// type or interface.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never classes.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsClass { get; }
+    public bool IsClass
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never enums.
-    /// </remarks>
     // --------------------------------------------------------------------------------
     public bool IsEnum
     {
-      get { return false; }
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current type is a generic type.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never generic.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsGenericType { get; }
+    public bool IsGenericType
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents a generic type 
     /// definition, from which other generic types can be constructed.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never generic definitions.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsGenericTypeDefinition { get; }
+    public bool IsGenericTypeDefinition
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Makes an array type from the current type with the specified rank.
     /// </summary>
@@ -259,10 +256,9 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ITypeAbstraction MakeArrayType(int rank)
     {
-      return new ArrayType(this, rank);
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Makes a pointer type from the current type with the specified rank.
     /// </summary>
@@ -272,90 +268,92 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public ITypeAbstraction MakePointerType()
     {
-      return new PointerType(this);
+      throw new System.NotImplementedException();
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the number of type parameters.
     /// </summary>
-    /// <remarks>
-    /// Constructed types never have type parameters.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract int TypeParameterCount { get; }
+    public int TypeParameterCount
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an interface; that is, not a 
     /// class or a value type.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never interfaces.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsInterface { get; }
+    public bool IsInterface
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type object represents a type 
     /// whose definition is nested inside the definition of another type.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are never nested.
-    /// </remarks>
     // --------------------------------------------------------------------------------
     public bool IsNested
     {
-      get { return false; }
+      get { throw new System.NotImplementedException(); }
     }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsNotPublic { get; }
+    public bool IsNotPublic
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a pointer.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsPointer { get; }
+    public bool IsPointer
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsPublic { get; }
+    public bool IsPublic
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
-    /// <remarks>
-    /// Constructed types are always sealed.
-    /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsSealed { get; }
+    public bool IsSealed
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared static.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsStatic { get; }
+    public bool IsStatic
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract bool IsValueType { get; }
+    public bool IsValueType
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type can be accessed by code outside the 
     /// assembly.
@@ -369,36 +367,47 @@ namespace CSharpParser.ProjectModel
     /// interface of a component assembly.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public abstract bool IsVisible { get; }
+    public bool IsVisible
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the simple name of the current member.
     /// </summary>
     /// <remarks>The simple name does not contain any adornements.</remarks>
     // --------------------------------------------------------------------------------
-    public abstract string SimpleName { get; }
+    public string SimpleName
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the parametrized name of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract string ParametrizedName { get; }
+    public string ParametrizedName
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the current member.
+    /// Gets the name of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract string Name { get; }
+    public string Name
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
-    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public abstract string Namespace { get; }
+    public string Namespace
+    {
+      get { throw new System.NotImplementedException(); }
+    }
 
     #endregion
   }

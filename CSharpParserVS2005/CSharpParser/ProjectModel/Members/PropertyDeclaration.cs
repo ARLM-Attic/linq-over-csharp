@@ -88,7 +88,7 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        return string.Format("get_{0}()", SimpleName);
+        return string.Format("get_{0}()", ParametrizedName);
       }
     }
 
@@ -101,11 +101,10 @@ namespace CSharpParser.ProjectModel
     {
       get
       {
-        string typeName = ResultingType.TailIsType
-                            ? ResultingType.Tail.TypeInstance.FullName
-                            : (ResultingType.TailIsTypeParameter
-                                 ? ResultingType.Tail.ResolvingTypeParameter.Name
-                                 : "");
+        string typeName = (ResultingType.Tail.IsResolvedToType || 
+          ResultingType.Tail.IsResolvedToTypeParameter)
+            ? ResultingType.Tail.ParametrizedName
+            : string.Empty;
         return string.Format("set_{0}({1})", SimpleName, typeName);
       }
     }

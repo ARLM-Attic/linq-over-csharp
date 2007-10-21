@@ -1475,7 +1475,9 @@ namespace CSharpParser.ProjectModel
         {
           // --- We check only typed declared within the source, because binary
           // --- types cannot cause circular dependency.
+          GenericType genType = dependsOn as GenericType;
           TypeDeclaration typeDecl = dependsOn as TypeDeclaration;
+          if (genType != null) typeDecl = genType.ConstructingType as TypeDeclaration;
           if (typeDecl == null || !typeDecl.IsValid) continue;
 
           if (typeDecl == type)

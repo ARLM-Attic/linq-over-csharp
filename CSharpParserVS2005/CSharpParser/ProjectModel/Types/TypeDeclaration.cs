@@ -313,7 +313,12 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public override string Namespace
     {
-      get { return _EnclosingNamespace == null ? String.Empty : FullName; }
+      get
+      {
+        return _EnclosingNamespace == null 
+          ? String.Empty 
+          : _EnclosingNamespace.FullName;
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -1942,8 +1947,7 @@ namespace CSharpParser.ProjectModel
     private bool CheckAccessibility(Visibility baseVisibility, TypeReference type)
     {
       // --- Get the base type in case of constructed types
-      ITypeAbstraction baseType = type.TypeInstance;
-      while (baseType.HasElementType) baseType = baseType.GetElementType();
+      ITypeAbstraction baseType = GetRootElementType(type.TypeInstance);
 
       // --- Is the base type a referenced type?
       TypeDeclaration baseDecl = baseType as TypeDeclaration;

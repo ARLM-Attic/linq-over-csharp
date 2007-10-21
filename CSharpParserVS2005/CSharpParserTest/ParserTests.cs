@@ -183,10 +183,11 @@ namespace CSharpParserTest
       Assert.IsTrue(fd.IsEvent);
       Assert.AreEqual(fd.Name, "_Event3");
       Assert.AreEqual(fd.DeclaredVisibility, Visibility.Private);
-      Assert.AreEqual(fd.ResultingType.ParametrizedName, "MyEvent1<List<int>, List<string>>");
+      Assert.AreEqual(fd.ResultingType.ParametrizedName,
+        "CSharpParserTest.TestFiles.MyEvent1<System.Collections.Generic.List<System.Int32>, System.Collections.Generic.List<System.String>>");
       Assert.AreEqual(fd.ResultingType.Arguments.Count, 2);
-      Assert.AreEqual(fd.ResultingType.Arguments[0].ParametrizedName, "List<int>");
-      Assert.AreEqual(fd.ResultingType.Arguments[1].ParametrizedName, "List<string>");
+      Assert.AreEqual(fd.ResultingType.Arguments[0].ParametrizedName, "System.Collections.Generic.List<System.Int32>");
+      Assert.AreEqual(fd.ResultingType.Arguments[1].ParametrizedName, "System.Collections.Generic.List<System.String>");
     }
 
     [TestMethod]

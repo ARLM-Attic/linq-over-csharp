@@ -47,7 +47,7 @@ namespace CSharpParser.ParserFiles
       if (text.StartsWith("/"))
       {
         text = text.Substring(1);
-        comment = new XmlComment(
+        comment = new XmlCommentLine(
           commentToken,
           _Parser,
           commentToken.line,

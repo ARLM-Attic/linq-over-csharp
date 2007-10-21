@@ -461,6 +461,7 @@
     <Compile Include="LanguageElements\TypeResolution.cs" />
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
     <None Include="TestFiles\TypeResolution\NullableType1.cs" />
     <None Include="TestFiles\TypeResolution\ResolveThroughInheritance.cs" />
     <None Include="TestFiles\TypeResolution\ConstructedType3.cs" />

@@ -71,12 +71,19 @@ namespace CSharpParser.Semantics
       {
         if (typePart.IsResolved && typePart.Arguments.Count > 0)
         {
+          List<ITypeAbstraction> genericPars = new List<ITypeAbstraction>();
+
           // --- Go through the generic arguments and resolve them
           foreach (TypeReference argument in typePart.Arguments)
           {
-            if (!argument.IsResolved) Resolve(argument, contextType, 
+            if (!argument.Tail.IsResolved) Resolve(argument, contextType, 
               declarationScope, parameterScope);
+            if (argument.Tail.IsResolvedToType || argument.Tail.IsResolvedToTypeParameter)
+              genericPars.Add(argument.Tail.TypeInstance);
+            else 
+              genericPars.Add(TypeReference.EmptyType);
           }
+          typePart.ChangeToConstructedType(genericPars);
         }
       }
 
