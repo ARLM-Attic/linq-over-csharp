@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpParser", "..\CSharpParser\CSharpParser.csproj", "{DAC84C34-6834-4398-AE6B-24559581D0E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UncommentedMembers", "UncommentedMembers\UncommentedMembers.csproj", "{34C616B0-653B-4080-82FF-318C6F03834E}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs03.codeplex.com/
+		SccProjectUniqueName0 = ..\\CSharpParser\\CSharpParser.csproj
+		SccProjectName0 = ../CSharpParser
+		SccLocalPath0 = ..\\CSharpParser
+		SccLocalPath1 = .
+		SccProjectUniqueName2 = UncommentedMembers\\UncommentedMembers.csproj
+		SccProjectName2 = UncommentedMembers
+		SccLocalPath2 = UncommentedMembers
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34C616B0-653B-4080-82FF-318C6F03834E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34C616B0-653B-4080-82FF-318C6F03834E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34C616B0-653B-4080-82FF-318C6F03834E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34C616B0-653B-4080-82FF-318C6F03834E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
