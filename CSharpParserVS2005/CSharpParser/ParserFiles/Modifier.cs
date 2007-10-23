@@ -16,60 +16,48 @@ namespace CSharpParser.ParserFiles
   [Flags]
   public enum Modifier
   {
-    // --- No modifier specified
+    /// <summary>No modifiers specified.</summary>
     none = 0x0000,
 
-    // --- Simple modifiers
-    @new = 0x0001, 
-    @public = 0x0002, 
-    @protected = 0x0004, 
+    /// <summary>"new" modifier has been used.</summary>
+    @new = 0x0001,
+    /// <summary>"public" modifier has been used.</summary>
+    @public = 0x0002,
+    /// <summary>"protected" modifier has been used.</summary>
+    @protected = 0x0004,
+    /// <summary>"internal" modifier has been used.</summary>
     @internal = 0x0008,
-    @private = 0x0010, 
-    @unsafe = 0x0020, 
-    @static = 0x0040, 
+    /// <summary>"private" modifier has been used.</summary>
+    @private = 0x0010,
+    /// <summary>"unsafe" modifier has been used.</summary>
+    @unsafe = 0x0020,
+    /// <summary>"static" modifier has been used.</summary>
+    @static = 0x0040,
+    /// <summary>"readonly" modifier has been used.</summary>
     @readonly = 0x0080,
-    @volatile = 0x0100, 
-    @virtual = 0x0200, 
-    @sealed = 0x0400, 
+    /// <summary>"volatile" modifier has been used.</summary>
+    @volatile = 0x0100,
+    /// <summary>"virtual" modifier has been used.</summary>
+    @virtual = 0x0200,
+    /// <summary>"sealed" modifier has been used.</summary>
+    @sealed = 0x0400,
+    /// <summary>"override" modifier has been used.</summary>
     @override = 0x0800,
-    @abstract = 0x1000, 
+    /// <summary>"abstract" modifier has been used.</summary>
+    @abstract = 0x1000,
+    /// <summary>"extern" modifier has been used.</summary>
     @extern = 0x2000,
 
-    // --- Visibility modifiers
+    /// <summary>Set of visibility modifiers</summary>
     VisibilityAccessors = @public | @protected | @internal | @private,
+    /// <summary>"protected internal" modifier</summary>
     ProtectedInternal = @protected | @internal,
 
-    // --- Modifiers applicable for constants
-    constants = VisibilityAccessors | @new ,
-
-    // --- Modifiers applicable for fields
+    /// <summary>Set of modifiers a field can have.</summary>
     fields = VisibilityAccessors | @new | @unsafe | @static | @readonly | @volatile,
 
-    // --- Modifiers applicable for property event methods
+    /// <summary>Set of modifiers an event property accessor can have.</summary>
     propEvntMeths = VisibilityAccessors | @new | @unsafe | @static | @virtual | @sealed | @override | @abstract | @extern,
-
-    // --- Modifiers applicable for property accessors: the two set cannot overlap each other
-    accessorsPossib1 = @private,
-    accessorsPossib2 = @protected | @internal,
-
-    // --- Modifiers applicable for indexers
-    indexers = VisibilityAccessors | @new | @unsafe | @virtual | @sealed | @override | @abstract | @extern,
-
-    // --- Modifiers applicable for operator overloads
-    operators = @public | @unsafe | @static | @extern,
-
-    // --- Mandatory modifiers for operator overloads
-    operatorsMust = @public | @static,
-
-    // --- Modifiers applicable for constructors
-    constructors = VisibilityAccessors | @unsafe | @extern,
-
-    // --- Modifiers applicable for static constructors
-    staticConstr = @extern | @static,
-
-    // --- Modifiers applicable for destructors
-    destructors = @extern | @unsafe,
-    all = 0x3fff
   }
 
   // ==================================================================================

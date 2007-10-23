@@ -3522,7 +3522,6 @@ TypeReference typeRef) {
 	}
 
 	void Primary(out Expression expr) {
-		TypeReference type = null; 
 		Expression innerExpr = null;
 		expr = null;
 		
@@ -4314,10 +4313,21 @@ TypeReference typeRef, bool isEvent) {
 	  }
 
 	  #endregion
-}
+  }
 
-public class FatalError: Exception {
-	public FatalError(string m): base(m) {}
-}
-
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a fatal error occuring during the parse operation.
+  /// </summary>
+  // ==================================================================================
+  public class FatalError : Exception
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance of this error.
+    /// </summary>
+    /// <param name="message">Error message.</param>
+    // --------------------------------------------------------------------------------
+    public FatalError(string message) : base(message) { }
+  }
 }

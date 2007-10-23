@@ -4,7 +4,7 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This abstract class represents an "&" operator
+  /// This abstract class represents a bitwise and operator.
   /// </summary>
   // ==================================================================================
   public sealed class BitwiseAndOperator : BinaryOperator

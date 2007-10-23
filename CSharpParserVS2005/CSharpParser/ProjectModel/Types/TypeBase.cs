@@ -11,7 +11,7 @@ namespace CSharpParser.ProjectModel
   /// This abstract type represents a type declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class TypeBase : AttributedElement,
+  public abstract class TypeBase : DeclarationBase,
     ITypeAbstraction
   {
     #region Private fields
@@ -188,7 +188,7 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public virtual ITypeAbstraction BaseType
     {
-      get { return null; }
+      get { return NetBinaryType.Object; }
     }
 
     // --------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ namespace CSharpParser.ProjectModel
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public virtual bool IsAbstract
+    public override bool IsAbstract
     {
       get { return false; }
     }
@@ -348,20 +348,6 @@ namespace CSharpParser.ProjectModel
     /// </summary>
     // --------------------------------------------------------------------------------
     public abstract bool IsPublic { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is declared sealed.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public abstract bool IsSealed { get; }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the Type is declared static.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public abstract bool IsStatic { get; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -570,7 +556,9 @@ namespace CSharpParser.ProjectModel
     /// Concrete type arguments that should be substituted in the specified type template
     /// </param>
     /// <param name="typeTemplate">Type template.</param>
-    /// <returns></returns>
+    /// <returns>
+    /// A type where type arguments have been substituted.
+    /// </returns>
     /// <remarks>
     /// Concrete type arguments are matched according to the index of the type parameter.
     /// </remarks>
@@ -602,10 +590,43 @@ namespace CSharpParser.ProjectModel
       return SubstituteTypeParameters(paramIndex, typeTemplate);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Substitues type arguments with concrete types in a type template.
+    /// </summary>
+    /// <param name="typeArgs">
+    /// Dictionary of type arguments and their substitutions
+    /// </param>
+    /// <param name="typeTemplate">Template type to use.</param>
+    /// <returns>
+    /// A type where type arguments have been substituted.
+    /// </returns>
+    // --------------------------------------------------------------------------------
     public static ITypeAbstraction SubstituteTypeParameters(
       Dictionary<string, ITypeAbstraction> typeArgs, ITypeAbstraction typeTemplate)
     {
-      return typeTemplate;
+      // --- Substitute arguments only in element types
+      if (typeTemplate.HasElementType)
+        return SubstituteTypeParameters(typeArgs, typeTemplate.GetElementType());
+
+      // --- Type parameters can be substituted according to the specified dictionary.
+      if (typeTemplate.IsGenericParameter && typeArgs.ContainsKey(typeTemplate.Name))
+      {
+          return new TypeClone(typeArgs[typeTemplate.Name]);
+      }
+
+      // --- Non-generic types require no substritution.
+      if (typeTemplate.TypeParameterCount == 0) return typeTemplate;
+
+      // --- We have a generic type, let us substitute each type arguments
+      TypeClone result = new TypeClone(typeTemplate);
+      for (int i = 0; i < typeTemplate.TypeParameterCount; i++)
+      {
+        ITypeAbstraction formalParam =
+          SubstituteTypeParameters(typeArgs, typeTemplate.GetGenericArguments()[i]);
+        result.SubstituteArgument(i, formalParam);
+      }
+      return result;
     }
 
     // --------------------------------------------------------------------------------

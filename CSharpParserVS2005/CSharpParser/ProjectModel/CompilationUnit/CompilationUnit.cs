@@ -21,7 +21,9 @@ namespace CSharpParser.ProjectModel
   {
     #region Constant values
 
+    /// <summary>Display name of this compilation unit.</summary>
     public const string ThisUnitName = "<this unit>";
+    /// <summary>Display name of the global namespace.</summary>
     public const string GlobalHierarchyName = "global namespace";
 
     #endregion

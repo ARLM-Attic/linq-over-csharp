@@ -86,8 +86,6 @@ public class CSharpPPExprSyntaxParser
     /// uint and file.
     /// </summary>
     /// <param name="scanner">The scanner used to scan tokens.</param>
-    /// <param name="unit">Compilation unit using this parser instance.</param>
-    /// <param name="file">File used by this parser instance.</param>
     // --------------------------------------------------------------------------------
   	public CSharpPPExprSyntaxParser(PPScanner scanner) 
   	{
@@ -260,8 +258,19 @@ public class CSharpPPExprSyntaxParser
 	  #endregion
 }
 
-public class FatalError: Exception {
-	public FatalError(string m): base(m) {}
-}
-
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a fatal error occuring during the parse operation.
+  /// </summary>
+  // ==================================================================================
+  public class FatalError : Exception
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance of this error.
+    /// </summary>
+    /// <param name="message">Error message.</param>
+    // --------------------------------------------------------------------------------
+    public FatalError(string message) : base(message) { }
+  }
 $$$

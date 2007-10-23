@@ -13,9 +13,13 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public enum ConstraintClassification
   {
+    /// <summary>"class" parameter constraint is used.</summary>
     Class,
+    /// <summary>"struct" parameter constraint is used.</summary>
     Struct,
+    /// <summary>"new" parameter constraint is used.</summary>
     New,
+    /// <summary>A type is used as parameter constraint.</summary>
     Type
   }
 

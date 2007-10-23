@@ -13,7 +13,15 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public sealed class TokenElement : LanguageElement
   {
-    public TokenElement(Token token, CSharpSyntaxParser parser) : base(token, parser)
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance of a token element.
+    /// </summary>
+    /// <param name="token">Token this element is based on.</param>
+    /// <param name="parser">Parser instance.</param>
+    // --------------------------------------------------------------------------------
+    public TokenElement(Token token, CSharpSyntaxParser parser)
+      : base(token, parser)
     {
     }
   }

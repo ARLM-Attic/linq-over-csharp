@@ -1163,11 +1163,16 @@ namespace CSharpParser.ProjectModel
 
   // ==================================================================================
   /// <summary>
-  /// This class represents a pointer modifier
+  /// This class represents a pointer modifier.
   /// </summary>
   // ==================================================================================
   public sealed class PointerModifier : TypeModifier { }
 
+  // ==================================================================================
+  /// <summary>
+  /// This class represents an array modifier.
+  /// </summary>
+  // ==================================================================================
   public sealed class ArrayModifier : TypeModifier
   {
     private readonly int _Rank;

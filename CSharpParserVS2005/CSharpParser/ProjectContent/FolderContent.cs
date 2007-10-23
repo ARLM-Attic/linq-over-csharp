@@ -81,7 +81,8 @@ namespace CSharpParser.ProjectContent
     /// <summary>
     /// Adds all .cs file in the specified folder and its subfolders to this project.
     /// </summary>
-    /// <param name="path"></param>
+    /// <param name="path">Path to search for source files.</param>
+    /// <param name="unit">Compilation unit to add the source files to.</param>
     // --------------------------------------------------------------------------------
     public void AddAllFilesFrom(string path, CompilationUnit unit)
     {

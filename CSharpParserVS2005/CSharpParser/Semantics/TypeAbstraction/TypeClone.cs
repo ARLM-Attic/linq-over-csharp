@@ -11,11 +11,37 @@ namespace CSharpParser.Semantics
   // ==================================================================================
   public sealed class TypeClone : ITypeAbstraction
   {
+    #region Private fields
+
+    private readonly ITypeAbstraction _OrigType;
+    private readonly List<ITypeAbstraction> _GenericArguments = new List<ITypeAbstraction>();
+    private readonly Dictionary<string, ITypeAbstraction> _Interfaces = 
+      new Dictionary<string, ITypeAbstraction>();
+    private readonly Dictionary<string, ITypeAbstraction> _NestedTypes =
+      new Dictionary<string, ITypeAbstraction>();
+    private readonly ITypeAbstraction _BaseType;
+
+    #endregion
+
     #region Lifecycle methods
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new clone of the specified type.
+    /// </summary>
+    /// <param name="origType">Original type to clone.</param>
+    // --------------------------------------------------------------------------------
     public TypeClone(ITypeAbstraction origType)
     {
-
+      _OrigType = origType;
+      foreach (ITypeAbstraction genArg in origType.GetGenericArguments())
+        _GenericArguments.Add(genArg);
+      foreach (string key in origType.GetInterfaces().Keys)
+        _Interfaces.Add(key, origType.GetInterfaces()[key]);
+      foreach (string key in origType.GetNestedTypes().Keys)
+        _NestedTypes.Add(key, origType.GetNestedTypes()[key]);
+      if (origType.BaseType != null)
+        _BaseType = new TypeClone(origType.BaseType);
     }
 
     #endregion
@@ -32,9 +58,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsOpenType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsOpenType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the number of dimensions of an array type.
     /// </summary>
@@ -42,9 +69,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public int GetArrayRank()
     {
-      throw new System.NotImplementedException();
+      return _OrigType.GetArrayRank();
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the element type of this type.
     /// </summary>
@@ -54,9 +82,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ITypeAbstraction GetElementType()
     {
-      throw new System.NotImplementedException();
+      return _OrigType.GetElementType();
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a list representing the generic arguments of a type.
     /// </summary>
@@ -66,9 +95,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public List<ITypeAbstraction> GetGenericArguments()
     {
-      throw new System.NotImplementedException();
+      return _GenericArguments;
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of interfaces implemented by this type.
     /// </summary>
@@ -81,18 +111,20 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public Dictionary<string, ITypeAbstraction> GetInterfaces()
     {
-      throw new System.NotImplementedException();
+      return _Interfaces;
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating, if the current type is a generic type parameter.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsGenericParameter
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsGenericParameter; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the types directly nested into this type.
     /// </summary>
@@ -103,9 +135,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public Dictionary<string, ITypeAbstraction> GetNestedTypes()
     {
-      throw new System.NotImplementedException();
+      return _NestedTypes;
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the underlying type of an enum type.
     /// </summary>
@@ -115,25 +148,27 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ITypeAbstraction GetUnderlyingEnumType()
     {
-      throw new System.NotImplementedException();
+      return _OrigType.GetUnderlyingEnumType();
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the flag indicating if this type is .NET runtime type or not
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsRuntimeType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsRuntimeType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the reference unit where the type is defined.
     /// </summary>
     // --------------------------------------------------------------------------------
     public ReferencedUnit DeclaringUnit
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.DeclaringUnit; }
     }
 
     /// <summary>
@@ -142,9 +177,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsUnmanagedType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsUnmanagedType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the base type of this type.
     /// </summary>
@@ -155,9 +191,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ITypeAbstraction BaseType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _BaseType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the type that declares the current nested type.
     /// </summary>
@@ -167,18 +204,20 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ITypeAbstraction DeclaringType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.DeclaringType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the fully qualified name of the type, including the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public string FullName
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.FullName; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type encompasses or refers to 
     /// another type; that is, whether the current Type is an array, a pointer, or is 
@@ -187,27 +226,30 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool HasElementType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.HasElementType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is abstract and must be overridden.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsAbstract
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsAbstract; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an array.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsArray
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsArray; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a class; that is, not a value 
     /// type or interface.
@@ -215,27 +257,30 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsClass
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsClass; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents an enumeration.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsEnum
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsEnum; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current type is a generic type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsGenericType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsGenericType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type represents a generic type 
     /// definition, from which other generic types can be constructed.
@@ -243,9 +288,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsGenericTypeDefinition
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsGenericTypeDefinition; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Makes an array type from the current type with the specified rank.
     /// </summary>
@@ -256,9 +302,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ITypeAbstraction MakeArrayType(int rank)
     {
-      throw new System.NotImplementedException();
+      return new ArrayType(this, rank);
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Makes a pointer type from the current type with the specified rank.
     /// </summary>
@@ -268,18 +315,20 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public ITypeAbstraction MakePointerType()
     {
-      throw new System.NotImplementedException();
+      return new PointerType(this);
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the number of type parameters.
     /// </summary>
     // --------------------------------------------------------------------------------
     public int TypeParameterCount
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _GenericArguments.Count; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is an interface; that is, not a 
     /// class or a value type.
@@ -287,9 +336,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsInterface
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsInterface; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the current Type object represents a type 
     /// whose definition is nested inside the definition of another type.
@@ -297,63 +347,70 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsNested
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsNested; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is not declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsNotPublic
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsNotPublic; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a pointer.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsPointer
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsPointer; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared public.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsPublic
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsPublic; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared sealed.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsSealed
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsSealed; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is declared static.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsStatic
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsStatic; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type is a value type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public bool IsValueType
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsValueType; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether the Type can be accessed by code outside the 
     /// assembly.
@@ -369,9 +426,10 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public bool IsVisible
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.IsVisible; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the simple name of the current member.
     /// </summary>
@@ -379,34 +437,54 @@ namespace CSharpParser.Semantics
     // --------------------------------------------------------------------------------
     public string SimpleName
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.SimpleName; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the parametrized name of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public string ParametrizedName
     {
-      get { throw new System.NotImplementedException(); }
+      get { return TypeBase.GetParametrizedName(this); }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the name of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public string Name
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.Name; }
     }
 
+    // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the namespace of the type.
     /// </summary>
     // --------------------------------------------------------------------------------
     public string Namespace
     {
-      get { throw new System.NotImplementedException(); }
+      get { return _OrigType.Namespace; }
+    }
+
+    #endregion
+
+    #region Public methods
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Substitutes the specified generic argument of this type with the specified
+    /// formal type parameter
+    /// </summary>
+    /// <param name="index">Zero-based ordinal number of the type parameter.</param>
+    /// <param name="type">Formal parameter value.</param>
+    // --------------------------------------------------------------------------------
+    public void SubstituteArgument(int index, ITypeAbstraction type)
+    {
+      _GenericArguments[index] = type;
     }
 
     #endregion

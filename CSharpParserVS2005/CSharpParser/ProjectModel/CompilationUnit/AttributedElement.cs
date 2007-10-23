@@ -32,7 +32,6 @@ namespace CSharpParser.ProjectModel
     {
     }
 
-
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a language element descriptor according to the info provided by the

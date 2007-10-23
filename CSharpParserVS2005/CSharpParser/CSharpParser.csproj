@@ -22,6 +22,7 @@
     <DefineConstants>TRACE;DEBUG;DIAGNOSTICS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\CSharpParser.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,10 +44,13 @@
     <Compile Include="ProjectContent\EmptyProject.cs" />
     <Compile Include="ProjectContent\FolderContent.cs" />
     <Compile Include="ProjectContent\IProjectContentProvider.cs" />
+    <Compile Include="ProjectModel\Comments\DocumentationComment.cs" />
+    <Compile Include="ProjectModel\Comments\ISupportsDocumentationComment.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ParseEvents.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />
+    <Compile Include="ProjectModel\Types\DeclarationBase.cs" />
     <Compile Include="Semantics\TypeAbstraction\ArrayType.cs" />
     <Compile Include="Semantics\TypeAbstraction\ExtendedType.cs" />
     <Compile Include="Semantics\TypeAbstraction\GenericType.cs" />

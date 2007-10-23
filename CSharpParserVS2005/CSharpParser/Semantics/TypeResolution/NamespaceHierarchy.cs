@@ -114,66 +114,6 @@ namespace CSharpParser.Semantics
       get { return _ResolutionTrees; }
     } 
     
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Finds the name in any resolution trees within this hierarchy.
-    /// </summary>
-    /// <param name="type">TypeReference representing the name to find.</param>
-    /// <param name="nextPart">Next part of the name that cannot be resolved.</param>
-    /// <returns>
-    /// List of resolution nodes that could resolve the name as long as
-    /// 'nextpart' indicates.
-    /// </returns>
-    // --------------------------------------------------------------------------------
-    //public ResolutionNodeList FindName(TypeReference type, out TypeReference nextPart)
-    //{
-    //  // --- Init name resolution
-    //  ResolutionNodeList result = new ResolutionNodeList();
-    //  nextPart = type;
-    //  int maxResolutionLength = 0;
-    //  foreach (TypeResolutionTree resTree in _ResolutionTrees.Values)
-    //  {
-    //    ResolutionNodeBase resolvingNode;
-    //    TypeReference carryOnPart;
-
-    //    // --- Resolve the name in the current tree
-    //    int depth = resTree.FindName(type, out resolvingNode, out carryOnPart);
-    //    if (depth == 0) continue;
-
-    //    // --- This time we could not resolve the name as deep as before, forget
-    //    // --- about this result.
-    //    if (depth < maxResolutionLength) continue;
-
-    //    // --- This time we resolved the name deeper then before. Forget about
-    //    // --- partial results found before and register only this new result.
-    //    if (depth > maxResolutionLength)
-    //    {
-    //      result.Clear();
-    //      maxResolutionLength = depth;
-    //    }
-
-    //    // --- Add the result found to the list resolution nodes
-    //    result.Add(resolvingNode);
-    //    nextPart = carryOnPart;
-    //  }
-    //  return result;
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the specified namespace into this hierarchy.
-    /// </summary>
-    /// <param name="nameSpace">Namespace to import.</param>
-    // --------------------------------------------------------------------------------
-    //public void ImportNamespace(string nameSpace)
-    //{
-    //  foreach (TypeResolutionTree tree in _ResolutionTrees.Values)
-    //  {
-    //    AssemblyResolutionTree asmTree = tree as AssemblyResolutionTree;
-    //    if (asmTree != null) asmTree.ImportNamespace(nameSpace);
-    //  }
-    //}
-
     #endregion
   }
 

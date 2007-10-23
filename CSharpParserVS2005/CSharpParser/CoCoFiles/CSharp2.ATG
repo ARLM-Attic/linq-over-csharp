@@ -2517,8 +2517,7 @@ Unary<out Expression expr>
 // Retrieves a primary expression.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
-Primary<out Expression expr>  (. TypeReference type = null; 
-                                 Expression innerExpr = null;
+Primary<out Expression expr>  (. Expression innerExpr = null;
                                  expr = null;
                               .)
 =

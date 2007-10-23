@@ -9,32 +9,17 @@ namespace CSharpParser.ProjectModel
   /// This type represents a type member declaration.
   /// </summary>
   // ==================================================================================
-  public abstract class MemberDeclaration : AttributedElement
+  public abstract class MemberDeclaration : DeclarationBase
   {
     #region Private fields
-
-    // --- Holds the declared modifiers, even not allowed for the type
-    protected Modifier _DeclaredModifier;
-
-    // --- Holds the information about the explicitly declared visibility.
-    protected Visibility _DeclaredVisibility;
-
-    // --- Modifier flags used by this declaration. True value indicates the modifier
-    // --- is used.
-    protected bool _IsNew;
-    protected bool _IsUnsafe;
-    protected bool _IsStatic;
-    protected bool _IsVirtual;
-    protected bool _IsSealed;
-    protected bool _IsOverride;
-    protected bool _IsAbstract;
-    protected bool _IsExtern;
-    protected bool _IsReadOnly;
-    protected bool _IsVolatile;
 
     // --- Fields describing the main characteristics of the member
     private readonly TypeDeclaration _DeclaringType;
     private TypeReference _ResultingType;
+
+    /// <summary>
+    /// Explicit name of this member (when member is an explicit interface member declaration).
+    /// </summary>
     protected TypeReference _ExplicitName;
 
     #endregion
@@ -70,17 +55,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the visibility of the type declaration.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public Visibility DeclaredVisibility
-    {
-      get { return _DeclaredVisibility; }
-      set { _DeclaredVisibility = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the effective visibility of the type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -94,18 +68,6 @@ namespace CSharpParser.ProjectModel
                  : _DeclaredVisibility;
         }
     }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if the type has its default visibility (no visibility
-    /// modifiers has been used for the class declaration).
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool HasDefaultVisibility
-    {
-      get { return _DeclaredVisibility == Visibility.Default; }
-    }
-
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -141,106 +103,6 @@ namespace CSharpParser.ProjectModel
           _ExplicitName = null;
         }
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "new" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNew
-    {
-      get { return _IsNew; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "unsafe" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsUnsafe
-    {
-      get { return _IsUnsafe; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "static" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsStatic
-    {
-      get { return _IsStatic; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "virtual" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsVirtual
-    {
-      get { return _IsVirtual; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "sealed" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsSealed
-    {
-      get { return _IsSealed; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "override" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsOverride
-    {
-      get { return _IsOverride; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "abstract" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsAbstract
-    {
-      get { return _IsAbstract; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this property has the "extern" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsExtern
-    {
-      get { return _IsExtern; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this field has the "readonly" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsReadOnly
-    {
-      get { return _IsReadOnly; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this field has the "volatile" modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsVolatile
-    {
-      get { return _IsVolatile; }
     }
 
     // --------------------------------------------------------------------------------

@@ -1,7 +1,3 @@
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using CSharpParser.ProjectModel;
 
 using System;
 
@@ -66,11 +62,16 @@ public class CSharpPPExprSyntaxParser
   #endregion
 
 private PPExpression _Expression;
-    
-    public PPExpression Expression
-    {
-      get { return _Expression; }
-    }
+
+  // --------------------------------------------------------------------------------
+  /// <summary>
+  /// Gets the expression parsed.
+  /// </summary>
+  // --------------------------------------------------------------------------------
+  public PPExpression Expression
+  {
+    get { return _Expression; }
+  }
     
 // ================================================================================
 // Scanner description
@@ -86,8 +87,6 @@ private PPExpression _Expression;
     /// uint and file.
     /// </summary>
     /// <param name="scanner">The scanner used to scan tokens.</param>
-    /// <param name="unit">Compilation unit using this parser instance.</param>
-    /// <param name="file">File used by this parser instance.</param>
     // --------------------------------------------------------------------------------
   	public CSharpPPExprSyntaxParser(PPScanner scanner) 
   	{
@@ -347,8 +346,19 @@ private PPExpression _Expression;
 	  #endregion
 }
 
-public class FatalError: Exception {
-	public FatalError(string m): base(m) {}
-}
-
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a fatal error occuring during the parse operation.
+  /// </summary>
+  // ==================================================================================
+  public class FatalError : Exception
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new instance of this error.
+    /// </summary>
+    /// <param name="message">Error message.</param>
+    // --------------------------------------------------------------------------------
+    public FatalError(string message) : base(message) { }
+  }
 }

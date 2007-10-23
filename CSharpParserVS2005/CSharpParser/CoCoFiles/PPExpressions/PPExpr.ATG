@@ -1,16 +1,16 @@
-using System.Text;
-using System.Collections;
-using System.Collections.Generic;
-using CSharpParser.ProjectModel;
-
 COMPILER CS2PPExpr
 
-    private PPExpression _Expression;
-    
-    public PPExpression Expression
-    {
-      get { return _Expression; }
-    }
+  private PPExpression _Expression;
+
+  // --------------------------------------------------------------------------------
+  /// <summary>
+  /// Gets the expression parsed.
+  /// </summary>
+  // --------------------------------------------------------------------------------
+  public PPExpression Expression
+  {
+    get { return _Expression; }
+  }
     
 // ================================================================================
 // Scanner description

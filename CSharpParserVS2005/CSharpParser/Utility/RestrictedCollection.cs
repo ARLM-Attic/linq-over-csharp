@@ -7,7 +7,7 @@ namespace CSharpParser.Collections
   // ==================================================================================
   /// <summary>
   /// This type implements a collection that can be cleared and items added, other
-  /// operation are only accessible through the IList<T> interface.
+  /// operation are only accessible through the IList{T} interface.
   /// </summary>
   /// <remarks>
   /// Events can de decalred for the Add method.

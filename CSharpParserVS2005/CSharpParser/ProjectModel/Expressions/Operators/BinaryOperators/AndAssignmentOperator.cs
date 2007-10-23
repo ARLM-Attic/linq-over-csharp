@@ -4,7 +4,7 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This abstract class represents an "&=" assignemnt operator
+  /// This abstract class represents a assignment operator
   /// </summary>
   // ==================================================================================
   public sealed class AndAssignmentOperator : AssignmentOperator

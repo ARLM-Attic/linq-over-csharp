@@ -46,6 +46,7 @@ namespace CSharpParser.ParserFiles.PPExpressions {
   {
     #region Constant values
 
+    /// <summary>This constant represents the end of file token.</summary>
     public const int EOF = char.MaxValue + 1;
     private const int MaxBufferLength = 4 * 1024; // 4KB
 

@@ -62,15 +62,18 @@ namespace CSharpParser.Collections
 
     // ------------------------------------------------------------------------------------
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ImmutableChangedException"/>
-    ///     class with a specified error message and a reference to the inner exception that is
-    ///     the cause of this exception.
+    /// Initializes a new instance of the <see cref="ImmutableChangedException"/>
+    /// class with a specified error message and a reference to the inner exception that is
+    /// the cause of this exception.
     /// </summary>
     /// <returns>
     /// The exception that is the cause of the current exception, or a null reference
     /// (<b>Nothing</b> in Visual Basic) if no inner exception is specified.
     /// </returns>
-    /// <param name="message">The error message that explains the reason for the exception.</param>
+    /// <param name="message">
+    /// The error message that explains the reason for the exception.
+    /// </param>
+    /// <param name="innerException">Exception embedded into this instance.</param>
     // ------------------------------------------------------------------------------------
     public ImmutableChangedException(string message, Exception innerException)
       : 

@@ -3,6 +3,11 @@ using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
 {
+  // ==================================================================================
+  /// <summary>
+  /// This interface defines the behaviour of a compilation error handler object.
+  /// </summary>
+  // ==================================================================================
   public interface ICompilationErrorHandler
   {
     // --------------------------------------------------------------------------------

@@ -63,6 +63,56 @@ namespace CSharpParser.ParserFiles
           commentToken.col + commentToken.val.Length,
           text);
       }
+      ProcessComment(commentToken, comment);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Parses the specified block comment.
+    /// </summary>
+    /// <param name="commentToken">Pragma token holding the comment.</param>
+    // --------------------------------------------------------------------------------
+    public void HandleBlockComment(Token commentToken)
+    {
+      CommentInfo comment;
+      string text = commentToken.val.Substring(2);
+      if (text.EndsWith("*/")) text = text.Substring(0, text.Length - 2);
+      if (text.StartsWith("*"))
+      {
+        text = text.Substring(1);
+        comment = new XmlBlockComment(
+          commentToken,
+          _Parser,
+          commentToken.line,
+          commentToken.col + commentToken.val.Length,
+          text);
+      }
+      else
+      {
+        comment = new BlockComment(
+          commentToken,
+          _Parser,
+          commentToken.line,
+          commentToken.col + commentToken.val.Length,
+          text);
+      }
+      ProcessComment(commentToken, comment);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Processes the specified comment.
+    /// </summary>
+    /// <param name="commentToken"></param>
+    /// <param name="comment"></param>
+    /// <remarks>
+    /// If the comment is the first token in the line, adds this comment to the ones
+    /// already collected into a MultiCommentBlock. Later when a language element is 
+    /// used, the comment is assigned to the appropriate element.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    private void ProcessComment(Token commentToken, CommentInfo comment)
+    {
       _Parser.File.AddComment(comment);
 
       // --- Check, if the comment is the first token in this line
@@ -94,17 +144,6 @@ namespace CSharpParser.ParserFiles
           comment.RelatedElement = new TokenElement(commentToken.prev, _Parser);
         }
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Parses the specified block comment.
-    /// </summary>
-    /// <param name="commentToken">Pragma token holding the comment.</param>
-    // --------------------------------------------------------------------------------
-    public void HandleBlockComment(Token commentToken)
-    {
-      
     }
 
     #endregion

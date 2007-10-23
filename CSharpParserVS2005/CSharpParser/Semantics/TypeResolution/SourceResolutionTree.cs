@@ -109,32 +109,6 @@ namespace CSharpParser.Semantics
       _ImportedNamespaces.Add(nsKey);
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Obtains the namespace resolver for the specified type.
-    /// </summary>
-    /// <param name="type">Type to obtain the namespace resolver for.</param>
-    /// <returns>The namespace resolver of the specified type.</returns>
-    // --------------------------------------------------------------------------------
-    //public ResolutionNodeBase ObtainNamespaceResolver(Type type)
-    //{
-    //  if (String.IsNullOrEmpty(type.Namespace))
-    //  {
-    //    // --- These types belong to the global namespace hierarchy
-    //    return this;
-    //  }
-    //  // --- Type has an explicit namspace, register it.
-    //  NamespaceResolutionNode nsResolver;
-    //  ResolutionNodeBase conflictingNode;
-    //  //if (!RegisterNamespace(type.Namespace, out nsResolver, out conflictingNode))
-    //  //{
-    //  //  throw new InvalidOperationException(
-    //  //    String.Format("Type and namespace conflict within the assembly: {0}",
-    //  //                  type.Assembly.FullName));
-    //  //}
-    //  return nsResolver;
-    //}
-
     #endregion
   }
 }

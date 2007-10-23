@@ -17,7 +17,7 @@ namespace CSharpParser.Collections
 
     private readonly List<TValue> _Items;
     private readonly Dictionary<string, TValue> _IndexedItems;
-    protected bool _IsReadOnly;
+    private bool _IsReadOnly;
     private event EventHandler<ItemedCancelEventArgs<TValue>> _BeforeAdd;
     private event EventHandler<ItemedEventArgs<TValue>> _AfterAdd;
 

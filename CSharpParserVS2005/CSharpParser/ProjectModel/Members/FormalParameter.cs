@@ -11,8 +11,11 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public enum FormalParameterKind
   {
+    /// <summary>Input parameter</summary>
     In,
+    /// <summary>Output parameter</summary>
     Out,
+    /// <summary>Parameter passed by reference</summary>
     Ref
   }
 

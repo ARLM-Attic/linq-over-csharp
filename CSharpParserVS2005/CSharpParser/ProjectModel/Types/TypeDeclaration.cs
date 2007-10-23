@@ -17,22 +17,10 @@ namespace CSharpParser.ProjectModel
     ITypeParameterScope,
     IResolutionContext
   {
-    #region Private fields
+    #region Private and protected fields
 
-    // --- Holds the declared modifiers, even not allowed for the type
-    protected Modifier _DeclaredModifier;
-
-    // --- Holds the information about the explicitly declared visibility.
-    protected Visibility _DeclaredVisibility;
-
-    // --- Modifier flags used by this declaration. True value indicates the modifier
-    // --- is used.
-    private bool _IsAbstract;
-    private bool _IsNew;
+    /// <summary>Type has the "partial" modifier.</summary>
     private bool _IsPartial;
-    private bool _IsSealed;
-    private bool _IsStatic;
-    private bool _IsUnsafe;
 
     // --- Fields to decribe the type declaration scope
     private SourceFile _EnclosingSourceFile;
@@ -43,7 +31,6 @@ namespace CSharpParser.ProjectModel
     private ITypeAbstraction _BaseType;
     private TypeReference _BaseTypeReference;
     private readonly List<TypeReference> _InterfaceList = new List<TypeReference>();
-    private readonly Dictionary<string, ITypeAbstraction> _InterfaceDictionary;
     private readonly TypeParameterCollection _TypeParameters = new TypeParameterCollection();
     private readonly List<TypeParameterConstraint> _ParameterConstraints =
       new List<TypeParameterConstraint>();
@@ -103,21 +90,6 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the declared visibility of the type declaration.
-    /// </summary>
-    /// <remarks>
-    /// Declared visibility is the one that is explicitly declared in the source code.
-    /// The effective visibility can be accessed by the Visibility property.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    public Visibility DeclaredVisibility
-    {
-      get { return _DeclaredVisibility; }
-      set { _DeclaredVisibility = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the effective visibility of this type declaration.
     /// </summary>
     // --------------------------------------------------------------------------------
@@ -142,16 +114,6 @@ namespace CSharpParser.ProjectModel
       {
         return _IsAbstract;
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type has a 'new' modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsNew
-    {
-      get { return _IsNew; }
     }
 
     // --------------------------------------------------------------------------------
@@ -184,16 +146,6 @@ namespace CSharpParser.ProjectModel
     public override bool IsStatic
     {
       get { return _IsStatic; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this type has an 'unsafe' modifier or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool IsUnsafe
-    {
-      get { return _IsUnsafe; }
     }
 
     // --------------------------------------------------------------------------------
@@ -833,17 +785,6 @@ namespace CSharpParser.ProjectModel
       {
         Parser.Error1527(Token);
       }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if the type has its default visibility (no visibility
-    /// modifiers has been used for the class declaration).
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool HasDefaultVisibility
-    {
-      get { return _DeclaredVisibility == Visibility.Default; }
     }
 
     // --------------------------------------------------------------------------------
@@ -2238,11 +2179,17 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public enum Visibility
   {
+    /// <summary>No explicit visibility is declared, default visibility is used.</summary>
     Default = 0,
+    /// <summary>"private" visibility modifier is used.</summary>
     Private,
+    /// <summary>"protected" visibility modifier is used.</summary>
     Protected,
+    /// <summary>"public" visibility modifier is used.</summary>
     Public,
+    /// <summary>"internal" visibility modifier is used.</summary>
     Internal,
+    /// <summary>"protected internal" visibility modifier is used.</summary>
     ProtectedInternal
   }
 

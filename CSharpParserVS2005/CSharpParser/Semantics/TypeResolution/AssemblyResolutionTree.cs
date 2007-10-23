@@ -123,52 +123,6 @@ namespace CSharpParser.Semantics
       }
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Add a namespace to the resolution unit.
-    /// </summary>
-    /// <param name="ns">Namespace information</param>
-    /// <param name="resolverName">Name of resolver registering the namespace.</param>
-    // --------------------------------------------------------------------------------
-    //private void AddNamespace(string ns, string resolverName)
-    //{
-    //  NamespaceResolutionNode nsResolver;
-    //  ResolutionNodeBase conflictingNode;
-    //  if (!RegisterNamespace(ns, out nsResolver, out conflictingNode))
-    //  {
-    //    throw new InvalidOperationException(
-    //      String.Format("Conflict when resolving namespace '{0}' in '{1}'",
-    //                    ns, resolverName));
-    //  }
-    //  return;
-    //}
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Imports the types for the specified namespace.
-    /// </summary>
-    /// <param name="nameSpace">Namespace</param>
-    // --------------------------------------------------------------------------------
-    //public void ImportNamespace(string nameSpace)
-    //{
-    //  // --- Check if this tree has the specified namespace
-    //  if (this[nameSpace] == null) return;
-
-    //  // --- Check if this namespace has already been imported by the hierarchy
-    //  if (IsImported(nameSpace)) return;
-
-    //  // --- This tree has this namespace but types has not been imported yet.
-    //  foreach (Type type in _Assembly.GetTypes())
-    //  {
-    //    if (nameSpace == String.Empty && !String.IsNullOrEmpty(type.Namespace))
-    //      continue;
-    //    if (nameSpace != null && type.Namespace != nameSpace)
-    //      continue;
-    //    ImportTypeToHierarchy(new NetBinaryType(type));
-    //    SignNamespaceIsImported(nameSpace);
-    //  }
-    //}
-
     #endregion
   }
 }

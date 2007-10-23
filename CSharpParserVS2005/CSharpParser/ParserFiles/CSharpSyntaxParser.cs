@@ -13,10 +13,15 @@ namespace CSharpParser.ParserFiles
   {
     #region Fields used by the parser
 
+    /// <summary>Token ID for #if preprocessor directive.</summary>
     public const int ppIfKind = _ppIf;
+    /// <summary>Token ID for #elif preprocessor directive.</summary>
     public const int ppElifKind = _ppElif;
+    /// <summary>Token ID for #else preprocessor directive.</summary>
     public const int ppElseKind = _ppElse;
+    /// <summary>Token ID for #endif preprocessor directive.</summary>
     public const int ppEndifKind = _ppEndif;
+    /// <summary>Token ID for EOF.</summary>
     public const int EOFKind = _EOF;
 
     #endregion

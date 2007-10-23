@@ -32,13 +32,14 @@ namespace CSharpParser.ProjectModel
     }
 
     // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a project parser using the specified working folder.
-    /// </summary>
-    /// <param name="workingFolder">Folder used as the working folder</param>
-    /// <param name="addCSharpFiles">
-    /// If true, all C# files are added to the project.
-    /// </param>
+    /** <summary>
+      * Creates a project parser using the specified working folder.
+      * </summary>
+      * <param name="workingFolder">Folder used as the working folder</param>
+      * <param name="addCSharpFiles">
+      * If true, all C# files are added to the project.
+      * </param>
+    */
     // --------------------------------------------------------------------------------
     public CompilationUnit(string workingFolder, bool addCSharpFiles)
     {

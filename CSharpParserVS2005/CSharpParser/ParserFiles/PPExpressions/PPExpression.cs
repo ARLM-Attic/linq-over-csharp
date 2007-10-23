@@ -9,8 +9,11 @@ namespace CSharpParser.ParserFiles.PPExpressions
   // ==================================================================================
   public enum PPEvaluationStatus
   {
+    /// <summary>Evaluation failed.</summary>
     Failed,
+    /// <summary>Expression evaluated to true.</summary>
     True,
+    /// <summary>Expression evaluated to false.</summary>
     False
   }
 

@@ -1,3 +1,4 @@
+using System;
 using CSharpParser.ProjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -40,6 +41,13 @@ namespace CSharpParserTest.LanguageElements
       Assert.IsTrue(ci.Comments[3].Text.StartsWith(" </summary>"));
       Assert.IsTrue(ci.Comments[4] is LineComment);
       Assert.IsTrue(ci.Comments[4].Text.StartsWith(" ========"));
+      Console.WriteLine(parser.DeclaredTypes[0].DocumentationComment.Text);
+      Console.WriteLine(parser.DeclaredTypes[0].DocumentationComment.IsWellFormedXml);
+      foreach (MemberDeclaration member in parser.DeclaredTypes[0].Members)
+      {
+        Console.WriteLine(member.DocumentationComment.Text);
+        Console.WriteLine(member.DocumentationComment.IsWellFormedXml);
+      }
     }
   }
 }

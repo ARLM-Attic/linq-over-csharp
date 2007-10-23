@@ -107,6 +107,7 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Resolves the type reference of an attribute name
     /// </summary>
+    /// <param name="type">Type to resolve.</param>
     /// <param name="contextType">Type of resolution context.</param>
     /// <param name="declarationScope">Current type declaration context.</param>
     /// <param name="parameterScope">Current type parameter declaration scope.</param>

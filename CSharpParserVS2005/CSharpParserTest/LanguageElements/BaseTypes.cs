@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using CSharpParser.ProjectModel;
+using CSharpParser.Semantics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.LanguageElements
@@ -348,7 +350,14 @@ namespace CSharpParserTest.LanguageElements
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"BaseTypes\ComplexbaseType1.cs");
       Assert.IsTrue(InvokeParser(parser));
+      List <ITypeAbstraction> typeParams = new List<ITypeAbstraction>();
+      typeParams.Add(new NetBinaryType(typeof(int)));
+      typeParams.Add(new NetBinaryType(typeof(string)));
+      ITypeAbstraction result = TypeBase.SubstituteTypeParameters(parser.DeclaredTypes[0], 
+        typeParams, 
+        parser.DeclaredTypes[0].BaseType);
       Console.WriteLine(parser.DeclaredTypes[0].BaseType.ParametrizedName);
+      Console.WriteLine(result.ParametrizedName);
       Console.WriteLine(parser.DeclaredTypes[2].BaseType.ParametrizedName);
     }
   }

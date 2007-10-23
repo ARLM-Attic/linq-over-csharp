@@ -12,11 +12,17 @@ namespace CSharpParser.ProjectModel
   {
     #region Private fields
 
+    /// <summary>Start line position of this comment.</summary>
     protected int _StartLine;
+    /// <summary>Start column position of this comment.</summary>
     protected int _StartColumn;
+    /// <summary>Ending line position of this comment.</summary>
     protected int _EndLine;
+    /// <summary>Ending column position of this comment.</summary>
     protected int _EndColumn;
+    /// <summary>Text information within this comment.</summary>
     protected string _Text;
+    /// <summary>Language element related to this comment.</summary>
     private LanguageElement _RelatedElement;
 
     #endregion
@@ -140,7 +146,7 @@ namespace CSharpParser.ProjectModel
 
   // ==================================================================================
   /// <summary>
-  /// This class represents a C# XML comment.
+  /// This class represents a C# XML comment line.
   /// </summary>
   // ==================================================================================
   public sealed class XmlCommentLine : CommentInfo
@@ -156,6 +162,30 @@ namespace CSharpParser.ProjectModel
     /// <param name="text">Comment text.</param>
     // --------------------------------------------------------------------------------
     public XmlCommentLine(Token token, CSharpSyntaxParser parser, int endLine, 
+      int endColumn, string text)
+      : base(token, parser, endLine, endColumn, text)
+    {
+    }
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represents a C# XML block comment.
+  /// </summary>
+  // ==================================================================================
+  public sealed class XmlBlockComment : CommentInfo
+  {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new comment instance.
+    /// </summary>
+    /// <param name="token">Start token of the comment.</param>
+    /// <param name="parser">Parser used by the comment</param>
+    /// <param name="endLine">Ending line.</param>
+    /// <param name="endColumn">Ending column.</param>
+    /// <param name="text">Comment text.</param>
+    // --------------------------------------------------------------------------------
+    public XmlBlockComment(Token token, CSharpSyntaxParser parser, int endLine,
       int endColumn, string text)
       : base(token, parser, endLine, endColumn, text)
     {
