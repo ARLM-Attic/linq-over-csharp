@@ -1666,6 +1666,137 @@ namespace CSharpParser.ParserFiles
           type, name));
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1570: XML comment on '{0}' has badly formed XML -- '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="reason">Reason text</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1570(Token token, string member, string reason)
+    {
+      Warning("CS1570", token,
+        "XML comment on '{0}' has badly formed XML -- '{1}'", member, reason);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1571: XML comment on '{0}' has a duplicate param tag for '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="parameter">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1571(Token token, string member, string parameter)
+    {
+      Warning("CS1571", token,
+        "XML comment on '{0}' has a duplicate param tag for '{1}'", member, parameter);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1572: XML comment on '{0}' has a param tag for '{1}', but there is 
+    /// no parameter by that name.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="parameter">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1572(Token token, string member, string parameter)
+    {
+      Warning("CS1572", token,
+        "XML comment on '{0}' has a param tag for '{1}', but there is no parameter " +
+        "by that name", member, parameter);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1573: Parameter '{0}' has no matching param tag in the XML comment 
+    /// for '{1}' (but other parameters do).
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="parameter">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1573(Token token, string member, string parameter)
+    {
+      Warning("CS1573", token,
+        "Parameter '{0}' has no matching param tag in the XML comment for '{1}' " +
+        "(but other parameters do)", parameter, member);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1587: XML comment is not placed on a valid language element.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1587(Token token)
+    {
+      Warning("CS1587", token, "XML comment is not placed on a valid language element");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1591: Missing XML comment for publicly visible type or member '{0}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="type">Type name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1591(Token token, string type)
+    {
+      Warning("CS1591", token, 
+        "Missing XML comment for publicly visible type or member '{0}'", type);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1710: XML comment on '{0}' has a duplicate typeparam tag for '{1}'.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="parameter">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1710(Token token, string member, string parameter)
+    {
+      Warning("CS1710", token,
+        "XML comment on '{0}' has a duplicate typeparam tag for '{1}'", 
+        member, parameter);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1711: XML comment on '{0}' has a typeparam tag for '{1}', but there 
+    /// is no type parameter by that name.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="parameter">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1711(Token token, string member, string parameter)
+    {
+      Warning("CS1711", token,
+        "XML comment on '{0}' has a typeparam tag for '{1}', but there is no type " +
+        "parameter by that name", member, parameter);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Warning CS1712: Type parameter '{0}' has no matching typeparam tag in the XML 
+    /// comment on '{1}.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="member">Member name</param>
+    /// <param name="parameter">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Warning1712(Token token, string member, string parameter)
+    {
+      Warning("CS1712", token,
+        "Type parameter '{0}' has no matching typeparam tag in the XML comment on '{1}", 
+        parameter, member);
+    }
+
     #endregion
   }
 }

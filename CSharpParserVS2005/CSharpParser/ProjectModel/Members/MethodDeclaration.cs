@@ -54,7 +54,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of formal parameters belonging to the method.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public FormalParameterCollection FormalParameters
+    public override FormalParameterCollection FormalParameters
     {
       get { return _FormalParameters; }
     }
@@ -64,7 +64,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the list of type parameters belonging to the method.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeParameterCollection TypeParameters
+    public override TypeParameterCollection TypeParameters
     {
       get { return _TypeParameters; }
     }

@@ -127,6 +127,19 @@ namespace CSharpParser.ProjectModel
       CheckUnallowedNonClassModifiers();
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the members of of this language element that are also can be documented.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<ISupportsDocumentationComment> DocumentableMembers
+    {
+      get
+      {
+        foreach (EnumValueDeclaration value in _Values) yield return value;
+      }
+    }
+
     #endregion
   }
 
@@ -135,7 +148,7 @@ namespace CSharpParser.ProjectModel
   /// This type represents an enumeration value declaration.
   /// </summary>
   // ==================================================================================
-  public sealed class EnumValueDeclaration : AttributedElement
+  public sealed class EnumValueDeclaration : DeclarationBase
   {
     #region Private fields
 

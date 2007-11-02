@@ -26,6 +26,13 @@ namespace CSharpParserTest
           error.Code, error.Description, error.File);
       }
       Console.WriteLine();
+      Console.WriteLine("{0} warnings detected", parser.Warnings.Count);
+      foreach (Error warning in parser.Warnings)
+      {
+        Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", warning.Line, warning.Column,
+          warning.Code, warning.Description, warning.File);
+      }
+      Console.WriteLine();
       return errors == 0;
     }
   }

@@ -45,8 +45,12 @@
     <Compile Include="ProjectContent\FolderContent.cs" />
     <Compile Include="ProjectContent\IProjectContentProvider.cs" />
     <Compile Include="ProjectModel\Comments\DocumentationComment.cs" />
+    <Compile Include="ProjectModel\Comments\DocumentationTag.cs" />
     <Compile Include="ProjectModel\Comments\ISupportsDocumentationComment.cs" />
     <Compile Include="ProjectModel\Comments\MultiCommentBlock.cs" />
+    <Compile Include="ProjectModel\Comments\NamedDocumentationTag.cs" />
+    <Compile Include="ProjectModel\Comments\ParamTag.cs" />
+    <Compile Include="ProjectModel\Comments\TypeParamTag.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ParseEvents.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />

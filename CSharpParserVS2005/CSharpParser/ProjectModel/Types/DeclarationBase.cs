@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CSharpParser.ParserFiles;
 
 namespace CSharpParser.ProjectModel
@@ -229,11 +230,146 @@ namespace CSharpParser.ProjectModel
             comment = Attributes[0].Comment;
 
           // --- Extract the document information from the comment.
-          if (comment == null) _DocComment = new DocumentationComment();
+          if (comment == null) _DocComment = DocumentationComment.EmptyComment;
           else _DocComment = new DocumentationComment(comment);
         }
         return _DocComment;
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the members of of this language element that are also can be documented.
+    /// </summary>
+    /// <remarks>
+    /// This implementation does not return any documentable members.
+    /// </remarks>
+    // --------------------------------------------------------------------------------
+    public virtual IEnumerable<ISupportsDocumentationComment> DocumentableMembers
+    {
+      get { yield break; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the documentation comment belonging to the language element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual void ProcessDocumentationComment()
+    {
+      // --- Check for missing documentation comment
+      if (DocumentationComment.IsEmpty)
+      {
+        // REFACTOR: Refactor this later
+        TypeDeclaration typeDef = this as TypeDeclaration;
+        MemberDeclaration memberDef = this as MemberDeclaration;
+        if (typeDef != null && typeDef.Visibility != Visibility.Private ||
+          memberDef != null && memberDef.Visibility != Visibility.Private)
+        {
+          Parser.Warning1591(Token, FullName);
+        }
+        return;
+      }
+
+      // --- Check XML formatting
+      if (!DocumentationComment.IsWellFormedXml)
+      {
+        Parser.Warning1570(DocumentationComment.OriginalComment.Token,
+          FullName, DocumentationComment.BadlyFormedReason);
+        return;
+      }
+
+      // --- Check for missing or duplicate "param" tags
+      if (DocumentationComment.Parameters.Count > 0)
+      {
+        foreach (FormalParameter param in FormalParameters)
+        {
+          int count = 0;
+          foreach (ParamTag paramTag in DocumentationComment.Parameters)
+          {
+            if (param.Name.Equals(paramTag.Name)) count++;
+            if (count > 1)
+              Parser.Warning1571(param.Token, Signature, param.Name);
+          }
+          if (count == 0)
+            Parser.Warning1573(param.Token, Signature, param.Name);
+        }
+
+        // --- Check for "param" tags without matching formal parameters
+        foreach (ParamTag paramTag in DocumentationComment.Parameters)
+        {
+          if (!string.IsNullOrEmpty(paramTag.Name))
+          {
+            bool found = false;
+            foreach (FormalParameter param in FormalParameters)
+            {
+              if (param.Name.Equals(paramTag.Name))
+              {
+                found = true;
+                break;
+              }
+            }
+            if (!found)
+              Parser.Warning1572(Token, Signature, paramTag.Name);
+          }
+        }
+      }
+
+      // --- Check for missing or duplicate "typeparam" tags
+      if (DocumentationComment.TypeParameters.Count > 0)
+      {
+        foreach (TypeParameter param in TypeParameters)
+        {
+          int count = 0;
+          foreach (TypeParamTag paramTag in DocumentationComment.TypeParameters)
+          {
+            if (param.Name.Equals(paramTag.Name)) count++;
+            if (count > 1)
+              Parser.Warning1710(param.Token, Signature, param.Name);
+          }
+          if (count == 0)
+            Parser.Warning1712(param.Token, Signature, param.Name);
+        }
+
+        // --- Check for "param" tags without matching formal parameters
+        foreach (TypeParamTag paramTag in DocumentationComment.TypeParameters)
+        {
+          if (!string.IsNullOrEmpty(paramTag.Name))
+          {
+            bool found = false;
+            foreach (TypeParameter param in TypeParameters)
+            {
+              if (param.Name.Equals(paramTag.Name))
+              {
+                found = true;
+                break;
+              }
+            }
+            if (!found)
+              Parser.Warning1711(Token, Signature, paramTag.Name);
+          }
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of formal parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual FormalParameterCollection FormalParameters
+    {
+      get { return new FormalParameterCollection(); }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of type parameters.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual TypeParameterCollection TypeParameters
+    {
+      get { return new TypeParameterCollection(); }
     }
 
     #endregion

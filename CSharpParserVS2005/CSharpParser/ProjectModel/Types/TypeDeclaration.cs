@@ -177,7 +177,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the type parameters belonging to this type.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeParameterCollection TypeParameters
+    public override TypeParameterCollection TypeParameters
     {
       get { return _TypeParameters; }
     }
@@ -1169,6 +1169,24 @@ namespace CSharpParser.ProjectModel
     public MethodDeclaration EnclosingMethod
     {
       get { throw new NotSupportedException("TypeDeclaration has no enclosing method."); }
+    }
+
+    #endregion
+
+    #region ISupportsDocumentationComment implementation
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the members of of this language element that are also can be documented.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override IEnumerable<ISupportsDocumentationComment> DocumentableMembers
+    {
+      get
+      {
+        foreach (MemberDeclaration member in _Members)
+          yield return member;
+      }
     }
 
     #endregion

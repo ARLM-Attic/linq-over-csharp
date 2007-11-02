@@ -244,7 +244,21 @@ namespace CSharpParser.ProjectModel
     public CommentInfo Comment
     {
       get { return _Comment; }
-      set { _Comment = value; }
+      set
+      {
+        _Comment = value;
+
+        // --- Check documentation comments
+        ISupportsDocumentationComment commentedElement = this as ISupportsDocumentationComment;
+        if (commentedElement == null)
+        {
+          // --- Documentation comment is not allowed here
+          if (value != null && value.HasDocumentation)
+          {
+            Parser.Warning1587(Token);
+          }
+        }
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -286,6 +300,17 @@ namespace CSharpParser.ProjectModel
     public bool IsValid
     {
       get { return _IsValid; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the signature of the member.
+    /// </summary>
+    /// <remarks>By default, it is the full name of the member.</remarks>
+    // --------------------------------------------------------------------------------
+    public virtual string Signature
+    {
+      get { return FullName; }
     }
 
     #endregion

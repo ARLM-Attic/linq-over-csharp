@@ -9,8 +9,9 @@ namespace CSharpParser.Collections
   /// This type implements a collection that can be cleared and items added, other
   /// operation are only accessible through the IList{T} interface.
   /// </summary>
+  /// <typeparam name="T">Item type of the collection</typeparam>
   /// <remarks>
-  /// Events can de decalred for the Add method.
+  /// Events can de declared for the Add method.
   /// </remarks>
   // ==================================================================================
   public class RestrictedCollection<T> : IList<T>, IReadOnlySupport

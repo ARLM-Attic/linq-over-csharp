@@ -462,6 +462,11 @@
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
     <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
+    <None Include="TestFiles\Comments\DocCommentWarning2.cs" />
+    <None Include="TestFiles\Comments\BadlyFormedDocComment.cs" />
+    <None Include="TestFiles\Comments\DocCommentWarning1.cs" />
+    <None Include="TestFiles\Comments\MisplacedDocComments.cs" />
+    <None Include="TestFiles\Comments\MissingDocComments.cs" />
     <None Include="TestFiles\TypeResolution\NullableType1.cs" />
     <None Include="TestFiles\TypeResolution\ResolveThroughInheritance.cs" />
     <None Include="TestFiles\TypeResolution\ConstructedType3.cs" />

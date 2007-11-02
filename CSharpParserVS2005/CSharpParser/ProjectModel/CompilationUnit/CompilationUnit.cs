@@ -41,6 +41,7 @@ namespace CSharpParser.ProjectModel
     private CSharpSyntaxParser _Parser;
     private SourceFile _CurrentFile;
     private readonly ReferencedCompilation _ThisUnit;
+    private string _XmlDocumentFile;
 
     // --- Members related to error handling
     private readonly ErrorCollection _Errors = new ErrorCollection();
@@ -305,6 +306,27 @@ namespace CSharpParser.ProjectModel
     public Dictionary<string, NamespaceHierarchy> NamespaceHierarchies
     {
       get { return _NamespaceHierarchies; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the file where XML documentation should be put.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string XmlDocumentFile
+    {
+      get { return _XmlDocumentFile; }
+      set { _XmlDocumentFile = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if XML document comments should be processed or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasXmlDocumentFile
+    {
+      get { return !String.IsNullOrEmpty(_XmlDocumentFile); }  
     }
 
     #endregion
@@ -899,6 +921,9 @@ namespace CSharpParser.ProjectModel
 
       // --- Phase 6: Check partial types
       CheckPartialTypes();
+
+      // --- Documentation comment checking phase
+      if (HasXmlDocumentFile) CheckDocumentComments();
 
       // --- Return the number of errors found
       return _Errors.Count;
@@ -1847,6 +1872,27 @@ namespace CSharpParser.ProjectModel
       foreach (TypeDeclaration type in TypesInSource)
       {
         type.CheckConstraintDeclarations();
+      }
+    }
+
+    #endregion
+
+    #region Documentation comment checks
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks the documentation comments of all typed declared.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void CheckDocumentComments()
+    {
+      foreach (ISupportsDocumentationComment type in _DeclaredTypes)
+      {
+        type.ProcessDocumentationComment();
+        foreach (ISupportsDocumentationComment member in type.DocumentableMembers)
+        {
+          member.ProcessDocumentationComment();
+        }
       }
     }
 

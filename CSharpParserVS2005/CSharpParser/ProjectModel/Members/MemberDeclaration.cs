@@ -60,13 +60,14 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     public Visibility Visibility
     {
-      get {
+      get
+      {
         return HasDefaultVisibility
                  ? (_DeclaringType.IsClass || _DeclaringType.IsStruct
                       ? Visibility.Private
                       : Visibility.Public)
                  : _DeclaredVisibility;
-        }
+      }
     }
 
     // --------------------------------------------------------------------------------
@@ -196,15 +197,6 @@ namespace CSharpParser.ProjectModel
     #region Virtual properties and methods
 
     // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the signature of the member.
-    /// </summary>
-    /// <remarks>By default, it is the full name of the member.</remarks>
-    // --------------------------------------------------------------------------------
-    public virtual string Signature
-    {
-      get { return FullName; }
-    }
 
     // --------------------------------------------------------------------------------
     /// <summary>

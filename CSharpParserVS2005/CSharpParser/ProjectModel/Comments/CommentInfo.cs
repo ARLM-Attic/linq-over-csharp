@@ -92,6 +92,17 @@ namespace CSharpParser.ProjectModel
       set { _RelatedElement = value; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this comment has a documentation comment within
+    /// its body or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public virtual bool HasDocumentation
+    {
+      get { return false; }
+    }
+
     #endregion
   }
 
@@ -166,6 +177,17 @@ namespace CSharpParser.ProjectModel
       : base(token, parser, endLine, endColumn, text)
     {
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this comment has a documentation comment within
+    /// its body or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool HasDocumentation
+    {
+      get { return true; }
+    }
   }
 
   // ==================================================================================
@@ -190,6 +212,17 @@ namespace CSharpParser.ProjectModel
       : base(token, parser, endLine, endColumn, text)
     {
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this comment has a documentation comment within
+    /// its body or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool HasDocumentation
+    {
+      get { return true; }
+    }
   }
 
   // ==================================================================================
@@ -199,5 +232,20 @@ namespace CSharpParser.ProjectModel
   // ==================================================================================
   public class CommentInfoCollection : RestrictedCollection<CommentInfo>
   {
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this block has a documentation comment within
+    /// its body or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasDocumentation
+    {
+      get
+      {
+        foreach (CommentInfo comment in this)
+          if (comment.HasDocumentation) return true;
+        return false;
+      }
+    }
   }
 }

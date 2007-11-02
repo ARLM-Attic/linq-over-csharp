@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 
@@ -17,6 +18,25 @@ namespace CSharpParser.ProjectModel
     private readonly string _Text;
     private readonly XmlDocument _XmlDocument;
     private readonly bool _IsWellFormedXml;
+    private readonly string _BadlyFormedReason;
+    private bool _TagsExtracted;
+    private DocumentationTag _Summary;
+    private DocumentationTag _Remarks;
+    private DocumentationTag _Returns;
+    private DocumentationTag _Value;
+    private readonly List<ParamTag> _Parameters = new List<ParamTag>();
+    private readonly List<TypeParamTag> _TypeParameters = new List<TypeParamTag>();
+
+    #endregion
+
+    #region Static fields
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Reresents an empty documentation comment.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public static DocumentationComment EmptyComment = new DocumentationComment();
 
     #endregion
 
@@ -27,7 +47,7 @@ namespace CSharpParser.ProjectModel
     /// Creates an empty documentation comment.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public DocumentationComment()
+    private DocumentationComment()
     {
       _OriginalComment = null;
       _Text = String.Empty;
@@ -52,8 +72,9 @@ namespace CSharpParser.ProjectModel
         _XmlDocument.LoadXml("<document>" + _Text + "</document>");
         _IsWellFormedXml = true;
       }
-      catch (XmlException)
+      catch (XmlException ex)
       {
+        _BadlyFormedReason = ex.Message;
         _IsWellFormedXml = false;
       }
     }
@@ -70,6 +91,16 @@ namespace CSharpParser.ProjectModel
     public CommentInfo OriginalComment
     {
       get { return _OriginalComment; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if the documentation comment is empty.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsEmpty
+    {
+      get { return _OriginalComment == null; }
     }
 
     // --------------------------------------------------------------------------------
@@ -102,10 +133,104 @@ namespace CSharpParser.ProjectModel
       get { return _IsWellFormedXml; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reason why the XML text is badly formatted.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public string BadlyFormedReason
+    {
+      get { return _BadlyFormedReason; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the "summary" part of the documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public DocumentationTag Summary
+    {
+      get
+      {
+        ExtractTags();
+        return _Summary;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the "remarks" part of the documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public DocumentationTag Remarks
+    {
+      get
+      {
+        ExtractTags();
+        return _Remarks;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the "returns" part of the documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public DocumentationTag Returns
+    {
+      get
+      {
+        ExtractTags();
+        return _Returns;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the "value" part of the documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public DocumentationTag Value
+    {
+      get
+      {
+        ExtractTags();
+        return _Value;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of parameter documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<ParamTag> Parameters
+    {
+      get
+      {
+        ExtractTags();
+        return _Parameters;
+      }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of type parameter documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public List<TypeParamTag> TypeParameters
+    {
+      get
+      {
+        ExtractTags();
+        return _TypeParameters;
+      }
+    }
+
     #endregion
 
     #region Private methods
-    
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Extracts the documentation from the specified comment.
@@ -187,6 +312,37 @@ namespace CSharpParser.ProjectModel
     {
       builder.Append(line.Text.TrimStart());
       builder.Append("\r\n");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Extracts tags from the XML documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    private void ExtractTags()
+    {
+      if (_TagsExtracted) return;
+      
+      // --- Init tags
+      _Summary = new DocumentationTag(null);
+      _Remarks = new DocumentationTag(null);
+      _Returns = new DocumentationTag(null);
+      _Value = new DocumentationTag(null);
+      if (!IsWellFormedXml) return;
+
+      // --- Extract information from tags
+      foreach (XmlNode node in _XmlDocument.DocumentElement.ChildNodes)
+      {
+        if (node.LocalName == "summary") _Summary = new DocumentationTag(node);
+        else if (node.LocalName == "remarks") _Remarks = new DocumentationTag(node);
+        else if (node.LocalName == "returns") _Returns = new DocumentationTag(node);
+        else if (node.LocalName == "value") _Value = new DocumentationTag(node);
+        else if (node.LocalName == "param") _Parameters.Add(new ParamTag(node));
+        else if (node.LocalName == "typeparam") _TypeParameters.Add(new TypeParamTag(node));
+
+        // TODO: Extract other tags
+      }
+      _TagsExtracted = true;
     }
 
     #endregion

@@ -42,7 +42,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the formal parameters belonging to this indexer.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public FormalParameterCollection FormalParameters
+    public override FormalParameterCollection FormalParameters
     {
       get { return _FormalParameters; }
     }

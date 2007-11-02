@@ -23,7 +23,7 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a project parser using the specified working folder.
+    /// Creates a project parser <c>using</c> the specified working folder.
     /// </summary>
     /// <param name="workingFolder">Folder used as the working folder</param>
     // --------------------------------------------------------------------------------

@@ -55,7 +55,7 @@ namespace CSharpParser.ProjectModel
     /// Gets the formal parameters of this delegate.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public FormalParameterCollection FormalParameters
+    public override FormalParameterCollection FormalParameters
     {
       get { return _FormalParameters; }
     }

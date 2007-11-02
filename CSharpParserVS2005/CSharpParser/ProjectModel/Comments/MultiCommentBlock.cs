@@ -82,6 +82,17 @@ namespace CSharpParser.ProjectModel
       }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this comment has a documentation comment within
+    /// its body or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public override bool HasDocumentation
+    {
+      get { return _Comments.HasDocumentation; }
+    }
+
     #endregion
 
     #region Public methods
