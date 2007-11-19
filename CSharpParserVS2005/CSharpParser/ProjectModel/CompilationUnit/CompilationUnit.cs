@@ -62,6 +62,9 @@ namespace CSharpParser.ProjectModel
     // --- Types to check and fix (arrays, pointers, generic types)
     private readonly List<TypeReference> _TypesToFix = new List<TypeReference>();
 
+    // --- Documentation comments to check
+    private readonly List<CommentInfo> _CommentsToCheck = new List<CommentInfo>();
+
     // --- Diagnostic counters
     private int _ResolutionCounter;
     private int _ResolvedToSystemType;
@@ -693,14 +696,25 @@ namespace CSharpParser.ProjectModel
     /// <summary>
     /// Adds a type to the list of type to fix.
     /// </summary>
-    /// <param name="type"></param>
+    /// <param name="type">Type reference to fix up</param>
     // --------------------------------------------------------------------------------
-    public void AddTypeToFix(TypeReference type)
+    internal void AddTypeToFix(TypeReference type)
     {
       if (type.TypeModifiers.Count > 0 || type.Arguments.Count > 0 ||type.IsNullable)
       {
         _TypesToFix.Add(type);
       }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a comment to the list of comments to be checked later.
+    /// </summary>
+    /// <param name="comment">Comment to add</param>
+    // --------------------------------------------------------------------------------
+    internal void AddCommentToFix(CommentInfo comment)
+    {
+      _CommentsToCheck.Add(comment);  
     }
 
     #endregion
@@ -1886,9 +1900,29 @@ namespace CSharpParser.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckDocumentComments()
     {
+      // --- Check, if document commenta are placed in a valid location
+      foreach (CommentInfo comment in _CommentsToCheck)
+      {
+        // --- Related element must be an attribute declaration of an element that is
+        // --- valid place for a documentation comment
+        AttributeDeclaration attr = comment.RelatedElement as AttributeDeclaration;
+        if (attr != null)
+        {
+          ISupportsDocumentationComment docElement = 
+            attr.RelatedElement as ISupportsDocumentationComment;
+          if (docElement != null) continue;
+        }
+
+        // --- This documentation comment is misplaced
+        Parser.Warning1587(comment.Token);
+      }
+
+      // --- Check document comments related to types
       foreach (ISupportsDocumentationComment type in _DeclaredTypes)
       {
         type.ProcessDocumentationComment();
+
+        // --- Check document comments related to type members
         foreach (ISupportsDocumentationComment member in type.DocumentableMembers)
         {
           member.ProcessDocumentationComment();

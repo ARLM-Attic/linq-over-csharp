@@ -79,6 +79,8 @@ namespace CSharpParser.ProjectModel
       else
       {
         _Attributes = attrs;
+        foreach (AttributeDeclaration attr in attrs)
+          attr.RelatedElement = this;
       }
     }
 

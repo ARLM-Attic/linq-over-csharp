@@ -43,8 +43,11 @@ namespace CSharpParser.CodeExplorer
     private void MainForm_Load(object sender, EventArgs e)
     {
       Text += " v" + Assembly.GetEntryAssembly().GetName().Version;
-      _FileTreeController = new FileTreeController(FileTreeView, PropertiyGrid);
-      _NamespaceTreeController = new NamespaceTreeController(NamespaceTreeView, PropertiyGrid);
+      ControlledUIelements uiElements = 
+        new ControlledUIelements(FileTreeView, PropertiyGrid, DocumentationBox);
+      _FileTreeController = new FileTreeController(uiElements);
+      uiElements = new ControlledUIelements(NamespaceTreeView, PropertiyGrid, DocumentationBox); 
+      _NamespaceTreeController = new NamespaceTreeController(uiElements);
     }
 
     // ----------------------------------------------------------------------------------

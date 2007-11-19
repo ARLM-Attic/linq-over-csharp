@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Drawing;
+using System.Windows.Forms;
 using CSharpParser.ProjectModel;
 
 namespace CSharpParser.CodeExplorer.TreeNodes
@@ -18,6 +19,7 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     private OnDemandTreeNode _RootNode;
     private CompilationUnit _CompilationUnit;
     private string _WorkingFolder;
+    private RichTextDocumentor _Documentor;
 
     #endregion
 
@@ -83,15 +85,15 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     /// Creates an instance of the controller and attaches it to the specifier 
     /// TreeView and PropertyGrid
     /// </summary>
-    /// <param name="treeView">Tree view of the controller.</param>
-    /// <param name="grid">Property grid of the controller</param>
+    /// <param name="elements">UI elements used by the controller</param>
     // --------------------------------------------------------------------------------
-    public TreeControllerBase(TreeView treeView, PropertyGrid grid)
+    public TreeControllerBase(ControlledUIelements elements)
     {
-      _TreeView = treeView;
-      _PropertyGrid = grid;
-      treeView.BeforeExpand += OnBeforeExpand;
-      treeView.AfterSelect += OnAfterSelect;
+      _TreeView = elements.Tree;
+      _PropertyGrid = elements.Properties;
+      _TreeView.BeforeExpand += OnBeforeExpand;
+      _TreeView.AfterSelect += OnAfterSelect;
+      _Documentor = new RichTextDocumentor(elements.DocumentBox);
     }
 
     #endregion
@@ -157,8 +159,11 @@ namespace CSharpParser.CodeExplorer.TreeNodes
       if (node != null)
       {
         PropertyGrid.SelectedObject = node.GetSelectedObject();
+        ISupportsDocumentationComment doc = 
+          node.GetSelectedObject() as ISupportsDocumentationComment;
+        _Documentor.Document(doc);
       }
-    }
+    } 
 
     #endregion
 
@@ -178,5 +183,62 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     }
 
     #endregion
+  }
+
+  // ==================================================================================
+  /// <summary>
+  /// This class represnts a combination of UI elements used by the tree controllers.
+  /// </summary>
+  // ==================================================================================
+  public sealed class ControlledUIelements
+  {
+    private readonly TreeView _Tree;
+    private readonly PropertyGrid _Properties;
+    private readonly RichTextBox _DocumentBox;
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an instance of UI element descriptor used by the controllers.
+    /// </summary>
+    /// <param name="tree">TreeView of the C# project.</param>
+    /// <param name="properties">Property grid displaying selected element.</param>
+    /// <param name="documentBox">Rich text box for source documentation.</param>
+    // --------------------------------------------------------------------------------
+    public ControlledUIelements(TreeView tree, PropertyGrid properties, RichTextBox documentBox)
+    {
+      _Tree = tree;
+      _Properties = properties;
+      _DocumentBox = documentBox;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the tree view representing the C# project.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TreeView Tree
+    {
+      get { return _Tree; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the property grid displaying element properties.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public PropertyGrid Properties
+    {
+      get { return _Properties; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the rich text box displaying source documentation.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public RichTextBox DocumentBox
+    {
+      get { return _DocumentBox; }
+    }
   }
 }

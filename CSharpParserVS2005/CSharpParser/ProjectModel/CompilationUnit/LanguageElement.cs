@@ -19,6 +19,9 @@ namespace CSharpParser.ProjectModel
     private CommentInfo _Comment;
     private Token _TerminatingToken;
 
+    /// <summary>Language element related to this comment.</summary>
+    private LanguageElement _RelatedElement;
+
     #endregion
 
     #region Lifecycle methods
@@ -247,15 +250,18 @@ namespace CSharpParser.ProjectModel
       set
       {
         _Comment = value;
+        if (value == null) return;
+
+        _Comment.RelatedElement = this;
 
         // --- Check documentation comments
         ISupportsDocumentationComment commentedElement = this as ISupportsDocumentationComment;
         if (commentedElement == null)
         {
-          // --- Documentation comment is not allowed here
-          if (value != null && value.HasDocumentation)
+          // --- Documentation comment is probably not allowed here
+          if (value.HasDocumentation)
           {
-            Parser.Warning1587(Token);
+            Parser.CompilationUnit.AddCommentToFix(value);
           }
         }
       }
@@ -311,6 +317,17 @@ namespace CSharpParser.ProjectModel
     public virtual string Signature
     {
       get { return FullName; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the language element related to this element.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public LanguageElement RelatedElement
+    {
+      get { return _RelatedElement; }
+      set { _RelatedElement = value; }
     }
 
     #endregion

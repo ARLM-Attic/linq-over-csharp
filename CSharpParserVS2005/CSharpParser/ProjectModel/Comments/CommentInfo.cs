@@ -22,8 +22,6 @@ namespace CSharpParser.ProjectModel
     protected int _EndColumn;
     /// <summary>Text information within this comment.</summary>
     protected string _Text;
-    /// <summary>Language element related to this comment.</summary>
-    private LanguageElement _RelatedElement;
 
     #endregion
 
@@ -79,17 +77,6 @@ namespace CSharpParser.ProjectModel
     public virtual string Text
     {
       get { return _Text; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the language element related to this comment.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public LanguageElement RelatedElement
-    {
-      get { return _RelatedElement; }
-      set { _RelatedElement = value; }
     }
 
     // --------------------------------------------------------------------------------

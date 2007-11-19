@@ -84,6 +84,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="SourceDocumentation\RichTextDocumentor.cs" />
     <Compile Include="TreeNodes\EnumTreeNode.cs" />
     <Compile Include="TreeNodes\EnumValueTreeNode.cs" />
     <Compile Include="TreeNodes\FileTreeController.cs" />

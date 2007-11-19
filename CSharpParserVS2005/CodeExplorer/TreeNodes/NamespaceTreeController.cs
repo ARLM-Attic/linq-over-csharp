@@ -15,11 +15,10 @@ namespace CSharpParser.CodeExplorer.TreeNodes
     /// Creates an instance of the controller and attaches it to the specifier 
     /// TreeView and PropertyGrid
     /// </summary>
-    /// <param name="treeView">Tree view of the controller.</param>
-    /// <param name="grid">Property grid of the controller</param>
+    /// <param name="elements">UI elements used by the controller</param>
     // --------------------------------------------------------------------------------
-    public NamespaceTreeController(TreeView treeView, PropertyGrid grid)
-      : base(treeView, grid)
+    public NamespaceTreeController(ControlledUIelements elements)
+      : base(elements)
     {
     }
 

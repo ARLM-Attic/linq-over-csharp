@@ -50,6 +50,10 @@
       this.StatusStrip = new System.Windows.Forms.StatusStrip();
       this.StatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
       this.FileDialog = new System.Windows.Forms.OpenFileDialog();
+      this.InfoTab = new System.Windows.Forms.TabControl();
+      this.PropertiesTab = new System.Windows.Forms.TabPage();
+      this.DocumentationTab = new System.Windows.Forms.TabPage();
+      this.DocumentationBox = new System.Windows.Forms.RichTextBox();
       this.MainStrip.SuspendLayout();
       this.SplitContainer.Panel1.SuspendLayout();
       this.SplitContainer.Panel2.SuspendLayout();
@@ -58,6 +62,9 @@
       this.FileTabPage.SuspendLayout();
       this.NamespaceTabView.SuspendLayout();
       this.StatusStrip.SuspendLayout();
+      this.InfoTab.SuspendLayout();
+      this.PropertiesTab.SuspendLayout();
+      this.DocumentationTab.SuspendLayout();
       this.SuspendLayout();
       // 
       // MainStrip
@@ -127,7 +134,7 @@
       // 
       // SplitContainer.Panel2
       // 
-      this.SplitContainer.Panel2.Controls.Add(this.PropertiyGrid);
+      this.SplitContainer.Panel2.Controls.Add(this.InfoTab);
       this.SplitContainer.Size = new System.Drawing.Size(688, 477);
       this.SplitContainer.SplitterDistance = 347;
       this.SplitContainer.TabIndex = 1;
@@ -222,9 +229,9 @@
       // PropertiyGrid
       // 
       this.PropertiyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.PropertiyGrid.Location = new System.Drawing.Point(0, 0);
+      this.PropertiyGrid.Location = new System.Drawing.Point(3, 3);
       this.PropertiyGrid.Name = "PropertiyGrid";
-      this.PropertiyGrid.Size = new System.Drawing.Size(337, 477);
+      this.PropertiyGrid.Size = new System.Drawing.Size(323, 442);
       this.PropertiyGrid.TabIndex = 0;
       // 
       // StatusStrip
@@ -246,6 +253,49 @@
       // 
       this.FileDialog.FileName = "C:\\Work\\LINQOverCSharp\\CSharpParserVS2005\\CSharpParser\\CSharpParser.csproj";
       this.FileDialog.Filter = "C# project files (*.csproj)|*.csproj";
+      // 
+      // InfoTab
+      // 
+      this.InfoTab.Controls.Add(this.PropertiesTab);
+      this.InfoTab.Controls.Add(this.DocumentationTab);
+      this.InfoTab.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.InfoTab.Location = new System.Drawing.Point(0, 0);
+      this.InfoTab.Name = "InfoTab";
+      this.InfoTab.SelectedIndex = 0;
+      this.InfoTab.Size = new System.Drawing.Size(337, 477);
+      this.InfoTab.TabIndex = 1;
+      // 
+      // PropertiesTab
+      // 
+      this.PropertiesTab.Controls.Add(this.PropertiyGrid);
+      this.PropertiesTab.Location = new System.Drawing.Point(4, 25);
+      this.PropertiesTab.Name = "PropertiesTab";
+      this.PropertiesTab.Padding = new System.Windows.Forms.Padding(3);
+      this.PropertiesTab.Size = new System.Drawing.Size(329, 448);
+      this.PropertiesTab.TabIndex = 0;
+      this.PropertiesTab.Text = "Properties";
+      this.PropertiesTab.UseVisualStyleBackColor = true;
+      // 
+      // DocumentationTab
+      // 
+      this.DocumentationTab.Controls.Add(this.DocumentationBox);
+      this.DocumentationTab.Location = new System.Drawing.Point(4, 25);
+      this.DocumentationTab.Name = "DocumentationTab";
+      this.DocumentationTab.Padding = new System.Windows.Forms.Padding(8);
+      this.DocumentationTab.Size = new System.Drawing.Size(329, 448);
+      this.DocumentationTab.TabIndex = 1;
+      this.DocumentationTab.Text = "Documentation";
+      this.DocumentationTab.UseVisualStyleBackColor = true;
+      // 
+      // DocumentationBox
+      // 
+      this.DocumentationBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+      this.DocumentationBox.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.DocumentationBox.Location = new System.Drawing.Point(8, 8);
+      this.DocumentationBox.Name = "DocumentationBox";
+      this.DocumentationBox.Size = new System.Drawing.Size(313, 432);
+      this.DocumentationBox.TabIndex = 0;
+      this.DocumentationBox.Text = "";
       // 
       // MainForm
       // 
@@ -270,6 +320,9 @@
       this.NamespaceTabView.ResumeLayout(false);
       this.StatusStrip.ResumeLayout(false);
       this.StatusStrip.PerformLayout();
+      this.InfoTab.ResumeLayout(false);
+      this.PropertiesTab.ResumeLayout(false);
+      this.DocumentationTab.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -295,6 +348,10 @@
     private System.Windows.Forms.OpenFileDialog FileDialog;
     private System.Windows.Forms.ToolStripMenuItem StatisticsMenu;
     private System.Windows.Forms.ToolStripMenuItem ParsingTimesItems;
+    private System.Windows.Forms.TabControl InfoTab;
+    private System.Windows.Forms.TabPage PropertiesTab;
+    private System.Windows.Forms.TabPage DocumentationTab;
+    private System.Windows.Forms.RichTextBox DocumentationBox;
   }
 }
 
