@@ -160,6 +160,7 @@ TOKENS
   unsafe     = "unsafe".
   ushort     = "ushort".
   usingKW    = "using".
+  var        = "var".
   virtual    = "virtual".
   void       = "void".
   volatile   = "volatile".
@@ -1011,24 +1012,32 @@ InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDecla
 // Declares a local variable within a block.
 // +block: Block the variable is declared within.
 // ------------------------------------------------------------------------------------
-LocalVariableDeclaration<IBlockOwner block> (. TypeReference typeRef; .)
+LocalVariableDeclaration<IBlockOwner block> (. 
+                                               TypeReference typeRef = null; 
+                                               bool isImplicit = false; 
+                                            .)
 =
-  Type<out typeRef, false> 
-  LocalVariableDeclarator<block, typeRef>
-  { "," LocalVariableDeclarator<block, typeRef> }
+  (
+    Type<out typeRef, false>
+    | "var"                   (. isImplicit = true; .)
+  )
+  LocalVariableDeclarator<block, typeRef, isImplicit>
+  { "," LocalVariableDeclarator<block, typeRef, isImplicit> }
 .
 
 // ------------------------------------------------------------------------------------
 // Declares a local variable within a block with the specified type.
 // +block: Block the variable is declared within.
-// +ypeRef: Type of the variable to declare.
+// +typeRef: Type of the variable to declare.
+// +isImplicit: Indicates if the local declaration is implicit or not.
 // ------------------------------------------------------------------------------------
-LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef>
+LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplicit>
 = 
   ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); .)
         (. CurrentElement = loc; .)
         (. loc.Name = t.val; .)
         (. loc.Variable.ResultingType = typeRef; .)
+        (. loc.Variable.IsImplicit = isImplicit; .)
         (. if (block != null) block.Statements.Add(loc); .)       
   [
     "=" 
@@ -1399,6 +1408,28 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
   ]
   PointerOrArray<typeRef>                            (. CompilationUnit.AddTypeToFix(typeRef); .)
                                                      (. typeRef.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Reference for a type
+// +typeRef: type reference
+// +voidAllowed: indicates if "void" is an acceptable type or not.
+// ------------------------------------------------------------------------------------
+NonArrayType<out TypeReference typeRef>    (. typeRef = null; .)
+=                                                    
+  ( 
+    PrimitiveType<out typeRef>
+  | 
+    ClassType<out typeRef>                                               
+  )
+  [ 
+    "?"                         (. typeRef.IsNullable = true; .)                                              
+  ]
+  [
+    "*"                         (. typeRef.TypeModifiers.Add(new PointerModifier()); .)
+                                (. CompilationUnit.AddTypeToFix(typeRef); .)
+  ]
+                                (. typeRef.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1787,16 +1818,19 @@ ForStatement<IBlockOwner block>
 // ------------------------------------------------------------------------------------
 ForEachStatement<IBlockOwner block>
 =
-  "foreach"                   (. ForEachStatement fes = new ForEachStatement(t, this, block); .)
-                              (. CurrentElement = fes; .)
-  "("                         (. if (block != null) block.Add(fes); .)
-                              (. TypeReference typeRef; .)
-    Type<out typeRef, false>  (. fes.Variable.ResultingType = typeRef; .)
-    ident                     (. fes.Variable.Name = t.val; .)
-    "in"                      (. Expression expr; .)
-    Expression<out expr>      (. fes.Expression = expr; .)
-  ")"                         (. fes.Add(fes.Variable); .)
-  EmbeddedStatement<fes>      (. fes.Terminate(t); .)
+  "foreach"                     (. ForEachStatement fes = new ForEachStatement(t, this, block); .)
+                                (. CurrentElement = fes; .)
+  "("                           (. if (block != null) block.Add(fes); .)
+                                (. TypeReference typeRef; .)
+    (                          
+      Type<out typeRef, false>  (. fes.Variable.ResultingType = typeRef; .)
+      | "var"                   (. fes.Variable.IsImplicit = true; .)
+    )
+    ident                       (. fes.Variable.Name = t.val; .)
+    "in"                        (. Expression expr; .)
+    Expression<out expr>        (. fes.Expression = expr; .)
+  ")"                           (. fes.Add(fes.Variable); .)
+  EmbeddedStatement<fes>        (. fes.Terminate(t); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2728,16 +2762,75 @@ DefaultOperator<out Expression expr>
   ")"                       (. dop.Terminate(t); .)
 .
 
+//// ------------------------------------------------------------------------------------
+//// Declaration of a "new" operator.
+//// +expr: Expression value.
+//// ------------------------------------------------------------------------------------
+//NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
+//= 
+//  "new"                           (. NewOperator nop = new NewOperator(t, this); .)
+//                                  (. expr = nop; .)
+//                                  (. TypeReference typeRef; .)
+//  Type<out typeRef, false>        (. nop.Type = typeRef; .)
+//  (
+//    // --- Simple constructor call
+//    "(" 
+//    [ 
+//      Argument<nop.Arguments> 
+//      { "," Argument<nop.Arguments> } 
+//    ] 
+//    ")"
+//  | // --- New array creation
+//    "["                           (. Expression dimExpr; .)
+//    Expression<out dimExpr>       (. nop.Dimensions.Add(dimExpr); .)
+//    { 
+//      "," 
+//      Expression<out dimExpr>     (. nop.Dimensions.Add(dimExpr); .)
+//    } 
+//    "]" 
+//    { IF (IsDims()) 
+//      "["                         (. nop.RunningDimensions = 1; .)
+//       { 
+//          ","                     (. nop.RunningDimensions++; .)
+//       } 
+//      "]" 
+//    }
+//    [                             
+//      ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+//    ] 
+//  | // --- Array initialization
+//    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
+//  )                                  (. nop.Terminate(t); .)
+//.
+
 // ------------------------------------------------------------------------------------
 // Declaration of a "new" operator.
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
-NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
+NewOperator<out Expression expr>  
 = 
   "new"                           (. NewOperator nop = new NewOperator(t, this); .)
                                   (. expr = nop; .)
                                   (. TypeReference typeRef; .)
-  Type<out typeRef, false>        (. nop.Type = typeRef; .)
+  (
+    NonArrayType<out typeRef>      
+    NewOperatorWithType<nop, typeRef>
+  |
+    ImplicitArrayCreation<nop>
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a "new" operator with explicit type.
+// +nop: NewOperator delcaration
+// +typeRef: Type to create with the new operator
+// ------------------------------------------------------------------------------------
+NewOperatorWithType<NewOperator nop, TypeReference typeRef> 
+                                   (. 
+                                      ArrayInitializer arrayInit;
+                                      nop.Type = typeRef; 
+                                   .)
+=
   (
     // --- Simple constructor call
     "(" 
@@ -2746,6 +2839,21 @@ NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
       { "," Argument<nop.Arguments> } 
     ] 
     ")"
+    // --- Optional initializer list
+    [ ObjectOrCollectionInitializer<nop> ]
+
+  | // --- Implicit default constructor call
+    ObjectOrCollectionInitializer<nop>
+
+  | // --- Array initialization
+    IF (IsDims())
+    "["                         (. nop.RunningDimensions = 1; .)
+      { 
+        ","                     (. nop.RunningDimensions++; .)
+      } 
+    "]" 
+    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
+
   | // --- New array creation
     "["                           (. Expression dimExpr; .)
     Expression<out dimExpr>       (. nop.Dimensions.Add(dimExpr); .)
@@ -2756,17 +2864,44 @@ NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
     "]" 
     { IF (IsDims()) 
       "["                         (. nop.RunningDimensions = 1; .)
-       { 
+        { 
           ","                     (. nop.RunningDimensions++; .)
-       } 
+        } 
       "]" 
     }
     [                             
       ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
     ] 
-  | // --- Array initialization
-    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
   )                                  (. nop.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an implicit array creation
+// +nop: NewOperator delcaration
+// +typeRef: Type to create with the new operator
+// ------------------------------------------------------------------------------------
+ImplicitArrayCreation<NewOperator nop> 
+                                    (. 
+                                       ArrayInitializer arrayInit;
+                                       nop.IsImplicitArray = true;
+                                    .)
+=
+  "["                               (. nop.RunningDimensions = 1; .)
+    { 
+      ","                           (. nop.RunningDimensions++; .)
+    } 
+  "]" 
+  [                             
+    ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// Declares an object or collection initializer used with "new" operator
+// ------------------------------------------------------------------------------------
+ObjectOrCollectionInitializer<NewOperator nop>
+=
+  "{" "}"
 .
 
 // ------------------------------------------------------------------------------------

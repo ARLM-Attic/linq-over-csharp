@@ -16,6 +16,7 @@ namespace CSharpParser.ProjectModel
     private TypeReference _ResultingType;
     private Initializer _Initializer;
     private bool _IsInitiallyAssigned;
+    private bool _IsImplicit;
 
     #endregion
 
@@ -97,6 +98,18 @@ namespace CSharpParser.ProjectModel
       set { _IsInitiallyAssigned = value; }
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the flag indicating if the variable has been declared with the
+    /// "var" keyword.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsImplicit
+    {
+      get { return _IsImplicit; }
+      set { _IsImplicit = value; }
+    } 
+    
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Stores the declaration point (token) of the variable.

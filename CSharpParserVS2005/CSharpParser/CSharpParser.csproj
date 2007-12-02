@@ -54,6 +54,7 @@
     <Compile Include="ProjectModel\CompilationUnit\ImplicitNamespace.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ParseEvents.cs" />
     <Compile Include="ProjectModel\CompilationUnit\UsingClause.cs" />
+    <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\CastOperator.cs" />
     <Compile Include="ProjectModel\Types\DeclarationBase.cs" />
     <Compile Include="Semantics\TypeAbstraction\ArrayType.cs" />
     <Compile Include="Semantics\TypeAbstraction\ExtendedType.cs" />
@@ -171,7 +172,6 @@
     <Compile Include="ProjectModel\Expressions\Operators\PrimaryOperators\PrimaryOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\ReferenceOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\PrimaryOperators\SizeOfOperator.cs" />
-    <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\TypeCastOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\PrimaryOperators\TypeOfOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UnaryMinusOperator.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\UnaryOperator.cs" />
@@ -286,6 +286,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CoCoFiles\NewOperator.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="_Diagrams\" />

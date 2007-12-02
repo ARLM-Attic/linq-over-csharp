@@ -19,5 +19,6 @@ namespace CSharpParser.ProjectModel
     public ReferenceOperator(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
+
   }
 }

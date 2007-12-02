@@ -18,6 +18,7 @@ namespace CSharpParser.ProjectModel
     private readonly ArgumentList _Arguments = new ArgumentList();
     private readonly List<Expression> _Dimensions = new List<Expression>();
     private int _RunningDimensions;
+    private bool _IsImplicitArray;
 
     #endregion
 
@@ -111,6 +112,18 @@ namespace CSharpParser.ProjectModel
     public bool IsNewArray
     {
       get { return _Dimensions.Count > 0; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if this operator is used to an implicit array
+    /// creation or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsImplicitArray
+    {
+      get { return _IsImplicitArray; }
+      set { _IsImplicitArray = value; }
     }
 
     // --------------------------------------------------------------------------------
