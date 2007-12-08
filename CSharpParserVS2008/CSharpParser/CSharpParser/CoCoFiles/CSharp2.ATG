@@ -1,0 +1,3223 @@
+using System.Text;
+using System.Collections;
+using CSharpParser.ProjectModel;
+
+COMPILER CS2
+
+// ================================================================================
+// Scanner description
+// ================================================================================
+
+CHARACTERS
+
+  tab                = '\u0009'. /*  9 = tabulator */
+  eol                = '\u000a'. /* 10 = line feed */
+  cr                 = '\u000d'. /* 13 = carriage return */
+  newLine            = cr + eol. /* Line separator character (U+2028) + Paragraph separator character (U+2029) */
+
+  startLetter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '\u00aa' + '\u00b5' + '\u00ba' + '\u00c0' .. '\u00d6' + '\u00d8' .. '\u00f6' + '\u00f8' .. '\u00ff'.
+  partLetter         = '0' .. '9' + 'A' .. 'Z' + 'a' .. 'z' + '_' + '\u00a0' + '\u00aa' + '\u00b5' + '\u00ba' + '\u00c0' .. '\u00d6' + '\u00d8' .. '\u00f6' + '\u00f8' .. '\u00ff'.
+
+  digit              = "0123456789".  
+  hexDigit           = digit + "ABCDEFabcdef".
+  notDigit           = ANY - digit.
+
+  char               = ANY - "'" - '\\' - newLine.
+  verbatimStringChar = ANY - '"'.
+  regularStringChar  = ANY - '"' - '\\' - newLine.
+  notNewLine         = ANY - newLine .
+  ws                 = " " + tab + '\u000b' + '\u000c'. /* Any character with Unicode class Zs */
+  blockComCh         = ANY - '*' - '/'.
+
+TOKENS
+
+  ident =
+    ['@']
+    ( startLetter
+    | '\\'
+      ( 'u' hexDigit hexDigit hexDigit hexDigit
+      | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+      )
+    )
+    { partLetter
+    | '\\'
+      ( 'u' hexDigit hexDigit hexDigit hexDigit
+      | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+      )
+    }.
+  /*--------------------------------------------------------------------------------*/
+  intCon =
+    ( digit {digit} | digit {digit} CONTEXT ("." notDigit)
+    | ("0x" | "0X") hexDigit {hexDigit}
+    )
+    ["U" | "u" | "L" | "l" | "UL" | "Ul" | "uL" | "ul" | "LU" | "Lu" | "lU" | "lu"].
+  /*--------------------------------------------------------------------------------*/
+  realCon =
+    "." digit {digit} 
+    [("e" | "E") ["+" | "-"] digit {digit}] 
+    ["F" | "f" | "D" | "d" | "M" | "m"]
+  | digit {digit} 
+    ( "." digit {digit} 
+      [("e" | "E" ) ["+" | "-"] digit {digit} ] 
+      ["F" | "f" | "D" | "d" | "M" | "m"]
+    | ("e" | "E") ["+" | "-"] digit {digit}
+      ["F" | "f" | "D" | "d" | "M" | "m"]
+    | "F" | "f" | "D" | "d" | "M" | "m"
+    ).
+  /*--------------------------------------------------------------------------------*/
+  charCon =
+    "'" ( char
+        | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+        | "\\x" hexDigit [hexDigit] [hexDigit] [hexDigit]
+        | "\\u" hexDigit hexDigit hexDigit hexDigit
+        | "\\U" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+        ) 
+    "'".
+  /*--------------------------------------------------------------------------------*/
+  stringCon =
+    "\""  { regularStringChar
+          | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+          | "\\x" hexDigit [hexDigit] [hexDigit] [hexDigit]
+          | "\\u" hexDigit hexDigit hexDigit hexDigit
+          | "\\U" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+          } 
+    "\""
+  | "@\"" {verbatimStringChar | "\"\""} "\"".
+
+
+  /*----- keyword names needed in LL(1) resolvers -----*/
+  
+  abstract   = "abstract".
+  as         = "as".
+  base       = "base".
+  bool       = "bool".
+  break      = "break".
+  byte       = "byte".
+  case       = "case".
+  catch      = "catch".
+  char       = "char".
+  checked    = "checked".
+  class      = "class".
+  const      = "const".
+  continue   = "continue".
+  decimal    = "decimal".
+  default    = "default".
+  delegate   = "delegate".
+  do         = "do".
+  double     = "double".
+  else       = "else".
+  enum       = "enum".
+  event      = "event".
+  explicit   = "explicit".
+  extern     = "extern".
+  false      = "false".
+  finally    = "finally".
+  fixed      = "fixed".
+  float      = "float".
+  for        = "for".
+  foreach    = "foreach".
+  goto       = "goto".
+  if         = "if".
+  implicit   = "implicit".
+  in         = "in".
+  int        = "int".
+  interface  = "interface".
+  internal   = "internal".
+  is         = "is".
+  lock       = "lock".
+  long       = "long".
+  namespace  = "namespace".
+  new        = "new".
+  null       = "null".
+  object     = "object".
+  operator   = "operator".
+  out        = "out".
+  override   = "override".
+  params     = "params".
+  private    = "private".
+  protected  = "protected".
+  public     = "public".
+  readonly   = "readonly".
+  ref        = "ref".
+  return     = "return".
+  sbyte      = "sbyte".
+  sealed     = "sealed".
+  short      = "short".
+  sizeof     = "sizeof".
+  stackalloc = "stackalloc".
+  static     = "static".
+  string     = "string".
+  struct     = "struct".
+  switch     = "switch".
+  this       = "this".
+  throw      = "throw".
+  true       = "true".
+  try        = "try".
+  typeof     = "typeof".
+  uint       = "uint".
+  ulong      = "ulong".
+  unchecked  = "unchecked".
+  unsafe     = "unsafe".
+  ushort     = "ushort".
+  usingKW    = "using".
+  var        = "var".
+  virtual    = "virtual".
+  void       = "void".
+  volatile   = "volatile".
+  while      = "while".
+  
+
+  /*----- operators and special characters needed in LL(1) resolvers --------------*/
+  and        = "&".
+  andassgn   = "&=".
+  assgn      = "=".
+  colon      = ":".
+  comma      = ",".
+  dec        = "--".
+  divassgn   = "/=".
+  dot        = ".".
+  dblcolon   = "::".
+  eq         = "==".
+  gt         = ">".
+  gteq       = ">=".
+  inc        = "++".
+  lbrace     = "{".
+  lbrack     = "[".
+  lpar       = "(".
+  lshassgn   = "<<=".
+  lt         = "<".
+  ltlt       = "<<".
+  minus      = "-".
+  minusassgn = "-=".
+  modassgn   = "%=".
+  neq        = "!=".
+  not        = "!".
+  orassgn    = "|=".
+  plus       = "+".
+  plusassgn  = "+=".
+  question   = "?".
+  rbrace     = "}".
+  rbrack     = "]".
+  rpar       = ")".
+  scolon     = ";".
+  tilde      = "~".
+  times      = "*".
+  timesassgn = "*=".
+  xorassgn   = "^=".
+
+
+PRAGMAS
+
+// Preprocessor directives.                                               
+// The exact parsing of their syntax is left for later processing        
+
+  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     (. _PragmaHandler.AddConditionalDirective(la); .)
+  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      (. _PragmaHandler.RemoveConditionalDirective(la); .)
+  ppIf      = "#" {ws} "if" {notNewLine} newLine.         (. _PragmaHandler.IfPragma(la); .)
+  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       (. _PragmaHandler.ElifPragma(la); .) 
+  ppElse    = "#" {ws} "else" {notNewLine} newLine.       (. _PragmaHandler.ElsePragma(la); .) 
+  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      (. _PragmaHandler.EndifPragma(la); .) 
+  ppLine    = "#" {ws} "line" {notNewLine} newLine.       (. _PragmaHandler.LinePragma(la); .) 
+  ppError   = "#" {ws} "error" {notNewLine} newLine.      (. _PragmaHandler.ErrorPragma(la); .) 
+  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    (. _PragmaHandler.WarningPragma(la); .) 
+  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     (. _PragmaHandler.PragmaPragma(la); .) 
+  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     (. _PragmaHandler.RegionPragma(la); .) 
+  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  (. _PragmaHandler.EndregionPragma(la); .) 
+
+// Pragma for comments
+  
+  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  (. _CommentHandler.HandleBlockComment(la); .)
+  cLineCom  = "//" { notNewLine } newLine.                                  (. _CommentHandler.HandleLineComment(la); .)
+
+IGNORE eol + cr + tab
+
+PRODUCTIONS
+
+// ====================================================================================
+// This is the definition of C# 2.0 grammar. The definition contains the grammar syntax 
+// definition with the corresponding semantic actions.
+// This is main entry point of the grammar parser.
+// ====================================================================================
+CS2
+=                                                               
+  { 
+    IF (IsExternAliasDirective()) (. _PragmaHandler.SignRealToken(); .)
+      ExternAliasDirective<null>
+  }
+  {
+    UsingDirective<null>
+  }
+  {
+    IF (IsGlobalAttrTarget()) (. _PragmaHandler.SignRealToken(); .)
+      GlobalAttributes
+  }
+  {
+    (. _PragmaHandler.SignRealToken(); .)
+    NamespaceMemberDeclaration<null, _File>
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// "extern alias" directive that is used in conjunction with a file or with a namespace
+// +parent: Parent namespace of the "extern alias" directive. If this parameter is
+//   null, the directive belongs to the file and not to the specified namespace.
+// ------------------------------------------------------------------------------------
+ExternAliasDirective<NamespaceFragment parent>
+=
+  "extern"   (. Token token = t; .)
+  ident      (. 
+                if (t.val != "alias") 
+                  Error1003(la, "alias"); 
+             .)
+  ident      (. 
+               ExternalAlias externAlias = new ExternalAlias(token, this);
+               externAlias.Name = t.val;
+               CurrentElement = externAlias;
+               if (parent == null) _File.ExternAliases.Add(externAlias); 
+               else parent.ExternAliases.Add(externAlias); 
+             .)
+  ";"        (. externAlias.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// "using" directive that is used in conjunction with a files or a namespace.
+// +parent: Parent namespace of the "using" directive. If this parameter is null, 
+//   the directive belongs to the file and not to the specified namespace.
+// ------------------------------------------------------------------------------------
+UsingDirective<NamespaceFragment parent>
+=                                                               
+  "using"                  (. 
+                              Token token = t;
+                              string name = String.Empty; 
+                              TypeReference typeUsed = null;
+                              _PragmaHandler.SignRealToken();
+                           .)
+   [ IF (IsAssignment()) 
+     ident                 (. name = t.val; .)
+     "="
+   ]
+     TypeName<out typeUsed> 
+   ";"                     (. 
+                              UsingClause uc = new UsingClause(token, this, name, typeUsed);
+                              CurrentElement = uc;
+                              if (parent == null) _File.Usings.Add(uc);
+                              else parent.Usings.Add(uc); 
+                              uc.Terminate(t);
+                           .)
+.
+
+// ------------------------------------------------------------------------------------
+// Global attributes belonging to a file.
+// This element accepts only attributes with "assembly" or "module" scope.
+// ------------------------------------------------------------------------------------
+GlobalAttributes
+=
+  "[" ident                    (.
+                                  // We accept module because csc does (even if it is against 
+                                  // the specification).
+                                  if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
+                                    Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
+                                  string scope = t.val;
+                                  AttributeDeclaration attr;
+                               .) 
+  ":" Attribute<out attr>      (. 
+                                  attr.Scope = scope; 
+                                  _File.GlobalAttributes.Add(attr);
+                                  CurrentElement = attr;
+                               .)
+  { IF (NotFinalComma()) "," 
+    Attribute<out attr>        (. 
+                                  attr.Scope = scope; 
+                                  _File.GlobalAttributes.Add(attr);
+                                  CurrentElement = attr;
+                               .)
+        } [ "," ]
+  "]"                          (. attr.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a namespace member.
+// A member of a namespace can be a subnamespace or a type.
+// +parent: Parent namespace of the type declaration. If this parameter is null, 
+//   the type belongs to the file and not to the specified namespace.
+// +file: file that defines the namespace.
+// ------------------------------------------------------------------------------------
+NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>  
+=
+  "namespace"    (. Token startToken = t; .)
+  ident          (. StringBuilder sb = new StringBuilder(t.val); .)
+  { 
+    "." ident    (. sb.Append("."); sb.Append(t.val); .)
+  }              (. 
+                    NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
+                    CurrentElement = ns;
+                 .)
+  "{" 
+      { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
+      { UsingDirective<ns> } 
+      { NamespaceMemberDeclaration<ns, _File> } 
+  "}"            (. ns.Terminate(t); .)
+  [ ";"          (. ns.Terminate(t); .)
+  ]
+  |                                              (. 
+                                                    Modifiers m = new Modifiers(this); 
+                                                    TypeDeclaration td;
+                                                    AttributeCollection attrs = new AttributeCollection();
+                                                 .)  
+      { Attributes<attrs> } 
+      ModifierList<m> 
+      TypeDeclaration<attrs, null, m, out td>    (.
+                                                    if (td != null)
+                                                    {
+                                                      if (parent == null) _File.AddTypeDeclaration(td);
+                                                      else parent.AddTypeDeclaration(td);
+                                                    }
+                                                 .)
+.
+
+// ------------------------------------------------------------------------------------
+// Type declaration within a file or a namespace.
+// +modifiers: Set of modifiers belongign to the type.
+// +td: resulting type declaration.
+// ------------------------------------------------------------------------------------
+TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers m, 
+  out TypeDeclaration td>            
+=                                                    (. td = null; .)
+  (                                                             
+                                                     (. bool isPartial = false; .)
+    [ 
+      "partial"                                      (. isPartial = true; .)
+    ]
+    ( 
+      ClassDeclaration<m, parentType, isPartial, out td> |                                                           
+      StructDeclaration<m, parentType, isPartial, out td> |                                                           
+      InterfaceDeclaration<m, parentType, isPartial, out td>                                                           
+    )                                                          
+    | EnumDeclaration<m, parentType, out td> 
+    | DelegateDeclaration<m, parentType, out td>
+  )                                                  (. 
+                                                        if (td != null)
+                                                        {
+                                                          td.SetModifiers(m.Value); 
+                                                          td.AssignAttributes(attrs);
+                                                          td.Terminate(t);
+                                                        }
+                                                     .)                               
+.
+
+// ------------------------------------------------------------------------------------
+// Class declaration in the file or within a namespace.
+// +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
+// +partial: flag indicating if this is a partial type definition or not.
+// +td: resulting type declaration.
+// ------------------------------------------------------------------------------------
+ClassDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
+  out TypeDeclaration td>
+=
+  "class"                                            (. 
+                                                        ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
+                                                        cd.IsPartial = isPartial;
+                                                        td = cd;
+                                                        CurrentElement = cd;
+                                                     .)
+  ident                                              (. cd.Name = t.val; .)
+  [ TypeParameterList<cd> ] 
+  [ ClassBase<cd> ]
+  {                                                  (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint>   (. td.AddTypeParameterConstraint(constraint); .)
+  } ClassBody<td> 
+  [ ";" ]                                                       
+.
+
+// ------------------------------------------------------------------------------------
+// Base type declaration of a class.
+// +cd: Class declaration that has the base types defined here.
+// ------------------------------------------------------------------------------------
+ClassBase<ClassDeclaration cd>                                  
+=
+  ":"                        (. TypeReference typeRef; .)
+  ClassType<out typeRef>     (. cd.InterfaceList.Add(typeRef); .)
+  
+  { ","                                                         
+    ClassType<out typeRef>    (. cd.InterfaceList.Add(typeRef); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Body declaration of a class.
+// +td: Class declaration that has the body defined here.
+// ------------------------------------------------------------------------------------
+ClassBody<TypeDeclaration td>
+=                                     (. AttributeCollection attrs = new AttributeCollection(); .)
+  "{" {                               (. attrs = new AttributeCollection(); .)
+        { Attributes<attrs> }         (. Modifiers m = new Modifiers(this); .)                          
+        ModifierList<m>
+        ClassMemberDeclaration<attrs, m, td>
+      }
+  "}"
+.
+
+// ------------------------------------------------------------------------------------
+// Structure declaration within a file a namespace.
+// +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
+// +partial: flag indicating if this is a partial type definition or not.
+// +td: resulting type declaration.
+// ------------------------------------------------------------------------------------
+StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
+  out TypeDeclaration td>
+=
+  "struct"                                         (. 
+                                                      StructDeclaration sd = new StructDeclaration(t, this, parentType);
+                                                      td = sd;
+                                                      CurrentElement = sd;
+                                                      sd.IsPartial = isPartial;
+                                                      TypeReference typeRef;
+                                                   .)
+  ident                                            (. sd.Name = t.val; .)
+  [ TypeParameterList<sd> ]
+  [ ":"                                                     
+  ClassType<out typeRef>                           (. sd.InterfaceList.Add(typeRef); .)
+  { "," 
+    ClassType<out typeRef>                         (. sd.InterfaceList.Add(typeRef); .)
+  } ]
+  {                                                (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
+  } StructBody<td>
+  [ ";" ]                                                       
+.
+
+// ------------------------------------------------------------------------------------
+// Body declaration of a structure.
+// +td: Structure declaration that has the body defined here.
+// ------------------------------------------------------------------------------------
+StructBody<TypeDeclaration td>
+=                                    (. AttributeCollection attrs = new AttributeCollection(); .)
+  "{" {                              (. attrs = new AttributeCollection(); .)
+        { Attributes<attrs> }        (. Modifiers m = new Modifiers(this); .)                             
+        ModifierList<m>
+        StructMemberDeclaration<attrs, m, td>
+      }
+  "}"   
+.
+
+// ------------------------------------------------------------------------------------
+// Enumerated type declaration within a file or a namespace
+// +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
+// +td: resulting type declaration.
+// ------------------------------------------------------------------------------------
+EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
+=
+  "enum"                         (. 
+                                    EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
+                                    td = ed;
+                                    CurrentElement = ed;
+                                 .)
+  ident                          (. ed.Name = t.val; .)
+  [ ":"                          (. TypeReference typeRef; .)
+    ( 
+      ClassType<out typeRef>     (. ed.InterfaceList.Add(typeRef); .)
+      |
+      IntegralType<out typeRef>  (. ed.InterfaceList.Add(typeRef); .)
+    )
+  ] 
+  EnumBody<ed>                   (. ed.Terminate(t); .)
+  [ ";"                          (. ed.Terminate(t); .)
+  ]                                                       
+.
+
+// ------------------------------------------------------------------------------------
+// Body declaration of an enumerated type.
+// +ed: Enumeration declaration that has the body defined here.
+// ------------------------------------------------------------------------------------
+EnumBody<EnumDeclaration ed>
+=
+  "{" [ 
+    EnumMemberDeclaration<ed> 
+    {IF (NotFinalComma())  "," SYNC EnumMemberDeclaration<ed>} 
+    [ "," ] ] 
+  SYNC "}"
+.
+
+// ------------------------------------------------------------------------------------
+// Enumeration value declaration.
+// +ed: Enumeration declaration that has the member values defined here.
+// ------------------------------------------------------------------------------------
+EnumMemberDeclaration<EnumDeclaration ed>  
+=                            (. AttributeCollection attrs = new AttributeCollection(); .)
+  { Attributes<attrs> } 
+  ident                      (. 
+                                 EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
+                                 CurrentElement = ev;
+                                 Expression expr;
+                             .)
+  [ 
+    "=" Expression<out expr> (. ev.ValueExpression = expr; .)
+  ]     
+                             (.
+                                ev.AssignAttributes(attrs);
+                                ed.Values.Add(ev);
+                                ev.Terminate(t);
+                             .)
+.
+
+// ------------------------------------------------------------------------------------
+// Delegate type declaration within a file a namespace.
+// +modifiers: Set of modifiers belonging to the type.
+// +parentType: Parent type declaration
+// +td: resulting type declaration.
+// ------------------------------------------------------------------------------------
+DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
+=
+  "delegate"                                       (. 
+                                                      DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
+                                                      td = dd;
+                                                      CurrentElement = dd;
+                                                      TypeReference returnType;
+                                                   .)
+  Type<out returnType, true>                       (. dd.ReturnType = returnType; .)
+  ident                                            (. dd.Name = t.val; .)
+  [ TypeParameterList<dd> ]
+  "(" [ FormalParameterList<dd.FormalParameters> ] ")"
+  {                                                (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
+  } 
+  ";"                                                         
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a class member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+=
+  StructMemberDeclaration<attrs, m, td>
+  | "~" ident   (. 
+                   FinalizerDeclaration dd = new FinalizerDeclaration(t, td);
+                   CurrentElement = dd;
+                   dd.Name = t.val;
+                   dd.SetModifiers(m.Value);
+                   dd.AssignAttributes(attrs);
+                .)
+  "(" ")" 
+  ( 
+  Block<dd> | ";" 
+  )             (. 
+                   dd.Terminate(t);
+                   td.AddMember(dd); 
+                .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a structure member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>        
+                                              (. TypeReference typeRef; .)
+=                                             
+  (                                                                          
+    ConstMemberDeclaration<attrs, m, td> 
+    | EventDeclaration<attrs, m, td> 
+    | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
+        ConstructorDeclaration<attrs, m, td> 
+    | Type<out typeRef, true>
+    ( 
+      OperatorDeclaration<attrs, m, typeRef, td>
+      | // --- Field declaration
+        IF (IsFieldDecl()) FieldMemberDeclarators<attrs, m, td, typeRef, false, Modifier.fields> ";"
+      |                                          (. TypeReference memberRef; .)
+        MemberName<out memberRef>
+        ( 
+          PropertyDeclaration<attrs, m, typeRef, memberRef, td>
+          | "." IndexerDeclaration<attrs, m, typeRef, memberRef, td>
+          | MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
+        )
+      | IndexerDeclaration<attrs, m, typeRef, null, td>
+    )
+  | CastOperatorDeclaration<attrs, m, td>
+  |                                               (. TypeDeclaration nestedType; .)
+    TypeDeclaration<attrs, td, m, out nestedType> (. td.AddTypeDeclaration(nestedType); .)
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a "const" member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+=                                    
+  "const"                            (. TypeReference typeRef; .)
+  Type<out typeRef, false>          
+  SingleConstMember<attrs, m, td, typeRef>
+  { "," SingleConstMember<attrs, m, td, typeRef> } ";"
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a single "const" member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// +typeRef: Type of the constant.
+// ------------------------------------------------------------------------------------
+SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
+  TypeReference typeRef>
+=                            (.  .)
+  ident                      (. 
+                                ConstDeclaration cd = new ConstDeclaration(t, td); 
+                                CurrentElement = cd;
+                                cd.AssignAttributes(attrs);
+                                cd.SetModifiers(m.Value);
+                                cd.ResultingType = typeRef;
+                                cd.Name = t.val;
+                             .)
+  "="                        (. td.AddMember(cd); .)
+                             (. Expression expr; .)
+  Expression<out expr>       (. 
+                                cd.Expression = expr; 
+                                cd.Terminate(t);
+                             .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a event member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+= (. TypeReference typeRef; .)
+  "event" Type<out typeRef, false>
+  ( IF (IsFieldDecl()) 
+    FieldMemberDeclarators<attrs, m, td, typeRef, true, Modifier.propEvntMeths> ";"
+  |                              (. TypeReference memberRef; .)
+    TypeName<out memberRef> 
+    "{"                          (. EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  .)   
+                                 (. CurrentElement = ep; .)
+                                 (. ep.ResultingType = typeRef; .) 
+                                 (. ep.ExplicitName = memberRef; .)
+                                 (. td.AddMember(ep); .)
+    EventAccessorDeclarations<ep>
+    "}"                          (. ep.Terminate(t); .)
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a constructor member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+= 
+    ident                   (. 
+                               ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
+                               CurrentElement = cd;
+                               cd.SetModifiers(m.Value);
+                               cd.AssignAttributes(attrs);
+                            .)
+    "(" 
+    [                                    
+      FormalParameterList<cd.FormalParameters>
+    ] 
+    ")" 
+    [                                        
+      ":" ( "base"          (. cd.HasBase = true; .)
+      | "this"              (. cd.HasThis = true; .)
+      ) "("
+    [ Argument<cd.BaseArguments> { "," Argument<cd.BaseArguments> } ] ")"
+    ] ( Block<cd> | ";" )   (. 
+                               td.AddMember(cd); 
+                               cd.Terminate(t);
+                            .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a property member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +typeRef: type of the property
+// +memberRef: member name reference.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
+  TypeReference memberRef, TypeDeclaration td>
+=                 (. 
+                     PropertyDeclaration pd = new PropertyDeclaration(t, td);
+                     CurrentElement = pd;
+                     pd.SetModifiers(m.Value);
+                     pd.AssignAttributes(attrs);
+                     pd.ExplicitName = memberRef;
+                     pd.ResultingType = typeRef;
+                  .)
+  "{" 
+     AccessorDeclarations<pd> 
+  "}"             (. 
+                     td.AddMember(pd); 
+                     pd.Terminate(t);
+                  .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an indexer member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +typeRef: type of the property
+// +memberRef: member name reference.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
+  TypeReference memberRef, TypeDeclaration td>
+=                 (. 
+                     IndexerDeclaration ind = new IndexerDeclaration(t, td);
+                     CurrentElement = ind;
+                     ind.SetModifiers(m.Value);
+                     ind.AssignAttributes(attrs);
+                     if (memberRef != null) 
+                     {
+                       ind.ExplicitName = memberRef;
+                       ind.Name = memberRef.FullName;
+                     }
+                     else
+                     {
+                       ind.Name = "this";
+                     }
+                     ind.ResultingType = typeRef;
+                  .)
+  "this" "[" [ FormalParameterList<ind.FormalParameters> ] "]" 
+  "{" 
+      AccessorDeclarations<ind> 
+  "}"             (. 
+                     td.AddMember(ind); 
+                     ind.Terminate(t);
+                  .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a method member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +typeRef: type of the property
+// +memberRef: member name reference.
+// +td: Type declaration the member belongs to.
+// +allowBody: indicates if method body is allowd or not.
+// ------------------------------------------------------------------------------------
+MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
+  TypeReference memberRef, TypeDeclaration td, bool allowBody>
+=                                                   (. 
+                                                       MethodDeclaration md = new MethodDeclaration(t, td);
+                                                       CurrentElement = md;
+                                                       md.SetModifiers(m.Value);
+                                                       md.AssignAttributes(attrs);
+                                                       md.ExplicitName = memberRef;
+                                                       md.ResultingType = typeRef;
+                                                    .)
+  [ TypeParameterList<md> ]
+  "(" [ 
+    FormalParameterList<md.FormalParameters>
+  ] ")"
+  {                                                 (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint>  (. md.AddTypeParameterConstraint(constraint); .)
+  } 
+  ( 
+    Block<md>                                       (. 
+                                                       if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
+                                                       md.HasBody = true;
+                                                    .)
+    | ";"                                           (. md.HasBody = false; .)
+  )                                                 (. 
+                                                       td.AddMember(md); 
+                                                       md.Terminate(t);
+                                                    .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a cast operator.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+=                                       (. 
+                                           CastOperatorDeclaration cod = new CastOperatorDeclaration(t, td);
+                                           CurrentElement = cod;
+                                           cod.SetModifiers(m.Value);
+                                           cod.AssignAttributes(attrs);
+                                           TypeReference typeRef;
+                                        .)
+    ( 
+      "implicit"                        
+      | "explicit"                      (. cod.IsExplicit = true; .)
+    ) "operator"                        
+    Type<out typeRef, false>            (. 
+                                           cod.ResultingType = typeRef;
+                                           cod.Name = typeRef.TailName;
+                                        .)
+    "("                                 
+      [ FormalParameterList<cod.FormalParameters> ]   
+    ")"                                 
+    ( Block<cod> | ";" )                (. 
+                                           td.AddMember(cod); 
+                                           cod.Terminate(t);
+                                        .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an operator overload member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +typeRef: resulting type reference.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
+  TypeDeclaration td>
+=                                  (. 
+                                      OperatorDeclaration od = new OperatorDeclaration(t, td);
+                                      CurrentElement = od;
+                                      od.SetModifiers(m.Value);
+                                      od.AssignAttributes(attrs);
+                                      od.ResultingType = typeRef;
+                                      Operator op;
+                                   .)
+  "operator" 
+  OverloadableOp<out op>           (. od.Operator = op; .)
+  "("                              (. od.Name = op.ToString(); .)
+    [ FormalParameterList<od.FormalParameters> ]
+  ")"
+  ( Block<od> | ";" )              (. 
+                                      td.AddMember(od); 
+                                      od.Terminate(t);
+                                   .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface.
+// +modifiers: Set of modifiers belonging to the member.
+// +parentType: Parent type declaration
+// +isPartial: indicates partial modifier.
+// +td: Type declaration the member belongs to.
+// ------------------------------------------------------------------------------------
+InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
+  out TypeDeclaration td>
+=
+  "interface"       (. 
+                       InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
+                       CurrentElement = ifd;
+                       td = ifd;
+                       ifd.IsPartial = isPartial;
+                    .)
+  ident                                               (. ifd.Name = t.val; .)
+  [ TypeParameterList<ifd> ]
+  [ InterfaceBase<ifd> ]
+  {                                                   (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint>    (. td.AddTypeParameterConstraint(constraint); .)
+  }
+  "{" { InterfaceMemberDeclaration<ifd> } "}" 
+  [ ";" ]                                                       
+.
+
+// ------------------------------------------------------------------------------------
+// Base type declaration of an interface.
+// +ifd: Interface declaration that has the base types defined here.
+// ------------------------------------------------------------------------------------
+InterfaceBase<InterfaceDeclaration ifd> 
+=
+  ":"                        (. TypeReference typeRef; .)
+  ClassType<out typeRef>      (. ifd.InterfaceList.Add(typeRef); .)
+  
+  { ","                                                         
+    ClassType<out typeRef>    (. ifd.InterfaceList.Add(typeRef); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface member.
+// +idf: declaration representing the interface type.
+// ------------------------------------------------------------------------------------
+InterfaceMemberDeclaration<InterfaceDeclaration ifd>
+                               (. 
+                                  Modifiers m = new Modifiers(this);
+                                  TypeReference typeRef;
+                                  AttributeCollection attrs = new AttributeCollection();
+                               .)
+=                              (. FormalParameterCollection pars = new FormalParameterCollection(); .)
+  { Attributes<attrs> } 
+  ModifierList<m>
+  ( Type<out typeRef, true>
+    (                          
+      ident                   (.
+                                 TypeReference memberRef = new TypeReference(t, this); 
+                                 memberRef.Name = t.val;
+                              .)
+      ( 
+        MethodDeclaration<attrs, m, typeRef, memberRef, ifd, false>        
+      | // --- Interface property
+        (. PropertyDeclaration prop = new PropertyDeclaration(t, ifd); .)
+        (. CurrentElement = prop; .)
+        (. ifd.AddMember(prop); .)
+        (. prop.ResultingType = typeRef; .)
+        (. prop.ExplicitName = memberRef; .)
+        (. prop.AssignAttributes(attrs); .)
+        (. prop.SetModifiers(m.Value); .)
+        "{" InterfaceAccessors<prop> "}" (. prop.Terminate(t); .)
+      )
+    | (. 
+         IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
+         CurrentElement =ind;
+         ind.SetModifiers(m.Value);
+         ind.AssignAttributes(attrs);
+         ind.Name = "";
+         ind.ResultingType = typeRef;
+      .)
+      "this" "[" [ FormalParameterList<ind.FormalParameters> ] "]" 
+      "{" InterfaceAccessors<ind> "}" (. ind.Terminate(t); .)
+    )
+  | InterfaceEventDeclaration<attrs, m, ifd>
+  ) 
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface event member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +idf: declaration representing the interface type.
+// ------------------------------------------------------------------------------------
+InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDeclaration ifd>
+          (. TypeReference typeRef; .)
+=
+  "event" Type<out typeRef, false> 
+  ident (. 
+           FieldDeclaration fd = new FieldDeclaration(t, ifd); 
+           CurrentElement = fd;
+           fd.SetModifiers(m.Value);
+           fd.AssignAttributes(attrs);
+           fd.ResultingType = typeRef;
+           fd.Name = t.val;
+           fd.IsEvent = true;
+        .)
+  ";"   (. 
+           ifd.AddMember(fd); 
+           fd.Terminate(t);
+        .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declares a local variable within a block.
+// +block: Block the variable is declared within.
+// ------------------------------------------------------------------------------------
+LocalVariableDeclaration<IBlockOwner block> (. 
+                                               TypeReference typeRef = null; 
+                                               bool isImplicit = false; 
+                                            .)
+=
+  (
+    Type<out typeRef, false>
+    | "var"                   (. isImplicit = true; .)
+  )
+  LocalVariableDeclarator<block, typeRef, isImplicit>
+  { "," LocalVariableDeclarator<block, typeRef, isImplicit> }
+.
+
+// ------------------------------------------------------------------------------------
+// Declares a local variable within a block with the specified type.
+// +block: Block the variable is declared within.
+// +typeRef: Type of the variable to declare.
+// +isImplicit: Indicates if the local declaration is implicit or not.
+// ------------------------------------------------------------------------------------
+LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplicit>
+= 
+  ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); .)
+        (. CurrentElement = loc; .)
+        (. loc.Name = t.val; .)
+        (. loc.Variable.ResultingType = typeRef; .)
+        (. loc.Variable.IsImplicit = isImplicit; .)
+        (. if (block != null) block.Statements.Add(loc); .)       
+  [
+    "=" 
+    (   (. Initializer init; .)
+      VariableInitializer<out init> (. loc.Variable.Initializer = init; .)
+      | "stackalloc" 
+        (. StackAllocInitializer saIn = new StackAllocInitializer(t, this); .)
+        (. loc.Variable.Initializer = saIn; .)
+        (. TypeReference tr; .)
+      Type<out tr, false> 
+        (. saIn.Type = tr; .)
+        (. Expression expr; .)
+      "[" 
+        Expression<out expr> 
+        (. saIn.Expression = expr; .)
+      "]" (. saIn.Terminate(t); .)
+    )
+  ]
+        (. 
+           block.Add(loc.Variable); 
+           loc.Terminate(t);
+        .)
+. 
+
+// ------------------------------------------------------------------------------------
+// Creates an initializer.
+// +init: Initializer created.
+// ------------------------------------------------------------------------------------
+VariableInitializer<out Initializer init> (. Expression expr; init = null; .)
+= 
+  Expression<out expr>  (. ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); .)
+                        (. init = expIn; expIn.Terminate(t); .)
+  |                     (. ArrayInitializer arrInit; .)
+    ArrayInitializer<out arrInit> (. init = arrInit; .)
+.
+
+// ------------------------------------------------------------------------------------
+// Creates an array initializer.
+// +init: Initializer created.
+// ------------------------------------------------------------------------------------
+ArrayInitializer<out ArrayInitializer init> (. init = new ArrayInitializer(t, this); .)
+= (. Initializer arrayInit = null; .)
+  "{" [ 
+  VariableInitializer<out arrayInit> (. init.Initializers.Add(arrayInit); .)
+  {IF (NotFinalComma()) ","
+  VariableInitializer<out arrayInit> (. init.Initializers.Add(arrayInit); .)
+  } [ "," ] ] "}" (. init.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a formal parameter list
+// +pars List holding the formal parameter declarations.
+// ------------------------------------------------------------------------------------
+FormalParameterList<FormalParameterCollection pars>                                                  
+=                                      (. 
+                                          TypeReference typeRef = null; 
+                                          AttributeCollection attrs = new AttributeCollection();
+                                       .)
+  { Attributes<attrs> }                (. 
+                                          FormalParameter fp = new FormalParameter(t, this); 
+                                          fp.AssignAttributes(attrs);
+                                       .)
+  (                                    
+    [ 
+      "ref"                            (. fp.Kind = FormalParameterKind.Ref; .) 
+      | "out"                          (. fp.Kind = FormalParameterKind.Out; .) 
+    ] Type<out typeRef, false>         (. fp.Type = typeRef; .)
+    ident                              (. 
+                                          fp.Name = t.val; 
+                                          fp.Type = typeRef;
+                                          pars.Add(fp);
+                                          fp.Terminate(t);
+                                       .)
+    [ "," FormalParameterList<pars> ]
+  | "params"                           (. fp.HasParams = true; .)
+    Type<out typeRef, false>           (. if (!typeRef.IsArray) { Error("UNDEF", la, "params argument must be an array"); } .)
+    ident                              (. fp.Name = t.val; .)
+                                       (. fp.Type = typeRef; .)
+                                       (. 
+                                          pars.Add(fp); 
+                                          fp.Terminate(t);
+                                       .)
+  )
+.
+
+Argument<ArgumentList argList> 
+              (. Argument arg = new Argument(t, this); .)
+= 
+  [           
+    "ref"     (. arg.Kind = FormalParameterKind.Ref; .)
+    | "out"   (. arg.Kind = FormalParameterKind.Out; .)
+  ]           (. Expression expr; .)
+  Expression<out expr>
+              (. arg.Expression = expr; .)
+              (. 
+                 if (argList != null) argList.Add(arg); 
+                 arg.Terminate(t);
+              .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a property accessors.
+// +prop: property holding the accessor.
+// ------------------------------------------------------------------------------------
+AccessorDeclarations<PropertyDeclaration prop>                                    
+       (. 
+          AttributeCollection attrs = new AttributeCollection();
+          AccessorDeclaration accessor = null;
+       .)
+= { Attributes<attrs> }               (. Modifiers am = new Modifiers(this); .)
+  ModifierList<am>                    
+  ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
+                                      (. CurrentElement = accessor; .)
+  | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
+                                      (. CurrentElement = accessor; .)
+  | ident                             (. Error("UNDEF", la, "set or get expected"); .)
+  ) 
+  (
+    Block<accessor>                   (. accessor.HasBody = true; .)
+  | ";"                               (. accessor.HasBody = false; .)
+  )                                   (. 
+                                         accessor.Terminate(t);
+                                         accessor.SetModifiers(am.Value); 
+                                         accessor.AssignAttributes(attrs);
+                                      .)
+  [                                   (. attrs = new AttributeCollection(); .)                               
+    { Attributes<attrs> }             (. am = new Modifiers(this); .)
+    ModifierList<am>                  
+    ( IF ("get".Equals(la.val)) ident (. 
+                                         if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
+                                         accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+                                         CurrentElement = accessor;
+                                      .)
+    | IF ("set".Equals(la.val)) ident (. 
+                                         if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
+                                         accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+                                         CurrentElement = accessor;
+                                      .)
+    | ident                           (. Error("UNDEF", la, "set or get expected"); .)
+    ) 
+    (
+      Block<accessor>                 (. accessor.HasBody = true; .)
+    | ";"                             (. accessor.HasBody = false; .)
+    )                                 (. 
+                                         accessor.Terminate(t);
+                                         accessor.SetModifiers(am.Value); 
+                                         accessor.AssignAttributes(attrs);
+                                      .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an event property accessors.
+// +prop: event property holding the accessor.
+// ------------------------------------------------------------------------------------
+EventAccessorDeclarations<EventPropertyDeclaration prop>                                                 
+       (. 
+          AttributeCollection attrs = new AttributeCollection();
+          AccessorDeclaration accessor = null;
+       .)
+= { Attributes<attrs> }                   (. Modifiers am = new Modifiers(this); .)
+  ModifierList<am>                    
+  ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
+                                          (. CurrentElement = accessor; .)
+  | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
+                                          (. CurrentElement = accessor; .)
+  | ident                                 (. Error("UNDEF", la, "add or remove expected"); .)
+  ) 
+  Block<accessor>                         (. 
+                                             accessor.Terminate(t);
+                                             accessor.HasBody = true;
+                                             accessor.SetModifiers(am.Value); 
+                                             accessor.AssignAttributes(attrs); 
+                                          .)
+  [                                       (. attrs = new AttributeCollection(); .)                               
+    { Attributes<attrs> }                 (. am = new Modifiers(this); .)
+    ModifierList<am>                      
+    ( IF ("add".Equals(la.val)) ident     (. 
+                                             if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
+                                             accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
+                                             CurrentElement = accessor;
+                                          .)
+    | IF ("remove".Equals(la.val)) ident  (. 
+                                             if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
+                                             accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
+                                             CurrentElement = accessor;
+                                          .)
+    | ident                               (. Error("UNDEF", la, "add or remove expected"); .)
+    ) 
+    Block<accessor>                       (. 
+                                             accessor.Terminate(t);
+                                             accessor.HasBody = true;
+                                             accessor.SetModifiers(am.Value); 
+                                             accessor.AssignAttributes(attrs); 
+                                          .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface accessors.
+// +prop: event property holding the accessor.
+// ------------------------------------------------------------------------------------
+InterfaceAccessors<PropertyDeclaration prop>
+       (. 
+          AttributeCollection attrs = new AttributeCollection();
+          AccessorDeclaration accessor = null;
+       .)
+= { Attributes<attrs> }                 (. Modifiers am = new Modifiers(this); .)
+  ModifierList<am>                    
+  ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
+                                        (. CurrentElement = accessor; .)
+  | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
+                                        (. CurrentElement = accessor; .)
+  | ident                               (. Error("UNDEF", la, "set or get expected"); .)
+  ) ";"                                 (. 
+                                           accessor.Terminate(t);
+                                           accessor.SetModifiers(am.Value); 
+                                           accessor.AssignAttributes(attrs); 
+                                        .)
+  [                                     (. attrs = new AttributeCollection(); .)                               
+    { Attributes<attrs> }               (. am = new Modifiers(this); .)
+    ModifierList<am>                    
+    ( IF ("get".Equals(la.val)) ident   (. 
+                                           if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
+                                           accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+                                           CurrentElement = accessor;
+                                        .)
+    | IF ("set".Equals(la.val)) ident   (. 
+                                           if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
+                                           accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+                                           CurrentElement = accessor;
+                                        .)
+    | ident                             (. Error("UNDEF", la, "set or get expected"); .)
+    ) ";"                               (. 
+                                           accessor.Terminate(t);
+                                           accessor.SetModifiers(am.Value); 
+                                           accessor.AssignAttributes(attrs); 
+                                        .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of attributes.
+// +attrs: List holding the attribute declarations.
+// ------------------------------------------------------------------------------------
+Attributes<AttributeCollection attrs>
+=                                                            (. string scope = ""; .)
+  "[" [ IF (IsAttrTargSpec()) 
+  ( ident | Keyword )                                        (. scope = t.val; .)
+  ":" ]                                                      (. AttributeDeclaration attr; .)
+  Attribute<out attr>                                        (. 
+                                                                attr.Scope = scope;
+                                                                attrs.Add(attr);
+                                                             .)
+  { 
+    IF (la.kind == _comma && Peek(1).kind != _rbrack) "," 
+    Attribute<out attr>                                      (. 
+                                                                attr.Scope = scope;
+                                                                attrs.Add(attr);
+                                                             .)
+  } [ "," ] "]"
+.
+
+// ------------------------------------------------------------------------------------
+// Declarations tokens that function as keywords.
+// ------------------------------------------------------------------------------------
+Keyword
+=
+  "abstract" | "as" | "base" | "bool" | "break" | "byte" | "case" | "catch"
+  | "char" | "checked" | "class" | "const" | "continue" | "decimal" | "default"
+  | "delegate" | "do" | "double" | "else" | "enum" | "event" | "explicit"
+  | "extern" | "false" | "finally" | "fixed" | "float" | "for" | "foreach"
+  | "goto" | "if" | "implicit" | "in" | "int" | "interface" | "internal" | "is"
+  | "lock" | "long" | "namespace" | "new" | "null" | "object" | "operator"
+  | "out" | "override" | "params" | "private" | "protected" | "public"
+  | "readonly" | "ref" | "return" | "sbyte" | "sealed" | "short" | "sizeof"
+  | "stackalloc" | "static" | "string" | "struct" | "switch" | "this" | "throw"
+  | "true" | "try" | "typeof" | "uint" | "ulong" | "unchecked" | "unsafe"
+  | "ushort" | "using" | "virtual" | "void" | "volatile" | "while"
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an attribute.
+// +attr: Attribute declaration.
+// ------------------------------------------------------------------------------------
+Attribute<out AttributeDeclaration attr> (. TypeReference typeRef; .)
+=  
+  TypeName<out typeRef>                  (. 
+                                            attr = new AttributeDeclaration(t, this, typeRef); 
+                                            CurrentElement = attr;
+                                         .)
+  [ AttributeArguments<attr> ]           (. attr.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declares the list of attribute arguments.
+// +attr: Attribute declaration.
+// ------------------------------------------------------------------------------------
+AttributeArguments<AttributeDeclaration attr> 
+                                     (. AttributeArgument arg; .)
+=                                    (. bool nameFound = false; .)
+  "(" 
+    [                                (. arg = new AttributeArgument(t,this); .)
+      [ IF (IsAssignment())          
+        ident                        (. arg.Name = t.val; .)
+        "="                          (. nameFound = true; .)
+      ]                              (. Expression expr; .)
+      Expression<out expr>           (. arg.Expression = expr; .)
+                                     (. 
+                                        attr.Arguments.Add(arg); 
+                                        arg.Terminate(t);
+                                     .)
+      { ","                          (. arg = new AttributeArgument(t, this); .)
+        ( IF (IsAssignment())  
+          ident                      (. arg.Name = t.val; .)
+          "="                        (. nameFound = true; .)
+          |                          (. if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); .)
+        ) Expression<out expr>       (. arg.Expression = expr; .)
+                                     (. 
+                                        attr.Arguments.Add(arg); 
+                                        arg.Terminate(t);
+                                     .)
+      }
+    ]
+  ")"
+.
+
+// ------------------------------------------------------------------------------------
+// Modifiers that can be assigned to types and members.
+// +m: List of modifier flags.
+// ------------------------------------------------------------------------------------
+ModifierList<Modifiers m>
+=
+{
+  "new"                            (. m.Add(Modifier.@new, t); .)
+  | "public"                       (. m.Add(Modifier.@public, t); .)
+  | "protected"                    (. m.Add(Modifier.@protected, t); .)
+  | "internal"                     (. m.Add(Modifier.@internal, t); .)
+  | "private"                      (. m.Add(Modifier.@private, t); .)
+  | "unsafe"                       (. m.Add(Modifier.@unsafe, t); .)
+  | "static"                       (. m.Add(Modifier.@static, t); .)
+  | "readonly"                     (. m.Add(Modifier.@readonly, t); .)
+  | "volatile"                     (. m.Add(Modifier.@volatile, t); .)
+  | "virtual"                      (. m.Add(Modifier.@virtual, t); .)
+  | "sealed"                       (. m.Add(Modifier.@sealed, t); .)
+  | "override"                     (. m.Add(Modifier.@override, t); .)
+  | "abstract"                     (. m.Add(Modifier.@abstract, t); .)
+  | "extern"                       (. m.Add(Modifier.@extern, t); .)
+}
+.
+
+// ------------------------------------------------------------------------------------
+// Reference for a type
+// +typeRef: type reference
+// +voidAllowed: indicates if "void" is an acceptable type or not.
+// ------------------------------------------------------------------------------------
+Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
+=                                                    
+  ( PrimitiveType<out typeRef>
+  | ClassType<out typeRef>                                               
+  | "void"                                           (. 
+                                                        typeRef = new TypeReference(t, this); 
+                                                        typeRef.Name = t.val;
+                                                        typeRef.IsVoid = true; 
+                                                     .)
+  )
+  [ "?"                                              (. typeRef.IsNullable = true; .)                                              
+  ]
+  PointerOrArray<typeRef>                            (. CompilationUnit.AddTypeToFix(typeRef); .)
+                                                     (. typeRef.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Reference for a type
+// +typeRef: type reference
+// +voidAllowed: indicates if "void" is an acceptable type or not.
+// ------------------------------------------------------------------------------------
+NonArrayType<out TypeReference typeRef>    (. typeRef = null; .)
+=                                                    
+  ( 
+    PrimitiveType<out typeRef>
+  | 
+    ClassType<out typeRef>                                               
+  )
+  [ 
+    "?"                         (. typeRef.IsNullable = true; .)                                              
+  ]
+  [
+    "*"                         (. typeRef.TypeModifiers.Add(new PointerModifier()); .)
+                                (. CompilationUnit.AddTypeToFix(typeRef); .)
+  ]
+                                (. typeRef.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Reference for a type in a relational expression
+// +typeRef: type reference
+// +voidAllowed: indicates if "void" is an acceptable type or not.
+// ------------------------------------------------------------------------------------
+TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
+=                                                    
+  ( PrimitiveType<out typeRef>
+  | ClassType<out typeRef>                                               
+  | "void"                                           (. 
+                                                        typeRef = new TypeReference(t, this); 
+                                                        typeRef.Name = t.val;
+                                                        typeRef.IsVoid = true; 
+                                                     .)
+  )
+  [ IF (IsNullableTypeMark())
+    "?"                                              
+  ]
+  PointerOrArray<typeRef>                            (. CompilationUnit.AddTypeToFix(typeRef); .)
+                                                     (. typeRef.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Sets the appropriate flags of a type reference if the declaration shows it is
+// a pointer or array.
+// +typeRef: type reference.
+// ------------------------------------------------------------------------------------
+PointerOrArray<TypeReference typeRef>
+=
+  { IF (IsPointerOrDims())
+    ( "*"                   (. typeRef.TypeModifiers.Add(new PointerModifier()); .)  
+    | 
+    "["                     (. int rank = 1; .)
+      { ","                 (. rank++; .)
+      } 
+    "]"                     (. typeRef.TypeModifiers.Add(new ArrayModifier(rank)); .)
+    )
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Types that are taken into account as primitive types.
+// ------------------------------------------------------------------------------------
+PrimitiveType<out TypeReference typeRef> (. typeRef = null; .)
+=
+  IntegralType<out typeRef> | 
+  (
+    "float"       (. typeRef = new TypeReference(t, this, typeof(float)); .)    
+    | "double"    (. typeRef = new TypeReference(t, this, typeof(double)); .) 
+    | "decimal"   (. typeRef = new TypeReference(t, this, typeof(decimal)); .)
+    | "bool"      (. typeRef = new TypeReference(t, this, typeof(bool)); .)
+  )               (. typeRef.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Types that are taken into account as integral types.
+// ------------------------------------------------------------------------------------
+IntegralType<out TypeReference typeRef> (. typeRef = null; .)
+= (
+    "sbyte"       (. typeRef = new TypeReference(t, this, typeof(sbyte)); .)
+    | "byte"      (. typeRef = new TypeReference(t, this, typeof(byte)); .)
+    | "short"     (. typeRef = new TypeReference(t, this, typeof(short)); .)
+    | "ushort"    (. typeRef = new TypeReference(t, this, typeof(ushort)); .)
+    | "int"       (. typeRef = new TypeReference(t, this, typeof(int)); .)
+    | "uint"      (. typeRef = new TypeReference(t, this, typeof(uint)); .)
+    | "long"      (. typeRef = new TypeReference(t, this, typeof(long)); .)
+    | "ulong"     (. typeRef = new TypeReference(t, this, typeof(ulong)); .)
+    | "char"      (. typeRef = new TypeReference(t, this, typeof(char)); .)
+  )               (. typeRef.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Types that are taken into account as class types.
+// +typeRef: resulting type reference.
+// ------------------------------------------------------------------------------------
+ClassType<out TypeReference typeRef>   (. typeRef = null; .)
+=                                                               
+  TypeName<out typeRef> |               
+  (                                    
+    "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
+    | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
+  )                                    (. typeRef.Terminate(t); .)                                 
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a compound member name
+// +typeRef: An instance to a member reference
+// ------------------------------------------------------------------------------------
+MemberName<out TypeReference typeRef>                                              
+= 
+  ident                                  (. 
+                                            typeRef = new TypeReference(t, this);
+                                            typeRef.Name = t.val; 
+                                            TypeReference nextType = typeRef;
+                                         .)
+  [ 
+    "::"                                 (. typeRef.IsGlobalScope = true; .)
+    ident                                (. 
+                                            typeRef.Suffix = new TypeReference(t, this);
+                                            typeRef.Suffix.Name = t.val; 
+                                            nextType = typeRef.Suffix;
+                                         .)
+  ]
+  [ 
+    IF (la.kind == _lt && IsPartOfMemberName()) 
+      TypeArgumentList<typeRef.Arguments> 
+  ]
+  { IF (la.kind == _dot && Peek(1).kind == _ident)
+      "." ident                          (. 
+                                            nextType.Suffix = new TypeReference(t, this);
+                                            nextType.Suffix.Name = t.val;
+                                            nextType = nextType.Suffix;
+                                         .)
+    [ 
+      IF (la.kind == _lt && IsPartOfMemberName()) 
+        TypeArgumentList<typeRef.Arguments>
+    ]
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a compound type name
+// +typeRef: An instance to a member reference
+// ------------------------------------------------------------------------------------
+TypeName<out TypeReference typeRef>                             
+=                                                               
+  ident                                  (. 
+                                            typeRef = new TypeReference(t, this);
+                                            typeRef.Name = t.val; 
+                                            TypeReference nextType = typeRef;
+                                         .)
+  [ 
+    "::"                                 (. typeRef.IsGlobalScope = true; .)
+    ident                                (. 
+                                            typeRef.Suffix = new TypeReference(t, this);
+                                            typeRef.Suffix.Name = t.val; 
+                                            nextType = typeRef.Suffix;
+                                         .)
+  ]                                                
+  [ TypeArgumentList<nextType.Arguments> ]                                    
+  {
+    "." ident                            (. 
+                                            nextType.Suffix = new TypeReference(t, this);
+                                            nextType.Suffix.Name = t.val;
+                                            nextType = nextType.Suffix;
+                                         .)
+    [ TypeArgumentList<nextType.Arguments> ]   
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+Statement<IBlockOwner block>
+= 
+  IF (la.kind == _ident && Peek(1).kind == _colon) ident ":" Statement<block>
+  | ConstStatement<block>
+  | IF (IsLocalVarDecl()) LocalVariableDeclaration<block> ";"
+  | EmbeddedStatement<block>
+.
+
+// ------------------------------------------------------------------------------------
+// Defines statements that can be nested in other statements.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+EmbeddedStatement<IBlockOwner block> 
+=   
+    // --- Block nested into a statement
+                    (. BlockStatement embedded = new BlockStatement(t, this, block); .)
+    Block<embedded> (. if (block != null) block.Add(embedded); .)
+  | EmptyStatement<block>
+  | CheckedBlock<block>
+  | UncheckedBlock<block>
+  | UnsafeBlock<block>
+  | StatementExpression<block> ";"
+  | IfStatement<block>
+  | SwitchStatement<block>
+  | WhileStatement<block>
+  | DoWhileStatement<block>
+  | ForStatement<block>
+  | ForEachStatement<block>
+  | BreakStatement<block>
+  | ContinueStatement<block>
+  | GotoStatement<block>
+  | ReturnStatement<block>
+  | ThrowStatement<block>
+  | TryFinallyBlock<block>
+  | LockStatement<block>
+  | UsingStatement<block>
+  | "yield" ( YieldReturnStatement<block> | YieldBreakStatement<block> ) ";"
+  | FixedStatement<block>
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a block of statements.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+Block<IBlockOwner block> (. CurrentElement = block.Owner as LanguageElement; .)
+=
+  "{" { Statement<block> } "}"
+.
+
+
+// ------------------------------------------------------------------------------------
+// Defines a switch statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+SwitchStatement<IBlockOwner block>
+=
+  "switch"                (. SwitchStatement sws = new SwitchStatement(t, this, block); .)
+                          (. CurrentElement = sws; .)
+  "("                     (. Expression expr; .)
+  Expression<out expr>    (. sws.Expression = expr; .)
+  ")" "{" 
+  { 
+    SwitchSection<sws> 
+  } 
+  "}"                     (. 
+                             if (block != null) block.Add(sws); 
+                             sws.Terminate(t);
+                          .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a constant statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ConstStatement<IBlockOwner block>
+=
+  "const"                (. TypeReference typeRef; .)
+                         (. ConstStatement cs = new ConstStatement(t, this, block); .)
+                         (. CurrentElement = cs; .)
+  Type<out typeRef, false> 
+  ident                  (. cs.Name = t.val; .)
+  "="                    (. Expression expr; .)
+  Expression<out expr>   (. cs.Expression = expr; .)
+                         (. 
+                            if (block != null) block.Add(cs); 
+                            cs.Terminate(t);
+                         .)
+  { ","                  (. cs = new ConstStatement(t, this, block); .)
+    ident                (. cs.Name = t.val; .)
+    "=" 
+    Expression<out expr> (. cs.Expression = expr; .)
+                         (. 
+                            if (block != null) block.Add(cs); 
+                            cs.Terminate(t);
+                         .)
+  } ";".                 
+
+// ------------------------------------------------------------------------------------
+// Defines an empty statement (";").
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+EmptyStatement<IBlockOwner block>
+=
+  ";"     (. EmptyStatement es = new EmptyStatement(t, this, block); .)
+          (. CurrentElement = es; .)
+          (. if (block != null) block.Add(es); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "checked" block
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+CheckedBlock<IBlockOwner block>
+=
+  (
+    IF (la.kind == _checked && Peek(1).kind == _lbrace) 
+      "checked" (. 
+                   CheckedBlock cb = new CheckedBlock(t, this, block);
+                   CurrentElement = cb;
+                   if (block != null) block.Add(cb);
+                .)
+    Block<cb>   (. cb.Terminate(t); .)
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Defines an "unchecked" block
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+UncheckedBlock<IBlockOwner block>
+=
+  (
+    IF (la.kind == _unchecked && Peek(1).kind == _lbrace) 
+    "unchecked" (. 
+                   UncheckedBlock ucb = new UncheckedBlock(t, this, block);
+                   CurrentElement = ucb;
+                   if (block != null) block.Add(ucb);
+                .)
+    Block<ucb>  (. ucb.Terminate(t); .)
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Defines an "unsafe" block
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+UnsafeBlock<IBlockOwner block>
+=
+  "unsafe" (. 
+              UnsafeBlock usb = new UnsafeBlock(t, this, block);
+              CurrentElement = usb;
+              if (block != null) block.Add(usb);
+           .)
+  Block<usb> (. usb.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines an "if" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+IfStatement<IBlockOwner block>
+=   
+  "if"                   (. IfStatement ifs = new IfStatement(t, this, block); .)
+                         (. CurrentElement = ifs; .)
+  "("                    (. if (block != null) block.Add(ifs); .)
+                         (. Expression expr; .)
+    Expression<out expr> (. ifs.Condition = expr; .)
+  ")"                    (. ifs.CreateThenBlock(t); .)
+  EmbeddedStatement<ifs.ThenStatements> (. ifs.ThenStatements.Terminate(t); .)
+  [ "else"               (. ifs.CreateElseBlock(t); .)
+    EmbeddedStatement<ifs.ElseStatements> (. ifs.ElseStatements.Terminate(t); .)
+  ]                      (. ifs.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "while" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+WhileStatement<IBlockOwner block>
+= 
+  "while"                 (. WhileStatement whs = new WhileStatement(t, this, block); .)
+                          (. CurrentElement = whs; .)
+  "("                     (. if (block != null) block.Add(whs); .)
+                          (. Expression expr; .)
+    Expression<out expr>  (. whs.Condition = expr; .)
+  ")" 
+  EmbeddedStatement<whs>  (. whs.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "do...while" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+DoWhileStatement<IBlockOwner block>
+=   
+  "do"                      (. DoWhileStatement whs = new DoWhileStatement(t, this, block); .)
+                            (. CurrentElement = whs; .)
+    EmbeddedStatement<whs>  (. if (block != null) block.Add(whs); .)
+  "while" 
+  "("                       (. Expression expr; .)
+    Expression<out expr>    (. whs.Condition = expr; .)
+  ")" ";"                   (. whs.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "for" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ForStatement<IBlockOwner block>
+= 
+  "for"                       (. ForStatement fs = new ForStatement(t, this, block); .)
+                              (. CurrentElement = fs; .)
+  "("                         (. if (block != null) block.Add(fs); .)
+    [                         (. fs.CreateInitializerBlock(t); .)
+      ForInitializer<fs>
+    ] ";" 
+    [                         (. Expression expr; .)
+      Expression<out expr>    (. fs.Condition = expr; .)
+    ] ";" 
+    [ 
+      ForIterator<fs>         (. fs.CreateIteratorBlock(t); .)
+    ] 
+  ")"
+  EmbeddedStatement<fs>       (. fs.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "foreach" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ForEachStatement<IBlockOwner block>
+=
+  "foreach"                     (. ForEachStatement fes = new ForEachStatement(t, this, block); .)
+                                (. CurrentElement = fes; .)
+  "("                           (. if (block != null) block.Add(fes); .)
+                                (. TypeReference typeRef; .)
+    (                          
+      Type<out typeRef, false>  (. fes.Variable.ResultingType = typeRef; .)
+      | "var"                   (. fes.Variable.IsImplicit = true; .)
+    )
+    ident                       (. fes.Variable.Name = t.val; .)
+    "in"                        (. Expression expr; .)
+    Expression<out expr>        (. fes.Expression = expr; .)
+  ")"                           (. fes.Add(fes.Variable); .)
+  EmbeddedStatement<fes>        (. fes.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "break" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+BreakStatement<IBlockOwner block>
+=
+  "break" ";" (. BreakStatement bs = new BreakStatement(t, this, block); .)
+              (. CurrentElement = bs; .)
+              (. if (block != null) block.Add(bs); .)
+              (. bs.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "goto" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+GotoStatement<IBlockOwner block>
+=
+  "goto"                  (. GotoStatement gs = new GotoStatement(t, this, block); .)
+                          (. CurrentElement = gs; .)
+                          (. if (block != null) block.Add(gs); .)
+  ( 
+    ident                 (. gs.Name = t.val; .)
+  | 
+    "case"                (. Expression expr; .)
+    Expression<out expr>  (. gs.LabelExpression = expr; .)
+  | 
+    "default"             (. gs.Name = t.val; .)
+  ) ";"                   (. gs.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "continue" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ContinueStatement<IBlockOwner block>
+=
+  "continue" ";"  (. ContinueStatement cs = new ContinueStatement(t, this, block); .)
+                  (. CurrentElement = cs; .)
+                  (. if (block != null) block.Add(cs); .)
+                  (. cs.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "try...catch...finally" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+TryFinallyBlock<IBlockOwner block>
+=
+  "try"         (. 
+                   TryStatement ts = new TryStatement(t, this, block); 
+                   CurrentElement = ts;
+                   ts.CreateTryBlock(t);
+                   if (block != null) block.Add(ts);
+                .)
+  Block<ts.TryBlock> 
+  ( 
+    CatchClauses<ts>
+    [ 
+      "finally" (. ts.CreateFinallyBlock(t); .) 
+      Block<ts.FinallyBlock> (. ts.FinallyBlock.Terminate(t); .)
+    ] 
+  | "finally" (. ts.CreateFinallyBlock(t); .) 
+    Block<ts.FinallyBlock>   (. ts.FinallyBlock.Terminate(t); .)
+  )                          (. ts.Terminate(t); .) 
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "lock" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+LockStatement<IBlockOwner block>
+=   
+  "lock"                  (. LockStatement ls = new LockStatement(t, this, block); .)
+                          (. CurrentElement = ls; .)
+                          (. if (block != null) block.Add(ls); .)
+  "("                     (. Expression expr; .)
+    Expression<out expr>  (. ls.Expression = expr; .)
+  ")" 
+  EmbeddedStatement<ls>   (. ls.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "using" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+UsingStatement<IBlockOwner block>
+=
+  "using" (. 
+              UsingStatement us = new UsingStatement(t, this, block);
+              CurrentElement = us;
+              if (block != null) block.Add(us);
+           .)
+  "(" 
+  (
+    IF (IsLocalVarDecl()) LocalVariableDeclaration<us>  
+  |                             (. Expression expr; .)
+    Expression<out expr>        (. us.ResourceExpression = expr; .)
+  ) 
+  ")" 
+  EmbeddedStatement<us>         (. us.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a "return" statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ReturnStatement<IBlockOwner block>
+=
+  "return"                 (. ReturnStatement yrs = new ReturnStatement(t, this, block); .)
+                           (. CurrentElement = yrs; .)
+  [                        (. Expression expr; .)
+  Expression<out expr>     (. yrs.Expression = expr; .)
+  ]
+  ";"                      (. if (block != null) block.Add(yrs); .)
+                           (. yrs.Terminate(t); .)
+                           
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "throw" statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+ThrowStatement<IBlockOwner block>
+=
+  "throw"                 (. ThrowStatement ts = new ThrowStatement(t, this, block); .)
+                          (. CurrentElement = ts; .)
+  [                       (. Expression expr; .)
+    Expression<out expr>  (. ts.Expression = expr; .)
+  ] ";"                   (. if (block != null) block.Add(ts); .)
+                          (. ts.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "yield return" statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+YieldReturnStatement<IBlockOwner block>
+=
+  "return"                 (. Expression expr; .)
+  Expression<out expr>     (. YieldReturnStatement yrs = new YieldReturnStatement(t, this, block); .)
+                           (. CurrentElement = yrs; .)
+                           (. yrs.Expression = expr; .)
+                           (. if (block != null) block.Add(yrs); .)
+                           (. yrs.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "yield break" statement.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+YieldBreakStatement<IBlockOwner block>
+=
+  "break"   (. YieldBreakStatement ybs = new YieldBreakStatement(t, this, block); .)
+            (. CurrentElement = ybs; .) 
+            (. if (block != null) block.Add(ybs); .)
+            (. ybs.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a "fixed" statement
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+FixedStatement<IBlockOwner block>
+= 
+  "fixed"                     (. FixedStatement fs = new FixedStatement(t, this, block); .)
+                              (. CurrentElement = fs; .)
+                              (. if (block != null) block.Add(fs); .)
+  "("                         (. TypeReference typeRef; .)
+          
+    Type<out typeRef, false>          
+                              (. if (!typeRef.IsPointer) Error("UNDEF", la, "can only fix pointer types"); .)
+                              (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t, this, block); .)
+                              (. CurrentElement = vas; .)
+    ident                     (. vas.Name = t.val; .)
+    "="                       (. Expression expr; .)
+    Expression<out expr>      (. vas.Expression = expr; .)
+                              (. fs.Assignments.Add(vas); .)
+    { 
+      ","                     (. vas = new ValueAssignmentStatement(t, this, block); .)
+                              (. CurrentElement = vas; .)
+      ident                   (. vas.Name = t.val; .)
+      "=" 
+      Expression<out expr>    (. vas.Expression = expr; .)
+                              (. fs.Assignments.Add(vas); .)
+    }
+  ")" EmbeddedStatement<fs>   (. fs.Terminate(t); .)
+.    
+
+// ------------------------------------------------------------------------------------
+// Defines a statement expression
+// +operateor: Assignement operator 
+// ------------------------------------------------------------------------------------
+StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
+=                                       (. Expression expr = null; .)
+  Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t, this, block); .)
+                                        (. CurrentElement = es; .)
+                                        (. es.Expression = expr; .)
+  ( (. AssignmentOperator asgn; .)
+    AssignmentOperator<out asgn>        (. es.Expression = asgn; .)
+                                        (. asgn.LeftOperand = expr; .)
+                                        (. Expression rightExpr; .)
+    Expression<out rightExpr>           (. asgn.RightOperand = rightExpr; .)
+  | (. if (isAssignment) Error("UNDEF", la, "error in assignment."); .)
+  )                                     (. if (block != null) block.Add(es); .)
+                                        (. es.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines assignment operators.
+// +operateor: Assignement operator 
+// ------------------------------------------------------------------------------------
+AssignmentOperator<out AssignmentOperator op> (. op = null; .)
+=
+    "="     (. op = new AssignmentOperator(t, this); .)
+  | "+="    (. op = new PlusAssignmentOperator(t, this); .)
+  | "-="    (. op = new MinusAssignmentOperator(t, this); .)
+  | "*="    (. op = new MultiplyAssignmentOperator(t, this); .)
+  | "/="    (. op = new DivideAssignmentOperator(t, this); .)
+  | "%="    (. op = new ModuloAssignmentOperator(t, this); .)
+  | "&="    (. op = new AndAssignmentOperator(t, this); .)
+  | "|="    (. op = new OrAssignmentOperator(t, this); .)
+  | "^="    (. op = new XorAssignmentOperator(t, this); .)
+  | "<<="   (. op = new LeftShiftAssignmentOperator(t, this); .)
+  | ">"     (. int pos = t.pos; .)
+    ">="    (. if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment"); .)
+            (. op = new RightShiftAssignmentOperator(t, this); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Represents a section of a switch statement.
+// +expr: Label expression
+// ------------------------------------------------------------------------------------
+SwitchSection<SwitchStatement sws>
+=                         (. 
+                             SwitchSection section = sws.CreateSwitchSection(t);
+                             CurrentElement = section;
+                             Expression expr;
+                          .)
+  SwitchLabel<out expr>   (. 
+                            if (expr == null) section.IsDefault = true; 
+                             else section.Labels.Add(expr);
+                          .)
+  { 
+    IF (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) 
+    SwitchLabel<out expr> (. 
+                           if (expr == null) section.IsDefault = true; 
+                           else section.Labels.Add(expr);
+                          .)
+  }
+  Statement<section> 
+  { 
+    IF (IsNoSwitchLabelOrRBrace()) 
+    Statement<section> 
+  }                       (. sws.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Represents a label of a switch statement.
+// +expr: Label expression
+// ------------------------------------------------------------------------------------
+SwitchLabel<out Expression expr> (. expr = null; .)
+= 
+  "case" Expression<out expr> ":"
+  | "default" ":"                 
+.
+
+// ------------------------------------------------------------------------------------
+// Represents the initializer of a for statement.
+// +fs: For statement owning the initializator.
+// ------------------------------------------------------------------------------------
+ForInitializer<ForStatement fs>
+=
+  IF (IsLocalVarDecl()) LocalVariableDeclaration<fs>
+  | StatementExpression<fs.InitializerBlock> { "," StatementExpression<fs.InitializerBlock> }
+.
+
+// ------------------------------------------------------------------------------------
+// Represents the iterator of a for statement.
+// +fs: For statement owning the iterator.
+// ------------------------------------------------------------------------------------
+ForIterator<ForStatement fs>
+=
+  StatementExpression<fs.IteratorBlock> { "," StatementExpression<fs.IteratorBlock> }
+.
+
+// ------------------------------------------------------------------------------------
+// Represents catch clauses in a try..catch..finally statement.
+// +try: Statement owning the catch clauses.
+// ------------------------------------------------------------------------------------
+CatchClauses<TryStatement tryStm>
+=                                                     
+  "catch"                   (. CatchClause cc = tryStm.CreateCatchClause(t); .)    
+                            (. CurrentElement = cc; .)  
+  (                         
+    Block<cc>
+  | 
+    "("                     (. TypeReference typeRef; .)
+    ClassType<out typeRef>  (. cc.ExceptionType = typeRef; .)
+    [ 
+      ident                 (. cc.Name = t.val; .)
+                            (. cc.CreateInstanceVariable(typeRef, t.val); .)
+    ] 
+    ")" Block<cc>           (. cc.Terminate(t); .)
+    [ CatchClauses<tryStm> ]
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Retrieves an expression.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+Expression<out Expression expr>   (. expr = null; .)
+=                                 (. Expression leftExpr; .)
+  Unary<out leftExpr>
+  ( IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
+                                  (. AssignmentOperator asgn; .)
+    AssignmentOperator<out asgn>  (. Expression rightExpr; .)
+    Expression<out rightExpr>     (. asgn.RightOperand = rightExpr; .)
+                                  (. asgn.LeftOperand = leftExpr; .)
+                                  (. expr = asgn; .)
+  | (. BinaryOperator simpleExpr; .)
+    NullCoalescingExpr<out simpleExpr> 
+                                  (. 
+                                     if (simpleExpr == null) 
+                                     {
+                                       expr = leftExpr;
+                                     }
+                                     else
+                                     {
+                                       simpleExpr.LeftMostNonNull.LeftOperand = leftExpr;
+                                       expr = simpleExpr;
+                                     }
+                                  .)
+    [                             (. ConditionalOperator condExpr = new ConditionalOperator(t, this, expr); .)
+                                  (. expr = condExpr; .)    
+      "?"                         (. Expression trueExpr; .)
+      Expression<out trueExpr>    (. condExpr.TrueExpression = trueExpr; .)
+      ":"                         (. Expression falseExpr; .)
+      Expression<out falseExpr>   (. condExpr.FalseExpression = falseExpr; .)
+                                  (. condExpr.Terminate(t); .)
+    ]
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a null coalescing operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+NullCoalescingExpr<out BinaryOperator expr> (. expr = null; .)
+=                     
+  OrExpr<out expr>    
+  { 
+    "??"                  (. BinaryOperator oper = new NullCoalescingOperator(t, this); .)
+                          (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    OrExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a logical or operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+OrExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  AndExpr<out expr>    
+  { 
+    "||"                  (. BinaryOperator oper = new OrOperator(t, this); .)
+                          (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    AndExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a logical and operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+AndExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  BitOrExpr<out expr>    
+  { 
+    "&&"                  (. BinaryOperator oper = new AndOperator(t, this); .)
+                          (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    BitOrExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a bitwise or operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+BitOrExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  BitXorExpr<out expr>    
+  { 
+    "|"                   (. BinaryOperator oper = new BitwiseOrOperator(t, this); .)
+                          (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    BitXorExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a bitwise xor operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+BitXorExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  BitAndExpr<out expr>    
+  { 
+    "^"                   (. BinaryOperator oper = new BitwiseXorOperator(t, this); .)
+                          (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    BitAndExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines a bitwise and operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+BitAndExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  EqlExpr<out expr>    
+  { 
+    "&"                   (. BinaryOperator oper = new BitwiseAndOperator(t, this); .)
+                          (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    EqlExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines an "==" or "!=" operator.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+EqlExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  RelExpr<out expr>       (. BinaryOperator oper; .)
+  {           
+    (                     
+      "!="                (. oper = new EqualOperator(t, this); .)
+      | "=="              (. oper = new NotEqualOperator(t, this); .)
+    )                     (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
+    RelExpr<out rightExpr> (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines relational and typecheck operators.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+RelExpr<out BinaryOperator expr> (. expr = null; BinaryOperator oper = null; .)
+= 
+  ShiftExpr<out expr>  
+  { 
+    (
+      "<"                 (. oper = new LessThanOperator(t, this); .)
+      | ">"               (. oper = new GreaterThanOperator(t, this); .)
+      | "<="              (. oper = new LessThanOrEqualOperator(t, this); .)
+      | ">="              (. oper = new GreaterThanOrEqualOperator(t, this); .)
+    )                     (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .)
+    ShiftExpr<out rightExpr>             
+                          (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+    |
+      (
+          "is"            (. oper = new IsOperator(t, this); .)
+        | "as"            (. oper = new IsOperator(t, this); .)
+      )                   (. oper.LeftOperand = expr; .)
+                          (. TypeReference typeRef; .)
+      TypeInRelExpr<out typeRef, false>
+                          (. oper.RightOperand = new TypeOperator(t, typeRef); .)
+                          (. expr = oper; .)
+                          (. oper.Terminate(t); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines shift operators.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+ShiftExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  AddExpr<out expr>       (. BinaryOperator oper = null; .)
+  { IF (IsShift())
+    (
+      "<<"                (. oper = new LeftShiftOperator(t, this); .)
+      | ">" ">"           (. oper = new RightShiftOperator(t, this); .)
+    )                     (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
+    AddExpr<out rightExpr>
+                          (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines addition operators.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+AddExpr<out BinaryOperator expr> (. expr = null; .)
+= 
+  MulExpr<out expr>       (. BinaryOperator oper = null; .)
+  {
+    ( 
+      "+"                 (. oper = new AddOperator(t, this); .)
+      | "-"               (. oper = new SubtractOperator(t, this); .)
+    )                     (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. BinaryOperator rightExpr; .) 
+    MulExpr<out rightExpr>
+                          (. 
+                             if (rightExpr == null) 
+                             {
+                               oper.RightOperand = unExpr;
+                             }
+                             else
+                             {
+                               oper.RightOperand = rightExpr;
+                               rightExpr.LeftOperand = unExpr;
+                             }
+                             expr = oper;
+                             oper.Terminate(t);
+                          .)
+  }
+.
+
+// ------------------------------------------------------------------------------------
+// Defines multiplication operators.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+MulExpr<out BinaryOperator expr> 
+                          (. 
+                             expr = null;
+                             BinaryOperator oper = null; 
+                          .)
+=                          
+  {
+    (
+      "*"                 (. oper = new MultiplyOperator(t, this); .)
+      | "/"               (. oper = new DivideOperator(t, this); .)
+      | "%"               (. oper = new ModuloOperator(t, this); .)
+    )                     (. oper.LeftOperand = expr; .)
+                          (. Expression unExpr; .)
+    Unary<out unExpr>     (. oper.RightOperand = unExpr; .)
+                          (. expr = oper; .)
+                          (. oper.Terminate(t); .)
+  }
+                          
+.
+
+// ------------------------------------------------------------------------------------
+// Retrieves an unary expression.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+Unary<out Expression expr>    
+              (. 
+                 UnaryOperator unOp = null;
+                 expr = null;
+              .)
+=
+  (
+    IF (unaryHead[la.kind] || IsTypeCast())
+    ( 
+      "+"     (. unOp = new UnaryPlusOperator(t, this); .)
+      | "-"   (. unOp = new UnaryMinusOperator(t, this); .)
+      | "!"   (. unOp = new NotOperator(t, this); .)
+      | "~"   (. unOp = new BitwiseNotOperator(t, this); .)
+      | "++"  (. unOp = new PreIncrementOperator(t, this); .)
+      | "--"  (. unOp = new PreDecrementOperator(t, this); .)
+      | "*"   (. unOp = new PointerOperator(t, this); .)
+      | "&"   (. unOp = new ReferenceOperator(t, this); .)
+      | "("   (. TypeReference typeRef; .)
+              (. TypeCastOperator tcOp = new TypeCastOperator(t, this); .)
+        Type<out typeRef, false> 
+        ")"   (. tcOp.Type = typeRef; .)
+              (. unOp = tcOp; .)
+    )
+  )
+              (. Expression unaryExpr; .)
+  Unary<out unaryExpr>
+              (. 
+                 if (unOp == null) expr = unaryExpr;
+                 else
+                 {
+                   unOp.Operand = unaryExpr;
+                   expr = unOp;
+                 }
+                 unOp.Terminate(t);
+              .)
+  | Primary<out expr>
+.
+
+// ------------------------------------------------------------------------------------
+// Retrieves a primary expression.
+// +expr: expression retrieved.
+// ------------------------------------------------------------------------------------
+Primary<out Expression expr>  (. Expression innerExpr = null;
+                                 expr = null;
+                              .)
+=
+  ( 
+    Literal<out innerExpr>             
+  | "(" Expression<out innerExpr> ")"  (. if (innerExpr != null) innerExpr.BracketsUsed = true; .)
+  | PrimitiveNamedLiteral<out innerExpr>
+  | NamedLiteral<out innerExpr>
+  | "this" (. innerExpr = new ThisLiteral(t, this); .)
+  | "base" ( BaseNamedLiteral<out expr> | BaseIndexerOperator<out expr> )  
+  | NewOperator<out innerExpr>
+  | TypeOfOperator<out innerExpr>
+  | CheckedOperator<out innerExpr>
+  | UncheckedOperator<out innerExpr>
+  | DefaultOperator<out innerExpr>
+  | AnonymousDelegate<out innerExpr>
+  | SizeOfOperator<out innerExpr>
+  )
+
+  (. Expression curExpr = innerExpr; .)
+
+  { 
+  (
+      "++"  (. curExpr = new PostIncrementOperator(t, this, innerExpr); .) 
+    | "--"  (. curExpr = new PostDecrementOperator(t, this, innerExpr); .) 
+    | "->"  (. NamedLiteral nl; .)
+      SimpleNamedLiteral<out nl>
+            (. curExpr = new CTypeMemberAccessOperator(t, innerExpr, nl); .)
+    | "."   (. NamedLiteral nl; .)
+      SimpleNamedLiteral<out nl>
+            (. curExpr = new MemberAccessOperator(t, innerExpr, nl); .)
+    | "("   (. ArgumentListOperator alop = new ArgumentListOperator(t, this, innerExpr); .)
+        [ Argument<alop.Arguments> { "," Argument<alop.Arguments> } ] 
+      ")"   (. curExpr = alop; .)
+    |       (. ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, this, innerExpr); .)                                                                         
+      ArrayIndexer<aiop> 
+            (. curExpr = aiop; .)
+  )         (. curExpr.Terminate(t); .)
+  }
+  
+  (. expr = curExpr; .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a literal expression.
+// +value: Literal expression value.
+// ------------------------------------------------------------------------------------
+Literal<out Expression value>
+  (. value = null; .)
+= 
+  intCon        (. value = IntegerConstant.Create(t, this); .)
+  | realCon     (. value = RealConstant.Create(t, this); .)
+  | charCon     (. value = new CharLiteral(t, this); .)
+  | stringCon   (. value = new StringLiteral(t, this); .)
+  | "true"      (. value = new TrueLiteral(t, this); .)
+  | "false"     (. value = new FalseLiteral(t, this); .)
+  | "null"      (. value = new NullLiteral(t, this); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a primitive named literal expression.
+// +expr: Literal expression value.
+// ------------------------------------------------------------------------------------
+PrimitiveNamedLiteral<out Expression expr>  (. expr = null; .)
+=                 (. PrimitiveNamedLiteral pml = null; .)
+  (   "bool"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(bool)); .)
+    | "byte"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(byte)); .)
+    | "char"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(char)); .)
+    | "decimal"   (. pml = new PrimitiveNamedLiteral(t, this, typeof(decimal)); .)
+    | "double"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(double)); .)
+    | "float"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(float)); .)
+    | "int"       (. pml = new PrimitiveNamedLiteral(t, this, typeof(int)); .)
+    | "long"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(long)); .)
+    | "object"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(object)); .)
+    | "sbyte"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(sbyte)); .)
+    | "short"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(short)); .)
+    | "string"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(string)); .)
+    | "uint"      (. pml = new PrimitiveNamedLiteral(t, this, typeof(uint)); .)
+    | "ulong"     (. pml = new PrimitiveNamedLiteral(t, this, typeof(ulong)); .)
+    | "ushort"    (. pml = new PrimitiveNamedLiteral(t, this, typeof(ushort)); .)
+  )               (. expr = pml; .)
+  "." 
+  ident           (. pml.Name = t.val; .)
+  [ 
+    IF (IsGeneric()) TypeArgumentList<pml.TypeArguments> 
+  ]               (. pml.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a named literal expression.
+// +expr: Literal expression value.
+// ------------------------------------------------------------------------------------
+NamedLiteral<out Expression expr>  (. expr = null; .)
+= 
+  ident        (. NamedLiteral nl = new NamedLiteral(t, this); .)
+               (. expr = nl; .)
+               (. nl.Name = t.val; .)
+  [ "::"       (. nl.IsGlobalScope = true; .)
+    ident      (. nl.Name = t.val; .)
+  ] 
+  [ IF (IsGeneric()) TypeArgumentList<nl.TypeArguments> ]
+               (. nl.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a simple named literal expression.
+// +expr: Named literal expression value.
+// ------------------------------------------------------------------------------------
+SimpleNamedLiteral<out NamedLiteral expr> 
+= 
+  ident        (. expr = new NamedLiteral(t, this); .)
+  [ IF (IsGeneric()) TypeArgumentList<expr.TypeArguments> ]
+               (. expr.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a named literal expression.
+// +expr: Literal expression value.
+// ------------------------------------------------------------------------------------
+BaseNamedLiteral<out Expression expr>  (. expr = null; .)
+= 
+  "."       
+  ident    (. BaseNamedLiteral bnl = new BaseNamedLiteral(t, this); .)
+           (. bnl.Name = t.val; .)
+           (. expr = bnl; .)
+   [ IF (IsGeneric()) TypeArgumentList<bnl.TypeArguments> ]
+           (. bnl.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a base indexer operator expression.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+BaseIndexerOperator<out Expression expr>
+= 
+  "["                             (. BaseIndexerOperator bio = new BaseIndexerOperator(t, this); .)
+                                  (. expr = bio; .)
+                                  (. Expression indexExpr; .)
+  Expression<out indexExpr>       (. bio.Indexes.Add(indexExpr); .) 
+    { "," 
+      Expression<out indexExpr>   (. bio.Indexes.Add(indexExpr); .) 
+    } 
+  "]"                             (. bio.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a typeof operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+TypeOfOperator<out Expression expr>
+= 
+  "typeof"                   (. TypeOfOperator top = new TypeOfOperator(t, this); .)
+  "("                        (. expr = top; .)
+                             (. TypeReference typeRef; .)
+    Type<out typeRef, true>  (. top.Type = typeRef; .)
+  ")"                        (. top.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a sizeof operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+SizeOfOperator<out Expression expr>
+= 
+  "sizeof"                   (. SizeOfOperator sop = new SizeOfOperator(t, this); .)
+  "("                        (. expr = sop; .)
+                             (. TypeReference typeRef; .)
+    Type<out typeRef, true>  (. sop.Type = typeRef; .)
+  ")"                        (. sop.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a checked operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+CheckedOperator<out Expression expr>
+= 
+  "checked"                     (. CheckedOperator cop = new CheckedOperator(t, this); .)
+  "("                           (. expr = cop; .)
+                                (. Expression innerExpr; .)
+    Expression<out innerExpr>   (. cop.Operand = innerExpr; .)
+  ")"                           (. cop.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an unchecked operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+UncheckedOperator<out Expression expr>
+= 
+  "unchecked"                   (. UncheckedOperator uop = new UncheckedOperator(t, this); .)
+  "("                           (. expr = uop; .)
+                                (. Expression innerExpr; .)
+    Expression<out innerExpr>   (. uop.Operand = innerExpr; .)
+  ")"                           (. uop.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a default operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+DefaultOperator<out Expression expr>
+= 
+  "default"                 (. DefaultOperator dop = new DefaultOperator(t, this); .)
+  "("                       (. expr = dop; .)
+                            (. Expression innerExpr; .)
+    Primary<out innerExpr>  (. dop.Operand = innerExpr; .)
+  ")"                       (. dop.Terminate(t); .)
+.
+
+//// ------------------------------------------------------------------------------------
+//// Declaration of a "new" operator.
+//// +expr: Expression value.
+//// ------------------------------------------------------------------------------------
+//NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
+//= 
+//  "new"                           (. NewOperator nop = new NewOperator(t, this); .)
+//                                  (. expr = nop; .)
+//                                  (. TypeReference typeRef; .)
+//  Type<out typeRef, false>        (. nop.Type = typeRef; .)
+//  (
+//    // --- Simple constructor call
+//    "(" 
+//    [ 
+//      Argument<nop.Arguments> 
+//      { "," Argument<nop.Arguments> } 
+//    ] 
+//    ")"
+//  | // --- New array creation
+//    "["                           (. Expression dimExpr; .)
+//    Expression<out dimExpr>       (. nop.Dimensions.Add(dimExpr); .)
+//    { 
+//      "," 
+//      Expression<out dimExpr>     (. nop.Dimensions.Add(dimExpr); .)
+//    } 
+//    "]" 
+//    { IF (IsDims()) 
+//      "["                         (. nop.RunningDimensions = 1; .)
+//       { 
+//          ","                     (. nop.RunningDimensions++; .)
+//       } 
+//      "]" 
+//    }
+//    [                             
+//      ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+//    ] 
+//  | // --- Array initialization
+//    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
+//  )                                  (. nop.Terminate(t); .)
+//.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a "new" operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+NewOperator<out Expression expr>  
+= 
+  "new"                           (. NewOperator nop = new NewOperator(t, this); .)
+                                  (. expr = nop; .)
+                                  (. TypeReference typeRef; .)
+  (
+    NonArrayType<out typeRef>      
+    NewOperatorWithType<nop, typeRef>
+  |
+    ImplicitArrayCreation<nop>    (. nop.Kind = NewOperatorKind.UntypedArrayInitialization; .)
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a "new" operator with explicit type.
+// +nop: NewOperator delcaration
+// +typeRef: Type to create with the new operator
+// ------------------------------------------------------------------------------------
+NewOperatorWithType<NewOperator nop, TypeReference typeRef> 
+                                   (. 
+                                      ArrayInitializer arrayInit;
+                                      nop.Type = typeRef; 
+                                   .)
+=
+  (
+    // --- Simple constructor call
+    "(" 
+    [ 
+      Argument<nop.Arguments> 
+      { "," Argument<nop.Arguments> } 
+    ] 
+    ")"
+    // --- Optional initializer list
+    [                             (. Initializer init; .)
+      ObjectOrCollectionInitializer<out init> 
+                                  (. nop.Initializer = init; .)
+    ]
+
+  | // --- Implicit default constructor call
+                                  (. Initializer init; .)
+      ObjectOrCollectionInitializer<out init> 
+                                  (. nop.Initializer = init; .)
+  | // --- Array initialization
+    IF (IsDims())                 (. nop.Kind = NewOperatorKind.TypedArrayInitialization; .)
+    "["                           (. nop.RunningDimensions = 1; .)
+      { 
+        ","                       (. nop.RunningDimensions++; .)
+      } 
+    "]" 
+    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
+
+  | // --- New array creation
+    "["                           (. Expression dimExpr; .)
+    Expression<out dimExpr>       (. nop.Dimensions.Add(dimExpr); .)
+    { 
+      "," 
+      Expression<out dimExpr>     (. nop.Dimensions.Add(dimExpr); .)
+    } 
+    "]" 
+    { IF (IsDims()) 
+      "["                         (. nop.RunningDimensions = 1; .)
+        { 
+          ","                     (. nop.RunningDimensions++; .)
+        } 
+      "]" 
+    }                             (. nop.Kind = NewOperatorKind.TypedArrayCreation; .)
+    [                             
+      ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+                                      (. nop.Kind = NewOperatorKind.TypedArrayInitialization; .)
+    ] 
+  )                                  (. nop.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an implicit array creation
+// +nop: NewOperator delcaration
+// +typeRef: Type to create with the new operator
+// ------------------------------------------------------------------------------------
+ImplicitArrayCreation<NewOperator nop> 
+                                    (. 
+                                       ArrayInitializer arrayInit;
+                                       nop.IsImplicitArray = true;
+                                    .)
+=
+  "["                               (. nop.RunningDimensions = 1; .)
+    { 
+      ","                           (. nop.RunningDimensions++; .)
+    } 
+  "]" 
+  [                             
+    ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// Declares an object or collection initializer used with "new" operator
+// ------------------------------------------------------------------------------------
+ObjectOrCollectionInitializer<out Initializer init> 
+=
+  "{"                                     (. init = null; .)
+  
+  (
+    IF (IsEmptyMemberInitializer()) "}"   
+  |
+    IF (IsMemberInitializer())            (. MemberInitializerList mInitList; .)
+    MemberInitializerList<out mInitList>  (. init = mInitList; .)
+  |
+    CollectionInitializer<out init> 
+  )
+  "}"
+.
+
+CollectionInitializer<out Initializer init> 
+                                          (. 
+                                             CollectionInitializer collInit = new CollectionInitializer(t, this); 
+                                             init = collInit;
+                                             Initializer elInit;
+                                          .)
+=
+  ElementInitializerList<out elInit>      (. collInit.Initializers.Add(elInit); .)
+                                          (. init.Terminate(t); .)
+.
+
+ElementInitializerList<out Initializer init> 
+                                          (. 
+                                             CollectionInitializer collInit = new CollectionInitializer(t, this); 
+                                             init = collInit;
+                                             Initializer elementInit;
+                                          .) 
+=
+  ElementInitializer<out elementInit>     (. collInit.Initializers.Add(elementInit); .)
+  {
+    IF (NotFinalComma()) ","
+    ElementInitializer<out elementInit>   (. collInit.Initializers.Add(elementInit); .)
+  } [ "," ]                               (. init.Terminate(t); .)
+.
+
+ElementInitializer<out Initializer init>   (. Expression expr; init = null; .)
+=
+  (
+    IF (IsValueInitializer())
+    Expression<out expr>                  (. init = new ExpressionInitializer(t, this, expr); .)
+  | 
+                                          (. ExpressionListInitializer listInit = new ExpressionListInitializer(t, this); .)
+                                          (. init = listInit; .)
+    "{"
+      Expression<out expr>                (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
+      {
+        ","
+        Expression<out expr>              (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
+      }
+    "}"
+  )                                       (. if (init != null) init.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// A member initialization list declaration
+// +initList: member initializer list
+// ------------------------------------------------------------------------------------
+MemberInitializerList<out MemberInitializerList initList>  
+                                  (. 
+                                     initList = new MemberInitializerList(t, this);
+                                     MemberInitializer mInit;
+                                  .)
+=                     
+  MemberInitializer<out mInit>    (. initList.Initializers.Add(mInit); .)
+  {
+    IF (NotFinalComma()) ","
+    MemberInitializer<out mInit>  (. initList.Initializers.Add(mInit); .)
+  } [ "," ]                       (. initList.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// A member initialization declaration
+// +init: member initializer
+// ------------------------------------------------------------------------------------
+MemberInitializer<out MemberInitializer init>
+=
+  ident                       (. Token startToken = t; .)
+  "="                         (. Expression expr; .)
+                              (. init = null; .)
+  (
+    IF (IsValueInitializer())
+    Expression<out expr>      (. init = new MemberInitializer(startToken, this, expr); .)
+  |                           
+                              (. Initializer compoundInit; .)
+    ObjectOrCollectionInitializer<out compoundInit>
+                              (. init = new MemberInitializer(startToken, this, compoundInit); .)
+  )
+                              (. init.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a "new" operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+AnonymousDelegate<out Expression expr>  
+= 
+  "delegate"            (. AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this); .)
+                        (. CurrentElement = adop; .)
+  [                     (. FormalParameter param; .)
+    "(" 
+    [ 
+      AnonymousMethodParameter<out param>     (. adop.FormalParameters.Add(param); .)
+      { 
+        "," 
+        AnonymousMethodParameter<out param>   (. adop.FormalParameters.Add(param); .)
+      } 
+    ] 
+    ")" 
+  ] 
+  Block<adop>           (. expr = adop; .)
+                        (. adop.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an anonymous method parameter.
+// +param: Parameter definition.
+// ------------------------------------------------------------------------------------
+AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParameter(t, this); .)
+=
+  [                             
+    "ref"                       (. param.Kind = FormalParameterKind.Ref; .) 
+    | "out"                     (. param.Kind = FormalParameterKind.Out; .) 
+  ]                             (. TypeReference typeRef; .)
+  Type<out typeRef, false>      (. param.Type = typeRef; .)
+  ident                         (. param.Name = t.val; .)
+                                (. param.Terminate(t); .)  
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a "new" operator.
+// +expr: Expression value.
+// ------------------------------------------------------------------------------------
+ArrayIndexer<ArrayIndexerOperator indexer>  
+= 
+  "["                         (. Expression expr; .)
+  Expression<out expr>        (. indexer.Indexers.Add(expr); .)
+  { 
+    "," 
+    Expression<out expr>      (. indexer.Indexers.Add(expr); .)
+  } 
+  "]"
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a field member variable.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// +typeRef: Type of the constant.
+// +isEvent: Flags, if the field is an event field or not.
+// ------------------------------------------------------------------------------------
+FieldMemberDeclarators<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
+  TypeReference typeRef, bool isEvent, Modifier toCheck>
+= 
+  SingleFieldMember<attrs, m, td, typeRef, isEvent>
+  { "," SingleFieldMember<attrs, m, td, typeRef, isEvent> }
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a single field member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +td: Type declaration the member belongs to.
+// +typeRef: Type of the constant.
+// +isEvent: Flags, if the field is an event field or not.
+// ------------------------------------------------------------------------------------
+SingleFieldMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
+  TypeReference typeRef, bool isEvent>
+= 
+  ident                      (. 
+                                FieldDeclaration fd = new FieldDeclaration(t, td); 
+                                CurrentElement = fd;
+                                fd.SetModifiers(m.Value);
+                                fd.AssignAttributes(attrs);
+                                fd.ResultingType = typeRef;
+                                fd.Name = t.val;
+                                fd.IsEvent = isEvent;
+                             .)
+  [ "="                      (. Initializer init; .)
+    VariableInitializer<out init> (. fd.Initializer = init; .) 
+  ]                          (. td.AddMember(fd); .) 
+                             (. fd.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Defines the operators that can be overloaded.
+// +op: overloaddable operator.
+// ------------------------------------------------------------------------------------
+OverloadableOp<out Operator op> (. op = Operator.Plus; .)
+=                          
+    "+"                                     
+  | "-"                         (. op = Operator.Minus; .)
+  | "!"                         (. op = Operator.Not; .)
+  | "~"                         (. op = Operator.BitwiseNot; .)
+  | "++"                        (. op = Operator.Increment; .)
+  | "--"                        (. op = Operator.Decrement; .)
+  | "true"                      (. op = Operator.True; .)
+  | "false"                     (. op = Operator.False; .)
+  | "*"                         (. op = Operator.Multiply; .)
+  | "/"                         (. op = Operator.Divide; .)
+  | "%"                         (. op = Operator.Modulus; .)
+  | "&"                         (. op = Operator.BitwiseAnd; .)
+  | "|"                         (. op = Operator.BitwiseOr; .)
+  | "^"                         (. op = Operator.BitwiseXor; .)
+  | "<<"                        (. op = Operator.LeftShift; .)
+  | "=="                        (. op = Operator.Equal; .)
+  | "!="                        (. op = Operator.NotEqual; .)
+  | ">"                         (. op = Operator.GreaterThan; .)
+        [                       (. if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); .)
+          ">"                   (. op = Operator.RightShift; .)
+        ]
+  | "<"                         (. op = Operator.LessThan; .)
+  | ">="                        (. op = Operator.GreaterThanOrEqual; .)
+  | "<="                        (. op = Operator.LessThanOrEqual; .)
+.
+
+// ------------------------------------------------------------------------------------
+// Type parameter declarations for generic types.
+// +td: Type parameter owner.
+// ------------------------------------------------------------------------------------
+TypeParameterList<ITypeParameterOwner td>
+=                            
+  "<"                        (. TypeParameter tp; .)
+  TypeParameter<out tp>      (. td.AddTypeParameter(tp); .)
+  { "," 
+    TypeParameter<out tp>    (. td.AddTypeParameter(tp); .)
+  } ">"
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a type parameter.
+// +tp: Type parameter defined here.
+// ------------------------------------------------------------------------------------
+TypeParameter<out TypeParameter tp>
+=                                   (. AttributeCollection attrs = new AttributeCollection(); .)
+  { Attributes<attrs> } 
+  ident                             (. 
+                                       tp = new TypeParameter(t, this);
+                                       tp.Name = t.val;
+                                       tp.AssignAttributes(attrs);
+                                    .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a type argument list.
+// +typeRef: Type that has the argument list defined here.
+// ------------------------------------------------------------------------------------
+TypeArgumentList<TypeReferenceCollection args>  (. TypeReference paramType; .)
+=
+  /*
+     We are a bit sloppy here and allow the type arguments to be "empty"
+     everywhere. This results in unbound-type-names. In fact this is only
+     allowed in typeof statements, see ECMA-334: 14.5.11 and 25.5.
+  */
+  "<"                            (. paramType = TypeReference.EmptyType; .)
+  [ 
+    Type<out paramType, false>           
+  ]                              (. args.Add(paramType); .) 
+  { 
+    ","                          (. paramType = TypeReference.EmptyType; .)
+    [ 
+      Type<out paramType, false>           
+    ]                            (. args.Add(paramType); .) 
+  } 
+  ">"
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a type parameter constraint belonging to a type, a method or a 
+// delegate.
+// +constraint: Declaration of the constraint
+// ------------------------------------------------------------------------------------
+TypeParameterConstraintsClause<out TypeParameterConstraint constraint>         
+=
+  ident                        (. if (t.val != "where") 
+                                    Error("UNDEF", la, "type parameter constraints clause must start with: where");
+                               .)
+  ident                        (. 
+                                  constraint = new TypeParameterConstraint(t, this); 
+                                  constraint.Name = t.val;
+                               .)
+  ":"                          (. 
+                                  TypeReference typeRef; 
+                                  ConstraintElement element = null;
+                               .)
+  (
+    "class"                    (. element = new ConstraintElement(t, this, ConstraintClassification.Class); .)
+    |
+    "struct"                   (. element = new ConstraintElement(t, this, ConstraintClassification.Struct); .)
+    |
+    "new"                      (. element = new ConstraintElement(t, this, ConstraintClassification.New); .)
+    "(" ")" |
+                               (. Token elemToken = t; .)
+    ClassType<out typeRef>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
+  )                            (. constraint.AddConstraintElement(element); .)
+
+  {
+    "," 
+    (
+    "class"                    (. element = new ConstraintElement(t, this, ConstraintClassification.Class); .)
+    |
+    "struct"                   (. element = new ConstraintElement(t, this, ConstraintClassification.Struct); .)
+    |
+    "new"                      (. element = new ConstraintElement(t, this, ConstraintClassification.New); .)
+    "(" ")" |
+                               (. Token elemToken = t; .)
+    ClassType<out typeRef>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
+    )                          (. constraint.AddConstraintElement(element); .)
+  }
+.
+
+END CS2.
