@@ -4,19 +4,19 @@ namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents an expression list initializer.
+  /// This type represents an member declarator list initializer.
   /// </summary>
   // ==================================================================================
-  public sealed class ExpressionListInitializer : ListInitializer
+  public sealed class MemberDeclaratorList : ListInitializer
   {
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new array initializer instance.
+    /// Creates a new member declarator list instance.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser used by this language element.</param>
     // --------------------------------------------------------------------------------
-    public ExpressionListInitializer(Token token, CSharpSyntaxParser parser)
+    public MemberDeclaratorList(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
     }

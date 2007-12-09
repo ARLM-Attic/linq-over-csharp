@@ -38,12 +38,22 @@ namespace CSharpParser.ProjectModel
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression used for initialization
+    /// Gets the expression used for initialization
     /// </summary>
     // --------------------------------------------------------------------------------
     public Expression Expression
     {
       get { return _Expression; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if expresion is used or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool HasExpression
+    {
+      get { return _Expression != null; }  
     }
 
     #endregion

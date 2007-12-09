@@ -480,7 +480,8 @@
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
     <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
-    <Compile Include="TestFiles\CSharp3\AnonymousType1.cs" />
+    <None Include="TestFiles\CSharp3\AnonymousType1.cs" />
+    <Compile Include="TestFiles\CSharp3\AnonymousType2.cs" />
     <None Include="TestFiles\CSharp3\NewOperator3.cs" />
     <None Include="TestFiles\CSharp3\NewOperator2.cs" />
     <None Include="TestFiles\CSharp3\NewOperator1.cs" />

@@ -73,5 +73,20 @@ namespace CSharpParserTest
       Assert.IsTrue(InvokeParser(parser));
     }
 
+    [TestMethod]
+    public void AnonymousTypesAreOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\AnonymousType1.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void AnonymousTypesAreOk2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\AnonymousType2.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
   }
 }

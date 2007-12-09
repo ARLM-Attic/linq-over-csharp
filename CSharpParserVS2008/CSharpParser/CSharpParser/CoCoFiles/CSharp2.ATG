@@ -1475,6 +1475,18 @@ PointerOrArray<TypeReference typeRef>
 // ------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------
+PredefinedType<out TypeReference typeRef> (. typeRef = null; .)
+=
+  PrimitiveType<out typeRef> | 
+  (                                    
+    "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
+    | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
+  )                                    (. typeRef.Terminate(t); .)                                 
+.
+
+// ------------------------------------------------------------------------------------
+// Types that are taken into account as primitive types.
+// ------------------------------------------------------------------------------------
 PrimitiveType<out TypeReference typeRef> (. typeRef = null; .)
 =
   IntegralType<out typeRef> | 
@@ -2635,9 +2647,7 @@ PrimitiveNamedLiteral<out Expression expr>  (. expr = null; .)
   )               (. expr = pml; .)
   "." 
   ident           (. pml.Name = t.val; .)
-  [ 
-    IF (IsGeneric()) TypeArgumentList<pml.TypeArguments> 
-  ]               (. pml.Terminate(t); .)
+                  (. pml.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2762,47 +2772,6 @@ DefaultOperator<out Expression expr>
   ")"                       (. dop.Terminate(t); .)
 .
 
-//// ------------------------------------------------------------------------------------
-//// Declaration of a "new" operator.
-//// +expr: Expression value.
-//// ------------------------------------------------------------------------------------
-//NewOperator<out Expression expr>  (. ArrayInitializer arrayInit; .)
-//= 
-//  "new"                           (. NewOperator nop = new NewOperator(t, this); .)
-//                                  (. expr = nop; .)
-//                                  (. TypeReference typeRef; .)
-//  Type<out typeRef, false>        (. nop.Type = typeRef; .)
-//  (
-//    // --- Simple constructor call
-//    "(" 
-//    [ 
-//      Argument<nop.Arguments> 
-//      { "," Argument<nop.Arguments> } 
-//    ] 
-//    ")"
-//  | // --- New array creation
-//    "["                           (. Expression dimExpr; .)
-//    Expression<out dimExpr>       (. nop.Dimensions.Add(dimExpr); .)
-//    { 
-//      "," 
-//      Expression<out dimExpr>     (. nop.Dimensions.Add(dimExpr); .)
-//    } 
-//    "]" 
-//    { IF (IsDims()) 
-//      "["                         (. nop.RunningDimensions = 1; .)
-//       { 
-//          ","                     (. nop.RunningDimensions++; .)
-//       } 
-//      "]" 
-//    }
-//    [                             
-//      ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
-//    ] 
-//  | // --- Array initialization
-//    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
-//  )                                  (. nop.Terminate(t); .)
-//.
-
 // ------------------------------------------------------------------------------------
 // Declaration of a "new" operator.
 // +expr: Expression value.
@@ -2813,10 +2782,65 @@ NewOperator<out Expression expr>
                                   (. expr = nop; .)
                                   (. TypeReference typeRef; .)
   (
+    AnonymousObjectInitializer<nop>
+  |
     NonArrayType<out typeRef>      
     NewOperatorWithType<nop, typeRef>
   |
     ImplicitArrayCreation<nop>    (. nop.Kind = NewOperatorKind.UntypedArrayInitialization; .)
+  )
+.
+
+AnonymousObjectInitializer<NewOperator nop>
+=
+  "{"                                   
+  (
+    IF (IsEmptyMemberInitializer()) "}"   
+  |
+    IF (IsMemberInitializer())    (. MemberDeclaratorList mInitList; .)      
+    MemberDeclaratorList<out mInitList> 
+    [ "," ]
+  )
+  "}"
+.
+
+MemberDeclaratorList<out MemberDeclaratorList initList>  
+                                  (. 
+                                     initList = new MemberDeclaratorList(t, this);
+                                     MemberDeclarator mInit;
+                                  .)
+=                     
+  MemberDeclarator<out mInit>     (. initList.Initializers.Add(mInit); .)
+  {
+    IF (NotFinalComma()) ","
+    MemberDeclarator<out mInit>   (. initList.Initializers.Add(mInit); .)
+  }                               (. initList.Terminate(t); .)
+.
+
+MemberDeclarator<out MemberDeclarator init> 
+                                  (. 
+                                     init = null; 
+                                     Expression expr = null;
+                                  .)
+=
+  (
+    ident                         (. Token start = t; .)
+    [ 
+      "=" Expression<out expr>
+    ]                             (. init = new MemberDeclarator(start, this, expr, start.val); .)
+  | 
+                                  (. Token start = la; .)
+    Primary<out expr>             
+    "."
+    ident                         (. init = new MemberDeclarator(start, this, expr, start.val, true); .)
+  |
+                                  (. 
+                                     Token start = la; 
+                                     TypeReference typeRef;
+                                  .)
+    PredefinedType<out typeRef>                                  
+    "."
+    ident                         (. init = new MemberDeclarator(start, this, typeRef, start.val); .)
   )
 .
 
@@ -2903,6 +2927,7 @@ ImplicitArrayCreation<NewOperator nop>
 
 // ------------------------------------------------------------------------------------
 // Declares an object or collection initializer used with "new" operator
+// +init: initializer resulted from parsing
 // ------------------------------------------------------------------------------------
 ObjectOrCollectionInitializer<out Initializer init> 
 =
@@ -2919,6 +2944,10 @@ ObjectOrCollectionInitializer<out Initializer init>
   "}"
 .
 
+// ------------------------------------------------------------------------------------
+// Declares a collection initializer used with "new" operator
+// +init: initializer resulted from parsing
+// ------------------------------------------------------------------------------------
 CollectionInitializer<out Initializer init> 
                                           (. 
                                              CollectionInitializer collInit = new CollectionInitializer(t, this); 
@@ -2930,6 +2959,10 @@ CollectionInitializer<out Initializer init>
                                           (. init.Terminate(t); .)
 .
 
+// ------------------------------------------------------------------------------------
+// Declares an element initializer list of a collection used with "new" operator
+// +init: initializer resulted from parsing
+// ------------------------------------------------------------------------------------
 ElementInitializerList<out Initializer init> 
                                           (. 
                                              CollectionInitializer collInit = new CollectionInitializer(t, this); 
@@ -2944,6 +2977,10 @@ ElementInitializerList<out Initializer init>
   } [ "," ]                               (. init.Terminate(t); .)
 .
 
+// ------------------------------------------------------------------------------------
+// Declares an element initializer of a collection used with "new" operator
+// +init: initializer resulted from parsing
+// ------------------------------------------------------------------------------------
 ElementInitializer<out Initializer init>   (. Expression expr; init = null; .)
 =
   (

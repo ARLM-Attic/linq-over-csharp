@@ -2526,6 +2526,22 @@ TypeReference typeRef) {
 		typeRef.Terminate(t); 
 	}
 
+	void PredefinedType(out TypeReference typeRef) {
+		typeRef = null; 
+		if (StartOf(15)) {
+			PrimitiveType(out typeRef);
+		} else if (la.kind == 48 || la.kind == 65) {
+			if (la.kind == 48) {
+				Get();
+				typeRef = new TypeReference(t, this, typeof(object)); 
+			} else {
+				Get();
+				typeRef = new TypeReference(t, this, typeof(string)); 
+			}
+			typeRef.Terminate(t); 
+		} else SynErr(179);
+	}
+
 	void TypeArgumentList(TypeReferenceCollection args) {
 		TypeReference paramType; 
 		Expect(101);
@@ -2557,7 +2573,7 @@ TypeReference typeRef) {
 			Expect(115);
 		} else if (StartOf(23)) {
 			EmbeddedStatement(block);
-		} else SynErr(179);
+		} else SynErr(180);
 	}
 
 	void ConstStatement(IBlockOwner block) {
@@ -2640,11 +2656,11 @@ TypeReference typeRef) {
 				YieldReturnStatement(block);
 			} else if (la.kind == 10) {
 				YieldBreakStatement(block);
-			} else SynErr(180);
+			} else SynErr(181);
 			Expect(115);
 		} else if (la.kind == 31) {
 			FixedStatement(block);
-		} else SynErr(181);
+		} else SynErr(182);
 	}
 
 	void EmptyStatement(IBlockOwner block) {
@@ -2701,7 +2717,7 @@ TypeReference typeRef) {
 			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 88 || la.kind == 114 || la.kind == 115) {
 			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
-		} else SynErr(182);
+		} else SynErr(183);
 		if (block != null) block.Add(es); 
 		es.Terminate(t); 
 	}
@@ -2816,7 +2832,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 79) {
 			Get();
 			fes.Variable.IsImplicit = true; 
-		} else SynErr(183);
+		} else SynErr(184);
 		Expect(1);
 		fes.Variable.Name = t.val; 
 		Expect(38);
@@ -2863,7 +2879,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 20) {
 			Get();
 			gs.Name = t.val; 
-		} else SynErr(184);
+		} else SynErr(185);
 		Expect(115);
 		gs.Terminate(t); 
 	}
@@ -2917,7 +2933,7 @@ TypeReference typeRef) {
 			ts.CreateFinallyBlock(t); 
 			Block(ts.FinallyBlock);
 			ts.FinallyBlock.Terminate(t); 
-		} else SynErr(185);
+		} else SynErr(186);
 		ts.Terminate(t); 
 	}
 
@@ -2948,7 +2964,7 @@ TypeReference typeRef) {
 			Expression expr; 
 			Expression(out expr);
 			us.ResourceExpression = expr; 
-		} else SynErr(186);
+		} else SynErr(187);
 		Expect(114);
 		EmbeddedStatement(us);
 		us.Terminate(t); 
@@ -3038,7 +3054,7 @@ TypeReference typeRef) {
 				Get();
 				StatementExpression(fs.InitializerBlock);
 			}
-		} else SynErr(187);
+		} else SynErr(188);
 	}
 
 	void ForIterator(ForStatement fs) {
@@ -3071,7 +3087,7 @@ TypeReference typeRef) {
 			if (la.kind == 13) {
 				CatchClauses(tryStm);
 			}
-		} else SynErr(188);
+		} else SynErr(189);
 	}
 
 	void Unary(out Expression expr) {
@@ -3130,7 +3146,7 @@ TypeReference typeRef) {
 				unOp = tcOp; 
 				break;
 			}
-			default: SynErr(189); break;
+			default: SynErr(190); break;
 			}
 			Expression unaryExpr; 
 			Unary(out unaryExpr);
@@ -3144,7 +3160,7 @@ TypeReference typeRef) {
 			
 		} else if (StartOf(26)) {
 			Primary(out expr);
-		} else SynErr(190);
+		} else SynErr(191);
 	}
 
 	void AssignmentOperator(out AssignmentOperator op) {
@@ -3208,7 +3224,7 @@ TypeReference typeRef) {
 			op = new RightShiftAssignmentOperator(t, this); 
 			break;
 		}
-		default: SynErr(191); break;
+		default: SynErr(192); break;
 		}
 	}
 
@@ -3221,7 +3237,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 20) {
 			Get();
 			Expect(87);
-		} else SynErr(192);
+		} else SynErr(193);
 	}
 
 	void NullCoalescingExpr(out BinaryOperator expr) {
@@ -3429,7 +3445,7 @@ TypeReference typeRef) {
 				} else if (la.kind == 95) {
 					Get();
 					oper = new GreaterThanOrEqualOperator(t, this); 
-				} else SynErr(193);
+				} else SynErr(194);
 				oper.LeftOperand = expr; 
 				Expression unExpr; 
 				Unary(out unExpr);
@@ -3454,7 +3470,7 @@ TypeReference typeRef) {
 				} else if (la.kind == 7) {
 					Get();
 					oper = new IsOperator(t, this); 
-				} else SynErr(194);
+				} else SynErr(195);
 				oper.LeftOperand = expr; 
 				TypeReference typeRef; 
 				TypeInRelExpr(out typeRef, false);
@@ -3477,7 +3493,7 @@ TypeReference typeRef) {
 				Get();
 				Expect(94);
 				oper = new RightShiftOperator(t, this); 
-			} else SynErr(195);
+			} else SynErr(196);
 			oper.LeftOperand = expr; 
 			Expression unExpr; 
 			Unary(out unExpr);
@@ -3589,7 +3605,7 @@ TypeReference typeRef) {
 				BaseNamedLiteral(out expr);
 			} else if (la.kind == 98) {
 				BaseIndexerOperator(out expr);
-			} else SynErr(196);
+			} else SynErr(197);
 			break;
 		}
 		case 46: {
@@ -3620,7 +3636,7 @@ TypeReference typeRef) {
 			SizeOfOperator(out innerExpr);
 			break;
 		}
-		default: SynErr(197); break;
+		default: SynErr(198); break;
 		}
 		Expression curExpr = innerExpr; 
 		while (StartOf(29)) {
@@ -3713,7 +3729,7 @@ TypeReference typeRef) {
 			value = new NullLiteral(t, this); 
 			break;
 		}
-		default: SynErr(198); break;
+		default: SynErr(199); break;
 		}
 	}
 
@@ -3796,15 +3812,12 @@ TypeReference typeRef) {
 			pml = new PrimitiveNamedLiteral(t, this, typeof(ushort)); 
 			break;
 		}
-		default: SynErr(199); break;
+		default: SynErr(200); break;
 		}
 		expr = pml; 
 		Expect(91);
 		Expect(1);
 		pml.Name = t.val; 
-		if (IsGeneric()) {
-			TypeArgumentList(pml.TypeArguments);
-		}
 		pml.Terminate(t); 
 	}
 
@@ -3860,13 +3873,15 @@ TypeReference typeRef) {
 		NewOperator nop = new NewOperator(t, this); 
 		expr = nop; 
 		TypeReference typeRef; 
-		if (StartOf(30)) {
+		if (la.kind == 97) {
+			AnonymousObjectInitializer(nop);
+		} else if (StartOf(30)) {
 			NonArrayType(out typeRef);
 			NewOperatorWithType(nop, typeRef);
 		} else if (la.kind == 98) {
 			ImplicitArrayCreation(nop);
 			nop.Kind = NewOperatorKind.UntypedArrayInitialization; 
-		} else SynErr(200);
+		} else SynErr(201);
 	}
 
 	void TypeOfOperator(out Expression expr) {
@@ -3974,6 +3989,20 @@ TypeReference typeRef) {
 		Expect(113);
 	}
 
+	void AnonymousObjectInitializer(NewOperator nop) {
+		Expect(97);
+		if (IsEmptyMemberInitializer()) {
+			Expect(112);
+		} else if (IsMemberInitializer()) {
+			MemberDeclaratorList mInitList; 
+			MemberDeclaratorList(out mInitList);
+			if (la.kind == 88) {
+				Get();
+			}
+		} else SynErr(202);
+		Expect(112);
+	}
+
 	void NewOperatorWithType(NewOperator nop, TypeReference typeRef) {
 		ArrayInitializer arrayInit;
 		nop.Type = typeRef; 
@@ -4034,7 +4063,7 @@ TypeReference typeRef) {
 				nop.Initializer = arrayInit; 
 				nop.Kind = NewOperatorKind.TypedArrayInitialization; 
 			}
-		} else SynErr(201);
+		} else SynErr(203);
 		nop.Terminate(t); 
 	}
 
@@ -4055,6 +4084,49 @@ TypeReference typeRef) {
 		}
 	}
 
+	void MemberDeclaratorList(out MemberDeclaratorList initList) {
+		initList = new MemberDeclaratorList(t, this);
+		MemberDeclarator mInit;
+		
+		MemberDeclarator(out mInit);
+		initList.Initializers.Add(mInit); 
+		while (NotFinalComma()) {
+			Expect(88);
+			MemberDeclarator(out mInit);
+			initList.Initializers.Add(mInit); 
+		}
+		initList.Terminate(t); 
+	}
+
+	void MemberDeclarator(out MemberDeclarator init) {
+		init = null; 
+		Expression expr = null;
+		
+		if (la.kind == 1) {
+			Get();
+			Token start = t; 
+			if (la.kind == 86) {
+				Get();
+				Expression(out expr);
+			}
+			init = new MemberDeclarator(start, this, expr, start.val); 
+		} else if (StartOf(26)) {
+			Token start = la; 
+			Primary(out expr);
+			Expect(91);
+			Expect(1);
+			init = new MemberDeclarator(start, this, expr, start.val, true); 
+		} else if (StartOf(31)) {
+			Token start = la; 
+			TypeReference typeRef;
+			
+			PredefinedType(out typeRef);
+			Expect(91);
+			Expect(1);
+			init = new MemberDeclarator(start, this, typeRef, start.val); 
+		} else SynErr(204);
+	}
+
 	void ObjectOrCollectionInitializer(out Initializer init) {
 		Expect(97);
 		init = null; 
@@ -4066,7 +4138,7 @@ TypeReference typeRef) {
 			init = mInitList; 
 		} else if (StartOf(20)) {
 			CollectionInitializer(out init);
-		} else SynErr(202);
+		} else SynErr(205);
 		Expect(112);
 	}
 
@@ -4132,7 +4204,7 @@ TypeReference typeRef) {
 				listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
 			}
 			Expect(112);
-		} else SynErr(203);
+		} else SynErr(206);
 		if (init != null) init.Terminate(t); 
 	}
 
@@ -4149,7 +4221,7 @@ TypeReference typeRef) {
 			Initializer compoundInit; 
 			ObjectOrCollectionInitializer(out compoundInit);
 			init = new MemberInitializer(startToken, this, compoundInit); 
-		} else SynErr(204);
+		} else SynErr(207);
 		init.Terminate(t); 
 	}
 
@@ -4272,7 +4344,8 @@ TypeReference typeRef, bool isEvent) {
 		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, x,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
 
 	  };
 
@@ -4464,32 +4537,35 @@ TypeReference typeRef, bool isEvent) {
 			case 176: s = "invalid PointerOrArray"; break;
 			case 177: s = "invalid NonArrayType"; break;
 			case 178: s = "invalid TypeInRelExpr"; break;
-			case 179: s = "invalid Statement"; break;
-			case 180: s = "invalid EmbeddedStatement"; break;
+			case 179: s = "invalid PredefinedType"; break;
+			case 180: s = "invalid Statement"; break;
 			case 181: s = "invalid EmbeddedStatement"; break;
-			case 182: s = "invalid StatementExpression"; break;
-			case 183: s = "invalid ForEachStatement"; break;
-			case 184: s = "invalid GotoStatement"; break;
-			case 185: s = "invalid TryFinallyBlock"; break;
-			case 186: s = "invalid UsingStatement"; break;
-			case 187: s = "invalid ForInitializer"; break;
-			case 188: s = "invalid CatchClauses"; break;
-			case 189: s = "invalid Unary"; break;
+			case 182: s = "invalid EmbeddedStatement"; break;
+			case 183: s = "invalid StatementExpression"; break;
+			case 184: s = "invalid ForEachStatement"; break;
+			case 185: s = "invalid GotoStatement"; break;
+			case 186: s = "invalid TryFinallyBlock"; break;
+			case 187: s = "invalid UsingStatement"; break;
+			case 188: s = "invalid ForInitializer"; break;
+			case 189: s = "invalid CatchClauses"; break;
 			case 190: s = "invalid Unary"; break;
-			case 191: s = "invalid AssignmentOperator"; break;
-			case 192: s = "invalid SwitchLabel"; break;
-			case 193: s = "invalid RelExpr"; break;
+			case 191: s = "invalid Unary"; break;
+			case 192: s = "invalid AssignmentOperator"; break;
+			case 193: s = "invalid SwitchLabel"; break;
 			case 194: s = "invalid RelExpr"; break;
-			case 195: s = "invalid ShiftExpr"; break;
-			case 196: s = "invalid Primary"; break;
+			case 195: s = "invalid RelExpr"; break;
+			case 196: s = "invalid ShiftExpr"; break;
 			case 197: s = "invalid Primary"; break;
-			case 198: s = "invalid Literal"; break;
-			case 199: s = "invalid PrimitiveNamedLiteral"; break;
-			case 200: s = "invalid NewOperator"; break;
-			case 201: s = "invalid NewOperatorWithType"; break;
-			case 202: s = "invalid ObjectOrCollectionInitializer"; break;
-			case 203: s = "invalid ElementInitializer"; break;
-			case 204: s = "invalid MemberInitializer"; break;
+			case 198: s = "invalid Primary"; break;
+			case 199: s = "invalid Literal"; break;
+			case 200: s = "invalid PrimitiveNamedLiteral"; break;
+			case 201: s = "invalid NewOperator"; break;
+			case 202: s = "invalid AnonymousObjectInitializer"; break;
+			case 203: s = "invalid NewOperatorWithType"; break;
+			case 204: s = "invalid MemberDeclarator"; break;
+			case 205: s = "invalid ObjectOrCollectionInitializer"; break;
+			case 206: s = "invalid ElementInitializer"; break;
+			case 207: s = "invalid MemberInitializer"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

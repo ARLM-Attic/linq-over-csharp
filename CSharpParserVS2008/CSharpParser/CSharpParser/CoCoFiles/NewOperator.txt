@@ -64,7 +64,7 @@ C# 3.0:
     non-assignment-expression 
     { expression-list }
     
-    member-declarator-list: 
+  member-declarator-list: 
     member-declarator 
     member-declarator-list , member-declarator 
     

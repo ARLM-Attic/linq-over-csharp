@@ -77,6 +77,8 @@
     <Compile Include="ProjectModel\Expressions\Initializers\CollectionInitializer.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\ExpressionListInitializer.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\ListInitializer.cs" />
+    <Compile Include="ProjectModel\Expressions\Initializers\MemberDeclarator.cs" />
+    <Compile Include="ProjectModel\Expressions\Initializers\MemberDeclaratorList.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\MemberInitializer.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\MemberInitializerList.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\CastOperator.cs" />
