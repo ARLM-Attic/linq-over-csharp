@@ -17,12 +17,12 @@ namespace SampleCompilation
   // ==================================================================================
   class Program
   {
-    private const string CodeExplorerProjectFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CodeExplorer\CodeExplorer.csproj";
+    private const string CSharpParserProjectFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParser\CSharpParser.csproj";
 
     static void Main(/* string[] args */)
     {
       // --- Create a compilation unit according to the specified .csproj file
-      CSharpProjectContent content = new CSharpProjectContent(CodeExplorerProjectFile);
+      CSharpProjectContent content = new CSharpProjectContent(CSharpParserProjectFile);
       CompilationUnit project = new CompilationUnit(content);
 
       // --- Parse the project and measure parse time

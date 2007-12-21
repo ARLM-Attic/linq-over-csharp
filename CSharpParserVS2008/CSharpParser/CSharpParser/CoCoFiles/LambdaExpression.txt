@@ -1,0 +1,35 @@
+﻿lambda-expression: 
+  anonymous-function-signature => anonymous-function-body
+  
+anonymous-function-signature: 
+  explicit-anonymous-function-signature 
+  implicit-anonymous-function-signature
+  
+explicit-anonymous-function-signature: 
+  ( explicit-anonymous-function-parameter-list#opt )
+  
+explicit-anonymous-function-parameter-list:
+  explicit-anonymous-function-parameter 
+  explicit-anonymous-function-parameter-list , explicit-anonymous-function-parameter
+  
+explicit-anonymous-function-parameter: 
+  anonymous-function-parameter-modifier#opt type identifier
+  
+anonymous-function-parameter-modifier: 
+  ref 
+  out
+  
+implicit-anonymous-function-signature: 
+  ( implicit-anonymous-function-parameter-list#opt ) 
+  implicit-anonymous-function-parameter
+  
+implicit-anonymous-function-parameter-list:
+  implicit-anonymous-function-parameter 
+  implicit-anonymous-function-parameter-list , implicit-anonymous-function-parameter 
+  
+implicit-anonymous-function-parameter: 
+  identifier 
+  
+anonymous-function-body: 
+  expression 
+  block

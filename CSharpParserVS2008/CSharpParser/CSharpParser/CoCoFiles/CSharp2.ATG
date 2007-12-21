@@ -204,7 +204,7 @@ TOKENS
   times      = "*".
   timesassgn = "*=".
   xorassgn   = "^=".
-
+  larrow     = "=>".
 
 PRAGMAS
 
@@ -619,19 +619,27 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
 StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>        
-                                              (. TypeReference typeRef; .)
+                                             (. 
+                                                TypeReference typeRef;
+                                                TypeReference memberRef; 
+                                             .)
 =                                             
   (                                                                          
     ConstMemberDeclaration<attrs, m, td> 
     | EventDeclaration<attrs, m, td> 
     | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
         ConstructorDeclaration<attrs, m, td> 
+    | IF (IsPartialMethod())
+      "partial"
+      Type<out typeRef, true>
+      MemberName<out memberRef>
+      MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
     | Type<out typeRef, true>
     ( 
       OperatorDeclaration<attrs, m, typeRef, td>
       | // --- Field declaration
         IF (IsFieldDecl()) FieldMemberDeclarators<attrs, m, td, typeRef, false, Modifier.fields> ";"
-      |                                          (. TypeReference memberRef; .)
+      |                                          
         MemberName<out memberRef>
         ( 
           PropertyDeclaration<attrs, m, typeRef, memberRef, td>
@@ -640,9 +648,9 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
         )
       | IndexerDeclaration<attrs, m, typeRef, null, td>
     )
-  | CastOperatorDeclaration<attrs, m, td>
-  |                                               (. TypeDeclaration nestedType; .)
-    TypeDeclaration<attrs, td, m, out nestedType> (. td.AddTypeDeclaration(nestedType); .)
+    | CastOperatorDeclaration<attrs, m, td>
+    |                                               (. TypeDeclaration nestedType; .)
+      TypeDeclaration<attrs, td, m, out nestedType> (. td.AddTypeDeclaration(nestedType); .)
   )
 .
 
@@ -1103,7 +1111,8 @@ FormalParameterList<FormalParameterCollection pars>
   (                                    
     [ 
       "ref"                            (. fp.Kind = FormalParameterKind.Ref; .) 
-      | "out"                          (. fp.Kind = FormalParameterKind.Out; .) 
+      | "out"                          (. fp.Kind = FormalParameterKind.Out; .)
+      | "this"                         (. fp.Kind = FormalParameterKind.This; .)
     ] Type<out typeRef, false>         (. fp.Type = typeRef; .)
     ident                              (. 
                                           fp.Name = t.val; 
@@ -2795,9 +2804,7 @@ AnonymousObjectInitializer<NewOperator nop>
 =
   "{"                                   
   (
-    IF (IsEmptyMemberInitializer()) "}"   
-  |
-    IF (IsMemberInitializer())    (. MemberDeclaratorList mInitList; .)      
+    IF (!IsEmptyMemberInitializer()) (. MemberDeclaratorList mInitList; .)      
     MemberDeclaratorList<out mInitList> 
     [ "," ]
   )
@@ -2824,15 +2831,12 @@ MemberDeclarator<out MemberDeclarator init>
                                   .)
 =
   (
+    IF (IsMemberInitializer())
     ident                         (. Token start = t; .)
-    [ 
-      "=" Expression<out expr>
-    ]                             (. init = new MemberDeclarator(start, this, expr, start.val); .)
+    "=" Expression<out expr>      (. init = new MemberDeclarator(start, this, expr, start.val); .)
   | 
                                   (. Token start = la; .)
-    Primary<out expr>             
-    "."
-    ident                         (. init = new MemberDeclarator(start, this, expr, start.val, true); .)
+    Primary<out expr>             (. init = new MemberDeclarator(start, this, expr, start.val, true); .)
   |
                                   (. 
                                      Token start = la; 

@@ -1076,13 +1076,20 @@ out TypeDeclaration td) {
 	}
 
 	void StructMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
-		TypeReference typeRef; 
+		TypeReference typeRef;
+		TypeReference memberRef; 
+		
 		if (la.kind == 17) {
 			ConstMemberDeclaration(attrs, m, td);
 		} else if (la.kind == 26) {
 			EventDeclaration(attrs, m, td);
 		} else if (la.kind == _ident && Peek(1).kind == _lpar) {
 			ConstructorDeclaration(attrs, m, td);
+		} else if (IsPartialMethod()) {
+			Expect(120);
+			Type(out typeRef, true);
+			MemberName(out memberRef);
+			MethodDeclaration(attrs, m, typeRef, memberRef, td, true);
 		} else if (StartOf(12)) {
 			Type(out typeRef, true);
 			if (la.kind == 49) {
@@ -1091,7 +1098,6 @@ out TypeDeclaration td) {
 				FieldMemberDeclarators(attrs, m, td, typeRef, false, Modifier.fields);
 				Expect(115);
 			} else if (la.kind == 1) {
-				TypeReference memberRef; 
 				MemberName(out memberRef);
 				if (la.kind == 97) {
 					PropertyDeclaration(attrs, m, typeRef, memberRef, td);
@@ -1278,13 +1284,16 @@ out TypeDeclaration td) {
 		fp.AssignAttributes(attrs);
 		
 		if (StartOf(16)) {
-			if (la.kind == 50 || la.kind == 57) {
+			if (la.kind == 50 || la.kind == 57 || la.kind == 68) {
 				if (la.kind == 57) {
 					Get();
 					fp.Kind = FormalParameterKind.Ref; 
-				} else {
+				} else if (la.kind == 50) {
 					Get();
 					fp.Kind = FormalParameterKind.Out; 
+				} else {
+					Get();
+					fp.Kind = FormalParameterKind.This; 
 				}
 			}
 			Type(out typeRef, false);
@@ -1397,43 +1406,6 @@ out TypeDeclaration td) {
 		
 	}
 
-	void OperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
-TypeDeclaration td) {
-		OperatorDeclaration od = new OperatorDeclaration(t, td);
-		CurrentElement = od;
-		od.SetModifiers(m.Value);
-		od.AssignAttributes(attrs);
-		od.ResultingType = typeRef;
-		Operator op;
-		
-		Expect(49);
-		OverloadableOp(out op);
-		od.Operator = op; 
-		Expect(99);
-		od.Name = op.ToString(); 
-		if (StartOf(8)) {
-			FormalParameterList(od.FormalParameters);
-		}
-		Expect(114);
-		if (la.kind == 97) {
-			Block(od);
-		} else if (la.kind == 115) {
-			Get();
-		} else SynErr(154);
-		td.AddMember(od); 
-		od.Terminate(t);
-		
-	}
-
-	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-TypeReference typeRef, bool isEvent, Modifier toCheck) {
-		SingleFieldMember(attrs, m, td, typeRef, isEvent);
-		while (la.kind == 88) {
-			Get();
-			SingleFieldMember(attrs, m, td, typeRef, isEvent);
-		}
-	}
-
 	void MemberName(out TypeReference typeRef) {
 		Expect(1);
 		typeRef = new TypeReference(t, this);
@@ -1462,6 +1434,79 @@ TypeReference typeRef, bool isEvent, Modifier toCheck) {
 			if (la.kind == _lt && IsPartOfMemberName()) {
 				TypeArgumentList(typeRef.Arguments);
 			}
+		}
+	}
+
+	void MethodDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
+TypeReference memberRef, TypeDeclaration td, bool allowBody) {
+		MethodDeclaration md = new MethodDeclaration(t, td);
+		CurrentElement = md;
+		md.SetModifiers(m.Value);
+		md.AssignAttributes(attrs);
+		md.ExplicitName = memberRef;
+		md.ResultingType = typeRef;
+		
+		if (la.kind == 101) {
+			TypeParameterList(md);
+		}
+		Expect(99);
+		if (StartOf(8)) {
+			FormalParameterList(md.FormalParameters);
+		}
+		Expect(114);
+		while (la.kind == 1) {
+			TypeParameterConstraint constraint; 
+			TypeParameterConstraintsClause(out constraint);
+			md.AddTypeParameterConstraint(constraint); 
+		}
+		if (la.kind == 97) {
+			Block(md);
+			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
+			md.HasBody = true;
+			
+		} else if (la.kind == 115) {
+			Get();
+			md.HasBody = false; 
+		} else SynErr(154);
+		td.AddMember(md); 
+		md.Terminate(t);
+		
+	}
+
+	void OperatorDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
+TypeDeclaration td) {
+		OperatorDeclaration od = new OperatorDeclaration(t, td);
+		CurrentElement = od;
+		od.SetModifiers(m.Value);
+		od.AssignAttributes(attrs);
+		od.ResultingType = typeRef;
+		Operator op;
+		
+		Expect(49);
+		OverloadableOp(out op);
+		od.Operator = op; 
+		Expect(99);
+		od.Name = op.ToString(); 
+		if (StartOf(8)) {
+			FormalParameterList(od.FormalParameters);
+		}
+		Expect(114);
+		if (la.kind == 97) {
+			Block(od);
+		} else if (la.kind == 115) {
+			Get();
+		} else SynErr(155);
+		td.AddMember(od); 
+		od.Terminate(t);
+		
+	}
+
+	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
+TypeReference typeRef, bool isEvent, Modifier toCheck) {
+		SingleFieldMember(attrs, m, td, typeRef, isEvent);
+		while (la.kind == 88) {
+			Get();
+			SingleFieldMember(attrs, m, td, typeRef, isEvent);
 		}
 	}
 
@@ -1510,42 +1555,6 @@ TypeReference memberRef, TypeDeclaration td) {
 		Expect(112);
 		td.AddMember(ind); 
 		ind.Terminate(t);
-		
-	}
-
-	void MethodDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
-TypeReference memberRef, TypeDeclaration td, bool allowBody) {
-		MethodDeclaration md = new MethodDeclaration(t, td);
-		CurrentElement = md;
-		md.SetModifiers(m.Value);
-		md.AssignAttributes(attrs);
-		md.ExplicitName = memberRef;
-		md.ResultingType = typeRef;
-		
-		if (la.kind == 101) {
-			TypeParameterList(md);
-		}
-		Expect(99);
-		if (StartOf(8)) {
-			FormalParameterList(md.FormalParameters);
-		}
-		Expect(114);
-		while (la.kind == 1) {
-			TypeParameterConstraint constraint; 
-			TypeParameterConstraintsClause(out constraint);
-			md.AddTypeParameterConstraint(constraint); 
-		}
-		if (la.kind == 97) {
-			Block(md);
-			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
-			md.HasBody = true;
-			
-		} else if (la.kind == 115) {
-			Get();
-			md.HasBody = false; 
-		} else SynErr(155);
-		td.AddMember(md); 
-		md.Terminate(t);
 		
 	}
 
@@ -3939,7 +3948,7 @@ TypeReference typeRef) {
 		if (la.kind == 99) {
 			FormalParameter param; 
 			Get();
-			if (StartOf(16)) {
+			if (StartOf(31)) {
 				AnonymousMethodParameter(out param);
 				adop.FormalParameters.Add(param); 
 				while (la.kind == 88) {
@@ -3991,15 +4000,11 @@ TypeReference typeRef) {
 
 	void AnonymousObjectInitializer(NewOperator nop) {
 		Expect(97);
-		if (IsEmptyMemberInitializer()) {
-			Expect(112);
-		} else if (IsMemberInitializer()) {
-			MemberDeclaratorList mInitList; 
-			MemberDeclaratorList(out mInitList);
-			if (la.kind == 88) {
-				Get();
-			}
-		} else SynErr(202);
+		MemberDeclaratorList mInitList; 
+		MemberDeclaratorList(out mInitList);
+		if (la.kind == 88) {
+			Get();
+		}
 		Expect(112);
 	}
 
@@ -4063,7 +4068,7 @@ TypeReference typeRef) {
 				nop.Initializer = arrayInit; 
 				nop.Kind = NewOperatorKind.TypedArrayInitialization; 
 			}
-		} else SynErr(203);
+		} else SynErr(202);
 		nop.Terminate(t); 
 	}
 
@@ -4102,21 +4107,17 @@ TypeReference typeRef) {
 		init = null; 
 		Expression expr = null;
 		
-		if (la.kind == 1) {
-			Get();
+		if (IsMemberInitializer()) {
+			Expect(1);
 			Token start = t; 
-			if (la.kind == 86) {
-				Get();
-				Expression(out expr);
-			}
+			Expect(86);
+			Expression(out expr);
 			init = new MemberDeclarator(start, this, expr, start.val); 
 		} else if (StartOf(26)) {
 			Token start = la; 
 			Primary(out expr);
-			Expect(91);
-			Expect(1);
 			init = new MemberDeclarator(start, this, expr, start.val, true); 
-		} else if (StartOf(31)) {
+		} else if (StartOf(32)) {
 			Token start = la; 
 			TypeReference typeRef;
 			
@@ -4124,7 +4125,7 @@ TypeReference typeRef) {
 			Expect(91);
 			Expect(1);
 			init = new MemberDeclarator(start, this, typeRef, start.val); 
-		} else SynErr(204);
+		} else SynErr(203);
 	}
 
 	void ObjectOrCollectionInitializer(out Initializer init) {
@@ -4138,7 +4139,7 @@ TypeReference typeRef) {
 			init = mInitList; 
 		} else if (StartOf(20)) {
 			CollectionInitializer(out init);
-		} else SynErr(205);
+		} else SynErr(204);
 		Expect(112);
 	}
 
@@ -4204,7 +4205,7 @@ TypeReference typeRef) {
 				listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
 			}
 			Expect(112);
-		} else SynErr(206);
+		} else SynErr(205);
 		if (init != null) init.Terminate(t); 
 	}
 
@@ -4221,7 +4222,7 @@ TypeReference typeRef) {
 			Initializer compoundInit; 
 			ObjectOrCollectionInitializer(out compoundInit);
 			init = new MemberInitializer(startToken, this, compoundInit); 
-		} else SynErr(207);
+		} else SynErr(206);
 		init.Terminate(t); 
 	}
 
@@ -4322,7 +4323,7 @@ TypeReference typeRef, bool isEvent) {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,T,x, T,x,x,x, T,x,x,x, x,x,x,T, x,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,x,x, x,x,x,x, x,T,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, T,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, T,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, T,x,x,x, T,x,x,x, x,T,x,T, T,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,T,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, T,x,x,x, T,x,x,x, x,T,x,T, T,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
@@ -4330,7 +4331,7 @@ TypeReference typeRef, bool isEvent) {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, T,x,x,x, x,T,T,T, x,x,x,x, x,T,T,T, x,x,T,x, x,T,x,T, T,T,T,T, x,T,x,x, x,x,T,T, T,T,T,T, T,T,x,x, x},
 		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,T,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,T, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, T,T,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,T, T,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,T,x, x,x,x,x, x,T,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, T,x,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
@@ -4345,6 +4346,7 @@ TypeReference typeRef, bool isEvent) {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, x,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x},
 		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
 
 	  };
@@ -4512,8 +4514,8 @@ TypeReference typeRef, bool isEvent) {
 			case 151: s = "invalid EventDeclaration"; break;
 			case 152: s = "invalid ConstructorDeclaration"; break;
 			case 153: s = "invalid ConstructorDeclaration"; break;
-			case 154: s = "invalid OperatorDeclaration"; break;
-			case 155: s = "invalid MethodDeclaration"; break;
+			case 154: s = "invalid MethodDeclaration"; break;
+			case 155: s = "invalid OperatorDeclaration"; break;
 			case 156: s = "invalid CastOperatorDeclaration"; break;
 			case 157: s = "invalid CastOperatorDeclaration"; break;
 			case 158: s = "invalid EventAccessorDeclarations"; break;
@@ -4560,12 +4562,11 @@ TypeReference typeRef, bool isEvent) {
 			case 199: s = "invalid Literal"; break;
 			case 200: s = "invalid PrimitiveNamedLiteral"; break;
 			case 201: s = "invalid NewOperator"; break;
-			case 202: s = "invalid AnonymousObjectInitializer"; break;
-			case 203: s = "invalid NewOperatorWithType"; break;
-			case 204: s = "invalid MemberDeclarator"; break;
-			case 205: s = "invalid ObjectOrCollectionInitializer"; break;
-			case 206: s = "invalid ElementInitializer"; break;
-			case 207: s = "invalid MemberInitializer"; break;
+			case 202: s = "invalid NewOperatorWithType"; break;
+			case 203: s = "invalid MemberDeclarator"; break;
+			case 204: s = "invalid ObjectOrCollectionInitializer"; break;
+			case 205: s = "invalid ElementInitializer"; break;
+			case 206: s = "invalid MemberInitializer"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

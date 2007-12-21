@@ -88,5 +88,21 @@ namespace CSharpParserTest
       parser.AddFile(@"CSharp3\AnonymousType2.cs");
       Assert.IsTrue(InvokeParser(parser));
     }
+
+    [TestMethod]
+    public void PartialMethodsAreOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\PartialMethod1.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void ExtensionMethodsAreOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\ExtensionMethod1.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
   }
 }

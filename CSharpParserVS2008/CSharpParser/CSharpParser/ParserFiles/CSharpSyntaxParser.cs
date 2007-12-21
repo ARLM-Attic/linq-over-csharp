@@ -652,6 +652,19 @@ namespace CSharpParser.ParserFiles
       return (la.kind != _lbrace);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens are: "partial" "void"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsPartialMethod()
+    {
+      return (la.val == "partial" && Peek(1).kind == _void);
+    }
+
     #endregion
   }
 }

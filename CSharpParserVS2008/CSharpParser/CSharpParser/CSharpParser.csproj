@@ -81,6 +81,8 @@
     <Compile Include="ProjectModel\Expressions\Initializers\MemberDeclaratorList.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\MemberInitializer.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\MemberInitializerList.cs" />
+    <Compile Include="ProjectModel\Expressions\LambdaExpressions\LambdaExpression.cs" />
+    <Compile Include="ProjectModel\Expressions\AnonymousFunction.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\CastOperator.cs" />
     <Compile Include="ProjectModel\Types\DeclarationBase.cs" />
     <Compile Include="Semantics\TypeAbstraction\ArrayType.cs" />
@@ -315,6 +317,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CoCoFiles\LambdaExpression.txt" />
     <Content Include="CoCoFiles\NewOperator.txt" />
   </ItemGroup>
   <ItemGroup>

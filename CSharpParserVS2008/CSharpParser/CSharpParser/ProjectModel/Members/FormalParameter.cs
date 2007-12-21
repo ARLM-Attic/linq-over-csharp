@@ -16,7 +16,9 @@ namespace CSharpParser.ProjectModel
     /// <summary>Output parameter</summary>
     Out,
     /// <summary>Parameter passed by reference</summary>
-    Ref
+    Ref,
+    /// <summary>Extension method parameter</summary>
+    This
   }
 
   // ==================================================================================
