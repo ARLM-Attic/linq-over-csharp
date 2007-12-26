@@ -104,5 +104,29 @@ namespace CSharpParserTest
       parser.AddFile(@"CSharp3\ExtensionMethod1.cs");
       Assert.IsTrue(InvokeParser(parser));
     }
+
+    [TestMethod]
+    public void LambdaExtensionsAreOk1()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\LambdaExpression1.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void LambdaExtensionsAreOk2()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\LambdaExpression2.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void LambdaExtensionsAreOk3()
+    {
+      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"CSharp3\LambdaExpression3.cs");
+      Assert.IsTrue(InvokeParser(parser));
+    }
   }
 }

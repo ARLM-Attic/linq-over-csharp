@@ -665,6 +665,87 @@ namespace CSharpParser.ParserFiles
       return (la.val == "partial" && Peek(1).kind == _void);
     }
 
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens are start tokens of a lambda
+    /// expression or not.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsLambda()
+    {
+      if (la.kind == _ident)
+      {
+        // --- ident =>
+        return _Scanner.Peek().kind == _larrow;
+      }
+      else if (la.kind == _lpar)
+      {
+        if (IsTypeCast()) return false;
+        if (IsExplicitLambdaParameter()) return true;
+
+        _Scanner.ResetPeek();
+        Token pt1 = _Scanner.Peek();
+        Token pt2 = _Scanner.Peek();
+        Token pt3 = _Scanner.Peek();
+
+        // --- () =>
+        if (pt1.kind == _rpar && pt2.kind == _larrow) return true;
+        // --- "(out ident" || "(ref ident" 
+        if ((pt1.kind == _out || pt1.kind == _ref) && pt2.kind == _ident) return true;
+        // --- (ident) =>
+        if (pt1.kind == _ident && pt2.kind == _rpar && pt3.kind == _larrow) return true;
+        // --- ( ident "," | "::" | "." | "<"
+        if (pt1.kind == _ident && pt2.kind == _comma) return true;
+        return false;
+      }
+      else return false;
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens are start tokens of an explicit 
+    /// lambda expression parameter.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsExplicitLambdaParameter()
+    {
+      _Scanner.ResetPeek();
+      Token pt1 = _Scanner.Peek();
+      return IsExplicitLambdaParameter(pt1);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens are start tokens of an explicit 
+    /// lambda expression parameter.
+    /// </summary>
+    /// <param name="tok">First token to check</param>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsExplicitLambdaParameter(Token tok)
+    {
+      Token token = tok;
+      if (token.kind == _ref || token.kind == _out) return true;
+      if (IsType(ref token))
+      {
+        if (token.kind == _ident)
+        {
+          Token identFollow = _Scanner.Peek();
+          if (identFollow.kind == _comma || identFollow.kind == _rpar) return true;
+        }
+      }
+      return false;
+    }
+    
+
     #endregion
   }
 }

@@ -2163,13 +2163,84 @@ CatchClauses<TryStatement tryStm>
 .
 
 // ------------------------------------------------------------------------------------
+// Gets the signature of the specified lambda expression.
+// +lambda: Lambda expression
+// ------------------------------------------------------------------------------------
+LambdaFunctionSignature<LambdaExpression lambda>
+=
+  (
+    IF (la.kind == _ident)
+    ident
+  |
+    "("
+    (
+      IF (IsExplicitLambdaParameter(la))
+      ExplicitLambdaParameterList<lambda>
+    |
+      IF (la.kind != _rpar)
+      ImplicitLambdaParameterList<lambda>      
+    |
+    )
+    ")"
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Gets the explicit parameter list of the specified lambda expression.
+// +lambda: Lambda expression
+// ------------------------------------------------------------------------------------
+ExplicitLambdaParameterList<LambdaExpression lambda>
+=
+                            (. FormalParameter fp = new FormalParameter(t, this); .)
+  [
+    "ref"                   (. fp.Kind = FormalParameterKind.Ref; .)
+    | "out"                 (. fp.Kind = FormalParameterKind.Out; .)
+  ]                         (. TypeReference typeRef; .)
+  Type<out typeRef, false>  (. fp.Type = typeRef; .)
+  ident                     (. fp.Name = t.val; .)
+                            (. lambda.FormalParameters.Add(fp); .)
+  [ "," ExplicitLambdaParameterList<lambda> ]
+.
+
+// ------------------------------------------------------------------------------------
+// Gets the implicit parameter list of the specified lambda expression.
+// +lambda: Lambda expression
+// ------------------------------------------------------------------------------------
+ImplicitLambdaParameterList<LambdaExpression lambda>
+=
+  ident                     (. FormalParameter fp = new FormalParameter(t, this); .)
+                            (. fp.Name = t.val; .)
+                            (. lambda.FormalParameters.Add(fp); .)
+  [ "," ImplicitLambdaParameterList<lambda> ]
+.
+
+// ------------------------------------------------------------------------------------
+// Gets the body of a lambda expression.
+// +lambda: Lambda expression
+// ------------------------------------------------------------------------------------
+LambdaFunctionBody<LambdaExpression lambda>
+=
+  (                         (. Expression expr; .)
+    Expression<out expr>    (. lambda.Expression = expr; .)
+    |Block<lambda>
+  )
+.
+
+// ------------------------------------------------------------------------------------
 // Retrieves an expression.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
 Expression<out Expression expr>   (. expr = null; .)
 =                                 (. Expression leftExpr; .)
+  (
+    IF (IsLambda())               (. LambdaExpression lambda = new LambdaExpression(t, this); .)
+    LambdaFunctionSignature<lambda>   
+    "=>"
+    LambdaFunctionBody<lambda>    (. expr = lambda; .)
+  |
   Unary<out leftExpr>
-  ( IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
+  (
+    IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
                                   (. AssignmentOperator asgn; .)
     AssignmentOperator<out asgn>  (. Expression rightExpr; .)
     Expression<out rightExpr>     (. asgn.RightOperand = rightExpr; .)
@@ -2196,6 +2267,7 @@ Expression<out Expression expr>   (. expr = null; .)
       Expression<out falseExpr>   (. condExpr.FalseExpression = falseExpr; .)
                                   (. condExpr.Terminate(t); .)
     ]
+  )
   )
 .
 

@@ -33,3 +33,13 @@ implicit-anonymous-function-parameter:
 anonymous-function-body: 
   expression 
   block
+  
+---
+Lambda start:
+  ident =>
+  () =>
+  (ref ident
+  (out ident
+  (ident ident
+  (ident) =>
+  (ident ,
