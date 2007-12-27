@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -16,6 +17,8 @@ namespace CSharpParser.ProjectModel
     private readonly string _Alias;
     private readonly Assembly _Assembly;
     private static readonly string _DotNetSystemFolder;
+    private static readonly Dictionary<string, string> _FullNames = 
+      new Dictionary<string, string>();
 
     #endregion
 
@@ -30,6 +33,10 @@ namespace CSharpParser.ProjectModel
     {
       Assembly systemAsm = Assembly.ReflectionOnlyLoad("mscorlib");
       _DotNetSystemFolder = Path.GetDirectoryName(systemAsm.Location);
+      _FullNames.Add("System.Core", 
+        "System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL");
+      _FullNames.Add("System.Xml.Linq",
+        "System.Xml.Linq, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL");
     }
 
     // --------------------------------------------------------------------------------
@@ -74,6 +81,10 @@ namespace CSharpParser.ProjectModel
         // --- Try to load the assembly with assemblyName
         try
         {
+          if (_FullNames.ContainsKey(name))
+          {
+            name = _FullNames[name];
+          }
           _Assembly = Assembly.Load(new AssemblyName(name));
           return;
         }

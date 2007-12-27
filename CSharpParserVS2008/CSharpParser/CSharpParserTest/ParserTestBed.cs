@@ -13,6 +13,7 @@ namespace CSharpParserTest
     {
       CompilationUnit parser = new CompilationUnit(new EmptyProject(WorkingFolder));
       parser.AddFile(fileName);
+      AddCommonSource(parser);
       return InvokeParser(parser);
     }
 
@@ -34,6 +35,10 @@ namespace CSharpParserTest
       }
       Console.WriteLine();
       return errors == 0;
+    }
+
+    protected virtual void AddCommonSource(CompilationUnit parser)
+    {
     }
   }
 }

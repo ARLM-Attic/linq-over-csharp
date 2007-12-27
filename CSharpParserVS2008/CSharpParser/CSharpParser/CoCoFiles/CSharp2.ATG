@@ -2227,12 +2227,190 @@ LambdaFunctionBody<LambdaExpression lambda>
 .
 
 // ------------------------------------------------------------------------------------
+// Gets a from clause for a query expression
+// +fromClause: From clause declaration
+// ------------------------------------------------------------------------------------
+FromClause<out FromClause fromClause>
+=
+  "from"                        (. Token typeToken = la; .)
+                                (. Token start = t; .)
+                                (. TypeReference typeRef; .)
+                                (. fromClause = new FromClause(start, this); .)
+  (                             
+    IF (IsType(ref typeToken) && typeToken.val != "in")
+    Type<out typeRef, false>    (. fromClause.Type = typeRef; .)
+  |
+  )                             
+  ident                         (. fromClause.Name = t.val; .)
+  "in"                          (. Expression expr; .)
+  Expression<out expr>          (. fromClause.Expression = expr; .)
+                                (. fromClause.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets the body of a query expression.
+// +query: Query expression to obtain the body for.
+// ------------------------------------------------------------------------------------
+QueryBody<QueryBody body>
+=
+  { QueryBodyClause<body> }
+  (
+    SelectClause<body>
+    | GroupClause<body>
+  )
+  [ QueryContinuation<body> ]
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a query body clause
+// +body: Query expression body to add the clause for.
+// ------------------------------------------------------------------------------------
+QueryBodyClause<QueryBody body>
+=
+  (                                 (. FromClause fromClause; .)
+    FromClause<out fromClause>      (. body.Clauses.Add(fromClause); .)
+    |                               (. LetClause letClause; .)
+      LetClause<out letClause>      (. body.Clauses.Add(letClause); .)
+    |                               (. WhereClause whereClause; .)
+      WhereClause<out whereClause>  (. body.Clauses.Add(whereClause); .)
+    |                               (. JoinClause joinClause; .)
+      JoinClause<out joinClause>    (. body.Clauses.Add(joinClause); .)
+    |                               (. OrderByClause obClause; .)
+      OrderByClause<out obClause>   (. body.Clauses.Add(obClause); .)
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a let clause
+// +letClause: Let clause declaration
+// ------------------------------------------------------------------------------------
+LetClause<out LetClause letClause>
+=
+  "let"                 (. letClause = new LetClause(t, this); .)
+  ident                 (. letClause.Name = t.val; .)
+  "="                   (. Expression expr; .)
+  Expression<out expr>  (. letClause.Expression = expr; .)
+                        (. letClause.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a where clause
+// +whereClause: Where clause declaration
+// ------------------------------------------------------------------------------------
+WhereClause<out WhereClause whereClause>
+=
+  "where"               (. whereClause = new WhereClause(t, this); .)
+                        (. Expression expr; .)
+  Expression<out expr>  (. whereClause.Expression = expr; .)
+                        (. whereClause.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a join clause
+// +joinClause: Join clause declaration
+// ------------------------------------------------------------------------------------
+JoinClause<out JoinClause joinClause>
+=
+  "join"                        (. Token typeToken = la; .)
+                                (. TypeReference typeRef; .)
+                                (. joinClause = new JoinClause(t, this); .)
+  (                     
+    IF (IsType(ref typeToken) && typeToken.val != "in")
+    Type<out typeRef, false>    (. joinClause.Type = typeRef; .)
+  |
+  )
+  ident                         (. joinClause.Name = t.val; .)
+  "in"                          (. Expression inExpr; .)
+  Expression<out inExpr>        (. joinClause.InExpression = inExpr; .)
+  "on"                          (. Expression onExpr; .)
+  Expression<out onExpr>        (. joinClause.OnExpression = onExpr; .)
+  "equals"                      (. Expression eqExpr; .)
+  Expression<out eqExpr>        (. joinClause.EqualsExpression = eqExpr; .)
+  [ 
+    "into"                      
+    ident                       (. joinClause.IntoIdentifier = t.val; .)
+  ]                             (. joinClause.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets an order by clause
+// +obClause: Order by clause declaration
+// ------------------------------------------------------------------------------------
+OrderByClause<out OrderByClause obClause>
+=
+  "orderby"                     (. obClause = new OrderByClause(t, this); .)
+  OrderingClause<obClause>
+  { 
+    "," 
+    OrderingClause<obClause> 
+  }                             (. obClause.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets an ordering clause
+// +obClause: Order by clause declaration
+// ------------------------------------------------------------------------------------
+OrderingClause<OrderByClause obClause>
+                                (. Expression expr; .)
+=
+  Expression<out expr>          (. OrderingClause oc = new OrderingClause(t, this); .)
+  [                             
+    "ascending"                 (. oc.Ascending = true; .)
+    | "descending"              (. oc.Ascending = false; .)
+  ]                             (. oc.Expression = expr; .)
+                                (. oc.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a select clause
+// +body: Query expression body to add the clause for.
+// ------------------------------------------------------------------------------------
+SelectClause<QueryBody body>
+=
+  "select"              (. Expression expr; .)
+  Expression<out expr>  (. body.Select = new SelectClause(t, this); .)
+                        (. body.Select.Expression = expr; .)
+                        (. body.Select.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a group by clause
+// +body: Query expression body to add the clause for.
+// ------------------------------------------------------------------------------------
+GroupClause<QueryBody body>
+=
+  "group"                 (. Expression grExpr; .)
+  Expression<out grExpr>  (. body.GroupBy = new GroupByClause(t, this); .)
+                          (. body.GroupBy.Expression = grExpr; .)
+  "by"                    (. Expression byExpr; .)
+  Expression<out byExpr>  (. body.GroupBy.ByExpression = byExpr; .)
+                          (. body.GroupBy.Terminate(t); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Gets a query continuation clause
+// +body: Query expression body to add the clause for.
+// ------------------------------------------------------------------------------------
+QueryContinuation<QueryBody body>
+=
+  "into"
+  ident                   (. body.IntoIdentifier = t.val; .)
+                          (. body.ContinuationBody = new QueryBody(); .)
+  QueryBody<body.ContinuationBody>
+.
+
+// ------------------------------------------------------------------------------------
 // Retrieves an expression.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
 Expression<out Expression expr>   (. expr = null; .)
 =                                 (. Expression leftExpr; .)
   (
+    IF (IsQueryExpression())      (. QueryExpression query = new QueryExpression(t, this); .)
+                                  (. FromClause fromClause; .)
+    FromClause<out fromClause>    (. query.From = fromClause; .)
+    QueryBody<query.Body>         (. expr = query; .)
+  |
     IF (IsLambda())               (. LambdaExpression lambda = new LambdaExpression(t, this); .)
     LambdaFunctionSignature<lambda>   
     "=>"
@@ -2268,7 +2446,7 @@ Expression<out Expression expr>   (. expr = null; .)
                                   (. condExpr.Terminate(t); .)
     ]
   )
-  )
+  )                               (. if (expr != null) expr.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3296,9 +3474,7 @@ TypeArgumentList<TypeReferenceCollection args>  (. TypeReference paramType; .)
 // ------------------------------------------------------------------------------------
 TypeParameterConstraintsClause<out TypeParameterConstraint constraint>         
 =
-  ident                        (. if (t.val != "where") 
-                                    Error("UNDEF", la, "type parameter constraints clause must start with: where");
-                               .)
+  "where"
   ident                        (. 
                                   constraint = new TypeParameterConstraint(t, this); 
                                   constraint.Name = t.val;

@@ -84,6 +84,17 @@
     <Compile Include="ProjectModel\Expressions\LambdaExpressions\LambdaExpression.cs" />
     <Compile Include="ProjectModel\Expressions\AnonymousFunction.cs" />
     <Compile Include="ProjectModel\Expressions\Operators\UnaryOperators\CastOperator.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\FromClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\GroupByClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\JoinClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\LetClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\OrderByClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\OrderingClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\QueryBody.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\QueryBodyClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\QueryExpression.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\SelectClause.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\WhereClause.cs" />
     <Compile Include="ProjectModel\Types\DeclarationBase.cs" />
     <Compile Include="Semantics\TypeAbstraction\ArrayType.cs" />
     <Compile Include="Semantics\TypeAbstraction\ExtendedType.cs" />
@@ -317,8 +328,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CoCoFiles\LambdaExpression.txt" />
-    <Content Include="CoCoFiles\NewOperator.txt" />
+    <Content Include="QueryExpression.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

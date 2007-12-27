@@ -7,7 +7,7 @@ namespace CSharpParserTest
   /// Summary description for UnitTest1
   /// </summary>
   [TestClass]
-  public class CSharpTests : ParserTestBed
+  public class CSharp3Tests : ParserTestBed
   {
     [TestMethod]
     public void AutoPropertiesAreOk()

@@ -11,9 +11,9 @@ public class MyClass
 
   public static void Main()
   {
+    WriteOut(23, x => 2 * x);
     WriteOut(23, (int x) => 2 * x);
     WriteOut(23, delegate(int x) { return 2 * x; });
-    WriteOut(23, x => 2*x);
     WriteOut(23, (int x) => { return 2 * x; });
   }
 }

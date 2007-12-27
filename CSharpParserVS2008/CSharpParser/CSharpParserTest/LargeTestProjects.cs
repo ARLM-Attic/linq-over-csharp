@@ -7,10 +7,11 @@ namespace CSharpParserTest
   [TestClass]
   public class LargeTestProjects: ParserTestBed
   {
-    const string CSharpParserFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser\CSharpParser.csproj";
-    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
-    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\NUnit.Core";
-    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParserTest\LargeTestProjects\CSLA";
+    const string CSharpParserFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParser\CSharpParser.csproj";
+    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
+    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\NUnit.Core";
+    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\CSLA";
+    const string LinqSamplesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\SampleQueries";
 
     [TestMethod]
     public void NUnitCoreInterfacesIsOK()
@@ -50,6 +51,16 @@ namespace CSharpParserTest
     {
       CSharpProjectContent content = new CSharpProjectContent(CSharpParserFile);
       CompilationUnit parser = new CompilationUnit(content);
+      Assert.IsTrue(InvokeParser(parser));
+    }
+
+    [TestMethod]
+    public void LinqSampleAreOK()
+    {
+      CompilationUnit parser = new CompilationUnit(LinqSamplesFolder, true);
+      parser.AddAssemblyReference("System.Core");
+      parser.AddAssemblyReference("System.Windows.Forms");
+      parser.AddAssemblyReference("System.Xml.Linq");
       Assert.IsTrue(InvokeParser(parser));
     }
   }

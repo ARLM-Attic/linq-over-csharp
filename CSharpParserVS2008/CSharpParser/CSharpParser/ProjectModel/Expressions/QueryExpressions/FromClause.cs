@@ -1,81 +1,69 @@
 ﻿using CSharpParser.ParserFiles;
-using CSharpParser.Semantics;
 
 namespace CSharpParser.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a lambda expression.
+  /// This type represents a from clause of a query expression.
   /// </summary>
   // ==================================================================================
-  public sealed class LambdaExpression : AnonymousFunction
+  public sealed class FromClause : QueryBodyClause
   {
     #region Private fields
 
+    private TypeReference _Type;
     private Expression _Expression;
-    
+
     #endregion
 
     #region Lifecycle methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new lambda expression.
+    /// Creates a new from clause.
     /// </summary>
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    public LambdaExpression(Token token, CSharpSyntaxParser parser)
+    public FromClause(Token token, CSharpSyntaxParser parser)
       : base(token, parser)
     {
     }
 
     #endregion
 
-    #region Public properties
+    #region Public methods
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the expression held by this lambda expression.
+    /// Gets or sets the type of the from clause variable, if explicitly defined.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public TypeReference Type
+    {
+      get { return _Type; }
+      internal set { _Type = value; }
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the flag indicating if the from caluse variable is explicitly typed or not.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public bool IsTyped
+    {
+      get { return _Type != null; }  
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the expression representing the basic set of the from clause. 
     /// </summary>
     // --------------------------------------------------------------------------------
     public Expression Expression
     {
       get { return _Expression; }
       internal set { _Expression = value; }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the flag indicating if this lambda expression has an expression or not.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool HasExpression
-    {
-      get { return _Expression != null; }
-    }
-
-    #endregion
-
-    #region IUsesResolutionContext implementation
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves all unresolved type references.
-    /// </summary>
-    /// <param name="contextType">Type of resolution context.</param>
-    /// <param name="declarationScope">Current type declaration context.</param>
-    /// <param name="parameterScope">Current type parameter declaration scope.</param>
-    // --------------------------------------------------------------------------------
-    public override void ResolveTypeReferences(ResolutionContext contextType,
-      ITypeDeclarationScope declarationScope,
-      ITypeParameterScope parameterScope)
-    {
-      base.ResolveTypeReferences(contextType, declarationScope, parameterScope);
-      if (_Expression != null)
-      {
-        _Expression.ResolveTypeReferences(contextType, declarationScope, parameterScope);
-      }
     }
 
     #endregion

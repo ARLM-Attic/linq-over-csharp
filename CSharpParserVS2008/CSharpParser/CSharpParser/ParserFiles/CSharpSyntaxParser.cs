@@ -676,6 +676,7 @@ namespace CSharpParser.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsLambda()
     {
+      _Scanner.ResetPeek();
       if (la.kind == _ident)
       {
         // --- ident =>
@@ -744,7 +745,28 @@ namespace CSharpParser.ParserFiles
       }
       return false;
     }
-    
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next tokens are start tokens of an query
+    /// expression.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsQueryExpression()
+    {
+      _Scanner.ResetPeek();
+      Token pt1 = _Scanner.Peek();
+      Token pt2 = _Scanner.Peek();
+
+      return la.val == "from"
+             && (pt1.kind == _ident || typeKW[pt1.kind])
+             && pt2.val != ";"
+             && pt2.val != ","
+             && pt2.val != "=";
+    }
 
     #endregion
   }

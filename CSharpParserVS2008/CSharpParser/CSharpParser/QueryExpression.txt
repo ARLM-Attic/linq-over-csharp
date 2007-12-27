@@ -1,0 +1,59 @@
+﻿query-expression: 
+  from-clause query-body 
+
+from-clause: 
+  from type#opt identifier in expression 
+  
+query-body: 
+  query-body-clauses#opt select-or-group-clause query-continuation#opt
+  
+query-body-clauses: 
+  query-body-clause 
+  query-body-clauses query-body-clause 
+  
+query-body-clause: 
+  from-clause 
+  let-clause 
+  where-clause 
+  join-clause 
+  join-into-clause 
+  orderby-clause 
+  
+let-clause: 
+  let identifier = expression 
+  
+where-clause: 
+  where boolean-expression 
+  
+join-clause: 
+  join type#opt identifier in expression on expression equals expression 
+  
+join-into-clause: 
+  join type#opt identifier in expression on expression equals expression into identifier 
+  
+orderby-clause: 
+  orderby orderings 
+  
+orderings: 
+  ordering 
+  orderings , ordering 
+  
+ordering: 
+  expression ordering-direction#opt 
+  
+ordering-direction: 
+  ascending 
+  descending 
+  
+select-or-group-clause: 
+  select-clause 
+  group-clause 
+  
+select-clause: 
+  select expression 
+  
+group-clause: 
+  group expression by expression 
+  
+query-continuation: 
+  into identifier query-body
