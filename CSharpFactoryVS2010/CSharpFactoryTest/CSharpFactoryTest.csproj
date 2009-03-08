@@ -1,0 +1,594 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{19B1E0F0-EEEE-43F0-B72A-37F9ABFFC5D4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CSharpParserTest</RootNamespace>
+    <AssemblyName>CSharpParserTest</AssemblyName>
+    <WarningLevel>4</WarningLevel>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>.\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <OutputPath>.\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\AssemblyInfo.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\EventListener.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\Addin.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\AddinStatus.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\ExtensionType.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\IAddin.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\IAddinManager.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\IAddinRegistry.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\IExtensionHost.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\IExtensionPoint.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\IFrameworkRegistry.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\ISuiteBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\ITestCaseBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\ITestDecorator.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\NUnitAddinAttribute.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Extensibility\TestFramework.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Filters\AndFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Filters\CategoryFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Filters\NameFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Filters\NotFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Filters\SimpleNameFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\IService.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\ITest.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\ITestFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\ResultState.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\ResultVisitor.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\RunState.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\RuntimeFramework.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\Test.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestAssemblyInfo.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestCaseResult.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestFilter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestID.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestInfo.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestName.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestNode.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestOutput.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestPackage.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestResult.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestRunner.cs" />
+    <None Include="LargeTestProjects\NUnit.Core.Interfaces\TestSuiteResult.cs" />
+    <Compile Include="..\CSharpFactory\Properties\AssemblyVersionInfo.cs">
+      <Link>Properties\AssemblyVersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="CSharp3Tests.cs" />
+    <Compile Include="LanguageElements\Comments.cs" />
+    <Compile Include="LanguageElements\ExternAliasDirective.cs" />
+    <Compile Include="LanguageElements\Members.cs" />
+    <Compile Include="LanguageElements\Methods.cs" />
+    <Compile Include="LanguageElements\Overloading.cs" />
+    <Compile Include="LanguageElements\Pragmas.cs" />
+    <Compile Include="LanguageElements\TypeDeclarations.cs" />
+    <Compile Include="LanguageElements\TypeParameters.cs" />
+    <Compile Include="LanguageElements\UsingsAndNamespaces.cs" />
+    <Compile Include="LargeTestProjects.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\AbstractTestCaseDecoration.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\AssemblyInfo.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\AssemblyReader.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\AssemblyResolver.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\AbstractFixtureBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\AbstractTestCaseBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\LegacySuiteBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\NUnitTestCaseBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\NUnitTestFixtureBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\SetUpFixtureBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Builders\TestAssemblyBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\CoreExtensions.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\DelegatingTestRunner.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\DirectorySwapper.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\EventListenerTextWriter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\EventPump.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\EventQueue.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Extensibility\AddinRegistry.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Extensibility\EventListenerCollection.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Extensibility\FrameworkRegistry.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Extensibility\SuiteBuilderCollection.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Extensibility\TestCaseBuilderCollection.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Extensibility\TestDecoratorCollection.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\ExtensionHost.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\IgnoreDecorator.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\InvalidSuiteException.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\InvalidTestFixtureException.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\LegacySuite.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NamespaceTreeBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NoTestFixturesException.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NotRunnableTestCase.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NullListener.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NUnitException.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NUnitFramework.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NUnitTestFixture.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\NUnitTestMethod.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\PlatformHelper.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\QueuingEventListener.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\Reflect.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\RemoteTestRunner.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\SetUpFixture.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\SimpleTestRunner.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\StringTextWriter.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\SuiteBuilderAttribute.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestBuilderAttribute.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestCase.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestCaseBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestCaseBuilderAttribute.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestContext.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestDecoratorAttribute.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestFixture.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestFixtureBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestMethod.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestRunnerThread.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestSuite.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\TestSuiteBuilder.cs" />
+    <None Include="LargeTestProjects\NUnit.Core\ThreadedTestRunner.cs" />
+    <None Include="LargeTestProjects\CSLA\BusinessBase.cs" />
+    <None Include="LargeTestProjects\CSLA\BusinessListBase.cs" />
+    <None Include="LargeTestProjects\CSLA\CommandBase.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\BindableBase.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\BusinessBase.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\ExtendedBindingList.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IBusinessObject.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\ICommandObject.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IEditableBusinessObject.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IEditableCollection.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IExtendedBindingList.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IParent.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IReadOnlyCollection.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IReadOnlyObject.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IReportTotalRowCount.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\ISavable.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\IUndoableObject.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\ObjectCloner.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\ReadOnlyBindingList.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\RemovingItemEventArgs.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\SavedEventArgs.cs" />
+    <None Include="LargeTestProjects\CSLA\Core\UndoableBase.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\ApplicationContext.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Client\DataPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Client\EnterpriseServicesProxy.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Client\IDataPortalProxy.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Client\LocalProxy.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Client\RemotingProxy.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\CriteriaBase.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\DataPortalEventArgs.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\DataPortalException.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Host\EnterpriseServicesPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Host\RemotingPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Host\WebServicePortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\MethodCaller.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\RunLocalAttribute.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\CallMethodException.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\DataPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\DataPortalContext.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\DataPortalException.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\DataPortalResult.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\IDataPortalServer.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\ServicedDataPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\SimpleDataPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\Server\TransactionalDataPortal.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\TransactionalAttribute.cs" />
+    <None Include="LargeTestProjects\CSLA\DataPortal\TransactionalTypes.cs" />
+    <None Include="LargeTestProjects\CSLA\Data\DataMapper.cs" />
+    <None Include="LargeTestProjects\CSLA\Data\ObjectAdapter.cs" />
+    <None Include="LargeTestProjects\CSLA\Data\SafeDataReader.cs" />
+    <None Include="LargeTestProjects\CSLA\DefaultFilter.cs" />
+    <None Include="LargeTestProjects\CSLA\EditableRootListBase.cs" />
+    <None Include="LargeTestProjects\CSLA\EnterpriseServicesSettings.cs" />
+    <None Include="LargeTestProjects\CSLA\FilteredBindingList.cs" />
+    <None Include="LargeTestProjects\CSLA\FilterProvider.cs" />
+    <None Include="LargeTestProjects\CSLA\GlobalSuppressions.cs" />
+    <None Include="LargeTestProjects\CSLA\NameValueListBase.cs" />
+    <None Include="LargeTestProjects\CSLA\NotUndoableAttribute.cs" />
+    <None Include="LargeTestProjects\CSLA\ReadOnlyBase.cs" />
+    <None Include="LargeTestProjects\CSLA\ReadOnlyListBase.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\AccessType.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\AuthorizationRules.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\AuthorizationRulesManager.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\BusinessPrincipalBase.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\IAuthorizeReadWrite.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\RolesForProperty.cs" />
+    <None Include="LargeTestProjects\CSLA\Security\SharedAuthorizationRules.cs" />
+    <None Include="LargeTestProjects\CSLA\SmartDate.cs" />
+    <None Include="LargeTestProjects\CSLA\SortedBindingList.cs" />
+    <None Include="LargeTestProjects\CSLA\Utilities.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\BrokenRule.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\BrokenRulesCollection.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\CommonRules.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\IRuleMethod.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\RuleArgs.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\RuleHandler.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\RuleMethod.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\RuleSeverity.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\RulesList.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\SharedValidationRules.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\ValidationException.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\ValidationRules.cs" />
+    <None Include="LargeTestProjects\CSLA\Validation\ValidationRulesManager.cs" />
+    <None Include="LargeTestProjects\CSLA\Properties\AssemblyInfo.cs" />
+    <None Include="LargeTestProjects\CSLA\Properties\Resources.Designer.cs" />
+    <None Include="LargeTestProjects\CSLA\Properties\Settings.Designer.cs" />
+    <None Include="LargeTestProjects\SampleQueries\LinqSamples.cs" />
+    <None Include="LargeTestProjects\SampleQueries\ObjectDumper.cs" />
+    <None Include="LargeTestProjects\SampleQueries\SampleHarness.cs" />
+    <Compile Include="ParserTestBed.cs" />
+    <Compile Include="LanguageElements\PartialTypes.cs" />
+    <Compile Include="LanguageElements\PreprocessorTest.cs" />
+    <Compile Include="ProjectProvider\CSharp9ProjectContentProviderTests.cs" />
+    <Content Include="ProjectProvider\WinFormsAppTest\Form1.cs">
+      <SubType>Form</SubType>
+    </Content>
+    <Content Include="ProjectProvider\WinFormsAppTest\Form1.designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Content>
+    <Content Include="ProjectProvider\WinFormsAppTest\Program.cs" />
+    <Content Include="ProjectProvider\WinFormsAppTest\Properties\AssemblyInfo.cs" />
+    <Content Include="ProjectProvider\WinFormsAppTest\Properties\Resources.Designer.cs" />
+    <Content Include="ProjectProvider\WinFormsAppTest\Properties\Settings.Designer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ParserTests.cs" />
+    <Content Include="ProjectProvider\WinFormsAppTest\TestWinApp.csproj.test" />
+    <Content Include="ProjectProvider\WinFormsAppTest\Properties\Settings.settings" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration3.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="TestFiles\MethodDeclarations.cs" />
+    <None Include="TestFiles\CastOperatorDeclarations.cs" />
+    <None Include="TestFiles\PropertyDeclarations.cs" />
+    <None Include="TestFiles\SimpleStatements.cs" />
+    <None Include="TestFiles\EventDeclarations.cs" />
+    <Compile Include="Regression\ParserRegressionTests.cs" />
+    <Compile Include="SimpleExpressionTests.cs" />
+    <Compile Include="StringHelperTest.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif4.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif5.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif6.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif7.cs" />
+    <None Include="TestFiles\Pragmas\PragmaAfterNonWhiteSpace.cs" />
+    <None Include="TestFiles\Pragmas\ErrorAndWarningByPragma.cs" />
+    <None Include="TestFiles\Pragmas\LinePragma.cs" />
+    <None Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\Pragmas\OpenRegion.cs" />
+    <None Include="TestFiles\Comments\SimpleLineComments.cs" />
+    <None Include="TestFiles\Comments\CompoundComments.cs" />
+    <None Include="TestFiles\Members\DuplicateConst.cs" />
+    <None Include="TestFiles\Members\DuplicateCtor.cs" />
+    <None Include="TestFiles\Members\DuplicateEventProp.cs" />
+    <None Include="TestFiles\Members\DuplicateProp.cs" />
+    <None Include="TestFiles\Members\DuplicateFinalizer.cs" />
+    <None Include="TestFiles\Members\DuplicateIndexer.cs" />
+    <None Include="TestFiles\Members\DuplicateMethod.cs" />
+    <None Include="TestFiles\Members\DuplicateOperator.cs" />
+    <None Include="TestFiles\Members\DuplicateCastOperator.cs" />
+    <None Include="TestFiles\Members\DuplicateField.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesOk1.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesOk2.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail1.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail2.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail3.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail4.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail5.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail6.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail7.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail8.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail9.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail10.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency1.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency2.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency3.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency4.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency5.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency6.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency7.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency8.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency9.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency10.cs" />
+    <None Include="TestFiles\BaseTypes\CircularDependency11.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails1.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails2.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails3.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityFails4.cs" />
+    <None Include="TestFiles\BaseTypes\AccessibilityOk1.cs" />
+    <None Include="TestFiles\ComparisonOperator.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail11.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType1.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType2.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType3.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType4.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType7.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType5.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType6.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType8.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType9.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType10.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType11.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType12.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType13.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail12.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType14.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType15.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType16.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType17.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType18.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType19.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType20.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration1.cs" />
+    <None Include="TestFiles\PartialTypes\PartialType21.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration2.cs" />
+    <None Include="TestFiles\BaseTypes\BaseTypesFail13.cs">
+      <SubType>Code</SubType>
+    </None>
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration4.cs" />
+    <None Include="TestFiles\InterfaceDeclaration\InterfaceDeclaration1.cs" />
+    <None Include="TestFiles\DelegateDeclaration\DelegateDeclaration1.cs" />
+    <None Include="TestFiles\EnumDeclaration\EnumDeclaration1.cs" />
+    <None Include="TestFiles\EnumDeclaration\EnumDeclaration2.cs" />
+    <None Include="TestFiles\DelegateDeclaration\DelegateDeclaration2.cs" />
+    <None Include="TestFiles\InterfaceDeclaration\InterfaceDeclaration2.cs" />
+    <None Include="TestFiles\DuplicateModifiers.cs" />
+    <None Include="TestFiles\Overloading\Overloading1.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration1.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration2.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration3.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration4.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration5.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration6.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration7.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration8.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration9.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration10.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration11.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration12.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration13.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration14.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration15.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration16.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration17.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration18.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration19.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration5.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration6.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration20.cs" />
+    <None Include="TestFiles\Members\ConstDeclaration1.cs" />
+    <None Include="TestFiles\Members\ConstDeclaration2.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration1.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration2.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration3.cs" />
+    <None Include="TestFiles\Methods\MethodDeclaration4.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration1.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration2.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration3.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration4.cs" />
+    <None Include="TestFiles\Methods\CtorDeclaration5.cs" />
+    <None Include="TestFiles\Methods\FinalizerDeclaration1.cs" />
+    <None Include="TestFiles\Methods\FinalizerDeclaration2.cs" />
+    <None Include="TestFiles\Methods\ReservedName1.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration1.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration1.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration2.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration3.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration4.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration5.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration6.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration7.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration8.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration9.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration10.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration11.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration2.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration3.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration4.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration1.cs" />
+    <None Include="TestFiles\Methods\IndexerDeclaration5.cs" />
+    <None Include="TestFiles\Members\FieldDeclaration21.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration2.cs" />
+    <None Include="TestFiles\Methods\PropertyDeclaration12.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration3.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration4.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration5.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration6.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration7.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration8.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration9.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration10.cs" />
+    <None Include="TestFiles\Methods\OperatorDeclaration11.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration1.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration2.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration3.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration4.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration5.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration6.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration7.cs" />
+    <None Include="TestFiles\Methods\CastOpDeclaration8.cs" />
+    <None Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace10.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace11.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace12.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable1.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable2.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable3.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable4.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable5.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable6.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable7.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable8.cs" />
+    <None Include="TestFiles\Variables\DuplicatedVariable9.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessCombination1.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessCombination2.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier1.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier2.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier3.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier4.cs" />
+    <None Include="TestFiles\Visibility\InvalidAccessModifier5.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidNamespace1.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidNamespace2.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidNamespace3.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace1.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace2.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace3.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace7.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace4.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace5.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace6.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace8.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace9.cs" />
+    <None Include="TestFiles\TypeResolution\MemberReferences1.cs" />
+    <None Include="TestFiles\TypeResolution\ConflictingName1.cs" />
+    <None Include="TestFiles\TypeResolution\AttributeName1.cs" />
+    <None Include="TestFiles\TypeResolution\AttributeName2.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace13.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespace14.cs">
+      <SubType>Component</SubType>
+    </None>
+    <None Include="TestFiles\TypeResolution\Generics1.cs" />
+    <None Include="TestFiles\TypeResolution\InvalidTypeName1.cs" />
+    <Compile Include="LanguageElements\BaseTypes.cs" />
+    <Compile Include="LanguageElements\TypeResolution.cs" />
+    <Compile Include="LanguageElements\Variables.cs" />
+    <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
+    <None Include="TestFiles\CSharp3\LambdaExpression3.cs" />
+    <None Include="TestFiles\CSharp3\LambdaExpression2.cs" />
+    <None Include="TestFiles\CSharp3\LambdaExpression1.cs" />
+    <None Include="TestFiles\CSharp3\ExtensionMethod1.cs" />
+    <None Include="TestFiles\CSharp3\AnonymousType1.cs" />
+    <None Include="TestFiles\CSharp3\AnonymousType2.cs" />
+    <None Include="TestFiles\CSharp3\PartialMethod1.cs" />
+    <None Include="TestFiles\CSharp3\NewOperator3.cs" />
+    <None Include="TestFiles\CSharp3\NewOperator2.cs" />
+    <None Include="TestFiles\CSharp3\NewOperator1.cs" />
+    <None Include="TestFiles\CSharp3\ImplicitArrayDecl1.cs" />
+    <None Include="TestFiles\CSharp3\VarDeclaration2.cs" />
+    <None Include="TestFiles\CSharp3\VarDeclaration1.cs" />
+    <None Include="TestFiles\CSharp3\AutoProperty1.cs" />
+    <None Include="TestFiles\Comments\DocCommentWarning2.cs" />
+    <None Include="TestFiles\Comments\BadlyFormedDocComment.cs" />
+    <None Include="TestFiles\Comments\DocCommentWarning1.cs" />
+    <None Include="TestFiles\Comments\MisplacedDocComments.cs" />
+    <None Include="TestFiles\Comments\MissingDocComments.cs" />
+    <None Include="TestFiles\TypeResolution\NullableType1.cs" />
+    <None Include="TestFiles\TypeResolution\ResolveThroughInheritance.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedType3.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedType2.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedType1.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails10.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails9.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails8.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails7.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails6.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails5.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails4.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails3.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails2.cs" />
+    <None Include="TestFiles\TypeParameters\ConstraintFails1.cs" />
+    <None Include="TestFiles\TypeParameters\MissingTypeParameter.cs" />
+    <None Include="TestFiles\StructDeclaration\StructDeclaration2.cs" />
+    <None Include="TestFiles\StructDeclaration\StructDeclaration1.cs" />
+    <None Include="TestFiles\TypeResolution\PrimitiveTypes.cs" />
+    <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
+    <None Include="TestFiles\Pragmas\IfEndIfInVerbatimString.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif3.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif2.cs" />
+    <None Include="TestFiles\Pragmas\IfEndif1.cs" />
+    <None Include="TestFiles\Pragmas\DefineUndefineWithCS1032.cs" />
+    <None Include="TestFiles\Pragmas\DefineUndefineOk.cs" />
+    <None Include="TestFiles\TypeParameters\DuplicatedConstraints.cs" />
+    <None Include="TestFiles\ConstDeclarations.cs" />
+    <None Include="TestFiles\ExternAliasDirective\ExternAliasDirectiveOK.cs" />
+    <None Include="TestFiles\ExternAliasDirective\ExternAliasDirectiveFailed.cs" />
+    <None Include="TestFiles\SimpleExpressions.cs" />
+    <None Include="TestFiles\TypeParameters\DuplicatedTypeParams.cs" />
+    <None Include="TestFiles\TypeParameters\TypeParamConstraintsAreOk.cs" />
+    <None Include="TestFiles\EnumTest.cs" />
+    <None Include="TestFiles\GlobalAttributes.cs" />
+    <None Include="TestFiles\ExternAliasDirective\ExternAliasesChecked.cs" />
+    <None Include="TestFiles\UsingsAndNamespaces\UsingsAndNamespacesOK.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Component Include="TestFiles\Assemblies\CSharpParser.dll" />
+    <Component Include="TestFiles\Assemblies\nunit.core.interfaces.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpFactory\CSharpFactory.csproj">
+      <Project>{DAC84C34-6834-4398-AE6B-24559581D0E4}</Project>
+      <Name>CSharpFactory</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ProjectProvider\WinFormsAppTest\Properties\Resources.resx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
+</Project>
