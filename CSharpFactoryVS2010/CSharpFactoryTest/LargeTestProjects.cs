@@ -7,11 +7,11 @@ namespace CSharpParserTest
   [TestClass]
   public class LargeTestProjects: ParserTestBed
   {
-    const string CSharpParserFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParser\CSharpParser.csproj";
-    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\NUnit.Core.Interfaces";
-    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\NUnit.Core";
-    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\CSLA";
-    const string LinqSamplesFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParserTest\LargeTestProjects\SampleQueries";
+    const string CSharpParserFile = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactory\CSharpFactory.csproj";
+    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\LargeTestProjects\NUnit.Core.Interfaces";
+    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\LargeTestProjects\NUnit.Core";
+    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\LargeTestProjects\CSLA";
+    const string LinqSamplesFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\LargeTestProjects\SampleQueries";
 
     [TestMethod]
     public void NUnitCoreInterfacesIsOK()

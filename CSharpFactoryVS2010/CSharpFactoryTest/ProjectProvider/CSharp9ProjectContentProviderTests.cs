@@ -8,9 +8,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.ProjectProvider
 {
-  /// <summary>
-  /// Summary description for UnitTest1
-  /// </summary>
   [TestClass]
   public class CSharp9ProjectContentProviderTests
   {
@@ -21,6 +18,8 @@ namespace CSharpParserTest.ProjectProvider
     public void ContentProviderParseProjectOk()
     {
       var provider = new CSharp9ProjectContentProvider(csProjFile);
+      Assert.AreEqual(provider.SourceFiles.Count, 6);
+      Assert.AreEqual(provider.References.Count, 9);
     }
   }
 }

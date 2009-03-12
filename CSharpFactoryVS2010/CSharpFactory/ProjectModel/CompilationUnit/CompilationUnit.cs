@@ -588,7 +588,7 @@ namespace CSharpFactory.ProjectModel
     public void AddAliasedReference(string alias, string name)
     {
       _ReferencedUnits.Add(new ReferencedAssembly(
-        name, ReferencedAssembly.DotNetSystemFolder, alias));
+        name, ReferencedAssembly.DotNet20SystemFolder, alias));
     }
 
     // --------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ namespace CSharpParserTest.LanguageElements
   [TestClass]
   public class ParserRegressionTests : ParserTestBed
   {
-    const string CSharpParserFolder = @"C:\Work\LINQOverCSharp\CSharpParserVS2005\CSharpParser";
+    const string CSharpParserFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactory";
 
     [TestMethod]
     public void TypeResolutionCounterIsOk4()

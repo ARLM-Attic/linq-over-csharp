@@ -17,23 +17,23 @@ namespace SampleCompilation
   // ==================================================================================
   class Program
   {
-    private const string CSharpParserProjectFile = @"C:\Work\LINQOverCSharp\CSharpParserVS2008\CSharpParser\CSharpParser.csproj";
+    private const string CSharpParserProjectFile = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactory\CSharpFactory.csproj";
 
     static void Main(/* string[] args */)
     {
       // --- Create a compilation unit according to the specified .csproj file
-      CSharpProjectContent content = new CSharpProjectContent(CSharpParserProjectFile);
-      CompilationUnit project = new CompilationUnit(content);
+      var content = new CSharpProjectContent(CSharpParserProjectFile);
+      var project = new CompilationUnit(content);
 
       // --- Parse the project and measure parse time
-      Stopwatch watch = new Stopwatch();
+      var watch = new Stopwatch();
       watch.Start();
       project.Parse();
       watch.Stop();
 
       // --- Display errors
       Console.WriteLine("{0} errors found.", project.Errors.Count);
-      foreach (Error error in project.Errors)
+      foreach (var error in project.Errors)
       {
         Console.WriteLine("--- Error {0}: {1} line: {2}, column: {3}, file: {4}",
                           error.Code, error.Description, error.Line, error.Column, error.File);

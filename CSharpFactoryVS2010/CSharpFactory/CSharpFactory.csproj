@@ -60,6 +60,9 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
@@ -68,6 +71,7 @@
     <Compile Include="ProjectContent\CSharpProjectContent.cs" />
     <Compile Include="ProjectContent\EmptyProject.cs" />
     <Compile Include="ProjectContent\FolderContent.cs" />
+    <Compile Include="ProjectContent\FolderContentProvider.cs" />
     <Compile Include="ProjectContent\IProjectContentProvider.cs" />
     <Compile Include="ProjectModel\Comments\DocumentationComment.cs" />
     <Compile Include="ProjectModel\Comments\DocumentationTag.cs" />

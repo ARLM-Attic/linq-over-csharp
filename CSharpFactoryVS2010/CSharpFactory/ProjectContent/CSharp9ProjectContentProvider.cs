@@ -4,7 +4,8 @@
 // Created: 2009.03.04, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.IO;
-using System.Xml;
+using System.Linq;
+using System.Xml.Linq;
 using CSharpFactory.SolutionHierarchy;
 
 namespace CSharpFactory.ProjectContent
@@ -17,6 +18,13 @@ namespace CSharpFactory.ProjectContent
   // ================================================================================================
   public class CSharp9ProjectContentProvider: ProjectProviderBase 
   {
+    private const string MSBuildSchema = "http://schemas.microsoft.com/developer/msbuild/2003";
+
+    private static readonly XName ItemGroupXName = XName.Get("ItemGroup", MSBuildSchema);
+    private static readonly XName ReferenceXName = XName.Get("Reference", MSBuildSchema);
+    private static readonly XName CompileXName = XName.Get("Compile", MSBuildSchema);
+    private static readonly XName ProjectRefXName = XName.Get("ProjectReference", MSBuildSchema);
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="CSharp9ProjectContentProvider"/> class.
@@ -38,32 +46,30 @@ namespace CSharpFactory.ProjectContent
     public void CollectProjectItems()
     {
       // --- Open the .csproj file as an XML document
-      var csProj = new XmlDocument();
-      csProj.Load(Name);
+      var csProj = XDocument.Load(Name);
+      if (csProj.Root == null) return;
 
-      // --- Obtain the files from the project
-      foreach (XmlNode node in csProj.DocumentElement.ChildNodes)
+      var itemGroup = csProj.Root.Elements(ItemGroupXName).Elements();
+      foreach (var refElem in itemGroup.Where(r => r.Name.Equals(ReferenceXName)))
       {
-        if (node.LocalName != "ItemGroup") continue;
-        foreach (XmlNode subNode in node.ChildNodes)
+        var includeAttr = refElem.Attribute("Include");
+        if (includeAttr != null) AddAssemblyReference(includeAttr.Value);
+      }
+
+      foreach (var refElem in itemGroup.Where(r => r.Name.Equals(CompileXName)))
+      {
+        var includeAttr = refElem.Attribute("Include");
+        if (includeAttr != null) AddFile(includeAttr.Value);
+      }
+
+      foreach (var refElem in itemGroup.Where(r => r.Name.Equals(ProjectRefXName)))
+      {
+        var includeAttr = refElem.Attribute("Include");
+        if (includeAttr != null)
         {
-          if (subNode.LocalName == "Reference")
-          {
-            string file = subNode.Attributes["Include"].Value;
-            AddAssemblyReference(file);
-          }
-          else if (subNode.LocalName == "Compile")
-          {
-            string file = subNode.Attributes["Include"].Value;
-            AddFile(file);
-          }
-          else if (subNode.LocalName == "ProjectReference")
-          {
-            string file = subNode.Attributes["Include"].Value;
-            var referencedProject =
-              new CSharp9ProjectContentProvider(Path.Combine(WorkingFolder, file));
-            AddProjectReference(referencedProject, Path.GetFileName(file));
-          }
+          var referencedProject =
+            new CSharp9ProjectContentProvider(Path.Combine(WorkingFolder, includeAttr.Value));
+          AddProjectReference(referencedProject, Path.GetFileName(includeAttr.Value));
         }
       }
     }

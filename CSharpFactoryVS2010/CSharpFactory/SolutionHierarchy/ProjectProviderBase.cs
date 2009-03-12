@@ -89,7 +89,7 @@ namespace CSharpFactory.SolutionHierarchy
     public void AddAliasedReference(string alias, string name)
     {
       References.Add(
-        new ReferencedAssembly(name, ReferencedAssembly.DotNetSystemFolder, alias));
+        new ReferencedAssembly(name, string.Empty, alias));
     }
 
     // ----------------------------------------------------------------------------------------------
