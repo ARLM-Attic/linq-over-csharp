@@ -58,9 +58,6 @@ public partial class CSharpSyntaxParser
   /// </summary>
   const int MinimumDistanceOfSeparateErrors = 2;
 
-  /// <summary>Scanner used by the parser to obtain tokens.</summary>
-  private readonly Scanner _Scanner;
-
   /// <summary>Represents the last recognized token.</summary>
   private Token t;
 
@@ -97,7 +94,7 @@ public partial class CSharpSyntaxParser
 	  	for (;;) 
 	  	{
         t = la;
-        la = _Scanner.Scan();
+        la = Scanner.Scan();
         if (la.kind <= maxT) { ++errDist; break; }
 -->pragmas
 			  la = t;
@@ -276,9 +273,9 @@ public partial class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     Token Peek(int n)
     {
-      _Scanner.ResetPeek();
+      Scanner.ResetPeek();
       Token x = la;
-      while (n > 0) { x = _Scanner.Peek(); n--; }
+      while (n > 0) { x = Scanner.Peek(); n--; }
       return x;
     }
 
@@ -295,15 +292,15 @@ public partial class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     public bool CheckTokenIsFirstInLine(Token symbol)
     {
-      int oldPos = _Scanner.Buffer.Pos;
+      int oldPos = Scanner.Buffer.Pos;
       bool wsOnly = true;
       for (int i = symbol.col - 1; i >= 1; i--)
       {
-        _Scanner.Buffer.Pos = symbol.pos - i;
-        int ch = _Scanner.Buffer.Peek();
+        Scanner.Buffer.Pos = symbol.pos - i;
+        int ch = Scanner.Buffer.Peek();
         wsOnly &= (ch == ' ' || (ch >= 9 && ch <= 13));
       }
-      _Scanner.Buffer.Pos = oldPos;
+      Scanner.Buffer.Pos = oldPos;
       return wsOnly;
     }
 
@@ -330,7 +327,7 @@ public partial class CSharpSyntaxParser
 		  Get();
 -->parseRoot
       Expect(0);
-      if (_PragmaHandler.OpenRegionCount > 0)
+      if (PragmaHandler.OpenRegionCount > 0)
       {
         Error1038(la);
       }
@@ -362,7 +359,7 @@ public partial class CSharpSyntaxParser
 -->errors
   			  default: s = "error " + n; break;
 	  	  }
-        _CompilationUnit.ErrorHandler.Error("SYNERR", la, s, null);
+        CompilationUnit.ErrorHandler.Error("SYNERR", la, s, null);
 	  	}
 		  errDist = 0;
 	  }

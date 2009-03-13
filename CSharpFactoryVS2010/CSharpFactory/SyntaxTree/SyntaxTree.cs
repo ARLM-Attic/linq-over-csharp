@@ -1,39 +1,34 @@
 // ================================================================================================
-// IProject.cs
+// SyntaxTree.cs
 //
-// Created: 2009.02.25, by Istvan Novak (DeepDiver)
+// Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Syntax;
-
-namespace CSharpFactory.SolutionHierarchy
+namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This interface represents a project in a solution.
+  /// This class represents the syntax tree as a result of the syntax parsing of a C# compilation 
+  /// unit.
   /// </summary>
   // ================================================================================================
-  public interface IProject: IProjectContainer
+  public class SyntaxTree: ISyntaxTree
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the parent solution of this project.
+    /// Initializes a new instance of the <see cref="SyntaxTree"/> class.
     /// </summary>
-    /// <value>The parent solution.</value>
     // ----------------------------------------------------------------------------------------------
-    ISolution ParentSolution { get; }
+    public SyntaxTree()
+    {
+      SourceFileNodes = new SourceFileNodeCollection();
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Syntax tree representing the project's grammar
+    /// Gets the source file nodes belonging to the syntax tree
     /// </summary>
+    /// <value>The source file nodes.</value>
     // ----------------------------------------------------------------------------------------------
-    ISyntaxTree SyntaxTree { get; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Semantic tree representing the project
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    ISemanticTree SemanticTree { get; }
+    public SourceFileNodeCollection SourceFileNodes { get; private set; }
   }
 }

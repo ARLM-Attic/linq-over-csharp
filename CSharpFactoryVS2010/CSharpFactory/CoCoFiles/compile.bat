@@ -1,4 +1,4 @@
-coco CSharp2.ATG -namespace CSharpParser.ParserFiles > _Output.txt
+coco CSharp2.ATG -namespace CSharpFactory.ParserFiles > _Output.txt
 copy trace.txt _Trace.txt
 copy Parser.cs ..\ParserFiles\Parser.cs
 copy Scanner.cs ..\ParserFiles\Scanner.cs

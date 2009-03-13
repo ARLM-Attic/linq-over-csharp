@@ -245,7 +245,7 @@ namespace CSharpFactory.ProjectModel
   /// full name of the type.
   /// </summary>
   // ==================================================================================
-  public class FieldDeclarationCollection : RestrictedIndexedCollection<FieldDeclaration>
+  public class FieldDeclarationCollection : ImmutableIndexedCollection<FieldDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

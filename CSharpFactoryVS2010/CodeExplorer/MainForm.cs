@@ -70,9 +70,12 @@ namespace CSharpFactory.CodeExplorer
       if (FileDialog.ShowDialog() != DialogResult.OK) return;
 
       // --- Creates a compilation unit for the selected folder.
-      CSharpProjectContent content = new CSharpProjectContent(FileDialog.FileName);
-      CompilationUnit unit = new CompilationUnit(content);
-      ParseAndShowCompilation(unit);
+      if (FileDialog != null)
+      {
+        var content = new CSharp9ProjectContentProvider(FileDialog.FileName);
+        var unit = new CompilationUnit(content);
+        ParseAndShowCompilation(unit);
+      }
     }
 
     #region Private methods

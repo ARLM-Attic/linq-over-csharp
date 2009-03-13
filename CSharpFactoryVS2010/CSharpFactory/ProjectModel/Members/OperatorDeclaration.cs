@@ -255,7 +255,7 @@ namespace CSharpFactory.ProjectModel
   /// signature of the method.
   /// </summary>
   // ==================================================================================
-  public class OperatorDeclarationCollection : RestrictedIndexedCollection<OperatorDeclaration>
+  public class OperatorDeclarationCollection : ImmutableIndexedCollection<OperatorDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

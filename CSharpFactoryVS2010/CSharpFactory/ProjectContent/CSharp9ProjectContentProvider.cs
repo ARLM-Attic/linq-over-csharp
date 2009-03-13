@@ -6,7 +6,6 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using CSharpFactory.SolutionHierarchy;
 
 namespace CSharpFactory.ProjectContent
 {

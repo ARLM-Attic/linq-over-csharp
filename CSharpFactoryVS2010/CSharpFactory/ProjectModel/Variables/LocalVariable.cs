@@ -129,7 +129,7 @@ namespace CSharpFactory.ProjectModel
   /// signature of the method.
   /// </summary>
   // ==================================================================================
-  public class VariableCollection : RestrictedIndexedCollection<LocalVariable>
+  public class VariableCollection : ImmutableIndexedCollection<LocalVariable>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -142,7 +142,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public class ConstructorDeclarationCollection : 
-    RestrictedIndexedCollection<ConstructorDeclaration>
+    ImmutableIndexedCollection<ConstructorDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

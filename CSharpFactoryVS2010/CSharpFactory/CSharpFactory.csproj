@@ -68,7 +68,7 @@
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectContent\CSharp9ProjectContentProvider.cs" />
-    <Compile Include="ProjectContent\CSharpProjectContent.cs" />
+    <Compile Include="ProjectContent\EmptyContentProvider.cs" />
     <Compile Include="ProjectContent\EmptyProject.cs" />
     <Compile Include="ProjectContent\FolderContent.cs" />
     <Compile Include="ProjectContent\FolderContentProvider.cs" />
@@ -315,15 +315,18 @@
     <Compile Include="SolutionHierarchy\IProjectContainer.cs" />
     <Compile Include="SolutionHierarchy\ISemanticTree.cs" />
     <Compile Include="SolutionHierarchy\ISolution.cs" />
-    <Compile Include="SolutionHierarchy\ISyntaxTree.cs" />
+    <Compile Include="SyntaxTree\ISyntaxTree.cs" />
     <Compile Include="SolutionHierarchy\PhysicalSourceFile.cs" />
-    <Compile Include="SolutionHierarchy\ProjectProviderBase.cs" />
+    <Compile Include="ProjectContent\ProjectProviderBase.cs" />
     <Compile Include="SolutionHierarchy\SourceFileBase.cs" />
+    <Compile Include="SyntaxTree\SourceFileNode.cs" />
+    <Compile Include="SyntaxTree\SyntaxNode.cs" />
+    <Compile Include="SyntaxTree\SyntaxTree.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
     <Compile Include="Utility\ImmutableCollection.cs" />
-    <Compile Include="Utility\RestrictedIndexedCollection.cs" />
+    <Compile Include="Utility\ImmutableIndexedCollection.cs" />
     <Compile Include="Utility\StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>

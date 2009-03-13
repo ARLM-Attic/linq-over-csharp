@@ -116,7 +116,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public class EventPropertyDeclarationCollection : 
-    RestrictedIndexedCollection<EventPropertyDeclaration>
+    ImmutableIndexedCollection<EventPropertyDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -15,11 +15,11 @@ namespace CSharpParserTest.ProjectProvider
       @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\ProjectProvider\WinFormsAppTest\TestWinApp.csproj.test";
 
     [TestMethod]
-    public void ContentProviderParseProjectOk()
+    public void CSharp9ProviderParseProjectOk()
     {
       var provider = new CSharp9ProjectContentProvider(csProjFile);
       Assert.AreEqual(provider.SourceFiles.Count, 6);
-      Assert.AreEqual(provider.References.Count, 9);
+      Assert.AreEqual(provider.References.Count, 10);
     }
   }
 }

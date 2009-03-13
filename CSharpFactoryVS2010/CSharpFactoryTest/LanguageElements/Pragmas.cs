@@ -21,7 +21,7 @@ namespace CSharpParserTest.LanguageElements
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"Pragmas\DefineUndefineOK.cs");
-      parser.AddConditionalCompilationSymbols(new string[] { "SymbolC" });
+      parser.AddConditionalCompilationSymbol("SymbolC");
       Assert.IsTrue(InvokeParser(parser));
       Assert.IsTrue(parser.IsConditionalSymbolDefined("SymbolA"));
       Assert.IsFalse(parser.IsConditionalSymbolDefined("SymbolB"));
@@ -33,7 +33,7 @@ namespace CSharpParserTest.LanguageElements
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"Pragmas\DefineUndefineOK.cs");
-      parser.AddConditionalCompilationSymbols(new string[] { "SymbolA", "SymbolB", "SymbolC" });
+      parser.AddConditionalCompilationSymbols(new[] { "SymbolA", "SymbolB", "SymbolC" });
       Assert.IsTrue(InvokeParser(parser));
       Assert.IsTrue(parser.IsConditionalSymbolDefined("SymbolA"));
       Assert.IsFalse(parser.IsConditionalSymbolDefined("SymbolB"));
@@ -45,7 +45,7 @@ namespace CSharpParserTest.LanguageElements
     {
       CompilationUnit parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"Pragmas\DefineUndefineWithCS1032.cs");
-      parser.AddConditionalCompilationSymbols(new string[] { "SymbolA", "SymbolB", "SymbolC" });
+      parser.AddConditionalCompilationSymbols(new[] { "SymbolA", "SymbolB", "SymbolC" });
       Assert.IsFalse(InvokeParser(parser));
       Assert.IsTrue(parser.IsConditionalSymbolDefined("SymbolA"));
       Assert.IsFalse(parser.IsConditionalSymbolDefined("SymbolB"));

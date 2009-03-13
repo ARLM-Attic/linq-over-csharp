@@ -3,23 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using CSharpFactory.Collections;
+using CSharpFactory.ParserFiles;
+using CSharpFactory.ParserFiles.PPExpressions;
 using CSharpFactory.ProjectContent;
 using CSharpFactory.Semantics;
-using AssemblyResolutionTree=CSharpFactory.Semantics.AssemblyResolutionTree;
-using CSharpPPExprSyntaxParser=CSharpFactory.ParserFiles.PPExpressions.CSharpPPExprSyntaxParser;
-using CSharpSyntaxParser=CSharpFactory.ParserFiles.CSharpSyntaxParser;
-using GenericType=CSharpFactory.Semantics.GenericType;
-using ITypeAbstraction=CSharpFactory.Semantics.ITypeAbstraction;
-using ITypeDeclarationScope=CSharpFactory.Semantics.ITypeDeclarationScope;
-using NamespaceHierarchy=CSharpFactory.Semantics.NamespaceHierarchy;
-using NamespaceOrTypeResolver=CSharpFactory.Semantics.NamespaceOrTypeResolver;
-using NamespaceOrTypeResolverInfo=CSharpFactory.Semantics.NamespaceOrTypeResolverInfo;
-using PPEvaluationStatus=CSharpFactory.ParserFiles.PPExpressions.PPEvaluationStatus;
-using PPScanner=CSharpFactory.ParserFiles.PPExpressions.PPScanner;
-using ResolutionContext=CSharpFactory.Semantics.ResolutionContext;
-using Scanner = CSharpFactory.ParserFiles.Scanner;
-using Token = CSharpFactory.ParserFiles.Token;
-using TypeResolutionTree=CSharpFactory.Semantics.TypeResolutionTree;
+using CSharpFactory.Syntax;
 
 namespace CSharpFactory.ProjectModel
 {
@@ -41,34 +29,16 @@ namespace CSharpFactory.ProjectModel
 
     #region Private Fields
 
-    private readonly IProjectContentProvider _ProjectContent;
-    private readonly SourceFileCollection _Files = new SourceFileCollection();
-    private readonly NamespaceCollection _DeclaredNamespaces = new NamespaceCollection();
-    private readonly TypeDeclarationCollection _DeclaredTypes = new TypeDeclarationCollection();
-    private readonly string _WorkingFolder = string.Empty;
-    private readonly ImmutableCollection<ReferencedUnit> _ReferencedUnits =
-      new ImmutableCollection<ReferencedUnit>();
-    private readonly List<string> _ConditionalSymbols = new List<string>();
-
-    private CSharpSyntaxParser _Parser;
-    private SourceFile _CurrentFile;
-    private readonly ReferencedCompilation _ThisUnit;
-    private string _XmlDocumentFile;
+    /// <summary>Provides all information related to the subject of compilation.</summary>
+    private readonly ProjectProviderBase _ProjectProvider;
 
     // --- Members related to error handling
-    private readonly ErrorCollection _Errors = new ErrorCollection();
-    private readonly ErrorCollection _Warnings = new ErrorCollection();
-    private ICompilationErrorHandler _ErrorHandler;
     private TextWriter _ErrorStream;
     private string _ErrorMessageFormat = "-- line {0} col {1}: {2}"; // 0=line, 1=column, 2=text
     private int _ErrorLineOffset;
     private string _ErrorFile;
 
     // --- Members related to semantics
-    private readonly NamespaceHierarchy _GlobalHierarchy = new NamespaceHierarchy();
-    private Semantics.SourceResolutionTree _SourceResolutionTree;
-    private readonly Dictionary<string, NamespaceHierarchy> _NamespaceHierarchies =
-      new Dictionary<string, NamespaceHierarchy>();
     private NamespaceOrTypeResolver _NamespaceOrTypeResolver;
 
     // --- Types to check and fix (arrays, pointers, generic types)
@@ -91,22 +61,32 @@ namespace CSharpFactory.ProjectModel
 
     #region Lifecycle methods
 
+    private CompilationUnit()
+    {
+      NamespaceHierarchies = new Dictionary<string, NamespaceHierarchy>();
+      GlobalHierarchy = new NamespaceHierarchy();
+      ConditionalSymbols = new List<string>();
+      DeclaredTypes = new TypeDeclarationCollection();
+      DeclaredNamespaces = new NamespaceCollection();
+      Files = new SourceFileCollection();
+      Warnings = new ErrorCollection();
+      Errors = new ErrorCollection();
+      ErrorHandler = this;
+      CurrentFile = null;
+      _ErrorLineOffset = -1;
+      _ErrorFile = null;
+      ThisUnit = new ReferencedCompilation(this, ThisUnitName);
+    }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Creates a project parser using the specified working folder.
     /// </summary>
     /// <param name="workingFolder">Folder used as the working folder</param>
     // --------------------------------------------------------------------------------
-    public CompilationUnit(string workingFolder)
+    public CompilationUnit(string workingFolder):
+      this(workingFolder, false)
     {
-      _ErrorHandler = this;
-      _WorkingFolder = workingFolder;
-      _CurrentFile = null;
-      _ErrorLineOffset = -1;
-      _ErrorFile = null;
-      _ThisUnit = new ReferencedCompilation(this, ThisUnitName);
-      AddAssemblyReference("mscorlib");
-      AddAssemblyReference("System");
     }
 
     // --------------------------------------------------------------------------------
@@ -118,12 +98,15 @@ namespace CSharpFactory.ProjectModel
     /// If true, all C# files are added to the project.
     /// </param>
     // --------------------------------------------------------------------------------
-    public CompilationUnit(string workingFolder, bool addCSharpFiles):
-      this(workingFolder)
+    public CompilationUnit(string workingFolder, bool addCSharpFiles): this()
     {
       if (addCSharpFiles)
       {
-        AddAllFilesFrom(_WorkingFolder);
+        _ProjectProvider = new FolderContentProvider(workingFolder);
+      }
+      else
+      {
+        _ProjectProvider = new EmptyContentProvider(workingFolder);
       }
     }
 
@@ -133,11 +116,9 @@ namespace CSharpFactory.ProjectModel
     /// </summary>
     /// <param name="content">Project content provider.</param>
     // --------------------------------------------------------------------------------
-    public CompilationUnit(IProjectContentProvider content):
-      this(content.WorkingFolder)
+    public CompilationUnit(ProjectProviderBase content): this()
     {
-      _ProjectContent = content;
-      content.CollectProjectItems(this);
+      _ProjectProvider = content;
     }
 
     #endregion
@@ -151,22 +132,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public string Name
     {
-      get
-      {
-        return _ProjectContent == null
-                 ? _WorkingFolder
-                 : _ProjectContent.Name;
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the object responsible for collecting project content information.
-    /// </summary>
-    // --------------------------------------------------------------------------------
-    public IProjectContentProvider ProjectContent
-    {
-      get { return _ProjectContent; }
+      get { return _ProjectProvider.Name; }
     }
 
     // --------------------------------------------------------------------------------
@@ -176,7 +142,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public string WorkingFolder
     {
-      get { return _WorkingFolder; }
+      get { return _ProjectProvider.WorkingFolder; }
     }
 
     // --------------------------------------------------------------------------------
@@ -184,91 +150,63 @@ namespace CSharpFactory.ProjectModel
     /// Gets the reference for this compilation unit.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ReferencedCompilation ThisUnit
-    {
-      get { return _ThisUnit; }
-    }
+    public ReferencedCompilation ThisUnit { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the parser.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CSharpSyntaxParser Parser
-    {
-      get { return _Parser; }
-    }
+    public CSharpSyntaxParser Parser { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of errors.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ErrorCollection Errors
-    {
-      get { return _Errors; }
-    }
+    public ErrorCollection Errors { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of warnings.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ErrorCollection Warnings
-    {
-      get { return _Warnings; }
-    }
+    public ErrorCollection Warnings { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the object handling compilation errors.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ICompilationErrorHandler ErrorHandler
-    {
-      get { return _ErrorHandler; }
-      set { _ErrorHandler = value; }
-    } 
-    
+    public ICompilationErrorHandler ErrorHandler { get; set; }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the collection of files included in the project.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public SourceFileCollection Files
-    {
-      get { return _Files; }
-    }
+    public SourceFileCollection Files { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the current file that is under compilation.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public SourceFile CurrentFile
-    {
-      get { return _CurrentFile; }
-    } 
-    
+    public SourceFile CurrentFile { get; private set; }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the dictionary of all namespaces declared in this project.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public NamespaceCollection DeclaredNamespaces
-    {
-      get { return _DeclaredNamespaces; }
-    }
+    public NamespaceCollection DeclaredNamespaces { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the dictionary of all types declared in this project.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public TypeDeclarationCollection DeclaredTypes
-    {
-      get { return _DeclaredTypes; }
-    }
+    public TypeDeclarationCollection DeclaredTypes { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -277,7 +215,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public ImmutableCollection<ReferencedUnit> ReferencedUnits
     {
-      get { return _ReferencedUnits; }
+      get { return _ProjectProvider.References; }
     }
 
     // --------------------------------------------------------------------------------
@@ -285,31 +223,22 @@ namespace CSharpFactory.ProjectModel
     /// Gets the list of conditional compilation symbols
     /// </summary>
     // --------------------------------------------------------------------------------
-    public List<string> ConditionalSymbols
-    {
-      get { return _ConditionalSymbols; }
-    }
+    public List<string> ConditionalSymbols { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the global namespace hierarchy of this compilation unit.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public NamespaceHierarchy GlobalHierarchy
-    {
-      get { return _GlobalHierarchy; }
-    }
+    public NamespaceHierarchy GlobalHierarchy { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the tree to resolve namespaces and types declared in the source code.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public Semantics.SourceResolutionTree SourceResolutionTree
-    {
-      get { return _SourceResolutionTree; }
-    } 
-    
+    public SourceResolutionTree SourceResolutionTree { get; private set; }
+
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the named namespace hierarchies of this compilation unit.
@@ -318,21 +247,14 @@ namespace CSharpFactory.ProjectModel
     /// The global namespace hierarchy in not included among these hierarchies.
     /// </remarks>
     // --------------------------------------------------------------------------------
-    public Dictionary<string, NamespaceHierarchy> NamespaceHierarchies
-    {
-      get { return _NamespaceHierarchies; }
-    }
+    public Dictionary<string, NamespaceHierarchy> NamespaceHierarchies { get; private set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the file where XML documentation should be put.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public string XmlDocumentFile
-    {
-      get { return _XmlDocumentFile; }
-      set { _XmlDocumentFile = value; }
-    }
+    public string XmlDocumentFile { get; set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -341,8 +263,15 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public bool HasXmlDocumentFile
     {
-      get { return !String.IsNullOrEmpty(_XmlDocumentFile); }  
+      get { return !String.IsNullOrEmpty(XmlDocumentFile); }  
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the syntax tree after the compilation unit has been parsed.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ISyntaxTree SyntaxTree { get; private set; }
 
     #endregion
 
@@ -507,8 +436,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddFile(string fileName)
     {
-      string fullName = Path.Combine(_WorkingFolder, fileName);
-        _Files.Add(new SourceFile(fullName, this));
+      _ProjectProvider.AddFile(fileName);
     }
 
     // --------------------------------------------------------------------------------
@@ -519,40 +447,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddFileWithFullName(string fileName)
     {
-      _Files.Add(new SourceFile(fileName, this));  
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds all .cs file in the specified folder and its subfolders to this project.
-    /// </summary>
-    /// <param name="path"></param>
-    // --------------------------------------------------------------------------------
-    public void AddAllFilesFrom(string path)
-    {
-      DirectoryInfo dir = new DirectoryInfo(path);
-      // --- Add files in this folder
-      foreach (FileInfo file in dir.GetFiles("*.cs"))
-      {
-        _Files.Add(new SourceFile(file.FullName, this));
-      }
-      // --- Add files in subfolders
-      foreach (DirectoryInfo subDir in dir.GetDirectories())
-      {
-        AddAllFilesFrom(subDir.FullName);
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a new project reference to the C# project.
-    /// </summary>
-    /// <param name="unit">Compilation unit representing the project.</param>
-    /// <param name="name">Name of the project to add.</param>
-    // --------------------------------------------------------------------------------
-    public void AddProjectReference(CompilationUnit unit, string name)
-    {
-      _ReferencedUnits.Add(new ReferencedCompilation(unit, name));
+      _ProjectProvider.AddFileWithFullName(fileName);
     }
 
     // --------------------------------------------------------------------------------
@@ -563,7 +458,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAssemblyReference(string name)
     {
-      _ReferencedUnits.Add(new ReferencedAssembly(name));  
+      _ProjectProvider.AddAssemblyReference(name);
     }
 
     // --------------------------------------------------------------------------------
@@ -575,7 +470,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAssemblyReference(string name, string path)
     {
-      _ReferencedUnits.Add(new ReferencedAssembly(name, path));
+      _ProjectProvider.AddAssemblyReference(name, path);
     }
 
     // --------------------------------------------------------------------------------
@@ -587,8 +482,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAliasedReference(string alias, string name)
     {
-      _ReferencedUnits.Add(new ReferencedAssembly(
-        name, ReferencedAssembly.DotNet20SystemFolder, alias));
+      _ProjectProvider.AddAliasedReference(alias, name);
     }
 
     // --------------------------------------------------------------------------------
@@ -601,7 +495,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAliasedReference(string alias, string name, string path)
     {
-      _ReferencedUnits.Add(new ReferencedAssembly(name, path, alias));
+      _ProjectProvider.AddAliasedReference(alias, name, path);
     }
 
     // --------------------------------------------------------------------------------
@@ -616,7 +510,18 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     internal void AddTypeDeclaration(TypeDeclaration type)
     {
-      _DeclaredTypes.Add(type);
+      DeclaredTypes.Add(type);
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a conditional compilation symbol to the list of existing symbols.
+    /// </summary>
+    /// <param name="symbol">Symbols to add.</param>
+    // --------------------------------------------------------------------------------
+    public void AddConditionalCompilationSymbol(string symbol)
+    {
+      _ProjectProvider.AddConditionalSymbol(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -627,17 +532,8 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddConditionalCompilationSymbols(String[] symbols)
     {
-      if (symbols != null)
-      {
-        for (int i = 0; i < symbols.Length; ++i)
-        {
-          symbols[i] = symbols[i].Trim();
-          if (symbols[i].Length > 0 && !_ConditionalSymbols.Contains(symbols[i]))
-          {
-            _ConditionalSymbols.Add(symbols[i]);
-          }
-        }
-      }
+      foreach (var symbol in symbols) 
+        AddConditionalCompilationSymbol(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -648,10 +544,8 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddConditionalDirective(String symbol)
     {
-      if (!_ConditionalSymbols.Contains(symbol))
-      {
-        _ConditionalSymbols.Add(symbol);
-      }
+      symbol = symbol.Trim();
+      if (!ConditionalSymbols.Contains(symbol)) ConditionalSymbols.Add(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -662,7 +556,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void RemoveConditionalDirective(String symbol)
     {
-      _ConditionalSymbols.Remove(symbol);
+      ConditionalSymbols.Remove(symbol.Trim());
     }
 
     // --------------------------------------------------------------------------------
@@ -676,7 +570,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public bool IsConditionalSymbolDefined(String symbol)
     {
-      return _ConditionalSymbols.Contains(symbol);
+      return ConditionalSymbols.Contains(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -690,18 +584,18 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public PPEvaluationStatus EvaluatePreprocessorExpression(string preprocessorExpression)
     {
-      MemoryStream memStream =
+      var memStream =
         new MemoryStream(new UTF8Encoding().GetBytes(preprocessorExpression));
-      PPScanner scanner = new PPScanner(memStream);
-      CSharpPPExprSyntaxParser parser = new CSharpPPExprSyntaxParser(scanner);
+      var scanner = new PPScanner(memStream);
+      var parser = new CSharpPPExprSyntaxParser(scanner);
       parser.Parse();
       if (parser.ErrorFound)
       {
         return PPEvaluationStatus.Failed;
       }
-      else return parser.Expression.Evaluate(_ConditionalSymbols)
-        ? PPEvaluationStatus.True
-        : PPEvaluationStatus.False;
+      return parser.Expression.Evaluate(ConditionalSymbols)
+               ? PPEvaluationStatus.True
+               : PPEvaluationStatus.False;
     }
 
     // --------------------------------------------------------------------------------
@@ -765,7 +659,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     void ICompilationErrorHandler.Error(string code, ParserFiles.Token errorPoint, string description)
     {
-      SignError(_Errors, code, errorPoint, description, null);
+      SignError(Errors, code, errorPoint, description, null);
     }
 
     // --------------------------------------------------------------------------------
@@ -780,7 +674,7 @@ namespace CSharpFactory.ProjectModel
     void ICompilationErrorHandler.Error(string code, ParserFiles.Token errorPoint, string description,
       params object[] parameters)
     {
-      SignError(_Errors, code, errorPoint, description, parameters);
+      SignError(Errors, code, errorPoint, description, parameters);
     }
 
     // --------------------------------------------------------------------------------
@@ -793,7 +687,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     void ICompilationErrorHandler.Warning(string code, ParserFiles.Token warningPoint, string description)
     {
-      SignError(_Warnings, code, warningPoint, description, null);
+      SignError(Warnings, code, warningPoint, description, null);
     }
 
     // --------------------------------------------------------------------------------
@@ -808,7 +702,7 @@ namespace CSharpFactory.ProjectModel
     void ICompilationErrorHandler.Warning(string code, ParserFiles.Token warningPoint, string description,
                                           params object[] parameters)
     {
-      SignError(_Warnings, code, warningPoint, description, parameters);
+      SignError(Warnings, code, warningPoint, description, parameters);
     }
 
     // --------------------------------------------------------------------------------
@@ -838,7 +732,7 @@ namespace CSharpFactory.ProjectModel
 
     #endregion
 
-    #region Parser method
+    #region Parse method and its helpers
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -850,61 +744,12 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public int Parse()
     {
-      // --- Notify subscribers (BeforeInitParse event)
-      bool cancelled = false;
-      OnBeforeInitParse(ref cancelled);
-      if (cancelled) return -1;
-
-      // --- Initialization 
-      (_Errors as IList<Error>).Clear();
-      _GlobalHierarchy.Clear();
-      _NamespaceHierarchies.Clear();
-      ResetDiagnosticCounters();
-
-      // --- Notify subscribers (AfterInitParse event)
-      OnAfterInitParse(ref cancelled);
-      if (cancelled) return -1;
-
-      // --- First we compile all referenced projects.
-      foreach (ReferencedUnit unit in _ReferencedUnits)
-      {
-        ReferencedCompilation compilation = unit as ReferencedCompilation;
-        if (compilation != null)
-        {
-          CompilationUnit refUnit = compilation.CompilationUnit;
-          
-          // --- Notify subscribers (BeforeParseReferencedUnit event)
-          OnBeforeParseReferencedUnit(refUnit, ref cancelled);
-          if (cancelled) return -1;
-
-          refUnit.Parse();
-
-          // --- Notify subscribers (AfterParseReferencedUnit event)
-          OnAfterParseReferencedUnit(refUnit, ref cancelled);
-          if (cancelled) return -1;
-        }
-      }
-
-      // --- Syntax parsing
-      foreach (SourceFile file in _Files)
-      {
-        ParserFiles.Scanner scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
-        _CurrentFile = file;
-
-        // --- Notify subscribers (BeforeParseFile event)
-        OnBeforeParseFile(file, ref cancelled);
-        if (cancelled) return -1;
-
-        _Parser = new CSharpSyntaxParser(scanner, this, file);
-        _Parser.Parse();
-
-        // --- Notify subscribers (AfterParseFile event)
-        OnAfterParseFile(file, ref cancelled);
-        if (cancelled) return -1;
-      }
+      if (!InitParse()) return -1;
+      if (!ParseReferencedProjects()) return -1;
+      if (!ParseSyntax()) return -1;
 
       // --- Semantical parsing
-      _NamespaceOrTypeResolver = new NamespaceOrTypeResolver(_Parser);
+      _NamespaceOrTypeResolver = new NamespaceOrTypeResolver(Parser);
 
       // --- Phase 1: Collect namespace hierarchy information from referenced assemblies
       // --- and namespaces declared by the source code. Set the resolvers for all 
@@ -952,7 +797,110 @@ namespace CSharpFactory.ProjectModel
       if (HasXmlDocumentFile) CheckDocumentComments();
 
       // --- Return the number of errors found
-      return _Errors.Count;
+      return Errors.Count;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes the parsing process
+    /// </summary>
+    /// <returns>
+    /// True, if parsing has been successfully initialized; false, if cancelled.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    private bool InitParse()
+    {
+      // --- Notify subscribers (BeforeInitParse event)
+      bool cancelled = false;
+      OnBeforeInitParse(ref cancelled);
+      if (cancelled) return false;
+
+      // --- Fill up the source files from the project content provider
+      Files.Clear();
+      foreach (var file in _ProjectProvider.SourceFiles)
+      {
+        Files.Add(new SourceFile(file.FullName, this));
+      }
+
+      // --- Fill up the conditional symbols defined
+      ConditionalSymbols.Clear();
+      foreach (var symbol in _ProjectProvider.ConditionalSymbols)
+      {
+        ConditionalSymbols.Add(symbol);
+      }
+
+      (Errors as IList<Error>).Clear();
+      GlobalHierarchy.Clear();
+      NamespaceHierarchies.Clear();
+      ResetDiagnosticCounters();
+      SyntaxTree = new SyntaxTree();
+
+      // --- Notify subscribers (AfterInitParse event)
+      OnAfterInitParse(ref cancelled);
+      return (!cancelled);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Parses all referenced project before parsing this compilation unit
+    /// </summary>
+    /// <returns>
+    /// True, if parsing has been successfully done; false, if cancelled.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    private bool ParseReferencedProjects()
+    {
+      // --- First we compile all referenced projects.
+      bool cancelled = false;
+      foreach (ReferencedUnit unit in _ProjectProvider.References)
+      {
+        var compilation = unit as ReferencedCompilation;
+        if (compilation == null) continue;
+        var refUnit = compilation.CompilationUnit;
+
+        // --- Notify subscribers (BeforeParseReferencedUnit event)
+        OnBeforeParseReferencedUnit(refUnit, ref cancelled);
+        if (cancelled) return false;
+
+        refUnit.Parse();
+
+        // --- Notify subscribers (AfterParseReferencedUnit event)
+        OnAfterParseReferencedUnit(refUnit, ref cancelled);
+        if (cancelled) return false;
+      }
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Executes syntax parsing on all files belonging to this project.
+    /// </summary>
+    /// <returns>
+    /// True, if parsing has been successfully done; false, if cancelled.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    private bool ParseSyntax()
+    {
+      bool cancelled = false;
+      foreach (SourceFile file in Files)
+      {
+        var scanner = new Scanner(File.OpenText(file.FullName).BaseStream);
+        CurrentFile = file;
+
+        // --- Notify subscribers (BeforeParseFile event)
+        OnBeforeParseFile(file, ref cancelled);
+        if (cancelled) return false;
+
+        var fileNode = new SourceFileNode(file.FullName);
+        SyntaxTree.SourceFileNodes.Add(fileNode);
+        Parser = new CSharpSyntaxParser(scanner, this, file, fileNode);
+        Parser.Parse();
+
+        // --- Notify subscribers (AfterParseFile event)
+        OnAfterParseFile(file, ref cancelled);
+        if (cancelled) return false;
+      }
+      return true;
     }
 
     #endregion
@@ -971,7 +919,7 @@ namespace CSharpFactory.ProjectModel
     {
       if (BeforeInitParse != null)
       {
-        ParseCancelEventArgs args = new ParseCancelEventArgs(this);
+        var args = new ParseCancelEventArgs(this);
         BeforeInitParse.Invoke(this, args);
         cancelled = args.Cancel;
       }
@@ -989,7 +937,7 @@ namespace CSharpFactory.ProjectModel
     {
       if (AfterInitParse != null)
       {
-        ParseCancelEventArgs args = new ParseCancelEventArgs(this);
+        var args = new ParseCancelEventArgs(this);
         AfterInitParse.Invoke(this, args);
         cancelled = args.Cancel;
       }
@@ -1009,8 +957,7 @@ namespace CSharpFactory.ProjectModel
     {
       if (BeforeParseReferencedUnit != null)
       {
-        ParseReferencedUnitEventArgs args =
-          new ParseReferencedUnitEventArgs(refUnit, this);
+        var args = new ParseReferencedUnitEventArgs(refUnit, this);
         BeforeParseReferencedUnit.Invoke(this, args);
         cancelled = args.Cancel;
       }
@@ -1030,8 +977,7 @@ namespace CSharpFactory.ProjectModel
     {
       if (AfterParseReferencedUnit != null)
       {
-        ParseReferencedUnitEventArgs args = 
-          new ParseReferencedUnitEventArgs(this, refUnit);
+        var args = new ParseReferencedUnitEventArgs(this, refUnit);
         AfterParseReferencedUnit.Invoke(this, args);
         cancelled = args.Cancel;
       }
@@ -1051,7 +997,7 @@ namespace CSharpFactory.ProjectModel
     {
       if (BeforeParseFile != null)
       {
-        ParseFileEventArgs args = new ParseFileEventArgs(this, file);
+        var args = new ParseFileEventArgs(this, file);
         BeforeParseFile.Invoke(this, args);
         cancelled = args.Cancel;
       }
@@ -1071,7 +1017,7 @@ namespace CSharpFactory.ProjectModel
     {
       if (AfterParseFile != null)
       {
-        ParseFileEventArgs args = new ParseFileEventArgs(this, file);
+        var args = new ParseFileEventArgs(this, file);
         AfterParseFile.Invoke(this, args);
         cancelled = args.Cancel;
       }
@@ -1090,7 +1036,7 @@ namespace CSharpFactory.ProjectModel
     {
       foreach (SourceFile source in Files)
       {
-        _CurrentFile = source;
+        CurrentFile = source;
         source.ResolveTypeReferences(ResolutionContext.SourceFile, source, null);
       }
     }
@@ -1119,17 +1065,16 @@ namespace CSharpFactory.ProjectModel
     private void PrepareNamespaceHierarchies()
     {
       // --- Init data structures
-      _GlobalHierarchy.Clear();
+      GlobalHierarchy.Clear();
 
       // --- Create a tree representing the types in the source code
-      _SourceResolutionTree = new SourceResolutionTree(ThisUnitName);
-      _GlobalHierarchy.AddTree(ThisUnitName, _SourceResolutionTree);
+      SourceResolutionTree = new SourceResolutionTree(ThisUnitName);
+      GlobalHierarchy.AddTree(ThisUnitName, SourceResolutionTree);
 
       // --- No named heirarchies found yet
-      _NamespaceHierarchies.Clear();
+      NamespaceHierarchies.Clear();
 
-      Dictionary<string, AssemblyResolutionTree> importedAssemblies = 
-        new Dictionary<string, AssemblyResolutionTree>();
+      var importedAssemblies = new Dictionary<string, AssemblyResolutionTree>();
 
       // --- Go through all referenced assemblies, skip ohter kind of referencies.
       foreach (ReferencedUnit reference in ReferencedUnits)
@@ -1138,7 +1083,7 @@ namespace CSharpFactory.ProjectModel
         NamespaceHierarchy hierarchy;
         string treeName;
 
-        ReferencedAssembly asmRef = reference as ReferencedAssembly;
+        var asmRef = reference as ReferencedAssembly;
         if (asmRef != null)
         {
           // --- This reference is a referenced assembly.
@@ -1157,7 +1102,7 @@ namespace CSharpFactory.ProjectModel
           if (String.IsNullOrEmpty(asmRef.Alias))
           {
             // --- Put information into the global namespace hierarchy
-            hierarchy = _GlobalHierarchy;
+            hierarchy = GlobalHierarchy;
           }
           else
           {
@@ -1172,13 +1117,13 @@ namespace CSharpFactory.ProjectModel
         }
         else
         {
-          ReferencedCompilation compilation = reference as ReferencedCompilation;
+          var compilation = reference as ReferencedCompilation;
           if (compilation == null) continue;
 
           // --- This reference is a compilation unit. This unit has to be compiled before
           // --- so we can use its type resolution tree.
-          hierarchy = _GlobalHierarchy;
-          resolutionTree = compilation.CompilationUnit._SourceResolutionTree;
+          hierarchy = GlobalHierarchy;
+          resolutionTree = compilation.CompilationUnit.SourceResolutionTree;
           treeName = compilation.Name;
         }
 
@@ -1194,7 +1139,7 @@ namespace CSharpFactory.ProjectModel
       // --- Register all declared namespaces.
       foreach (Namespace ns in DeclaredNamespaces)
       {
-        _SourceResolutionTree.CreateNamespace(ns.Name);
+        SourceResolutionTree.CreateNamespace(ns.Name);
       }
     }
 
@@ -1211,7 +1156,7 @@ namespace CSharpFactory.ProjectModel
     {
       foreach (SourceFile source in Files)
       {
-        _CurrentFile = source;
+        CurrentFile = source;
         foreach (NamespaceFragment fragment in source.NestedNamespaces)
         {
           fragment.SetNamespaceResolvers();
@@ -1232,7 +1177,7 @@ namespace CSharpFactory.ProjectModel
     {
       foreach (SourceFile source in Files)
       {
-        _CurrentFile = source;
+        CurrentFile = source;
         foreach (TypeDeclaration type in source.TypeDeclarations)
         {
           type.SetTypeResolvers();
@@ -1257,7 +1202,7 @@ namespace CSharpFactory.ProjectModel
     {
       foreach (SourceFile file in Files)
       {
-        _CurrentFile = file;
+        CurrentFile = file;
         ResolveExternAliasClauses(file, null);
       }
     }
@@ -1315,7 +1260,7 @@ namespace CSharpFactory.ProjectModel
     {
       foreach (SourceFile file in Files)
       {
-        _CurrentFile = file;
+        CurrentFile = file;
         ResolveUsingDirectives(file, null);
       }
     }
@@ -1374,17 +1319,12 @@ namespace CSharpFactory.ProjectModel
     {
       if (usingClause == null) throw new ArgumentNullException("usingClause");
       if (file == null) throw new ArgumentNullException("file");
-      NamespaceOrTypeResolverInfo info;
-      if (nsFragment == null)
-      {
-        info = _NamespaceOrTypeResolver.
-          Resolve(usingClause.ReferencedName,ResolutionContext.SourceFile, file, null);
-      }
-      else
-      {
-        info = _NamespaceOrTypeResolver.
-          Resolve(usingClause.ReferencedName,ResolutionContext.Namespace, nsFragment, null);
-      }
+      var info =
+        nsFragment == null
+          ? _NamespaceOrTypeResolver.
+              Resolve(usingClause.ReferencedName, ResolutionContext.SourceFile, file, null)
+          : _NamespaceOrTypeResolver.
+              Resolve(usingClause.ReferencedName, ResolutionContext.Namespace, nsFragment, null);
 
       // --- Exit, if resolution failed.
       if (!info.IsResolved) return;
@@ -1411,9 +1351,9 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void ResolveAndCheckBaseTypes()
     {
-      foreach (SourceFile file in _Files)
+      foreach (SourceFile file in Files)
       {
-        _CurrentFile = file;
+        CurrentFile = file;
 
         // --- Resolve types declared in the global namespace
         foreach (TypeDeclaration type in file.TypeDeclarations)
@@ -1490,7 +1430,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void CheckCircularDependency()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
+      foreach (TypeDeclaration type in DeclaredTypes)
       {
         CheckCircularDependency(type);
       }
@@ -1510,15 +1450,15 @@ namespace CSharpFactory.ProjectModel
 
       // --- We use a BFS algorithm to find circular dependency, start from 
       // --- the current type.
-      Queue<TypeDeclaration> typeQueue = new Queue<TypeDeclaration>();
+      var typeQueue = new Queue<TypeDeclaration>();
       typeQueue.Enqueue(type);
       
       // --- We dequeue a type declaration from the queue and enqueue its directly 
       // --- dependent types into the queue, if not put before. If anytime we put an 
       // --- instance into the queue that equals with 'type', it means we found a circular 
       // --- dependency for type. We do this check while the queue becomes empty.
-      Dictionary<string, int> typesAlreadyQueued = new Dictionary<string, int>();
-      bool circuitFound = false;
+      var typesAlreadyQueued = new Dictionary<string, int>();
+      var circuitFound = false;
       while (typeQueue.Count > 0 && !circuitFound)
       {
         TypeDeclaration toCheck = typeQueue.Dequeue();
@@ -1528,8 +1468,8 @@ namespace CSharpFactory.ProjectModel
         {
           // --- We check only typed declared within the source, because binary
           // --- types cannot cause circular dependency.
-          GenericType genType = dependsOn as GenericType;
-          TypeDeclaration typeDecl = dependsOn as TypeDeclaration;
+          var genType = dependsOn as GenericType;
+          var typeDecl = dependsOn as TypeDeclaration;
           if (genType != null) typeDecl = genType.ConstructingType as TypeDeclaration;
           if (typeDecl == null || !typeDecl.IsValid) continue;
 
@@ -1572,7 +1512,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckMultipleAndPartialDeclaration()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
+      foreach (TypeDeclaration type in DeclaredTypes)
       {
         // --- Check only, if there are no partitions
         if (type.Parts.Count == 0) continue;
@@ -1729,7 +1669,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     private void RaiseMultipleTypeError(LanguageElement type, TypeDeclaration partition)
     {
-      _Parser.Error0101(partition.Token,
+      Parser.Error0101(partition.Token,
         partition.EnclosingNamespace == null
         ? GlobalHierarchyName
         : partition.EnclosingNamespace.Name,
@@ -1748,7 +1688,7 @@ namespace CSharpFactory.ProjectModel
     private void RaiseMissingPartialModifierError(LanguageElement type, 
       LanguageElement partition)
     {
-      _Parser.Error0260(partition.Token, partition.Name);
+      Parser.Error0260(partition.Token, partition.Name);
       type.Invalidate();
       partition.Invalidate();
     }
@@ -1763,7 +1703,7 @@ namespace CSharpFactory.ProjectModel
     private void RaiseMultiplePartialTypeError(LanguageElement type,
       LanguageElement partition)
     {
-      _Parser.Error0261(partition.Token, partition.Name);
+      Parser.Error0261(partition.Token, partition.Name);
       type.Invalidate();
       partition.Invalidate();
     }
@@ -1778,7 +1718,7 @@ namespace CSharpFactory.ProjectModel
     private void RaiseIncompatibleAccessorError(LanguageElement type,
       LanguageElement partition)
     {
-      _Parser.Error0262(partition.Token, partition.Name);
+      Parser.Error0262(partition.Token, partition.Name);
       type.Invalidate();
       partition.Invalidate();
     }
@@ -1798,7 +1738,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     private void ConsolidatePartialTypeDeclarations()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
+      foreach (TypeDeclaration type in DeclaredTypes)
       {
         type.ConsolidateDeclarationParts();
       }
@@ -1850,7 +1790,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     private void CheckTypeDeclarations()
     {
-      foreach (TypeDeclaration type in _DeclaredTypes)
+      foreach (TypeDeclaration type in DeclaredTypes)
       {
         type.CheckTypeDeclaration();
       }
@@ -1917,11 +1857,10 @@ namespace CSharpFactory.ProjectModel
       {
         // --- Related element must be an attribute declaration of an element that is
         // --- valid place for a documentation comment
-        AttributeDeclaration attr = comment.RelatedElement as AttributeDeclaration;
+        var attr = comment.RelatedElement as AttributeDeclaration;
         if (attr != null)
         {
-          ISupportsDocumentationComment docElement = 
-            attr.RelatedElement as ISupportsDocumentationComment;
+          var docElement = attr.RelatedElement as ISupportsDocumentationComment;
           if (docElement != null) continue;
         }
 
@@ -1930,7 +1869,7 @@ namespace CSharpFactory.ProjectModel
       }
 
       // --- Check document comments related to types
-      foreach (ISupportsDocumentationComment type in _DeclaredTypes)
+      foreach (ISupportsDocumentationComment type in DeclaredTypes)
       {
         type.ProcessDocumentationComment();
 
@@ -1959,12 +1898,12 @@ namespace CSharpFactory.ProjectModel
     private void SignError(ICollection<Error> errors, string code, ParserFiles.Token errorPoint, string description,
                                           params object[] parameters)
     {
-      Error error = new Error(
+      var error = new Error(
         code, 
         _ErrorLineOffset < 0 ? errorPoint.line : errorPoint.line + _ErrorLineOffset, 
         errorPoint.col, 
         errorPoint.pos,
-        string.IsNullOrEmpty(_ErrorFile) ? _CurrentFile.Name : _ErrorFile, 
+        string.IsNullOrEmpty(_ErrorFile) ? CurrentFile.Name : _ErrorFile, 
         description, 
         parameters);
       errors.Add(error);
@@ -1989,7 +1928,7 @@ namespace CSharpFactory.ProjectModel
       {
         foreach (SourceFile file in Files)
         {
-          _CurrentFile = file;
+          CurrentFile = file;
           foreach (TypeDeclaration type in GetTypesInDeclarationScope(file)) 
             yield return type;
         }
@@ -2006,7 +1945,7 @@ namespace CSharpFactory.ProjectModel
     /// Iterator of types.
     /// </returns>
     // --------------------------------------------------------------------------------
-    private IEnumerable<TypeDeclaration> GetTypesInDeclarationScope(
+    private static IEnumerable<TypeDeclaration> GetTypesInDeclarationScope(
       ITypeDeclarationScope scope)
     {
       // --- Retrieve types declared within the scope 
@@ -2029,7 +1968,7 @@ namespace CSharpFactory.ProjectModel
     /// Iterator of types.
     /// </returns>
     // --------------------------------------------------------------------------------
-    private IEnumerable<TypeDeclaration> GetTypesInType(TypeDeclaration type)
+    private static IEnumerable<TypeDeclaration> GetTypesInType(TypeDeclaration type)
     {
       // --- Return the type itself
       yield return type;

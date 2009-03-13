@@ -363,7 +363,7 @@ namespace CSharpFactory.ProjectModel
   /// This class represents a collection of type parameters.
   /// </summary>
   // ==================================================================================
-  public class TypeParameterCollection : RestrictedIndexedCollection<TypeParameter>
+  public class TypeParameterCollection : ImmutableIndexedCollection<TypeParameter>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -169,7 +169,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public class CastOperatorDeclarationCollection : 
-    RestrictedIndexedCollection<CastOperatorDeclaration>
+    ImmutableIndexedCollection<CastOperatorDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

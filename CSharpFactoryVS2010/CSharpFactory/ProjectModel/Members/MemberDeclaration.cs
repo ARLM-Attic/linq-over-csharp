@@ -539,7 +539,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public sealed class MemberDeclarationCollection : 
-    RestrictedIndexedCollection<MemberDeclaration>
+    ImmutableIndexedCollection<MemberDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

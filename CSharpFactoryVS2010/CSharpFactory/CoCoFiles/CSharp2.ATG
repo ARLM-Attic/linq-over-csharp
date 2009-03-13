@@ -1,6 +1,6 @@
 using System.Text;
 using System.Collections;
-using CSharpParser.ProjectModel;
+using CSharpFactory.ProjectModel;
 
 COMPILER CS2
 
@@ -211,23 +211,23 @@ PRAGMAS
 // Preprocessor directives.                                               
 // The exact parsing of their syntax is left for later processing        
 
-  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     (. _PragmaHandler.AddConditionalDirective(la); .)
-  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      (. _PragmaHandler.RemoveConditionalDirective(la); .)
-  ppIf      = "#" {ws} "if" {notNewLine} newLine.         (. _PragmaHandler.IfPragma(la); .)
-  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       (. _PragmaHandler.ElifPragma(la); .) 
-  ppElse    = "#" {ws} "else" {notNewLine} newLine.       (. _PragmaHandler.ElsePragma(la); .) 
-  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      (. _PragmaHandler.EndifPragma(la); .) 
-  ppLine    = "#" {ws} "line" {notNewLine} newLine.       (. _PragmaHandler.LinePragma(la); .) 
-  ppError   = "#" {ws} "error" {notNewLine} newLine.      (. _PragmaHandler.ErrorPragma(la); .) 
-  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    (. _PragmaHandler.WarningPragma(la); .) 
-  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     (. _PragmaHandler.PragmaPragma(la); .) 
-  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     (. _PragmaHandler.RegionPragma(la); .) 
-  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  (. _PragmaHandler.EndregionPragma(la); .) 
+  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     (. PragmaHandler.AddConditionalDirective(la); .)
+  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      (. PragmaHandler.RemoveConditionalDirective(la); .)
+  ppIf      = "#" {ws} "if" {notNewLine} newLine.         (. PragmaHandler.IfPragma(la); .)
+  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       (. PragmaHandler.ElifPragma(la); .) 
+  ppElse    = "#" {ws} "else" {notNewLine} newLine.       (. PragmaHandler.ElsePragma(la); .) 
+  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      (. PragmaHandler.EndifPragma(la); .) 
+  ppLine    = "#" {ws} "line" {notNewLine} newLine.       (. PragmaHandler.LinePragma(la); .) 
+  ppError   = "#" {ws} "error" {notNewLine} newLine.      (. PragmaHandler.ErrorPragma(la); .) 
+  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    (. PragmaHandler.WarningPragma(la); .) 
+  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     (. PragmaHandler.PragmaPragma(la); .) 
+  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     (. PragmaHandler.RegionPragma(la); .) 
+  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  (. PragmaHandler.EndregionPragma(la); .) 
 
 // Pragma for comments
   
-  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  (. _CommentHandler.HandleBlockComment(la); .)
-  cLineCom  = "//" { notNewLine } newLine.                                  (. _CommentHandler.HandleLineComment(la); .)
+  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  (. CommentHandler.HandleBlockComment(la); .)
+  cLineCom  = "//" { notNewLine } newLine.                                  (. CommentHandler.HandleLineComment(la); .)
 
 IGNORE eol + cr + tab
 
@@ -241,19 +241,19 @@ PRODUCTIONS
 CS2
 =                                                               
   { 
-    IF (IsExternAliasDirective()) (. _PragmaHandler.SignRealToken(); .)
+    IF (IsExternAliasDirective()) (. PragmaHandler.SignRealToken(); .)
       ExternAliasDirective<null>
   }
   {
     UsingDirective<null>
   }
   {
-    IF (IsGlobalAttrTarget()) (. _PragmaHandler.SignRealToken(); .)
+    IF (IsGlobalAttrTarget()) (. PragmaHandler.SignRealToken(); .)
       GlobalAttributes
   }
   {
-    (. _PragmaHandler.SignRealToken(); .)
-    NamespaceMemberDeclaration<null, _File>
+    (. PragmaHandler.SignRealToken(); .)
+    NamespaceMemberDeclaration<null, File>
   }
 .
 
@@ -273,7 +273,7 @@ ExternAliasDirective<NamespaceFragment parent>
                ExternalAlias externAlias = new ExternalAlias(token, this);
                externAlias.Name = t.val;
                CurrentElement = externAlias;
-               if (parent == null) _File.ExternAliases.Add(externAlias); 
+               if (parent == null) File.ExternAliases.Add(externAlias); 
                else parent.ExternAliases.Add(externAlias); 
              .)
   ";"        (. externAlias.Terminate(t); .)
@@ -290,7 +290,7 @@ UsingDirective<NamespaceFragment parent>
                               Token token = t;
                               string name = String.Empty; 
                               TypeReference typeUsed = null;
-                              _PragmaHandler.SignRealToken();
+                              PragmaHandler.SignRealToken();
                            .)
    [ IF (IsAssignment()) 
      ident                 (. name = t.val; .)
@@ -300,7 +300,7 @@ UsingDirective<NamespaceFragment parent>
    ";"                     (. 
                               UsingClause uc = new UsingClause(token, this, name, typeUsed);
                               CurrentElement = uc;
-                              if (parent == null) _File.Usings.Add(uc);
+                              if (parent == null) File.Usings.Add(uc);
                               else parent.Usings.Add(uc); 
                               uc.Terminate(t);
                            .)
@@ -322,13 +322,13 @@ GlobalAttributes
                                .) 
   ":" Attribute<out attr>      (. 
                                   attr.Scope = scope; 
-                                  _File.GlobalAttributes.Add(attr);
+                                  File.GlobalAttributes.Add(attr);
                                   CurrentElement = attr;
                                .)
   { IF (NotFinalComma()) "," 
     Attribute<out attr>        (. 
                                   attr.Scope = scope; 
-                                  _File.GlobalAttributes.Add(attr);
+                                  File.GlobalAttributes.Add(attr);
                                   CurrentElement = attr;
                                .)
         } [ "," ]
@@ -355,7 +355,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
   "{" 
       { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
       { UsingDirective<ns> } 
-      { NamespaceMemberDeclaration<ns, _File> } 
+      { NamespaceMemberDeclaration<ns, File> } 
   "}"            (. ns.Terminate(t); .)
   [ ";"          (. ns.Terminate(t); .)
   ]
@@ -369,7 +369,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
       TypeDeclaration<attrs, null, m, out td>    (.
                                                     if (td != null)
                                                     {
-                                                      if (parent == null) _File.AddTypeDeclaration(td);
+                                                      if (parent == null) File.AddTypeDeclaration(td);
                                                       else parent.AddTypeDeclaration(td);
                                                     }
                                                  .)

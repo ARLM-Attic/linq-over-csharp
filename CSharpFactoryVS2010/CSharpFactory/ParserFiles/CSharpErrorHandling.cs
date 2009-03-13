@@ -45,7 +45,7 @@ namespace CSharpFactory.ParserFiles
     {
       if (!_SuppressErrors)
       {
-        _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, null);
+        CompilationUnit.ErrorHandler.Error(code, errorPoint, description, null);
       }
     }
 
@@ -63,7 +63,7 @@ namespace CSharpFactory.ParserFiles
     {
       if (!_SuppressErrors)
       {
-        _CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
+        CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
       }
     }
 
@@ -79,7 +79,7 @@ namespace CSharpFactory.ParserFiles
     {
       if (!_SuppressErrors)
       {
-        _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, null);
+        CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, null);
       }
     }
 
@@ -97,7 +97,7 @@ namespace CSharpFactory.ParserFiles
     {
       if (!_SuppressErrors)
       {
-        _CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, parameters);
+        CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, parameters);
       }
     }
 

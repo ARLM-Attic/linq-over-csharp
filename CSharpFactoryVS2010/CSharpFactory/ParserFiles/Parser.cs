@@ -170,9 +170,6 @@ public partial class CSharpSyntaxParser
   /// </summary>
   const int MinimumDistanceOfSeparateErrors = 2;
 
-  /// <summary>Scanner used by the parser to obtain tokens.</summary>
-  private readonly Scanner _Scanner;
-
   /// <summary>Represents the last recognized token.</summary>
   private Token t;
 
@@ -209,49 +206,49 @@ public partial class CSharpSyntaxParser
 	  	for (;;) 
 	  	{
         t = la;
-        la = _Scanner.Scan();
+        la = Scanner.Scan();
         if (la.kind <= maxT) { ++errDist; break; }
 				if (la.kind == 146) {
-				_PragmaHandler.AddConditionalDirective(la); 
+				PragmaHandler.AddConditionalDirective(la); 
 				}
 				if (la.kind == 147) {
-				_PragmaHandler.RemoveConditionalDirective(la); 
+				PragmaHandler.RemoveConditionalDirective(la); 
 				}
 				if (la.kind == 148) {
-				_PragmaHandler.IfPragma(la); 
+				PragmaHandler.IfPragma(la); 
 				}
 				if (la.kind == 149) {
-				_PragmaHandler.ElifPragma(la); 
+				PragmaHandler.ElifPragma(la); 
 				}
 				if (la.kind == 150) {
-				_PragmaHandler.ElsePragma(la); 
+				PragmaHandler.ElsePragma(la); 
 				}
 				if (la.kind == 151) {
-				_PragmaHandler.EndifPragma(la); 
+				PragmaHandler.EndifPragma(la); 
 				}
 				if (la.kind == 152) {
-				_PragmaHandler.LinePragma(la); 
+				PragmaHandler.LinePragma(la); 
 				}
 				if (la.kind == 153) {
-				_PragmaHandler.ErrorPragma(la); 
+				PragmaHandler.ErrorPragma(la); 
 				}
 				if (la.kind == 154) {
-				_PragmaHandler.WarningPragma(la); 
+				PragmaHandler.WarningPragma(la); 
 				}
 				if (la.kind == 155) {
-				_PragmaHandler.PragmaPragma(la); 
+				PragmaHandler.PragmaPragma(la); 
 				}
 				if (la.kind == 156) {
-				_PragmaHandler.RegionPragma(la); 
+				PragmaHandler.RegionPragma(la); 
 				}
 				if (la.kind == 157) {
-				_PragmaHandler.EndregionPragma(la); 
+				PragmaHandler.EndregionPragma(la); 
 				}
 				if (la.kind == 158) {
-				_CommentHandler.HandleBlockComment(la); 
+				CommentHandler.HandleBlockComment(la); 
 				}
 				if (la.kind == 159) {
-				_CommentHandler.HandleLineComment(la); 
+				CommentHandler.HandleLineComment(la); 
 				}
 
 			  la = t;
@@ -430,9 +427,9 @@ public partial class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     Token Peek(int n)
     {
-      _Scanner.ResetPeek();
+      Scanner.ResetPeek();
       Token x = la;
-      while (n > 0) { x = _Scanner.Peek(); n--; }
+      while (n > 0) { x = Scanner.Peek(); n--; }
       return x;
     }
 
@@ -449,15 +446,15 @@ public partial class CSharpSyntaxParser
     // --------------------------------------------------------------------------------
     public bool CheckTokenIsFirstInLine(Token symbol)
     {
-      int oldPos = _Scanner.Buffer.Pos;
+      int oldPos = Scanner.Buffer.Pos;
       bool wsOnly = true;
       for (int i = symbol.col - 1; i >= 1; i--)
       {
-        _Scanner.Buffer.Pos = symbol.pos - i;
-        int ch = _Scanner.Buffer.Peek();
+        Scanner.Buffer.Pos = symbol.pos - i;
+        int ch = Scanner.Buffer.Peek();
         wsOnly &= (ch == ' ' || (ch >= 9 && ch <= 13));
       }
-      _Scanner.Buffer.Pos = oldPos;
+      Scanner.Buffer.Pos = oldPos;
       return wsOnly;
     }
 
@@ -467,19 +464,19 @@ public partial class CSharpSyntaxParser
 	  
 	void CS2() {
 		while (IsExternAliasDirective()) {
-			_PragmaHandler.SignRealToken(); 
+			PragmaHandler.SignRealToken(); 
 			ExternAliasDirective(null);
 		}
 		while (la.kind == 78) {
 			UsingDirective(null);
 		}
 		while (IsGlobalAttrTarget()) {
-			_PragmaHandler.SignRealToken(); 
+			PragmaHandler.SignRealToken(); 
 			GlobalAttributes();
 		}
 		while (StartOf(1)) {
-			_PragmaHandler.SignRealToken(); 
-			NamespaceMemberDeclaration(null, _File);
+			PragmaHandler.SignRealToken(); 
+			NamespaceMemberDeclaration(null, File);
 		}
 	}
 
@@ -494,7 +491,7 @@ public partial class CSharpSyntaxParser
 		ExternalAlias externAlias = new ExternalAlias(token, this);
 		externAlias.Name = t.val;
 		CurrentElement = externAlias;
-		if (parent == null) _File.ExternAliases.Add(externAlias); 
+		if (parent == null) File.ExternAliases.Add(externAlias); 
 		else parent.ExternAliases.Add(externAlias); 
 		
 		Expect(115);
@@ -506,7 +503,7 @@ public partial class CSharpSyntaxParser
 		Token token = t;
 		string name = String.Empty; 
 		TypeReference typeUsed = null;
-		_PragmaHandler.SignRealToken();
+		PragmaHandler.SignRealToken();
 		
 		if (IsAssignment()) {
 			Expect(1);
@@ -517,7 +514,7 @@ public partial class CSharpSyntaxParser
 		Expect(115);
 		UsingClause uc = new UsingClause(token, this, name, typeUsed);
 		CurrentElement = uc;
-		if (parent == null) _File.Usings.Add(uc);
+		if (parent == null) File.Usings.Add(uc);
 		else parent.Usings.Add(uc); 
 		uc.Terminate(t);
 		
@@ -534,14 +531,14 @@ public partial class CSharpSyntaxParser
 		Expect(87);
 		Attribute(out attr);
 		attr.Scope = scope; 
-		_File.GlobalAttributes.Add(attr);
+		File.GlobalAttributes.Add(attr);
 		CurrentElement = attr;
 		
 		while (NotFinalComma()) {
 			Expect(88);
 			Attribute(out attr);
 			attr.Scope = scope; 
-			_File.GlobalAttributes.Add(attr);
+			File.GlobalAttributes.Add(attr);
 			CurrentElement = attr;
 			
 		}
@@ -574,7 +571,7 @@ public partial class CSharpSyntaxParser
 				UsingDirective(ns);
 			}
 			while (StartOf(1)) {
-				NamespaceMemberDeclaration(ns, _File);
+				NamespaceMemberDeclaration(ns, File);
 			}
 			Expect(112);
 			ns.Terminate(t); 
@@ -594,7 +591,7 @@ public partial class CSharpSyntaxParser
 			TypeDeclaration(attrs, null, m, out td);
 			if (td != null)
 			{
-			  if (parent == null) _File.AddTypeDeclaration(td);
+			  if (parent == null) File.AddTypeDeclaration(td);
 			  else parent.AddTypeDeclaration(td);
 			}
 			
@@ -4540,7 +4537,7 @@ TypeReference typeRef, bool isEvent) {
 		CS2();
 
       Expect(0);
-      if (_PragmaHandler.OpenRegionCount > 0)
+      if (PragmaHandler.OpenRegionCount > 0)
       {
         Error1038(la);
       }
@@ -4836,7 +4833,7 @@ TypeReference typeRef, bool isEvent) {
 
   			  default: s = "error " + n; break;
 	  	  }
-        _CompilationUnit.ErrorHandler.Error("SYNERR", la, s, null);
+        CompilationUnit.ErrorHandler.Error("SYNERR", la, s, null);
 	  	}
 		  errDist = 0;
 	  }

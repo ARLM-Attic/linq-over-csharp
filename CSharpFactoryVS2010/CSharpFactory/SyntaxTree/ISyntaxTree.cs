@@ -3,7 +3,7 @@
 //
 // Created: 2009.03.04, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.SolutionHierarchy
+namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
@@ -12,6 +12,12 @@ namespace CSharpFactory.SolutionHierarchy
   // ================================================================================================
   public interface ISyntaxTree
   {
-    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the source file nodes belonging to the syntax tree
+    /// </summary>
+    /// <value>The source file nodes.</value>
+    // ----------------------------------------------------------------------------------------------
+    SourceFileNodeCollection SourceFileNodes { get; }
   }
 }

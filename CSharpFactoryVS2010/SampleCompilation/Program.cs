@@ -22,7 +22,7 @@ namespace SampleCompilation
     static void Main(/* string[] args */)
     {
       // --- Create a compilation unit according to the specified .csproj file
-      var content = new CSharpProjectContent(CSharpParserProjectFile);
+      var content = new CSharp9ProjectContentProvider(CSharpParserProjectFile);
       var project = new CompilationUnit(content);
 
       // --- Parse the project and measure parse time

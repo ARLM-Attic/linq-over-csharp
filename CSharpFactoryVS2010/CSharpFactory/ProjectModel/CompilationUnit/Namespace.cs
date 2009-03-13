@@ -67,7 +67,7 @@ namespace CSharpFactory.ProjectModel
   /// of the namespace.
   /// </summary>
   // ==================================================================================
-  public sealed class NamespaceCollection : RestrictedIndexedCollection<Namespace>
+  public sealed class NamespaceCollection : ImmutableIndexedCollection<Namespace>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

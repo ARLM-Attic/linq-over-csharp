@@ -281,6 +281,7 @@
     <Content Include="ProjectProvider\WinFormsAppTest\Properties\AssemblyInfo.cs" />
     <Content Include="ProjectProvider\WinFormsAppTest\Properties\Resources.Designer.cs" />
     <Content Include="ProjectProvider\WinFormsAppTest\Properties\Settings.Designer.cs" />
+    <Compile Include="ProjectProvider\FolderContentProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ParserTests.cs" />
     <Content Include="ProjectProvider\WinFormsAppTest\TestWinApp.csproj.test" />

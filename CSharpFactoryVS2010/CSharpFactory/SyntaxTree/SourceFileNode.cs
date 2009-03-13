@@ -1,59 +1,69 @@
 // ================================================================================================
-// SourceFileBase.cs
+// SourceFileNode.cs
 //
-// Created: 2009.03.04, by Istvan Novak (DeepDiver)
+// Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.IO;
+using CSharpFactory.Collections;
 
-namespace CSharpFactory.SolutionHierarchy
+namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an abstract source file where the content of the source files comes 
-  /// either from a physical or a virtual stream.
+  /// This type defines a source file node in the syntax tree.
   /// </summary>
   // ================================================================================================
-  public abstract class SourceFileBase
+  public sealed class SourceFileNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SourceFileBase"/> class.
+    /// Initializes a new instance of the <see cref="SourceFileNode"/> class.
     /// </summary>
-    /// <param name="filePath">Full file name</param>
+    /// <param name="fullName">The full name of the source file.</param>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileBase(string filePath)
+    public SourceFileNode(string fullName)
     {
-      FullName = filePath;
-      Name = Path.GetFileName(filePath);
-      Folder = Path.GetDirectoryName(filePath);
+      Name = Path.GetFileName(fullName);
+      FullName = fullName;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the file
+    /// Gets or sets the name of the source file.
     /// </summary>
+    /// <value>The name.</value>
     // ----------------------------------------------------------------------------------------------
     public string Name { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the folder of the file
+    /// Gets or sets the full name of the source file.
     /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string Folder { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the full name of the file
-    /// </summary>
+    /// <value>The full name.</value>
     // ----------------------------------------------------------------------------------------------
     public string FullName { get; private set; }
+  }
+
+  // ================================================================================================
+  /// <summary>
+  /// This type defines a collection of source file nodes in the syntax tree.
+  /// </summary>
+  // ================================================================================================
+  public sealed class SourceFileNodeCollection : ImmutableIndexedCollection<SourceFileNode>
+  {
+    #region Overrides of ImmutableIndexedCollection<SourceFileNode>
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the stream representing the content of the source file.
+    /// Gets the key of the specified item.
     /// </summary>
+    /// <param name="item">Item used to determine the key.</param>
     // ----------------------------------------------------------------------------------------------
-    public abstract Stream Stream { get; }
+    protected override string GetKeyOfItem(SourceFileNode item)
+    {
+      return item.FullName;
+    }
+
+    #endregion
   }
 }

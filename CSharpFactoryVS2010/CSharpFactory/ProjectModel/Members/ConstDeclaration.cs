@@ -180,7 +180,7 @@ namespace CSharpFactory.ProjectModel
   /// full name of the type.
   /// </summary>
   // ==================================================================================
-  public class ConstDeclarationCollection : RestrictedIndexedCollection<ConstDeclaration>
+  public class ConstDeclarationCollection : ImmutableIndexedCollection<ConstDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

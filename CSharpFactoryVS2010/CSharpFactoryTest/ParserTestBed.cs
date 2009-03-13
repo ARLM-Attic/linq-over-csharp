@@ -11,7 +11,7 @@ namespace CSharpParserTest
 
     public bool InvokeParser(string fileName)
     {
-      CompilationUnit parser = new CompilationUnit(new EmptyProject(WorkingFolder));
+      CompilationUnit parser = new CompilationUnit(WorkingFolder, false);
       parser.AddFile(fileName);
       AddCommonSource(parser);
       return InvokeParser(parser);

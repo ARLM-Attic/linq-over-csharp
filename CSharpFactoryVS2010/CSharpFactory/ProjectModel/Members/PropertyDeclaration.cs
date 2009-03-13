@@ -237,7 +237,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public class PropertyDeclarationCollection :
-    RestrictedIndexedCollection<PropertyDeclaration>
+    ImmutableIndexedCollection<PropertyDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -469,7 +469,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public class TypeParameterConstraintCollection : 
-    RestrictedIndexedCollection<TypeParameterConstraint>
+    ImmutableIndexedCollection<TypeParameterConstraint>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

@@ -3,7 +3,7 @@
 //
 // Reviewed: 2009.03.05, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.SolutionHierarchy;
+using CSharpFactory.ProjectContent;
 
 namespace CSharpFactory.ProjectModel
 {

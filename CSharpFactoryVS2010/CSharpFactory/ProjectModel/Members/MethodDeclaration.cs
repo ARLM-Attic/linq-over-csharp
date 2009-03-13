@@ -418,7 +418,7 @@ namespace CSharpFactory.ProjectModel
   /// signature of the method.
   /// </summary>
   // ==================================================================================
-  public class MethodDeclarationCollection : RestrictedIndexedCollection<MethodDeclaration>
+  public class MethodDeclarationCollection : ImmutableIndexedCollection<MethodDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

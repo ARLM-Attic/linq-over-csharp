@@ -1,17 +1,20 @@
+// ================================================================================================
+// CSharpSyntaxParser.cs
+//
+// Reviewed: 2009.03.13, by Istvan Novak (DeepDiver)
+// ================================================================================================
 using System;
 using CSharpFactory.ProjectModel;
-using CommentInfo=CSharpFactory.ProjectModel.CommentInfo;
-using LanguageElement=CSharpFactory.ProjectModel.LanguageElement;
-using SourceFile=CSharpFactory.ProjectModel.SourceFile;
+using CSharpFactory.Syntax;
 
 namespace CSharpFactory.ParserFiles
 {
-  // ==================================================================================
+  // ================================================================================================
   /// <summary>
   /// This part of the CSharpSyntaxParser class adds extensions to the CoCo/R
   /// generated parser.
   /// </summary>
-  // ==================================================================================
+  // ================================================================================================
   public partial class CSharpSyntaxParser
   {
     #region Fields used by the parser
@@ -31,18 +34,13 @@ namespace CSharpFactory.ParserFiles
 
     #region Project Model extension fields
 
-    private ProjectModel.CompilationUnit _CompilationUnit;
-    private SourceFile _File;
     private LanguageElement _CurrentElement;
-    private CommentInfo _OrphanComment;
-    private readonly PragmaHandler _PragmaHandler;
-    private readonly CommentHandler _CommentHandler;
 
     #endregion
 
     #region Lifecycle methods
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new instance of this parser using the specified scanner, compilation
     /// uint and file.
@@ -50,111 +48,100 @@ namespace CSharpFactory.ParserFiles
     /// <param name="scanner">The scanner used to scan tokens.</param>
     /// <param name="unit">Compilation unit using this parser instance.</param>
     /// <param name="file">File used by this parser instance.</param>
-    // --------------------------------------------------------------------------------
-    public CSharpSyntaxParser(Scanner scanner, ProjectModel.CompilationUnit unit, SourceFile file)
+    // ----------------------------------------------------------------------------------------------
+    public CSharpSyntaxParser(Scanner scanner, CompilationUnit unit, 
+      SourceFile file, SourceFileNode sourceFileNode)
     {
-      _Scanner = scanner;
-      _CompilationUnit = unit;
-      _File = file;
-      _PragmaHandler = new PragmaHandler(this);
-      _CommentHandler = new CommentHandler(this);
+      Scanner = scanner;
+      CompilationUnit = unit;
+      File = file;
+      SourceFileNode = sourceFileNode;
+      PragmaHandler = new PragmaHandler(this);
+      CommentHandler = new CommentHandler(this);
     }
 
     #endregion
 
     #region Public properties
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the instance representing the compilation unit being parsed
     /// </summary>
-    // --------------------------------------------------------------------------------
-    public CompilationUnit CompilationUnit
-    {
-      get { return _CompilationUnit; }
-      set { _CompilationUnit = value; }
-    }
+    // ----------------------------------------------------------------------------------------------
+    public CompilationUnit CompilationUnit { get; set; }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the instance representing the file being parsed
     /// </summary>
-    // --------------------------------------------------------------------------------
-    public SourceFile File
-    {
-      get { return _File; }
-      set { _File = value; }
-    }
+    // ----------------------------------------------------------------------------------------------
+    public SourceFile File { get; private set; }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the source file node.
+    /// </summary>
+    /// <value>The source file node.</value>
+    // ----------------------------------------------------------------------------------------------
+    public SourceFileNode SourceFileNode { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the languauge element that is currently processed.
     /// </summary>
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     public LanguageElement CurrentElement
     {
       get { return _CurrentElement; }
       set
       {
         _CurrentElement = value;
-        if (_OrphanComment != null && _OrphanComment.Token.pos < _CurrentElement.Token.pos)
+        if (OrphanComment != null && OrphanComment.Token.pos < _CurrentElement.Token.pos)
         {
           // --- The orphan comment can be added to this language element.
-          _CurrentElement.Comment = _OrphanComment;
-          _OrphanComment = null;
+          _CurrentElement.Comment = OrphanComment;
+          OrphanComment = null;
         }
       }
     }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the last comment that is not assigned to any language element.
     /// </summary>
-    // --------------------------------------------------------------------------------
-    public CommentInfo OrphanComment
-    {
-      get { return _OrphanComment; }
-      set { _OrphanComment = value; }
-    }
+    // ----------------------------------------------------------------------------------------------
+    public CommentInfo OrphanComment { get; set; }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the scanner used by this parser.
     /// </summary>
-    // --------------------------------------------------------------------------------
-    public Scanner Scanner
-    {
-      get { return _Scanner; }
-    }
+    // ----------------------------------------------------------------------------------------------
+    public Scanner Scanner { get; private set; }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the pragma handler used by this parser.
     /// </summary>
-    // --------------------------------------------------------------------------------
-    internal PragmaHandler PragmaHandler
-    {
-      get { return _PragmaHandler; }
-    }
+    // ----------------------------------------------------------------------------------------------
+    internal PragmaHandler PragmaHandler { get; private set; }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the comment handler used by this parser.
     /// </summary>
-    // --------------------------------------------------------------------------------
-    internal CommentHandler CommentHandler
-    {
-      get { return _CommentHandler; }
-    }
+    // ----------------------------------------------------------------------------------------------
+    internal CommentHandler CommentHandler { get; private set; }
 
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the lookahead token.
     /// </summary>
-    // --------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     public Token Lookahead
     {
-      get { return la; }
+      get { return la; } 
     }
 
     #endregion
@@ -171,7 +158,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsAssignment()
     {
-      return la.kind == _ident && Peek(1).kind == _assgn;
+      return Lookahead.kind == _ident && Peek(1).kind == _assgn;
     }
 
     // --------------------------------------------------------------------------------
@@ -185,7 +172,7 @@ namespace CSharpFactory.ParserFiles
     bool NotFinalComma()
     {
       int peek = Peek(1).kind;
-      return la.kind == _comma && peek != _rbrace && peek != _rbrack;
+      return Lookahead.kind == _comma && peek != _rbrace && peek != _rbrack;
     }
 
     // --------------------------------------------------------------------------------
@@ -205,17 +192,17 @@ namespace CSharpFactory.ParserFiles
       if (pt.kind == _ident)
       {
         qualident = pt.val;
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
         while (pt.kind == _dot)
         {
-          pt = _Scanner.Peek();
+          pt = Scanner.Peek();
           if (pt.kind != _ident) return false;
           qualident += "." + pt.val;
-          pt = _Scanner.Peek();
+          pt = Scanner.Peek();
         }
         return true;
       }
-      else return false;
+      return false;
     }
 
     // --------------------------------------------------------------------------------
@@ -228,8 +215,8 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsGeneric()
     {
-      _Scanner.ResetPeek();
-      Token pt = la;
+      Scanner.ResetPeek();
+      Token pt = Lookahead;
       if (!IsTypeArgumentList(ref pt))
       {
         return false;
@@ -250,7 +237,7 @@ namespace CSharpFactory.ParserFiles
     {
       if (pt.kind == _lt)
       {
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
         while (true)
         {
           if (!IsType(ref pt))
@@ -260,13 +247,13 @@ namespace CSharpFactory.ParserFiles
           if (pt.kind == _gt)
           {
             // list recognized
-            pt = _Scanner.Peek();
+            pt = Scanner.Peek();
             break;
           }
-          else if (pt.kind == _comma)
+          if (pt.kind == _comma)
           {
             // another argument
-            pt = _Scanner.Peek();
+            pt = Scanner.Peek();
           }
           else
           {
@@ -295,25 +282,25 @@ namespace CSharpFactory.ParserFiles
     {
       if (typeKW[pt.kind])
       {
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
       }
       else if (pt.kind == _void)
       {
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
         if (pt.kind != _times)
         {
           return false;
         }
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
       }
       else if (pt.kind == _ident)
       {
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
         if (pt.kind == _dblcolon || pt.kind == _dot)
         {
           // either namespace alias qualifier "::" or first
           // part of the qualident
-          pt = _Scanner.Peek();
+          pt = Scanner.Peek();
           String dummyId;
           if (!IsQualident(ref pt, out dummyId))
           {
@@ -331,7 +318,7 @@ namespace CSharpFactory.ParserFiles
       }
       if (pt.kind == _question)
       {
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
       }
       return SkipPointerOrDims(ref pt);
     }
@@ -350,8 +337,8 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsLocalVarDecl()
     {
-      Token pt = la;
-      _Scanner.ResetPeek();
+      Token pt = Lookahead;
+      Scanner.ResetPeek();
       return IsType(ref pt) && pt.kind == _ident;
     }
 
@@ -367,7 +354,7 @@ namespace CSharpFactory.ParserFiles
     bool IsDims()
     {
       int peek = Peek(1).kind;
-      return la.kind == _lbrack && (peek == _comma || peek == _rbrack);
+      return Lookahead.kind == _lbrack && (peek == _comma || peek == _rbrack);
     }
 
     // --------------------------------------------------------------------------------
@@ -381,7 +368,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsPointerOrDims()
     {
-      return la.kind == _times || IsDims();
+      return Lookahead.kind == _times || IsDims();
     }
 
     // --------------------------------------------------------------------------------
@@ -399,12 +386,12 @@ namespace CSharpFactory.ParserFiles
       {
         if (pt.kind == _lbrack)
         {
-          do pt = _Scanner.Peek();
+          do pt = Scanner.Peek();
           while (pt.kind == _comma);
           if (pt.kind != _rbrack) return false;
         }
         else if (pt.kind != _times) break;
-        pt = _Scanner.Peek();
+        pt = Scanner.Peek();
       }
       return true;
     }
@@ -420,7 +407,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsAttrTargSpec()
     {
-      return (la.kind == _ident || keyword[la.kind]) && Peek(1).kind == _colon;
+      return (Lookahead.kind == _ident || keyword[Lookahead.kind]) && Peek(1).kind == _colon;
     }
 
     // --------------------------------------------------------------------------------
@@ -435,7 +422,7 @@ namespace CSharpFactory.ParserFiles
     bool IsFieldDecl()
     {
       int peek = Peek(1).kind;
-      return la.kind == _ident &&
+      return Lookahead.kind == _ident &&
              (peek == _comma || peek == _assgn || peek == _scolon);
     }
 
@@ -449,7 +436,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsTypeCast()
     {
-      if (la.kind != _lpar) { return false; }
+      if (Lookahead.kind != _lpar) { return false; }
       if (IsSimpleTypeCast()) { return true; }
       return GuessTypeCast();
     }
@@ -466,12 +453,12 @@ namespace CSharpFactory.ParserFiles
     bool IsSimpleTypeCast()
     {
       // assert: la.kind == _lpar
-      _Scanner.ResetPeek();
-      Token pt1 = _Scanner.Peek();
-      Token pt2 = _Scanner.Peek();
+      Scanner.ResetPeek();
+      Token pt1 = Scanner.Peek();
+      Token pt2 = Scanner.Peek();
       return typeKW[pt1.kind] &&
               (pt2.kind == _rpar ||
-              (pt2.kind == _question && _Scanner.Peek().kind == _rpar));
+              (pt2.kind == _question && Scanner.Peek().kind == _rpar));
     }
 
     // --------------------------------------------------------------------------------
@@ -486,8 +473,8 @@ namespace CSharpFactory.ParserFiles
     bool GuessTypeCast()
     {
       // assert: la.kind == _lpar
-      _Scanner.ResetPeek();
-      Token pt = _Scanner.Peek();
+      Scanner.ResetPeek();
+      Token pt = Scanner.Peek();
       if (!IsType(ref pt))
       {
         return false;
@@ -496,7 +483,7 @@ namespace CSharpFactory.ParserFiles
       {
         return false;
       }
-      pt = _Scanner.Peek();
+      pt = Scanner.Peek();
       return castFollower[pt.kind];
     }
 
@@ -512,7 +499,7 @@ namespace CSharpFactory.ParserFiles
     bool IsGlobalAttrTarget()
     {
       Token pt = Peek(1);
-      return la.kind == _lbrack && pt.kind == _ident && ("assembly".Equals(pt.val) || "module".Equals(pt.val));
+      return Lookahead.kind == _lbrack && pt.kind == _ident && ("assembly".Equals(pt.val) || "module".Equals(pt.val));
     }
 
     // --------------------------------------------------------------------------------
@@ -526,7 +513,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsExternAliasDirective()
     {
-      return la.kind == _extern;
+      return Lookahead.kind == _extern;
     }
 
     // --------------------------------------------------------------------------------
@@ -539,8 +526,8 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsNoSwitchLabelOrRBrace()
     {
-      return (la.kind != _case && la.kind != _default && la.kind != _rbrace) ||
-             (la.kind == _default && Peek(1).kind != _colon);
+      return (Lookahead.kind != _case && Lookahead.kind != _default && Lookahead.kind != _rbrace) ||
+             (Lookahead.kind == _default && Peek(1).kind != _colon);
     }
 
     // --------------------------------------------------------------------------------
@@ -554,18 +541,18 @@ namespace CSharpFactory.ParserFiles
     bool IsShift()
     {
       Token pt = Peek(1);
-      return (la.kind == _ltlt) ||
-             (la.kind == _gt &&
+      return (Lookahead.kind == _ltlt) ||
+             (Lookahead.kind == _gt &&
                pt.kind == _gt &&
-               (la.pos + la.val.Length == pt.pos)
+               (Lookahead.pos + Lookahead.val.Length == pt.pos)
              );
     }
 
     // true: TypeArgumentList followed by anything but "("
     bool IsPartOfMemberName()
     {
-      _Scanner.ResetPeek();
-      Token pt = la;
+      Scanner.ResetPeek();
+      Token pt = Lookahead;
       if (!IsTypeArgumentList(ref pt))
       {
         return false;
@@ -584,7 +571,7 @@ namespace CSharpFactory.ParserFiles
     bool IsNullableTypeMark()
     {
       int peek = Peek(1).kind;
-      return la.kind == _question &&
+      return Lookahead.kind == _question &&
              (
                peek == _and ||
                peek == _andassgn ||
@@ -626,7 +613,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsMemberInitializer()
     {
-      return (la.kind == _ident && Peek(1).kind == _assgn);
+      return (Lookahead.kind == _ident && Peek(1).kind == _assgn);
     }
 
     // --------------------------------------------------------------------------------
@@ -639,7 +626,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsEmptyMemberInitializer()
     {
-      return (la.kind == _rbrace);
+      return (Lookahead.kind == _rbrace);
     }
 
     // --------------------------------------------------------------------------------
@@ -652,7 +639,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsValueInitializer()
     {
-      return (la.kind != _lbrace);
+      return (Lookahead.kind != _lbrace);
     }
 
     // --------------------------------------------------------------------------------
@@ -665,7 +652,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsPartialMethod()
     {
-      return (la.val == "partial" && Peek(1).kind == _void);
+      return (Lookahead.val == "partial" && Peek(1).kind == _void);
     }
 
     // --------------------------------------------------------------------------------
@@ -679,21 +666,21 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsLambda()
     {
-      _Scanner.ResetPeek();
-      if (la.kind == _ident)
+      Scanner.ResetPeek();
+      if (Lookahead.kind == _ident)
       {
         // --- ident =>
-        return _Scanner.Peek().kind == _larrow;
+        return Scanner.Peek().kind == _larrow;
       }
-      else if (la.kind == _lpar)
+      if (Lookahead.kind == _lpar)
       {
         if (IsTypeCast()) return false;
         if (IsExplicitLambdaParameter()) return true;
 
-        _Scanner.ResetPeek();
-        Token pt1 = _Scanner.Peek();
-        Token pt2 = _Scanner.Peek();
-        Token pt3 = _Scanner.Peek();
+        Scanner.ResetPeek();
+        Token pt1 = Scanner.Peek();
+        Token pt2 = Scanner.Peek();
+        Token pt3 = Scanner.Peek();
 
         // --- () =>
         if (pt1.kind == _rpar && pt2.kind == _larrow) return true;
@@ -705,7 +692,7 @@ namespace CSharpFactory.ParserFiles
         if (pt1.kind == _ident && pt2.kind == _comma) return true;
         return false;
       }
-      else return false;
+      return false;
     }
 
     // --------------------------------------------------------------------------------
@@ -719,8 +706,8 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsExplicitLambdaParameter()
     {
-      _Scanner.ResetPeek();
-      Token pt1 = _Scanner.Peek();
+      Scanner.ResetPeek();
+      Token pt1 = Scanner.Peek();
       return IsExplicitLambdaParameter(pt1);
     }
 
@@ -742,7 +729,7 @@ namespace CSharpFactory.ParserFiles
       {
         if (token.kind == _ident)
         {
-          Token identFollow = _Scanner.Peek();
+          Token identFollow = Scanner.Peek();
           if (identFollow.kind == _comma || identFollow.kind == _rpar) return true;
         }
       }
@@ -760,11 +747,11 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     bool IsQueryExpression()
     {
-      _Scanner.ResetPeek();
-      Token pt1 = _Scanner.Peek();
-      Token pt2 = _Scanner.Peek();
+      Scanner.ResetPeek();
+      Token pt1 = Scanner.Peek();
+      Token pt2 = Scanner.Peek();
 
-      return la.val == "from"
+      return Lookahead.val == "from"
              && (pt1.kind == _ident || typeKW[pt1.kind])
              && pt2.val != ";"
              && pt2.val != ","

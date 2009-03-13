@@ -49,8 +49,8 @@ namespace CSharpParserTest
     [TestMethod]
     public void CSharpParserIsOK()
     {
-      CSharpProjectContent content = new CSharpProjectContent(CSharpParserFile);
-      CompilationUnit parser = new CompilationUnit(content);
+      var content = new CSharp9ProjectContentProvider(CSharpParserFile);
+      var parser = new CompilationUnit(content);
       Assert.IsTrue(InvokeParser(parser));
     }
 

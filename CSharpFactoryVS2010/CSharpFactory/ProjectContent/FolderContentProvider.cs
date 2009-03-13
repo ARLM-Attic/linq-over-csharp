@@ -4,7 +4,6 @@
 // Created: 2009.03.12, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.IO;
-using CSharpFactory.SolutionHierarchy;
 
 namespace CSharpFactory.ProjectContent
 {
@@ -21,13 +20,14 @@ namespace CSharpFactory.ProjectContent
     /// <summary>
     /// Initializes a new instance of the <see cref="CSharp9ProjectContentProvider"/> class.
     /// </summary>
-    /// <param name="fileName">Name of the file.</param>
+    /// <param name="path">Name of the file.</param>
     // ----------------------------------------------------------------------------------------------
-    public FolderContentProvider(string fileName)
+    public FolderContentProvider(string path)
     {
-      Name = fileName;
-      WorkingFolder = Path.GetDirectoryName(fileName);
+      Name = path;
+      WorkingFolder = path;
       CollectProjectItems();
+      AddAssemblyReference("System");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ namespace CSharpFactory.ProjectContent
       // --- Add files in this folder
       foreach (var file in dir.GetFiles("*.cs"))
       {
-        AddFile(file.FullName);
+        AddFileWithFullName(file.FullName);
       }
 
       // --- Add files in subfolders

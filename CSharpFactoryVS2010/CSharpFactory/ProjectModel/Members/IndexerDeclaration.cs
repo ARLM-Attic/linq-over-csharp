@@ -174,7 +174,7 @@ namespace CSharpFactory.ProjectModel
   /// </summary>
   // ==================================================================================
   public class IndexerDeclarationCollection :
-    RestrictedIndexedCollection<IndexerDeclaration>
+    ImmutableIndexedCollection<IndexerDeclaration>
   {
     // --------------------------------------------------------------------------------
     /// <summary>

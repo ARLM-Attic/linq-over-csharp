@@ -3,11 +3,13 @@
 //
 // Created: 2009.03.04, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Collections.Generic;
 using System.IO;
 using CSharpFactory.Collections;
 using CSharpFactory.ProjectModel;
+using CSharpFactory.SolutionHierarchy;
 
-namespace CSharpFactory.SolutionHierarchy
+namespace CSharpFactory.ProjectContent
 {
   // ================================================================================================
   /// <summary>
@@ -29,6 +31,7 @@ namespace CSharpFactory.SolutionHierarchy
       SourceFiles = new ImmutableCollection<SourceFileBase>();
       ConditionalSymbols = new ImmutableCollection<string>();
       References = new ImmutableCollection<ReferencedUnit>();
+      AddAssemblyReference("mscorlib");
     }
 
     #endregion
@@ -150,8 +153,9 @@ namespace CSharpFactory.SolutionHierarchy
     /// </summary>
     /// <param name="symbol">Conditional directive</param>
     // --------------------------------------------------------------------------------
-    public void AddConditionalDirective(string symbol)
+    public void AddConditionalSymbol(string symbol)
     {
+      symbol = symbol.Trim();
       if (!ConditionalSymbols.Contains(symbol))
       {
         ConditionalSymbols.Add(symbol);
@@ -185,6 +189,20 @@ namespace CSharpFactory.SolutionHierarchy
     public void AddFile(string fileName)
     {
       string fullName = Path.Combine(WorkingFolder, fileName);
+      SourceFiles.Add(new PhysicalSourceFile(fullName));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a physical source file specified with full name to the project.
+    /// </summary>
+    /// <param name="fullName">Full name of the file to add to the project.</param>
+    /// <remarks>
+    /// File name is relative to the working folder.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public void AddFileWithFullName(string fullName)
+    {
       SourceFiles.Add(new PhysicalSourceFile(fullName));
     }
 

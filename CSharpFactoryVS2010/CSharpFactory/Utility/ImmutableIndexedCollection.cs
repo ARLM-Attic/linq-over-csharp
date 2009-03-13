@@ -11,7 +11,7 @@ namespace CSharpFactory.Collections
   /// </summary>
   // ====================================================================================
   [Serializable]
-  public abstract class RestrictedIndexedCollection<TValue> : IList<TValue>, IReadOnlySupport
+  public abstract class ImmutableIndexedCollection<TValue> : IList<TValue>, IReadOnlySupport
   {
     #region Private fields
 
@@ -28,7 +28,7 @@ namespace CSharpFactory.Collections
     // ----------------------------------------------------------------------------------
     /// <summary>Creates an empty collection.</summary>
     // ----------------------------------------------------------------------------------
-    public RestrictedIndexedCollection()
+    public ImmutableIndexedCollection()
     {
       _Items = new List<TValue>();
       _IndexedItems = new Dictionary<string, TValue>();
@@ -39,7 +39,7 @@ namespace CSharpFactory.Collections
     /// <summary>Creates a collection with the specified capacity.</summary>
     /// <param name="capacity">Initial capacity of the collection.</param>
     // ----------------------------------------------------------------------------------
-    public RestrictedIndexedCollection(int capacity)
+    public ImmutableIndexedCollection(int capacity)
     {
       _Items = new List<TValue>(capacity);
       _IndexedItems = new Dictionary<string, TValue>(capacity);
