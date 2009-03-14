@@ -703,14 +703,14 @@ namespace CSharpFactory.ParserFiles
 
     // --------------------------------------------------------------------------------
     /// <summary>
-    /// Error CS0432: Alias '{0}' not found
+    /// Error CS0432: AliasToken '{0}' not found
     /// </summary>
     /// <param name="token">Error point</param>
     /// <param name="name">Missing alias</param>
     // --------------------------------------------------------------------------------
     public void Error0432(Token token, string name)
     {
-      Error("CS0432", token, string.Format("Alias '{0}' not found", name));
+      Error("CS0432", token, string.Format("AliasToken '{0}' not found", name));
     }
 
     // --------------------------------------------------------------------------------
@@ -1089,7 +1089,7 @@ namespace CSharpFactory.ParserFiles
     /// </summary>
     /// <param name="token">Error point</param>
     /// <param name="name">Member name</param>
-    /// <param name="alias">Alias name</param>
+    /// <param name="alias">AliasToken name</param>
     // --------------------------------------------------------------------------------
     public void Error0576(Token token, string name, string alias)
     {

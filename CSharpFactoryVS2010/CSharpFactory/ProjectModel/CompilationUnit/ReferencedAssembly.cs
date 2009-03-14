@@ -81,7 +81,7 @@ namespace CSharpFactory.ProjectModel
     /// </summary>
     /// <param name="name">Assembly name</param>
     /// <param name="path">Assembly path</param>
-    /// <param name="alias">Alias name</param>
+    /// <param name="alias">AliasToken name</param>
     // ----------------------------------------------------------------------------------------------
     public ReferencedAssembly(string name, string path, string alias)
       : base(name)

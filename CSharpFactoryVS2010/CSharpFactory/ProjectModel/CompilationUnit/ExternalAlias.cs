@@ -59,7 +59,7 @@ namespace CSharpFactory.ProjectModel
     /// <summary>r
     /// Gets the external alias having the specified alias name.
     /// </summary>
-    /// <param name="key">Alias name.</param>
+    /// <param name="key">AliasToken name.</param>
     /// <returns>
     /// External alias, if found by the alias name; otherwise, null.
     /// </returns>

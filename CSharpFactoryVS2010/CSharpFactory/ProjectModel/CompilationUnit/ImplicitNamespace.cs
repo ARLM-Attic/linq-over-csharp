@@ -190,7 +190,7 @@ namespace CSharpFactory.ProjectModel
     /// Checks if this declaration scope contains an extern-alias or a using-alias
     /// declaration with the specified name.
     /// </summary>
-    /// <param name="name">Alias name to check.</param>
+    /// <param name="name">AliasToken name to check.</param>
     /// <param name="foundInScope">Scope where the alias has been found.</param>
     /// <returns>
     /// True, if the this scope contains the alias; otherwise, false. If alias found, 

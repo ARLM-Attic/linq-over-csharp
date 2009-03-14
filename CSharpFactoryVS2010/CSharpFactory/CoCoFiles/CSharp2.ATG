@@ -1,6 +1,7 @@
 using System.Text;
 using System.Collections;
 using CSharpFactory.ProjectModel;
+using CSharpFactory.Syntax;
 
 COMPILER CS2
 
@@ -245,7 +246,7 @@ CS2
       ExternAliasDirective<null>
   }
   {
-    UsingDirective<null>
+    UsingDirective<null, SourceFileNode>
   }
   {
     IF (IsGlobalAttrTarget()) (. PragmaHandler.SignRealToken(); .)
@@ -284,25 +285,42 @@ ExternAliasDirective<NamespaceFragment parent>
 // +parent: Parent namespace of the "using" directive. If this parameter is null, 
 //   the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-UsingDirective<NamespaceFragment parent>
-=                                                               
+UsingDirective<NamespaceFragment parent, SourceFileNode sNode>
+=                          (.
+                              // :::
+                              Token alias = null;
+                              Token eq = null;
+                              TypeOrNamespaceNode nsNode = null;
+                           .)                                     
   "using"                  (. 
-                              Token token = t;
+                              Token start = t;
                               string name = String.Empty; 
                               TypeReference typeUsed = null;
                               PragmaHandler.SignRealToken();
                            .)
    [ IF (IsAssignment()) 
-     ident                 (. name = t.val; .)
-     "="
+     ident                 (. 
+                              name = t.val; 
+                              // :::
+                              alias = t;
+                           .)
+     "="                   (. eq = t; .)
    ]
-     TypeName<out typeUsed> 
+     TypeName<out typeUsed, out nsNode> 
    ";"                     (. 
-                              UsingClause uc = new UsingClause(token, this, name, typeUsed);
+                              UsingClause uc = new UsingClause(start, this, name, typeUsed);
                               CurrentElement = uc;
                               if (parent == null) File.Usings.Add(uc);
                               else parent.Usings.Add(uc); 
                               uc.Terminate(t);
+                              // :::
+                              if (parent == null)
+                              {
+                                if (alias == null)
+                                  SourceFileNode.AddUsing(start, nsNode);
+                                else
+                                  SourceFileNode.AddUsingWithAlias(start, alias, eq, nsNode);
+                              }
                            .)
 .
 
@@ -354,7 +372,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
                  .)
   "{" 
       { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
-      { UsingDirective<ns> } 
+      { UsingDirective<ns, SourceFileNode> } 
       { NamespaceMemberDeclaration<ns, File> } 
   "}"            (. ns.Terminate(t); .)
   [ ";"          (. ns.Terminate(t); .)
@@ -701,12 +719,16 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
 EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
-= (. TypeReference typeRef; .)
+=                                (. 
+                                    TypeReference typeRef; 
+                                    // :::
+                                    TypeOrNamespaceNode nsNode = null;
+                                 .)
   "event" Type<out typeRef, false>
   ( IF (IsFieldDecl()) 
     FieldMemberDeclarators<attrs, m, td, typeRef, true, Modifier.propEvntMeths> ";"
   |                              (. TypeReference memberRef; .)
-    TypeName<out memberRef> 
+    TypeName<out memberRef, out nsNode> 
     "{"                          (. EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  .)   
                                  (. CurrentElement = ep; .)
                                  (. ep.ResultingType = typeRef; .) 
@@ -1333,8 +1355,11 @@ Keyword
 // +attr: Attribute declaration.
 // ------------------------------------------------------------------------------------
 Attribute<out AttributeDeclaration attr> (. TypeReference typeRef; .)
-=  
-  TypeName<out typeRef>                  (. 
+=                                        (.
+                                            // :::
+                                            TypeOrNamespaceNode nsNode = null;
+                                         .)
+  TypeName<out typeRef, out nsNode>      (. 
                                             attr = new AttributeDeclaration(t, this, typeRef); 
                                             CurrentElement = attr;
                                          .)
@@ -1529,8 +1554,11 @@ IntegralType<out TypeReference typeRef> (. typeRef = null; .)
 // +typeRef: resulting type reference.
 // ------------------------------------------------------------------------------------
 ClassType<out TypeReference typeRef>   (. typeRef = null; .)
-=                                                               
-  TypeName<out typeRef> |               
+=                                      (.
+                                          // :::
+                                          TypeOrNamespaceNode nsNode = null;
+                                       .)
+  TypeName<out typeRef, out nsNode> |               
   (                                    
     "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
     | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
@@ -1542,7 +1570,10 @@ ClassType<out TypeReference typeRef>   (. typeRef = null; .)
 // +typeRef: An instance to a member reference
 // ------------------------------------------------------------------------------------
 MemberName<out TypeReference typeRef>                                              
-= 
+=                                        (.
+                                            // :::
+                                            TypeArgumentListNode argList = null;
+                                         .)
   ident                                  (. 
                                             typeRef = new TypeReference(t, this);
                                             typeRef.Name = t.val; 
@@ -1558,7 +1589,7 @@ MemberName<out TypeReference typeRef>
   ]
   [ 
     IF (la.kind == _lt && IsPartOfMemberName()) 
-      TypeArgumentList<typeRef.Arguments> 
+      TypeArgumentList<typeRef.Arguments, out argList> 
   ]
   { IF (la.kind == _dot && Peek(1).kind == _ident)
       "." ident                          (. 
@@ -1568,7 +1599,7 @@ MemberName<out TypeReference typeRef>
                                          .)
     [ 
       IF (la.kind == _lt && IsPartOfMemberName()) 
-        TypeArgumentList<typeRef.Arguments>
+        TypeArgumentList<typeRef.Arguments, out argList>
     ]
   }
 .
@@ -1577,29 +1608,70 @@ MemberName<out TypeReference typeRef>
 // Declaration of a compound type name
 // +typeRef: An instance to a member reference
 // ------------------------------------------------------------------------------------
-TypeName<out TypeReference typeRef>                             
-=                                                               
-  ident                                  (. 
-                                            typeRef = new TypeReference(t, this);
-                                            typeRef.Name = t.val; 
-                                            TypeReference nextType = typeRef;
-                                         .)
+TypeName<out TypeReference typeRef, out TypeOrNamespaceNode resultNode>                             
+=              (.
+                   // :::
+                   resultNode = null;
+                   Token qualifier = null;
+                   Token separator = null;
+                   Token identifier = null;
+                   TypeArgumentListNode argList = null;
+               .)
+  ident        (. 
+                   typeRef = new TypeReference(t, this);
+                   typeRef.Name = t.val; 
+                   TypeReference nextType = typeRef;
+                   // :::
+                   qualifier = t;
+               .)
   [ 
-    "::"                                 (. typeRef.IsGlobalScope = true; .)
-    ident                                (. 
-                                            typeRef.Suffix = new TypeReference(t, this);
-                                            typeRef.Suffix.Name = t.val; 
-                                            nextType = typeRef.Suffix;
-                                         .)
-  ]                                                
-  [ TypeArgumentList<nextType.Arguments> ]                                    
+    "::"       (. 
+                   typeRef.IsGlobalScope = true; 
+                   // :::
+                   separator = t;
+               .)
+    ident      (. 
+                   typeRef.Suffix = new TypeReference(t, this);
+                   typeRef.Suffix.Name = t.val; 
+                   nextType = typeRef.Suffix;
+                   // :::
+                   identifier = t;
+               .)
+  ]            (.
+                   if (separator == null)
+                   {
+                     resultNode = new TypeOrNamespaceNode(qualifier);
+                     identifier = qualifier;
+                   }
+                   else
+                   {
+                     resultNode = new TypeOrNamespaceNode(qualifier, separator);
+                   }
+               .)
+  
+  [ TypeArgumentList<nextType.Arguments, out argList> ]
+               (.
+                   // :::
+                   resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
+               .)                                    
   {
-    "." ident                            (. 
-                                            nextType.Suffix = new TypeReference(t, this);
-                                            nextType.Suffix.Name = t.val;
-                                            nextType = nextType.Suffix;
-                                         .)
-    [ TypeArgumentList<nextType.Arguments> ]   
+    "."        (.
+                   // :::
+                   separator = t;
+                   argList = null;
+               .)
+    ident      (. 
+                   nextType.Suffix = new TypeReference(t, this);
+                   nextType.Suffix.Name = t.val;
+                   nextType = nextType.Suffix;
+                   // :::
+                   identifier = t;
+               .)
+    [ TypeArgumentList<nextType.Arguments, out argList> ]   
+               (.
+                   // :::
+                   resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
+               .)                                    
   }
 .
 
@@ -2914,14 +2986,17 @@ PrimitiveNamedLiteral<out Expression expr>  (. expr = null; .)
 // +expr: Literal expression value.
 // ------------------------------------------------------------------------------------
 NamedLiteral<out Expression expr>  (. expr = null; .)
-= 
+=              (.
+                  // :::
+                  TypeArgumentListNode argList = null;
+               .)
   ident        (. NamedLiteral nl = new NamedLiteral(t, this); .)
                (. expr = nl; .)
                (. nl.Name = t.val; .)
   [ "::"       (. nl.IsGlobalScope = true; .)
     ident      (. nl.Name = t.val; .)
   ] 
-  [ IF (IsGeneric()) TypeArgumentList<nl.TypeArguments> ]
+  [ IF (IsGeneric()) TypeArgumentList<nl.TypeArguments, out argList> ]
                (. nl.Terminate(t); .)
 .
 
@@ -2930,9 +3005,12 @@ NamedLiteral<out Expression expr>  (. expr = null; .)
 // +expr: Named literal expression value.
 // ------------------------------------------------------------------------------------
 SimpleNamedLiteral<out NamedLiteral expr> 
-= 
-  ident        (. expr = new NamedLiteral(t, this); .)
-  [ IF (IsGeneric()) TypeArgumentList<expr.TypeArguments> ]
+=            (.
+                // :::
+                TypeArgumentListNode argList = null;
+             .)
+ident        (. expr = new NamedLiteral(t, this); .)
+  [ IF (IsGeneric()) TypeArgumentList<expr.TypeArguments, out argList> ]
                (. expr.Terminate(t); .)
 .
 
@@ -2941,12 +3019,15 @@ SimpleNamedLiteral<out NamedLiteral expr>
 // +expr: Literal expression value.
 // ------------------------------------------------------------------------------------
 BaseNamedLiteral<out Expression expr>  (. expr = null; .)
-= 
+=          (.
+              // :::
+              TypeArgumentListNode argList = null;
+           .)
   "."       
   ident    (. BaseNamedLiteral bnl = new BaseNamedLiteral(t, this); .)
            (. bnl.Name = t.val; .)
            (. expr = bnl; .)
-   [ IF (IsGeneric()) TypeArgumentList<bnl.TypeArguments> ]
+   [ IF (IsGeneric()) TypeArgumentList<bnl.TypeArguments, out argList> ]
            (. bnl.Terminate(t); .)
 .
 
@@ -3447,8 +3528,12 @@ TypeParameter<out TypeParameter tp>
 // Declaration of a type argument list.
 // +typeRef: Type that has the argument list defined here.
 // ------------------------------------------------------------------------------------
-TypeArgumentList<TypeReferenceCollection args>  (. TypeReference paramType; .)
-=
+TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>  
+  (. TypeReference paramType; .)
+= (.
+      // :::
+      argList = null;
+  .) 
   /*
      We are a bit sloppy here and allow the type arguments to be "empty"
      everywhere. This results in unbound-type-names. In fact this is only

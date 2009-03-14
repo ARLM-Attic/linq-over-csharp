@@ -548,7 +548,7 @@ namespace CSharpFactory.ParserFiles
              );
     }
 
-    // true: TypeArgumentList followed by anything but "("
+    // true: TypeArgumentListNode followed by anything but "("
     bool IsPartOfMemberName()
     {
       Scanner.ResetPeek();

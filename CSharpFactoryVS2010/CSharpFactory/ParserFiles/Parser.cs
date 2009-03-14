@@ -1,6 +1,7 @@
 using System.Text;
 using System.Collections;
 using CSharpFactory.ProjectModel;
+using CSharpFactory.Syntax;
 
 using System;
 
@@ -468,7 +469,7 @@ public partial class CSharpSyntaxParser
 			ExternAliasDirective(null);
 		}
 		while (la.kind == 78) {
-			UsingDirective(null);
+			UsingDirective(null, SourceFileNode);
 		}
 		while (IsGlobalAttrTarget()) {
 			PragmaHandler.SignRealToken(); 
@@ -498,9 +499,13 @@ public partial class CSharpSyntaxParser
 		externAlias.Terminate(t); 
 	}
 
-	void UsingDirective(NamespaceFragment parent) {
+	void UsingDirective(NamespaceFragment parent, SourceFileNode sNode) {
+		Token alias = null;
+		Token eq = null;
+		TypeOrNamespaceNode nsNode = null;
+		
 		Expect(78);
-		Token token = t;
+		Token start = t;
 		string name = String.Empty; 
 		TypeReference typeUsed = null;
 		PragmaHandler.SignRealToken();
@@ -508,15 +513,27 @@ public partial class CSharpSyntaxParser
 		if (IsAssignment()) {
 			Expect(1);
 			name = t.val; 
+			// :::
+			alias = t;
+			
 			Expect(86);
+			eq = t; 
 		}
-		TypeName(out typeUsed);
+		TypeName(out typeUsed, out nsNode);
 		Expect(115);
-		UsingClause uc = new UsingClause(token, this, name, typeUsed);
+		UsingClause uc = new UsingClause(start, this, name, typeUsed);
 		CurrentElement = uc;
 		if (parent == null) File.Usings.Add(uc);
 		else parent.Usings.Add(uc); 
 		uc.Terminate(t);
+		// :::
+		if (parent == null)
+		{
+		  if (alias == null)
+		    SourceFileNode.AddUsing(start, nsNode);
+		  else
+		    SourceFileNode.AddUsingWithAlias(start, alias, eq, nsNode);
+		}
 		
 	}
 
@@ -568,7 +585,7 @@ public partial class CSharpSyntaxParser
 				ExternAliasDirective(ns);
 			}
 			while (la.kind == 78) {
-				UsingDirective(ns);
+				UsingDirective(ns, SourceFileNode);
 			}
 			while (StartOf(1)) {
 				NamespaceMemberDeclaration(ns, File);
@@ -598,40 +615,74 @@ public partial class CSharpSyntaxParser
 		} else SynErr(146);
 	}
 
-	void TypeName(out TypeReference typeRef) {
+	void TypeName(out TypeReference typeRef, out TypeOrNamespaceNode resultNode) {
+		resultNode = null;
+		Token qualifier = null;
+		Token separator = null;
+		Token identifier = null;
+		TypeArgumentListNode argList = null;
+		
 		Expect(1);
 		typeRef = new TypeReference(t, this);
 		typeRef.Name = t.val; 
 		TypeReference nextType = typeRef;
+		// :::
+		qualifier = t;
 		
 		if (la.kind == 92) {
 			Get();
 			typeRef.IsGlobalScope = true; 
+			// :::
+			separator = t;
+			
 			Expect(1);
 			typeRef.Suffix = new TypeReference(t, this);
 			typeRef.Suffix.Name = t.val; 
 			nextType = typeRef.Suffix;
+			// :::
+			identifier = t;
 			
 		}
-		if (la.kind == 101) {
-			TypeArgumentList(nextType.Arguments);
+		if (separator == null)
+		{
+		  resultNode = new TypeOrNamespaceNode(qualifier);
+		  identifier = qualifier;
 		}
+		else
+		{
+		  resultNode = new TypeOrNamespaceNode(qualifier, separator);
+		}
+		
+		if (la.kind == 101) {
+			TypeArgumentList(nextType.Arguments, out argList);
+		}
+		resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
+		
 		while (la.kind == 91) {
 			Get();
+			separator = t;
+			argList = null;
+			
 			Expect(1);
 			nextType.Suffix = new TypeReference(t, this);
 			nextType.Suffix.Name = t.val;
 			nextType = nextType.Suffix;
+			// :::
+			identifier = t;
 			
 			if (la.kind == 101) {
-				TypeArgumentList(nextType.Arguments);
+				TypeArgumentList(nextType.Arguments, out argList);
 			}
+			resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
+			
 		}
 	}
 
 	void Attribute(out AttributeDeclaration attr) {
 		TypeReference typeRef; 
-		TypeName(out typeRef);
+		TypeOrNamespaceNode nsNode = null;
+		
+		TypeName(out typeRef, out nsNode);
 		attr = new AttributeDeclaration(t, this, typeRef); 
 		CurrentElement = attr;
 		
@@ -1017,7 +1068,9 @@ out TypeDeclaration td) {
 	void ClassType(out TypeReference typeRef) {
 		typeRef = null; 
 		if (la.kind == 1) {
-			TypeName(out typeRef);
+			TypeOrNamespaceNode nsNode = null;
+			
+			TypeName(out typeRef, out nsNode);
 		} else if (la.kind == 48 || la.kind == 65) {
 			if (la.kind == 48) {
 				Get();
@@ -1356,6 +1409,9 @@ out TypeDeclaration td) {
 
 	void EventDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td) {
 		TypeReference typeRef; 
+		// :::
+		TypeOrNamespaceNode nsNode = null;
+		
 		Expect(26);
 		Type(out typeRef, false);
 		if (IsFieldDecl()) {
@@ -1363,7 +1419,7 @@ out TypeDeclaration td) {
 			Expect(115);
 		} else if (la.kind == 1) {
 			TypeReference memberRef; 
-			TypeName(out memberRef);
+			TypeName(out memberRef, out nsNode);
 			Expect(97);
 			EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  
 			CurrentElement = ep; 
@@ -1418,6 +1474,8 @@ out TypeDeclaration td) {
 	}
 
 	void MemberName(out TypeReference typeRef) {
+		TypeArgumentListNode argList = null;
+		
 		Expect(1);
 		typeRef = new TypeReference(t, this);
 		typeRef.Name = t.val; 
@@ -1433,7 +1491,7 @@ out TypeDeclaration td) {
 			
 		}
 		if (la.kind == _lt && IsPartOfMemberName()) {
-			TypeArgumentList(typeRef.Arguments);
+			TypeArgumentList(typeRef.Arguments, out argList);
 		}
 		while (la.kind == _dot && Peek(1).kind == _ident) {
 			Expect(91);
@@ -1443,7 +1501,7 @@ out TypeDeclaration td) {
 			nextType = nextType.Suffix;
 			
 			if (la.kind == _lt && IsPartOfMemberName()) {
-				TypeArgumentList(typeRef.Arguments);
+				TypeArgumentList(typeRef.Arguments, out argList);
 			}
 		}
 	}
@@ -2562,8 +2620,10 @@ TypeReference typeRef) {
 		} else SynErr(194);
 	}
 
-	void TypeArgumentList(TypeReferenceCollection args) {
+	void TypeArgumentList(TypeReferenceCollection args, out TypeArgumentListNode argList) {
 		TypeReference paramType; 
+		argList = null;
+		
 		Expect(101);
 		paramType = TypeReference.EmptyType; 
 		if (StartOf(12)) {
@@ -4071,6 +4131,8 @@ TypeReference typeRef) {
 
 	void NamedLiteral(out Expression expr) {
 		expr = null; 
+		TypeArgumentListNode argList = null;
+		
 		Expect(1);
 		NamedLiteral nl = new NamedLiteral(t, this); 
 		expr = nl; 
@@ -4082,20 +4144,22 @@ TypeReference typeRef) {
 			nl.Name = t.val; 
 		}
 		if (IsGeneric()) {
-			TypeArgumentList(nl.TypeArguments);
+			TypeArgumentList(nl.TypeArguments, out argList);
 		}
 		nl.Terminate(t); 
 	}
 
 	void BaseNamedLiteral(out Expression expr) {
 		expr = null; 
+		TypeArgumentListNode argList = null;
+		
 		Expect(91);
 		Expect(1);
 		BaseNamedLiteral bnl = new BaseNamedLiteral(t, this); 
 		bnl.Name = t.val; 
 		expr = bnl; 
 		if (IsGeneric()) {
-			TypeArgumentList(bnl.TypeArguments);
+			TypeArgumentList(bnl.TypeArguments, out argList);
 		}
 		bnl.Terminate(t); 
 	}
@@ -4216,10 +4280,12 @@ TypeReference typeRef) {
 	}
 
 	void SimpleNamedLiteral(out NamedLiteral expr) {
+		TypeArgumentListNode argList = null;
+		
 		Expect(1);
 		expr = new NamedLiteral(t, this); 
 		if (IsGeneric()) {
-			TypeArgumentList(expr.TypeArguments);
+			TypeArgumentList(expr.TypeArguments, out argList);
 		}
 		expr.Terminate(t); 
 	}

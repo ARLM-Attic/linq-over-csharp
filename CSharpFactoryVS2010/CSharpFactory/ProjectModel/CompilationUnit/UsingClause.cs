@@ -181,7 +181,7 @@ namespace CSharpFactory.ProjectModel
     /// <summary>
     /// Gets the using clause having the specified alias name.
     /// </summary>
-    /// <param name="key">Alias name.</param>
+    /// <param name="key">AliasToken name.</param>
     /// <returns>
     /// Using clause, if found by the alias name; otherwise, null.
     /// </returns>
@@ -189,10 +189,6 @@ namespace CSharpFactory.ProjectModel
     public UsingClause this[string key]
     {
       get { return this.FirstOrDefault(item => item.HasAlias && item.Name == key); }
-      //foreach(var item in this)
-      //    if (item.HasAlias && item.Name == key) return item;
-      //  return null;
-      //}
     }
   }
 }

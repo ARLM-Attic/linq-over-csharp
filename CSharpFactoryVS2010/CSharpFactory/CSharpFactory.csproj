@@ -322,6 +322,9 @@
     <Compile Include="SyntaxTree\SourceFileNode.cs" />
     <Compile Include="SyntaxTree\SyntaxNode.cs" />
     <Compile Include="SyntaxTree\SyntaxTree.cs" />
+    <Compile Include="SyntaxTree\TypeArgumentListNode.cs" />
+    <Compile Include="SyntaxTree\TypeOrNamespaceNode.cs" />
+    <Compile Include="SyntaxTree\UsingNode.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />

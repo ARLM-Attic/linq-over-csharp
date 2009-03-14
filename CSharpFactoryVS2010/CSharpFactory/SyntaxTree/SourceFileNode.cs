@@ -5,6 +5,7 @@
 // ================================================================================================
 using System.IO;
 using CSharpFactory.Collections;
+using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
 {
@@ -15,6 +16,8 @@ namespace CSharpFactory.Syntax
   // ================================================================================================
   public sealed class SourceFileNode
   {
+    #region Lifecycle methods
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SourceFileNode"/> class.
@@ -25,7 +28,13 @@ namespace CSharpFactory.Syntax
     {
       Name = Path.GetFileName(fullName);
       FullName = fullName;
+      UsingNodes = new ImmutableCollection<UsingNode>();
+      UsingWithAliasNodes = new ImmutableCollection<UsingWithAliasNode>();
     }
+
+    #endregion
+
+    #region Public Properties
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -42,6 +51,60 @@ namespace CSharpFactory.Syntax
     /// <value>The full name.</value>
     // ----------------------------------------------------------------------------------------------
     public string FullName { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the using clauses belonging to the source file (only without using alias)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<UsingNode> UsingNodes { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the using clauses belonging to the source file (only with using alias)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<UsingWithAliasNode> UsingWithAliasNodes { get; private set; }
+
+    #endregion
+
+    #region Public operations
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Create a using node and add it to the source file node.
+    /// </summary>
+    /// <param name="start">The start.</param>
+    /// <param name="namespaceNode">The namespace node.</param>
+    /// <returns>The newly created using node.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public UsingNode AddUsing(Token start, TypeOrNamespaceNode namespaceNode)
+    {
+      var node = new UsingNode(start, namespaceNode);
+      UsingNodes.Add(node);
+      return node;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Create a using node and add it to the source file node.
+    /// </summary>
+    /// <param name="start">The start.</param>
+    /// <param name="alias">AliasToken of the using clause</param>
+    /// <param name="equalToken">The equal token.</param>
+    /// <param name="typeName">Name of the type.</param>
+    /// <returns>The newly created using node.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public UsingNode AddUsingWithAlias(Token start, Token alias, Token equalToken,
+      TypeOrNamespaceNode typeName)
+    {
+      var node = new UsingWithAliasNode(start, alias, equalToken, typeName);
+      UsingWithAliasNodes.Add(node);
+      return node;
+    }
+
+    #endregion
+
   }
 
   // ================================================================================================

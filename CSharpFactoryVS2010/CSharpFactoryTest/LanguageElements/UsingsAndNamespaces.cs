@@ -1,4 +1,10 @@
+// ================================================================================================
+// UsingsAndNamespaces.cs
+//
+// Reviewed: 2009.03.14, by Istvan Novak (DeepDiver)
+// ================================================================================================
 using CSharpFactory.ProjectModel;
+using CSharpFactory.Syntax;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.LanguageElements
@@ -9,7 +15,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void UsingsAndNameSpacesAreOK()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       parser.AddAssemblyReference("System.Data");
       parser.AddAssemblyReference("System.Xml");
@@ -72,6 +78,76 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles"].Fragments.Count, 2);
       Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1"].Fragments.Count, 3);
       Assert.AreEqual(parser.DeclaredNamespaces["CSharpParserTest.TestFiles.Level1.Level2"].Fragments.Count, 3);
+    }
+
+    [TestMethod]
+    public void UsingsAndNameSpacesSyntaxTreeIsOK()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      Assert.IsTrue(InvokeParser(parser));
+
+      // --- Check syntax tree
+      var sn = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(sn.UsingNodes.Count, 3);
+      Assert.AreEqual(sn.UsingWithAliasNodes.Count, 2);
+
+      var typeName = sn.UsingNodes[0].TypeName;
+      Assert.IsFalse(typeName.HasQualifier);
+      Assert.AreEqual(typeName.TypeTags.Count, 1);
+      var tag = typeName.TypeTags[0];
+      Assert.AreEqual(tag.Identifier, "System");
+      Assert.IsFalse(tag is TypeTagContinuationNode);
+
+      typeName = sn.UsingNodes[1].TypeName;
+      Assert.IsFalse(typeName.HasQualifier);
+      Assert.AreEqual(typeName.TypeTags.Count, 3);
+      tag = typeName.TypeTags[0];
+      Assert.AreEqual(tag.Identifier, "System");
+      Assert.IsFalse(tag is TypeTagContinuationNode);
+      tag = typeName.TypeTags[1];
+      Assert.AreEqual(tag.Identifier, "Collections");
+      Assert.IsTrue(tag is TypeTagContinuationNode);
+      tag = typeName.TypeTags[2];
+      Assert.AreEqual(tag.Identifier, "Generic");
+      Assert.IsTrue(tag is TypeTagContinuationNode);
+
+      typeName = sn.UsingNodes[2].TypeName;
+      Assert.IsFalse(typeName.HasQualifier);
+      Assert.AreEqual(typeName.TypeTags.Count, 2);
+      tag = typeName.TypeTags[0];
+      Assert.AreEqual(tag.Identifier, "System");
+      Assert.IsFalse(tag is TypeTagContinuationNode);
+      tag = typeName.TypeTags[1];
+      Assert.AreEqual(tag.Identifier, "Text");
+      Assert.IsTrue(tag is TypeTagContinuationNode);
+
+      Assert.AreEqual(sn.UsingWithAliasNodes[0].Alias, "AliasName");
+      typeName = sn.UsingWithAliasNodes[0].TypeName;
+      Assert.IsFalse(typeName.HasQualifier);
+      Assert.AreEqual(typeName.TypeTags.Count, 3);
+      tag = typeName.TypeTags[0];
+      Assert.AreEqual(tag.Identifier, "System");
+      Assert.IsFalse(tag is TypeTagContinuationNode);
+      tag = typeName.TypeTags[1];
+      Assert.AreEqual(tag.Identifier, "Text");
+      Assert.IsTrue(tag is TypeTagContinuationNode);
+      tag = typeName.TypeTags[2];
+      Assert.AreEqual(tag.Identifier, "Encoding");
+      Assert.IsTrue(tag is TypeTagContinuationNode);
+
+      Assert.AreEqual(sn.UsingWithAliasNodes[1].Alias, "SecondAlias");
+      typeName = sn.UsingWithAliasNodes[1].TypeName;
+      Assert.IsFalse(typeName.HasQualifier);
+      Assert.AreEqual(typeName.TypeTags.Count, 2);
+      tag = typeName.TypeTags[0];
+      Assert.AreEqual(tag.Identifier, "Microsoft");
+      Assert.IsFalse(tag is TypeTagContinuationNode);
+      tag = typeName.TypeTags[1];
+      Assert.AreEqual(tag.Identifier, "Win32");
+      Assert.IsTrue(tag is TypeTagContinuationNode);
     }
   }
 }
