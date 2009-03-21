@@ -503,6 +503,7 @@
     <Compile Include="LanguageElements\TypeResolution.cs" />
     <Compile Include="LanguageElements\Variables.cs" />
     <Compile Include="LanguageElements\VisibilityTest.cs" />
+    <Compile Include="SyntaxTreeWriter\SyntaxTreeFileWriterTest.cs" />
     <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression3.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression2.cs" />

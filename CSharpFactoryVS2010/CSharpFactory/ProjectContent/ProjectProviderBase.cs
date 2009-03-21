@@ -3,7 +3,6 @@
 //
 // Created: 2009.03.04, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System.Collections.Generic;
 using System.IO;
 using CSharpFactory.Collections;
 using CSharpFactory.ProjectModel;

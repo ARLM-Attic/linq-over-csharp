@@ -306,7 +306,7 @@ namespace CSharpFactory.Collections
     /// Retrieves the enumerator for this collection.
     /// </summary>
     // ----------------------------------------------------------------------------------
-    public IEnumerator GetEnumerator()
+    IEnumerator IEnumerable.GetEnumerator()
     {
       return _Items.GetEnumerator();
     }

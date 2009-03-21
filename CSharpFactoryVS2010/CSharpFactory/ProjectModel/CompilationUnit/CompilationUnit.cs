@@ -29,9 +29,6 @@ namespace CSharpFactory.ProjectModel
 
     #region Private Fields
 
-    /// <summary>Provides all information related to the subject of compilation.</summary>
-    private readonly ProjectProviderBase _ProjectProvider;
-
     // --- Members related to error handling
     private TextWriter _ErrorStream;
     private string _ErrorMessageFormat = "-- line {0} col {1}: {2}"; // 0=line, 1=column, 2=text
@@ -102,11 +99,11 @@ namespace CSharpFactory.ProjectModel
     {
       if (addCSharpFiles)
       {
-        _ProjectProvider = new FolderContentProvider(workingFolder);
+        ProjectProvider = new FolderContentProvider(workingFolder);
       }
       else
       {
-        _ProjectProvider = new EmptyContentProvider(workingFolder);
+        ProjectProvider = new EmptyContentProvider(workingFolder);
       }
     }
 
@@ -118,7 +115,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public CompilationUnit(ProjectProviderBase content): this()
     {
-      _ProjectProvider = content;
+      ProjectProvider = content;
     }
 
     #endregion
@@ -132,7 +129,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public string Name
     {
-      get { return _ProjectProvider.Name; }
+      get { return ProjectProvider.Name; }
     }
 
     // --------------------------------------------------------------------------------
@@ -142,7 +139,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public string WorkingFolder
     {
-      get { return _ProjectProvider.WorkingFolder; }
+      get { return ProjectProvider.WorkingFolder; }
     }
 
     // --------------------------------------------------------------------------------
@@ -215,7 +212,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public ImmutableCollection<ReferencedUnit> ReferencedUnits
     {
-      get { return _ProjectProvider.References; }
+      get { return ProjectProvider.References; }
     }
 
     // --------------------------------------------------------------------------------
@@ -272,6 +269,13 @@ namespace CSharpFactory.ProjectModel
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ISyntaxTree SyntaxTree { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the project provider.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ProjectProviderBase ProjectProvider { get; private set; }
 
     #endregion
 
@@ -436,7 +440,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddFile(string fileName)
     {
-      _ProjectProvider.AddFile(fileName);
+      ProjectProvider.AddFile(fileName);
     }
 
     // --------------------------------------------------------------------------------
@@ -447,7 +451,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddFileWithFullName(string fileName)
     {
-      _ProjectProvider.AddFileWithFullName(fileName);
+      ProjectProvider.AddFileWithFullName(fileName);
     }
 
     // --------------------------------------------------------------------------------
@@ -458,7 +462,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAssemblyReference(string name)
     {
-      _ProjectProvider.AddAssemblyReference(name);
+      ProjectProvider.AddAssemblyReference(name);
     }
 
     // --------------------------------------------------------------------------------
@@ -470,7 +474,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAssemblyReference(string name, string path)
     {
-      _ProjectProvider.AddAssemblyReference(name, path);
+      ProjectProvider.AddAssemblyReference(name, path);
     }
 
     // --------------------------------------------------------------------------------
@@ -482,7 +486,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAliasedReference(string alias, string name)
     {
-      _ProjectProvider.AddAliasedReference(alias, name);
+      ProjectProvider.AddAliasedReference(alias, name);
     }
 
     // --------------------------------------------------------------------------------
@@ -495,7 +499,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddAliasedReference(string alias, string name, string path)
     {
-      _ProjectProvider.AddAliasedReference(alias, name, path);
+      ProjectProvider.AddAliasedReference(alias, name, path);
     }
 
     // --------------------------------------------------------------------------------
@@ -521,7 +525,7 @@ namespace CSharpFactory.ProjectModel
     // --------------------------------------------------------------------------------
     public void AddConditionalCompilationSymbol(string symbol)
     {
-      _ProjectProvider.AddConditionalSymbol(symbol);
+      ProjectProvider.AddConditionalSymbol(symbol);
     }
 
     // --------------------------------------------------------------------------------
@@ -817,14 +821,14 @@ namespace CSharpFactory.ProjectModel
 
       // --- Fill up the source files from the project content provider
       Files.Clear();
-      foreach (var file in _ProjectProvider.SourceFiles)
+      foreach (var file in ProjectProvider.SourceFiles)
       {
         Files.Add(new SourceFile(file.FullName, this));
       }
 
       // --- Fill up the conditional symbols defined
       ConditionalSymbols.Clear();
-      foreach (var symbol in _ProjectProvider.ConditionalSymbols)
+      foreach (var symbol in ProjectProvider.ConditionalSymbols)
       {
         ConditionalSymbols.Add(symbol);
       }
@@ -852,7 +856,7 @@ namespace CSharpFactory.ProjectModel
     {
       // --- First we compile all referenced projects.
       bool cancelled = false;
-      foreach (ReferencedUnit unit in _ProjectProvider.References)
+      foreach (ReferencedUnit unit in ProjectProvider.References)
       {
         var compilation = unit as ReferencedCompilation;
         if (compilation == null) continue;

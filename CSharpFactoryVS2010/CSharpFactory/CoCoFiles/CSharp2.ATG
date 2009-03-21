@@ -246,7 +246,7 @@ CS2
       ExternAliasDirective<null>
   }
   {
-    UsingDirective<null, SourceFileNode>
+    UsingDirective<null>
   }
   {
     IF (IsGlobalAttrTarget()) (. PragmaHandler.SignRealToken(); .)
@@ -285,7 +285,7 @@ ExternAliasDirective<NamespaceFragment parent>
 // +parent: Parent namespace of the "using" directive. If this parameter is null, 
 //   the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-UsingDirective<NamespaceFragment parent, SourceFileNode sNode>
+UsingDirective<NamespaceFragment parent>
 =                          (.
                               // :::
                               Token alias = null;
@@ -372,7 +372,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>
                  .)
   "{" 
       { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
-      { UsingDirective<ns, SourceFileNode> } 
+      { UsingDirective<ns> } 
       { NamespaceMemberDeclaration<ns, File> } 
   "}"            (. ns.Terminate(t); .)
   [ ";"          (. ns.Terminate(t); .)
