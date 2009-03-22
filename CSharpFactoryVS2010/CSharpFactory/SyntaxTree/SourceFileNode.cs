@@ -105,6 +105,28 @@ namespace CSharpFactory.Syntax
 
     #endregion
 
+    #region Output methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates the output items describing this source file.
+    /// </summary>
+    /// <param name="options">The output formatting options.</param>
+    /// <returns>Colection of output items to be written.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public OutputItemCollection CreateOutput(SyntaxTreeOutputOptions options)
+    {
+      return
+        new OutputItemCollection(this)
+          {
+            new IndentationItem(0, 0, 4),
+            new TextOutputItem(0, 8, "//"),
+            new TextOutputItem(0, 9, "--- " + Name),
+            new TextOutputItem(1, 0, string.Empty)
+          };
+    }
+
+    #endregion
   }
 
   // ================================================================================================

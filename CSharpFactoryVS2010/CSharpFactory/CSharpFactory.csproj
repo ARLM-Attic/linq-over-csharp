@@ -319,9 +319,11 @@
     <Compile Include="SyntaxTree\SourceFileNode.cs" />
     <Compile Include="SyntaxTree\SyntaxNode.cs" />
     <Compile Include="SyntaxTree\SyntaxTree.cs" />
-    <Compile Include="SyntaxTree\SyntaxTreeOutputOptions.cs" />
-    <Compile Include="SyntaxTree\SyntaxTreeTextWriter.cs" />
-    <Compile Include="SyntaxTree\SyntaxTreeWriter.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\OutputItem.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\OutputSegment.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeOutputOptions.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeTextWriter.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeWriter.cs" />
     <Compile Include="SyntaxTree\TypeArgumentListNode.cs" />
     <Compile Include="SyntaxTree\TypeOrNamespaceNode.cs" />
     <Compile Include="SyntaxTree\UsingNode.cs" />

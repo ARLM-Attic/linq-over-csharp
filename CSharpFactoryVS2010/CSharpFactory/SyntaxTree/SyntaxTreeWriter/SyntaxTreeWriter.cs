@@ -4,6 +4,9 @@
 // Created: 2009.03.21, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using CSharpFactory.Collections;
 using CSharpFactory.ProjectContent;
 
 namespace CSharpFactory.Syntax
@@ -74,6 +77,34 @@ namespace CSharpFactory.Syntax
     /// Writes out the whole syntax tree.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public abstract void WriteTree();
+    public virtual void WriteTree()
+    {
+      foreach (var sourceFile in SyntaxTree.SourceFileNodes)
+      {
+        var outputForSource = CreateOutput(sourceFile);
+        WriteOutput(outputForSource);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a list of output items according to the specified source file.
+    /// </summary>
+    /// <param name="sourceFile">The source file.</param>
+    /// <returns></returns>
+    // ----------------------------------------------------------------------------------------------
+    protected virtual OutputItemCollection CreateOutput(SourceFileNode sourceFile)
+    {
+      return sourceFile.CreateOutput(OutputOptions);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Writes the list of items to the output.
+    /// </summary>
+    /// <param name="items">The items to be written to the output.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected abstract void WriteOutput(OutputItemCollection items);
   }
+
 }
