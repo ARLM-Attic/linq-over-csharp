@@ -50,7 +50,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public string WorkingFolder { get; set; }
 
-    protected override void WriteOutput(OutputItemCollection items)
+    protected override void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items)
     {
       var expectedPrefix = ProjectProvider.WorkingFolder.Trim();
       if (!expectedPrefix.EndsWith("\\")) expectedPrefix += "\\";
@@ -58,7 +58,6 @@ namespace CSharpFactory.Syntax
       var outputFolder = Path.IsPathRooted(WorkingFolder)
                            ? WorkingFolder
                            : Path.Combine(ProjectProvider.WorkingFolder, WorkingFolder);
-      var sourceFile = items.SourceFileNode;
       var outputFile = sourceFile.FullName + ".out.cs";
       if (sourceFile.FullName.ToLower().StartsWith(expectedPrefix))
       {

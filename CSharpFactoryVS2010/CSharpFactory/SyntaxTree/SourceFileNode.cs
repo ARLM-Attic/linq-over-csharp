@@ -116,14 +116,10 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public OutputItemCollection CreateOutput(SyntaxTreeOutputOptions options)
     {
-      return
-        new OutputItemCollection(this)
-          {
-            new IndentationItem(0, 0, 4),
-            new TextOutputItem(0, 8, "//"),
-            new TextOutputItem(0, 9, "--- " + Name),
-            new TextOutputItem(1, 0, string.Empty)
-          };
+      var serializer = new OutputItemSerializer(options);
+      var segment = new OutputSegment("// --- ", Name);
+      serializer.Append(segment);
+      return serializer.OutputItems;
     }
 
     #endregion

@@ -320,10 +320,12 @@
     <Compile Include="SyntaxTree\SyntaxNode.cs" />
     <Compile Include="SyntaxTree\SyntaxTree.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\OutputItem.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\OutputItemSerializer.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\OutputSegment.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeOutputOptions.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeTextWriter.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeWriter.cs" />
+    <Compile Include="SyntaxTree\SyntaxTreeWriter\WhiteSpaceSegment.cs" />
     <Compile Include="SyntaxTree\TypeArgumentListNode.cs" />
     <Compile Include="SyntaxTree\TypeOrNamespaceNode.cs" />
     <Compile Include="SyntaxTree\UsingNode.cs" />

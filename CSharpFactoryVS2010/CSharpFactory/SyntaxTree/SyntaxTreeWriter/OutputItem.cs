@@ -154,30 +154,7 @@ namespace CSharpFactory.Syntax
 
     #endregion
 
-    #region Lifecycle methods
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="OutputItemCollection"/> class.
-    /// </summary>
-    /// <param name="sourceFileNode">The source file node this collection belongs to.</param>
-    // ----------------------------------------------------------------------------------------------
-    public OutputItemCollection(SourceFileNode sourceFileNode)
-    {
-      SourceFileNode = sourceFileNode;
-    }
-
-    #endregion
-
     #region Public members
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the source file node belonging to this collection.
-    /// </summary>
-    /// <value>The source file node.</value>
-    // ----------------------------------------------------------------------------------------------
-    public SourceFileNode SourceFileNode { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

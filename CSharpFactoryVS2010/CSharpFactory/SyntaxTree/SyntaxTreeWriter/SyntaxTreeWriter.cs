@@ -4,9 +4,6 @@
 // Created: 2009.03.21, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using CSharpFactory.Collections;
 using CSharpFactory.ProjectContent;
 
 namespace CSharpFactory.Syntax
@@ -82,7 +79,7 @@ namespace CSharpFactory.Syntax
       foreach (var sourceFile in SyntaxTree.SourceFileNodes)
       {
         var outputForSource = CreateOutput(sourceFile);
-        WriteOutput(outputForSource);
+        WriteOutput(sourceFile, outputForSource);
       }
     }
 
@@ -102,9 +99,10 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// Writes the list of items to the output.
     /// </summary>
+    /// <param name="sourceFile">The source file.</param>
     /// <param name="items">The items to be written to the output.</param>
     // ----------------------------------------------------------------------------------------------
-    protected abstract void WriteOutput(OutputItemCollection items);
+    protected abstract void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items);
   }
 
 }
