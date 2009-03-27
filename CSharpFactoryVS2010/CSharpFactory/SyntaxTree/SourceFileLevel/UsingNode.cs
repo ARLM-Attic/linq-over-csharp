@@ -14,7 +14,7 @@ namespace CSharpFactory.Syntax
   /// <remarks>
   /// Syntax:
   ///   UsingNode:
-  ///     "using" TypeOrNamespaceNode
+  ///     "using" TypeOrNamespaceNode ";"
   /// </remarks>
   // ================================================================================================
   public class UsingNode : SyntaxNode
@@ -25,11 +25,13 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     /// <param name="namespaceNode">The namespace node.</param>
+    /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingNode(Token start, TypeOrNamespaceNode namespaceNode)
+    public UsingNode(Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
       : base(start)
     {
       TypeName = namespaceNode;
+      Terminate(terminating);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -39,6 +41,24 @@ namespace CSharpFactory.Syntax
     /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode TypeName { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        StartToken,
+        MandatoryWhiteSpaceSegment.Default,
+        TypeName,
+        TerminatingToken
+        );
+    }
   }
 
   // ================================================================================================
@@ -48,7 +68,7 @@ namespace CSharpFactory.Syntax
   /// <remarks>
   /// Syntax:
   ///   UsingNode:
-  ///     "using" alias "=" TypeOrNamespaceNode
+  ///     "using" alias "=" TypeOrNamespaceNode ";"
   /// </remarks>
   // ================================================================================================
   public sealed class UsingWithAliasNode : UsingNode
@@ -61,10 +81,11 @@ namespace CSharpFactory.Syntax
     /// <param name="alias">The alias token.</param>
     /// <param name="equalToken">The equal token.</param>
     /// <param name="typeName">Name of the type.</param>
+    /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
     public UsingWithAliasNode(Token start, Token alias, Token equalToken, 
-      TypeOrNamespaceNode typeName)
-      : base(start, typeName)
+      TypeOrNamespaceNode typeName, Token terminating)
+      : base(start, typeName, terminating)
     {
       AliasToken = alias;
       EqualToken = equalToken;
@@ -93,5 +114,25 @@ namespace CSharpFactory.Syntax
     /// <value>The equal token.</value>
     // ----------------------------------------------------------------------------------------------
     public Token EqualToken { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        StartToken,
+        MandatoryWhiteSpaceSegment.Default,
+        AliasToken,
+        EqualToken,
+        TypeName,
+        TerminatingToken
+        );
+    }
   }
 }

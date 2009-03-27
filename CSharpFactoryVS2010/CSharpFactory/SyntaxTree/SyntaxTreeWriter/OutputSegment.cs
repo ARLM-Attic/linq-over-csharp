@@ -3,6 +3,8 @@
 //
 // Created: 2009.03.22, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Collections.Generic;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
@@ -13,6 +15,8 @@ namespace CSharpFactory.Syntax
   // ================================================================================================
   public class OutputSegment
   {
+    private readonly List<object> _Elements;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="OutputSegment"/> class.
@@ -21,7 +25,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public OutputSegment(params object[] elements)
     {
-      OutputSegmentElements = elements;  
+      _Elements = new List<object>(elements);  
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -29,6 +33,31 @@ namespace CSharpFactory.Syntax
     /// Gets or sets the output segment elements.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public object[] OutputSegmentElements { get; private set; }   
+    public IEnumerable<object> OutputSegmentElements 
+    {
+      get { return _Elements; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Appends the specified element to the collection of output segment elements.
+    /// </summary>
+    /// <param name="element">The element to append.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void Append(object element)
+    {
+      _Elements.Add(element);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Appends the specified elements to the collection of output segment elements.
+    /// </summary>
+    /// <param name="elements">The elements to append.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void Append(params object[] elements)
+    {
+      _Elements.AddRange(elements);
+    }
   }
 }

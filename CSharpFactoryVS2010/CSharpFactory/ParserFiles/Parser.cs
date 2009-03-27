@@ -466,10 +466,10 @@ public partial class CSharpSyntaxParser
 	void CS2() {
 		while (IsExternAliasDirective()) {
 			PragmaHandler.SignRealToken(); 
-			ExternAliasDirective(null);
+			ExternAliasDirective(null, null);
 		}
 		while (la.kind == 78) {
-			UsingDirective(null, SourceFileNode);
+			UsingDirective(null, null);
 		}
 		while (IsGlobalAttrTarget()) {
 			PragmaHandler.SignRealToken(); 
@@ -477,16 +477,25 @@ public partial class CSharpSyntaxParser
 		}
 		while (StartOf(1)) {
 			PragmaHandler.SignRealToken(); 
-			NamespaceMemberDeclaration(null, File);
+			NamespaceMemberDeclaration(null, File, null);
 		}
 	}
 
-	void ExternAliasDirective(NamespaceFragment parent) {
+	void ExternAliasDirective(NamespaceFragment parent, NamespaceDeclarationNode parentNode) {
+		Token start;
+		Token alias;
+		Token identifier;
+		
 		Expect(28);
 		Token token = t; 
+		// :::
+		start = t;
+		
 		Expect(1);
 		if (t.val != "alias") 
 		 Error1003(la, "alias"); 
+		// :::
+		alias = t;
 		
 		Expect(1);
 		ExternalAlias externAlias = new ExternalAlias(token, this);
@@ -494,12 +503,20 @@ public partial class CSharpSyntaxParser
 		CurrentElement = externAlias;
 		if (parent == null) File.ExternAliases.Add(externAlias); 
 		else parent.ExternAliases.Add(externAlias); 
+		// :::
+		identifier = t;
 		
 		Expect(115);
 		externAlias.Terminate(t); 
+		// ::: 
+		NamespaceScopeNode nsScope = parentNode == null
+		  ? (NamespaceScopeNode)SourceFileNode 
+		  : (NamespaceScopeNode)parentNode;
+		nsScope.AddExternAlias(start, alias, identifier, t);
+		
 	}
 
-	void UsingDirective(NamespaceFragment parent, SourceFileNode sNode) {
+	void UsingDirective(NamespaceFragment parent, NamespaceDeclarationNode parentNode) {
 		Token alias = null;
 		Token eq = null;
 		TypeOrNamespaceNode nsNode = null;
@@ -527,13 +544,13 @@ public partial class CSharpSyntaxParser
 		else parent.Usings.Add(uc); 
 		uc.Terminate(t);
 		// :::
-		if (parent == null)
-		{
-		  if (alias == null)
-		    SourceFileNode.AddUsing(start, nsNode);
-		  else
-		    SourceFileNode.AddUsingWithAlias(start, alias, eq, nsNode);
-		}
+		NamespaceScopeNode nsScope = parentNode == null
+		  ? (NamespaceScopeNode)SourceFileNode 
+		  : (NamespaceScopeNode)parentNode;
+		if (alias == null)
+		  nsScope.AddUsing(start, nsNode, t);
+		else
+		  nsScope.AddUsingWithAlias(start, alias, eq, nsNode, t);
 		
 	}
 
@@ -566,35 +583,61 @@ public partial class CSharpSyntaxParser
 		attr.Terminate(t); 
 	}
 
-	void NamespaceMemberDeclaration(NamespaceFragment parent, SourceFile file) {
+	void NamespaceMemberDeclaration(NamespaceFragment parent, SourceFile file, 
+NamespaceDeclarationNode parentNode) {
 		if (la.kind == 45) {
 			Get();
 			Token startToken = t; 
+			// ::: 
+			var nsDecl = new NamespaceDeclarationNode(t);
+			
 			Expect(1);
 			StringBuilder sb = new StringBuilder(t.val); 
+			// :::
+			nsDecl.NameTags.Add(t);
+			
 			while (la.kind == 91) {
 				Get();
+				var sepToken = t;
+				
 				Expect(1);
 				sb.Append("."); sb.Append(t.val); 
+				// :::
+				nsDecl.NameTags.Add(sepToken, t);
+				
 			}
 			NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
 			CurrentElement = ns;
+			// :::
+			NamespaceScopeNode nsScope = parentNode == null
+			  ? (NamespaceScopeNode)SourceFileNode 
+			  : (NamespaceScopeNode)parentNode;
+			nsScope.NamespaceDeclarations.Add(nsDecl);
 			
 			Expect(97);
+			nsDecl.OpenBracket = t;
+			
 			while (IsExternAliasDirective()) {
-				ExternAliasDirective(ns);
+				ExternAliasDirective(ns, nsDecl);
 			}
 			while (la.kind == 78) {
-				UsingDirective(ns, SourceFileNode);
+				UsingDirective(ns, nsDecl);
 			}
 			while (StartOf(1)) {
-				NamespaceMemberDeclaration(ns, File);
+				NamespaceMemberDeclaration(ns, File, nsDecl);
 			}
 			Expect(112);
 			ns.Terminate(t); 
+			// :::
+			nsDecl.CloseBracket = t;
+			nsDecl.Terminate(t);
+			
 			if (la.kind == 115) {
 				Get();
 				ns.Terminate(t); 
+				// :::
+				nsDecl.Terminate(t);
+				
 			}
 		} else if (StartOf(2)) {
 			Modifiers m = new Modifiers(this); 

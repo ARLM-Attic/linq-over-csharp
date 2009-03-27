@@ -102,6 +102,21 @@ namespace CSharpFactory.Syntax
     {
       TypeTags.Add(tag);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return HasQualifier
+        ? new OutputSegment(QualifierToken, QualifierSeparatorToken)
+        : new OutputSegment(TypeTags);
+    }
   }
 
   // ================================================================================================
@@ -166,6 +181,22 @@ namespace CSharpFactory.Syntax
     {
       get { return Arguments != null && Arguments.Count > 0; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        IdentifierToken,
+        Arguments
+        );
+    }
   }
 
   // ================================================================================================
@@ -204,5 +235,22 @@ namespace CSharpFactory.Syntax
     /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        SeparatorToken,
+        IdentifierToken,
+        Arguments
+        );
+    }
   }
 }

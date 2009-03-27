@@ -15,10 +15,10 @@ namespace CSharpFactory.Syntax
 
   // ================================================================================================
   /// <summary>
-  /// This class represents an output item to be written at a specific position.
+  /// This abstract class represents an output item to be written at a specific position.
   /// </summary>
   // ================================================================================================
-  public class OutputItem : IComparable<OutputItem>
+  public abstract class OutputItem : IComparable<OutputItem>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -27,7 +27,7 @@ namespace CSharpFactory.Syntax
     /// <param name="row">The row position of the item.</param>
     /// <param name="column">The column position of the item.</param>
     // ----------------------------------------------------------------------------------------------
-    public OutputItem(int row, int column)
+    protected OutputItem(int row, int column)
     {
       Row = row;
       Column = column;
@@ -48,8 +48,6 @@ namespace CSharpFactory.Syntax
     public int Column { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Compares the current object with another object of the same type.
     /// </summary>
@@ -68,6 +66,27 @@ namespace CSharpFactory.Syntax
         ? Column - other.Column
         : Row - other.Row;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the text of this output item in the context of the specified options.
+    /// </summary>
+    /// <returns>
+    /// Text of this output item in the context of the specified options.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public abstract string GetText(SyntaxTreeOutputOptions options);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the length of this output item in the context of the specified options.
+    /// </summary>
+    /// <param name="options">Output options.</param>
+    /// <returns>
+    /// Length of this output item in the context of the specified options.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public abstract int GetLength(SyntaxTreeOutputOptions options);
   }
 
   #endregion
@@ -102,6 +121,37 @@ namespace CSharpFactory.Syntax
     /// <value>The depth.</value>
     // ----------------------------------------------------------------------------------------------
     public int Depth { get; private set; }
+
+    #region Overrides of OutputItem
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the text of this output item in the context of the specified options.
+    /// </summary>
+    /// <returns>
+    /// Text of this output item in the context of the specified options.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string GetText(SyntaxTreeOutputOptions options)
+    {
+      return string.Empty.PadRight(Depth*options.Indentation, ' ');
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the length of this output item in the context of the specified options.
+    /// </summary>
+    /// <param name="options">Output options.</param>
+    /// <returns>
+    /// Length of this output item in the context of the specified options.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override int GetLength(SyntaxTreeOutputOptions options)
+    {
+      return Depth * options.Indentation;
+    }
+
+    #endregion
   }
 
   #endregion
@@ -115,6 +165,8 @@ namespace CSharpFactory.Syntax
   // ================================================================================================
   public sealed class TextOutputItem : OutputItem
   {
+    private readonly string _Text;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TextOutputItem"/> class.
@@ -126,15 +178,39 @@ namespace CSharpFactory.Syntax
     public TextOutputItem(int row, int column, string text)
       : base(row, column)
     {
-      Text = text;
+      _Text = text;
+    }
+
+    #region Overrides of OutputItem
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the text of this output item in the context of the specified options.
+    /// </summary>
+    /// <returns>
+    /// Text of this output item in the context of the specified options.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string GetText(SyntaxTreeOutputOptions options)
+    {
+      return _Text;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the text representing this item.
+    /// Gets the length of this output item in the context of the specified options.
     /// </summary>
+    /// <param name="options">Output options.</param>
+    /// <returns>
+    /// Length of this output item in the context of the specified options.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public string Text { get; private set; }
+    public override int GetLength(SyntaxTreeOutputOptions options)
+    {
+      return _Text.Length;
+    }
+
+    #endregion
   }
 
   #endregion

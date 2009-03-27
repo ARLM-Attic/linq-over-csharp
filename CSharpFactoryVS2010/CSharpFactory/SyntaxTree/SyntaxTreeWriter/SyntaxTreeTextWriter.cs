@@ -16,6 +16,15 @@ namespace CSharpFactory.Syntax
   // ================================================================================================
   public class SyntaxTreeTextWriter : SyntaxTreeWriter
   {
+    #region Private fields
+
+    private int _CurrentRow;
+    private int _CurrentColumn;
+
+    #endregion
+
+    #region Lifecycle methods
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SyntaxTreeTextWriter"/> class.
@@ -42,6 +51,10 @@ namespace CSharpFactory.Syntax
     {
     }
 
+    #endregion
+
+    #region Public members
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the working folder where the output files should be written.
@@ -50,6 +63,13 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public string WorkingFolder { get; set; }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Writes the list of items to the output.
+    /// </summary>
+    /// <param name="sourceFile">The source file.</param>
+    /// <param name="items">The items to be written to the output.</param>
+    // ----------------------------------------------------------------------------------------------
     protected override void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items)
     {
       var expectedPrefix = ProjectProvider.WorkingFolder.Trim();
@@ -71,9 +91,17 @@ namespace CSharpFactory.Syntax
       tw.Close();
     }
 
-    private int _CurrentRow;
-    private int _CurrentColumn;
+    #endregion
 
+    #region Helper methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Writes the output items to the specified text writer.
+    /// </summary>
+    /// <param name="items">The output items to write out.</param>
+    /// <param name="writer">The text writer to use.</param>
+    // ----------------------------------------------------------------------------------------------
     private void WriteItems(IEnumerable<OutputItem> items, TextWriter writer)
     {
       _CurrentRow = 0;
@@ -82,30 +110,35 @@ namespace CSharpFactory.Syntax
       {
         WriteLeadingLines(item, writer);
         WriteLeadingWhitespace(item, writer);
-        if (item is IndentationItem)
-        {
-          var length = (item as IndentationItem).Depth*OutputOptions.Indentation;
-          writer.Write(string.Empty.PadRight(length, ' '));
-          _CurrentColumn += length;
-        }
-        else if (item is TextOutputItem)
-        {
-          var text = (item as TextOutputItem).Text;
-          writer.Write(text);
-          _CurrentColumn += text.Length;
-        }
+        writer.Write(item.GetText(OutputOptions));
+        _CurrentColumn += item.GetLength(OutputOptions);
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Writes the leading lines.
+    /// </summary>
+    /// <param name="item">The item to write the leading lines for.</param>
+    /// <param name="writer">The text writer to use.</param>
+    // ----------------------------------------------------------------------------------------------
     private void WriteLeadingLines(OutputItem item, TextWriter writer)
     {
       while (item.Row > _CurrentRow)
       {
         writer.WriteLine();
         _CurrentRow++;
+        _CurrentColumn = 0;
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Writes the leading white spaces.
+    /// </summary>
+    /// <param name="item">The item to write the leading lines for.</param>
+    /// <param name="writer">The text writer to use.</param>
+    // ----------------------------------------------------------------------------------------------
     private void WriteLeadingWhitespace(OutputItem item, TextWriter writer)
     {
       var whiteSpaceLength = item.Column - _CurrentColumn;
@@ -115,5 +148,7 @@ namespace CSharpFactory.Syntax
         _CurrentColumn += whiteSpaceLength;
       }
     }
+
+    #endregion
   }
 }

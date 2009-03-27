@@ -8,6 +8,8 @@ namespace CSharpParserTest
   {
     protected const string WorkingFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\TestFiles";
     protected const string AsmFolder = WorkingFolder + @"\Assemblies";
+    protected const string TempOutputFolder =
+      @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\TestFiles\Temp";
 
     public bool InvokeParser(string fileName)
     {

@@ -26,7 +26,6 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     protected SyntaxNode(Token start)
     {
-      if (start == null) throw new ArgumentNullException("start");
       StartToken = start;
     }
 
@@ -99,7 +98,7 @@ namespace CSharpFactory.Syntax
     /// Gets the starting token of this language element.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token StartToken { get; private set; }
+    public Token StartToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -159,6 +158,19 @@ namespace CSharpFactory.Syntax
     public void Terminate(Token token)
     {
       TerminatingToken = token;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public virtual OutputSegment GetOutputSegment()
+    {
+      return null;
     }
 
     #endregion

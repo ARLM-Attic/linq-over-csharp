@@ -243,10 +243,10 @@ CS2
 =                                                               
   { 
     IF (IsExternAliasDirective()) (. PragmaHandler.SignRealToken(); .)
-      ExternAliasDirective<null>
+      ExternAliasDirective<null, null>
   }
   {
-    UsingDirective<null>
+    UsingDirective<null, null>
   }
   {
     IF (IsGlobalAttrTarget()) (. PragmaHandler.SignRealToken(); .)
@@ -254,7 +254,7 @@ CS2
   }
   {
     (. PragmaHandler.SignRealToken(); .)
-    NamespaceMemberDeclaration<null, File>
+    NamespaceMemberDeclaration<null, File, null>
   }
 .
 
@@ -263,21 +263,41 @@ CS2
 // +parent: Parent namespace of the "extern alias" directive. If this parameter is
 //   null, the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-ExternAliasDirective<NamespaceFragment parent>
+ExternAliasDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
+             (.
+                 Token start;
+                 Token alias;
+                 Token identifier;
+             .)
 =
-  "extern"   (. Token token = t; .)
-  ident      (. 
-                if (t.val != "alias") 
-                  Error1003(la, "alias"); 
+  "extern"   (. 
+                 Token token = t; 
+                 // :::
+                 start = t;
              .)
   ident      (. 
-               ExternalAlias externAlias = new ExternalAlias(token, this);
-               externAlias.Name = t.val;
-               CurrentElement = externAlias;
-               if (parent == null) File.ExternAliases.Add(externAlias); 
-               else parent.ExternAliases.Add(externAlias); 
+                 if (t.val != "alias") 
+                   Error1003(la, "alias"); 
+                 // :::
+                 alias = t;
              .)
-  ";"        (. externAlias.Terminate(t); .)
+  ident      (. 
+                 ExternalAlias externAlias = new ExternalAlias(token, this);
+                 externAlias.Name = t.val;
+                 CurrentElement = externAlias;
+                 if (parent == null) File.ExternAliases.Add(externAlias); 
+                 else parent.ExternAliases.Add(externAlias); 
+                 // :::
+                 identifier = t;
+             .)
+  ";"        (. 
+                 externAlias.Terminate(t); 
+                 // ::: 
+                 NamespaceScopeNode nsScope = parentNode == null
+                   ? (NamespaceScopeNode)SourceFileNode 
+                   : (NamespaceScopeNode)parentNode;
+                 nsScope.AddExternAlias(start, alias, identifier, t);
+             .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -285,7 +305,7 @@ ExternAliasDirective<NamespaceFragment parent>
 // +parent: Parent namespace of the "using" directive. If this parameter is null, 
 //   the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-UsingDirective<NamespaceFragment parent>
+UsingDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
 =                          (.
                               // :::
                               Token alias = null;
@@ -314,13 +334,13 @@ UsingDirective<NamespaceFragment parent>
                               else parent.Usings.Add(uc); 
                               uc.Terminate(t);
                               // :::
-                              if (parent == null)
-                              {
-                                if (alias == null)
-                                  SourceFileNode.AddUsing(start, nsNode);
-                                else
-                                  SourceFileNode.AddUsingWithAlias(start, alias, eq, nsNode);
-                              }
+                              NamespaceScopeNode nsScope = parentNode == null
+                                ? (NamespaceScopeNode)SourceFileNode 
+                                : (NamespaceScopeNode)parentNode;
+                              if (alias == null)
+                                nsScope.AddUsing(start, nsNode, t);
+                              else
+                                nsScope.AddUsingWithAlias(start, alias, eq, nsNode, t);
                            .)
 .
 
@@ -360,22 +380,56 @@ GlobalAttributes
 //   the type belongs to the file and not to the specified namespace.
 // +file: file that defines the namespace.
 // ------------------------------------------------------------------------------------
-NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file>  
+NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file, 
+  NamespaceDeclarationNode parentNode>  
 =
-  "namespace"    (. Token startToken = t; .)
-  ident          (. StringBuilder sb = new StringBuilder(t.val); .)
-  { 
-    "." ident    (. sb.Append("."); sb.Append(t.val); .)
-  }              (. 
-                    NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
-                    CurrentElement = ns;
+  "namespace"    (. 
+                     Token startToken = t; 
+                     // ::: 
+                     var nsDecl = new NamespaceDeclarationNode(t);
                  .)
-  "{" 
-      { IF (IsExternAliasDirective()) ExternAliasDirective<ns> } 
-      { UsingDirective<ns> } 
-      { NamespaceMemberDeclaration<ns, File> } 
-  "}"            (. ns.Terminate(t); .)
-  [ ";"          (. ns.Terminate(t); .)
+  ident          (. 
+                     StringBuilder sb = new StringBuilder(t.val); 
+                     // :::
+                     nsDecl.NameTags.Add(t);
+                 .)
+  {              
+    "."          (.
+                     // :::
+                     var sepToken = t;
+                 .)
+    ident        (. 
+                     sb.Append("."); sb.Append(t.val); 
+                     // :::
+                     nsDecl.NameTags.Add(sepToken, t);
+                 .)
+  }              (. 
+                     NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
+                     CurrentElement = ns;
+                     // :::
+                     NamespaceScopeNode nsScope = parentNode == null
+                       ? (NamespaceScopeNode)SourceFileNode 
+                       : (NamespaceScopeNode)parentNode;
+                     nsScope.NamespaceDeclarations.Add(nsDecl);
+                 .)
+  "{"            (.
+                     // :::
+                     nsDecl.OpenBracket = t;
+                 .)
+      { IF (IsExternAliasDirective()) ExternAliasDirective<ns, nsDecl> } 
+      { UsingDirective<ns, nsDecl> } 
+      { NamespaceMemberDeclaration<ns, File, nsDecl> } 
+  "}"            (. 
+                     ns.Terminate(t); 
+                     // :::
+                     nsDecl.CloseBracket = t;
+                     nsDecl.Terminate(t);
+                 .)
+  [ ";"          (. 
+                     ns.Terminate(t); 
+                     // :::
+                     nsDecl.Terminate(t);
+                 .)
   ]
   |                                              (. 
                                                     Modifiers m = new Modifiers(this); 

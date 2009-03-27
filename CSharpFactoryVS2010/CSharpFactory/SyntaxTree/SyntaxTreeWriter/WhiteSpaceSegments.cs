@@ -1,5 +1,5 @@
 // ================================================================================================
-// WhiteSpaceSegment.cs
+// MandatoryWhiteSpaceSegment.cs
 //
 // Created: 2009.03.24, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -15,7 +15,18 @@ namespace CSharpFactory.Syntax
   /// the identifier (or identifier fragment) following it.
   /// </remarks>
   // ================================================================================================
-  public sealed class WhiteSpaceSegment : OutputSegment
+  public sealed class MandatoryWhiteSpaceSegment : OutputSegment
+  {
+    public static readonly MandatoryWhiteSpaceSegment Default = 
+      new MandatoryWhiteSpaceSegment();
+  }
+
+  // ================================================================================================
+  /// <summary>
+  /// This segment represents a new line
+  /// </summary>
+  // ================================================================================================
+  public sealed class ForceNewLineSegment : OutputSegment
   {
   }
 }

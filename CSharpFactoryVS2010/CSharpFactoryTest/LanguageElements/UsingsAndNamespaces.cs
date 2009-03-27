@@ -81,7 +81,7 @@ namespace CSharpParserTest.LanguageElements
     }
 
     [TestMethod]
-    public void UsingsAndNameSpacesSyntaxTreeIsOK()
+    public void UsingsSyntaxTreeIsOK()
     {
       var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
@@ -91,7 +91,7 @@ namespace CSharpParserTest.LanguageElements
 
       // --- Check syntax tree
       var sn = parser.SyntaxTree.SourceFileNodes[0];
-      Assert.AreEqual(sn.UsingNodes.Count, 3);
+      Assert.AreEqual(sn.UsingNodes.Count, 5);
       Assert.AreEqual(sn.UsingWithAliasNodes.Count, 2);
 
       var typeName = sn.UsingNodes[0].TypeName;
@@ -148,6 +148,51 @@ namespace CSharpParserTest.LanguageElements
       tag = typeName.TypeTags[1];
       Assert.AreEqual(tag.Identifier, "Win32");
       Assert.IsTrue(tag is TypeTagContinuationNode);
+    }
+
+    [TestMethod]
+    public void NameSpacesSyntaxTreeIsOK()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      Assert.IsTrue(InvokeParser(parser));
+
+      // --- Check syntax tree
+      var sn = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(sn.NamespaceDeclarations.Count, 3);
+      var nsDecl = sn.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.NameTags.FullName, "CSharpParserTest.TestFiles");
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 3);
+      Assert.AreEqual(nsDecl.NamespaceDeclarations.Count, 3);
+
+      nsDecl = sn.NamespaceDeclarations[1];
+      Assert.AreEqual(nsDecl.NameTags.FullName, "OtherNameSpace");
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 0);
+      Assert.AreEqual(nsDecl.NamespaceDeclarations.Count, 1);
+
+      nsDecl = sn.NamespaceDeclarations[2];
+      Assert.AreEqual(nsDecl.NameTags.FullName, "CSharpParserTest.TestFiles");
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 2);
+      Assert.AreEqual(nsDecl.NamespaceDeclarations.Count, 1);
+    }
+
+    [TestMethod]
+    public void ExternAliasSyntaxTreeWriterOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      Assert.IsTrue(InvokeParser(parser));
+      var treeWriter = new SyntaxTreeTextWriter(parser.SyntaxTree, parser.ProjectProvider) { WorkingFolder = TempOutputFolder };
+      treeWriter.WriteTree();
+      parser = new CompilationUnit(TempOutputFolder);
+      parser.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      parser.AddAssemblyReference("System.Data");
+      parser.AddAssemblyReference("System.Xml");
+      Assert.IsTrue(InvokeParser(parser));
     }
   }
 }
