@@ -53,10 +53,12 @@ namespace CSharpFactory.Syntax
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
+        IndentationSegment.Apply,
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
         TypeName,
-        TerminatingToken
+        TerminatingToken,
+        ForceNewLineSegment.Default
         );
     }
   }
@@ -126,12 +128,14 @@ namespace CSharpFactory.Syntax
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
+        IndentationSegment.Apply,
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
         AliasToken,
-        EqualToken,
+        SpaceAroundSegment.AssignmentOp(EqualToken),
         TypeName,
-        TerminatingToken
+        TerminatingToken,
+        ForceNewLineSegment.Default
         );
     }
   }

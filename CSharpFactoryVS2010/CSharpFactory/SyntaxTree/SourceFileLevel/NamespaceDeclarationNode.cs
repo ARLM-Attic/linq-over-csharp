@@ -64,11 +64,13 @@ namespace CSharpFactory.Syntax
     public override OutputSegment GetOutputSegment()
     {
       var result = new OutputSegment(
+        IndentationSegment.Apply,
         StartToken,
+        MandatoryWhiteSpaceSegment.Default,
         NameTags,
-        OpenBracket,
+        BraceSegment.OpenType(OpenBracket),
         base.GetOutputSegment(),
-        CloseBracket
+        BraceSegment.CloseType(CloseBracket)
         );
       if (TerminatingToken != CloseBracket)
         result.Append(TerminatingToken);

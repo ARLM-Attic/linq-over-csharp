@@ -134,7 +134,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public override string GetText(SyntaxTreeOutputOptions options)
     {
-      return string.Empty.PadRight(Depth*options.Indentation, ' ');
+      return string.Empty.PadRight(Depth*options.IndentationWidth, ' ');
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public override int GetLength(SyntaxTreeOutputOptions options)
     {
-      return Depth * options.Indentation;
+      return Depth * options.IndentationWidth;
     }
 
     #endregion

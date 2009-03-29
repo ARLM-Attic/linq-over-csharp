@@ -20,6 +20,7 @@ namespace CSharpFactory.Syntax
     // --- Generic formatting fields
     private bool _UseOriginalPositions;
     private bool _UseTabs;
+    private bool _KeepLineBreaks;
     private int _Indentation;
 
     // --- Bracing styles
@@ -35,6 +36,9 @@ namespace CSharpFactory.Syntax
     private ForceBracingStyle _ForceBracesInWhile;
     private ForceBracingStyle _ForceBracesInUsing;
     private ForceBracingStyle _ForceBracesInFixed;
+
+    // --- Space options
+    private bool _SpaceAroundAssignmentOps;
 
     #endregion
 
@@ -57,8 +61,13 @@ namespace CSharpFactory.Syntax
       Default =
         new SyntaxTreeOutputOptions
           {
-            UseOriginalPositions = true,
-            Indentation = 2
+            UseOriginalPositions = false,
+            KeepLineBreaks = true,
+            IndentationWidth = 2,
+
+            TypeAndNamespaceBraces = BracingStyle.NextLineBSD,
+
+            SpaceAroundAssignmentOps = true,
           };
       Default.MakeReadOnly();
     }
@@ -134,10 +143,26 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets a value indicating whether line breaks should be kept.
+    /// </summary>
+    /// <value><c>true</c> if line breaks should be kept; otherwise, <c>false</c>.</value>
+    // ----------------------------------------------------------------------------------------------
+    public bool KeepLineBreaks
+    {
+      get { return _KeepLineBreaks; }
+      set
+      {
+        CheckReadonly();
+        _KeepLineBreaks = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the number of positions used for indentation.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Indentation
+    public int IndentationWidth
     {
       get { return _Indentation; }
       set
@@ -333,6 +358,28 @@ namespace CSharpFactory.Syntax
 
     #endregion
 
+    #region Space options
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether space should be kept around assignment operators.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if space should be kept around assignment operators; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceAroundAssignmentOps
+    {
+      get { return _SpaceAroundAssignmentOps; }
+      set
+      {
+        CheckReadonly();
+        _SpaceAroundAssignmentOps = value;
+      }
+    }
+
+    #endregion
+
     #region Helper methods
 
     // ----------------------------------------------------------------------------------------------
@@ -360,7 +407,7 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// At next line with the current indentation position.
     /// </summary>
-    NexLineBSD,
+    NextLineBSD,
     /// <summary>
     /// At next line indented with one position.
     /// </summary>

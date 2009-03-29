@@ -555,6 +555,8 @@ public partial class CSharpSyntaxParser
 	}
 
 	void GlobalAttributes() {
+		AttributeNode attrNode;
+		
 		Expect(98);
 		Expect(1);
 		if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
@@ -563,14 +565,14 @@ public partial class CSharpSyntaxParser
 		AttributeDeclaration attr;
 		
 		Expect(87);
-		Attribute(out attr);
+		Attribute(out attr, out attrNode);
 		attr.Scope = scope; 
 		File.GlobalAttributes.Add(attr);
 		CurrentElement = attr;
 		
 		while (NotFinalComma()) {
 			Expect(88);
-			Attribute(out attr);
+			Attribute(out attr, out attrNode);
 			attr.Scope = scope; 
 			File.GlobalAttributes.Add(attr);
 			CurrentElement = attr;
@@ -643,9 +645,11 @@ NamespaceDeclarationNode parentNode) {
 			Modifiers m = new Modifiers(this); 
 			TypeDeclaration td;
 			AttributeCollection attrs = new AttributeCollection();
+			// :::
+			AttributeDecorationNode attrNode;
 			
 			while (la.kind == 98) {
-				Attributes(attrs);
+				Attributes(attrs, out attrNode);
 			}
 			ModifierList(m);
 			TypeDeclaration(attrs, null, m, out td);
@@ -721,23 +725,35 @@ NamespaceDeclarationNode parentNode) {
 		}
 	}
 
-	void Attribute(out AttributeDeclaration attr) {
+	void Attribute(out AttributeDeclaration attr, out AttributeNode attrNode) {
 		TypeReference typeRef; 
+		// :::
+		attrNode = new AttributeNode(t);
 		TypeOrNamespaceNode nsNode = null;
+		AttributeArgumentsNode args;
 		
 		TypeName(out typeRef, out nsNode);
 		attr = new AttributeDeclaration(t, this, typeRef); 
 		CurrentElement = attr;
+		attrNode.TypeName = nsNode;
 		
 		if (la.kind == 99) {
-			AttributeArguments(attr);
+			AttributeArguments(attr, out args);
 		}
 		attr.Terminate(t); 
+		// :::
+		attrNode.Terminate(t);
+		
 	}
 
-	void Attributes(AttributeCollection attrs) {
+	void Attributes(AttributeCollection attrs, out AttributeDecorationNode attrNode) {
 		string scope = ""; 
+		attrNode = null;
+		AttributeNode attributeNode;
+		
 		Expect(98);
+		attrNode = new AttributeDecorationNode(t);
+		
 		if (IsAttrTargSpec()) {
 			if (la.kind == 1) {
 				Get();
@@ -745,24 +761,37 @@ NamespaceDeclarationNode parentNode) {
 				Keyword();
 			} else SynErr(147);
 			scope = t.val; 
+			// :::
+			attrNode.IdentifierToken = t;
+			
 			Expect(87);
+			attrNode.ColonToken = t; 
 		}
 		AttributeDeclaration attr; 
-		Attribute(out attr);
+		Attribute(out attr, out attributeNode);
 		attr.Scope = scope;
 		attrs.Add(attr);
+		// :::
+		attrNode.Attributes.Add(attributeNode);
 		
 		while (la.kind == _comma && Peek(1).kind != _rbrack) {
 			Expect(88);
-			Attribute(out attr);
+			var separator = t; 
+			Attribute(out attr, out attributeNode);
 			attr.Scope = scope;
 			attrs.Add(attr);
+			// :::
+			attrNode.Attributes.Add(new AttributeContinuationNode(separator, attributeNode));
 			
 		}
 		if (la.kind == 88) {
 			Get();
+			attrNode.ClosingSeparator = t;
+			
 		}
 		Expect(113);
+		attrNode.Terminate(t);
+		
 	}
 
 	void ModifierList(Modifiers m) {
@@ -1095,11 +1124,14 @@ out TypeDeclaration td) {
 
 	void ClassBody(TypeDeclaration td) {
 		AttributeCollection attrs = new AttributeCollection(); 
+		// :::
+		AttributeDecorationNode attrNode;
+		
 		Expect(97);
 		while (StartOf(9)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 98) {
-				Attributes(attrs);
+				Attributes(attrs, out attrNode);
 			}
 			Modifiers m = new Modifiers(this); 
 			ModifierList(m);
@@ -1153,11 +1185,14 @@ out TypeDeclaration td) {
 
 	void StructBody(TypeDeclaration td) {
 		AttributeCollection attrs = new AttributeCollection(); 
+		// :::
+		AttributeDecorationNode attrNode;
+		
 		Expect(97);
 		while (StartOf(11)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 98) {
-				Attributes(attrs);
+				Attributes(attrs, out attrNode);
 			}
 			Modifiers m = new Modifiers(this); 
 			ModifierList(m);
@@ -1282,8 +1317,11 @@ out TypeDeclaration td) {
 
 	void EnumMemberDeclaration(EnumDeclaration ed) {
 		AttributeCollection attrs = new AttributeCollection(); 
+		// :::
+		AttributeDecorationNode attrNode;
+		
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		Expect(1);
 		EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
@@ -1383,9 +1421,11 @@ out TypeDeclaration td) {
 	void FormalParameterList(FormalParameterCollection pars) {
 		TypeReference typeRef = null; 
 		AttributeCollection attrs = new AttributeCollection();
+		// :::
+		AttributeDecorationNode attrNode;
 		
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		FormalParameter fp = new FormalParameter(t, this); 
 		fp.AssignAttributes(attrs);
@@ -1726,9 +1766,11 @@ TypeReference typeRef) {
 	void EventAccessorDeclarations(EventPropertyDeclaration prop) {
 		AttributeCollection attrs = new AttributeCollection();
 		AccessorDeclaration accessor = null;
+		// :::
+		AttributeDecorationNode attrNode;
 		
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		Modifiers am = new Modifiers(this); 
 		ModifierList(am);
@@ -1753,7 +1795,7 @@ TypeReference typeRef) {
 		if (StartOf(20)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 98) {
-				Attributes(attrs);
+				Attributes(attrs, out attrNode);
 			}
 			am = new Modifiers(this); 
 			ModifierList(am);
@@ -1804,9 +1846,11 @@ TypeReference typeRef) {
 	void AccessorDeclarations(PropertyDeclaration prop) {
 		AttributeCollection attrs = new AttributeCollection();
 		AccessorDeclaration accessor = null;
+		// :::
+		AttributeDecorationNode attrNode;
 		
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		Modifiers am = new Modifiers(this); 
 		ModifierList(am);
@@ -1836,7 +1880,7 @@ TypeReference typeRef) {
 		if (StartOf(20)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 98) {
-				Attributes(attrs);
+				Attributes(attrs, out attrNode);
 			}
 			am = new Modifiers(this); 
 			ModifierList(am);
@@ -2002,10 +2046,12 @@ TypeReference typeRef) {
 		Modifiers m = new Modifiers(this);
 		TypeReference typeRef;
 		AttributeCollection attrs = new AttributeCollection();
+		// :::
+		AttributeDecorationNode attrNode;
 		
 		FormalParameterCollection pars = new FormalParameterCollection(); 
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		ModifierList(m);
 		if (StartOf(12)) {
@@ -2057,9 +2103,11 @@ TypeReference typeRef) {
 	void InterfaceAccessors(PropertyDeclaration prop) {
 		AttributeCollection attrs = new AttributeCollection();
 		AccessorDeclaration accessor = null;
+		// :::
+		AttributeDecorationNode attrNode;
 		
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		Modifiers am = new Modifiers(this); 
 		ModifierList(am);
@@ -2083,7 +2131,7 @@ TypeReference typeRef) {
 		if (StartOf(20)) {
 			attrs = new AttributeCollection(); 
 			while (la.kind == 98) {
-				Attributes(attrs);
+				Attributes(attrs, out attrNode);
 			}
 			am = new Modifiers(this); 
 			ModifierList(am);
@@ -2528,10 +2576,11 @@ TypeReference typeRef) {
 		}
 	}
 
-	void AttributeArguments(AttributeDeclaration attr) {
+	void AttributeArguments(AttributeDeclaration attr, out AttributeArgumentsNode argsNode) {
 		AttributeArgument arg; 
 		bool nameFound = false; 
 		Expect(99);
+		argsNode = new AttributeArgumentsNode(t); 
 		if (StartOf(22)) {
 			arg = new AttributeArgument(t,this); 
 			if (IsAssignment()) {
@@ -2539,6 +2588,7 @@ TypeReference typeRef) {
 				arg.Name = t.val; 
 				Expect(86);
 				nameFound = true; 
+				
 			}
 			Expression expr; 
 			Expression(out expr);
@@ -2565,6 +2615,7 @@ TypeReference typeRef) {
 			}
 		}
 		Expect(114);
+		argsNode.Terminate(t); 
 	}
 
 	void PrimitiveType(out TypeReference typeRef) {
@@ -4616,8 +4667,11 @@ TypeReference typeRef, bool isEvent) {
 
 	void TypeParameter(out TypeParameter tp) {
 		AttributeCollection attrs = new AttributeCollection(); 
+		// :::
+		AttributeDecorationNode attrNode;
+		
 		while (la.kind == 98) {
-			Attributes(attrs);
+			Attributes(attrs, out attrNode);
 		}
 		Expect(1);
 		tp = new TypeParameter(t, this);

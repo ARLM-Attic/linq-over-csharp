@@ -19,6 +19,8 @@ namespace CSharpFactory.Syntax
     #region Private fields
 
     private bool _MandatoryWhiteSpaceNeeded;
+    private int _IndentationDepth;
+    private int _LastRowPosition;
 
     #endregion
 
@@ -131,12 +133,11 @@ namespace CSharpFactory.Syntax
         foreach (var item in enumerable) Append(item);
       }
 
-      // --- Append a mandatory whitespace
-      var whiteSpace = element as MandatoryWhiteSpaceSegment;
-      if (whiteSpace != null)
+      // --- Handle control segments
+      var controlSegment = element as ControlSegment;
+      if (controlSegment != null)
       {
-        _MandatoryWhiteSpaceNeeded = true;
-        return;
+        controlSegment.Control(this);  
       }
 
       // --- Append a nested output segment
@@ -146,6 +147,68 @@ namespace CSharpFactory.Syntax
         Append(outputSegment);
         return;
       }
+    }
+
+    #endregion
+
+    #region Internal methods and properties
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Signs the mandatory white space.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    internal void SignMandatoryWhiteSpace()
+    {
+      _MandatoryWhiteSpaceNeeded = true;  
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Forces the new line.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    internal void ForceNewLine()
+    {
+      if (OutputOptions.UseOriginalPositions) return;
+      CurrentRow++;
+      _LastRowPosition++;
+      CurrentColumn = 0;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Applies the current indentation
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    internal void ApplyIndentation()
+    {
+      if (!OutputOptions.UseOriginalPositions && CurrentColumn == 0)
+      {
+        CurrentColumn += OutputOptions.IndentationWidth*_IndentationDepth;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Increases the indentation depth.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    internal void IncrementIndentation()
+    {
+      _IndentationDepth++;
+      if (_IndentationDepth > 100) _IndentationDepth = 100;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Decreases the indentation depth.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    internal void DecrementIndentation()
+    {
+      _IndentationDepth--;
+      if (_IndentationDepth < 0) _IndentationDepth = 0;
     }
 
     #endregion
@@ -168,6 +231,7 @@ namespace CSharpFactory.Syntax
       }
       OutputItems.Add(item);
       CurrentColumn += item.GetLength(OutputOptions);
+      _LastRowPosition = CurrentRow;
       _MandatoryWhiteSpaceNeeded = false;
     }
 
@@ -199,6 +263,11 @@ namespace CSharpFactory.Syntax
       else
       {
         // --- Token should be positioned
+        if (OutputOptions.KeepLineBreaks && token.line >= 0 && (token.line - 1) > _LastRowPosition)
+        {
+          // --- Line breaks muts be kept
+          CurrentRow += (token.line - 1) - _LastRowPosition;
+        }
         item = new TextOutputItem(CurrentRow, CurrentColumn, token.val);
       }
       AppendOutputItem(item);

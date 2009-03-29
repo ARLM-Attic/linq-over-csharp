@@ -349,6 +349,9 @@ UsingDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
 // This element accepts only attributes with "assembly" or "module" scope.
 // ------------------------------------------------------------------------------------
 GlobalAttributes
+                               (.
+                                   AttributeNode attrNode;
+                               .)
 =
   "[" ident                    (.
                                   // We accept module because csc does (even if it is against 
@@ -358,13 +361,15 @@ GlobalAttributes
                                   string scope = t.val;
                                   AttributeDeclaration attr;
                                .) 
-  ":" Attribute<out attr>      (. 
+  ":" Attribute<out attr, out attrNode>
+                               (. 
                                   attr.Scope = scope; 
                                   File.GlobalAttributes.Add(attr);
                                   CurrentElement = attr;
                                .)
   { IF (NotFinalComma()) "," 
-    Attribute<out attr>        (. 
+    Attribute<out attr, out attrNode> 
+                               (. 
                                   attr.Scope = scope; 
                                   File.GlobalAttributes.Add(attr);
                                   CurrentElement = attr;
@@ -431,12 +436,14 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file,
                      nsDecl.Terminate(t);
                  .)
   ]
-  |                                              (. 
-                                                    Modifiers m = new Modifiers(this); 
-                                                    TypeDeclaration td;
-                                                    AttributeCollection attrs = new AttributeCollection();
-                                                 .)  
-      { Attributes<attrs> } 
+  |              (. 
+                     Modifiers m = new Modifiers(this); 
+                     TypeDeclaration td;
+                     AttributeCollection attrs = new AttributeCollection();
+                     // :::
+                     AttributeDecorationNode attrNode;
+                 .)  
+      { Attributes<attrs, out attrNode> } 
       ModifierList<m> 
       TypeDeclaration<attrs, null, m, out td>    (.
                                                     if (td != null)
@@ -521,9 +528,13 @@ ClassBase<ClassDeclaration cd>
 // +td: Class declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
 ClassBody<TypeDeclaration td>
-=                                     (. AttributeCollection attrs = new AttributeCollection(); .)
+=                              (. 
+                                   AttributeCollection attrs = new AttributeCollection(); 
+                                   // :::
+                                   AttributeDecorationNode attrNode;
+                               .)
   "{" {                               (. attrs = new AttributeCollection(); .)
-        { Attributes<attrs> }         (. Modifiers m = new Modifiers(this); .)                          
+        { Attributes<attrs, out attrNode> }         (. Modifiers m = new Modifiers(this); .)                          
         ModifierList<m>
         ClassMemberDeclaration<attrs, m, td>
       }
@@ -565,9 +576,13 @@ StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
 // +td: Structure declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
 StructBody<TypeDeclaration td>
-=                                    (. AttributeCollection attrs = new AttributeCollection(); .)
+=                              (. 
+                                   AttributeCollection attrs = new AttributeCollection(); 
+                                   // :::
+                                   AttributeDecorationNode attrNode;
+                               .)
   "{" {                              (. attrs = new AttributeCollection(); .)
-        { Attributes<attrs> }        (. Modifiers m = new Modifiers(this); .)                             
+        { Attributes<attrs, out attrNode> }        (. Modifiers m = new Modifiers(this); .)                             
         ModifierList<m>
         StructMemberDeclaration<attrs, m, td>
       }
@@ -618,8 +633,12 @@ EnumBody<EnumDeclaration ed>
 // +ed: Enumeration declaration that has the member values defined here.
 // ------------------------------------------------------------------------------------
 EnumMemberDeclaration<EnumDeclaration ed>  
-=                            (. AttributeCollection attrs = new AttributeCollection(); .)
-  { Attributes<attrs> } 
+=                            (. 
+                                 AttributeCollection attrs = new AttributeCollection(); 
+                                 // :::
+                                 AttributeDecorationNode attrNode;
+                             .)
+  { Attributes<attrs, out attrNode> } 
   ident                      (. 
                                  EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
                                  CurrentElement = ev;
@@ -1027,12 +1046,14 @@ InterfaceBase<InterfaceDeclaration ifd>
 // ------------------------------------------------------------------------------------
 InterfaceMemberDeclaration<InterfaceDeclaration ifd>
                                (. 
-                                  Modifiers m = new Modifiers(this);
-                                  TypeReference typeRef;
-                                  AttributeCollection attrs = new AttributeCollection();
+                                   Modifiers m = new Modifiers(this);
+                                   TypeReference typeRef;
+                                   AttributeCollection attrs = new AttributeCollection();
+                                   // :::
+                                   AttributeDecorationNode attrNode;
                                .)
 =                              (. FormalParameterCollection pars = new FormalParameterCollection(); .)
-  { Attributes<attrs> } 
+  { Attributes<attrs, out attrNode> } 
   ModifierList<m>
   ( Type<out typeRef, true>
     (                          
@@ -1179,8 +1200,10 @@ FormalParameterList<FormalParameterCollection pars>
 =                                      (. 
                                           TypeReference typeRef = null; 
                                           AttributeCollection attrs = new AttributeCollection();
+                                          // :::
+                                          AttributeDecorationNode attrNode;
                                        .)
-  { Attributes<attrs> }                (. 
+  { Attributes<attrs, out attrNode> }      (. 
                                           FormalParameter fp = new FormalParameter(t, this); 
                                           fp.AssignAttributes(attrs);
                                        .)
@@ -1231,8 +1254,10 @@ AccessorDeclarations<PropertyDeclaration prop>
        (. 
           AttributeCollection attrs = new AttributeCollection();
           AccessorDeclaration accessor = null;
+          // :::
+          AttributeDecorationNode attrNode;
        .)
-= { Attributes<attrs> }               (. Modifiers am = new Modifiers(this); .)
+= { Attributes<attrs, out attrNode> }     (. Modifiers am = new Modifiers(this); .)
   ModifierList<am>                    
   ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                       (. CurrentElement = accessor; .)
@@ -1249,7 +1274,7 @@ AccessorDeclarations<PropertyDeclaration prop>
                                          accessor.AssignAttributes(attrs);
                                       .)
   [                                   (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs> }             (. am = new Modifiers(this); .)
+    { Attributes<attrs, out attrNode> }   (. am = new Modifiers(this); .)
     ModifierList<am>                  
     ( IF ("get".Equals(la.val)) ident (. 
                                          if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
@@ -1282,8 +1307,10 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
        (. 
           AttributeCollection attrs = new AttributeCollection();
           AccessorDeclaration accessor = null;
+          // :::
+          AttributeDecorationNode attrNode;
        .)
-= { Attributes<attrs> }                   (. Modifiers am = new Modifiers(this); .)
+= { Attributes<attrs, out attrNode> }     (. Modifiers am = new Modifiers(this); .)
   ModifierList<am>                    
   ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                           (. CurrentElement = accessor; .)
@@ -1298,7 +1325,7 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
                                              accessor.AssignAttributes(attrs); 
                                           .)
   [                                       (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs> }                 (. am = new Modifiers(this); .)
+    { Attributes<attrs, out attrNode> }   (. am = new Modifiers(this); .)
     ModifierList<am>                      
     ( IF ("add".Equals(la.val)) ident     (. 
                                              if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
@@ -1329,8 +1356,10 @@ InterfaceAccessors<PropertyDeclaration prop>
        (. 
           AttributeCollection attrs = new AttributeCollection();
           AccessorDeclaration accessor = null;
+          // :::
+          AttributeDecorationNode attrNode;
        .)
-= { Attributes<attrs> }                 (. Modifiers am = new Modifiers(this); .)
+= { Attributes<attrs, out attrNode> }   (. Modifiers am = new Modifiers(this); .)
   ModifierList<am>                    
   ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                         (. CurrentElement = accessor; .)
@@ -1343,7 +1372,7 @@ InterfaceAccessors<PropertyDeclaration prop>
                                            accessor.AssignAttributes(attrs); 
                                         .)
   [                                     (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs> }               (. am = new Modifiers(this); .)
+    { Attributes<attrs, out attrNode> } (. am = new Modifiers(this); .)
     ModifierList<am>                    
     ( IF ("get".Equals(la.val)) ident   (. 
                                            if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
@@ -1368,22 +1397,51 @@ InterfaceAccessors<PropertyDeclaration prop>
 // Declaration of attributes.
 // +attrs: List holding the attribute declarations.
 // ------------------------------------------------------------------------------------
-Attributes<AttributeCollection attrs>
-=                                                            (. string scope = ""; .)
-  "[" [ IF (IsAttrTargSpec()) 
-  ( ident | Keyword )                                        (. scope = t.val; .)
-  ":" ]                                                      (. AttributeDeclaration attr; .)
-  Attribute<out attr>                                        (. 
-                                                                attr.Scope = scope;
-                                                                attrs.Add(attr);
-                                                             .)
+Attributes<AttributeCollection attrs, out AttributeDecorationNode attrNode>
+                               (. 
+                                   string scope = ""; 
+                                   attrNode = null;
+                                   AttributeNode attributeNode;
+                               .)
+=
+  "["                          (.
+                                   attrNode = new AttributeDecorationNode(t);
+                               .)
+  [ IF (IsAttrTargSpec()) 
+    ( ident | Keyword )        (.  
+                                   scope = t.val; 
+                                   // :::
+                                   attrNode.IdentifierToken = t;
+                               .)
+    ":"                        (.  attrNode.ColonToken = t; .)
+                               
+  ]                            (. AttributeDeclaration attr; .)
+  Attribute<out attr, out attributeNode>
+                               (. 
+                                   attr.Scope = scope;
+                                   attrs.Add(attr);
+                                   // :::
+                                   attrNode.Attributes.Add(attributeNode);
+                               .)
   { 
-    IF (la.kind == _comma && Peek(1).kind != _rbrack) "," 
-    Attribute<out attr>                                      (. 
-                                                                attr.Scope = scope;
-                                                                attrs.Add(attr);
-                                                             .)
-  } [ "," ] "]"
+    IF (la.kind == _comma && Peek(1).kind != _rbrack) 
+    ","                        (.  var separator = t; .)
+    Attribute<out attr, out attributeNode>
+                               (. 
+                                   attr.Scope = scope;
+                                   attrs.Add(attr);
+                                   // :::
+                                   attrNode.Attributes.Add(new AttributeContinuationNode(separator, attributeNode));
+                               .)
+  } 
+  [ 
+    ","                        (.
+                                   attrNode.ClosingSeparator = t;
+                               .)
+  ] 
+  "]"                          (.
+                                   attrNode.Terminate(t);
+                               .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1408,30 +1466,45 @@ Keyword
 // Declaration of an attribute.
 // +attr: Attribute declaration.
 // ------------------------------------------------------------------------------------
-Attribute<out AttributeDeclaration attr> (. TypeReference typeRef; .)
-=                                        (.
-                                            // :::
-                                            TypeOrNamespaceNode nsNode = null;
-                                         .)
-  TypeName<out typeRef, out nsNode>      (. 
-                                            attr = new AttributeDeclaration(t, this, typeRef); 
-                                            CurrentElement = attr;
-                                         .)
-  [ AttributeArguments<attr> ]           (. attr.Terminate(t); .)
+Attribute<out AttributeDeclaration attr, out AttributeNode attrNode> 
+                               (. 
+                                   TypeReference typeRef; 
+                                   // :::
+                                   attrNode = new AttributeNode(t);
+                                   TypeOrNamespaceNode nsNode = null;
+                                   AttributeArgumentsNode args;
+                               .)
+= 
+  TypeName<out typeRef, out nsNode>      
+                               (. 
+                                   attr = new AttributeDeclaration(t, this, typeRef); 
+                                   CurrentElement = attr;
+                                   attrNode.TypeName = nsNode;
+                               .)
+  [ 
+    AttributeArguments<attr, out args>
+    
+  ]                            (.  
+                                    attr.Terminate(t); 
+                                    // :::
+                                    attrNode.Terminate(t);
+                               .)
 .
 
 // ------------------------------------------------------------------------------------
 // Declares the list of attribute arguments.
 // +attr: Attribute declaration.
 // ------------------------------------------------------------------------------------
-AttributeArguments<AttributeDeclaration attr> 
-                                     (. AttributeArgument arg; .)
-=                                    (. bool nameFound = false; .)
-  "(" 
-    [                                (. arg = new AttributeArgument(t,this); .)
+AttributeArguments<AttributeDeclaration attr, out AttributeArgumentsNode argsNode> 
+                               (.  AttributeArgument arg; .)
+=                              (.  bool nameFound = false; .)
+  "("                          (.  argsNode = new AttributeArgumentsNode(t); .)
+    [                          (.  arg = new AttributeArgument(t,this); .)
       [ IF (IsAssignment())          
-        ident                        (. arg.Name = t.val; .)
-        "="                          (. nameFound = true; .)
+        ident                  (.  arg.Name = t.val; .)
+        "="                    (. 
+                                   nameFound = true; 
+                               .)
       ]                              (. Expression expr; .)
       Expression<out expr>           (. arg.Expression = expr; .)
                                      (. 
@@ -1450,7 +1523,7 @@ AttributeArguments<AttributeDeclaration attr>
                                      .)
       }
     ]
-  ")"
+  ")"                          (.  argsNode.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3569,13 +3642,17 @@ TypeParameterList<ITypeParameterOwner td>
 // +tp: Type parameter defined here.
 // ------------------------------------------------------------------------------------
 TypeParameter<out TypeParameter tp>
-=                                   (. AttributeCollection attrs = new AttributeCollection(); .)
-  { Attributes<attrs> } 
-  ident                             (. 
-                                       tp = new TypeParameter(t, this);
-                                       tp.Name = t.val;
-                                       tp.AssignAttributes(attrs);
-                                    .)
+=                        (. 
+                            AttributeCollection attrs = new AttributeCollection(); 
+                            // :::
+                            AttributeDecorationNode attrNode;
+                         .)
+  { Attributes<attrs, out attrNode> } 
+  ident                  (. 
+                            tp = new TypeParameter(t, this);
+                            tp.Name = t.val;
+                            tp.AssignAttributes(attrs);
+                         .)
 .
 
 // ------------------------------------------------------------------------------------

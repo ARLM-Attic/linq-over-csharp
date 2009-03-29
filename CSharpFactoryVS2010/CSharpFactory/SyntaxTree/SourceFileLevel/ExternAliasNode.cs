@@ -71,11 +71,14 @@ namespace CSharpFactory.Syntax
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
+        IndentationSegment.Apply,
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
         AliasToken,
+        MandatoryWhiteSpaceSegment.Default,
         IdentifierToken,
-        TerminatingToken
+        TerminatingToken,
+        ForceNewLineSegment.Default
         );
     }
   }
