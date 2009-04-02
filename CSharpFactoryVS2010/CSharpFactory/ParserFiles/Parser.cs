@@ -556,33 +556,51 @@ public partial class CSharpSyntaxParser
 
 	void GlobalAttributes() {
 		AttributeNode attrNode;
+		// :::
+		AttributeDecorationNode globAttrNode = null;
 		
 		Expect(98);
+		globAttrNode = new AttributeDecorationNode(t);
+		
 		Expect(1);
 		if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
 		 Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
 		string scope = t.val;
 		AttributeDeclaration attr;
+		// :::
+		globAttrNode.IdentifierToken = t;
 		
 		Expect(87);
+		globAttrNode.ColonToken = t; 
 		Attribute(out attr, out attrNode);
 		attr.Scope = scope; 
 		File.GlobalAttributes.Add(attr);
 		CurrentElement = attr;
+		// :::
+		globAttrNode.Attributes.Add(attrNode);
 		
 		while (NotFinalComma()) {
 			Expect(88);
+			var separator = t; 
 			Attribute(out attr, out attrNode);
 			attr.Scope = scope; 
 			File.GlobalAttributes.Add(attr);
 			CurrentElement = attr;
+			// :::
+			globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode));
 			
 		}
 		if (la.kind == 88) {
 			Get();
+			globAttrNode.ClosingSeparator = t;
+			
 		}
 		Expect(113);
 		attr.Terminate(t); 
+		// :::
+		globAttrNode.Terminate(t);
+		SourceFileNode.GlobalAttributes.Add(globAttrNode);
+		
 	}
 
 	void NamespaceMemberDeclaration(NamespaceFragment parent, SourceFile file, 
@@ -730,7 +748,6 @@ NamespaceDeclarationNode parentNode) {
 		// :::
 		attrNode = new AttributeNode(t);
 		TypeOrNamespaceNode nsNode = null;
-		AttributeArgumentsNode args;
 		
 		TypeName(out typeRef, out nsNode);
 		attr = new AttributeDeclaration(t, this, typeRef); 
@@ -738,12 +755,9 @@ NamespaceDeclarationNode parentNode) {
 		attrNode.TypeName = nsNode;
 		
 		if (la.kind == 99) {
-			AttributeArguments(attr, out args);
+			AttributeArguments(attr, attrNode);
 		}
 		attr.Terminate(t); 
-		// :::
-		attrNode.Terminate(t);
-		
 	}
 
 	void Attributes(AttributeCollection attrs, out AttributeDecorationNode attrNode) {
@@ -790,6 +804,8 @@ NamespaceDeclarationNode parentNode) {
 			
 		}
 		Expect(113);
+		attr.Terminate(t);
+		// :::
 		attrNode.Terminate(t);
 		
 	}
@@ -1319,6 +1335,7 @@ out TypeDeclaration td) {
 		AttributeCollection attrs = new AttributeCollection(); 
 		// :::
 		AttributeDecorationNode attrNode;
+		ExpressionNode exprNode;
 		
 		while (la.kind == 98) {
 			Attributes(attrs, out attrNode);
@@ -1330,7 +1347,7 @@ out TypeDeclaration td) {
 		
 		if (la.kind == 86) {
 			Get();
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			ev.ValueExpression = expr; 
 		}
 		ev.AssignAttributes(attrs);
@@ -1339,8 +1356,11 @@ out TypeDeclaration td) {
 		
 	}
 
-	void Expression(out Expression expr) {
+	void Expression(out Expression expr, out ExpressionNode exprNode) {
 		expr = null; 
+		// :::
+		exprNode = null;
+		
 		Expression leftExpr; 
 		if (IsQueryExpression()) {
 			QueryExpression query = new QueryExpression(t, this); 
@@ -1361,7 +1381,7 @@ out TypeDeclaration td) {
 				AssignmentOperator asgn; 
 				AssignmentOperator(out asgn);
 				Expression rightExpr; 
-				Expression(out rightExpr);
+				Expression(out rightExpr, out exprNode);
 				asgn.RightOperand = rightExpr; 
 				asgn.LeftOperand = leftExpr; 
 				expr = asgn; 
@@ -1383,11 +1403,11 @@ out TypeDeclaration td) {
 					expr = condExpr; 
 					Get();
 					Expression trueExpr; 
-					Expression(out trueExpr);
+					Expression(out trueExpr, out exprNode);
 					condExpr.TrueExpression = trueExpr; 
 					Expect(87);
 					Expression falseExpr; 
-					Expression(out falseExpr);
+					Expression(out falseExpr, out exprNode);
 					condExpr.FalseExpression = falseExpr; 
 					condExpr.Terminate(t); 
 				}
@@ -1423,6 +1443,7 @@ out TypeDeclaration td) {
 		AttributeCollection attrs = new AttributeCollection();
 		// :::
 		AttributeDecorationNode attrNode;
+		ExpressionNode exprNode;
 		
 		while (la.kind == 98) {
 			Attributes(attrs, out attrNode);
@@ -1745,7 +1766,7 @@ TypeReference memberRef, TypeDeclaration td) {
 
 	void SingleConstMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
 TypeReference typeRef) {
-		
+		ExpressionNode exprNode; 
 		Expect(1);
 		ConstDeclaration cd = new ConstDeclaration(t, td); 
 		CurrentElement = cd;
@@ -1757,7 +1778,7 @@ TypeReference typeRef) {
 		Expect(86);
 		td.AddMember(cd); 
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		cd.Expression = expr; 
 		cd.Terminate(t);
 		
@@ -1826,6 +1847,8 @@ TypeReference typeRef) {
 
 	void Argument(ArgumentList argList) {
 		Argument arg = new Argument(t, this); 
+		ExpressionNode exprNode;
+		
 		if (la.kind == 50 || la.kind == 57) {
 			if (la.kind == 57) {
 				Get();
@@ -1836,7 +1859,7 @@ TypeReference typeRef) {
 			}
 		}
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		arg.Expression = expr; 
 		if (argList != null) argList.Add(arg); 
 		arg.Terminate(t);
@@ -2196,6 +2219,7 @@ TypeReference typeRef) {
 	}
 
 	void LocalVariableDeclarator(IBlockOwner block, TypeReference typeRef, bool isImplicit) {
+		ExpressionNode exprNode; 
 		Expect(1);
 		LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); 
 		CurrentElement = loc; 
@@ -2218,7 +2242,7 @@ TypeReference typeRef) {
 				saIn.Type = tr; 
 				Expression expr; 
 				Expect(98);
-				Expression(out expr);
+				Expression(out expr, out exprNode);
 				saIn.Expression = expr; 
 				Expect(113);
 				saIn.Terminate(t); 
@@ -2231,8 +2255,11 @@ TypeReference typeRef) {
 
 	void VariableInitializer(out Initializer init) {
 		Expression expr; init = null; 
+		// :::
+		ExpressionNode exprNode;
+		
 		if (StartOf(22)) {
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); 
 			init = expIn; expIn.Terminate(t); 
 		} else if (la.kind == 97) {
@@ -2576,41 +2603,67 @@ TypeReference typeRef) {
 		}
 	}
 
-	void AttributeArguments(AttributeDeclaration attr, out AttributeArgumentsNode argsNode) {
+	void AttributeArguments(AttributeDeclaration attr, AttributeNode argsNode) {
 		AttributeArgument arg; 
+		Token identifier = null;
+		Token equal = null;
+		ExpressionNode exprNode;
+		
 		bool nameFound = false; 
 		Expect(99);
-		argsNode = new AttributeArgumentsNode(t); 
+		argsNode.OpenParenthesis = t; 
 		if (StartOf(22)) {
-			arg = new AttributeArgument(t,this); 
+			arg = new AttributeArgument(t, this); 
 			if (IsAssignment()) {
 				Expect(1);
-				arg.Name = t.val; 
+				arg.Name = t.val;
+				// :::
+				identifier = t;
+				
 				Expect(86);
 				nameFound = true; 
+				// :::
+				equal = t;
 				
 			}
 			Expression expr; 
-			Expression(out expr);
-			arg.Expression = expr; 
+			Expression(out expr, out exprNode);
+			arg.Expression = expr;
 			attr.Arguments.Add(arg); 
 			arg.Terminate(t);
+			// :::
+			var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
+			argNode.Terminate(t);
+			argsNode.Arguments.Add(argNode);
 			
 			while (la.kind == 88) {
 				Get();
 				arg = new AttributeArgument(t, this); 
+				// :::
+				var separator = t;
+				
 				if (IsAssignment()) {
 					Expect(1);
 					arg.Name = t.val; 
+					// :::
+					identifier = t;
+					
 					Expect(86);
 					nameFound = true; 
+					// :::
+					equal = t;
+					
 				} else if (StartOf(22)) {
 					if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); 
 				} else SynErr(189);
-				Expression(out expr);
+				Expression(out expr, out exprNode);
 				arg.Expression = expr; 
 				attr.Arguments.Add(arg); 
 				arg.Terminate(t);
+				// :::
+				var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
+				argcNode.Terminate(t);
+				argsNode.Arguments.Add(argcNode);
 				
 			}
 		}
@@ -2751,6 +2804,7 @@ TypeReference typeRef) {
 	}
 
 	void ConstStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(17);
 		TypeReference typeRef; 
 		ConstStatement cs = new ConstStatement(t, this, block); 
@@ -2760,7 +2814,7 @@ TypeReference typeRef) {
 		cs.Name = t.val; 
 		Expect(86);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		cs.Expression = expr; 
 		if (block != null) block.Add(cs); 
 		cs.Terminate(t);
@@ -2771,7 +2825,7 @@ TypeReference typeRef) {
 			Expect(1);
 			cs.Name = t.val; 
 			Expect(86);
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			cs.Expression = expr; 
 			if (block != null) block.Add(cs); 
 			cs.Terminate(t);
@@ -2875,7 +2929,9 @@ TypeReference typeRef) {
 	}
 
 	void StatementExpression(IBlockOwner block) {
+		ExpressionNode exprNode;
 		bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); 
+		
 		Expression expr = null; 
 		Unary(out expr);
 		ExpressionStatement es = new ExpressionStatement(t, this, block); 
@@ -2887,7 +2943,7 @@ TypeReference typeRef) {
 			es.Expression = asgn; 
 			asgn.LeftOperand = expr; 
 			Expression rightExpr; 
-			Expression(out rightExpr);
+			Expression(out rightExpr, out exprNode);
 			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 88 || la.kind == 114 || la.kind == 115) {
 			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
@@ -2897,13 +2953,14 @@ TypeReference typeRef) {
 	}
 
 	void IfStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(36);
 		IfStatement ifs = new IfStatement(t, this, block); 
 		CurrentElement = ifs; 
 		Expect(99);
 		if (block != null) block.Add(ifs); 
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		ifs.Condition = expr; 
 		Expect(114);
 		ifs.CreateThenBlock(t); 
@@ -2919,12 +2976,13 @@ TypeReference typeRef) {
 	}
 
 	void SwitchStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(67);
 		SwitchStatement sws = new SwitchStatement(t, this, block); 
 		CurrentElement = sws; 
 		Expect(99);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		sws.Expression = expr; 
 		Expect(114);
 		Expect(97);
@@ -2938,13 +2996,14 @@ TypeReference typeRef) {
 	}
 
 	void WhileStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(83);
 		WhileStatement whs = new WhileStatement(t, this, block); 
 		CurrentElement = whs; 
 		Expect(99);
 		if (block != null) block.Add(whs); 
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		whs.Condition = expr; 
 		Expect(114);
 		EmbeddedStatement(whs);
@@ -2952,6 +3011,7 @@ TypeReference typeRef) {
 	}
 
 	void DoWhileStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(22);
 		DoWhileStatement whs = new DoWhileStatement(t, this, block); 
 		CurrentElement = whs; 
@@ -2960,7 +3020,7 @@ TypeReference typeRef) {
 		Expect(83);
 		Expect(99);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		whs.Condition = expr; 
 		Expect(114);
 		Expect(115);
@@ -2968,6 +3028,7 @@ TypeReference typeRef) {
 	}
 
 	void ForStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(33);
 		ForStatement fs = new ForStatement(t, this, block); 
 		CurrentElement = fs; 
@@ -2980,7 +3041,7 @@ TypeReference typeRef) {
 		Expect(115);
 		if (StartOf(22)) {
 			Expression expr; 
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			fs.Condition = expr; 
 		}
 		Expect(115);
@@ -2994,6 +3055,7 @@ TypeReference typeRef) {
 	}
 
 	void ForEachStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(34);
 		ForEachStatement fes = new ForEachStatement(t, this, block); 
 		CurrentElement = fes; 
@@ -3011,7 +3073,7 @@ TypeReference typeRef) {
 		fes.Variable.Name = t.val; 
 		Expect(38);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		fes.Expression = expr; 
 		Expect(114);
 		fes.Add(fes.Variable); 
@@ -3038,6 +3100,7 @@ TypeReference typeRef) {
 	}
 
 	void GotoStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(35);
 		GotoStatement gs = new GotoStatement(t, this, block); 
 		CurrentElement = gs; 
@@ -3048,7 +3111,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 12) {
 			Get();
 			Expression expr; 
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			gs.LabelExpression = expr; 
 		} else if (la.kind == 20) {
 			Get();
@@ -3059,12 +3122,13 @@ TypeReference typeRef) {
 	}
 
 	void ReturnStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(58);
 		ReturnStatement yrs = new ReturnStatement(t, this, block); 
 		CurrentElement = yrs; 
 		if (StartOf(22)) {
 			Expression expr; 
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			yrs.Expression = expr; 
 		}
 		Expect(115);
@@ -3073,12 +3137,13 @@ TypeReference typeRef) {
 	}
 
 	void ThrowStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(69);
 		ThrowStatement ts = new ThrowStatement(t, this, block); 
 		CurrentElement = ts; 
 		if (StartOf(22)) {
 			Expression expr; 
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			ts.Expression = expr; 
 		}
 		Expect(115);
@@ -3112,13 +3177,14 @@ TypeReference typeRef) {
 	}
 
 	void LockStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(43);
 		LockStatement ls = new LockStatement(t, this, block); 
 		CurrentElement = ls; 
 		if (block != null) block.Add(ls); 
 		Expect(99);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		ls.Expression = expr; 
 		Expect(114);
 		EmbeddedStatement(ls);
@@ -3126,6 +3192,7 @@ TypeReference typeRef) {
 	}
 
 	void UsingStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(78);
 		UsingStatement us = new UsingStatement(t, this, block);
 		CurrentElement = us;
@@ -3136,7 +3203,7 @@ TypeReference typeRef) {
 			LocalVariableDeclaration(us);
 		} else if (StartOf(22)) {
 			Expression expr; 
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			us.ResourceExpression = expr; 
 		} else SynErr(202);
 		Expect(114);
@@ -3145,9 +3212,10 @@ TypeReference typeRef) {
 	}
 
 	void YieldReturnStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(58);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		YieldReturnStatement yrs = new YieldReturnStatement(t, this, block); 
 		CurrentElement = yrs; 
 		yrs.Expression = expr; 
@@ -3164,6 +3232,7 @@ TypeReference typeRef) {
 	}
 
 	void FixedStatement(IBlockOwner block) {
+		ExpressionNode exprNode; 
 		Expect(31);
 		FixedStatement fs = new FixedStatement(t, this, block); 
 		CurrentElement = fs; 
@@ -3178,7 +3247,7 @@ TypeReference typeRef) {
 		vas.Name = t.val; 
 		Expect(86);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		vas.Expression = expr; 
 		fs.Assignments.Add(vas); 
 		while (la.kind == 88) {
@@ -3188,7 +3257,7 @@ TypeReference typeRef) {
 			Expect(1);
 			vas.Name = t.val; 
 			Expect(86);
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			vas.Expression = expr; 
 			fs.Assignments.Add(vas); 
 		}
@@ -3404,9 +3473,11 @@ TypeReference typeRef) {
 
 	void SwitchLabel(out Expression expr) {
 		expr = null; 
+		ExpressionNode exprNode;
+		
 		if (la.kind == 12) {
 			Get();
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			Expect(87);
 		} else if (la.kind == 20) {
 			Get();
@@ -3464,9 +3535,10 @@ TypeReference typeRef) {
 	}
 
 	void LambdaFunctionBody(LambdaExpression lambda) {
+		ExpressionNode exprNode; 
 		if (StartOf(22)) {
 			Expression expr; 
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			lambda.Expression = expr; 
 		} else if (la.kind == 97) {
 			Block(lambda);
@@ -3474,6 +3546,7 @@ TypeReference typeRef) {
 	}
 
 	void FromClause(out FromClause fromClause) {
+		ExpressionNode exprNode; 
 		Expect(123);
 		Token typeToken = la; 
 		Token start = t; 
@@ -3488,7 +3561,7 @@ TypeReference typeRef) {
 		fromClause.Name = t.val; 
 		Expect(38);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		fromClause.Expression = expr; 
 		fromClause.Terminate(t); 
 	}
@@ -3532,23 +3605,25 @@ TypeReference typeRef) {
 	}
 
 	void SelectClause(QueryBody body) {
+		ExpressionNode exprNode; 
 		Expect(133);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		body.Select = new SelectClause(t, this); 
 		body.Select.Expression = expr; 
 		body.Select.Terminate(t); 
 	}
 
 	void GroupClause(QueryBody body) {
+		ExpressionNode exprNode; 
 		Expect(134);
 		Expression grExpr; 
-		Expression(out grExpr);
+		Expression(out grExpr, out exprNode);
 		body.GroupBy = new GroupByClause(t, this); 
 		body.GroupBy.Expression = grExpr; 
 		Expect(135);
 		Expression byExpr; 
-		Expression(out byExpr);
+		Expression(out byExpr, out exprNode);
 		body.GroupBy.ByExpression = byExpr; 
 		body.GroupBy.Terminate(t); 
 	}
@@ -3562,27 +3637,30 @@ TypeReference typeRef) {
 	}
 
 	void LetClause(out LetClause letClause) {
+		ExpressionNode exprNode; 
 		Expect(124);
 		letClause = new LetClause(t, this); 
 		Expect(1);
 		letClause.Name = t.val; 
 		Expect(86);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		letClause.Expression = expr; 
 		letClause.Terminate(t); 
 	}
 
 	void WhereClause(out WhereClause whereClause) {
+		ExpressionNode exprNode; 
 		Expect(125);
 		whereClause = new WhereClause(t, this); 
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		whereClause.Expression = expr; 
 		whereClause.Terminate(t); 
 	}
 
 	void JoinClause(out JoinClause joinClause) {
+		ExpressionNode exprNode; 
 		Expect(126);
 		Token typeToken = la; 
 		TypeReference typeRef; 
@@ -3596,15 +3674,15 @@ TypeReference typeRef) {
 		joinClause.Name = t.val; 
 		Expect(38);
 		Expression inExpr; 
-		Expression(out inExpr);
+		Expression(out inExpr, out exprNode);
 		joinClause.InExpression = inExpr; 
 		Expect(127);
 		Expression onExpr; 
-		Expression(out onExpr);
+		Expression(out onExpr, out exprNode);
 		joinClause.OnExpression = onExpr; 
 		Expect(128);
 		Expression eqExpr; 
-		Expression(out eqExpr);
+		Expression(out eqExpr, out exprNode);
 		joinClause.EqualsExpression = eqExpr; 
 		if (la.kind == 129) {
 			Get();
@@ -3627,7 +3705,9 @@ TypeReference typeRef) {
 
 	void OrderingClause(OrderByClause obClause) {
 		Expression expr; 
-		Expression(out expr);
+		ExpressionNode exprNode;
+		
+		Expression(out expr, out exprNode);
 		OrderingClause oc = new OrderingClause(t, this); 
 		if (la.kind == 131 || la.kind == 132) {
 			if (la.kind == 131) {
@@ -3975,6 +4055,7 @@ TypeReference typeRef) {
 	void Primary(out Expression expr) {
 		Expression innerExpr = null;
 		expr = null;
+		ExpressionNode exprNode;
 		
 		switch (la.kind) {
 		case 2: case 3: case 4: case 5: case 29: case 47: case 70: {
@@ -3983,7 +4064,7 @@ TypeReference typeRef) {
 		}
 		case 99: {
 			Get();
-			Expression(out innerExpr);
+			Expression(out innerExpr, out exprNode);
 			Expect(114);
 			if (innerExpr != null) innerExpr.BracketsUsed = true; 
 			break;
@@ -4259,15 +4340,16 @@ TypeReference typeRef) {
 	}
 
 	void BaseIndexerOperator(out Expression expr) {
+		ExpressionNode exprNode; 
 		Expect(98);
 		BaseIndexerOperator bio = new BaseIndexerOperator(t, this); 
 		expr = bio; 
 		Expression indexExpr; 
-		Expression(out indexExpr);
+		Expression(out indexExpr, out exprNode);
 		bio.Indexes.Add(indexExpr); 
 		while (la.kind == 88) {
 			Get();
-			Expression(out indexExpr);
+			Expression(out indexExpr, out exprNode);
 			bio.Indexes.Add(indexExpr); 
 		}
 		Expect(113);
@@ -4303,24 +4385,26 @@ TypeReference typeRef) {
 	}
 
 	void CheckedOperator(out Expression expr) {
+		ExpressionNode exprNode; 
 		Expect(15);
 		CheckedOperator cop = new CheckedOperator(t, this); 
 		Expect(99);
 		expr = cop; 
 		Expression innerExpr; 
-		Expression(out innerExpr);
+		Expression(out innerExpr, out exprNode);
 		cop.Operand = innerExpr; 
 		Expect(114);
 		cop.Terminate(t); 
 	}
 
 	void UncheckedOperator(out Expression expr) {
+		ExpressionNode exprNode; 
 		Expect(75);
 		UncheckedOperator uop = new UncheckedOperator(t, this); 
 		Expect(99);
 		expr = uop; 
 		Expression innerExpr; 
-		Expression(out innerExpr);
+		Expression(out innerExpr, out exprNode);
 		uop.Operand = innerExpr; 
 		Expect(114);
 		uop.Terminate(t); 
@@ -4385,13 +4469,14 @@ TypeReference typeRef) {
 	}
 
 	void ArrayIndexer(ArrayIndexerOperator indexer) {
+		ExpressionNode exprNode; 
 		Expect(98);
 		Expression expr; 
-		Expression(out expr);
+		Expression(out expr, out exprNode);
 		indexer.Indexers.Add(expr); 
 		while (la.kind == 88) {
 			Get();
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			indexer.Indexers.Add(expr); 
 		}
 		Expect(113);
@@ -4410,6 +4495,7 @@ TypeReference typeRef) {
 	void NewOperatorWithType(NewOperator nop, TypeReference typeRef) {
 		ArrayInitializer arrayInit;
 		nop.Type = typeRef; 
+		ExpressionNode exprNode;
 		
 		if (la.kind == 99) {
 			Get();
@@ -4444,11 +4530,11 @@ TypeReference typeRef) {
 		} else if (la.kind == 98) {
 			Get();
 			Expression dimExpr; 
-			Expression(out dimExpr);
+			Expression(out dimExpr, out exprNode);
 			nop.Dimensions.Add(dimExpr); 
 			while (la.kind == 88) {
 				Get();
-				Expression(out dimExpr);
+				Expression(out dimExpr, out exprNode);
 				nop.Dimensions.Add(dimExpr); 
 			}
 			Expect(113);
@@ -4505,12 +4591,13 @@ TypeReference typeRef) {
 	void MemberDeclarator(out MemberDeclarator init) {
 		init = null; 
 		Expression expr = null;
+		ExpressionNode exprNode;
 		
 		if (IsMemberInitializer()) {
 			Expect(1);
 			Token start = t; 
 			Expect(86);
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			init = new MemberDeclarator(start, this, expr, start.val); 
 		} else if (StartOf(27)) {
 			Token start = la; 
@@ -4589,18 +4676,20 @@ TypeReference typeRef) {
 
 	void ElementInitializer(out Initializer init) {
 		Expression expr; init = null; 
+		ExpressionNode exprNode;
+		
 		if (IsValueInitializer()) {
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			init = new ExpressionInitializer(t, this, expr); 
 		} else if (la.kind == 97) {
 			ExpressionListInitializer listInit = new ExpressionListInitializer(t, this); 
 			init = listInit; 
 			Get();
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
 			while (la.kind == 88) {
 				Get();
-				Expression(out expr);
+				Expression(out expr, out exprNode);
 				listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
 			}
 			Expect(112);
@@ -4609,13 +4698,14 @@ TypeReference typeRef) {
 	}
 
 	void MemberInitializer(out MemberInitializer init) {
+		ExpressionNode exprNode; 
 		Expect(1);
 		Token startToken = t; 
 		Expect(86);
 		Expression expr; 
 		init = null; 
 		if (IsValueInitializer()) {
-			Expression(out expr);
+			Expression(out expr, out exprNode);
 			init = new MemberInitializer(startToken, this, expr); 
 		} else if (la.kind == 97) {
 			Initializer compoundInit; 

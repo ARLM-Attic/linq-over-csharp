@@ -27,6 +27,7 @@ namespace CSharpFactory.Syntax
     {
       Name = Path.GetFileName(fullName);
       FullName = fullName;
+      GlobalAttributes = new ImmutableCollection<AttributeDecorationNode>();
     }
 
     #endregion
@@ -49,6 +50,13 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public string FullName { get; private set; }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the global attributes belonging to this source file.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<AttributeDecorationNode> GlobalAttributes { get; private set; }
+    
     #endregion
 
     #region Output methods

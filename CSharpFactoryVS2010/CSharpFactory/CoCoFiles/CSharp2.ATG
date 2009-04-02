@@ -348,34 +348,56 @@ UsingDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
 // Global attributes belonging to a file.
 // This element accepts only attributes with "assembly" or "module" scope.
 // ------------------------------------------------------------------------------------
-GlobalAttributes
+GlobalAttributes<>
                                (.
                                    AttributeNode attrNode;
+                                   // :::
+                                   AttributeDecorationNode globAttrNode = null;
                                .)
 =
-  "[" ident                    (.
-                                  // We accept module because csc does (even if it is against 
-                                  // the specification).
-                                  if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
-                                    Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
-                                  string scope = t.val;
-                                  AttributeDeclaration attr;
-                               .) 
-  ":" Attribute<out attr, out attrNode>
-                               (. 
-                                  attr.Scope = scope; 
-                                  File.GlobalAttributes.Add(attr);
-                                  CurrentElement = attr;
+  "["                          (.
+                                   globAttrNode = new AttributeDecorationNode(t);
                                .)
-  { IF (NotFinalComma()) "," 
+  ident                        (.
+                                   // We accept module because csc does (even if it is against 
+                                   // the specification).
+                                   if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
+                                     Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
+                                   string scope = t.val;
+                                   AttributeDeclaration attr;
+                                   // :::
+                                   globAttrNode.IdentifierToken = t;
+                               .) 
+  ":"                          (.  globAttrNode.ColonToken = t; .)
+  Attribute<out attr, out attrNode>
+                               (. 
+                                   attr.Scope = scope; 
+                                   File.GlobalAttributes.Add(attr);
+                                   CurrentElement = attr;
+                                   // :::
+                                   globAttrNode.Attributes.Add(attrNode);
+                               .)
+  { IF (NotFinalComma()) ","   (.  var separator = t; .)
     Attribute<out attr, out attrNode> 
                                (. 
-                                  attr.Scope = scope; 
-                                  File.GlobalAttributes.Add(attr);
-                                  CurrentElement = attr;
+                                   attr.Scope = scope; 
+                                   File.GlobalAttributes.Add(attr);
+                                   CurrentElement = attr;
+                                   // :::
+                                   globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode));
                                .)
-        } [ "," ]
-  "]"                          (. attr.Terminate(t); .)
+  } 
+  [ 
+    ","                        (.
+                                   globAttrNode.ClosingSeparator = t;
+                               .) 
+  ]
+  "]"                          (. 
+                                   attr.Terminate(t); 
+                                   // :::
+                                   globAttrNode.Terminate(t);
+                                   SourceFileNode.GlobalAttributes.Add(globAttrNode);
+                               .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -637,6 +659,7 @@ EnumMemberDeclaration<EnumDeclaration ed>
                                  AttributeCollection attrs = new AttributeCollection(); 
                                  // :::
                                  AttributeDecorationNode attrNode;
+                                 ExpressionNode exprNode;
                              .)
   { Attributes<attrs, out attrNode> } 
   ident                      (. 
@@ -645,7 +668,7 @@ EnumMemberDeclaration<EnumDeclaration ed>
                                  Expression expr;
                              .)
   [ 
-    "=" Expression<out expr> (. ev.ValueExpression = expr; .)
+    "=" Expression<out expr, out exprNode> (. ev.ValueExpression = expr; .)
   ]     
                              (.
                                 ev.AssignAttributes(attrs);
@@ -768,7 +791,7 @@ ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 // ------------------------------------------------------------------------------------
 SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
   TypeReference typeRef>
-=                            (.  .)
+=                            (. ExpressionNode exprNode; .)
   ident                      (. 
                                 ConstDeclaration cd = new ConstDeclaration(t, td); 
                                 CurrentElement = cd;
@@ -779,7 +802,8 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
                              .)
   "="                        (. td.AddMember(cd); .)
                              (. Expression expr; .)
-  Expression<out expr>       (. 
+  Expression<out expr, out exprNode>
+                             (. 
                                 cd.Expression = expr; 
                                 cd.Terminate(t);
                              .)
@@ -1137,6 +1161,7 @@ LocalVariableDeclaration<IBlockOwner block> (.
 // +isImplicit: Indicates if the local declaration is implicit or not.
 // ------------------------------------------------------------------------------------
 LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplicit>
+        (. ExpressionNode exprNode; .)
 = 
   ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); .)
         (. CurrentElement = loc; .)
@@ -1156,7 +1181,7 @@ LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplici
         (. saIn.Type = tr; .)
         (. Expression expr; .)
       "[" 
-        Expression<out expr> 
+        Expression<out expr, out exprNode> 
         (. saIn.Expression = expr; .)
       "]" (. saIn.Terminate(t); .)
     )
@@ -1171,9 +1196,15 @@ LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplici
 // Creates an initializer.
 // +init: Initializer created.
 // ------------------------------------------------------------------------------------
-VariableInitializer<out Initializer init> (. Expression expr; init = null; .)
+VariableInitializer<out Initializer init> 
+                        (. 
+                            Expression expr; init = null; 
+                            // :::
+                            ExpressionNode exprNode;
+                        .)
 = 
-  Expression<out expr>  (. ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); .)
+  Expression<out expr, out exprNode>  
+                        (. ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); .)
                         (. init = expIn; expIn.Terminate(t); .)
   |                     (. ArrayInitializer arrInit; .)
     ArrayInitializer<out arrInit> (. init = arrInit; .)
@@ -1202,6 +1233,7 @@ FormalParameterList<FormalParameterCollection pars>
                                           AttributeCollection attrs = new AttributeCollection();
                                           // :::
                                           AttributeDecorationNode attrNode;
+                                          ExpressionNode exprNode;
                                        .)
   { Attributes<attrs, out attrNode> }      (. 
                                           FormalParameter fp = new FormalParameter(t, this); 
@@ -1232,13 +1264,16 @@ FormalParameterList<FormalParameterCollection pars>
 .
 
 Argument<ArgumentList argList> 
-              (. Argument arg = new Argument(t, this); .)
+              (. 
+                  Argument arg = new Argument(t, this); 
+                  ExpressionNode exprNode;
+              .)
 = 
   [           
     "ref"     (. arg.Kind = FormalParameterKind.Ref; .)
     | "out"   (. arg.Kind = FormalParameterKind.Out; .)
   ]           (. Expression expr; .)
-  Expression<out expr>
+  Expression<out expr, out exprNode>
               (. arg.Expression = expr; .)
               (. 
                  if (argList != null) argList.Add(arg); 
@@ -1440,6 +1475,8 @@ Attributes<AttributeCollection attrs, out AttributeDecorationNode attrNode>
                                .)
   ] 
   "]"                          (.
+                                   attr.Terminate(t);
+                                   // :::
                                    attrNode.Terminate(t);
                                .)
 .
@@ -1472,7 +1509,6 @@ Attribute<out AttributeDeclaration attr, out AttributeNode attrNode>
                                    // :::
                                    attrNode = new AttributeNode(t);
                                    TypeOrNamespaceNode nsNode = null;
-                                   AttributeArgumentsNode args;
                                .)
 = 
   TypeName<out typeRef, out nsNode>      
@@ -1482,45 +1518,74 @@ Attribute<out AttributeDeclaration attr, out AttributeNode attrNode>
                                    attrNode.TypeName = nsNode;
                                .)
   [ 
-    AttributeArguments<attr, out args>
+    AttributeArguments<attr, attrNode>
     
-  ]                            (.  
-                                    attr.Terminate(t); 
-                                    // :::
-                                    attrNode.Terminate(t);
-                               .)
+  ]                            (.  attr.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
 // Declares the list of attribute arguments.
 // +attr: Attribute declaration.
 // ------------------------------------------------------------------------------------
-AttributeArguments<AttributeDeclaration attr, out AttributeArgumentsNode argsNode> 
-                               (.  AttributeArgument arg; .)
+AttributeArguments<AttributeDeclaration attr, AttributeNode argsNode> 
+                               (.  
+                                   AttributeArgument arg; 
+                                   Token identifier = null;
+                                   Token equal = null;
+                                   ExpressionNode exprNode;
+                               .)
 =                              (.  bool nameFound = false; .)
-  "("                          (.  argsNode = new AttributeArgumentsNode(t); .)
-    [                          (.  arg = new AttributeArgument(t,this); .)
+  "("                          (.  argsNode.OpenParenthesis = t; .)
+    [                          (.  arg = new AttributeArgument(t, this); .)
       [ IF (IsAssignment())          
-        ident                  (.  arg.Name = t.val; .)
+        ident                  (.  
+                                   arg.Name = t.val;
+                                   // :::
+                                   identifier = t;
+                               .)
         "="                    (. 
                                    nameFound = true; 
+                                   // :::
+                                   equal = t;
                                .)
-      ]                              (. Expression expr; .)
-      Expression<out expr>           (. arg.Expression = expr; .)
-                                     (. 
-                                        attr.Arguments.Add(arg); 
-                                        arg.Terminate(t);
-                                     .)
-      { ","                          (. arg = new AttributeArgument(t, this); .)
+      ]                        (.  Expression expr; .)
+      Expression<out expr, out exprNode>           
+                               (. 
+                                   arg.Expression = expr;
+                                   attr.Arguments.Add(arg); 
+                                   arg.Terminate(t);
+                                   // :::
+                                   var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
+                                   argNode.Terminate(t);
+                                   argsNode.Arguments.Add(argNode);
+                               .)
+      { ","                    (. 
+                                   arg = new AttributeArgument(t, this); 
+                                   // :::
+                                   var separator = t;
+                               .)
         ( IF (IsAssignment())  
-          ident                      (. arg.Name = t.val; .)
-          "="                        (. nameFound = true; .)
-          |                          (. if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); .)
-        ) Expression<out expr>       (. arg.Expression = expr; .)
-                                     (. 
-                                        attr.Arguments.Add(arg); 
-                                        arg.Terminate(t);
-                                     .)
+          ident                (. 
+                                   arg.Name = t.val; 
+                                   // :::
+                                   identifier = t;
+                               .)
+          "="                  (.  
+                                   nameFound = true; 
+                                   // :::
+                                   equal = t;
+                               .)
+          |                    (.  if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); .)
+        ) Expression<out expr, out exprNode> 
+                               (.  
+                                   arg.Expression = expr; 
+                                   attr.Arguments.Add(arg); 
+                                   arg.Terminate(t);
+                                   // :::
+                                   var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
+                                   argcNode.Terminate(t);
+                                   argsNode.Arguments.Add(argcNode);
+                               .)
       }
     ]
   ")"                          (.  argsNode.Terminate(t); .)
@@ -1530,7 +1595,7 @@ AttributeArguments<AttributeDeclaration attr, out AttributeArgumentsNode argsNod
 // Modifiers that can be assigned to types and members.
 // +m: List of modifier flags.
 // ------------------------------------------------------------------------------------
-ModifierList<Modifiers m>
+ModifierList<Modifiers m, ModifierNodeCollection mods>
 =
 {
   "new"                            (. m.Add(Modifier.@new, t); .)
@@ -1861,11 +1926,13 @@ Block<IBlockOwner block> (. CurrentElement = block.Owner as LanguageElement; .)
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 SwitchStatement<IBlockOwner block>
+                          (. ExpressionNode exprNode; .)
 =
   "switch"                (. SwitchStatement sws = new SwitchStatement(t, this, block); .)
                           (. CurrentElement = sws; .)
   "("                     (. Expression expr; .)
-  Expression<out expr>    (. sws.Expression = expr; .)
+  Expression<out expr, out exprNode>    
+                          (. sws.Expression = expr; .)
   ")" "{" 
   { 
     SwitchSection<sws> 
@@ -1881,6 +1948,7 @@ SwitchStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ConstStatement<IBlockOwner block>
+                         (. ExpressionNode exprNode; .)
 =
   "const"                (. TypeReference typeRef; .)
                          (. ConstStatement cs = new ConstStatement(t, this, block); .)
@@ -1888,7 +1956,8 @@ ConstStatement<IBlockOwner block>
   Type<out typeRef, false> 
   ident                  (. cs.Name = t.val; .)
   "="                    (. Expression expr; .)
-  Expression<out expr>   (. cs.Expression = expr; .)
+  Expression<out expr, out exprNode>   
+                         (. cs.Expression = expr; .)
                          (. 
                             if (block != null) block.Add(cs); 
                             cs.Terminate(t);
@@ -1896,7 +1965,8 @@ ConstStatement<IBlockOwner block>
   { ","                  (. cs = new ConstStatement(t, this, block); .)
     ident                (. cs.Name = t.val; .)
     "=" 
-    Expression<out expr> (. cs.Expression = expr; .)
+    Expression<out expr, out exprNode> 
+                         (. cs.Expression = expr; .)
                          (. 
                             if (block != null) block.Add(cs); 
                             cs.Terminate(t);
@@ -1967,12 +2037,14 @@ UnsafeBlock<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 IfStatement<IBlockOwner block>
+                         (. ExpressionNode exprNode; .)
 =   
   "if"                   (. IfStatement ifs = new IfStatement(t, this, block); .)
                          (. CurrentElement = ifs; .)
   "("                    (. if (block != null) block.Add(ifs); .)
                          (. Expression expr; .)
-    Expression<out expr> (. ifs.Condition = expr; .)
+    Expression<out expr, out exprNode> 
+                         (. ifs.Condition = expr; .)
   ")"                    (. ifs.CreateThenBlock(t); .)
   EmbeddedStatement<ifs.ThenStatements> (. ifs.ThenStatements.Terminate(t); .)
   [ "else"               (. ifs.CreateElseBlock(t); .)
@@ -1985,12 +2057,14 @@ IfStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 WhileStatement<IBlockOwner block>
+                          (. ExpressionNode exprNode; .)
 = 
   "while"                 (. WhileStatement whs = new WhileStatement(t, this, block); .)
                           (. CurrentElement = whs; .)
   "("                     (. if (block != null) block.Add(whs); .)
                           (. Expression expr; .)
-    Expression<out expr>  (. whs.Condition = expr; .)
+    Expression<out expr, out exprNode>  
+                          (. whs.Condition = expr; .)
   ")" 
   EmbeddedStatement<whs>  (. whs.Terminate(t); .)
 .    
@@ -2000,13 +2074,15 @@ WhileStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 DoWhileStatement<IBlockOwner block>
+                            (. ExpressionNode exprNode; .)
 =   
   "do"                      (. DoWhileStatement whs = new DoWhileStatement(t, this, block); .)
                             (. CurrentElement = whs; .)
     EmbeddedStatement<whs>  (. if (block != null) block.Add(whs); .)
   "while" 
   "("                       (. Expression expr; .)
-    Expression<out expr>    (. whs.Condition = expr; .)
+    Expression<out expr, out exprNode>    
+                            (. whs.Condition = expr; .)
   ")" ";"                   (. whs.Terminate(t); .)
 .    
 
@@ -2015,6 +2091,7 @@ DoWhileStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ForStatement<IBlockOwner block>
+                              (. ExpressionNode exprNode; .)
 = 
   "for"                       (. ForStatement fs = new ForStatement(t, this, block); .)
                               (. CurrentElement = fs; .)
@@ -2023,7 +2100,8 @@ ForStatement<IBlockOwner block>
       ForInitializer<fs>
     ] ";" 
     [                         (. Expression expr; .)
-      Expression<out expr>    (. fs.Condition = expr; .)
+      Expression<out expr, out exprNode>    
+                              (. fs.Condition = expr; .)
     ] ";" 
     [ 
       ForIterator<fs>         (. fs.CreateIteratorBlock(t); .)
@@ -2037,6 +2115,7 @@ ForStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ForEachStatement<IBlockOwner block>
+                                (. ExpressionNode exprNode; .)
 =
   "foreach"                     (. ForEachStatement fes = new ForEachStatement(t, this, block); .)
                                 (. CurrentElement = fes; .)
@@ -2048,7 +2127,8 @@ ForEachStatement<IBlockOwner block>
     )
     ident                       (. fes.Variable.Name = t.val; .)
     "in"                        (. Expression expr; .)
-    Expression<out expr>        (. fes.Expression = expr; .)
+    Expression<out expr, out exprNode>
+                                (. fes.Expression = expr; .)
   ")"                           (. fes.Add(fes.Variable); .)
   EmbeddedStatement<fes>        (. fes.Terminate(t); .)
 .    
@@ -2070,6 +2150,7 @@ BreakStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 GotoStatement<IBlockOwner block>
+                          (. ExpressionNode exprNode; .)
 =
   "goto"                  (. GotoStatement gs = new GotoStatement(t, this, block); .)
                           (. CurrentElement = gs; .)
@@ -2078,7 +2159,8 @@ GotoStatement<IBlockOwner block>
     ident                 (. gs.Name = t.val; .)
   | 
     "case"                (. Expression expr; .)
-    Expression<out expr>  (. gs.LabelExpression = expr; .)
+    Expression<out expr, out exprNode>  
+                          (. gs.LabelExpression = expr; .)
   | 
     "default"             (. gs.Name = t.val; .)
   ) ";"                   (. gs.Terminate(t); .)
@@ -2125,12 +2207,14 @@ TryFinallyBlock<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 LockStatement<IBlockOwner block>
+                          (. ExpressionNode exprNode; .)
 =   
   "lock"                  (. LockStatement ls = new LockStatement(t, this, block); .)
                           (. CurrentElement = ls; .)
                           (. if (block != null) block.Add(ls); .)
   "("                     (. Expression expr; .)
-    Expression<out expr>  (. ls.Expression = expr; .)
+    Expression<out expr, out exprNode>  
+                          (. ls.Expression = expr; .)
   ")" 
   EmbeddedStatement<ls>   (. ls.Terminate(t); .)
 .    
@@ -2140,6 +2224,7 @@ LockStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 UsingStatement<IBlockOwner block>
+          (. ExpressionNode exprNode; .)
 =
   "using" (. 
               UsingStatement us = new UsingStatement(t, this, block);
@@ -2150,7 +2235,8 @@ UsingStatement<IBlockOwner block>
   (
     IF (IsLocalVarDecl()) LocalVariableDeclaration<us>  
   |                             (. Expression expr; .)
-    Expression<out expr>        (. us.ResourceExpression = expr; .)
+    Expression<out expr, out exprNode>        
+                                (. us.ResourceExpression = expr; .)
   ) 
   ")" 
   EmbeddedStatement<us>         (. us.Terminate(t); .)
@@ -2161,11 +2247,13 @@ UsingStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ReturnStatement<IBlockOwner block>
+                           (. ExpressionNode exprNode; .)
 =
   "return"                 (. ReturnStatement yrs = new ReturnStatement(t, this, block); .)
                            (. CurrentElement = yrs; .)
   [                        (. Expression expr; .)
-  Expression<out expr>     (. yrs.Expression = expr; .)
+  Expression<out expr, out exprNode>     
+                           (. yrs.Expression = expr; .)
   ]
   ";"                      (. if (block != null) block.Add(yrs); .)
                            (. yrs.Terminate(t); .)
@@ -2177,11 +2265,13 @@ ReturnStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 ThrowStatement<IBlockOwner block>
+                          (. ExpressionNode exprNode; .)
 =
   "throw"                 (. ThrowStatement ts = new ThrowStatement(t, this, block); .)
                           (. CurrentElement = ts; .)
   [                       (. Expression expr; .)
-    Expression<out expr>  (. ts.Expression = expr; .)
+    Expression<out expr, out exprNode>
+                          (. ts.Expression = expr; .)
   ] ";"                   (. if (block != null) block.Add(ts); .)
                           (. ts.Terminate(t); .)
 .
@@ -2191,9 +2281,11 @@ ThrowStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 YieldReturnStatement<IBlockOwner block>
+                           (. ExpressionNode exprNode; .)
 =
   "return"                 (. Expression expr; .)
-  Expression<out expr>     (. YieldReturnStatement yrs = new YieldReturnStatement(t, this, block); .)
+  Expression<out expr, out exprNode>
+                           (. YieldReturnStatement yrs = new YieldReturnStatement(t, this, block); .)
                            (. CurrentElement = yrs; .)
                            (. yrs.Expression = expr; .)
                            (. if (block != null) block.Add(yrs); .)
@@ -2217,6 +2309,7 @@ YieldBreakStatement<IBlockOwner block>
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
 FixedStatement<IBlockOwner block>
+                              (. ExpressionNode exprNode; .)
 = 
   "fixed"                     (. FixedStatement fs = new FixedStatement(t, this, block); .)
                               (. CurrentElement = fs; .)
@@ -2229,14 +2322,16 @@ FixedStatement<IBlockOwner block>
                               (. CurrentElement = vas; .)
     ident                     (. vas.Name = t.val; .)
     "="                       (. Expression expr; .)
-    Expression<out expr>      (. vas.Expression = expr; .)
+    Expression<out expr, out exprNode>
+                              (. vas.Expression = expr; .)
                               (. fs.Assignments.Add(vas); .)
     { 
       ","                     (. vas = new ValueAssignmentStatement(t, this, block); .)
                               (. CurrentElement = vas; .)
       ident                   (. vas.Name = t.val; .)
       "=" 
-      Expression<out expr>    (. vas.Expression = expr; .)
+      Expression<out expr, out exprNode>
+                              (. vas.Expression = expr; .)
                               (. fs.Assignments.Add(vas); .)
     }
   ")" EmbeddedStatement<fs>   (. fs.Terminate(t); .)
@@ -2246,7 +2341,11 @@ FixedStatement<IBlockOwner block>
 // Defines a statement expression
 // +operateor: Assignement operator 
 // ------------------------------------------------------------------------------------
-StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
+StatementExpression<IBlockOwner block>
+                                        (. 
+                                           ExpressionNode exprNode;
+                                           bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); 
+                                        .)
 =                                       (. Expression expr = null; .)
   Unary<out expr>                       (. ExpressionStatement es = new ExpressionStatement(t, this, block); .)
                                         (. CurrentElement = es; .)
@@ -2255,7 +2354,8 @@ StatementExpression<IBlockOwner block>  (. bool isAssignment = assnStartOp[la.ki
     AssignmentOperator<out asgn>        (. es.Expression = asgn; .)
                                         (. asgn.LeftOperand = expr; .)
                                         (. Expression rightExpr; .)
-    Expression<out rightExpr>           (. asgn.RightOperand = rightExpr; .)
+    Expression<out rightExpr, out exprNode>
+                                        (. asgn.RightOperand = rightExpr; .)
   | (. if (isAssignment) Error("UNDEF", la, "error in assignment."); .)
   )                                     (. if (block != null) block.Add(es); .)
                                         (. es.Terminate(t); .)
@@ -2314,9 +2414,13 @@ SwitchSection<SwitchStatement sws>
 // Represents a label of a switch statement.
 // +expr: Label expression
 // ------------------------------------------------------------------------------------
-SwitchLabel<out Expression expr> (. expr = null; .)
+SwitchLabel<out Expression expr> 
+                 (. 
+                    expr = null; 
+                    ExpressionNode exprNode;
+                 .)
 = 
-  "case" Expression<out expr> ":"
+  "case" Expression<out expr, out exprNode> ":"
   | "default" ":"                 
 .
 
@@ -2418,9 +2522,11 @@ ImplicitLambdaParameterList<LambdaExpression lambda>
 // +lambda: Lambda expression
 // ------------------------------------------------------------------------------------
 LambdaFunctionBody<LambdaExpression lambda>
+                            (. ExpressionNode exprNode; .)
 =
   (                         (. Expression expr; .)
-    Expression<out expr>    (. lambda.Expression = expr; .)
+    Expression<out expr, out exprNode>    
+                            (. lambda.Expression = expr; .)
     |Block<lambda>
   )
 .
@@ -2430,6 +2536,7 @@ LambdaFunctionBody<LambdaExpression lambda>
 // +fromClause: From clause declaration
 // ------------------------------------------------------------------------------------
 FromClause<out FromClause fromClause>
+                                (. ExpressionNode exprNode; .)
 =
   "from"                        (. Token typeToken = la; .)
                                 (. Token start = t; .)
@@ -2442,7 +2549,8 @@ FromClause<out FromClause fromClause>
   )                             
   ident                         (. fromClause.Name = t.val; .)
   "in"                          (. Expression expr; .)
-  Expression<out expr>          (. fromClause.Expression = expr; .)
+  Expression<out expr, out exprNode>
+                                (. fromClause.Expression = expr; .)
                                 (. fromClause.Terminate(t); .)
 .
 
@@ -2484,11 +2592,13 @@ QueryBodyClause<QueryBody body>
 // +letClause: Let clause declaration
 // ------------------------------------------------------------------------------------
 LetClause<out LetClause letClause>
+                        (. ExpressionNode exprNode; .)
 =
   "let"                 (. letClause = new LetClause(t, this); .)
   ident                 (. letClause.Name = t.val; .)
   "="                   (. Expression expr; .)
-  Expression<out expr>  (. letClause.Expression = expr; .)
+  Expression<out expr, out exprNode>
+                        (. letClause.Expression = expr; .)
                         (. letClause.Terminate(t); .)
 .
 
@@ -2497,10 +2607,12 @@ LetClause<out LetClause letClause>
 // +whereClause: Where clause declaration
 // ------------------------------------------------------------------------------------
 WhereClause<out WhereClause whereClause>
+                        (. ExpressionNode exprNode; .)
 =
   "where"               (. whereClause = new WhereClause(t, this); .)
                         (. Expression expr; .)
-  Expression<out expr>  (. whereClause.Expression = expr; .)
+  Expression<out expr, out exprNode>  
+                        (. whereClause.Expression = expr; .)
                         (. whereClause.Terminate(t); .)
 .
 
@@ -2509,6 +2621,7 @@ WhereClause<out WhereClause whereClause>
 // +joinClause: Join clause declaration
 // ------------------------------------------------------------------------------------
 JoinClause<out JoinClause joinClause>
+                                (. ExpressionNode exprNode; .)
 =
   "join"                        (. Token typeToken = la; .)
                                 (. TypeReference typeRef; .)
@@ -2520,11 +2633,14 @@ JoinClause<out JoinClause joinClause>
   )
   ident                         (. joinClause.Name = t.val; .)
   "in"                          (. Expression inExpr; .)
-  Expression<out inExpr>        (. joinClause.InExpression = inExpr; .)
+  Expression<out inExpr, out exprNode>
+                                (. joinClause.InExpression = inExpr; .)
   "on"                          (. Expression onExpr; .)
-  Expression<out onExpr>        (. joinClause.OnExpression = onExpr; .)
+  Expression<out onExpr, out exprNode>
+                                (. joinClause.OnExpression = onExpr; .)
   "equals"                      (. Expression eqExpr; .)
-  Expression<out eqExpr>        (. joinClause.EqualsExpression = eqExpr; .)
+  Expression<out eqExpr, out exprNode>
+                                (. joinClause.EqualsExpression = eqExpr; .)
   [ 
     "into"                      
     ident                       (. joinClause.IntoIdentifier = t.val; .)
@@ -2550,9 +2666,13 @@ OrderByClause<out OrderByClause obClause>
 // +obClause: Order by clause declaration
 // ------------------------------------------------------------------------------------
 OrderingClause<OrderByClause obClause>
-                                (. Expression expr; .)
+                                (. 
+                                    Expression expr; 
+                                    ExpressionNode exprNode;
+                                .)
 =
-  Expression<out expr>          (. OrderingClause oc = new OrderingClause(t, this); .)
+  Expression<out expr, out exprNode>
+                                (. OrderingClause oc = new OrderingClause(t, this); .)
   [                             
     "ascending"                 (. oc.Ascending = true; .)
     | "descending"              (. oc.Ascending = false; .)
@@ -2565,9 +2685,11 @@ OrderingClause<OrderByClause obClause>
 // +body: Query expression body to add the clause for.
 // ------------------------------------------------------------------------------------
 SelectClause<QueryBody body>
+                        (. ExpressionNode exprNode; .)
 =
   "select"              (. Expression expr; .)
-  Expression<out expr>  (. body.Select = new SelectClause(t, this); .)
+  Expression<out expr, out exprNode>  
+                        (. body.Select = new SelectClause(t, this); .)
                         (. body.Select.Expression = expr; .)
                         (. body.Select.Terminate(t); .)
 .
@@ -2577,12 +2699,15 @@ SelectClause<QueryBody body>
 // +body: Query expression body to add the clause for.
 // ------------------------------------------------------------------------------------
 GroupClause<QueryBody body>
+                          (. ExpressionNode exprNode; .)
 =
   "group"                 (. Expression grExpr; .)
-  Expression<out grExpr>  (. body.GroupBy = new GroupByClause(t, this); .)
+  Expression<out grExpr, out exprNode>
+                          (. body.GroupBy = new GroupByClause(t, this); .)
                           (. body.GroupBy.Expression = grExpr; .)
   "by"                    (. Expression byExpr; .)
-  Expression<out byExpr>  (. body.GroupBy.ByExpression = byExpr; .)
+  Expression<out byExpr, out exprNode>
+                          (. body.GroupBy.ByExpression = byExpr; .)
                           (. body.GroupBy.Terminate(t); .)
 .
 
@@ -2602,7 +2727,12 @@ QueryContinuation<QueryBody body>
 // Retrieves an expression.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
-Expression<out Expression expr>   (. expr = null; .)
+Expression<out Expression expr, out ExpressionNode exprNode>   
+                                  (. 
+                                      expr = null; 
+                                      // :::
+                                      exprNode = null;
+                                  .)
 =                                 (. Expression leftExpr; .)
   (
     IF (IsQueryExpression())      (. QueryExpression query = new QueryExpression(t, this); .)
@@ -2620,7 +2750,8 @@ Expression<out Expression expr>   (. expr = null; .)
     IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
                                   (. AssignmentOperator asgn; .)
     AssignmentOperator<out asgn>  (. Expression rightExpr; .)
-    Expression<out rightExpr>     (. asgn.RightOperand = rightExpr; .)
+    Expression<out rightExpr, out exprNode>
+                                  (. asgn.RightOperand = rightExpr; .)
                                   (. asgn.LeftOperand = leftExpr; .)
                                   (. expr = asgn; .)
   | (. BinaryOperator simpleExpr; .)
@@ -2639,9 +2770,11 @@ Expression<out Expression expr>   (. expr = null; .)
     [                             (. ConditionalOperator condExpr = new ConditionalOperator(t, this, expr); .)
                                   (. expr = condExpr; .)    
       "?"                         (. Expression trueExpr; .)
-      Expression<out trueExpr>    (. condExpr.TrueExpression = trueExpr; .)
+      Expression<out trueExpr, out exprNode>
+                                  (. condExpr.TrueExpression = trueExpr; .)
       ":"                         (. Expression falseExpr; .)
-      Expression<out falseExpr>   (. condExpr.FalseExpression = falseExpr; .)
+      Expression<out falseExpr, out exprNode>
+                                  (. condExpr.FalseExpression = falseExpr; .)
                                   (. condExpr.Terminate(t); .)
     ]
   )
@@ -3021,13 +3154,15 @@ Unary<out Expression expr>
 // Retrieves a primary expression.
 // +expr: expression retrieved.
 // ------------------------------------------------------------------------------------
-Primary<out Expression expr>  (. Expression innerExpr = null;
-                                 expr = null;
+Primary<out Expression expr>  (. 
+                                  Expression innerExpr = null;
+                                  expr = null;
+                                  ExpressionNode exprNode;
                               .)
 =
   ( 
     Literal<out innerExpr>             
-  | "(" Expression<out innerExpr> ")"  (. if (innerExpr != null) innerExpr.BracketsUsed = true; .)
+  | "(" Expression<out innerExpr, out exprNode> ")"  (. if (innerExpr != null) innerExpr.BracketsUsed = true; .)
   | PrimitiveNamedLiteral<out innerExpr>
   | NamedLiteral<out innerExpr>
   | "this" (. innerExpr = new ThisLiteral(t, this); .)
@@ -3163,13 +3298,16 @@ BaseNamedLiteral<out Expression expr>  (. expr = null; .)
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
 BaseIndexerOperator<out Expression expr>
+                                  (. ExpressionNode exprNode; .)
 = 
   "["                             (. BaseIndexerOperator bio = new BaseIndexerOperator(t, this); .)
                                   (. expr = bio; .)
                                   (. Expression indexExpr; .)
-  Expression<out indexExpr>       (. bio.Indexes.Add(indexExpr); .) 
+  Expression<out indexExpr, out exprNode>
+                                  (. bio.Indexes.Add(indexExpr); .) 
     { "," 
-      Expression<out indexExpr>   (. bio.Indexes.Add(indexExpr); .) 
+      Expression<out indexExpr, out exprNode>   
+                                  (. bio.Indexes.Add(indexExpr); .) 
     } 
   "]"                             (. bio.Terminate(t); .)
 .
@@ -3205,11 +3343,13 @@ SizeOfOperator<out Expression expr>
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
 CheckedOperator<out Expression expr>
+                                (. ExpressionNode exprNode; .)
 = 
   "checked"                     (. CheckedOperator cop = new CheckedOperator(t, this); .)
   "("                           (. expr = cop; .)
                                 (. Expression innerExpr; .)
-    Expression<out innerExpr>   (. cop.Operand = innerExpr; .)
+    Expression<out innerExpr, out exprNode>   
+                                (. cop.Operand = innerExpr; .)
   ")"                           (. cop.Terminate(t); .)
 .
 
@@ -3218,11 +3358,13 @@ CheckedOperator<out Expression expr>
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
 UncheckedOperator<out Expression expr>
+                                (. ExpressionNode exprNode; .)
 = 
   "unchecked"                   (. UncheckedOperator uop = new UncheckedOperator(t, this); .)
   "("                           (. expr = uop; .)
                                 (. Expression innerExpr; .)
-    Expression<out innerExpr>   (. uop.Operand = innerExpr; .)
+    Expression<out innerExpr, out exprNode>
+                                (. uop.Operand = innerExpr; .)
   ")"                           (. uop.Terminate(t); .)
 .
 
@@ -3286,12 +3428,14 @@ MemberDeclarator<out MemberDeclarator init>
                                   (. 
                                      init = null; 
                                      Expression expr = null;
+                                     ExpressionNode exprNode;
                                   .)
 =
   (
     IF (IsMemberInitializer())
     ident                         (. Token start = t; .)
-    "=" Expression<out expr>      (. init = new MemberDeclarator(start, this, expr, start.val); .)
+    "=" Expression<out expr, out exprNode>
+                                  (. init = new MemberDeclarator(start, this, expr, start.val); .)
   | 
                                   (. Token start = la; .)
     Primary<out expr>             (. init = new MemberDeclarator(start, this, expr, start.val, true); .)
@@ -3315,6 +3459,7 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
                                    (. 
                                       ArrayInitializer arrayInit;
                                       nop.Type = typeRef; 
+                                      ExpressionNode exprNode;
                                    .)
 =
   (
@@ -3346,10 +3491,12 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
 
   | // --- New array creation
     "["                           (. Expression dimExpr; .)
-    Expression<out dimExpr>       (. nop.Dimensions.Add(dimExpr); .)
+    Expression<out dimExpr, out exprNode>
+                                  (. nop.Dimensions.Add(dimExpr); .)
     { 
       "," 
-      Expression<out dimExpr>     (. nop.Dimensions.Add(dimExpr); .)
+      Expression<out dimExpr, out exprNode>
+                                  (. nop.Dimensions.Add(dimExpr); .)
     } 
     "]" 
     { IF (IsDims()) 
@@ -3443,19 +3590,23 @@ ElementInitializerList<out Initializer init>
 // Declares an element initializer of a collection used with "new" operator
 // +init: initializer resulted from parsing
 // ------------------------------------------------------------------------------------
-ElementInitializer<out Initializer init>   (. Expression expr; init = null; .)
+ElementInitializer<out Initializer init>   
+                                          (. 
+                                              Expression expr; init = null; 
+                                              ExpressionNode exprNode;
+                                          .)
 =
   (
     IF (IsValueInitializer())
-    Expression<out expr>                  (. init = new ExpressionInitializer(t, this, expr); .)
+    Expression<out expr, out exprNode>    (. init = new ExpressionInitializer(t, this, expr); .)
   | 
                                           (. ExpressionListInitializer listInit = new ExpressionListInitializer(t, this); .)
                                           (. init = listInit; .)
     "{"
-      Expression<out expr>                (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
+      Expression<out expr, out exprNode>  (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
       {
         ","
-        Expression<out expr>              (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
+        Expression<out expr, out exprNode> (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
       }
     "}"
   )                                       (. if (init != null) init.Terminate(t); .)
@@ -3483,13 +3634,15 @@ MemberInitializerList<out MemberInitializerList initList>
 // +init: member initializer
 // ------------------------------------------------------------------------------------
 MemberInitializer<out MemberInitializer init>
+                              (. ExpressionNode exprNode; .)
 =
   ident                       (. Token startToken = t; .)
   "="                         (. Expression expr; .)
                               (. init = null; .)
   (
     IF (IsValueInitializer())
-    Expression<out expr>      (. init = new MemberInitializer(startToken, this, expr); .)
+    Expression<out expr, out exprNode>
+                              (. init = new MemberInitializer(startToken, this, expr); .)
   |                           
                               (. Initializer compoundInit; .)
     ObjectOrCollectionInitializer<out compoundInit>
@@ -3540,13 +3693,16 @@ AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParamet
 // Declaration of a "new" operator.
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
-ArrayIndexer<ArrayIndexerOperator indexer>  
+ArrayIndexer<ArrayIndexerOperator indexer> 
+                              (. ExpressionNode exprNode; .) 
 = 
   "["                         (. Expression expr; .)
-  Expression<out expr>        (. indexer.Indexers.Add(expr); .)
+  Expression<out expr, out exprNode>
+                              (. indexer.Indexers.Add(expr); .)
   { 
     "," 
-    Expression<out expr>      (. indexer.Indexers.Add(expr); .)
+    Expression<out expr, out exprNode>
+                              (. indexer.Indexers.Add(expr); .)
   } 
   "]"
 .

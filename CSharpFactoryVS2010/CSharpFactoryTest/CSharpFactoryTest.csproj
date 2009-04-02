@@ -113,6 +113,7 @@
     <Compile Include="CSharp3Tests.cs" />
     <Compile Include="LanguageElements\Comments.cs" />
     <Compile Include="LanguageElements\ExternAliasDirective.cs" />
+    <Compile Include="LanguageElements\GlobalAttributesTest.cs" />
     <Compile Include="LanguageElements\Members.cs" />
     <Compile Include="LanguageElements\Methods.cs" />
     <Compile Include="LanguageElements\Overloading.cs" />
@@ -505,6 +506,7 @@
     <Compile Include="LanguageElements\VisibilityTest.cs" />
     <Compile Include="SyntaxTreeWriter\SyntaxTreeFileWriterTest.cs" />
     <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
+    <None Include="TestFiles\GlobalAttributes\GlobalAttributesOk.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression3.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression2.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression1.cs" />

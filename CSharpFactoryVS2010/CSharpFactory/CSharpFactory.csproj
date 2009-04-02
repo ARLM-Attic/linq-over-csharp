@@ -334,6 +334,7 @@
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeTextWriter.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeWriter.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\ControlSegments.cs" />
+    <Compile Include="SyntaxTree\Types\ModifierNode.cs" />
     <Compile Include="SyntaxTree\Types\NameTagNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeArgumentListNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeOrNamespaceNode.cs" />

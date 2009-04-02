@@ -79,6 +79,12 @@ namespace CSharpFactory.Syntax
   /// <summary>
   /// This node represents an attribute with its arguments.
   /// </summary>
+  /// <remarks>
+  /// Syntax:
+  ///   AttributeNode: 
+  ///     TypeOrNamespaceNode 
+  ///       [ "(" [ AttributeArgumentNode ] { AttributeArgumentContinuationNode }  ")" ]
+  /// </remarks>
   // ================================================================================================
   public class AttributeNode : SyntaxNode 
   {
@@ -91,6 +97,7 @@ namespace CSharpFactory.Syntax
     public AttributeNode(Token start)
       : base(start)
     {
+      Arguments = new ImmutableCollection<AttributeArgumentNode>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -103,10 +110,34 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the opening parenthesis token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token OpenParenthesis { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the closing parenthesis token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token CloseParenthesis { get { return TerminatingToken; } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this attribute defines arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool DefinesArguments
+    {
+      get { return OpenParenthesis != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the arguments belonging to this attribute.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AttributeArgumentsNode Arguments { get; internal set; }
+    public ImmutableCollection<AttributeArgumentNode> Arguments { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -116,7 +147,10 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has arguments; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasArguments { get { return Arguments != null; } }
+    public bool HasArguments
+    {
+      get { return DefinesArguments && Arguments != null && Arguments.Count > 0; }
+    }
   }
 
   // ================================================================================================
@@ -247,41 +281,5 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token Separator { get; internal set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a list of attribute arguments.
-  /// </summary>
-  /// <remarks>
-  /// Syntax:
-  ///   AttributeArgumentsNode:
-  ///     "(" [ AttributeArgumentNode { AttributeArgumentContinuationNode } ] ")"
-  /// 
-  /// The openining parenthesis is represented by StartToken, the closing parenthesis with
-  /// TerminatingToken.
-  /// </remarks>
-  // ================================================================================================
-  public sealed class AttributeArgumentsNode : SyntaxNode
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AttributeArgumentsNode"/> class.
-    /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    // ----------------------------------------------------------------------------------------------
-    public AttributeArgumentsNode(Token start)
-      : base(start)
-    {
-      Arguments = new ImmutableCollection<AttributeArgumentNode>();
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the arguments.
-    /// </summary>
-    /// <value>The arguments.</value>
-    // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<AttributeArgumentNode> Arguments { get; private set; }
   }
 }

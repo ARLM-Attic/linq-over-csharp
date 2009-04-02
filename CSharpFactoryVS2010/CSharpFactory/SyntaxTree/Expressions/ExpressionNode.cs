@@ -14,7 +14,14 @@ namespace CSharpFactory.Syntax
   // ================================================================================================
   public abstract class ExpressionNode: SyntaxNode
   {
-    protected ExpressionNode(Token start) : base(start)
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ExpressionNode"/> class.
+    /// </summary>
+    /// <param name="start">Token providing information about the element.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected ExpressionNode(Token start)
+      : base(start)
     {
     }
   }
