@@ -282,4 +282,14 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public Token Separator { get; internal set; }
   }
+
+  // ================================================================================================
+  /// <summary>
+  /// This class represents a collection of attribute decoration nodes.
+  /// </summary>
+  // ================================================================================================
+  public sealed class AttributeDecorationNodeCollection : 
+    ImmutableCollection<AttributeDecorationNode>
+  {
+  }
 }

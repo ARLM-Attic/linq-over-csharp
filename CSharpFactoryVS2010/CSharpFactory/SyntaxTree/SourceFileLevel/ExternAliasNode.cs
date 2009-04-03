@@ -23,18 +23,27 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// Initializes a new instance of the <see cref="ExternAliasNode"/> class.
     /// </summary>
+    /// <param name="parent">The parent namespace scope node.</param>
     /// <param name="start">The start token.</param>
     /// <param name="alias">The alias token.</param>
     /// <param name="identifier">The identifier token.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExternAliasNode(Token start, Token alias, Token identifier, Token terminating) : 
-      base(start)
+    public ExternAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token identifier, 
+      Token terminating) : base(start)
     {
+      Parent = parent;
       AliasToken = alias;
       IdentifierToken = identifier;
       Terminate(terminating);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent of this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -242,19 +242,21 @@ PRODUCTIONS
 CS2
 =                                                               
   { 
-    IF (IsExternAliasDirective()) (. PragmaHandler.SignRealToken(); .)
-      ExternAliasDirective<null, null>
+    IF (IsExternAliasDirective()) 
+      (. PragmaHandler.SignRealToken(); .)
+      ExternAliasDirective<null, SourceFileNode>
   }
   {
-    UsingDirective<null, null>
+    UsingDirective<null, SourceFileNode>
   }
   {
-    IF (IsGlobalAttrTarget()) (. PragmaHandler.SignRealToken(); .)
+    IF (IsGlobalAttrTarget()) 
+      (. PragmaHandler.SignRealToken(); .)
       GlobalAttributes
   }
   {
     (. PragmaHandler.SignRealToken(); .)
-    NamespaceMemberDeclaration<null, File, null>
+    NamespaceMemberDeclaration<null, File, SourceFileNode>
   }
 .
 
@@ -263,41 +265,42 @@ CS2
 // +parent: Parent namespace of the "extern alias" directive. If this parameter is
 //   null, the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-ExternAliasDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
-             (.
-                 Token start;
-                 Token alias;
-                 Token identifier;
-             .)
+ExternAliasDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
+  (.
+     Token start;
+     Token alias;
+     Token identifier;
+  .)
 =
-  "extern"   (. 
-                 Token token = t; 
-                 // :::
-                 start = t;
-             .)
-  ident      (. 
-                 if (t.val != "alias") 
-                   Error1003(la, "alias"); 
-                 // :::
-                 alias = t;
-             .)
-  ident      (. 
-                 ExternalAlias externAlias = new ExternalAlias(token, this);
-                 externAlias.Name = t.val;
-                 CurrentElement = externAlias;
-                 if (parent == null) File.ExternAliases.Add(externAlias); 
-                 else parent.ExternAliases.Add(externAlias); 
-                 // :::
-                 identifier = t;
-             .)
-  ";"        (. 
-                 externAlias.Terminate(t); 
-                 // ::: 
-                 NamespaceScopeNode nsScope = parentNode == null
-                   ? (NamespaceScopeNode)SourceFileNode 
-                   : (NamespaceScopeNode)parentNode;
-                 nsScope.AddExternAlias(start, alias, identifier, t);
-             .)
+  "extern"   
+  (. 
+     Token token = t; 
+     // :::
+     start = t;
+  .)
+  ident
+  (. 
+     if (t.val != "alias") 
+       Error1003(la, "alias"); 
+     // :::
+     alias = t;
+  .)
+  ident      
+  (. 
+     ExternalAlias externAlias = new ExternalAlias(token, this);
+     externAlias.Name = t.val;
+     CurrentElement = externAlias;
+     if (parent == null) File.ExternAliases.Add(externAlias); 
+     else parent.ExternAliases.Add(externAlias); 
+     // :::
+     identifier = t;
+  .)
+  ";"
+  (. 
+     externAlias.Terminate(t); 
+     // ::: 
+     parentNode.AddExternAlias(start, alias, identifier, t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -305,7 +308,7 @@ ExternAliasDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNo
 // +parent: Parent namespace of the "using" directive. If this parameter is null, 
 //   the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
-UsingDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
+UsingDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
 =                          (.
                               // :::
                               Token alias = null;
@@ -334,13 +337,10 @@ UsingDirective<NamespaceFragment parent, NamespaceDeclarationNode parentNode>
                               else parent.Usings.Add(uc); 
                               uc.Terminate(t);
                               // :::
-                              NamespaceScopeNode nsScope = parentNode == null
-                                ? (NamespaceScopeNode)SourceFileNode 
-                                : (NamespaceScopeNode)parentNode;
                               if (alias == null)
-                                nsScope.AddUsing(start, nsNode, t);
+                                parentNode.AddUsing(start, nsNode, t);
                               else
-                                nsScope.AddUsingWithAlias(start, alias, eq, nsNode, t);
+                                parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
                            .)
 .
 
@@ -408,12 +408,12 @@ GlobalAttributes<>
 // +file: file that defines the namespace.
 // ------------------------------------------------------------------------------------
 NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file, 
-  NamespaceDeclarationNode parentNode>  
+  NamespaceScopeNode parentNode>  
 =
   "namespace"    (. 
                      Token startToken = t; 
                      // ::: 
-                     var nsDecl = new NamespaceDeclarationNode(t);
+                     var nsDecl = new NamespaceDeclarationNode(parentNode, t);
                  .)
   ident          (. 
                      StringBuilder sb = new StringBuilder(t.val); 
@@ -434,10 +434,7 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file,
                      NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
                      CurrentElement = ns;
                      // :::
-                     NamespaceScopeNode nsScope = parentNode == null
-                       ? (NamespaceScopeNode)SourceFileNode 
-                       : (NamespaceScopeNode)parentNode;
-                     nsScope.NamespaceDeclarations.Add(nsDecl);
+                     parentNode.NamespaceDeclarations.Add(nsDecl);
                  .)
   "{"            (.
                      // :::
@@ -463,10 +460,11 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file,
                      TypeDeclaration td;
                      AttributeCollection attrs = new AttributeCollection();
                      // :::
-                     AttributeDecorationNode attrNode;
+                     var mod = new ModifierNodeCollection();
+                     var attrNodes = new AttributeDecorationNodeCollection();
                  .)  
-      { Attributes<attrs, out attrNode> } 
-      ModifierList<m> 
+      AttributeDecorations<attrs, attrNodes>
+      ModifierList<m, mod> 
       TypeDeclaration<attrs, null, m, out td>    (.
                                                     if (td != null)
                                                     {
@@ -550,14 +548,17 @@ ClassBase<ClassDeclaration cd>
 // +td: Class declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
 ClassBody<TypeDeclaration td>
-=                              (. 
-                                   AttributeCollection attrs = new AttributeCollection(); 
-                                   // :::
-                                   AttributeDecorationNode attrNode;
+=                              (.  AttributeCollection attrs = new AttributeCollection(); .)
+  "{" {                        (. 
+                                   attrs = new AttributeCollection(); 
+                                   var attrNodes = new AttributeDecorationNodeCollection();
                                .)
-  "{" {                               (. attrs = new AttributeCollection(); .)
-        { Attributes<attrs, out attrNode> }         (. Modifiers m = new Modifiers(this); .)                          
-        ModifierList<m>
+        AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   Modifiers m = new Modifiers(this); 
+                                   var mod = new ModifierNodeCollection();
+                               .)                          
+        ModifierList<m, mod>
         ClassMemberDeclaration<attrs, m, td>
       }
   "}"
@@ -598,14 +599,18 @@ StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
 // +td: Structure declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
 StructBody<TypeDeclaration td>
-=                              (. 
-                                   AttributeCollection attrs = new AttributeCollection(); 
-                                   // :::
-                                   AttributeDecorationNode attrNode;
+=                              (.  AttributeCollection attrs = new AttributeCollection(); .)
+  "{" {                        (. 
+                                   attrs = new AttributeCollection(); 
+                                   var attrNodes = new AttributeDecorationNodeCollection();
                                .)
-  "{" {                              (. attrs = new AttributeCollection(); .)
-        { Attributes<attrs, out attrNode> }        (. Modifiers m = new Modifiers(this); .)                             
-        ModifierList<m>
+        AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   Modifiers m = new Modifiers(this); 
+                                   // :::
+                                   var mod = new ModifierNodeCollection();
+                               .)                             
+        ModifierList<m, mod>
         StructMemberDeclaration<attrs, m, td>
       }
   "}"   
@@ -658,10 +663,10 @@ EnumMemberDeclaration<EnumDeclaration ed>
 =                            (. 
                                  AttributeCollection attrs = new AttributeCollection(); 
                                  // :::
-                                 AttributeDecorationNode attrNode;
                                  ExpressionNode exprNode;
+                                 var attrNodes = new AttributeDecorationNodeCollection();
                              .)
-  { Attributes<attrs, out attrNode> } 
+  AttributeDecorations<attrs, attrNodes>
   ident                      (. 
                                  EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
                                  CurrentElement = ev;
@@ -1070,15 +1075,17 @@ InterfaceBase<InterfaceDeclaration ifd>
 // ------------------------------------------------------------------------------------
 InterfaceMemberDeclaration<InterfaceDeclaration ifd>
                                (. 
-                                   Modifiers m = new Modifiers(this);
+                                   var m = new Modifiers(this);
                                    TypeReference typeRef;
-                                   AttributeCollection attrs = new AttributeCollection();
+                                   var attrs = new AttributeCollection();
+                                   var pars = new FormalParameterCollection();
                                    // :::
-                                   AttributeDecorationNode attrNode;
+                                   var mod = new ModifierNodeCollection();
+                                   var attrNodes = new AttributeDecorationNodeCollection();
                                .)
-=                              (. FormalParameterCollection pars = new FormalParameterCollection(); .)
-  { Attributes<attrs, out attrNode> } 
-  ModifierList<m>
+=                              
+  AttributeDecorations<attrs, attrNodes>
+  ModifierList<m, mod>
   ( Type<out typeRef, true>
     (                          
       ident                   (.
@@ -1232,10 +1239,11 @@ FormalParameterList<FormalParameterCollection pars>
                                           TypeReference typeRef = null; 
                                           AttributeCollection attrs = new AttributeCollection();
                                           // :::
-                                          AttributeDecorationNode attrNode;
                                           ExpressionNode exprNode;
+                                          var attrNodes = new AttributeDecorationNodeCollection();
                                        .)
-  { Attributes<attrs, out attrNode> }      (. 
+  AttributeDecorations<attrs, attrNodes>                                       
+                                       (. 
                                           FormalParameter fp = new FormalParameter(t, this); 
                                           fp.AssignAttributes(attrs);
                                        .)
@@ -1286,14 +1294,20 @@ Argument<ArgumentList argList>
 // +prop: property holding the accessor.
 // ------------------------------------------------------------------------------------
 AccessorDeclarations<PropertyDeclaration prop>                                    
-       (. 
-          AttributeCollection attrs = new AttributeCollection();
-          AccessorDeclaration accessor = null;
-          // :::
-          AttributeDecorationNode attrNode;
-       .)
-= { Attributes<attrs, out attrNode> }     (. Modifiers am = new Modifiers(this); .)
-  ModifierList<am>                    
+                               (. 
+                                   AttributeCollection attrs = new AttributeCollection();
+                                   AccessorDeclaration accessor = null;
+                                   // :::
+                                   var attrNodes = new AttributeDecorationNodeCollection();
+                               .)
+= 
+  AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   Modifiers am = new Modifiers(this); 
+                                   // :::
+                                   var mod = new ModifierNodeCollection();
+                               .)
+  ModifierList<am, mod>                    
   ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                       (. CurrentElement = accessor; .)
   | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
@@ -1308,9 +1322,16 @@ AccessorDeclarations<PropertyDeclaration prop>
                                          accessor.SetModifiers(am.Value); 
                                          accessor.AssignAttributes(attrs);
                                       .)
-  [                                   (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs, out attrNode> }   (. am = new Modifiers(this); .)
-    ModifierList<am>                  
+  [                                   (. 
+                                          attrs = new AttributeCollection(); 
+                                          attrNodes = new AttributeDecorationNodeCollection();
+                                      .)
+    AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   am = new Modifiers(this); 
+                                   mod = new ModifierNodeCollection();
+                               .)
+    ModifierList<am, mod>                  
     ( IF ("get".Equals(la.val)) ident (. 
                                          if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
                                          accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
@@ -1339,14 +1360,20 @@ AccessorDeclarations<PropertyDeclaration prop>
 // +prop: event property holding the accessor.
 // ------------------------------------------------------------------------------------
 EventAccessorDeclarations<EventPropertyDeclaration prop>                                                 
-       (. 
-          AttributeCollection attrs = new AttributeCollection();
-          AccessorDeclaration accessor = null;
-          // :::
-          AttributeDecorationNode attrNode;
-       .)
-= { Attributes<attrs, out attrNode> }     (. Modifiers am = new Modifiers(this); .)
-  ModifierList<am>                    
+                               (. 
+                                   AttributeCollection attrs = new AttributeCollection();
+                                   AccessorDeclaration accessor = null;
+                                   // :::
+                                   var attrNodes = new AttributeDecorationNodeCollection();
+                               .)
+= 
+  AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   Modifiers am = new Modifiers(this); 
+                                   // :::
+                                   var mod = new ModifierNodeCollection();
+                               .)
+  ModifierList<am, mod>                    
   ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                           (. CurrentElement = accessor; .)
   | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
@@ -1359,9 +1386,17 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
                                              accessor.SetModifiers(am.Value); 
                                              accessor.AssignAttributes(attrs); 
                                           .)
-  [                                       (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs, out attrNode> }   (. am = new Modifiers(this); .)
-    ModifierList<am>                      
+  [                                       (. 
+                                              attrs = new AttributeCollection(); 
+                                              attrNodes = new AttributeDecorationNodeCollection();
+                                          .)
+    AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   am = new Modifiers(this); 
+                                   // :::
+                                   mod = new ModifierNodeCollection();
+                               .)
+    ModifierList<am, mod>                      
     ( IF ("add".Equals(la.val)) ident     (. 
                                              if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
                                              accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
@@ -1388,14 +1423,19 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
 // +prop: event property holding the accessor.
 // ------------------------------------------------------------------------------------
 InterfaceAccessors<PropertyDeclaration prop>
-       (. 
-          AttributeCollection attrs = new AttributeCollection();
-          AccessorDeclaration accessor = null;
-          // :::
-          AttributeDecorationNode attrNode;
-       .)
-= { Attributes<attrs, out attrNode> }   (. Modifiers am = new Modifiers(this); .)
-  ModifierList<am>                    
+                               (. 
+                                   AttributeCollection attrs = new AttributeCollection();
+                                   AccessorDeclaration accessor = null;
+                                   // :::
+                                   var attrNodes = new AttributeDecorationNodeCollection();
+                               .)
+= 
+  AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   Modifiers am = new Modifiers(this); 
+                                   var mod = new ModifierNodeCollection();
+                               .)
+  ModifierList<am, mod>                    
   ( IF ("get".Equals(la.val)) ident     (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
                                         (. CurrentElement = accessor; .)
   | IF ("set".Equals(la.val)) ident     (. accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
@@ -1406,9 +1446,16 @@ InterfaceAccessors<PropertyDeclaration prop>
                                            accessor.SetModifiers(am.Value); 
                                            accessor.AssignAttributes(attrs); 
                                         .)
-  [                                     (. attrs = new AttributeCollection(); .)                               
-    { Attributes<attrs, out attrNode> } (. am = new Modifiers(this); .)
-    ModifierList<am>                    
+  [                                     (. 
+                                            attrs = new AttributeCollection(); 
+                                            attrNodes = new AttributeDecorationNodeCollection();
+                                        .)
+    AttributeDecorations<attrs, attrNodes>
+                               (. 
+                                   am = new Modifiers(this); 
+                                   mod = new ModifierNodeCollection();
+                               .)
+    ModifierList<am, mod>                    
     ( IF ("get".Equals(la.val)) ident   (. 
                                            if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
                                            accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
@@ -1479,6 +1526,18 @@ Attributes<AttributeCollection attrs, out AttributeDecorationNode attrNode>
                                    // :::
                                    attrNode.Terminate(t);
                                .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of attributes.
+// +attrs: List holding the attribute declarations.
+// ------------------------------------------------------------------------------------
+AttributeDecorations<AttributeCollection attrs, AttributeDecorationNodeCollection attrNodes>
+                               (.  AttributeDecorationNode attrNode; .)
+=
+  {
+    Attributes<attrs, out attrNode>  (. attrNodes.Add(attrNode); .)
+  }
 .
 
 // ------------------------------------------------------------------------------------
@@ -1598,20 +1657,22 @@ AttributeArguments<AttributeDeclaration attr, AttributeNode argsNode>
 ModifierList<Modifiers m, ModifierNodeCollection mods>
 =
 {
-  "new"                            (. m.Add(Modifier.@new, t); .)
-  | "public"                       (. m.Add(Modifier.@public, t); .)
-  | "protected"                    (. m.Add(Modifier.@protected, t); .)
-  | "internal"                     (. m.Add(Modifier.@internal, t); .)
-  | "private"                      (. m.Add(Modifier.@private, t); .)
-  | "unsafe"                       (. m.Add(Modifier.@unsafe, t); .)
-  | "static"                       (. m.Add(Modifier.@static, t); .)
-  | "readonly"                     (. m.Add(Modifier.@readonly, t); .)
-  | "volatile"                     (. m.Add(Modifier.@volatile, t); .)
-  | "virtual"                      (. m.Add(Modifier.@virtual, t); .)
-  | "sealed"                       (. m.Add(Modifier.@sealed, t); .)
-  | "override"                     (. m.Add(Modifier.@override, t); .)
-  | "abstract"                     (. m.Add(Modifier.@abstract, t); .)
-  | "extern"                       (. m.Add(Modifier.@extern, t); .)
+  (
+    "new"                            (. m.Add(Modifier.@new, t); .)
+    | "public"                       (. m.Add(Modifier.@public, t); .)
+    | "protected"                    (. m.Add(Modifier.@protected, t); .)
+    | "internal"                     (. m.Add(Modifier.@internal, t); .)
+    | "private"                      (. m.Add(Modifier.@private, t); .)
+    | "unsafe"                       (. m.Add(Modifier.@unsafe, t); .)
+    | "static"                       (. m.Add(Modifier.@static, t); .)
+    | "readonly"                     (. m.Add(Modifier.@readonly, t); .)
+    | "volatile"                     (. m.Add(Modifier.@volatile, t); .)
+    | "virtual"                      (. m.Add(Modifier.@virtual, t); .)
+    | "sealed"                       (. m.Add(Modifier.@sealed, t); .)
+    | "override"                     (. m.Add(Modifier.@override, t); .)
+    | "abstract"                     (. m.Add(Modifier.@abstract, t); .)
+    | "extern"                       (. m.Add(Modifier.@extern, t); .)
+  )                                  (. mods.Add(t); .)
 }
 .
 
@@ -3801,9 +3862,9 @@ TypeParameter<out TypeParameter tp>
 =                        (. 
                             AttributeCollection attrs = new AttributeCollection(); 
                             // :::
-                            AttributeDecorationNode attrNode;
+                            var attrNodes = new AttributeDecorationNodeCollection();
                          .)
-  { Attributes<attrs, out attrNode> } 
+  AttributeDecorations<attrs, attrNodes>
   ident                  (. 
                             tp = new TypeParameter(t, this);
                             tp.Name = t.val;

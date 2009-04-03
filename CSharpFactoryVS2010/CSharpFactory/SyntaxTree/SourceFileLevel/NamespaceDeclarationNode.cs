@@ -25,12 +25,21 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceDeclarationNode"/> class.
     /// </summary>
+    /// <param name="parent">The parent node.</param>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceDeclarationNode(Token start): base(start)
+    public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start): base(start)
     {
+      Parent = parent;
       NameTags = new NameTagCollection();
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent of this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

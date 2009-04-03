@@ -23,16 +23,25 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// Initializes a new instance of the <see cref="UsingNode"/> class.
     /// </summary>
+    /// <param name="parent">The parent node.</param>
     /// <param name="start">Token providing information about the element.</param>
     /// <param name="namespaceNode">The namespace node.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingNode(Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
+    public UsingNode(NamespaceScopeNode parent, Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
       : base(start)
     {
+      Parent = parent;
       TypeName = namespaceNode;
       Terminate(terminating);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the parent of this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -79,15 +88,16 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// Initializes a new instance of the <see cref="UsingWithAliasNode"/> class.
     /// </summary>
+    /// <param name="parent">The parent node.</param>
     /// <param name="start">The start token.</param>
     /// <param name="alias">The alias token.</param>
     /// <param name="equalToken">The equal token.</param>
     /// <param name="typeName">Name of the type.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingWithAliasNode(Token start, Token alias, Token equalToken, 
+    public UsingWithAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token equalToken, 
       TypeOrNamespaceNode typeName, Token terminating)
-      : base(start, typeName, terminating)
+      : base(parent, start, typeName, terminating)
     {
       AliasToken = alias;
       EqualToken = equalToken;

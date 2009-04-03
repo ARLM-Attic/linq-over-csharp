@@ -318,6 +318,7 @@
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
     <Compile Include="SolutionHierarchy\SourceFileBase.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\AttributeNode.cs" />
+    <Compile Include="SyntaxTree\Types\AttributedDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\ExternAliasNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\NamespaceDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\NamespaceScopeNode.cs" />
@@ -337,6 +338,7 @@
     <Compile Include="SyntaxTree\Types\ModifierNode.cs" />
     <Compile Include="SyntaxTree\Types\NameTagNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeArgumentListNode.cs" />
+    <Compile Include="SyntaxTree\Types\TypeOrMemberDeclaration.cs" />
     <Compile Include="SyntaxTree\Types\TypeOrNamespaceNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\UsingNode.cs" />
     <Compile Include="Utility\EventArguments.cs" />

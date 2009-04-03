@@ -79,7 +79,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public UsingNode AddUsing(Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
     {
-      var node = new UsingNode(start, namespaceNode, terminating);
+      var node = new UsingNode(this, start, namespaceNode, terminating);
       UsingNodes.Add(node);
       return node;
     }
@@ -98,7 +98,7 @@ namespace CSharpFactory.Syntax
     public UsingNode AddUsingWithAlias(Token start, Token alias, Token equalToken,
       TypeOrNamespaceNode typeName, Token terminating)
     {
-      var node = new UsingWithAliasNode(start, alias, equalToken, typeName, terminating);
+      var node = new UsingWithAliasNode(this, start, alias, equalToken, typeName, terminating);
       UsingNodes.Add(node);
       UsingWithAliasNodes.Add(node);
       return node;
@@ -117,7 +117,7 @@ namespace CSharpFactory.Syntax
     public ExternAliasNode AddExternAlias(Token start, Token alias, Token identifier, 
       Token terminating)
     {
-      var node = new ExternAliasNode(start, alias, identifier, terminating);
+      var node = new ExternAliasNode(this, start, alias, identifier, terminating);
       ExternAliaseNodes.Add(node);
       return node;
     }

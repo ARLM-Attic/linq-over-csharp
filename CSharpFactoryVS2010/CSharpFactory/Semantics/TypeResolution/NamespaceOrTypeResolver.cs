@@ -2,16 +2,6 @@ using System;
 using System.Collections.Generic;
 using CSharpFactory.ParserFiles;
 using CSharpFactory.ProjectModel;
-using ExternalAlias=CSharpFactory.ProjectModel.ExternalAlias;
-using MethodDeclaration=CSharpFactory.ProjectModel.MethodDeclaration;
-using NamespaceFragment=CSharpFactory.ProjectModel.NamespaceFragment;
-using ReferencedCompilation=CSharpFactory.ProjectModel.ReferencedCompilation;
-using ResolutionTarget=CSharpFactory.ProjectModel.ResolutionTarget;
-using SourceFile=CSharpFactory.ProjectModel.SourceFile;
-using TypeDeclaration=CSharpFactory.ProjectModel.TypeDeclaration;
-using TypeParameter=CSharpFactory.ProjectModel.TypeParameter;
-using TypeReference=CSharpFactory.ProjectModel.TypeReference;
-using UsingClause=CSharpFactory.ProjectModel.UsingClause;
 
 namespace CSharpFactory.Semantics
 {
