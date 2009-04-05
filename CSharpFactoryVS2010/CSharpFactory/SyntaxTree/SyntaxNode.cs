@@ -3,7 +3,6 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax

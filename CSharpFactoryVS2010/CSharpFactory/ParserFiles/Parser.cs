@@ -554,8 +554,7 @@ public partial class CSharpSyntaxParser
 		AttributeDecorationNode globAttrNode = null;
 		
 		Expect(98);
-		globAttrNode = new AttributeDecorationNode(t);
-		
+		globAttrNode = new AttributeDecorationNode(t); 
 		Expect(1);
 		if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
 		 Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
@@ -586,8 +585,7 @@ public partial class CSharpSyntaxParser
 		}
 		if (la.kind == 88) {
 			Get();
-			globAttrNode.ClosingSeparator = t;
-			
+			globAttrNode.ClosingSeparator = t; 
 		}
 		Expect(113);
 		attr.Terminate(t); 

@@ -121,7 +121,7 @@ namespace CSharpFactory.ParserFiles
         _Parser.Error1032(_Parser.Lookahead);
         return;
       }
-      string symbol = GetPreprocessorSymbol(pragma.val);
+      var symbol = GetPreprocessorSymbol(pragma.val);
       _Parser.CompilationUnit.AddConditionalDirective(symbol);
     }
 

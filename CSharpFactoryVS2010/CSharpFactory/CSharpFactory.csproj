@@ -104,6 +104,11 @@
     <Compile Include="ProjectModel\Types\DeclarationBase.cs" />
     <Compile Include="ProjectWriter\CodeFormattingOptions.cs" />
     <Compile Include="ProjectWriter\CompilationUnitWriter.cs" />
+    <Compile Include="SemanticsTree\CompilationMessageNode.cs" />
+    <Compile Include="SemanticsTree\ISemanticsNodeCollection.cs" />
+    <Compile Include="SemanticsTree\ISemanticsTree.cs" />
+    <Compile Include="SemanticsTree\SemanticsNode.cs" />
+    <Compile Include="SemanticsTree\SemanticsTree.cs" />
     <Compile Include="Semantics\TypeAbstraction\ArrayType.cs" />
     <Compile Include="Semantics\TypeAbstraction\ExtendedType.cs" />
     <Compile Include="Semantics\TypeAbstraction\GenericType.cs" />

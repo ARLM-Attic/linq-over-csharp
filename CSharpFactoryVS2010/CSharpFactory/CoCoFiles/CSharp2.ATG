@@ -266,11 +266,11 @@ CS2
 //   null, the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
 ExternAliasDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
-  (.
-     Token start;
-     Token alias;
-     Token identifier;
-  .)
+(.
+   Token start;
+   Token alias;
+   Token identifier;
+.)
 =
   "extern"   
   (. 
@@ -309,95 +309,103 @@ ExternAliasDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
 //   the directive belongs to the file and not to the specified namespace.
 // ------------------------------------------------------------------------------------
 UsingDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
-=                          (.
-                              // :::
-                              Token alias = null;
-                              Token eq = null;
-                              TypeOrNamespaceNode nsNode = null;
-                           .)                                     
-  "using"                  (. 
-                              Token start = t;
-                              string name = String.Empty; 
-                              TypeReference typeUsed = null;
-                              PragmaHandler.SignRealToken();
-                           .)
-   [ IF (IsAssignment()) 
-     ident                 (. 
-                              name = t.val; 
-                              // :::
-                              alias = t;
-                           .)
-     "="                   (. eq = t; .)
-   ]
-     TypeName<out typeUsed, out nsNode> 
-   ";"                     (. 
-                              UsingClause uc = new UsingClause(start, this, name, typeUsed);
-                              CurrentElement = uc;
-                              if (parent == null) File.Usings.Add(uc);
-                              else parent.Usings.Add(uc); 
-                              uc.Terminate(t);
-                              // :::
-                              if (alias == null)
-                                parentNode.AddUsing(start, nsNode, t);
-                              else
-                                parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
-                           .)
+(.
+   // :::
+   Token alias = null;
+   Token eq = null;
+   TypeOrNamespaceNode nsNode = null;
+.)                                     
+=                           
+  "using"
+  (. 
+     Token start = t;
+     string name = String.Empty; 
+     TypeReference typeUsed = null;
+     PragmaHandler.SignRealToken();
+  .)
+  [ IF (IsAssignment()) 
+    ident                 
+    (. 
+       name = t.val; 
+       // :::
+       alias = t;
+    .)
+    "="
+    (. eq = t; .)
+  ]
+  TypeName<out typeUsed, out nsNode> 
+  ";"
+  (. 
+     UsingClause uc = new UsingClause(start, this, name, typeUsed);
+     CurrentElement = uc;
+     if (parent == null) File.Usings.Add(uc);
+     else parent.Usings.Add(uc); 
+     uc.Terminate(t);
+     // :::
+     if (alias == null)
+       parentNode.AddUsing(start, nsNode, t);
+     else
+       parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
 // Global attributes belonging to a file.
 // This element accepts only attributes with "assembly" or "module" scope.
 // ------------------------------------------------------------------------------------
-GlobalAttributes<>
-                               (.
-                                   AttributeNode attrNode;
-                                   // :::
-                                   AttributeDecorationNode globAttrNode = null;
-                               .)
+GlobalAttributes
+(.
+   AttributeNode attrNode;
+   // :::
+   AttributeDecorationNode globAttrNode = null;
+.)
 =
-  "["                          (.
-                                   globAttrNode = new AttributeDecorationNode(t);
-                               .)
-  ident                        (.
-                                   // We accept module because csc does (even if it is against 
-                                   // the specification).
-                                   if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
-                                     Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
-                                   string scope = t.val;
-                                   AttributeDeclaration attr;
-                                   // :::
-                                   globAttrNode.IdentifierToken = t;
-                               .) 
-  ":"                          (.  globAttrNode.ColonToken = t; .)
+  "["
+  (. globAttrNode = new AttributeDecorationNode(t); .)
+  ident                        
+  (.
+     // We accept module because csc does (even if it is against 
+     // the specification).
+     if (!"assembly".Equals(t.val) && !"module".Equals(t.val)) 
+       Error("UNDEF", la, "Global attribute target specifier \"assembly\" or \"module\" expected");
+     string scope = t.val;
+     AttributeDeclaration attr;
+     // :::
+     globAttrNode.IdentifierToken = t;
+  .) 
+  ":"
+  (.  globAttrNode.ColonToken = t; .)
   Attribute<out attr, out attrNode>
-                               (. 
-                                   attr.Scope = scope; 
-                                   File.GlobalAttributes.Add(attr);
-                                   CurrentElement = attr;
-                                   // :::
-                                   globAttrNode.Attributes.Add(attrNode);
-                               .)
-  { IF (NotFinalComma()) ","   (.  var separator = t; .)
+  (. 
+     attr.Scope = scope; 
+     File.GlobalAttributes.Add(attr);
+     CurrentElement = attr;
+     // :::
+     globAttrNode.Attributes.Add(attrNode);
+  .)
+  { 
+    IF (NotFinalComma()) ","   
+    (. var separator = t; .)
     Attribute<out attr, out attrNode> 
-                               (. 
-                                   attr.Scope = scope; 
-                                   File.GlobalAttributes.Add(attr);
-                                   CurrentElement = attr;
-                                   // :::
-                                   globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode));
-                               .)
+    (. 
+       attr.Scope = scope; 
+       File.GlobalAttributes.Add(attr);
+       CurrentElement = attr;
+       // :::
+       globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode));
+    .)
   } 
   [ 
-    ","                        (.
-                                   globAttrNode.ClosingSeparator = t;
-                               .) 
+    ","
+    (. globAttrNode.ClosingSeparator = t; .) 
   ]
-  "]"                          (. 
-                                   attr.Terminate(t); 
-                                   // :::
-                                   globAttrNode.Terminate(t);
-                                   SourceFileNode.GlobalAttributes.Add(globAttrNode);
-                               .)
+  "]"                          
+  (. 
+     attr.Terminate(t); 
+     // :::
+     globAttrNode.Terminate(t);
+     SourceFileNode.GlobalAttributes.Add(globAttrNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -410,68 +418,79 @@ GlobalAttributes<>
 NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file, 
   NamespaceScopeNode parentNode>  
 =
-  "namespace"    (. 
-                     Token startToken = t; 
-                     // ::: 
-                     var nsDecl = new NamespaceDeclarationNode(parentNode, t);
-                 .)
-  ident          (. 
-                     StringBuilder sb = new StringBuilder(t.val); 
-                     // :::
-                     nsDecl.NameTags.Add(t);
-                 .)
+  "namespace"    
+  (. 
+     Token startToken = t; 
+     // ::: 
+     var nsDecl = new NamespaceDeclarationNode(parentNode, t);
+  .)
+  ident
+  (. 
+     StringBuilder sb = new StringBuilder(t.val); 
+     // :::
+     nsDecl.NameTags.Add(t);
+  .)
   {              
-    "."          (.
-                     // :::
-                     var sepToken = t;
-                 .)
-    ident        (. 
-                     sb.Append("."); sb.Append(t.val); 
-                     // :::
-                     nsDecl.NameTags.Add(sepToken, t);
-                 .)
-  }              (. 
-                     NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
-                     CurrentElement = ns;
-                     // :::
-                     parentNode.NamespaceDeclarations.Add(nsDecl);
-                 .)
-  "{"            (.
-                     // :::
-                     nsDecl.OpenBracket = t;
-                 .)
-      { IF (IsExternAliasDirective()) ExternAliasDirective<ns, nsDecl> } 
-      { UsingDirective<ns, nsDecl> } 
-      { NamespaceMemberDeclaration<ns, File, nsDecl> } 
-  "}"            (. 
-                     ns.Terminate(t); 
-                     // :::
-                     nsDecl.CloseBracket = t;
-                     nsDecl.Terminate(t);
-                 .)
-  [ ";"          (. 
-                     ns.Terminate(t); 
-                     // :::
-                     nsDecl.Terminate(t);
-                 .)
+    "."
+    (.
+       // :::
+       var sepToken = t;
+    .)
+    ident
+    (. 
+       sb.Append("."); sb.Append(t.val); 
+       // :::
+       nsDecl.NameTags.Add(sepToken, t);
+    .)
+  } 
+  (. 
+     NamespaceFragment ns = new NamespaceFragment(startToken, this, sb.ToString(), parent, file); 
+     CurrentElement = ns;
+     // :::
+     parentNode.NamespaceDeclarations.Add(nsDecl);
+  .)
+  "{"
+  (.
+     // :::
+     nsDecl.OpenBracket = t;
+  .)
+  { IF (IsExternAliasDirective()) ExternAliasDirective<ns, nsDecl> } 
+  { UsingDirective<ns, nsDecl> } 
+  { NamespaceMemberDeclaration<ns, File, nsDecl> } 
+  "}"
+  (. 
+     ns.Terminate(t); 
+     // :::
+     nsDecl.CloseBracket = t;
+     nsDecl.Terminate(t);
+  .)
+  [ 
+    ";"
+    (. 
+       ns.Terminate(t); 
+       // :::
+       nsDecl.Terminate(t);
+    .)
   ]
-  |              (. 
-                     Modifiers m = new Modifiers(this); 
-                     TypeDeclaration td;
-                     AttributeCollection attrs = new AttributeCollection();
-                     // :::
-                     var mod = new ModifierNodeCollection();
-                     var attrNodes = new AttributeDecorationNodeCollection();
-                 .)  
-      AttributeDecorations<attrs, attrNodes>
-      ModifierList<m, mod> 
-      TypeDeclaration<attrs, null, m, out td>    (.
-                                                    if (td != null)
-                                                    {
-                                                      if (parent == null) File.AddTypeDeclaration(td);
-                                                      else parent.AddTypeDeclaration(td);
-                                                    }
-                                                 .)
+  | 
+    (. 
+       Modifiers m = new Modifiers(this); 
+       TypeDeclaration td;
+       AttributeCollection attrs = new AttributeCollection();
+       // :::
+       var mod = new ModifierNodeCollection();
+       var attrNodes = new AttributeDecorationNodeCollection();
+    .)  
+    AttributeDecorations<attrs, attrNodes>
+    ModifierList<m, mod> 
+    TypeDeclaration<attrs, null, m, out td>
+    (.
+       if (td != null)
+       {
+         if (parent == null) File.AddTypeDeclaration(td);
+         else parent.AddTypeDeclaration(td);
+       }
+    .)
 .
 
 // ------------------------------------------------------------------------------------
