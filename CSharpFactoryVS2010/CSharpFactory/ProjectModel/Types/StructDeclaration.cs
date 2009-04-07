@@ -5,7 +5,7 @@ namespace CSharpFactory.ProjectModel
 {
   // ==================================================================================
   /// <summary>
-  /// This type represents a C# class declaration
+  /// This type represents a C# struct declaration
   /// </summary>
   // ==================================================================================
   public sealed class StructDeclaration: TypeDeclaration

@@ -1,4 +1,5 @@
 using CSharpFactory.ProjectModel;
+using CSharpFactory.ResourceInfo;
 
 namespace CSharpFactory.ParserFiles
 {
@@ -1381,8 +1382,7 @@ namespace CSharpFactory.ParserFiles
     // --------------------------------------------------------------------------------
     public void Error1003(Token token, string missingSymbol)
     {
-      Error("CS1003", token,
-        string.Format("Syntax error, '{0}' expected", missingSymbol));
+      Error("CS1003", token, string.Format(ErrorCodes.CS1003, missingSymbol));
     }
 
     // --------------------------------------------------------------------------------

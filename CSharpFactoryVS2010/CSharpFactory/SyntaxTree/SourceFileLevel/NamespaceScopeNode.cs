@@ -30,6 +30,7 @@ namespace CSharpFactory.Syntax
       UsingWithAliasNodes = new ImmutableCollection<UsingWithAliasNode>();
       ExternAliaseNodes = new ImmutableCollection<ExternAliasNode>();
       NamespaceDeclarations = new NamespaceDeclarationNodeCollection();
+      TypeDeclarations = new TypeDeclarationNodeCollection();
     }
 
     #endregion
@@ -63,6 +64,13 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public NamespaceDeclarationNodeCollection NamespaceDeclarations { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of nested types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeDeclarationNodeCollection TypeDeclarations { get; private set; }
 
     #endregion
 

@@ -162,7 +162,7 @@ namespace CSharpParserTest.LanguageElements
       parser.AddFile(@"Pragmas\PragmaAfterNonWhiteSpace.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 12);
-      foreach (Error error in parser.Errors)
+      foreach (var error in parser.Errors)
       {
         Assert.AreEqual(error.Code, "CS1040");
       }
@@ -191,12 +191,12 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors.Count, 4);
       Assert.AreEqual(parser.Warnings.Count, 3);
       Assert.IsTrue(parser.Warnings[0].Line > 1000);
-      Assert.AreNotEqual(parser.Warnings[0].File, "correct.cs");
+      Assert.AreNotEqual(parser.Warnings[0].SourceFileName, "correct.cs");
       Assert.IsTrue(parser.Warnings[1].Line < 1000);
-      Assert.AreNotEqual(parser.Warnings[1].File, "correct.cs");
+      Assert.AreNotEqual(parser.Warnings[1].SourceFileName, "correct.cs");
       Assert.IsTrue(parser.Warnings[2].Line > 2000);
-      Assert.AreEqual(parser.Warnings[2].File, "correct.cs");
-      foreach (Error error in parser.Errors)
+      Assert.AreEqual(parser.Warnings[2].SourceFileName, "correct.cs");
+      foreach (var error in parser.Errors)
       {
         Assert.AreEqual(error.Code, "CS1576");
       }

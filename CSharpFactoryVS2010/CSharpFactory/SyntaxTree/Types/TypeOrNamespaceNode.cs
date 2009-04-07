@@ -53,7 +53,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The qualifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token QualifierToken { get; private set; }
+    public Token QualifierToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -82,7 +82,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token QualifierSeparatorToken { get; private set; }
+    public Token QualifierSeparatorToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -90,7 +90,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The type tags.</value>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<TypeTagNode> TypeTags { get; private set; }
+    public ImmutableCollection<TypeTagNode> TypeTags { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -117,6 +117,44 @@ namespace CSharpFactory.Syntax
         ? new OutputSegment(QualifierToken, QualifierSeparatorToken)
         : new OutputSegment(TypeTags);
     }
+  }
+
+  // ================================================================================================
+  /// <summary>
+  /// This class represents the continuation of a TypeOrNamespaceNode.
+  /// </summary>
+  /// <remarks>
+  /// Syntax
+  ///   TypeOrNamespaceContinuationNode:
+  ///     "," TypeOrNamespaceNode
+  /// </remarks>
+  // ================================================================================================
+  public sealed class TypeOrNamespaceContinuationNode : TypeOrNamespaceNode
+  {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TypeOrNamespaceContinuationNode"/> class.
+    /// </summary>
+    /// <param name="separator">The separator.</param>
+    /// <param name="node">The node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceContinuationNode(Token separator, TypeOrNamespaceNode node) : 
+      base(separator)
+    {
+      SeparatorToken = separator;
+      QualifierToken = node.QualifierToken;
+      QualifierSeparatorToken = node.QualifierSeparatorToken;
+      TypeTags = node.TypeTags;
+      Terminate(node.TerminatingToken);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the separator token.
+    /// </summary>
+    /// <value>The separator token.</value>
+    // ----------------------------------------------------------------------------------------------
+    public Token SeparatorToken { get; private set; }
   }
 
   // ================================================================================================
@@ -252,5 +290,14 @@ namespace CSharpFactory.Syntax
         Arguments
         );
     }
+  }
+
+  // ================================================================================================
+  /// <summary>
+  /// This class represents a collection of TypeOrNamespaceNode instances.
+  /// </summary>
+  // ================================================================================================
+  public sealed class TypeOrNamespaceNodeCollection : ImmutableCollection<TypeOrNamespaceNode>
+  {
   }
 }

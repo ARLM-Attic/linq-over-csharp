@@ -104,6 +104,11 @@
     <Compile Include="ProjectModel\Types\DeclarationBase.cs" />
     <Compile Include="ProjectWriter\CodeFormattingOptions.cs" />
     <Compile Include="ProjectWriter\CompilationUnitWriter.cs" />
+    <Compile Include="ResourceInfo\ErrorCodes.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorCodes.resx</DependentUpon>
+    </Compile>
     <Compile Include="SemanticsTree\CompilationMessageNode.cs" />
     <Compile Include="SemanticsTree\ISemanticsNodeCollection.cs" />
     <Compile Include="SemanticsTree\ISemanticsTree.cs" />
@@ -140,8 +145,7 @@
     <Compile Include="ProjectModel\CompilationUnit\AttributedElement.cs" />
     <Compile Include="ProjectModel\Comments\CommentInfo.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ReferencedUnit.cs" />
-    <Compile Include="ProjectModel\ErrorHandling\Error.cs" />
-    <Compile Include="ProjectModel\ErrorHandling\ICompilationErrorHandler.cs" />
+    <Compile Include="ProjectModel\CompilationUnit\ICompilationErrorHandler.cs" />
     <Compile Include="ProjectModel\Expressions\Argument.cs" />
     <Compile Include="ProjectModel\Expressions\ArgumentList.cs" />
     <Compile Include="ProjectModel\Expressions\Expression.cs" />
@@ -340,12 +344,21 @@
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeTextWriter.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\SyntaxTreeWriter.cs" />
     <Compile Include="SyntaxTree\SyntaxTreeWriter\ControlSegments.cs" />
+    <Compile Include="SyntaxTree\Types\ClassDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Types\DelegateDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Types\EnumDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Types\InterfaceDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Types\ModifierNode.cs" />
     <Compile Include="SyntaxTree\Types\NameTagNode.cs" />
+    <Compile Include="SyntaxTree\Types\StructDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeArgumentListNode.cs" />
-    <Compile Include="SyntaxTree\Types\TypeOrMemberDeclaration.cs" />
+    <Compile Include="SyntaxTree\Types\TypeDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Types\TypeOrMemberDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeOrNamespaceNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\UsingNode.cs" />
+    <Compile Include="SyntaxTree\Types\TypeParameterConstraintNode.cs" />
+    <Compile Include="SyntaxTree\Types\TypeParameters.cs" />
+    <Compile Include="SyntaxTree\Types\TypeWithMembersDeclarationNode.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
@@ -371,6 +384,10 @@
       <SubType>Designer</SubType>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceInfo\ErrorCodes.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorCodes.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

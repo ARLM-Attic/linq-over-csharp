@@ -30,8 +30,6 @@ namespace CSharpFactory.ProjectModel
     #region Private Fields
 
     // --- Members related to error handling
-    private TextWriter _ErrorStream;
-    private string _ErrorMessageFormat = "-- line {0} col {1}: {2}"; // 0=line, 1=column, 2=text
     private int _ErrorLineOffset;
     private string _ErrorFile;
 
@@ -58,16 +56,20 @@ namespace CSharpFactory.ProjectModel
 
     #region Lifecycle methods
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompilationUnit"/> class.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
     private CompilationUnit()
     {
+      ErrorMessageFormat = "-- line {0} col {1}: {2}";
       NamespaceHierarchies = new Dictionary<string, NamespaceHierarchy>();
       GlobalHierarchy = new NamespaceHierarchy();
       ConditionalSymbols = new List<string>();
       DeclaredTypes = new TypeDeclarationCollection();
       DeclaredNamespaces = new NamespaceCollection();
       Files = new SourceFileCollection();
-      Warnings = new ErrorCollection();
-      Errors = new ErrorCollection();
       ErrorHandler = this;
       CurrentFile = null;
       _ErrorLineOffset = -1;
@@ -161,14 +163,20 @@ namespace CSharpFactory.ProjectModel
     /// Gets the list of errors.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ErrorCollection Errors { get; private set; }
+    public CompilationMessages Errors 
+    {
+      get { return SemanticsTree.Errors;  }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Gets the list of warnings.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public ErrorCollection Warnings { get; private set; }
+    public CompilationMessages Warnings
+    {
+      get { return SemanticsTree.Warnings; }
+    }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -265,10 +273,24 @@ namespace CSharpFactory.ProjectModel
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the source file node currently under syntax parsing.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SourceFileNode SourceFileNode { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the syntax tree after the compilation unit has been parsed.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ISyntaxTree SyntaxTree { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the syntax tree after the compilation unit has been parsed.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ISemanticsTree SemanticsTree { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -636,22 +658,14 @@ namespace CSharpFactory.ProjectModel
     /// Defines the output stream where errors should be written.
     /// </summary>
     // --------------------------------------------------------------------------------
-    TextWriter ICompilationErrorHandler.ErrorStream
-    {
-      get { return _ErrorStream; }
-      set { _ErrorStream = value; }
-    }
+    public TextWriter ErrorStream { get; set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
     /// Defines the format of message to write to the output stream.
     /// </summary>
     // --------------------------------------------------------------------------------
-    string ICompilationErrorHandler.ErrorMessageFormat
-    {
-      get { return _ErrorMessageFormat; }
-      set { _ErrorMessageFormat = value; }
-    }
+    public string ErrorMessageFormat { get; set; }
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -661,7 +675,8 @@ namespace CSharpFactory.ProjectModel
     /// <param name="errorPoint">Token describing the error position.</param>
     /// <param name="description">Detailed error description.</param>
     // --------------------------------------------------------------------------------
-    void ICompilationErrorHandler.Error(string code, ParserFiles.Token errorPoint, string description)
+    void ICompilationErrorHandler.Error(string code, ParserFiles.Token errorPoint, 
+      string description)
     {
       SignError(Errors, code, errorPoint, description, null);
     }
@@ -675,7 +690,8 @@ namespace CSharpFactory.ProjectModel
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    void ICompilationErrorHandler.Error(string code, ParserFiles.Token errorPoint, string description,
+    void ICompilationErrorHandler.Error(string code, ParserFiles.Token errorPoint, 
+      string description,
       params object[] parameters)
     {
       SignError(Errors, code, errorPoint, description, parameters);
@@ -833,11 +849,13 @@ namespace CSharpFactory.ProjectModel
         ConditionalSymbols.Add(symbol);
       }
 
-      (Errors as IList<Error>).Clear();
+      // --- Set up the syntax and semantics trees
+      SyntaxTree = new SyntaxTree();
+      SemanticsTree = new SemanticsTree();
+
       GlobalHierarchy.Clear();
       NamespaceHierarchies.Clear();
       ResetDiagnosticCounters();
-      SyntaxTree = new SyntaxTree();
 
       // --- Notify subscribers (AfterInitParse event)
       OnAfterInitParse(ref cancelled);
@@ -895,9 +913,9 @@ namespace CSharpFactory.ProjectModel
         OnBeforeParseFile(file, ref cancelled);
         if (cancelled) return false;
 
-        var fileNode = new SourceFileNode(file.FullName);
-        SyntaxTree.SourceFileNodes.Add(fileNode);
-        Parser = new CSharpSyntaxParser(scanner, this, file, fileNode);
+        SourceFileNode = new SourceFileNode(file.FullName);
+        SyntaxTree.SourceFileNodes.Add(SourceFileNode);
+        Parser = new CSharpSyntaxParser(scanner, this, file, SourceFileNode);
         Parser.Parse();
 
         // --- Notify subscribers (AfterParseFile event)
@@ -1893,28 +1911,21 @@ namespace CSharpFactory.ProjectModel
     /// <summary>
     /// Add a new error to the list of errors.
     /// </summary>
-    /// <param name="errors">Collection where the error should be added.</param>
+    /// <param name="messageCollection">Collection where the error should be added.</param>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    private void SignError(ICollection<Error> errors, string code, ParserFiles.Token errorPoint, string description,
-                                          params object[] parameters)
+    private CompilationMessageNode SignError(CompilationMessages messageCollection, string code, ParserFiles.Token errorPoint, string description,
+                                              params object[] parameters)
     {
-      var error = new Error(
-        code, 
-        _ErrorLineOffset < 0 ? errorPoint.line : errorPoint.line + _ErrorLineOffset, 
-        errorPoint.col, 
-        errorPoint.pos,
-        string.IsNullOrEmpty(_ErrorFile) ? CurrentFile.Name : _ErrorFile, 
-        description, 
-        parameters);
-      errors.Add(error);
-      if (_ErrorStream != null)
-      {
-        _ErrorStream.WriteLine(_ErrorMessageFormat, errorPoint.line, errorPoint.col, description);
-      }
+      var message = new CompilationMessageNode(SourceFileNode, code, errorPoint, description) 
+        { Parameters = parameters };
+      message.SetErrorLineOffset(_ErrorLineOffset);
+      message.RedirectSourceFile(_ErrorFile);
+      messageCollection.Add(message);
+      return message;
     }
 
     // --------------------------------------------------------------------------------

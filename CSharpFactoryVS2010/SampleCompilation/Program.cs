@@ -36,15 +36,15 @@ namespace SampleCompilation
       foreach (var error in project.Errors)
       {
         Console.WriteLine("--- Error {0}: {1} line: {2}, column: {3}, file: {4}",
-                          error.Code, error.Description, error.Line, error.Column, error.File);
+                          error.Code, error.Description, error.Line, error.Column, error.SourceFileNode.Name);
       }
 
       // --- Display warnings
       Console.WriteLine("{0} warnings found.", project.Warnings.Count);
-      foreach (Error warning in project.Warnings)
+      foreach (var warning in project.Warnings)
       {
         Console.WriteLine("--- Warning {0}: {1} line: {2}, column: {3}, file: {4}",
-                          warning.Code, warning.Description, warning.Line, warning.Column, warning.File);
+                          warning.Code, warning.Description, warning.Line, warning.Column, warning.SourceFileNode.Name);
       }
 
       // --- Display files parsed

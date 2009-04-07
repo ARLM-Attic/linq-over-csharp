@@ -70,6 +70,69 @@ namespace CSharpFactory.Semantics
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<object> Parameters { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the line number of the error token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Line
+    {
+      get { return MessageToken.line + (ErrorLineOffset > 0 ? ErrorLineOffset : 0); }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the columns number of the error token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Column { get { return MessageToken.col; } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the error line offset.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int ErrorLineOffset { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the redirected source file name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string RedirectedSourceFile { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the source file.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string SourceFileName
+    {
+      get { return RedirectedSourceFile ?? SourceFileNode.Name; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the error line offset to the sepcified value.
+    /// </summary>
+    /// <param name="offset">Error line offset.</param>
+    // ----------------------------------------------------------------------------------------------
+    internal void SetErrorLineOffset(int offset)
+    {
+      ErrorLineOffset = offset;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Redirects the source file.
+    /// </summary>
+    /// <param name="fileName">Name of the file.</param>
+    internal void RedirectSourceFile(string fileName)
+    // ----------------------------------------------------------------------------------------------
+    {
+      RedirectedSourceFile = fileName;
+    }
   }
 
   // ================================================================================================

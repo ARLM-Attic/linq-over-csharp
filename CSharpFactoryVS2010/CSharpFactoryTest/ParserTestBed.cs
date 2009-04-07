@@ -1,6 +1,7 @@
 using System;
 using CSharpFactory.ProjectContent;
 using CSharpFactory.ProjectModel;
+using CSharpFactory.Semantics;
 
 namespace CSharpParserTest
 {
@@ -23,17 +24,17 @@ namespace CSharpParserTest
     {
       int errors = parser.Parse();
       Console.WriteLine("{0} errors detected", errors);
-      foreach (Error error in parser.Errors)
+      foreach (var error in parser.Errors)
       {
         Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", error.Line, error.Column,
-          error.Code, error.Description, error.File);
+          error.Code, error.Description, error.SourceFileNode.Name);
       }
       Console.WriteLine();
       Console.WriteLine("{0} warnings detected", parser.Warnings.Count);
-      foreach (Error warning in parser.Warnings)
+      foreach (var warning in parser.Warnings)
       {
         Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", warning.Line, warning.Column,
-          warning.Code, warning.Description, warning.File);
+          warning.Code, warning.Description, warning.SourceFileNode.Name);
       }
       Console.WriteLine();
       return errors == 0;

@@ -493,8 +493,7 @@ public partial class CSharpSyntaxParser
 		
 		Expect(1);
 		if (t.val != "alias") 
-		 Error1003(la, "alias"); 
-		// :::
+		 Error1003(t, "alias"); 
 		alias = t;
 		
 		Expect(1);
@@ -658,11 +657,20 @@ NamespaceScopeNode parentNode) {
 			
 			AttributeDecorations(attrs, attrNodes);
 			ModifierList(m, mod);
-			TypeDeclaration(attrs, null, m, out td);
+			TypeDeclarationNode typeDecl; 
+			TypeDeclaration(attrs, null, m, out td, parentNode, null, out typeDecl);
 			if (td != null)
 			{
 			  if (parent == null) File.AddTypeDeclaration(td);
 			  else parent.AddTypeDeclaration(td);
+			}
+			// :::
+			if (typeDecl != null)
+			{
+			  typeDecl.AttributeDecorations = attrNodes;
+			  typeDecl.Modifiers = mod;
+			  typeDecl.DeclaringNamespace = parentNode;
+			  parentNode.TypeDeclarations.Add(typeDecl);
 			}
 			
 		} else SynErr(146);
@@ -835,50 +843,67 @@ NamespaceScopeNode parentNode) {
 	}
 
 	void TypeDeclaration(AttributeCollection attrs, TypeDeclaration parentType, Modifiers m, 
-out TypeDeclaration td) {
-		td = null; 
+out TypeDeclaration td, NamespaceScopeNode parentNs, TypeDeclarationNode declaringType,
+out TypeDeclarationNode typeDecl) {
+		td = null;
+		bool isPartial = false;
+		// :::
+		typeDecl = null; 
+		
 		if (StartOf(4)) {
-			bool isPartial = false; 
 			if (la.kind == 121) {
 				Get();
 				isPartial = true; 
 			}
 			if (la.kind == 16) {
-				ClassDeclaration(m, parentType, isPartial, out td);
+				ClassDeclaration(m, parentType, isPartial, out td, out typeDecl);
 			} else if (la.kind == 66) {
-				StructDeclaration(m, parentType, isPartial, out td);
+				StructDeclaration(m, parentType, isPartial, out td, out typeDecl);
 			} else if (la.kind == 40) {
-				InterfaceDeclaration(m, parentType, isPartial, out td);
+				InterfaceDeclaration(m, parentType, isPartial, out td, out typeDecl);
 			} else SynErr(147);
 		} else if (la.kind == 25) {
-			EnumDeclaration(m, parentType, out td);
+			EnumDeclaration(m, parentType, out td, out typeDecl);
 		} else if (la.kind == 21) {
-			DelegateDeclaration(m, parentType, out td);
+			DelegateDeclaration(m, parentType, out td, out typeDecl);
 		} else SynErr(148);
 		if (td != null)
 		{
-		  td.SetModifiers(m.Value); 
-		  td.AssignAttributes(attrs);
-		  td.Terminate(t);
+		   td.SetModifiers(m.Value); 
+		   td.AssignAttributes(attrs);
+		   td.Terminate(t);
+		}
+		// :::
+		if (typeDecl != null)
+		{
+		  typeDecl.IsPartial = isPartial;
+		  typeDecl.DeclaringNamespace = parentNs;
+		  typeDecl.DeclaringType = declaringType;
+		  typeDecl.Terminate(t);
 		}
 		
 	}
 
 	void ClassDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
-out TypeDeclaration td) {
+out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		Expect(16);
 		ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
 		cd.IsPartial = isPartial;
 		td = cd;
 		CurrentElement = cd;
+		// :::
+		var start = t;
 		
 		Expect(1);
 		cd.Name = t.val; 
+		// :::
+		typeDecl = new ClassDeclarationNode(start, t);
+		
 		if (la.kind == 101) {
-			TypeParameterList(cd);
+			TypeParameterList(cd, typeDecl);
 		}
 		if (la.kind == 87) {
-			ClassBase(cd);
+			BaseTypeList(cd, typeDecl);
 		}
 		while (la.kind == 125) {
 			TypeParameterConstraint constraint; 
@@ -886,34 +911,35 @@ out TypeDeclaration td) {
 			td.AddTypeParameterConstraint(constraint); 
 		}
 		ClassBody(td);
+		typeDecl.Terminate(t); 
 		if (la.kind == 115) {
 			Get();
+			typeDecl.Terminate(t); 
 		}
 	}
 
 	void StructDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
-out TypeDeclaration td) {
+out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
+		TypeOrNamespaceNode typeNode; 
 		Expect(66);
 		StructDeclaration sd = new StructDeclaration(t, this, parentType);
 		td = sd;
 		CurrentElement = sd;
 		sd.IsPartial = isPartial;
 		TypeReference typeRef;
+		// :::
+		var start = t;
 		
 		Expect(1);
 		sd.Name = t.val; 
+		// :::
+		typeDecl = new StructDeclarationNode(start, t);
+		
 		if (la.kind == 101) {
-			TypeParameterList(sd);
+			TypeParameterList(sd, typeDecl);
 		}
 		if (la.kind == 87) {
-			Get();
-			ClassType(out typeRef);
-			sd.InterfaceList.Add(typeRef); 
-			while (la.kind == 88) {
-				Get();
-				ClassType(out typeRef);
-				sd.InterfaceList.Add(typeRef); 
-			}
+			BaseTypeList(sd, typeDecl);
 		}
 		while (la.kind == 125) {
 			TypeParameterConstraint constraint; 
@@ -921,26 +947,32 @@ out TypeDeclaration td) {
 			td.AddTypeParameterConstraint(constraint); 
 		}
 		StructBody(td);
+		typeDecl.Terminate(t); 
 		if (la.kind == 115) {
 			Get();
+			typeDecl.Terminate(t); 
 		}
 	}
 
 	void InterfaceDeclaration(Modifiers m, TypeDeclaration parentType, bool isPartial, 
-out TypeDeclaration td) {
+out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		Expect(40);
 		InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
 		CurrentElement = ifd;
 		td = ifd;
 		ifd.IsPartial = isPartial;
+		var start = t;
 		
 		Expect(1);
 		ifd.Name = t.val; 
+		// :::
+		typeDecl = new InterfaceDeclarationNode(start, t);
+		
 		if (la.kind == 101) {
-			TypeParameterList(ifd);
+			TypeParameterList(ifd, typeDecl);
 		}
 		if (la.kind == 87) {
-			InterfaceBase(ifd);
+			BaseTypeList(ifd, typeDecl);
 		}
 		while (la.kind == 125) {
 			TypeParameterConstraint constraint; 
@@ -952,24 +984,32 @@ out TypeDeclaration td) {
 			InterfaceMemberDeclaration(ifd);
 		}
 		Expect(112);
+		typeDecl.Terminate(t); 
 		if (la.kind == 115) {
 			Get();
+			typeDecl.Terminate(t); 
 		}
 	}
 
-	void EnumDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td) {
+	void EnumDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
+out TypeDeclarationNode typeDecl) {
+		TypeOrNamespaceNode typeNode; 
 		Expect(25);
 		EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
 		td = ed;
 		CurrentElement = ed;
+		// :::
+		var start = t;
 		
 		Expect(1);
 		ed.Name = t.val; 
+		typeDecl = new EnumDeclarationNode(start, t);
+		
 		if (la.kind == 87) {
 			Get();
 			TypeReference typeRef; 
 			if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
-				ClassType(out typeRef);
+				ClassType(out typeRef, out typeNode);
 				ed.InterfaceList.Add(typeRef); 
 			} else if (StartOf(6)) {
 				IntegralType(out typeRef);
@@ -978,25 +1018,36 @@ out TypeDeclaration td) {
 		}
 		EnumBody(ed);
 		ed.Terminate(t); 
+		// :::
+		typeDecl.Terminate(t);
+		
 		if (la.kind == 115) {
 			Get();
 			ed.Terminate(t); 
+			// :::
+			typeDecl.Terminate(t);
+			
 		}
 	}
 
-	void DelegateDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td) {
+	void DelegateDeclaration(Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
+out TypeDeclarationNode typeDecl) {
 		Expect(21);
 		DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
 		td = dd;
 		CurrentElement = dd;
 		TypeReference returnType;
+		// :::
+		var start = t;
 		
 		Type(out returnType, true);
 		dd.ReturnType = returnType; 
 		Expect(1);
 		dd.Name = t.val; 
+		typeDecl = new DelegateDeclarationNode(start, t);
+		
 		if (la.kind == 101) {
-			TypeParameterList(dd);
+			TypeParameterList(dd, typeDecl);
 		}
 		Expect(99);
 		if (StartOf(7)) {
@@ -1009,34 +1060,60 @@ out TypeDeclaration td) {
 			td.AddTypeParameterConstraint(constraint); 
 		}
 		Expect(115);
+		typeDecl.Terminate(t); 
 	}
 
-	void TypeParameterList(ITypeParameterOwner td) {
+	void TypeParameterList(ITypeParameterOwner td, ITypeParameterHolder paramNode) {
+		TypeParameter tp;
+		Token identifier;
+		AttributeDecorationNodeCollection attrNodes;
+		
 		Expect(101);
-		TypeParameter tp; 
-		TypeParameter(out tp);
+		if (paramNode != null) paramNode.SetOpenSign(t); 
+		TypeParameter(out tp, out attrNodes, out identifier);
 		td.AddTypeParameter(tp); 
+		// :::
+		var typeParam = new TypeParameterNode(identifier, attrNodes);
+		if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
+		
 		while (la.kind == 88) {
 			Get();
-			TypeParameter(out tp);
+			var separator= t; 
+			TypeParameter(out tp, out attrNodes, out identifier);
 			td.AddTypeParameter(tp); 
+			// :::
+			typeParam = new TypeParameterContinuationNode(separator, identifier, attrNodes);
+			if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
+			
 		}
 		Expect(94);
+		if (paramNode != null) paramNode.SetCloseSign(t); 
 	}
 
-	void ClassBase(ClassDeclaration cd) {
-		Expect(87);
+	void BaseTypeList(TypeDeclaration td, TypeDeclarationNode typeDecl) {
 		TypeReference typeRef; 
-		ClassType(out typeRef);
-		cd.InterfaceList.Add(typeRef); 
+		// :::
+		TypeOrNamespaceNode typeNode;
+		
+		Expect(87);
+		ClassType(out typeRef, out typeNode);
+		td.InterfaceList.Add(typeRef); 
+		// ::: 
+		typeDecl.BaseTypes.Add(typeNode);
+		
 		while (la.kind == 88) {
 			Get();
-			ClassType(out typeRef);
-			cd.InterfaceList.Add(typeRef); 
+			var separator = t; 
+			ClassType(out typeRef, out typeNode);
+			td.InterfaceList.Add(typeRef); 
+			// :::
+			typeDecl.BaseTypes.Add(new TypeOrNamespaceContinuationNode(separator, typeNode));
+			
 		}
 	}
 
 	void TypeParameterConstraintsClause(out TypeParameterConstraint constraint) {
+		TypeOrNamespaceNode typeNode; 
 		Expect(125);
 		Expect(1);
 		constraint = new TypeParameterConstraint(t, this); 
@@ -1059,7 +1136,7 @@ out TypeDeclaration td) {
 			Expect(114);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			Token elemToken = t; 
-			ClassType(out typeRef);
+			ClassType(out typeRef, out typeNode);
 			element = new ConstraintElement(elemToken, this, typeRef); 
 		} else SynErr(150);
 		constraint.AddConstraintElement(element); 
@@ -1078,7 +1155,7 @@ out TypeDeclaration td) {
 				Expect(114);
 			} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 				Token elemToken = t; 
-				ClassType(out typeRef);
+				ClassType(out typeRef, out typeNode);
 				element = new ConstraintElement(elemToken, this, typeRef); 
 			} else SynErr(151);
 			constraint.AddConstraintElement(element); 
@@ -1102,12 +1179,13 @@ out TypeDeclaration td) {
 		Expect(112);
 	}
 
-	void ClassType(out TypeReference typeRef) {
+	void ClassType(out TypeReference typeRef, out TypeOrNamespaceNode typeNode) {
 		typeRef = null; 
+		// ::: 
+		typeNode = null;
+		
 		if (la.kind == 1) {
-			TypeOrNamespaceNode nsNode = null;
-			
-			TypeName(out typeRef, out nsNode);
+			TypeName(out typeRef, out typeNode);
 		} else if (la.kind == 48 || la.kind == 65) {
 			if (la.kind == 48) {
 				Get();
@@ -1117,6 +1195,11 @@ out TypeDeclaration td) {
 				typeRef = new TypeReference(t, this, typeof(string)); 
 			}
 			typeRef.Terminate(t); 
+			// :::
+			typeNode = new TypeOrNamespaceNode(t);
+			typeNode.AddTypeTag(new TypeTagNode(t, null));
+			typeNode.Terminate(t);
+			
 		} else SynErr(152);
 	}
 
@@ -1202,8 +1285,19 @@ out TypeDeclaration td) {
 			CastOperatorDeclaration(attrs, m, td);
 		} else if (StartOf(12)) {
 			TypeDeclaration nestedType; 
-			TypeDeclaration(attrs, td, m, out nestedType);
+			// :::
+			TypeDeclarationNode nestedTypeNode;
+			
+			TypeDeclaration(attrs, td, m, out nestedType, null, null, out nestedTypeNode);
 			td.AddTypeDeclaration(nestedType); 
+			// :::
+			if (nestedTypeNode != null)
+			{
+			  // TODO: Handle attributes and modifiers
+			  //nestedTypeNode.AttributeDecorations = attrNodes;
+			  //nestedTypeNode.Modifiers = mod;
+			}
+			
 		} else SynErr(157);
 	}
 
@@ -1361,11 +1455,14 @@ out TypeDeclaration td) {
 	}
 
 	void Type(out TypeReference typeRef, bool voidAllowed) {
-		typeRef = null; 
+		typeRef = null;
+		// :::
+		TypeOrNamespaceNode typeNode;
+		
 		if (StartOf(15)) {
 			PrimitiveType(out typeRef);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
-			ClassType(out typeRef);
+			ClassType(out typeRef, out typeNode);
 		} else if (la.kind == 81) {
 			Get();
 			typeRef = new TypeReference(t, this); 
@@ -1562,7 +1659,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		md.ResultingType = typeRef;
 		
 		if (la.kind == 101) {
-			TypeParameterList(md);
+			TypeParameterList(md, null);
 		}
 		Expect(99);
 		if (StartOf(7)) {
@@ -1999,18 +2096,6 @@ TypeReference typeRef) {
 			break;
 		}
 		default: SynErr(178); break;
-		}
-	}
-
-	void InterfaceBase(InterfaceDeclaration ifd) {
-		Expect(87);
-		TypeReference typeRef; 
-		ClassType(out typeRef);
-		ifd.InterfaceList.Add(typeRef); 
-		while (la.kind == 88) {
-			Get();
-			ClassType(out typeRef);
-			ifd.InterfaceList.Add(typeRef); 
 		}
 	}
 
@@ -2712,11 +2797,14 @@ TypeReference typeRef) {
 	}
 
 	void NonArrayType(out TypeReference typeRef) {
-		typeRef = null; 
+		typeRef = null;
+		// :::
+		TypeOrNamespaceNode typeNode;
+		
 		if (StartOf(15)) {
 			PrimitiveType(out typeRef);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
-			ClassType(out typeRef);
+			ClassType(out typeRef, out typeNode);
 		} else SynErr(192);
 		if (la.kind == 111) {
 			Get();
@@ -2731,11 +2819,14 @@ TypeReference typeRef) {
 	}
 
 	void TypeInRelExpr(out TypeReference typeRef, bool voidAllowed) {
-		typeRef = null; 
+		typeRef = null;
+		// :::
+		TypeOrNamespaceNode typeNode; 
+		
 		if (StartOf(15)) {
 			PrimitiveType(out typeRef);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
-			ClassType(out typeRef);
+			ClassType(out typeRef, out typeNode);
 		} else if (la.kind == 81) {
 			Get();
 			typeRef = new TypeReference(t, this); 
@@ -3309,6 +3400,7 @@ TypeReference typeRef) {
 	}
 
 	void CatchClauses(TryStatement tryStm) {
+		TypeOrNamespaceNode typeNode; 
 		Expect(13);
 		CatchClause cc = tryStm.CreateCatchClause(t); 
 		CurrentElement = cc; 
@@ -3317,7 +3409,7 @@ TypeReference typeRef) {
 		} else if (la.kind == 99) {
 			Get();
 			TypeReference typeRef; 
-			ClassType(out typeRef);
+			ClassType(out typeRef, out typeNode);
 			cc.ExceptionType = typeRef; 
 			if (la.kind == 1) {
 				Get();
@@ -4755,16 +4847,19 @@ TypeReference typeRef, bool isEvent) {
 		fd.Terminate(t); 
 	}
 
-	void TypeParameter(out TypeParameter tp) {
+	void TypeParameter(out TypeParameter tp, out AttributeDecorationNodeCollection attrNodes,
+out Token identifier) {
 		AttributeCollection attrs = new AttributeCollection(); 
 		// :::
-		var attrNodes = new AttributeDecorationNodeCollection();
+		attrNodes = new AttributeDecorationNodeCollection();
 		
 		AttributeDecorations(attrs, attrNodes);
 		Expect(1);
 		tp = new TypeParameter(t, this);
 		tp.Name = t.val;
 		tp.AssignAttributes(attrs);
+		// :::
+		identifier = t;
 		
 	}
 

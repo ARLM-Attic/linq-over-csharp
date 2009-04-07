@@ -506,6 +506,12 @@
     <Compile Include="LanguageElements\VisibilityTest.cs" />
     <Compile Include="SyntaxTreeWriter\SyntaxTreeFileWriterTest.cs" />
     <Compile Include="TestFiles\BaseTypes\ComplexBaseType1.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration8.cs" />
+    <None Include="TestFiles\DelegateDeclaration\DelegateDeclaration3.cs" />
+    <None Include="TestFiles\EnumDeclaration\EnumDeclaration3.cs" />
+    <None Include="TestFiles\InterfaceDeclaration\InterfaceDeclaration3.cs" />
+    <None Include="TestFiles\StructDeclaration\StructDeclaration3.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration7.cs" />
     <None Include="TestFiles\GlobalAttributes\GlobalAttributesOk.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression3.cs" />
     <None Include="TestFiles\CSharp3\LambdaExpression2.cs" />

@@ -1,4 +1,5 @@
 using CSharpFactory.ProjectModel;
+using CSharpFactory.Syntax;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.LanguageElements
@@ -9,7 +10,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void NewOnNotnestedClassFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ClassDeclaration\ClassDeclaration1.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 1);
@@ -19,7 +20,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void NewOnNotnestedStructFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"StructDeclaration\StructDeclaration2.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 1);
@@ -29,7 +30,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void NewOnNotnestedDelegateFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"DelegateDeclaration\DelegateDeclaration2.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 1);
@@ -39,7 +40,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void NewOnNotnestedEnumFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"EnumDeclaration\EnumDeclaration2.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 1);
@@ -49,7 +50,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void NewOnNotnestedInterfaceFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"InterfaceDeclaration\InterfaceDeclaration2.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 1);
@@ -59,7 +60,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void SealedOrStaticAbstractFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ClassDeclaration\ClassDeclaration2.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 4);
@@ -72,7 +73,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void SealedAndStaticClassFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ClassDeclaration\ClassDeclaration3.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 2);
@@ -83,7 +84,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void InvalidClassModifiersFail()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ClassDeclaration\ClassDeclaration4.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 4);
@@ -96,7 +97,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void InvalidStructModifiersFail()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"StructDeclaration\StructDeclaration1.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 7);
@@ -112,7 +113,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void InvalidInterfaceModifiersFail()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"InterfaceDeclaration\InterfaceDeclaration1.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 7);
@@ -128,7 +129,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void InvalidDelegateModifiersFail()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"DelegateDeclaration\DelegateDeclaration1.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 7);
@@ -144,7 +145,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void InvalidEnumModifiersFail()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"EnumDeclaration\EnumDeclaration1.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 7);
@@ -160,7 +161,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void MemberWithEnclosingNameFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ClassDeclaration\ClassDeclaration5.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 9);
@@ -178,7 +179,7 @@ namespace CSharpParserTest.LanguageElements
     [TestMethod]
     public void TypeParameterWithInvalidNameFails()
     {
-      CompilationUnit parser = new CompilationUnit(WorkingFolder);
+      var parser = new CompilationUnit(WorkingFolder);
       parser.AddFile(@"ClassDeclaration\ClassDeclaration6.cs");
       Assert.IsFalse(InvokeParser(parser));
       Assert.AreEqual(parser.Errors.Count, 3);
@@ -186,5 +187,177 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(parser.Errors[1].Code, "CS0694");
       Assert.AreEqual(parser.Errors[2].Code, "CS0102");
     }
+
+    [TestMethod]
+    public void ClassDeclarationIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"ClassDeclaration\ClassDeclaration7.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+    }
+
+    [TestMethod]
+    public void StructDeclarationIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"StructDeclaration\StructDeclaration3.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(StructDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(StructDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(StructDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+    }
+
+    [TestMethod]
+    public void InterfaceDeclarationIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"InterfaceDeclaration\InterfaceDeclaration3.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(InterfaceDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(InterfaceDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(InterfaceDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+    }
+
+    [TestMethod]
+    public void EnumDeclarationIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(EnumDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(EnumDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(EnumDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+    }
+
+    [TestMethod]
+    public void DelegateDeclarationIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"DelegateDeclaration\DelegateDeclaration3.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(DelegateDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(DelegateDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(DelegateDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+    }
+
+    [TestMethod]
+    public void ClassDeclarationWithTypeParamsIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      Assert.IsTrue(typeDecl.HasTypeParameters);
+      Assert.AreEqual(typeDecl.TypeParameters.Count, 1);
+      Assert.AreEqual(typeDecl.TypeParameters[0].Identifier, "Z");
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsFalse(typeDecl.HasTypeParameters);
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsTrue(typeDecl.HasTypeParameters);
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+      Assert.AreEqual(typeDecl.TypeParameters.Count, 2);
+      Assert.AreEqual(typeDecl.TypeParameters[0].Identifier, "X");
+      Assert.AreEqual(typeDecl.TypeParameters[1].Identifier, "Y");
+    }
+
+    [TestMethod]
+    public void ClassDeclarationWithBaseListIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      Assert.AreEqual(typeDecl.BaseTypes.Count, 1);
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags.Count, 4);
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[0].Identifier, "System");
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[1].Identifier, "Collections");
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[2].Identifier, "Generic");
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[3].Identifier, "List");
+
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      Assert.AreEqual(typeDecl.BaseTypes.Count, 2);
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags.Count, 1);
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[0].Identifier, "List");
+      Assert.AreEqual(typeDecl.BaseTypes[1].TypeTags.Count, 1);
+      Assert.AreEqual(typeDecl.BaseTypes[1].TypeTags[0].Identifier, "IEnumerable");
+
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+      Assert.AreEqual(typeDecl.BaseTypes.Count, 1);
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags.Count, 1);
+      Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[0].Identifier, "Dictionary");
+    }
+
   }
 }

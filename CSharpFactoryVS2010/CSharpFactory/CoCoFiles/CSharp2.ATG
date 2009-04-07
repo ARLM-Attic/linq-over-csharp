@@ -281,8 +281,7 @@ ExternAliasDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
   ident
   (. 
      if (t.val != "alias") 
-       Error1003(la, "alias"); 
-     // :::
+       Error1003(t, "alias"); 
      alias = t;
   .)
   ident      
@@ -483,12 +482,21 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file,
     .)  
     AttributeDecorations<attrs, attrNodes>
     ModifierList<m, mod> 
-    TypeDeclaration<attrs, null, m, out td>
+    (. TypeDeclarationNode typeDecl; .)
+    TypeDeclaration<attrs, null, m, out td, parentNode, null, out typeDecl>
     (.
        if (td != null)
        {
          if (parent == null) File.AddTypeDeclaration(td);
          else parent.AddTypeDeclaration(td);
+       }
+       // :::
+       if (typeDecl != null)
+       {
+         typeDecl.AttributeDecorations = attrNodes;
+         typeDecl.Modifiers = mod;
+         typeDecl.DeclaringNamespace = parentNode;
+         parentNode.TypeDeclarations.Add(typeDecl);
        }
     .)
 .
@@ -499,28 +507,44 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file,
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
 TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers m, 
-  out TypeDeclaration td>            
-=                                                    (. td = null; .)
+  out TypeDeclaration td, NamespaceScopeNode parentNs, TypeDeclarationNode declaringType,
+  out TypeDeclarationNode typeDecl>            
+  (. 
+     td = null;
+     bool isPartial = false;
+     // :::
+     typeDecl = null; 
+  .)
+= 
   (                                                             
-                                                     (. bool isPartial = false; .)
     [ 
-      "partial"                                      (. isPartial = true; .)
+      "partial"                                      
+      (. isPartial = true; .)
     ]
     ( 
-      ClassDeclaration<m, parentType, isPartial, out td> |                                                           
-      StructDeclaration<m, parentType, isPartial, out td> |                                                           
-      InterfaceDeclaration<m, parentType, isPartial, out td>                                                           
+      ClassDeclaration<m, parentType, isPartial, out td, out typeDecl> |                                                           
+      StructDeclaration<m, parentType, isPartial, out td, out typeDecl> |                                                           
+      InterfaceDeclaration<m, parentType, isPartial, out td, out typeDecl>                                                           
     )                                                          
-    | EnumDeclaration<m, parentType, out td> 
-    | DelegateDeclaration<m, parentType, out td>
-  )                                                  (. 
-                                                        if (td != null)
-                                                        {
-                                                          td.SetModifiers(m.Value); 
-                                                          td.AssignAttributes(attrs);
-                                                          td.Terminate(t);
-                                                        }
-                                                     .)                               
+    | EnumDeclaration<m, parentType, out td, out typeDecl> 
+    | DelegateDeclaration<m, parentType, out td, out typeDecl>
+  )
+  (. 
+     if (td != null)
+     {
+        td.SetModifiers(m.Value); 
+        td.AssignAttributes(attrs);
+        td.Terminate(t);
+     }
+     // :::
+     if (typeDecl != null)
+     {
+       typeDecl.IsPartial = isPartial;
+       typeDecl.DeclaringNamespace = parentNs;
+       typeDecl.DeclaringType = declaringType;
+       typeDecl.Terminate(t);
+     }
+  .)                               
 .
 
 // ------------------------------------------------------------------------------------
@@ -531,34 +555,64 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
 ClassDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
-  out TypeDeclaration td>
+  out TypeDeclaration td, out TypeDeclarationNode typeDecl>
 =
-  "class"                                            (. 
-                                                        ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
-                                                        cd.IsPartial = isPartial;
-                                                        td = cd;
-                                                        CurrentElement = cd;
-                                                     .)
-  ident                                              (. cd.Name = t.val; .)
-  [ TypeParameterList<cd> ] 
-  [ ClassBase<cd> ]
-  {                                                  (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>   (. td.AddTypeParameterConstraint(constraint); .)
-  } ClassBody<td> 
-  [ ";" ]                                                       
+  "class"                                            
+  (. 
+     ClassDeclaration cd = new ClassDeclaration(t, this, parentType);
+     cd.IsPartial = isPartial;
+     td = cd;
+     CurrentElement = cd;
+     // :::
+     var start = t;
+  .)
+  ident    
+  (. 
+     cd.Name = t.val; 
+     // :::
+     typeDecl = new ClassDeclarationNode(start, t);
+  .)
+  [ TypeParameterList<cd, typeDecl> ] 
+  [ BaseTypeList<cd, typeDecl> ]
+  {                                                  
+    (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint>   
+    (. td.AddTypeParameterConstraint(constraint); .)
+  } ClassBody<td>
+  (. typeDecl.Terminate(t); .)
+  [ 
+    ";" 
+    (. typeDecl.Terminate(t); .)
+  ]                                                       
 .
 
 // ------------------------------------------------------------------------------------
 // Base type declaration of a class.
-// +cd: Class declaration that has the base types defined here.
+// +td: Type declaration that has the base types defined here.
 // ------------------------------------------------------------------------------------
-ClassBase<ClassDeclaration cd>                                  
+BaseTypeList<TypeDeclaration td, TypeDeclarationNode typeDecl>
+  (. 
+     TypeReference typeRef; 
+     // :::
+     TypeOrNamespaceNode typeNode;
+  .)
 =
-  ":"                        (. TypeReference typeRef; .)
-  ClassType<out typeRef>     (. cd.InterfaceList.Add(typeRef); .)
-  
-  { ","                                                         
-    ClassType<out typeRef>    (. cd.InterfaceList.Add(typeRef); .)
+  ":"                        
+  ClassType<out typeRef, out typeNode>     
+  (. 
+     td.InterfaceList.Add(typeRef); 
+     // ::: 
+     typeDecl.BaseTypes.Add(typeNode);
+  .)
+  { 
+    ","  
+    (. var separator = t; .)
+    ClassType<out typeRef, out typeNode>    
+    (. 
+       td.InterfaceList.Add(typeRef); 
+       // :::
+       typeDecl.BaseTypes.Add(new TypeOrNamespaceContinuationNode(separator, typeNode));
+    .)
   }
 .
 
@@ -591,26 +645,38 @@ ClassBody<TypeDeclaration td>
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
 StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
-  out TypeDeclaration td>
+  out TypeDeclaration td, out TypeDeclarationNode typeDecl>
+  (. TypeOrNamespaceNode typeNode; .)      
 =
-  "struct"                                         (. 
-                                                      StructDeclaration sd = new StructDeclaration(t, this, parentType);
-                                                      td = sd;
-                                                      CurrentElement = sd;
-                                                      sd.IsPartial = isPartial;
-                                                      TypeReference typeRef;
-                                                   .)
-  ident                                            (. sd.Name = t.val; .)
-  [ TypeParameterList<sd> ]
-  [ ":"                                                     
-  ClassType<out typeRef>                           (. sd.InterfaceList.Add(typeRef); .)
-  { "," 
-    ClassType<out typeRef>                         (. sd.InterfaceList.Add(typeRef); .)
-  } ]
-  {                                                (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
-  } StructBody<td>
-  [ ";" ]                                                       
+  "struct"
+  (. 
+     StructDeclaration sd = new StructDeclaration(t, this, parentType);
+     td = sd;
+     CurrentElement = sd;
+     sd.IsPartial = isPartial;
+     TypeReference typeRef;
+     // :::
+     var start = t;
+  .)
+  ident
+  (. 
+     sd.Name = t.val; 
+     // :::
+     typeDecl = new StructDeclarationNode(start, t);
+  .)
+  [ TypeParameterList<sd, typeDecl> ]
+  [ BaseTypeList<sd, typeDecl> ]
+  {                                                
+    (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint> 
+    (. td.AddTypeParameterConstraint(constraint); .)
+  } 
+  StructBody<td>
+  (. typeDecl.Terminate(t); .)
+  [ 
+    ";" 
+    (. typeDecl.Terminate(t); .)
+  ]                                                       
 .
 
 // ------------------------------------------------------------------------------------
@@ -641,23 +707,47 @@ StructBody<TypeDeclaration td>
 // +parentType: Parent type declaration
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
+EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
+  out TypeDeclarationNode typeDecl>
+  (. TypeOrNamespaceNode typeNode; .)      
 =
-  "enum"                         (. 
-                                    EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
-                                    td = ed;
-                                    CurrentElement = ed;
-                                 .)
-  ident                          (. ed.Name = t.val; .)
-  [ ":"                          (. TypeReference typeRef; .)
+  "enum"                         
+  (. 
+     EnumDeclaration ed = new EnumDeclaration(t, this, parentType);
+     td = ed;
+     CurrentElement = ed;
+     // :::
+     var start = t;
+  .)
+  ident                          
+  (. 
+     ed.Name = t.val; 
+     typeDecl = new EnumDeclarationNode(start, t);
+  .)
+  [ 
+    ":"                          
+    (. TypeReference typeRef; .)
     ( 
-      ClassType<out typeRef>     (. ed.InterfaceList.Add(typeRef); .)
+      ClassType<out typeRef, out typeNode>     
+      (. ed.InterfaceList.Add(typeRef); .)
       |
-      IntegralType<out typeRef>  (. ed.InterfaceList.Add(typeRef); .)
+      IntegralType<out typeRef>  
+      (. ed.InterfaceList.Add(typeRef); .)
     )
   ] 
-  EnumBody<ed>                   (. ed.Terminate(t); .)
-  [ ";"                          (. ed.Terminate(t); .)
+  EnumBody<ed>                   
+  (. 
+     ed.Terminate(t); 
+     // :::
+     typeDecl.Terminate(t);
+  .)
+  [ 
+    ";"                          
+    (. 
+       ed.Terminate(t); 
+       // :::
+       typeDecl.Terminate(t);
+    .)
   ]                                                       
 .
 
@@ -707,22 +797,36 @@ EnumMemberDeclaration<EnumDeclaration ed>
 // +parentType: Parent type declaration
 // +td: resulting type declaration.
 // ------------------------------------------------------------------------------------
-DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td>
+DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
+  out TypeDeclarationNode typeDecl>
 =
-  "delegate"                                       (. 
-                                                      DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
-                                                      td = dd;
-                                                      CurrentElement = dd;
-                                                      TypeReference returnType;
-                                                   .)
-  Type<out returnType, true>                       (. dd.ReturnType = returnType; .)
-  ident                                            (. dd.Name = t.val; .)
-  [ TypeParameterList<dd> ]
-  "(" [ FormalParameterList<dd.FormalParameters> ] ")"
-  {                                                (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint> (. td.AddTypeParameterConstraint(constraint); .)
+  "delegate"                                       
+  (. 
+     DelegateDeclaration dd = new DelegateDeclaration(t, this, parentType);
+     td = dd;
+     CurrentElement = dd;
+     TypeReference returnType;
+     // :::
+     var start = t;
+  .)
+  Type<out returnType, true>
+  (. dd.ReturnType = returnType; .)
+  ident
+  (. 
+     dd.Name = t.val; 
+     typeDecl = new DelegateDeclarationNode(start, t);
+  .)
+  [ TypeParameterList<dd, typeDecl> ]
+  "(" 
+  [ FormalParameterList<dd.FormalParameters> ] 
+  ")"
+  {                                                
+    (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint> 
+    (. td.AddTypeParameterConstraint(constraint); .)
   } 
   ";"                                                         
+  (. typeDecl.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -787,8 +891,22 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       | IndexerDeclaration<attrs, m, typeRef, null, td>
     )
     | CastOperatorDeclaration<attrs, m, td>
-    |                                               (. TypeDeclaration nestedType; .)
-      TypeDeclaration<attrs, td, m, out nestedType> (. td.AddTypeDeclaration(nestedType); .)
+    |                                               (. 
+                                                       TypeDeclaration nestedType; 
+                                                       // :::
+                                                       TypeDeclarationNode nestedTypeNode;
+                                                    .)
+      TypeDeclaration<attrs, td, m, out nestedType, null, null, out nestedTypeNode> 
+      (. 
+         td.AddTypeDeclaration(nestedType); 
+         // :::
+         if (nestedTypeNode != null)
+         {
+           // TODO: Handle attributes and modifiers
+           //nestedTypeNode.AttributeDecorations = attrNodes;
+           //nestedTypeNode.Modifiers = mod;
+         }
+      .)
   )
 .
 
@@ -970,7 +1088,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
                                                        md.ExplicitName = memberRef;
                                                        md.ResultingType = typeRef;
                                                     .)
-  [ TypeParameterList<md> ]
+  [ TypeParameterList<md, null> ]
   "(" [ 
     FormalParameterList<md.FormalParameters>
   ] ")"
@@ -1056,36 +1174,37 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
 InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial, 
-  out TypeDeclaration td>
+  out TypeDeclaration td, out TypeDeclarationNode typeDecl>
 =
-  "interface"       (. 
-                       InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
-                       CurrentElement = ifd;
-                       td = ifd;
-                       ifd.IsPartial = isPartial;
-                    .)
-  ident                                               (. ifd.Name = t.val; .)
-  [ TypeParameterList<ifd> ]
-  [ InterfaceBase<ifd> ]
-  {                                                   (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>    (. td.AddTypeParameterConstraint(constraint); .)
+  "interface"       
+  (. 
+     InterfaceDeclaration ifd = new InterfaceDeclaration(t, this, parentType);
+     CurrentElement = ifd;
+     td = ifd;
+     ifd.IsPartial = isPartial;
+     var start = t;
+  .)
+  ident            
+  (. 
+     ifd.Name = t.val; 
+     // :::
+     typeDecl = new InterfaceDeclarationNode(start, t);
+  .)
+  [ TypeParameterList<ifd, typeDecl> ]
+  [ BaseTypeList<ifd, typeDecl> ]
+  {                                                   
+    (. TypeParameterConstraint constraint; .)
+    TypeParameterConstraintsClause<out constraint>    
+    (. td.AddTypeParameterConstraint(constraint); .)
   }
-  "{" { InterfaceMemberDeclaration<ifd> } "}" 
-  [ ";" ]                                                       
-.
-
-// ------------------------------------------------------------------------------------
-// Base type declaration of an interface.
-// +ifd: Interface declaration that has the base types defined here.
-// ------------------------------------------------------------------------------------
-InterfaceBase<InterfaceDeclaration ifd> 
-=
-  ":"                        (. TypeReference typeRef; .)
-  ClassType<out typeRef>      (. ifd.InterfaceList.Add(typeRef); .)
-  
-  { ","                                                         
-    ClassType<out typeRef>    (. ifd.InterfaceList.Add(typeRef); .)
-  }
+  "{" 
+      { InterfaceMemberDeclaration<ifd> } 
+  "}" 
+  (. typeDecl.Terminate(t); .)
+  [ 
+    ";" 
+    (. typeDecl.Terminate(t); .)
+  ]                                                       
 .
 
 // ------------------------------------------------------------------------------------
@@ -1700,10 +1819,15 @@ ModifierList<Modifiers m, ModifierNodeCollection mods>
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
+Type<out TypeReference typeRef, bool voidAllowed>    
+  (. 
+     typeRef = null;
+     // :::
+     TypeOrNamespaceNode typeNode;
+  .)      
 =                                                    
   ( PrimitiveType<out typeRef>
-  | ClassType<out typeRef>                                               
+  | ClassType<out typeRef, out typeNode>                                               
   | "void"                                           (. 
                                                         typeRef = new TypeReference(t, this); 
                                                         typeRef.Name = t.val;
@@ -1721,12 +1845,17 @@ Type<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-NonArrayType<out TypeReference typeRef>    (. typeRef = null; .)
+NonArrayType<out TypeReference typeRef>    
+  (. 
+     typeRef = null;
+     // :::
+     TypeOrNamespaceNode typeNode;
+  .)      
 =                                                    
   ( 
     PrimitiveType<out typeRef>
   | 
-    ClassType<out typeRef>                                               
+    ClassType<out typeRef, out typeNode>
   )
   [ 
     "?"                         (. typeRef.IsNullable = true; .)                                              
@@ -1743,10 +1872,15 @@ NonArrayType<out TypeReference typeRef>    (. typeRef = null; .)
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    (. typeRef = null; .)
+TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    
+  (. 
+     typeRef = null;
+     // :::
+     TypeOrNamespaceNode typeNode; 
+  .)      
 =                                                    
   ( PrimitiveType<out typeRef>
-  | ClassType<out typeRef>                                               
+  | ClassType<out typeRef, out typeNode>                                               
   | "void"                                           (. 
                                                         typeRef = new TypeReference(t, this); 
                                                         typeRef.Name = t.val;
@@ -1825,16 +1959,27 @@ IntegralType<out TypeReference typeRef> (. typeRef = null; .)
 // Types that are taken into account as class types.
 // +typeRef: resulting type reference.
 // ------------------------------------------------------------------------------------
-ClassType<out TypeReference typeRef>   (. typeRef = null; .)
-=                                      (.
-                                          // :::
-                                          TypeOrNamespaceNode nsNode = null;
-                                       .)
-  TypeName<out typeRef, out nsNode> |               
+ClassType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>   
+  (. 
+     typeRef = null; 
+     // ::: 
+     typeNode = null;
+  .)
+=                                      
+  TypeName<out typeRef, out typeNode> |               
   (                                    
-    "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
-    | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
-  )                                    (. typeRef.Terminate(t); .)                                 
+    "object"                               
+    (. typeRef = new TypeReference(t, this, typeof(object)); .)
+    | "string"                         
+    (. typeRef = new TypeReference(t, this, typeof(string)); .)
+  )                                    
+  (. 
+     typeRef.Terminate(t); 
+     // :::
+     typeNode = new TypeOrNamespaceNode(t);
+     typeNode.AddTypeTag(new TypeTagNode(t, null));
+     typeNode.Terminate(t);
+  .)                                 
 .
 
 // ------------------------------------------------------------------------------------
@@ -1881,69 +2026,75 @@ MemberName<out TypeReference typeRef>
 // +typeRef: An instance to a member reference
 // ------------------------------------------------------------------------------------
 TypeName<out TypeReference typeRef, out TypeOrNamespaceNode resultNode>                             
-=              (.
-                   // :::
-                   resultNode = null;
-                   Token qualifier = null;
-                   Token separator = null;
-                   Token identifier = null;
-                   TypeArgumentListNode argList = null;
-               .)
-  ident        (. 
-                   typeRef = new TypeReference(t, this);
-                   typeRef.Name = t.val; 
-                   TypeReference nextType = typeRef;
-                   // :::
-                   qualifier = t;
-               .)
+  (.
+     // :::
+     resultNode = null;
+     Token qualifier = null;
+     Token separator = null;
+     Token identifier = null;
+     TypeArgumentListNode argList = null;
+  .)
+=               
+  ident
+  (. 
+     typeRef = new TypeReference(t, this);
+     typeRef.Name = t.val; 
+     TypeReference nextType = typeRef;
+     // :::
+     qualifier = t;
+  .)
   [ 
-    "::"       (. 
-                   typeRef.IsGlobalScope = true; 
-                   // :::
-                   separator = t;
-               .)
-    ident      (. 
-                   typeRef.Suffix = new TypeReference(t, this);
-                   typeRef.Suffix.Name = t.val; 
-                   nextType = typeRef.Suffix;
-                   // :::
-                   identifier = t;
-               .)
-  ]            (.
-                   if (separator == null)
-                   {
-                     resultNode = new TypeOrNamespaceNode(qualifier);
-                     identifier = qualifier;
-                   }
-                   else
-                   {
-                     resultNode = new TypeOrNamespaceNode(qualifier, separator);
-                   }
-               .)
-  
+    "::"
+    (. 
+       typeRef.IsGlobalScope = true; 
+       // :::
+       separator = t;
+    .)
+    ident
+    (. 
+       typeRef.Suffix = new TypeReference(t, this);
+       typeRef.Suffix.Name = t.val; 
+       nextType = typeRef.Suffix;
+       // :::
+       identifier = t;
+    .)
+  ]
+  (.
+     if (separator == null)
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier);
+       identifier = qualifier;
+     }
+     else
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier, separator);
+     }
+  .)
   [ TypeArgumentList<nextType.Arguments, out argList> ]
-               (.
-                   // :::
-                   resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
-               .)                                    
+  (.
+     // :::
+     resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
+  .)                                    
   {
-    "."        (.
-                   // :::
-                   separator = t;
-                   argList = null;
-               .)
-    ident      (. 
-                   nextType.Suffix = new TypeReference(t, this);
-                   nextType.Suffix.Name = t.val;
-                   nextType = nextType.Suffix;
-                   // :::
-                   identifier = t;
-               .)
+    "."
+    (.
+       // :::
+       separator = t;
+       argList = null;
+    .)
+    ident 
+    (. 
+       nextType.Suffix = new TypeReference(t, this);
+       nextType.Suffix.Name = t.val;
+       nextType = nextType.Suffix;
+       // :::
+       identifier = t;
+    .)
     [ TypeArgumentList<nextType.Arguments, out argList> ]   
-               (.
-                   // :::
-                   resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
-               .)                                    
+    (.
+       // :::
+       resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
+    .)                                    
   }
 .
 
@@ -2528,6 +2679,7 @@ ForIterator<ForStatement fs>
 // +try: Statement owning the catch clauses.
 // ------------------------------------------------------------------------------------
 CatchClauses<TryStatement tryStm>
+  (. TypeOrNamespaceNode typeNode; .)
 =                                                     
   "catch"                   (. CatchClause cc = tryStm.CreateCatchClause(t); .)    
                             (. CurrentElement = cc; .)  
@@ -2535,7 +2687,7 @@ CatchClauses<TryStatement tryStm>
     Block<cc>
   | 
     "("                     (. TypeReference typeRef; .)
-    ClassType<out typeRef>  (. cc.ExceptionType = typeRef; .)
+    ClassType<out typeRef, out typeNode>  (. cc.ExceptionType = typeRef; .)
     [ 
       ident                 (. cc.Name = t.val; .)
                             (. cc.CreateInstanceVariable(typeRef, t.val); .)
@@ -3864,31 +4016,58 @@ OverloadableOp<out Operator op> (. op = Operator.Plus; .)
 // Type parameter declarations for generic types.
 // +td: Type parameter owner.
 // ------------------------------------------------------------------------------------
-TypeParameterList<ITypeParameterOwner td>
+TypeParameterList<ITypeParameterOwner td, ITypeParameterHolder paramNode>
+  (. 
+     TypeParameter tp;
+     Token identifier;
+     AttributeDecorationNodeCollection attrNodes;
+  .)
 =                            
-  "<"                        (. TypeParameter tp; .)
-  TypeParameter<out tp>      (. td.AddTypeParameter(tp); .)
-  { "," 
-    TypeParameter<out tp>    (. td.AddTypeParameter(tp); .)
-  } ">"
+  "<"                        
+  (. if (paramNode != null) paramNode.SetOpenSign(t); .)
+  TypeParameter<out tp, out attrNodes, out identifier>      
+  (. 
+     td.AddTypeParameter(tp); 
+     // :::
+     var typeParam = new TypeParameterNode(identifier, attrNodes);
+     if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
+  .)
+  { 
+    "," 
+    (. var separator= t; .)
+    TypeParameter<out tp, out attrNodes, out identifier>      
+    (. 
+       td.AddTypeParameter(tp); 
+       // :::
+       typeParam = new TypeParameterContinuationNode(separator, identifier, attrNodes);
+       if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
+    .)
+  } 
+  ">"
+  (. if (paramNode != null) paramNode.SetCloseSign(t); .)
 .
 
 // ------------------------------------------------------------------------------------
 // Declaration of a type parameter.
 // +tp: Type parameter defined here.
 // ------------------------------------------------------------------------------------
-TypeParameter<out TypeParameter tp>
-=                        (. 
-                            AttributeCollection attrs = new AttributeCollection(); 
-                            // :::
-                            var attrNodes = new AttributeDecorationNodeCollection();
-                         .)
+TypeParameter<out TypeParameter tp, out AttributeDecorationNodeCollection attrNodes,
+  out Token identifier>
+  (. 
+     AttributeCollection attrs = new AttributeCollection(); 
+     // :::
+     attrNodes = new AttributeDecorationNodeCollection();
+  .)
+=                         
   AttributeDecorations<attrs, attrNodes>
-  ident                  (. 
-                            tp = new TypeParameter(t, this);
-                            tp.Name = t.val;
-                            tp.AssignAttributes(attrs);
-                         .)
+  ident
+  (. 
+     tp = new TypeParameter(t, this);
+     tp.Name = t.val;
+     tp.AssignAttributes(attrs);
+     // :::
+     identifier = t;
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3924,7 +4103,8 @@ TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>
 // delegate.
 // +constraint: Declaration of the constraint
 // ------------------------------------------------------------------------------------
-TypeParameterConstraintsClause<out TypeParameterConstraint constraint>         
+TypeParameterConstraintsClause<out TypeParameterConstraint constraint>   
+  (. TypeOrNamespaceNode typeNode; .)      
 =
   "where"
   ident                        (. 
@@ -3943,7 +4123,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint>
     "new"                      (. element = new ConstraintElement(t, this, ConstraintClassification.New); .)
     "(" ")" |
                                (. Token elemToken = t; .)
-    ClassType<out typeRef>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
+    ClassType<out typeRef, out typeNode>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
   )                            (. constraint.AddConstraintElement(element); .)
 
   {
@@ -3956,7 +4136,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint>
     "new"                      (. element = new ConstraintElement(t, this, ConstraintClassification.New); .)
     "(" ")" |
                                (. Token elemToken = t; .)
-    ClassType<out typeRef>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
+    ClassType<out typeRef, out typeNode>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
     )                          (. constraint.AddConstraintElement(element); .)
   }
 .
