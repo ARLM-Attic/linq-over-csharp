@@ -105,6 +105,45 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Create type of namespace node from the specified token used for a simple type.
+    /// </summary>
+    /// <param name="t">The token for the simple type.</param>
+    /// <returns></returns>
+    // ----------------------------------------------------------------------------------------------
+    public static TypeOrNamespaceNode CreateTypeNode(Token t)
+    {
+      var result = new TypeOrNamespaceNode(t);
+      result.AddTypeTag(new TypeTagNode(t, null));
+      result.Terminate(t);
+      return result;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the nullable token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token NullableToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is nullable.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is nullable; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsNullable { get { return NullableToken != null; } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type modifiers.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<TypeModifierNode> TypeModifiers { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>

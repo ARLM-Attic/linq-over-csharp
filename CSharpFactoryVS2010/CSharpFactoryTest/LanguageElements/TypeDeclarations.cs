@@ -359,5 +359,43 @@ namespace CSharpParserTest.LanguageElements
       Assert.AreEqual(typeDecl.BaseTypes[0].TypeTags[0].Identifier, "Dictionary");
     }
 
+    [TestMethod]
+    public void ClassDeclarationWithTypeConstraintIsOk()
+    {
+      var parser = new CompilationUnit(WorkingFolder);
+      parser.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 1);
+
+      var typeDecl = source.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "C");
+      Assert.AreEqual(typeDecl.TypeParameterConstraints.Count, 1);
+      Assert.AreEqual(typeDecl.TypeParameterConstraints[0].ConstraintTags.Count, 2);
+      Assert.IsTrue(typeDecl.TypeParameterConstraints[0].ConstraintTags[0].IsTypeName);
+      Assert.AreEqual(typeDecl.TypeParameterConstraints[0].ConstraintTags[0].ConstraintToken.val, "Hashtable");
+      Assert.IsTrue(typeDecl.TypeParameterConstraints[0].ConstraintTags[1].IsTypeName);
+      Assert.AreEqual(typeDecl.TypeParameterConstraints[0].ConstraintTags[1].ConstraintToken.val, "IEnumerable");
+
+      var nsDecl = source.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.TypeDeclarations.Count, 2);
+      typeDecl = nsDecl.TypeDeclarations[0];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "A");
+      Assert.AreEqual(typeDecl.TypeParameterConstraints.Count, 0);
+
+      typeDecl = nsDecl.TypeDeclarations[1];
+      Assert.IsInstanceOfType(typeDecl, typeof(ClassDeclarationNode));
+      Assert.AreEqual(typeDecl.Name, "B");
+      Assert.AreEqual(typeDecl.TypeParameterConstraints.Count, 2);
+      Assert.AreEqual(typeDecl.TypeParameterConstraints[0].ConstraintTags.Count, 3);
+      Assert.IsTrue(typeDecl.TypeParameterConstraints[0].ConstraintTags[0].IsClass);
+      Assert.IsTrue(typeDecl.TypeParameterConstraints[0].ConstraintTags[1].IsTypeName);
+      Assert.AreEqual(typeDecl.TypeParameterConstraints[0].ConstraintTags[1].ConstraintToken.val, "IEnumerable");
+      Assert.IsTrue(typeDecl.TypeParameterConstraints[0].ConstraintTags[2].IsNew);
+      Assert.AreEqual(typeDecl.TypeParameterConstraints[1].ConstraintTags.Count, 1);
+      Assert.IsTrue(typeDecl.TypeParameterConstraints[1].ConstraintTags[0].IsStruct);
+    }
   }
 }

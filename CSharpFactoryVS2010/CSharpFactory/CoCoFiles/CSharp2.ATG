@@ -570,15 +570,24 @@ ClassDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   (. 
      cd.Name = t.val; 
      // :::
-     typeDecl = new ClassDeclarationNode(start, t);
+     var classDecl = new ClassDeclarationNode(start, t);
+     typeDecl = classDecl;
   .)
   [ TypeParameterList<cd, typeDecl> ] 
   [ BaseTypeList<cd, typeDecl> ]
   {                                                  
-    (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>   
-    (. td.AddTypeParameterConstraint(constraint); .)
-  } ClassBody<td>
+    (. 
+       TypeParameterConstraint constraint; 
+       // :::
+       TypeParameterConstraintNode constrNode; 
+    .)
+    TypeParameterConstraintsClause<out constraint, out constrNode>   
+    (. 
+       td.AddTypeParameterConstraint(constraint); 
+       // :::
+       typeDecl.TypeParameterConstraints.Add(constrNode);
+    .)
+  } ClassBody<td, classDecl>
   (. typeDecl.Terminate(t); .)
   [ 
     ";" 
@@ -620,21 +629,27 @@ BaseTypeList<TypeDeclaration td, TypeDeclarationNode typeDecl>
 // Body declaration of a class.
 // +td: Class declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
-ClassBody<TypeDeclaration td>
-=                              (.  AttributeCollection attrs = new AttributeCollection(); .)
-  "{" {                        (. 
-                                   attrs = new AttributeCollection(); 
-                                   var attrNodes = new AttributeDecorationNodeCollection();
-                               .)
-        AttributeDecorations<attrs, attrNodes>
-                               (. 
-                                   Modifiers m = new Modifiers(this); 
-                                   var mod = new ModifierNodeCollection();
-                               .)                          
-        ModifierList<m, mod>
-        ClassMemberDeclaration<attrs, m, td>
-      }
+ClassBody<TypeDeclaration td, ClassDeclarationNode typeDecl>
+   (.  AttributeCollection attrs = new AttributeCollection(); .)
+=
+  "{" 
+  (. typeDecl.OpenBrace = t; .)
+  {
+    (. 
+       attrs = new AttributeCollection(); 
+       var attrNodes = new AttributeDecorationNodeCollection();
+    .)
+    AttributeDecorations<attrs, attrNodes>
+    (. 
+       Modifiers m = new Modifiers(this); 
+       var mod = new ModifierNodeCollection();
+    .)                          
+    ModifierList<m, mod>
+    (. MemberDeclarationNode memNode; .)
+    ClassMemberDeclaration<attrs, m, td, out memNode>
+  }
   "}"
+  (. typeDecl.CloseBrace = t; .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -662,16 +677,24 @@ StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   (. 
      sd.Name = t.val; 
      // :::
-     typeDecl = new StructDeclarationNode(start, t);
+     var structDecl = new StructDeclarationNode(start, t);
+     typeDecl = structDecl;
   .)
   [ TypeParameterList<sd, typeDecl> ]
   [ BaseTypeList<sd, typeDecl> ]
   {                                                
-    (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint> 
-    (. td.AddTypeParameterConstraint(constraint); .)
+    (. 
+       TypeParameterConstraint constraint; 
+       TypeParameterConstraintNode constrNode; 
+    .)
+    TypeParameterConstraintsClause<out constraint, out constrNode> 
+    (. 
+       td.AddTypeParameterConstraint(constraint); 
+       // :::
+       typeDecl.TypeParameterConstraints.Add(constrNode);
+    .)
   } 
-  StructBody<td>
+  StructBody<td, structDecl>
   (. typeDecl.Terminate(t); .)
   [ 
     ";" 
@@ -683,22 +706,28 @@ StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
 // Body declaration of a structure.
 // +td: Structure declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
-StructBody<TypeDeclaration td>
-=                              (.  AttributeCollection attrs = new AttributeCollection(); .)
-  "{" {                        (. 
-                                   attrs = new AttributeCollection(); 
-                                   var attrNodes = new AttributeDecorationNodeCollection();
-                               .)
-        AttributeDecorations<attrs, attrNodes>
-                               (. 
-                                   Modifiers m = new Modifiers(this); 
-                                   // :::
-                                   var mod = new ModifierNodeCollection();
-                               .)                             
-        ModifierList<m, mod>
-        StructMemberDeclaration<attrs, m, td>
-      }
+StructBody<TypeDeclaration td, StructDeclarationNode typeDecl>
+  (.  AttributeCollection attrs = new AttributeCollection(); .)
+=
+  "{" 
+  (. typeDecl.OpenBrace = t; .)
+  {
+    (. 
+       attrs = new AttributeCollection(); 
+       var attrNodes = new AttributeDecorationNodeCollection();
+    .)
+    AttributeDecorations<attrs, attrNodes>
+    (. 
+       Modifiers m = new Modifiers(this); 
+       // :::
+       var mod = new ModifierNodeCollection();
+    .)                             
+    ModifierList<m, mod>
+    (. MemberDeclarationNode memNode; .)
+    StructMemberDeclaration<attrs, m, td, out memNode>
+  }
   "}"   
+  (. typeDecl.CloseBrace = t; .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -721,8 +750,9 @@ EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
   .)
   ident                          
   (. 
-     ed.Name = t.val; 
-     typeDecl = new EnumDeclarationNode(start, t);
+     ed.Name = t.val;
+     var enumDecl = new EnumDeclarationNode(start, t);
+     typeDecl = enumDecl;
   .)
   [ 
     ":"                          
@@ -731,11 +761,12 @@ EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
       ClassType<out typeRef, out typeNode>     
       (. ed.InterfaceList.Add(typeRef); .)
       |
-      IntegralType<out typeRef>  
+      (. TypeOrNamespaceNode itypeNode; .)
+      IntegralType<out typeRef, out itypeNode>  
       (. ed.InterfaceList.Add(typeRef); .)
     )
   ] 
-  EnumBody<ed>                   
+  EnumBody<ed, enumDecl>                   
   (. 
      ed.Terminate(t); 
      // :::
@@ -755,13 +786,17 @@ EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
 // Body declaration of an enumerated type.
 // +ed: Enumeration declaration that has the body defined here.
 // ------------------------------------------------------------------------------------
-EnumBody<EnumDeclaration ed>
+EnumBody<EnumDeclaration ed, EnumDeclarationNode typeDecl>
 =
-  "{" [ 
+  "{" 
+  (. typeDecl.OpenBrace = t; .)
+  [ 
     EnumMemberDeclaration<ed> 
     {IF (NotFinalComma())  "," SYNC EnumMemberDeclaration<ed>} 
-    [ "," ] ] 
+    [ "," ] 
+  ] 
   SYNC "}"
+  (. typeDecl.CloseBrace = t; .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -808,8 +843,9 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
      TypeReference returnType;
      // :::
      var start = t;
+     TypeOrNamespaceNode typeNode;
   .)
-  Type<out returnType, true>
+  Type<out returnType, true, out typeNode>
   (. dd.ReturnType = returnType; .)
   ident
   (. 
@@ -821,9 +857,16 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
   [ FormalParameterList<dd.FormalParameters> ] 
   ")"
   {                                                
-    (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint> 
-    (. td.AddTypeParameterConstraint(constraint); .)
+    (. 
+       TypeParameterConstraint constraint; 
+       TypeParameterConstraintNode constrNode; 
+    .)
+    TypeParameterConstraintsClause<out constraint, out constrNode> 
+    (. 
+       td.AddTypeParameterConstraint(constraint); 
+       // :::
+       typeDecl.TypeParameterConstraints.Add(constrNode);
+    .)
   } 
   ";"                                                         
   (. typeDecl.Terminate(t); .)
@@ -835,9 +878,11 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
 // +modifiers: Set of modifiers belonging to the member.
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
-ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
+  out MemberDeclarationNode memNode>
+  (. memNode = null; .)
 =
-  StructMemberDeclaration<attrs, m, td>
+  StructMemberDeclaration<attrs, m, td, out memNode>
   | "~" ident   (. 
                    FinalizerDeclaration dd = new FinalizerDeclaration(t, td);
                    CurrentElement = dd;
@@ -860,23 +905,29 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 // +modifiers: Set of modifiers belonging to the member.
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
-StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>        
-                                             (. 
-                                                TypeReference typeRef;
-                                                TypeReference memberRef; 
-                                             .)
+StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
+  out MemberDeclarationNode memNode>        
+  (. 
+     TypeReference typeRef;
+     TypeReference memberRef; 
+     // :::
+     memNode = null;
+  .)
 =                                             
   (                                                                          
-    ConstMemberDeclaration<attrs, m, td> 
+    ConstMemberDeclaration<attrs, m, td, out memNode> 
     | EventDeclaration<attrs, m, td> 
     | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
         ConstructorDeclaration<attrs, m, td> 
     | IF (IsPartialMethod())
       "partial"
-      Type<out typeRef, true>
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out typeRef, true, out typeNode>
       MemberName<out memberRef>
       MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
-    | Type<out typeRef, true>
+    | 
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out typeRef, true, out typeNode>
     ( 
       OperatorDeclaration<attrs, m, typeRef, td>
       | // --- Field declaration
@@ -916,10 +967,13 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
 // +modifiers: Set of modifiers belonging to the member.
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
-ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
+ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
+  out MemberDeclarationNode memNode>
+  (. memNode = null; .)
 =                                    
   "const"                            (. TypeReference typeRef; .)
-  Type<out typeRef, false>          
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode>          
   SingleConstMember<attrs, m, td, typeRef>
   { "," SingleConstMember<attrs, m, td, typeRef> } ";"
 .
@@ -963,7 +1017,9 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td>
                                     // :::
                                     TypeOrNamespaceNode nsNode = null;
                                  .)
-  "event" Type<out typeRef, false>
+  "event" 
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode>
   ( IF (IsFieldDecl()) 
     FieldMemberDeclarators<attrs, m, td, typeRef, true, Modifier.propEvntMeths> ";"
   |                              (. TypeReference memberRef; .)
@@ -1092,8 +1148,13 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
   "(" [ 
     FormalParameterList<md.FormalParameters>
   ] ")"
-  {                                                 (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>  (. md.AddTypeParameterConstraint(constraint); .)
+  {                                                 
+    (. 
+       TypeParameterConstraint constraint; 
+       TypeParameterConstraintNode constrNode; 
+    .)
+    TypeParameterConstraintsClause<out constraint, out constrNode>  
+    (. md.AddTypeParameterConstraint(constraint); .)
   } 
   ( 
     Block<md>                                       (. 
@@ -1125,7 +1186,9 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       "implicit"                        
       | "explicit"                      (. cod.IsExplicit = true; .)
     ) "operator"                        
-    Type<out typeRef, false>            (. 
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>
+                                        (. 
                                            cod.ResultingType = typeRef;
                                            cod.Name = typeRef.TailName;
                                         .)
@@ -1188,19 +1251,31 @@ InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   (. 
      ifd.Name = t.val; 
      // :::
-     typeDecl = new InterfaceDeclarationNode(start, t);
+     var intfDecl = new InterfaceDeclarationNode(start, t);
+     typeDecl = intfDecl;
   .)
   [ TypeParameterList<ifd, typeDecl> ]
   [ BaseTypeList<ifd, typeDecl> ]
   {                                                   
-    (. TypeParameterConstraint constraint; .)
-    TypeParameterConstraintsClause<out constraint>    
-    (. td.AddTypeParameterConstraint(constraint); .)
+    (. 
+       TypeParameterConstraint constraint; 
+       TypeParameterConstraintNode constrNode; 
+    .)
+    TypeParameterConstraintsClause<out constraint, out constrNode>    
+    (. 
+       td.AddTypeParameterConstraint(constraint); 
+       // :::
+       typeDecl.TypeParameterConstraints.Add(constrNode);
+    .)
   }
   "{" 
-      { InterfaceMemberDeclaration<ifd> } 
+  (. intfDecl.OpenBrace = t; .)
+  { InterfaceMemberDeclaration<ifd, intfDecl> } 
   "}" 
-  (. typeDecl.Terminate(t); .)
+  (. 
+     intfDecl.CloseBrace = t;
+     typeDecl.Terminate(t);
+  .)
   [ 
     ";" 
     (. typeDecl.Terminate(t); .)
@@ -1211,20 +1286,22 @@ InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
 // Declaration of an interface member.
 // +idf: declaration representing the interface type.
 // ------------------------------------------------------------------------------------
-InterfaceMemberDeclaration<InterfaceDeclaration ifd>
-                               (. 
-                                   var m = new Modifiers(this);
-                                   TypeReference typeRef;
-                                   var attrs = new AttributeCollection();
-                                   var pars = new FormalParameterCollection();
-                                   // :::
-                                   var mod = new ModifierNodeCollection();
-                                   var attrNodes = new AttributeDecorationNodeCollection();
-                               .)
+InterfaceMemberDeclaration<InterfaceDeclaration ifd, InterfaceDeclarationNode typeDecl>
+  (. 
+     var m = new Modifiers(this);
+     TypeReference typeRef;
+     var attrs = new AttributeCollection();
+     var pars = new FormalParameterCollection();
+     // :::
+     var mod = new ModifierNodeCollection();
+     var attrNodes = new AttributeDecorationNodeCollection();
+  .)
 =                              
   AttributeDecorations<attrs, attrNodes>
   ModifierList<m, mod>
-  ( Type<out typeRef, true>
+  ( 
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, true, out typeNode>
     (                          
       ident                   (.
                                  TypeReference memberRef = new TypeReference(t, this); 
@@ -1266,7 +1343,9 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd>
 InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDeclaration ifd>
           (. TypeReference typeRef; .)
 =
-  "event" Type<out typeRef, false> 
+  "event" 
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode> 
   ident (. 
            FieldDeclaration fd = new FieldDeclaration(t, ifd); 
            CurrentElement = fd;
@@ -1292,7 +1371,8 @@ LocalVariableDeclaration<IBlockOwner block> (.
                                             .)
 =
   (
-    Type<out typeRef, false>
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>
     | "var"                   (. isImplicit = true; .)
   )
   LocalVariableDeclarator<block, typeRef, isImplicit>
@@ -1322,7 +1402,8 @@ LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplici
         (. StackAllocInitializer saIn = new StackAllocInitializer(t, this); .)
         (. loc.Variable.Initializer = saIn; .)
         (. TypeReference tr; .)
-      Type<out tr, false> 
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out tr, false, out typeNode> 
         (. saIn.Type = tr; .)
         (. Expression expr; .)
       "[" 
@@ -1390,7 +1471,10 @@ FormalParameterList<FormalParameterCollection pars>
       "ref"                            (. fp.Kind = FormalParameterKind.Ref; .) 
       | "out"                          (. fp.Kind = FormalParameterKind.Out; .)
       | "this"                         (. fp.Kind = FormalParameterKind.This; .)
-    ] Type<out typeRef, false>         (. fp.Type = typeRef; .)
+    ] 
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>
+                                       (. fp.Type = typeRef; .)
     ident                              (. 
                                           fp.Name = t.val; 
                                           fp.Type = typeRef;
@@ -1398,8 +1482,11 @@ FormalParameterList<FormalParameterCollection pars>
                                           fp.Terminate(t);
                                        .)
     [ "," FormalParameterList<pars> ]
-  | "params"                           (. fp.HasParams = true; .)
-    Type<out typeRef, false>           (. if (!typeRef.IsArray) { Error("UNDEF", la, "params argument must be an array"); } .)
+  | "params" 
+    (. fp.HasParams = true; .)
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>
+                                       (. if (!typeRef.IsArray) { Error("UNDEF", la, "params argument must be an array"); } .)
     ident                              (. fp.Name = t.val; .)
                                        (. fp.Type = typeRef; .)
                                        (. 
@@ -1725,67 +1812,78 @@ Attribute<out AttributeDeclaration attr, out AttributeNode attrNode>
 // +attr: Attribute declaration.
 // ------------------------------------------------------------------------------------
 AttributeArguments<AttributeDeclaration attr, AttributeNode argsNode> 
-                               (.  
-                                   AttributeArgument arg; 
-                                   Token identifier = null;
-                                   Token equal = null;
-                                   ExpressionNode exprNode;
-                               .)
-=                              (.  bool nameFound = false; .)
-  "("                          (.  argsNode.OpenParenthesis = t; .)
-    [                          (.  arg = new AttributeArgument(t, this); .)
-      [ IF (IsAssignment())          
-        ident                  (.  
-                                   arg.Name = t.val;
-                                   // :::
-                                   identifier = t;
-                               .)
-        "="                    (. 
-                                   nameFound = true; 
-                                   // :::
-                                   equal = t;
-                               .)
-      ]                        (.  Expression expr; .)
+  (.  
+     AttributeArgument arg; 
+     Token identifier = null;
+     Token equal = null;
+     ExpressionNode exprNode;
+     bool nameFound = false;
+  .)
+=                           
+  "("                          
+  (.  argsNode.OpenParenthesis = t; .)
+    [                          
+      (.  arg = new AttributeArgument(t, this); .)
+      [ IF (IsAssignment()) ident
+        (.  
+           arg.Name = t.val;
+           // :::
+           identifier = t;
+        .)
+        "="
+        (. 
+           nameFound = true; 
+           // :::
+           equal = t;
+        .)
+      ]
+      (.  Expression expr; .)
       Expression<out expr, out exprNode>           
-                               (. 
-                                   arg.Expression = expr;
-                                   attr.Arguments.Add(arg); 
-                                   arg.Terminate(t);
-                                   // :::
-                                   var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
-                                   argNode.Terminate(t);
-                                   argsNode.Arguments.Add(argNode);
-                               .)
-      { ","                    (. 
-                                   arg = new AttributeArgument(t, this); 
-                                   // :::
-                                   var separator = t;
-                               .)
-        ( IF (IsAssignment())  
-          ident                (. 
-                                   arg.Name = t.val; 
-                                   // :::
-                                   identifier = t;
-                               .)
-          "="                  (.  
-                                   nameFound = true; 
-                                   // :::
-                                   equal = t;
-                               .)
-          |                    (.  if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); .)
-        ) Expression<out expr, out exprNode> 
-                               (.  
-                                   arg.Expression = expr; 
-                                   attr.Arguments.Add(arg); 
-                                   arg.Terminate(t);
-                                   // :::
-                                   var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
-                                   argcNode.Terminate(t);
-                                   argsNode.Arguments.Add(argcNode);
-                               .)
+      (. 
+         arg.Expression = expr;
+         attr.Arguments.Add(arg); 
+         arg.Terminate(t);
+         // :::
+         var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
+         argNode.Terminate(t);
+         argsNode.Arguments.Add(argNode);
+      .)
+      { 
+        ","
+        (. 
+           arg = new AttributeArgument(t, this); 
+           // :::
+           var separator = t;
+        .)
+        ( IF (IsAssignment()) ident
+          (. 
+             arg.Name = t.val; 
+             // :::
+             identifier = t;
+          .)
+          "="
+          (.  
+             nameFound = true; 
+             // :::
+             equal = t;
+          .)
+        |                    
+          (.  if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); .)
+        ) 
+        Expression<out expr, out exprNode> 
+        (.  
+           arg.Expression = expr; 
+           attr.Arguments.Add(arg); 
+           arg.Terminate(t);
+           // :::
+           var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
+           argcNode.Terminate(t);
+           argsNode.Arguments.Add(argcNode);
+        .)
       }
     ]
-  ")"                          (.  argsNode.Terminate(t); .)
+  ")"   
+  (.  argsNode.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1796,7 +1894,7 @@ ModifierList<Modifiers m, ModifierNodeCollection mods>
 =
 {
   (
-    "new"                            (. m.Add(Modifier.@new, t); .)
+      "new"                          (. m.Add(Modifier.@new, t); .)
     | "public"                       (. m.Add(Modifier.@public, t); .)
     | "protected"                    (. m.Add(Modifier.@protected, t); .)
     | "internal"                     (. m.Add(Modifier.@internal, t); .)
@@ -1819,20 +1917,24 @@ ModifierList<Modifiers m, ModifierNodeCollection mods>
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-Type<out TypeReference typeRef, bool voidAllowed>    
+Type<out TypeReference typeRef, bool voidAllowed, out TypeOrNamespaceNode typeNode>    
   (. 
      typeRef = null;
      // :::
-     TypeOrNamespaceNode typeNode;
+     typeNode = null;
   .)      
 =                                                    
-  ( PrimitiveType<out typeRef>
-  | ClassType<out typeRef, out typeNode>                                               
-  | "void"                                           (. 
-                                                        typeRef = new TypeReference(t, this); 
-                                                        typeRef.Name = t.val;
-                                                        typeRef.IsVoid = true; 
-                                                     .)
+  ( 
+     PrimitiveType<out typeRef, out typeNode>
+  |  ClassType<out typeRef, out typeNode>                                               
+  |  "void"                                           
+     (. 
+        typeRef = new TypeReference(t, this); 
+        typeRef.Name = t.val;
+        typeRef.IsVoid = true; 
+        // :::
+        typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+     .)
   )
   [ "?"                                              (. typeRef.IsNullable = true; .)                                              
   ]
@@ -1845,26 +1947,40 @@ Type<out TypeReference typeRef, bool voidAllowed>
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-NonArrayType<out TypeReference typeRef>    
+NonArrayType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>    
   (. 
      typeRef = null;
      // :::
-     TypeOrNamespaceNode typeNode;
+     typeNode = null;
   .)      
 =                                                    
   ( 
-    PrimitiveType<out typeRef>
+    PrimitiveType<out typeRef, out typeNode>
   | 
     ClassType<out typeRef, out typeNode>
   )
   [ 
-    "?"                         (. typeRef.IsNullable = true; .)                                              
+    "?"
+    (. 
+       typeRef.IsNullable = true;
+       // :::
+       typeNode.NullableToken = t;
+    .)                                              
   ]
   [
-    "*"                         (. typeRef.TypeModifiers.Add(new PointerModifier()); .)
-                                (. CompilationUnit.AddTypeToFix(typeRef); .)
+    "*"                         
+    (. 
+       typeRef.TypeModifiers.Add(new PointerModifier());
+       CompilationUnit.AddTypeToFix(typeRef); 
+       // :::
+       typeNode.TypeModifiers.Add(new PointerModifierNode(t));
+    .)
   ]
-                                (. typeRef.Terminate(t); .)
+  (. 
+     typeRef.Terminate(t); 
+     // :::
+     typeNode.Terminate(t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1879,7 +1995,7 @@ TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>
      TypeOrNamespaceNode typeNode; 
   .)      
 =                                                    
-  ( PrimitiveType<out typeRef>
+  ( PrimitiveType<out typeRef, out typeNode>
   | ClassType<out typeRef, out typeNode>                                               
   | "void"                                           (. 
                                                         typeRef = new TypeReference(t, this); 
@@ -1917,7 +2033,8 @@ PointerOrArray<TypeReference typeRef>
 // ------------------------------------------------------------------------------------
 PredefinedType<out TypeReference typeRef> (. typeRef = null; .)
 =
-  PrimitiveType<out typeRef> | 
+  (. TypeOrNamespaceNode typeNode; .)
+  PrimitiveType<out typeRef, out typeNode> | 
   (                                    
     "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
     | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
@@ -1927,32 +2044,61 @@ PredefinedType<out TypeReference typeRef> (. typeRef = null; .)
 // ------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------
-PrimitiveType<out TypeReference typeRef> (. typeRef = null; .)
+PrimitiveType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode> 
+  (. 
+     typeRef = null; 
+     // :::
+     typeNode = null;
+  .)
 =
-  IntegralType<out typeRef> | 
+  IntegralType<out typeRef, out typeNode> | 
   (
-    "float"       (. typeRef = new TypeReference(t, this, typeof(float)); .)    
-    | "double"    (. typeRef = new TypeReference(t, this, typeof(double)); .) 
-    | "decimal"   (. typeRef = new TypeReference(t, this, typeof(decimal)); .)
-    | "bool"      (. typeRef = new TypeReference(t, this, typeof(bool)); .)
-  )               (. typeRef.Terminate(t); .)
+    "float"       
+    (. typeRef = new TypeReference(t, this, typeof(float)); .)    
+  | "double"    
+    (. typeRef = new TypeReference(t, this, typeof(double)); .) 
+  | "decimal" 
+    (. typeRef = new TypeReference(t, this, typeof(decimal)); .)
+  | "bool"    
+    (. typeRef = new TypeReference(t, this, typeof(bool)); .)
+  )
+  (. 
+     typeRef.Terminate(t); 
+     // :::
+     typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
 // Types that are taken into account as integral types.
 // ------------------------------------------------------------------------------------
-IntegralType<out TypeReference typeRef> (. typeRef = null; .)
+IntegralType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode> 
+  (. typeRef = null; .)
 = (
-    "sbyte"       (. typeRef = new TypeReference(t, this, typeof(sbyte)); .)
-    | "byte"      (. typeRef = new TypeReference(t, this, typeof(byte)); .)
-    | "short"     (. typeRef = new TypeReference(t, this, typeof(short)); .)
-    | "ushort"    (. typeRef = new TypeReference(t, this, typeof(ushort)); .)
-    | "int"       (. typeRef = new TypeReference(t, this, typeof(int)); .)
-    | "uint"      (. typeRef = new TypeReference(t, this, typeof(uint)); .)
-    | "long"      (. typeRef = new TypeReference(t, this, typeof(long)); .)
-    | "ulong"     (. typeRef = new TypeReference(t, this, typeof(ulong)); .)
-    | "char"      (. typeRef = new TypeReference(t, this, typeof(char)); .)
-  )               (. typeRef.Terminate(t); .)
+    "sbyte"       
+    (. typeRef = new TypeReference(t, this, typeof(sbyte)); .)
+  | "byte"
+    (. typeRef = new TypeReference(t, this, typeof(byte)); .)
+  | "short" 
+    (. typeRef = new TypeReference(t, this, typeof(short)); .)
+  | "ushort"
+    (. typeRef = new TypeReference(t, this, typeof(ushort)); .)
+  | "int"
+    (. typeRef = new TypeReference(t, this, typeof(int)); .)
+  | "uint"
+    (. typeRef = new TypeReference(t, this, typeof(uint)); .)
+  | "long"    
+    (. typeRef = new TypeReference(t, this, typeof(long)); .)
+  | "ulong"     
+    (. typeRef = new TypeReference(t, this, typeof(ulong)); .)
+  | "char"     
+    (. typeRef = new TypeReference(t, this, typeof(char)); .)
+  )               
+  (. 
+     typeRef.Terminate(t); 
+     // :::
+     typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1976,9 +2122,7 @@ ClassType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
   (. 
      typeRef.Terminate(t); 
      // :::
-     typeNode = new TypeOrNamespaceNode(t);
-     typeNode.AddTypeTag(new TypeTagNode(t, null));
-     typeNode.Terminate(t);
+     typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
   .)                                 
 .
 
@@ -2184,7 +2328,8 @@ ConstStatement<IBlockOwner block>
   "const"                (. TypeReference typeRef; .)
                          (. ConstStatement cs = new ConstStatement(t, this, block); .)
                          (. CurrentElement = cs; .)
-  Type<out typeRef, false> 
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode> 
   ident                  (. cs.Name = t.val; .)
   "="                    (. Expression expr; .)
   Expression<out expr, out exprNode>   
@@ -2352,8 +2497,10 @@ ForEachStatement<IBlockOwner block>
                                 (. CurrentElement = fes; .)
   "("                           (. if (block != null) block.Add(fes); .)
                                 (. TypeReference typeRef; .)
-    (                          
-      Type<out typeRef, false>  (. fes.Variable.ResultingType = typeRef; .)
+    (         
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out typeRef, false, out typeNode>
+                                (. fes.Variable.ResultingType = typeRef; .)
       | "var"                   (. fes.Variable.IsImplicit = true; .)
     )
     ident                       (. fes.Variable.Name = t.val; .)
@@ -2547,7 +2694,8 @@ FixedStatement<IBlockOwner block>
                               (. if (block != null) block.Add(fs); .)
   "("                         (. TypeReference typeRef; .)
           
-    Type<out typeRef, false>          
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>          
                               (. if (!typeRef.IsPointer) Error("UNDEF", la, "can only fix pointer types"); .)
                               (. ValueAssignmentStatement vas = new ValueAssignmentStatement(t, this, block); .)
                               (. CurrentElement = vas; .)
@@ -2731,7 +2879,9 @@ ExplicitLambdaParameterList<LambdaExpression lambda>
     "ref"                   (. fp.Kind = FormalParameterKind.Ref; .)
     | "out"                 (. fp.Kind = FormalParameterKind.Out; .)
   ]                         (. TypeReference typeRef; .)
-  Type<out typeRef, false>  (. fp.Type = typeRef; .)
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode>  
+                            (. fp.Type = typeRef; .)
   ident                     (. fp.Name = t.val; .)
                             (. lambda.FormalParameters.Add(fp); .)
   [ "," ExplicitLambdaParameterList<lambda> ]
@@ -2776,7 +2926,8 @@ FromClause<out FromClause fromClause>
                                 (. fromClause = new FromClause(start, this); .)
   (                             
     IF (IsType(ref typeToken) && typeToken.val != "in")
-    Type<out typeRef, false>    (. fromClause.Type = typeRef; .)
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>    (. fromClause.Type = typeRef; .)
   |
   )                             
   ident                         (. fromClause.Name = t.val; .)
@@ -2860,7 +3011,8 @@ JoinClause<out JoinClause joinClause>
                                 (. joinClause = new JoinClause(t, this); .)
   (                     
     IF (IsType(ref typeToken) && typeToken.val != "in")
-    Type<out typeRef, false>    (. joinClause.Type = typeRef; .)
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, false, out typeNode>    (. joinClause.Type = typeRef; .)
   |
   )
   ident                         (. joinClause.Name = t.val; .)
@@ -3363,7 +3515,8 @@ Unary<out Expression expr>
       | "&"   (. unOp = new ReferenceOperator(t, this); .)
       | "("   (. TypeReference typeRef; .)
               (. TypeCastOperator tcOp = new TypeCastOperator(t, this); .)
-        Type<out typeRef, false> 
+        (. TypeOrNamespaceNode typeNode; .)
+        Type<out typeRef, false, out typeNode> 
         ")"   (. tcOp.Type = typeRef; .)
               (. unOp = tcOp; .)
     )
@@ -3553,7 +3706,9 @@ TypeOfOperator<out Expression expr>
   "typeof"                   (. TypeOfOperator top = new TypeOfOperator(t, this); .)
   "("                        (. expr = top; .)
                              (. TypeReference typeRef; .)
-    Type<out typeRef, true>  (. top.Type = typeRef; .)
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, true, out typeNode>
+    (. top.Type = typeRef; .)
   ")"                        (. top.Terminate(t); .)
 .
 
@@ -3566,7 +3721,9 @@ SizeOfOperator<out Expression expr>
   "sizeof"                   (. SizeOfOperator sop = new SizeOfOperator(t, this); .)
   "("                        (. expr = sop; .)
                              (. TypeReference typeRef; .)
-    Type<out typeRef, true>  (. sop.Type = typeRef; .)
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, true, out typeNode>  
+                             (. sop.Type = typeRef; .)
   ")"                        (. sop.Terminate(t); .)
 .
 
@@ -3625,7 +3782,8 @@ NewOperator<out Expression expr>
   (
     AnonymousObjectInitializer<nop>
   |
-    NonArrayType<out typeRef>      
+    (. TypeOrNamespaceNode typeNode; .)
+    NonArrayType<out typeRef, out typeNode>      
     NewOperatorWithType<nop, typeRef>
   |
     ImplicitArrayCreation<nop>    (. nop.Kind = NewOperatorKind.UntypedArrayInitialization; .)
@@ -3916,7 +4074,8 @@ AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParamet
     "ref"                       (. param.Kind = FormalParameterKind.Ref; .) 
     | "out"                     (. param.Kind = FormalParameterKind.Out; .) 
   ]                             (. TypeReference typeRef; .)
-  Type<out typeRef, false>      (. param.Type = typeRef; .)
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode>      (. param.Type = typeRef; .)
   ident                         (. param.Name = t.val; .)
                                 (. param.Terminate(t); .)  
 .
@@ -4087,12 +4246,14 @@ TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>
   */
   "<"                            (. paramType = TypeReference.EmptyType; .)
   [ 
-    Type<out paramType, false>           
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out paramType, false, out typeNode>           
   ]                              (. args.Add(paramType); .) 
   { 
     ","                          (. paramType = TypeReference.EmptyType; .)
     [ 
-      Type<out paramType, false>           
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out paramType, false, out typeNode>           
     ]                            (. args.Add(paramType); .) 
   } 
   ">"
@@ -4103,42 +4264,93 @@ TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>
 // delegate.
 // +constraint: Declaration of the constraint
 // ------------------------------------------------------------------------------------
-TypeParameterConstraintsClause<out TypeParameterConstraint constraint>   
-  (. TypeOrNamespaceNode typeNode; .)      
+TypeParameterConstraintsClause<out TypeParameterConstraint constraint, 
+  out TypeParameterConstraintNode constrNode>   
+  (. 
+     Token start;
+     Token identifier;
+  .)      
 =
   "where"
-  ident                        (. 
-                                  constraint = new TypeParameterConstraint(t, this); 
-                                  constraint.Name = t.val;
-                               .)
-  ":"                          (. 
-                                  TypeReference typeRef; 
-                                  ConstraintElement element = null;
-                               .)
-  (
-    "class"                    (. element = new ConstraintElement(t, this, ConstraintClassification.Class); .)
-    |
-    "struct"                   (. element = new ConstraintElement(t, this, ConstraintClassification.Struct); .)
-    |
-    "new"                      (. element = new ConstraintElement(t, this, ConstraintClassification.New); .)
-    "(" ")" |
-                               (. Token elemToken = t; .)
-    ClassType<out typeRef, out typeNode>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
-  )                            (. constraint.AddConstraintElement(element); .)
-
+  (. start = t; .)
+  ident                        
+  (. 
+     constraint = new TypeParameterConstraint(t, this); 
+     constraint.Name = t.val;
+     // :::
+     identifier = t;
+  .)
+  ":"
+  (. 
+     TypeReference typeRef; 
+     ConstraintElement element = null;
+     // :::
+     constrNode = new TypeParameterConstraintNode(start, identifier, t);
+     ParameterConstraintTagNode tag;
+  .)
+  TypeParameterConstraintTag<out element, out tag>
+  (. 
+     constraint.AddConstraintElement(element); 
+     // ::: 
+     constrNode.ConstraintTags.Add(tag);
+  .)
   {
     "," 
-    (
-    "class"                    (. element = new ConstraintElement(t, this, ConstraintClassification.Class); .)
-    |
-    "struct"                   (. element = new ConstraintElement(t, this, ConstraintClassification.Struct); .)
-    |
-    "new"                      (. element = new ConstraintElement(t, this, ConstraintClassification.New); .)
-    "(" ")" |
-                               (. Token elemToken = t; .)
-    ClassType<out typeRef, out typeNode>     (. element = new ConstraintElement(elemToken, this, typeRef); .)
-    )                          (. constraint.AddConstraintElement(element); .)
+    (. var separator = t; .)
+    TypeParameterConstraintTag<out element, out tag>
+    (. 
+       constraint.AddConstraintElement(element); 
+       // ::: 
+       constrNode.ConstraintTags.Add(new ParameterConstraintTagContinuationNode(separator, tag));
+    .)
   }
+.
+
+// ----------------------------------------------------------------------------------------------
+// Obtains a type parametet constraint tag.
+// ----------------------------------------------------------------------------------------------
+TypeParameterConstraintTag<out ConstraintElement element, out ParameterConstraintTagNode tag> 
+  (.
+    element = null;
+    tag = null;
+  .)
+=
+  "class"                    
+  (. 
+     element = new ConstraintElement(t, this, ConstraintClassification.Class); 
+     // :::
+     tag = new ParameterConstraintTagNode(t);       
+  .)
+  |
+  "struct"                   
+  (. 
+     element = new ConstraintElement(t, this, ConstraintClassification.Struct); 
+     // :::
+     tag = new ParameterConstraintTagNode(t);       
+  .)
+  |
+  "new"                      
+  (. 
+     element = new ConstraintElement(t, this, ConstraintClassification.New); 
+     var start = t;
+  .)
+  "(" 
+  (. var openPar = t; .)
+  ")" 
+  (. tag = new ParameterConstraintTagNode(start, openPar, t); .)
+  |
+  (. 
+     Token elemToken = t; 
+     TypeReference typeRef; 
+     // :::
+     TypeOrNamespaceNode typeNode;
+  .)
+  ClassType<out typeRef, out typeNode>     
+  (. 
+     element = new ConstraintElement(elemToken, this, typeRef); 
+     // :::
+     tag = new ParameterConstraintTagNode(typeNode);       
+  .)
 .
 
 END CS2.

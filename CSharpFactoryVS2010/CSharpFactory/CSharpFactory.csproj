@@ -326,6 +326,7 @@
     <Compile Include="SolutionHierarchy\PhysicalSourceFile.cs" />
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
     <Compile Include="SolutionHierarchy\SourceFileBase.cs" />
+    <Compile Include="SyntaxTree\Members\MemberDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\AttributeNode.cs" />
     <Compile Include="SyntaxTree\Types\AttributedDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\ExternAliasNode.cs" />
@@ -353,6 +354,7 @@
     <Compile Include="SyntaxTree\Types\StructDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeArgumentListNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Types\TypeModifierNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeOrMemberDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeOrNamespaceNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\UsingNode.cs" />

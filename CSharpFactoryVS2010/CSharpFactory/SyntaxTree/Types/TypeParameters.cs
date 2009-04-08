@@ -62,6 +62,14 @@ namespace CSharpFactory.Syntax
     /// <value>The type parameters.</value>
     // ----------------------------------------------------------------------------------------------
     ImmutableCollection<TypeParameterNode> TypeParameters { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type parameter constraints.
+    /// </summary>
+    /// <value>The type parameter constraints.</value>
+    // ----------------------------------------------------------------------------------------------
+    TypeParameterConstraintNodeCollection TypeParameterConstraints { get; }
   }
 
   // ================================================================================================

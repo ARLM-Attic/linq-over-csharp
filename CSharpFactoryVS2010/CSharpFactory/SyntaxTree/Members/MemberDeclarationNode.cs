@@ -1,7 +1,7 @@
 // ================================================================================================
-// EnumDeclarationNode.cs
+// MemberDeclarationNode.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.04.08, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,20 +9,19 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// Represents an enum declaration.
+  /// This class is an abstraction root for all type member declarations.
   /// </summary>
   // ================================================================================================
-  public class EnumDeclarationNode: TypeWithBodyDeclarationNode
+  public abstract class MemberDeclarationNode : TypeOrMemberDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnumDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="MemberDeclarationNode"/> class.
     /// </summary>
-    /// <param name="start">The start token of the declaration.</param>
-    /// <param name="name">The name of the delcaration.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumDeclarationNode(Token start, Token name)
-      : base(start, name)
+    protected MemberDeclarationNode(Token start)
+      : base(start)
     {
     }
   }

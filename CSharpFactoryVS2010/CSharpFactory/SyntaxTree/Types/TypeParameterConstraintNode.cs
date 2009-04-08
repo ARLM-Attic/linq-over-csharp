@@ -135,7 +135,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is "class" constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsClass { get { return StartToken.val == "class"; } }
+    public bool IsClass { get { return ConstraintToken.val == "class"; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -143,7 +143,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is "struct" constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsStruct { get { return StartToken.val == "struct"; } }
+    public bool IsStruct { get { return ConstraintToken.val == "struct"; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -151,7 +151,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is "new" constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsNew { get { return StartToken.val == "new"; } }
+    public bool IsNew { get { return ConstraintToken.val == "new"; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -166,21 +166,21 @@ namespace CSharpFactory.Syntax
     /// Gets the constarint type name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; private set; }
+    public TypeOrNamespaceNode TypeName { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis { get; private set; }
+    public Token OpenParenthesis { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the closing parenthesis token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis { get; private set; }
+    public Token CloseParenthesis { get; protected set; }
   }
 
   // ================================================================================================
@@ -200,43 +200,16 @@ namespace CSharpFactory.Syntax
     /// Initializes a new instance of the <see cref="ParameterConstraintTagContinuationNode"/> class.
     /// </summary>
     /// <param name="separator">The separator token.</param>
-    /// <param name="start">The start token.</param>
+    /// <param name="tag">The tag to clone properties from.</param>
     // ----------------------------------------------------------------------------------------------
-    public ParameterConstraintTagContinuationNode(Token separator, Token start)
+    public ParameterConstraintTagContinuationNode(Token separator, ParameterConstraintTagNode tag)
       : base(separator)
     {
       Separator = separator;
-      ConstraintToken = start;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ParameterConstraintTagContinuationNode"/> class.
-    /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="start">The start token.</param>
-    /// <param name="openPar">The opening parenthesis token.</param>
-    /// <param name="closePar">The closing parenthesis token.</param>
-    // ----------------------------------------------------------------------------------------------
-    public ParameterConstraintTagContinuationNode(Token separator, Token start, Token openPar, Token closePar)
-      : base(start, openPar, closePar)
-    {
-      Separator = separator;
-      ConstraintToken = start;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ParameterConstraintTagContinuationNode"/> class.
-    /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="typeNode">The type node.</param>
-    // ----------------------------------------------------------------------------------------------
-    public ParameterConstraintTagContinuationNode(Token separator, TypeOrNamespaceNode typeNode)
-      : base(typeNode)
-    {
-      Separator = separator;
-      ConstraintToken = typeNode.StartToken;
+      ConstraintToken = tag.ConstraintToken;
+      OpenParenthesis = tag.OpenParenthesis;
+      CloseParenthesis = tag.CloseParenthesis;
+      TypeName = tag.TypeName;
     }
 
     // ----------------------------------------------------------------------------------------------

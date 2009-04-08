@@ -25,6 +25,7 @@ namespace CSharpFactory.Syntax
     protected TypeOrMemberDeclarationNode(Token start) : base(start)
     {
       TypeParameters = new ImmutableCollection<TypeParameterNode>();
+      TypeParameterConstraints = new TypeParameterConstraintNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -91,6 +92,14 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ImmutableCollection<TypeParameterNode> TypeParameters { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type parameter constraints.
+    /// </summary>
+    /// <value>The type parameter constraints.</value>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterConstraintNodeCollection TypeParameterConstraints { get; private set; }
 
     #endregion
   }
