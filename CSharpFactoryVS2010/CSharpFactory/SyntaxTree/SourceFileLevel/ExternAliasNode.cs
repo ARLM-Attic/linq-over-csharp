@@ -17,7 +17,7 @@ namespace CSharpFactory.Syntax
   ///     "extern" "alias" identifier ";"
   /// </remarks>
   // ================================================================================================
-  public sealed class ExternAliasNode: SyntaxNode
+  public sealed class ExternAliasNode: SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -67,6 +67,19 @@ namespace CSharpFactory.Syntax
     public string Identifier 
     { 
       get { return IdentifierToken == null ? string.Empty : IdentifierToken.val; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
     }
 
     // ----------------------------------------------------------------------------------------------

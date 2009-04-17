@@ -109,7 +109,7 @@ namespace CSharpFactory.Syntax
   /// This type represents a type parameter continuation node.
   /// </summary>
   // ================================================================================================
-  public class TypeParameterContinuationNode : TypeParameterNode
+  public class TypeParameterContinuationNode : TypeParameterNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

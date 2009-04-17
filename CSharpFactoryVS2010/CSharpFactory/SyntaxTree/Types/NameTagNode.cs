@@ -20,7 +20,7 @@ namespace CSharpFactory.Syntax
   ///     identifier
   /// </remarks>
   // ================================================================================================
-  public class NameTagNode : SyntaxNode
+  public class NameTagNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -52,6 +52,19 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>
@@ -74,7 +87,7 @@ namespace CSharpFactory.Syntax
   ///     "." NameTagNode
   /// </remarks>
   // ================================================================================================
-  public class NameTagContinuationNode : NameTagNode
+  public class NameTagContinuationNode : NameTagNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

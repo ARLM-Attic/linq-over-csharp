@@ -30,6 +30,7 @@ namespace CSharpFactory.Syntax
     public TypeOrNamespaceNode(Token start) : base(start)
     {
       TypeTags = new ImmutableCollection<TypeTagNode>();
+      TypeModifiers = new ImmutableCollection<TypeModifierNode>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -45,6 +46,7 @@ namespace CSharpFactory.Syntax
       QualifierToken = qualifier;
       QualifierSeparatorToken = separator;
       TypeTags = new ImmutableCollection<TypeTagNode>();
+      TypeModifiers = new ImmutableCollection<TypeModifierNode>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -206,7 +208,7 @@ namespace CSharpFactory.Syntax
   ///     identifier [TypeArgumentListNode]
   /// </remarks>
   // ================================================================================================
-  public class TypeTagNode : SyntaxNode
+  public class TypeTagNode : SyntaxNode, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -237,6 +239,19 @@ namespace CSharpFactory.Syntax
     /// <value>The identifier name.</value>
     // ----------------------------------------------------------------------------------------------
     public string Identifier { get { return IdentifierToken.val; } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -286,7 +301,7 @@ namespace CSharpFactory.Syntax
   ///     "." TypeTagNode
   /// </remarks>
   // ================================================================================================
-  public class TypeTagContinuationNode : TypeTagNode
+  public class TypeTagContinuationNode : TypeTagNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -1,45 +1,41 @@
 // ================================================================================================
-// MemberDeclarationNode.cs
+// CharNode.cs
 //
-// Created: 2009.04.08, by Istvan Novak (DeepDiver)
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
+using System;
 using CSharpFactory.ParserFiles;
+using CSharpFactory.Utility;
 
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class is an abstraction root for all type member declarations.
+  /// This abstract class defines a System.Char literal.
   /// </summary>
   // ================================================================================================
-  public abstract class MemberDeclarationNode : TypeOrMemberDeclarationNode
+  public class CharNode : LiteralNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemberDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="CharNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="start">The start token.</param>
     // ----------------------------------------------------------------------------------------------
-    protected MemberDeclarationNode(Token start)
+    public CharNode(Token start)
       : base(start)
     {
+      if (start.val.StartsWith("'") && start.val.EndsWith("'"))
+        Value = StringHelper.CharFromCSharpLiteral(start.val.Substring(1, start.val.Length - 2));
+      else
+        throw new ArgumentException("Invalid char literal is used.");
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type of the member.
+    /// Gets the value of the constant.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of member declarations.
-  /// </summary>
-  // ================================================================================================
-  public sealed class MemberDeclarationNodeCollection : ImmutableCollection<MemberDeclarationNode>
-  {
+    public char Value { get; internal set; }
   }
 }

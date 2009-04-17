@@ -1,45 +1,37 @@
 // ================================================================================================
-// MemberDeclarationNode.cs
+// DecimalNode.cs
 //
-// Created: 2009.04.08, by Istvan Novak (DeepDiver)
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class is an abstraction root for all type member declarations.
+  /// This abstract class defines a System.Decimal constant.
   /// </summary>
   // ================================================================================================
-  public abstract class MemberDeclarationNode : TypeOrMemberDeclarationNode
+  public class DecimalNode : RealConstantNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemberDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="DecimalNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="start">The start token.</param>
+    /// <param name="value">The value of the constant.</param>
     // ----------------------------------------------------------------------------------------------
-    protected MemberDeclarationNode(Token start)
+    public DecimalNode(Token start, decimal value)
       : base(start)
     {
+      Value = value;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type of the member.
+    /// Gets the value of the constant.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of member declarations.
-  /// </summary>
-  // ================================================================================================
-  public sealed class MemberDeclarationNodeCollection : ImmutableCollection<MemberDeclarationNode>
-  {
+    public decimal Value { get; internal set; }
   }
 }

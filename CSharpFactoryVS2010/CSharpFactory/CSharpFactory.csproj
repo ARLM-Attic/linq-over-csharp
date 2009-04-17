@@ -147,7 +147,7 @@
     <Compile Include="ProjectModel\CompilationUnit\ReferencedUnit.cs" />
     <Compile Include="ProjectModel\CompilationUnit\ICompilationErrorHandler.cs" />
     <Compile Include="ProjectModel\Expressions\Argument.cs" />
-    <Compile Include="ProjectModel\Expressions\ArgumentList.cs" />
+    <Compile Include="ProjectModel\Expressions\QueryExpressions\ArgumentList.cs" />
     <Compile Include="ProjectModel\Expressions\Expression.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\ArrayInitializer.cs" />
     <Compile Include="ProjectModel\Expressions\Initializers\Initializer.cs" />
@@ -321,12 +321,47 @@
     <Compile Include="SolutionHierarchy\IProjectContainer.cs" />
     <Compile Include="SolutionHierarchy\ISemanticTree.cs" />
     <Compile Include="SolutionHierarchy\ISolution.cs" />
+    <Compile Include="SyntaxTree\Behavior\IContinuationTag.cs" />
+    <Compile Include="SyntaxTree\Behavior\IIdentifierSupport.cs" />
+    <Compile Include="SyntaxTree\Behavior\ITypeArguments.cs" />
     <Compile Include="SyntaxTree\Expressions\ExpressionNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\BaseNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\BooleanNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\CharNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\DecimalNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\DoubleNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\Int32Node.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\Int64Node.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\IntegerConstantNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\NamedLiteralNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\NullNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\PrimitiveNamedNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\RealConstantNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\SingleNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\StringNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\ThisNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\UInt32Node.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\UInt64Node.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\OperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ParenthesisExpressionNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\BitwiseNotNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PointerOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreDecrementNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreIncrementNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\ReferenceOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\TypecastNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryMinusNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryNotNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryPlusNode.cs" />
     <Compile Include="SyntaxTree\ISyntaxTree.cs" />
     <Compile Include="SolutionHierarchy\PhysicalSourceFile.cs" />
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
     <Compile Include="SolutionHierarchy\SourceFileBase.cs" />
+    <Compile Include="SyntaxTree\Members\ConstMemberDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Members\FinalizerDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\MemberDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Members\MemberWithBodyDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Members\MemberWithNameDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\AttributeNode.cs" />
     <Compile Include="SyntaxTree\Types\AttributedDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\ExternAliasNode.cs" />
@@ -410,6 +445,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="SyntaxTree\Expressions\Initializers\" />
+    <Folder Include="SyntaxTree\Expressions\Operators\BinaryOperators\" />
     <Folder Include="_Diagrams\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

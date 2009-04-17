@@ -1,105 +1,102 @@
 // ================================================================================================
-// TypeDeclarationNode.cs
+// NamedLiteralNode.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.04.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class is the base class of all syntax tree nodes representing a type declaration.
+  /// This class represents the common root class on named literals.
   /// </summary>
   // ================================================================================================
-  public abstract class TypeDeclarationNode : TypeOrMemberDeclarationNode
+  public abstract class NamedLiteralNode : LiteralNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypeDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="NamedLiteralNode"/> class.
     /// </summary>
-    /// <param name="start">The start token of the declaration.</param>
-    /// <param name="name">The name of the delcaration.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected TypeDeclarationNode(Token start, Token name)
+    protected NamedLiteralNode(Token start)
       : base(start)
     {
-      NameToken = name;
-      BaseTypes = new TypeOrNamespaceNodeCollection();
-      NestedTypes = new TypeDeclarationNodeCollection();
-      MemberDeclarations = new MemberDeclarationNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type declaring this type.
+    /// Gets or sets the qualifier token.
     /// </summary>
+    /// <value>The qualifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeDeclarationNode DeclaringType { get; internal set; }
+    public Token QualifierToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the declaring namespace.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceScopeNode DeclaringNamespace { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance is partial type declaration.
+    /// Gets a value indicating whether this instance has qualifier.
     /// </summary>
     /// <value>
-    /// 	<c>true</c> if this instance is partial; otherwise, <c>false</c>.
+    /// 	<c>true</c> if this instance has qualifier; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsPartial { get; internal set; }
+    public bool HasQualifier { get { return QualifierToken != null; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the token representing the nameof the type.
+    /// Gets the qualifier.
     /// </summary>
+    /// <value>The qualifier.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token NameToken { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the name of the type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string Name
+    public string Qualifier
     {
-      get { return NameToken.val; }
+      get { return QualifierToken == null ? string.Empty : QualifierToken.val; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of base types.
+    /// Gets or sets the separator token.
     /// </summary>
+    /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeCollection BaseTypes { get; private set; }
+    public Token QualifierSeparatorToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of nested types.
+    /// Gets or sets the identifier token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeDeclarationNodeCollection NestedTypes { get; private set; }
+    public Token IdentifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of member declarations.
+    /// Gets the identifier name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public MemberDeclarationNodeCollection MemberDeclarations { get; private set; }
-  }
+    public string Identifier
+    {
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.val; }
+    }
 
-  // ================================================================================================
-  /// <summary>
-  /// This type represents a collection of type declaration nodes.
-  /// </summary>
-  // ================================================================================================
-  public sealed class TypeDeclarationNodeCollection : ImmutableCollection<TypeDeclarationNode>
-  {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the separator token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token SeparatorToken { get; internal set; }
   }
 }

@@ -7,7 +7,7 @@ namespace CSharpFactory.ProjectModel
   /// This abstract type represents an abstract "base" literal.
   /// </summary>
   // ==================================================================================
-  public abstract class BaseLiteral : Literal
+  public class BaseLiteral : Literal
   {
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -16,7 +16,7 @@ namespace CSharpFactory.ProjectModel
     /// <param name="token">Token providing position information.</param>
     /// <param name="parser">Parser instance creating this element.</param>
     // --------------------------------------------------------------------------------
-    protected BaseLiteral(Token token, CSharpSyntaxParser parser) : base(token, parser)
+    public BaseLiteral(Token token, CSharpSyntaxParser parser) : base(token, parser)
     {
     }
   }

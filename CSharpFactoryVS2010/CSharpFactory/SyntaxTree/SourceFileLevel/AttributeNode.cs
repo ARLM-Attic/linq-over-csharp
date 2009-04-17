@@ -3,6 +3,7 @@
 //
 // Created: 2009.03.29, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
@@ -22,7 +23,7 @@ namespace CSharpFactory.Syntax
 
   /// </remarks>
   // ================================================================================================
-  public sealed class AttributeDecorationNode : SyntaxNode
+  public sealed class AttributeDecorationNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -42,6 +43,16 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token IdentifierToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the identifier name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
+    {
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.val; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -163,7 +174,7 @@ namespace CSharpFactory.Syntax
   ///     "," AttributeNode
   /// </remarks>
   // ================================================================================================
-  public sealed class AttributeContinuationNode : AttributeNode
+  public sealed class AttributeContinuationNode : AttributeNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -175,7 +186,7 @@ namespace CSharpFactory.Syntax
     public AttributeContinuationNode(Token separator, AttributeNode baseNode)
       : base(separator)
     {
-      Separator = separator;
+      SeparatorToken = separator;
       TypeName = baseNode.TypeName;
       Arguments = baseNode.Arguments;
     }
@@ -185,7 +196,7 @@ namespace CSharpFactory.Syntax
     /// Gets the separator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token Separator { get; private set; }  
+    public Token SeparatorToken { get; private set; }  
   }
 
   // ================================================================================================
@@ -198,7 +209,7 @@ namespace CSharpFactory.Syntax
   ///     [ identifier "=" ] ExpressionNode
   /// </remarks>
   // ================================================================================================
-  public class AttributeArgumentNode : SyntaxNode
+  public class AttributeArgumentNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -222,6 +233,16 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token IdentifierToken { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the identifier string.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
+    {
+      get { return IdentifierToken == null ? String.Empty : IdentifierToken.val; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -258,7 +279,7 @@ namespace CSharpFactory.Syntax
   ///     "," AttributeArgumentNode
   /// </remarks>
   // ================================================================================================
-  public sealed class AttributeArgumentContinuationNode : AttributeArgumentNode
+  public sealed class AttributeArgumentContinuationNode : AttributeArgumentNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -280,7 +301,7 @@ namespace CSharpFactory.Syntax
     /// Gets the separator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token Separator { get; internal set; }
+    public Token SeparatorToken { get; internal set; }
   }
 
   // ================================================================================================

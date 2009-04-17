@@ -43,7 +43,7 @@ namespace CSharpFactory.ProjectModel
       get { return _TypeArguments; }
     }
     
-#endregion
+    #endregion
 
     #region Type resolution
 
