@@ -4362,7 +4362,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			break;
 		}
 		case 1: {
-			NamedLiteral(out innerExpr);
+			NamedLiteral(out innerExpr, out innerNode);
 			break;
 		}
 		case 68: {
@@ -4384,15 +4384,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			break;
 		}
 		case 72: {
-			TypeOfOperator(out innerExpr);
+			TypeOfOperator(out innerExpr, out innerNode);
 			break;
 		}
 		case 15: {
-			CheckedOperator(out innerExpr);
+			CheckedOperator(out innerExpr, out innerNode);
 			break;
 		}
 		case 75: {
-			UncheckedOperator(out innerExpr);
+			UncheckedOperator(out innerExpr, out innerNode);
 			break;
 		}
 		case 20: {
@@ -4404,22 +4404,32 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			break;
 		}
 		case 62: {
-			SizeOfOperator(out innerExpr);
+			SizeOfOperator(out innerExpr, out innerNode);
 			break;
 		}
 		default: SynErr(217); break;
 		}
 		Expression curExpr = innerExpr; 
+		var curExprNode = innerNode;
+		
 		while (StartOf(31)) {
 			switch (la.kind) {
 			case 96: {
 				Get();
 				curExpr = new PostIncrementOperator(t, this, innerExpr); 
+				var incNode = new PostIncrementNode(t);
+				incNode.Operand = curExprNode;
+				curExprNode = incNode;
+				
 				break;
 			}
 			case 89: {
 				Get();
 				curExpr = new PostDecrementOperator(t, this, innerExpr); 
+				var decNode = new PostDecrementNode(t);
+				decNode.Operand = curExprNode;
+				curExprNode = decNode;
+				
 				break;
 			}
 			case 144: {
@@ -4619,24 +4629,39 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 	}
 
-	void NamedLiteral(out Expression expr) {
+	void NamedLiteral(out Expression expr, out ExpressionNode exprNode) {
 		expr = null; 
-		TypeArgumentListNode argList = null;
+		// :::
+		exprNode = null;
 		
 		Expect(1);
 		NamedLiteral nl = new NamedLiteral(t, this); 
-		expr = nl; 
-		nl.Name = t.val; 
+		expr = nl;
+		nl.Name = t.val;
+		// :::
+		var nlNode = new NamedLiteralNode(t);
+		exprNode = nlNode;
+		
 		if (la.kind == 92) {
 			Get();
 			nl.IsGlobalScope = true; 
+			nlNode.QualifierSeparatorToken = t;
+			nlNode.QualifierToken = nlNode.IdentifierToken;
+			
 			Expect(1);
 			nl.Name = t.val; 
+			nlNode.IdentifierToken = t;
+			
 		}
+		TypeArgumentListNode argList; 
 		if (IsGeneric()) {
 			TypeArgumentList(nl.TypeArguments, out argList);
+			nlNode.Arguments = argList; 
 		}
 		nl.Terminate(t); 
+		// :::
+		nlNode.Terminate(t);
+		
 	}
 
 	void NewOperator(out Expression expr) {
@@ -4656,43 +4681,73 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else SynErr(220);
 	}
 
-	void TypeOfOperator(out Expression expr) {
+	void TypeOfOperator(out Expression expr, out ExpressionNode exprNode) {
 		Expect(72);
 		TypeOfOperator top = new TypeOfOperator(t, this); 
+		var topNode = new TypeofOperatorNode(t);
+		exprNode = topNode;
+		
 		Expect(99);
 		expr = top; 
+		topNode.OpenParenthesis = t;
 		TypeReference typeRef; 
-		TypeOrNamespaceNode typeNode; 
+		TypeOrNamespaceNode typeNode;
+		
 		Type(out typeRef, true, out typeNode);
 		top.Type = typeRef; 
+		topNode.TypeName = typeNode;
+		
 		Expect(114);
 		top.Terminate(t); 
+		topNode.CloseParenthesis = t;
+		exprNode.Terminate(t);
+		
 	}
 
-	void CheckedOperator(out Expression expr) {
-		ExpressionNode exprNode; 
+	void CheckedOperator(out Expression expr, out ExpressionNode exprNode) {
 		Expect(15);
 		CheckedOperator cop = new CheckedOperator(t, this); 
+		var copNode = new CheckedOperatorNode(t);
+		exprNode = copNode;
+		
 		Expect(99);
 		expr = cop; 
-		Expression innerExpr; 
-		Expression(out innerExpr, out exprNode);
+		copNode.OpenParenthesis = t;
+		Expression innerExpr;
+		ExpressionNode innerNode;
+		
+		Expression(out innerExpr, out innerNode);
 		cop.Operand = innerExpr; 
+		copNode.Expression = innerNode;
+		
 		Expect(114);
 		cop.Terminate(t); 
+		copNode.CloseParenthesis = t;
+		exprNode.Terminate(t);
+		
 	}
 
-	void UncheckedOperator(out Expression expr) {
-		ExpressionNode exprNode; 
+	void UncheckedOperator(out Expression expr, out ExpressionNode exprNode) {
 		Expect(75);
 		UncheckedOperator uop = new UncheckedOperator(t, this); 
+		var uopNode = new UncheckedOperatorNode(t);
+		exprNode = uopNode;
+		
 		Expect(99);
-		expr = uop; 
+		expr = uop;
+		uopNode.OpenParenthesis = t;
 		Expression innerExpr; 
-		Expression(out innerExpr, out exprNode);
+		ExpressionNode innerNode;
+		
+		Expression(out innerExpr, out innerNode);
 		uop.Operand = innerExpr; 
+		uopNode.Expression = innerNode;
+		
 		Expect(114);
 		uop.Terminate(t); 
+		uopNode.CloseParenthesis = t;
+		exprNode.Terminate(t);
+		
 	}
 
 	void DefaultOperator(out Expression expr) {
@@ -4732,17 +4787,27 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		adop.Terminate(t); 
 	}
 
-	void SizeOfOperator(out Expression expr) {
+	void SizeOfOperator(out Expression expr, out ExpressionNode exprNode) {
 		Expect(62);
 		SizeOfOperator sop = new SizeOfOperator(t, this); 
+		var sopNode = new SizeofOperatorNode(t);
+		exprNode = sopNode;
+		
 		Expect(99);
 		expr = sop; 
+		sopNode.OpenParenthesis = t;
 		TypeReference typeRef; 
-		TypeOrNamespaceNode typeNode; 
+		TypeOrNamespaceNode typeNode;
+		
 		Type(out typeRef, true, out typeNode);
 		sop.Type = typeRef; 
+		sopNode.TypeName = typeNode;
+		
 		Expect(114);
 		sop.Terminate(t); 
+		sopNode.CloseParenthesis = t;
+		exprNode.Terminate(t);
+		
 	}
 
 	void SimpleNamedLiteral(out NamedLiteral expr) {

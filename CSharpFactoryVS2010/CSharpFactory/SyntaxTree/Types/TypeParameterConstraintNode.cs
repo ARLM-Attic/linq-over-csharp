@@ -3,7 +3,6 @@
 //
 // Created: 2009.04.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
@@ -93,7 +92,7 @@ namespace CSharpFactory.Syntax
   ///     "class" | "struct" | "new" "(" ")" | TypeOrNamespaceNode
   /// </remarks>
   // ================================================================================================
-  public class ParameterConstraintTagNode : SyntaxNode
+  public class ParameterConstraintTagNode : SyntaxNode, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

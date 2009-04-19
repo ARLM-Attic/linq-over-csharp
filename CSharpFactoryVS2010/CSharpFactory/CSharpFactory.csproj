@@ -323,6 +323,7 @@
     <Compile Include="SolutionHierarchy\ISolution.cs" />
     <Compile Include="SyntaxTree\Behavior\IContinuationTag.cs" />
     <Compile Include="SyntaxTree\Behavior\IIdentifierSupport.cs" />
+    <Compile Include="SyntaxTree\Behavior\IParentheses.cs" />
     <Compile Include="SyntaxTree\Behavior\ITypeArguments.cs" />
     <Compile Include="SyntaxTree\Expressions\ExpressionNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\BaseNode.cs" />
@@ -343,9 +344,16 @@
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\UInt32Node.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\UInt64Node.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\OperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\CheckedOperatorNodes.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\EmbeddedExpressionNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\EmbeddedTypeNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ParenthesisExpressionNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\SizeofOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\TypeofOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\BitwiseNotNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PointerOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PostDecrementNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PostIncrementNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreDecrementNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreIncrementNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\ReferenceOperatorNode.cs" />
@@ -362,6 +370,7 @@
     <Compile Include="SyntaxTree\Members\MemberDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\MemberWithBodyDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\MemberWithNameDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Members\MethodDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\AttributeNode.cs" />
     <Compile Include="SyntaxTree\Types\AttributedDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\ExternAliasNode.cs" />

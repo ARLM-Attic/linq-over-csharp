@@ -3810,7 +3810,7 @@ Primary<out Expression expr, out ExpressionNode exprNode>
        pExprNode.Terminate(t);
     .)
   | PrimitiveNamedLiteral<out innerExpr, out innerNode>
-  | NamedLiteral<out innerExpr>
+  | NamedLiteral<out innerExpr, out innerNode>
   | "this" 
     (. 
        innerExpr = new ThisLiteral(t, this); 
@@ -3822,20 +3822,35 @@ Primary<out Expression expr, out ExpressionNode exprNode>
        innerNode = new BaseNode(t);
     .)
   | NewOperator<out innerExpr>
-  | TypeOfOperator<out innerExpr>
-  | CheckedOperator<out innerExpr>
-  | UncheckedOperator<out innerExpr>
+  | TypeOfOperator<out innerExpr, out innerNode>
+  | CheckedOperator<out innerExpr, out innerNode>
+  | UncheckedOperator<out innerExpr, out innerNode>
   | DefaultOperator<out innerExpr>
   | AnonymousDelegate<out innerExpr>
-  | SizeOfOperator<out innerExpr>
+  | SizeOfOperator<out innerExpr, out innerNode>
   )
 
-  (. Expression curExpr = innerExpr; .)
+  (. 
+     Expression curExpr = innerExpr; 
+     var curExprNode = innerNode;
+  .)
 
   { 
   (
-      "++"  (. curExpr = new PostIncrementOperator(t, this, innerExpr); .) 
-    | "--"  (. curExpr = new PostDecrementOperator(t, this, innerExpr); .) 
+      "++"  
+      (. 
+         curExpr = new PostIncrementOperator(t, this, innerExpr); 
+         var incNode = new PostIncrementNode(t);
+         incNode.Operand = curExprNode;
+         curExprNode = incNode;
+      .) 
+    | "--"  
+      (. 
+         curExpr = new PostDecrementOperator(t, this, innerExpr); 
+         var decNode = new PostDecrementNode(t);
+         decNode.Operand = curExprNode;
+         curExprNode = decNode;
+      .) 
     | "->"  (. NamedLiteral nl; .)
       SimpleNamedLiteral<out nl>
             (. curExpr = new CTypeMemberAccessOperator(t, innerExpr, nl); .)
@@ -3952,19 +3967,45 @@ PrimitiveNamedLiteral<out Expression expr, out ExpressionNode exprNode>
 // Declaration of a named literal expression.
 // +expr: Literal expression value.
 // ------------------------------------------------------------------------------------
-NamedLiteral<out Expression expr>  (. expr = null; .)
-=              (.
-                  // :::
-                  TypeArgumentListNode argList = null;
-               .)
-  ident        (. NamedLiteral nl = new NamedLiteral(t, this); .)
-               (. expr = nl; .)
-               (. nl.Name = t.val; .)
-  [ "::"       (. nl.IsGlobalScope = true; .)
-    ident      (. nl.Name = t.val; .)
+NamedLiteral<out Expression expr, out ExpressionNode exprNode>  
+  (. 
+     expr = null; 
+     // :::
+     exprNode = null;
+  .)
+=              
+  ident        
+  (. 
+     NamedLiteral nl = new NamedLiteral(t, this); 
+     expr = nl;
+     nl.Name = t.val;
+     // :::
+     var nlNode = new NamedLiteralNode(t);
+     exprNode = nlNode;
+  .)
+  [ 
+    "::"       
+    (. 
+       nl.IsGlobalScope = true; 
+       nlNode.QualifierSeparatorToken = t;
+       nlNode.QualifierToken = nlNode.IdentifierToken;
+    .)
+    ident      
+    (. 
+       nl.Name = t.val; 
+       nlNode.IdentifierToken = t;
+    .)
   ] 
-  [ IF (IsGeneric()) TypeArgumentList<nl.TypeArguments, out argList> ]
-               (. nl.Terminate(t); .)
+  (. TypeArgumentListNode argList; .)
+  [ 
+    IF (IsGeneric()) TypeArgumentList<nl.TypeArguments, out argList>
+    (. nlNode.Arguments = argList; .)
+  ]
+  (. 
+     nl.Terminate(t); 
+     // :::
+     nlNode.Terminate(t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3981,64 +4022,136 @@ ident        (. expr = new NamedLiteral(t, this); .)
                (. expr.Terminate(t); .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a typeof operator.
-// +expr: Expression value.
-// ------------------------------------------------------------------------------------
-TypeOfOperator<out Expression expr>
+//   expr: Expression value.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+TypeOfOperator<out Expression expr, out ExpressionNode exprNode>
 = 
-  "typeof"                   (. TypeOfOperator top = new TypeOfOperator(t, this); .)
-  "("                        (. expr = top; .)
-                             (. TypeReference typeRef; .)
-    (. TypeOrNamespaceNode typeNode; .)
-    Type<out typeRef, true, out typeNode>
-    (. top.Type = typeRef; .)
-  ")"                        (. top.Terminate(t); .)
+  "typeof"                   
+  (. 
+     TypeOfOperator top = new TypeOfOperator(t, this); 
+     var topNode = new TypeofOperatorNode(t);
+     exprNode = topNode;
+  .)
+  "("                        
+  (. 
+     expr = top; 
+     topNode.OpenParenthesis = t;
+     TypeReference typeRef; 
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeRef, true, out typeNode>
+  (. 
+     top.Type = typeRef; 
+     topNode.TypeName = typeNode;
+  .)
+  ")"
+  (. 
+     top.Terminate(t); 
+     topNode.CloseParenthesis = t;
+     exprNode.Terminate(t);
+  .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a sizeof operator.
-// +expr: Expression value.
-// ------------------------------------------------------------------------------------
-SizeOfOperator<out Expression expr>
+//   expr: Expression value.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+SizeOfOperator<out Expression expr, out ExpressionNode exprNode>
 = 
-  "sizeof"                   (. SizeOfOperator sop = new SizeOfOperator(t, this); .)
-  "("                        (. expr = sop; .)
-                             (. TypeReference typeRef; .)
-    (. TypeOrNamespaceNode typeNode; .)
-    Type<out typeRef, true, out typeNode>  
-                             (. sop.Type = typeRef; .)
-  ")"                        (. sop.Terminate(t); .)
+  "sizeof"                   
+  (. 
+     SizeOfOperator sop = new SizeOfOperator(t, this); 
+     var sopNode = new SizeofOperatorNode(t);
+     exprNode = sopNode;
+  .)
+  "("                        
+  (. 
+     expr = sop; 
+     sopNode.OpenParenthesis = t;
+     TypeReference typeRef; 
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeRef, true, out typeNode>  
+  (. 
+     sop.Type = typeRef; 
+     sopNode.TypeName = typeNode;
+  .)
+  ")"                        
+  (. 
+     sop.Terminate(t); 
+     sopNode.CloseParenthesis = t;
+     exprNode.Terminate(t);
+  .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a checked operator.
-// +expr: Expression value.
-// ------------------------------------------------------------------------------------
-CheckedOperator<out Expression expr>
-                                (. ExpressionNode exprNode; .)
+//   expr: Expression value.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+CheckedOperator<out Expression expr, out ExpressionNode exprNode>
 = 
-  "checked"                     (. CheckedOperator cop = new CheckedOperator(t, this); .)
-  "("                           (. expr = cop; .)
-                                (. Expression innerExpr; .)
-    Expression<out innerExpr, out exprNode>   
-                                (. cop.Operand = innerExpr; .)
-  ")"                           (. cop.Terminate(t); .)
+  "checked"                     
+  (. 
+     CheckedOperator cop = new CheckedOperator(t, this); 
+     var copNode = new CheckedOperatorNode(t);
+     exprNode = copNode;
+  .)
+  "("                           
+  (. 
+     expr = cop; 
+     copNode.OpenParenthesis = t;
+     Expression innerExpr;
+     ExpressionNode innerNode;
+  .)
+  Expression<out innerExpr, out innerNode>   
+  (. 
+     cop.Operand = innerExpr; 
+     copNode.Expression = innerNode;
+  .)
+  ")"
+  (. 
+     cop.Terminate(t); 
+     copNode.CloseParenthesis = t;
+     exprNode.Terminate(t);
+  .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of an unchecked operator.
-// +expr: Expression value.
-// ------------------------------------------------------------------------------------
-UncheckedOperator<out Expression expr>
-                                (. ExpressionNode exprNode; .)
+//   expr: Expression value.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+UncheckedOperator<out Expression expr, out ExpressionNode exprNode>
 = 
-  "unchecked"                   (. UncheckedOperator uop = new UncheckedOperator(t, this); .)
-  "("                           (. expr = uop; .)
-                                (. Expression innerExpr; .)
-    Expression<out innerExpr, out exprNode>
-                                (. uop.Operand = innerExpr; .)
-  ")"                           (. uop.Terminate(t); .)
+  "unchecked"                   
+  (. 
+     UncheckedOperator uop = new UncheckedOperator(t, this); 
+     var uopNode = new UncheckedOperatorNode(t);
+     exprNode = uopNode;
+  .)
+  "("                           
+  (. 
+     expr = uop;
+     uopNode.OpenParenthesis = t;
+     Expression innerExpr; 
+     ExpressionNode innerNode;
+  .)
+  Expression<out innerExpr, out innerNode>
+  (. 
+     uop.Operand = innerExpr; 
+     uopNode.Expression = innerNode;
+  .)
+  ")"                           
+  (. 
+     uop.Terminate(t); 
+     uopNode.CloseParenthesis = t;
+     exprNode.Terminate(t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4539,7 +4652,10 @@ TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>
   // --- results in unbound-type-names. In fact this is only allowed in typeof statements, 
   // --- see ECMA-334: 14.5.11 and 25.5.
   "<"
-  (. paramType = TypeReference.EmptyType; .)
+  (. 
+     paramType = TypeReference.EmptyType;
+     argList = new TypeArgumentListNode(t);
+  .)
   [ 
     (. TypeOrNamespaceNode typeNode; .)
     Type<out paramType, false, out typeNode>           
@@ -4555,6 +4671,7 @@ TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>
     (. args.Add(paramType); .) 
   } 
   ">"
+  (. argList.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------------------

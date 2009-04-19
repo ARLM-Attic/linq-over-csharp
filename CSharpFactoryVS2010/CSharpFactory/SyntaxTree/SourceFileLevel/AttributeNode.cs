@@ -97,7 +97,7 @@ namespace CSharpFactory.Syntax
   ///       [ "(" [ AttributeArgumentNode ] { AttributeArgumentContinuationNode }  ")" ]
   /// </remarks>
   // ================================================================================================
-  public class AttributeNode : SyntaxNode 
+  public class AttributeNode : SyntaxNode , IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

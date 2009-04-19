@@ -11,8 +11,11 @@ namespace CSharpFactory.Syntax
   /// <summary>
   /// This class represents an expression closed between parentheses.
   /// </summary>
+  /// <remarks>
+  /// Parentheses are represented by the start and terminating token.
+  /// </remarks>
   // ================================================================================================
-  public sealed class ParenthesisExpressionNode : PrimaryOperatorNode
+  public sealed class ParenthesisExpressionNode : EmbeddedExpressionNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -24,12 +27,5 @@ namespace CSharpFactory.Syntax
       : base(start)
     {
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the expression between parentheses.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
   }
 }

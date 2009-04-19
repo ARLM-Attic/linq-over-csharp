@@ -3,6 +3,7 @@
 //
 // Created: 2009.04.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
@@ -12,7 +13,7 @@ namespace CSharpFactory.Syntax
   /// This class represents the common root class on named literals.
   /// </summary>
   // ================================================================================================
-  public abstract class NamedLiteralNode : LiteralNode, IIdentifierSupport
+  public class NamedLiteralNode : LiteralNode, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -20,7 +21,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NamedLiteralNode(Token start)
+    public NamedLiteralNode(Token start)
       : base(start)
     {
     }
@@ -31,7 +32,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The qualifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token QualifierToken { get; protected set; }
+    public Token QualifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -60,7 +61,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token QualifierSeparatorToken { get; protected set; }
+    public Token QualifierSeparatorToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -98,5 +99,25 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the node providing type arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeArgumentListNode Arguments { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has type arguments.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has type arguments; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasTypeArguments
+    {
+      get { return Arguments != null; }
+    }
   }
 }

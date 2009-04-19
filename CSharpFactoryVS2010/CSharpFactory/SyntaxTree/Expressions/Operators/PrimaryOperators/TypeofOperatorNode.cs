@@ -1,7 +1,7 @@
 // ================================================================================================
-// FinalizerDeclarationNode.cs
+// TypeofOperatorNode.cs
 //
-// Created: 2009.04.13, by Istvan Novak (DeepDiver)
+// Created: 2009.04.19, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,19 +9,18 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class declares a finalizer member.
+  /// This class represents the "typeof" operator.
   /// </summary>
   // ================================================================================================
-  public class FinalizerDeclarationNode: MethodDeclarationNode
+  public class TypeofOperatorNode : EmbeddedTypeNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="FinalizerDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="PrimaryOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public FinalizerDeclarationNode(Token start)
-      : base(start)
+    public TypeofOperatorNode(Token start) : base(start)
     {
     }
   }
