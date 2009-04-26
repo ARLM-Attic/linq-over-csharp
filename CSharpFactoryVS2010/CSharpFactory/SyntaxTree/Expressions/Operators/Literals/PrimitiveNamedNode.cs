@@ -12,7 +12,7 @@ namespace CSharpFactory.Syntax
   /// This class defines a primitive type node.
   /// </summary>
   // ================================================================================================
-  public class PrimitiveNamedNode : NamedLiteralNode
+  public class PrimitiveNamedNode : SimpleNameNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

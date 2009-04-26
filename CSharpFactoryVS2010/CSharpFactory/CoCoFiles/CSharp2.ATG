@@ -1136,7 +1136,8 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
       ":" ( "base"          (. cd.HasBase = true; .)
       | "this"              (. cd.HasThis = true; .)
       ) "("
-    [ Argument<cd.BaseArguments> { "," Argument<cd.BaseArguments> } ] ")"
+        CurrentArgumentList<cd.BaseArguments, null>
+        ")"
     ] ( Block<cd> | ";" )   (. 
                                td.AddMember(cd); 
                                cd.Terminate(t);
@@ -1577,23 +1578,79 @@ FormalParameterList<FormalParameterCollection pars>
   )
 .
 
-Argument<ArgumentList argList> 
-              (. 
-                  Argument arg = new Argument(t, this); 
-                  ExpressionNode exprNode;
-              .)
-= 
-  [           
-    "ref"     (. arg.Kind = FormalParameterKind.Ref; .)
-    | "out"   (. arg.Kind = FormalParameterKind.Out; .)
-  ]           (. Expression expr; .)
-  Expression<out expr, out exprNode>
-              (. arg.Expression = expr; .)
-              (. 
-                 if (argList != null) argList.Add(arg); 
-                 arg.Terminate(t);
-              .)
-.
+// ------------------------------------------------------------------------------------------------
+// Declaration of a formal parameter list
+//   argList: List holding the actual parameter declarations.
+// ------------------------------------------------------------------------------------------------
+CurrentArgumentList<ArgumentList argList, ArgumentNodeCollection argNodes> 
+  (. 
+     ExpressionNode exprNode; 
+     Argument arg = new Argument(t, this);
+     Token argKind = null;
+     Token separator = null;
+  .)
+=
+  [
+    [           
+      "ref"     
+      (. 
+         arg.Kind = FormalParameterKind.Ref; 
+         argKind = t;
+      .)
+    | "out"   
+      (. 
+         arg.Kind = FormalParameterKind.Out; 
+         argKind = t;
+      .)
+    ]           
+    (. Expression expr; .)
+    Expression<out expr, out exprNode>
+    (. 
+       arg.Expression = expr;
+       if (argList != null) argList.Add(arg); 
+       arg.Terminate(t);
+       if (argNodes != null)
+       {
+         var argNode = new ArgumentNode(argKind == null ? 
+           (exprNode == null ? t : exprNode.StartToken) : argKind);
+         argNode.KindToken = argKind;
+         argNode.Expression = exprNode;
+         argNode.Terminate(t);
+         argNodes.Add(argNode);
+       }
+    .)
+    {
+      ","
+      (. separator = t; .)
+      [           
+        "ref"     
+        (. 
+           arg.Kind = FormalParameterKind.Ref; 
+           argKind = t;
+        .)
+      | "out"   
+        (. 
+           arg.Kind = FormalParameterKind.Out; 
+           argKind = t;
+        .)
+      ]           
+      Expression<out expr, out exprNode>
+      (. 
+         arg.Expression = expr;
+         if (argList != null) argList.Add(arg); 
+         arg.Terminate(t);
+         if (argNodes != null)
+         {
+           var argNode = new ArgumentContinuationNode(separator);
+           argNode.KindToken = argKind;
+           argNode.Expression = exprNode;
+           argNode.Terminate(t);
+           argNodes.Add(argNode);
+         }
+      .)
+    }
+  ]
+.  
 
 // ------------------------------------------------------------------------------------
 // Declaration of a property accessors.
@@ -3829,12 +3886,10 @@ Primary<out Expression expr, out ExpressionNode exprNode>
   | AnonymousDelegate<out innerExpr>
   | SizeOfOperator<out innerExpr, out innerNode>
   )
-
   (. 
      Expression curExpr = innerExpr; 
      var curExprNode = innerNode;
   .)
-
   { 
   (
       "++"  
@@ -3851,22 +3906,63 @@ Primary<out Expression expr, out ExpressionNode exprNode>
          decNode.Operand = curExprNode;
          curExprNode = decNode;
       .) 
-    | "->"  (. NamedLiteral nl; .)
-      SimpleNamedLiteral<out nl>
-            (. curExpr = new CTypeMemberAccessOperator(t, innerExpr, nl); .)
-    | "."   (. NamedLiteral nl; .)
-      SimpleNamedLiteral<out nl>
-            (. curExpr = new MemberAccessOperator(t, innerExpr, nl); .)
-    | "("   (. ArgumentListOperator alop = new ArgumentListOperator(t, this, innerExpr); .)
-        [ Argument<alop.Arguments> { "," Argument<alop.Arguments> } ] 
-      ")"   (. curExpr = alop; .)
-    |       (. ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, this, innerExpr); .)                                                                         
-      ArrayIndexer<aiop> 
-            (. curExpr = aiop; .)
-  )         (. curExpr.Terminate(t); .)
+    | "->"  
+      (. 
+         NamedLiteral nl; 
+         SimpleNameNode snlNode;
+         var ctypeNode = new CTypeMemberAccessNode(t);
+      .)
+      SimpleNamedLiteral<out nl, out snlNode>
+      (. 
+         curExpr = new CTypeMemberAccessOperator(t, innerExpr, nl); 
+         ctypeNode.ScopeOperand = curExprNode;
+         ctypeNode.MemberName = snlNode;
+         curExprNode = ctypeNode;
+      .)
+    | "."   
+      (. 
+         NamedLiteral nl; 
+         SimpleNameNode snlNode;
+         var maNode = new MemberAccessNode(t);
+      .)
+      SimpleNamedLiteral<out nl, out snlNode>
+      (. 
+         curExpr = new MemberAccessOperator(t, innerExpr, nl); 
+         maNode.ScopeOperand = curExprNode;
+         maNode.MemberName = snlNode;
+         curExprNode = maNode;
+      .)
+    | "("   
+      (. 
+         ArgumentListOperator alop = new ArgumentListOperator(t, this, innerExpr); 
+         var invNode = new MethodInvocationNode(t);
+         invNode.ScopeOperand = curExprNode;
+      .)
+      CurrentArgumentList<alop.Arguments, invNode.Arguments>
+      ")"   
+      (. 
+         curExpr = alop; 
+         invNode.Terminate(t);
+         curExprNode = invNode;
+      .)
+    |       
+      "["
+      (. 
+         ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, this, innerExpr); 
+         var indNode = new ArrayIndexerInvocationNode(t);
+         indNode.ScopeOperand = curExprNode;
+      .)
+      ArrayIndexer<aiop, indNode.Arguments> 
+      (. curExpr = aiop; .)
+      "]"
+      (. indNode.Terminate(t); .)
+  )         
+  (. curExpr.Terminate(t); .)
   }
-  
-  (. expr = curExpr; .)
+  (. 
+     expr = curExpr; 
+     exprNode = curExprNode;
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3980,7 +4076,7 @@ NamedLiteral<out Expression expr, out ExpressionNode exprNode>
      expr = nl;
      nl.Name = t.val;
      // :::
-     var nlNode = new NamedLiteralNode(t);
+     var nlNode = new ScopedNameNode(t);
      exprNode = nlNode;
   .)
   [ 
@@ -4012,14 +4108,22 @@ NamedLiteral<out Expression expr, out ExpressionNode exprNode>
 // Declaration of a simple named literal expression.
 // +expr: Named literal expression value.
 // ------------------------------------------------------------------------------------
-SimpleNamedLiteral<out NamedLiteral expr> 
-=            (.
-                // :::
-                TypeArgumentListNode argList = null;
-             .)
-ident        (. expr = new NamedLiteral(t, this); .)
-  [ IF (IsGeneric()) TypeArgumentList<expr.TypeArguments, out argList> ]
-               (. expr.Terminate(t); .)
+SimpleNamedLiteral<out NamedLiteral expr, out SimpleNameNode snlNode> 
+=
+  ident        
+  (. 
+     expr = new NamedLiteral(t, this); 
+     snlNode = new SimpleNameNode(t);
+  .)
+  (. TypeArgumentListNode argList; .)
+  [ 
+    IF (IsGeneric()) TypeArgumentList<expr.TypeArguments, out argList>
+    (. snlNode.Arguments = argList; .)
+  ]
+  (. 
+     expr.Terminate(t); 
+     snlNode.Terminate(t);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -4260,10 +4364,7 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
   (
     // --- Simple constructor call
     "(" 
-    [ 
-      Argument<nop.Arguments> 
-      { "," Argument<nop.Arguments> } 
-    ] 
+    CurrentArgumentList<nop.Arguments, null>
     ")"
     // --- Optional initializer list
     [                             (. Initializer init; .)
@@ -4489,18 +4590,42 @@ AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParamet
 // Declaration of a "new" operator.
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
-ArrayIndexer<ArrayIndexerOperator indexer> 
-                              (. ExpressionNode exprNode; .) 
+ArrayIndexer<ArrayIndexerOperator indexer, ArgumentNodeCollection argNodes> 
+  (. 
+     Expression expr;
+     ExpressionNode exprNode; 
+     Argument arg = new Argument(t, this);
+     Token separator = null;
+  .) 
 = 
-  "["                         (. Expression expr; .)
   Expression<out expr, out exprNode>
-                              (. indexer.Indexers.Add(expr); .)
+  (. 
+     indexer.Indexers.Add(expr); 
+     // :::
+     if (argNodes != null)
+     {
+       var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
+       argNode.Expression = exprNode;
+       argNode.Terminate(t);
+       argNodes.Add(argNode);
+     }
+  .)
   { 
     "," 
+    (. separator = t; .)
     Expression<out expr, out exprNode>
-                              (. indexer.Indexers.Add(expr); .)
+    (. 
+       indexer.Indexers.Add(expr); 
+       // :::
+       if (argNodes != null)
+       {
+         var argNode = new ArgumentContinuationNode(separator);
+         argNode.Expression = exprNode;
+         argNode.Terminate(t);
+         argNodes.Add(argNode);
+       }
+    .)
   } 
-  "]"
 .
 
 // ------------------------------------------------------------------------------------
