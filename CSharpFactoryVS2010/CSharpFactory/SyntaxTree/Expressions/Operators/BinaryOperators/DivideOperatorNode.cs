@@ -1,7 +1,7 @@
 // ================================================================================================
-// PostIncrementNode.cs
+// DivideOperatorNode.cs
 //
-// Created: 2009.04.19, by Istvan Novak (DeepDiver)
+// Created: 2009.04.27, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,18 +9,18 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a postincrement (++) operator.
+  /// This class defines a division ("/") operator node.
   /// </summary>
   // ================================================================================================
-  public sealed class PostIncrementNode : UnaryOperatorNode
+  public class DivideOperatorNode : BinaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="PostIncrementNode"/> class.
+    /// Initializes a new instance of the <see cref="DivideOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public PostIncrementNode(Token start)
+    public DivideOperatorNode(Token start)
       : base(start)
     {
     }

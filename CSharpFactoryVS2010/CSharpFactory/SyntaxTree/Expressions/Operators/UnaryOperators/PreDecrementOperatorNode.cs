@@ -1,5 +1,5 @@
 // ================================================================================================
-// TypecastNode.cs
+// PreDecrementOperatorNode.cs
 //
 // Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -9,27 +9,20 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a bitwise not operator.
+  /// This class represents a predecrement (--) operator.
   /// </summary>
   // ================================================================================================
-  public sealed class TypecastNode : UnaryOperatorNode
+  public sealed class PreDecrementOperatorNode : UnaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypecastNode"/> class.
+    /// Initializes a new instance of the <see cref="PreDecrementOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypecastNode(Token start)
+    public PreDecrementOperatorNode(Token start)
       : base(start)
     {
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the type used by the cast operator.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
   }
 }

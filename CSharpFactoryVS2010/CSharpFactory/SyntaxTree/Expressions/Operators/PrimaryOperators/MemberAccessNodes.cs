@@ -1,5 +1,5 @@
 // ================================================================================================
-// CTypeMemberAccessNode.cs
+// CTypeMemberAccessOperatorNode.cs
 //
 // Created: 2009.04.26, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -12,15 +12,15 @@ namespace CSharpFactory.Syntax
   /// This type is intended to be the base class of all member access operators.
   /// </summary>
   // ================================================================================================
-  public abstract class MemberAccessNodeBase : PrimaryOperatorNode
+  public abstract class MemberAccessOperatorNodeBase : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemberAccessNodeBase"/> class.
+    /// Initializes a new instance of the <see cref="MemberAccessOperatorNodeBase"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected MemberAccessNodeBase(Token start)
+    protected MemberAccessOperatorNodeBase(Token start)
       : base(start)
     {
     }
@@ -45,15 +45,15 @@ namespace CSharpFactory.Syntax
   /// This type represents a C-type member access operator ("->").
   /// </summary>
   // ================================================================================================
-  public class CTypeMemberAccessNode : MemberAccessNodeBase
+  public class CTypeMemberAccessOperatorNode : MemberAccessOperatorNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="CTypeMemberAccessNode"/> class.
+    /// Initializes a new instance of the <see cref="CTypeMemberAccessOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public CTypeMemberAccessNode(Token start)
+    public CTypeMemberAccessOperatorNode(Token start)
       : base(start)
     {
     }
@@ -64,15 +64,15 @@ namespace CSharpFactory.Syntax
   /// This type represents a member access operator (".").
   /// </summary>
   // ================================================================================================
-  public class MemberAccessNode : MemberAccessNodeBase
+  public class MemberAccessOperatorNode : MemberAccessOperatorNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemberAccessNode"/> class.
+    /// Initializes a new instance of the <see cref="MemberAccessOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public MemberAccessNode(Token start)
+    public MemberAccessOperatorNode(Token start)
       : base(start)
     {
     }

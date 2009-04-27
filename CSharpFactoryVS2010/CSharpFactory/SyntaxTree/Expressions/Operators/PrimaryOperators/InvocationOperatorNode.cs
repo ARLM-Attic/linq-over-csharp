@@ -1,5 +1,5 @@
 // ================================================================================================
-// InvocationNode.cs
+// InvocationOperatorNode.cs
 //
 // Created: 2009.04.26, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -12,15 +12,15 @@ namespace CSharpFactory.Syntax
   /// This class represents an abstract invocation operator node.
   /// </summary>
   // ================================================================================================
-  public abstract class InvocationNode : PrimaryOperatorNode
+  public abstract class InvocationOperatorNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="InvocationNode"/> class.
+    /// Initializes a new instance of the <see cref="InvocationOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected InvocationNode(Token start)
+    protected InvocationOperatorNode(Token start)
       : base(start)
     {
       Arguments = new ArgumentNodeCollection();
@@ -46,15 +46,15 @@ namespace CSharpFactory.Syntax
   /// This class represents a method invocation operator node.
   /// </summary>
   // ================================================================================================
-  public sealed class MethodInvocationNode : InvocationNode
+  public sealed class MethodInvocationOperatorNode : InvocationOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MethodInvocationNode"/> class.
+    /// Initializes a new instance of the <see cref="MethodInvocationOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public MethodInvocationNode(Token start)
+    public MethodInvocationOperatorNode(Token start)
       : base(start)
     {
     }
@@ -65,15 +65,15 @@ namespace CSharpFactory.Syntax
   /// This class represents an array indexer invocation operator node.
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayIndexerInvocationNode : InvocationNode
+  public sealed class ArrayIndexerInvocationOperatorNode : InvocationOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayIndexerInvocationNode"/> class.
+    /// Initializes a new instance of the <see cref="ArrayIndexerInvocationOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayIndexerInvocationNode(Token start)
+    public ArrayIndexerInvocationOperatorNode(Token start)
       : base(start)
     {
     }

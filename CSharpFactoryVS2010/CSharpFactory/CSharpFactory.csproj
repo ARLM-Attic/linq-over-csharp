@@ -326,6 +326,11 @@
     <Compile Include="SyntaxTree\Behavior\IParentheses.cs" />
     <Compile Include="SyntaxTree\Behavior\ITypeArguments.cs" />
     <Compile Include="SyntaxTree\Expressions\ExpressionNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\AddOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\DivideOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\ModuloOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\MultiplyOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\SubtractOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\BaseNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\BooleanNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\CharNode.cs" />
@@ -347,24 +352,24 @@
     <Compile Include="SyntaxTree\Expressions\Operators\OperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ArgumentNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\CheckedOperatorNodes.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\InvocationNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\MemberAccessNodes.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\EmbeddedExpressionNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\EmbeddedTypeNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ParenthesisExpressionNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\SizeofOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\TypeofOperatorNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\BitwiseNotNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\BitwiseNotOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PointerOperatorNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PostDecrementNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PostIncrementNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreDecrementNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreIncrementNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PostDecrementOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PostIncrementOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreDecrementOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\PreIncrementOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\ReferenceOperatorNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\TypecastNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryMinusNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryNotNode.cs" />
-    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryPlusNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\TypecastOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryMinusOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryNotOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\UnaryOperators\UnaryPlusOperatorNode.cs" />
     <Compile Include="SyntaxTree\ISyntaxTree.cs" />
     <Compile Include="SolutionHierarchy\PhysicalSourceFile.cs" />
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
@@ -459,7 +464,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="SyntaxTree\Expressions\Initializers\" />
-    <Folder Include="SyntaxTree\Expressions\Operators\BinaryOperators\" />
     <Folder Include="_Diagrams\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

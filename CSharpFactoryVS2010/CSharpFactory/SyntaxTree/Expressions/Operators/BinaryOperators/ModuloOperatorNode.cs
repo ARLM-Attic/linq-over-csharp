@@ -1,7 +1,7 @@
 // ================================================================================================
-// PreIncrementNode.cs
+// ModuloOperatorNode.cs
 //
-// Created: 2009.04.15, by Istvan Novak (DeepDiver)
+// Created: 2009.04.27, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,18 +9,18 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a preincrement (++) operator.
+  /// This class defines a modulo ("%") operator node.
   /// </summary>
   // ================================================================================================
-  public sealed class PreIncrementNode : UnaryOperatorNode
+  public class ModuloOperatorNode : BinaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="PreIncrementNode"/> class.
+    /// Initializes a new instance of the <see cref="ModuloOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public PreIncrementNode(Token start)
+    public ModuloOperatorNode(Token start)
       : base(start)
     {
     }

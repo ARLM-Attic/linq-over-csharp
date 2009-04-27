@@ -3606,42 +3606,42 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			case 109: {
 				Get();
 				unOp = new UnaryPlusOperator(t, this); 
-				unaryOp = new UnaryPlusNode(t);
+				unaryOp = new UnaryPlusOperatorNode(t);
 				
 				break;
 			}
 			case 103: {
 				Get();
 				unOp = new UnaryMinusOperator(t, this); 
-				unaryOp = new UnaryMinusNode(t);
+				unaryOp = new UnaryMinusOperatorNode(t);
 				
 				break;
 			}
 			case 107: {
 				Get();
 				unOp = new NotOperator(t, this); 
-				unaryOp = new UnaryNotNode(t);
+				unaryOp = new UnaryNotOperatorNode(t);
 				
 				break;
 			}
 			case 116: {
 				Get();
 				unOp = new BitwiseNotOperator(t, this); 
-				unaryOp = new BitwiseNotNode(t);
+				unaryOp = new BitwiseNotOperatorNode(t);
 				
 				break;
 			}
 			case 96: {
 				Get();
 				unOp = new PreIncrementOperator(t, this); 
-				unaryOp = new PreIncrementNode(t);
+				unaryOp = new PreIncrementOperatorNode(t);
 				
 				break;
 			}
 			case 89: {
 				Get();
 				unOp = new PreDecrementOperator(t, this);
-				unaryOp = new PreDecrementNode(t);
+				unaryOp = new PreDecrementOperatorNode(t);
 				
 				break;
 			}
@@ -3665,7 +3665,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				TypeCastOperator tcOp = new TypeCastOperator(t, this);
 				// :::
 				TypeOrNamespaceNode typeNode; 
-				var tcNode = new TypecastNode(t);
+				var tcNode = new TypecastOperatorNode(t);
 				unaryOp = tcNode;
 				
 				Type(out typeRef, false, out typeNode);
@@ -4281,8 +4281,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	}
 
 	void ShiftExpr(out BinaryOperator expr) {
-		expr = null; 
-		AddExpr(out expr);
+		expr = null;
+		BinaryOperatorNode exprNode = null;
+		
+		AddExpr(out expr, out exprNode);
 		BinaryOperator oper = null; 
 		while (IsShift()) {
 			if (la.kind == 102) {
@@ -4299,7 +4301,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			AddExpr(out rightExpr);
+			BinaryOperatorNode rgNode;
+			
+			AddExpr(out rightExpr, out rgNode);
 			if (rightExpr == null) 
 			{
 			  oper.RightOperand = unExpr;
@@ -4315,63 +4319,99 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		}
 	}
 
-	void AddExpr(out BinaryOperator expr) {
+	void AddExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		MulExpr(out expr);
+		exprNode = null;
+		
+		MulExpr(out expr, out exprNode);
 		BinaryOperator oper = null; 
+		BinaryOperatorNode opNode = null;
+		
 		while (la.kind == 103 || la.kind == 109) {
 			if (la.kind == 109) {
 				Get();
 				oper = new AddOperator(t, this); 
+				opNode = new AddOperatorNode(t);
+				
 			} else {
 				Get();
 				oper = new SubtractOperator(t, this); 
+				opNode = new SubtractOperatorNode(t);
+				
 			}
-			oper.LeftOperand = expr; 
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			MulExpr(out rightExpr);
+			BinaryOperatorNode rgNode;
+			
+			MulExpr(out rightExpr, out rgNode);
 			if (rightExpr == null) 
 			{
-			  oper.RightOperand = unExpr;
+			   oper.RightOperand = unExpr;
 			}
 			else
 			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
+			   oper.RightOperand = rightExpr;
+			   rightExpr.LeftOperand = unExpr;
 			}
 			expr = oper;
 			oper.Terminate(t);
+			// :::
+			if (rgNode == null) 
+			{
+			   opNode.RightOperand = unaryNode;
+			}
+			else
+			{
+			   opNode.RightOperand = rgNode;
+			   rgNode.LeftOperand = unaryNode;
+			}
+			exprNode = opNode;
+			opNode.Terminate(t);
 			
 		}
 	}
 
-	void MulExpr(out BinaryOperator expr) {
+	void MulExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null;
 		BinaryOperator oper = null; 
+		exprNode = null;
+		BinaryOperatorNode opNode = null;
 		
 		while (la.kind == 117 || la.kind == 142 || la.kind == 143) {
 			if (la.kind == 117) {
 				Get();
 				oper = new MultiplyOperator(t, this); 
+				opNode = new MultiplyOperatorNode(t);
+				
 			} else if (la.kind == 142) {
 				Get();
 				oper = new DivideOperator(t, this); 
+				opNode = new DivideOperatorNode(t);
+				
 			} else {
 				Get();
 				oper = new ModuloOperator(t, this); 
+				opNode = new ModuloOperatorNode(t);
+				
 			}
-			oper.LeftOperand = expr; 
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
-			oper.RightOperand = unExpr; 
-			expr = oper; 
-			oper.Terminate(t); 
+			oper.RightOperand = unExpr;
+			expr = oper;
+			oper.Terminate(t);
+			opNode.RightOperand = unaryNode;
+			exprNode = opNode;
+			opNode.Terminate(t);
+			
 		}
 	}
 
@@ -4461,7 +4501,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			case 96: {
 				Get();
 				curExpr = new PostIncrementOperator(t, this, innerExpr); 
-				var incNode = new PostIncrementNode(t);
+				var incNode = new PostIncrementOperatorNode(t);
 				incNode.Operand = curExprNode;
 				curExprNode = incNode;
 				
@@ -4470,7 +4510,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			case 89: {
 				Get();
 				curExpr = new PostDecrementOperator(t, this, innerExpr); 
-				var decNode = new PostDecrementNode(t);
+				var decNode = new PostDecrementOperatorNode(t);
 				decNode.Operand = curExprNode;
 				curExprNode = decNode;
 				
@@ -4480,7 +4520,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				NamedLiteral nl; 
 				SimpleNameNode snlNode;
-				var ctypeNode = new CTypeMemberAccessNode(t);
+				var ctypeNode = new CTypeMemberAccessOperatorNode(t);
 				
 				SimpleNamedLiteral(out nl, out snlNode);
 				curExpr = new CTypeMemberAccessOperator(t, innerExpr, nl); 
@@ -4494,7 +4534,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				NamedLiteral nl; 
 				SimpleNameNode snlNode;
-				var maNode = new MemberAccessNode(t);
+				var maNode = new MemberAccessOperatorNode(t);
 				
 				SimpleNamedLiteral(out nl, out snlNode);
 				curExpr = new MemberAccessOperator(t, innerExpr, nl); 
@@ -4507,7 +4547,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			case 99: {
 				Get();
 				ArgumentListOperator alop = new ArgumentListOperator(t, this, innerExpr); 
-				var invNode = new MethodInvocationNode(t);
+				var invNode = new MethodInvocationOperatorNode(t);
 				invNode.ScopeOperand = curExprNode;
 				
 				CurrentArgumentList(alop.Arguments, invNode.Arguments);
@@ -4521,7 +4561,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			case 98: {
 				Get();
 				ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, this, innerExpr); 
-				var indNode = new ArrayIndexerInvocationNode(t);
+				var indNode = new ArrayIndexerInvocationOperatorNode(t);
 				indNode.ScopeOperand = curExprNode;
 				
 				ArrayIndexer(aiop, indNode.Arguments);

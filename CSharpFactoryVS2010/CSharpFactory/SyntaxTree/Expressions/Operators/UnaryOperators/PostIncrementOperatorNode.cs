@@ -1,7 +1,7 @@
 // ================================================================================================
-// UnaryPlusNode.cs
+// PostIncrementOperatorNode.cs
 //
-// Created: 2009.04.15, by Istvan Novak (DeepDiver)
+// Created: 2009.04.19, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,18 +9,18 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an unary plus operator.
+  /// This class represents a postincrement (++) operator.
   /// </summary>
   // ================================================================================================
-  public sealed class UnaryPlusNode : UnaryOperatorNode
+  public sealed class PostIncrementOperatorNode : UnaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="UnaryPlusNode"/> class.
+    /// Initializes a new instance of the <see cref="PostIncrementOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public UnaryPlusNode(Token start)
+    public PostIncrementOperatorNode(Token start)
       : base(start)
     {
     }
