@@ -1449,6 +1449,7 @@ out MemberDeclarationNode memNode) {
 		exprNode = null;
 		Expression leftExpr;
 		ExpressionNode leftExprNode;
+		BinaryOperatorNode ncsNode = null;
 		
 		if (IsQueryExpression()) {
 			QueryExpression query = new QueryExpression(t, this); 
@@ -1475,7 +1476,7 @@ out MemberDeclarationNode memNode) {
 				expr = asgn; 
 			} else if (StartOf(14)) {
 				BinaryOperator simpleExpr; 
-				NullCoalescingExpr(out simpleExpr);
+				NullCoalescingExpr(out simpleExpr, out ncsNode);
 				if (simpleExpr == null) 
 				{
 				  expr = leftExpr;
@@ -1487,21 +1488,35 @@ out MemberDeclarationNode memNode) {
 				}
 				
 				if (la.kind == 111) {
-					ConditionalOperator condExpr = new ConditionalOperator(t, this, expr); 
-					expr = condExpr; 
 					Get();
+					var condExpr = new ConditionalOperator(t, this, expr);
+					ConditionalOperatorNode condNode = null;
+					if (exprNode != null) condNode = new ConditionalOperatorNode(exprNode);
+					expr = condExpr;
+					exprNode = condNode;
 					Expression trueExpr; 
-					Expression(out trueExpr, out exprNode);
+					ExpressionNode trueNode;
+					
+					Expression(out trueExpr, out trueNode);
 					condExpr.TrueExpression = trueExpr; 
+					if (condNode != null) condNode.TrueExpression = trueNode; 
+					
 					Expect(87);
-					Expression falseExpr; 
-					Expression(out falseExpr, out exprNode);
-					condExpr.FalseExpression = falseExpr; 
+					Expression falseExpr;
+					ExpressionNode falseNode;
+					
+					Expression(out falseExpr, out falseNode);
+					condExpr.FalseExpression = falseExpr;
+					if (condNode != null) condNode.FalseExpression = falseNode; 
 					condExpr.Terminate(t); 
+					if (condNode != null) condNode.Terminate(t);
+					
 				}
 			} else SynErr(159);
 		} else SynErr(160);
 		if (expr != null) expr.Terminate(t); 
+		if (exprNode != null) exprNode.Terminate(t);
+		
 	}
 
 	void Type(out TypeReference typeRef, bool voidAllowed, out TypeOrNamespaceNode typeNode) {
@@ -2976,10 +2991,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 	}
 
-	void TypeInRelExpr(out TypeReference typeRef, bool voidAllowed) {
+	void TypeInRelExpr(out TypeReference typeRef, out TypeOrNamespaceNode typeNode, bool voidAllowed) {
 		typeRef = null;
 		// :::
-		TypeOrNamespaceNode typeNode = null; 
+		typeNode = null; 
 		
 		if (StartOf(15)) {
 			PrimitiveType(out typeRef, out typeNode);
@@ -2990,10 +3005,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			typeRef = new TypeReference(t, this); 
 			typeRef.Name = t.val;
 			typeRef.IsVoid = true; 
+			// :::
+			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
 		} else SynErr(191);
 		if (IsNullableTypeMark()) {
 			Expect(111);
+			typeNode.NullableToken = t; 
 		}
 		PointerOrArray(typeRef, typeNode);
 		CompilationUnit.AddTypeToFix(typeRef);
@@ -3001,10 +3019,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 	}
 
-	void PredefinedType(out TypeReference typeRef) {
+	void PredefinedType(out TypeReference typeRef, out TypeOrNamespaceNode typeNode) {
 		typeRef = null; 
+		typeNode = null;
+		
 		if (StartOf(15)) {
-			TypeOrNamespaceNode typeNode; 
 			PrimitiveType(out typeRef, out typeNode);
 		} else if (la.kind == 48 || la.kind == 65) {
 			if (la.kind == 48) {
@@ -3015,6 +3034,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				typeRef = new TypeReference(t, this, typeof(string)); 
 			}
 			typeRef.Terminate(t); 
+			// :::
+			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+			
 		} else SynErr(192);
 	}
 
@@ -4023,279 +4045,297 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		oc.Terminate(t); 
 	}
 
-	void NullCoalescingExpr(out BinaryOperator expr) {
+	void NullCoalescingExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		OrExpr(out expr);
+		exprNode = null;
+		
+		OrExpr(out expr, out exprNode);
 		while (la.kind == 136) {
 			Get();
-			BinaryOperator oper = new NullCoalescingOperator(t, this); 
-			oper.LeftOperand = expr; 
+			var oper = new NullCoalescingOperator(t, this); 
+			var opNode = new NullCoalescingOperatorNode(t);
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			OrExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			OrExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void OrExpr(out BinaryOperator expr) {
+	void OrExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		AndExpr(out expr);
+		exprNode = null;
+		
+		AndExpr(out expr, out exprNode);
 		while (la.kind == 137) {
 			Get();
-			BinaryOperator oper = new OrOperator(t, this); 
-			oper.LeftOperand = expr; 
+			var oper = new OrOperator(t, this); 
+			var opNode = new LogicalOrOperatorNode(t);
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			AndExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			AndExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void AndExpr(out BinaryOperator expr) {
+	void AndExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		BitOrExpr(out expr);
+		exprNode = null;
+		
+		BitOrExpr(out expr, out exprNode);
 		while (la.kind == 138) {
 			Get();
-			BinaryOperator oper = new AndOperator(t, this); 
-			oper.LeftOperand = expr; 
+			var oper = new AndOperator(t, this); 
+			var opNode = new LogicalAndOperatorNode(t);
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			BitOrExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			BitOrExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void BitOrExpr(out BinaryOperator expr) {
+	void BitOrExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		BitXorExpr(out expr);
+		exprNode = null;
+		
+		BitXorExpr(out expr, out exprNode);
 		while (la.kind == 139) {
 			Get();
-			BinaryOperator oper = new BitwiseOrOperator(t, this); 
-			oper.LeftOperand = expr; 
+			var oper = new BitwiseOrOperator(t, this); 
+			var opNode = new BitwiseOrOperatorNode(t);
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			BitXorExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			BitXorExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void BitXorExpr(out BinaryOperator expr) {
+	void BitXorExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		BitAndExpr(out expr);
+		exprNode = null;
+		
+		BitAndExpr(out expr, out exprNode);
 		while (la.kind == 140) {
 			Get();
-			BinaryOperator oper = new BitwiseXorOperator(t, this); 
-			oper.LeftOperand = expr; 
+			var oper = new BitwiseXorOperator(t, this); 
+			var opNode = new BitwiseXorOperatorNode(t);
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			BitAndExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			BitAndExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void BitAndExpr(out BinaryOperator expr) {
+	void BitAndExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		EqlExpr(out expr);
+		exprNode = null;
+		
+		EqlExpr(out expr, out exprNode);
 		while (la.kind == 84) {
 			Get();
-			BinaryOperator oper = new BitwiseAndOperator(t, this); 
-			oper.LeftOperand = expr; 
+			var oper = new BitwiseAndOperator(t, this); 
+			var opNode = new BitwiseAndOperatorNode(t);
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			EqlExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			EqlExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void EqlExpr(out BinaryOperator expr) {
+	void EqlExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
 		expr = null; 
-		RelExpr(out expr);
-		BinaryOperator oper; 
+		exprNode = null;
+		
+		RelExpr(out expr, out exprNode);
+		BinaryOperator oper = null; 
+		BinaryOperatorNode opNode = null;
+		
 		while (la.kind == 93 || la.kind == 106) {
 			if (la.kind == 106) {
 				Get();
 				oper = new EqualOperator(t, this); 
+				opNode = new EqualOperatorNode(t);
+				
 			} else {
 				Get();
 				oper = new NotEqualOperator(t, this); 
+				opNode = new EqualOperatorNode(t);
+				
 			}
-			oper.LeftOperand = expr; 
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
 			Unary(out unExpr, out unaryNode);
 			BinaryOperator rightExpr; 
-			RelExpr(out rightExpr);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BinaryOperatorNode rgNode;
+			
+			RelExpr(out rightExpr, out rgNode);
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
 
-	void RelExpr(out BinaryOperator expr) {
-		expr = null; BinaryOperator oper = null; 
-		ShiftExpr(out expr);
+	void RelExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
+		expr = null; 
+		exprNode = null;
+		
+		ShiftExpr(out expr, out exprNode);
+		BinaryOperator oper = null; 
+		BinaryOperatorNode opNode = null;
+		
 		while (StartOf(29)) {
 			if (StartOf(30)) {
 				if (la.kind == 101) {
 					Get();
 					oper = new LessThanOperator(t, this); 
+					opNode = new LessThanOperatorNode(t);
+					
 				} else if (la.kind == 94) {
 					Get();
 					oper = new GreaterThanOperator(t, this); 
+					opNode = new GreaterThanOperatorNode(t);
+					
 				} else if (la.kind == 141) {
 					Get();
 					oper = new LessThanOrEqualOperator(t, this); 
+					opNode = new LessThanOrEqualOperatorNode(t);
+					
 				} else if (la.kind == 95) {
 					Get();
 					oper = new GreaterThanOrEqualOperator(t, this); 
+					opNode = new GreaterThanOrEqualOperatorNode(t);
+					
 				} else SynErr(214);
-				oper.LeftOperand = expr; 
+				oper.LeftOperand = expr;
+				opNode.LeftOperand = exprNode;
 				Expression unExpr; 
 				ExpressionNode unaryNode;
 				
 				Unary(out unExpr, out unaryNode);
 				BinaryOperator rightExpr; 
-				ShiftExpr(out rightExpr);
-				if (rightExpr == null) 
-				{
-				  oper.RightOperand = unExpr;
-				}
-				else
-				{
-				  oper.RightOperand = rightExpr;
-				  rightExpr.LeftOperand = unExpr;
-				}
+				BinaryOperatorNode rgNode;
+				
+				ShiftExpr(out rightExpr, out rgNode);
+				BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 				expr = oper;
-				oper.Terminate(t);
+				exprNode = opNode;
 				
 			} else {
 				if (la.kind == 42) {
 					Get();
 					oper = new IsOperator(t, this); 
+					opNode = new IsOperatorNode(t);
+					
 				} else if (la.kind == 7) {
 					Get();
-					oper = new IsOperator(t, this); 
+					oper = new AsOperator(t, this); 
+					opNode = new AsOperatorNode(t);
+					
 				} else SynErr(215);
-				oper.LeftOperand = expr; 
+				oper.LeftOperand = expr;
 				TypeReference typeRef; 
-				TypeInRelExpr(out typeRef, false);
-				oper.RightOperand = new TypeOperator(t, typeRef); 
-				expr = oper; 
-				oper.Terminate(t); 
+				TypeOrNamespaceNode typeNode;
+				
+				TypeInRelExpr(out typeRef, out typeNode, false);
+				oper.RightOperand = new TypeOperator(t, typeRef);
+				opNode.RightOperand = new TypeOperatorNode(typeNode);
+				expr = oper;
+				exprNode = opNode;
+				oper.Terminate(t);
+				opNode.Terminate(t); 
+				
 			}
 		}
 	}
 
-	void ShiftExpr(out BinaryOperator expr) {
-		expr = null;
-		BinaryOperatorNode exprNode = null;
+	void ShiftExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
+		expr = null; 
+		exprNode = null;
+		Token start;
 		
 		AddExpr(out expr, out exprNode);
 		BinaryOperator oper = null; 
+		BinaryOperatorNode opNode = null;
+		
 		while (IsShift()) {
 			if (la.kind == 102) {
 				Get();
 				oper = new LeftShiftOperator(t, this); 
+				opNode = new LeftShiftOperatorNode(t);
+				
 			} else if (la.kind == 94) {
 				Get();
+				start = t; 
 				Expect(94);
 				oper = new RightShiftOperator(t, this); 
+				opNode = new RightShiftOperatorNode(start, t);
+				
 			} else SynErr(216);
-			oper.LeftOperand = expr; 
+			oper.LeftOperand = expr;
+			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
 			ExpressionNode unaryNode;
 			
@@ -4304,17 +4344,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			BinaryOperatorNode rgNode;
 			
 			AddExpr(out rightExpr, out rgNode);
-			if (rightExpr == null) 
-			{
-			  oper.RightOperand = unExpr;
-			}
-			else
-			{
-			  oper.RightOperand = rightExpr;
-			  rightExpr.LeftOperand = unExpr;
-			}
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
+			exprNode = opNode;
 			
 		}
 	}
@@ -4349,29 +4381,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			BinaryOperatorNode rgNode;
 			
 			MulExpr(out rightExpr, out rgNode);
-			if (rightExpr == null) 
-			{
-			   oper.RightOperand = unExpr;
-			}
-			else
-			{
-			   oper.RightOperand = rightExpr;
-			   rightExpr.LeftOperand = unExpr;
-			}
+			BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
 			expr = oper;
-			oper.Terminate(t);
-			// :::
-			if (rgNode == null) 
-			{
-			   opNode.RightOperand = unaryNode;
-			}
-			else
-			{
-			   opNode.RightOperand = rgNode;
-			   rgNode.LeftOperand = unaryNode;
-			}
 			exprNode = opNode;
-			opNode.Terminate(t);
 			
 		}
 	}
@@ -5085,8 +5097,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (StartOf(34)) {
 			Token start = la; 
 			TypeReference typeRef;
+			TypeOrNamespaceNode typeNode;
 			
-			PredefinedType(out typeRef);
+			PredefinedType(out typeRef, out typeNode);
 			Expect(91);
 			Expect(1);
 			init = new MemberDeclarator(start, this, typeRef, start.val); 

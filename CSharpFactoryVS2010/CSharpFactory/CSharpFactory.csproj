@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ParserFiles\CSharpErrorHandling.cs" />
+    <Compile Include="ParserFiles\CSharpParserUtilities.cs" />
     <Compile Include="ParserFiles\CSharpSyntaxParser.cs" />
     <Compile Include="ProjectContent\CSharp9ProjectContentProvider.cs" />
     <Compile Include="ProjectContent\EmptyContentProvider.cs" />
@@ -327,9 +328,25 @@
     <Compile Include="SyntaxTree\Behavior\ITypeArguments.cs" />
     <Compile Include="SyntaxTree\Expressions\ExpressionNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\AddOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\AsOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\BitwiseAndOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\BitwiseOrOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\BitwiseXorOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\DivideOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\EqualOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\GreaterThanOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\GreaterThanOrEqualOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\IsOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\LeftShiftOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\LessThanOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\LessThanOrEqualOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\LogicalAndOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\LogicalOrOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\ModuloOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\MultiplyOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\NotEqualOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\NullCoalescingOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\RightShiftOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\BinaryOperators\SubtractOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\BaseNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\BooleanNode.cs" />
@@ -347,11 +364,13 @@
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\SingleNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\StringNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\ThisNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\Literals\TypeOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\UInt32Node.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\Literals\UInt64Node.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\OperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ArgumentNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\CheckedOperatorNodes.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ConditionalOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\MemberAccessNodes.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\EmbeddedExpressionNode.cs" />

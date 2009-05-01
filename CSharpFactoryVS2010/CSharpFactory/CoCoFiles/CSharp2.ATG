@@ -2145,23 +2145,27 @@ NonArrayType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
 // +typeRef: type reference
 // +voidAllowed: indicates if "void" is an acceptable type or not.
 // ------------------------------------------------------------------------------------
-TypeInRelExpr<out TypeReference typeRef, bool voidAllowed>    
+TypeInRelExpr<out TypeReference typeRef, out TypeOrNamespaceNode typeNode, bool voidAllowed>    
   (. 
      typeRef = null;
      // :::
-     TypeOrNamespaceNode typeNode = null; 
+     typeNode = null; 
   .)      
 =                                                    
   ( PrimitiveType<out typeRef, out typeNode>
   | ClassType<out typeRef, out typeNode>                                               
-  | "void"                                           (. 
-                                                        typeRef = new TypeReference(t, this); 
-                                                        typeRef.Name = t.val;
-                                                        typeRef.IsVoid = true; 
-                                                     .)
+  | "void"                                           
+    (. 
+       typeRef = new TypeReference(t, this); 
+       typeRef.Name = t.val;
+       typeRef.IsVoid = true; 
+       // :::
+       typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+    .)
   )
   [ IF (IsNullableTypeMark())
-    "?"                                              
+    "?" 
+    (. typeNode.NullableToken = t; .)                                             
   ]
   PointerOrArray<typeRef, typeNode>
   (. 
@@ -2214,14 +2218,24 @@ PointerOrArray<TypeReference typeRef, TypeOrNamespaceNode typeNode>
 // ------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------
-PredefinedType<out TypeReference typeRef> (. typeRef = null; .)
+PredefinedType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode> 
+  (. 
+     typeRef = null; 
+     typeNode = null;
+  .)
 =
-  (. TypeOrNamespaceNode typeNode; .)
   PrimitiveType<out typeRef, out typeNode> | 
   (                                    
-    "object"                           (. typeRef = new TypeReference(t, this, typeof(object)); .)
-    | "string"                         (. typeRef = new TypeReference(t, this, typeof(string)); .)
-  )                                    (. typeRef.Terminate(t); .)                                 
+    "object"                           
+    (. typeRef = new TypeReference(t, this, typeof(object)); .)
+    | "string"                         
+    (. typeRef = new TypeReference(t, this, typeof(string)); .)
+  )                                    
+  (. 
+     typeRef.Terminate(t); 
+     // :::
+     typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+  .)                                 
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -3311,6 +3325,7 @@ Expression<out Expression expr, out ExpressionNode exprNode>
      exprNode = null;
      Expression leftExpr;
      ExpressionNode leftExprNode;
+     BinaryOperatorNode ncsNode = null;
   .)
 =
   (
@@ -3334,7 +3349,7 @@ Expression<out Expression expr, out ExpressionNode exprNode>
                                   (. asgn.LeftOperand = leftExpr; .)
                                   (. expr = asgn; .)
   | (. BinaryOperator simpleExpr; .)
-    NullCoalescingExpr<out simpleExpr> 
+    NullCoalescingExpr<out simpleExpr, out ncsNode> 
                                   (. 
                                      if (simpleExpr == null) 
                                      {
@@ -3346,313 +3361,429 @@ Expression<out Expression expr, out ExpressionNode exprNode>
                                        expr = simpleExpr;
                                      }
                                   .)
-    [                             (. ConditionalOperator condExpr = new ConditionalOperator(t, this, expr); .)
-                                  (. expr = condExpr; .)    
-      "?"                         (. Expression trueExpr; .)
-      Expression<out trueExpr, out exprNode>
-                                  (. condExpr.TrueExpression = trueExpr; .)
-      ":"                         (. Expression falseExpr; .)
-      Expression<out falseExpr, out exprNode>
-                                  (. condExpr.FalseExpression = falseExpr; .)
-                                  (. condExpr.Terminate(t); .)
+    [ 
+      "?"                            
+      (. 
+         var condExpr = new ConditionalOperator(t, this, expr);
+         ConditionalOperatorNode condNode = null;
+         if (exprNode != null) condNode = new ConditionalOperatorNode(exprNode);
+         expr = condExpr;
+         exprNode = condNode;
+         Expression trueExpr; 
+         ExpressionNode trueNode;
+      .)
+      Expression<out trueExpr, out trueNode>
+      (. 
+         condExpr.TrueExpression = trueExpr; 
+         if (condNode != null) condNode.TrueExpression = trueNode; 
+      .)
+      ":"                         
+      (. 
+         Expression falseExpr;
+         ExpressionNode falseNode;
+      .)
+      Expression<out falseExpr, out falseNode>
+      (. 
+         condExpr.FalseExpression = falseExpr;
+         if (condNode != null) condNode.FalseExpression = falseNode; 
+         condExpr.Terminate(t); 
+         if (condNode != null) condNode.Terminate(t);
+      .)
     ]
   )
-  )                               (. if (expr != null) expr.Terminate(t); .)
+  )                               
+  (. 
+     if (expr != null) expr.Terminate(t); 
+     if (exprNode != null) exprNode.Terminate(t);
+  .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Defines a null coalescing operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-NullCoalescingExpr<out BinaryOperator expr> (. expr = null; .)
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+NullCoalescingExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
 =                     
-  OrExpr<out expr>    
+  OrExpr<out expr, out exprNode>    
   { 
-    "??"                  (. BinaryOperator oper = new NullCoalescingOperator(t, this); .)
-                          (. oper.LeftOperand = expr; .)
+    "??"                  
     (. 
+       var oper = new NullCoalescingOperator(t, this); 
+       var opNode = new NullCoalescingOperatorNode(t);
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
        Expression unExpr; 
        ExpressionNode unaryNode;
     .)
     Unary<out unExpr, out unaryNode>
-    (. BinaryOperator rightExpr; .)
-    OrExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    OrExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
   }
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Defines a logical or operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-OrExpr<out BinaryOperator expr> (. expr = null; .)
-= 
-  AndExpr<out expr>    
-  { 
-    "||"                  (. BinaryOperator oper = new OrOperator(t, this); .)
-                          (. oper.LeftOperand = expr; .)
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .)
-    AndExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines a logical and operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-AndExpr<out BinaryOperator expr> (. expr = null; .)
-= 
-  BitOrExpr<out expr>    
-  { 
-    "&&"                  (. BinaryOperator oper = new AndOperator(t, this); .)
-                          (. oper.LeftOperand = expr; .)
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .)
-    BitOrExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines a bitwise or operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-BitOrExpr<out BinaryOperator expr> (. expr = null; .)
-= 
-  BitXorExpr<out expr>    
-  { 
-    "|"                   (. BinaryOperator oper = new BitwiseOrOperator(t, this); .)
-                          (. oper.LeftOperand = expr; .)
-                          
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .)
-    BitXorExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines a bitwise xor operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-BitXorExpr<out BinaryOperator expr> (. expr = null; .)
-= 
-  BitAndExpr<out expr>    
-  { 
-    "^"                   (. BinaryOperator oper = new BitwiseXorOperator(t, this); .)
-                          (. oper.LeftOperand = expr; .)
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .)
-    BitAndExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines a bitwise and operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-BitAndExpr<out BinaryOperator expr> (. expr = null; .)
-= 
-  EqlExpr<out expr>    
-  { 
-    "&"                   (. BinaryOperator oper = new BitwiseAndOperator(t, this); .)
-                          (. oper.LeftOperand = expr; .)
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .)
-    EqlExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines an "==" or "!=" operator.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-EqlExpr<out BinaryOperator expr> (. expr = null; .)
-= 
-  RelExpr<out expr>       (. BinaryOperator oper; .)
-  {           
-    (                     
-      "!="                (. oper = new EqualOperator(t, this); .)
-      | "=="              (. oper = new NotEqualOperator(t, this); .)
-    )                     (. oper.LeftOperand = expr; .)
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .) 
-    RelExpr<out rightExpr> (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines relational and typecheck operators.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-RelExpr<out BinaryOperator expr> (. expr = null; BinaryOperator oper = null; .)
-= 
-  ShiftExpr<out expr>  
-  { 
-    (
-      "<"                 (. oper = new LessThanOperator(t, this); .)
-      | ">"               (. oper = new GreaterThanOperator(t, this); .)
-      | "<="              (. oper = new LessThanOrEqualOperator(t, this); .)
-      | ">="              (. oper = new GreaterThanOrEqualOperator(t, this); .)
-    )                     (. oper.LeftOperand = expr; .)
-                          
-    (. 
-       Expression unExpr; 
-       ExpressionNode unaryNode;
-    .)
-    Unary<out unExpr, out unaryNode>     
-    (. BinaryOperator rightExpr; .)
-    ShiftExpr<out rightExpr>             
-                          (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
-    |
-      (
-          "is"            (. oper = new IsOperator(t, this); .)
-        | "as"            (. oper = new IsOperator(t, this); .)
-      )                   (. oper.LeftOperand = expr; .)
-                          (. TypeReference typeRef; .)
-      TypeInRelExpr<out typeRef, false>
-                          (. oper.RightOperand = new TypeOperator(t, typeRef); .)
-                          (. expr = oper; .)
-                          (. oper.Terminate(t); .)
-  }
-.
-
-// ------------------------------------------------------------------------------------
-// Defines shift operators.
-// +expr: expression retrieved.
-// ------------------------------------------------------------------------------------
-ShiftExpr<out BinaryOperator expr> 
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+OrExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
   (. 
-     expr = null;
-     BinaryOperatorNode exprNode = null;
+     expr = null; 
+     exprNode = null;
   .)
 = 
-  AddExpr<out expr, out exprNode>       (. BinaryOperator oper = null; .)
+  AndExpr<out expr, out exprNode>    
+  { 
+    "||"                  
+    (. 
+       var oper = new OrOperator(t, this); 
+       var opNode = new LogicalOrOperatorNode(t);
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    AndExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a logical and operator.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+AndExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
+= 
+  BitOrExpr<out expr, out exprNode>    
+  { 
+    "&&"                  
+    (. 
+       var oper = new AndOperator(t, this); 
+       var opNode = new LogicalAndOperatorNode(t);
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    BitOrExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a bitwise or operator.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+BitOrExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
+= 
+  BitXorExpr<out expr, out exprNode>    
+  { 
+    "|"
+    (. 
+       var oper = new BitwiseOrOperator(t, this); 
+       var opNode = new BitwiseOrOperatorNode(t);
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    BitXorExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a bitwise xor operator.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+BitXorExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode> 
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
+= 
+  BitAndExpr<out expr, out exprNode>    
+  { 
+    "^"                   
+    (. 
+       var oper = new BitwiseXorOperator(t, this); 
+       var opNode = new BitwiseXorOperatorNode(t);
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    BitAndExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a bitwise and operator.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+BitAndExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode> 
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
+= 
+  EqlExpr<out expr, out exprNode>    
+  { 
+    "&"                   
+    (. 
+       var oper = new BitwiseAndOperator(t, this); 
+       var opNode = new BitwiseAndOperatorNode(t);
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    EqlExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines an "==" or "!=" operator.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+EqlExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
+= 
+  RelExpr<out expr, out exprNode>       
+  (. 
+     BinaryOperator oper = null; 
+     BinaryOperatorNode opNode = null;
+  .)
+  {           
+    (                     
+      "!="                
+      (. 
+         oper = new EqualOperator(t, this); 
+         opNode = new EqualOperatorNode(t);
+      .)
+    | "=="              
+      (. 
+         oper = new NotEqualOperator(t, this); 
+         opNode = new EqualOperatorNode(t);
+      .)
+    )
+    (. 
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    RelExpr<out rightExpr, out rgNode> 
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines relational and typecheck operators.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+RelExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode> 
+  (. 
+     expr = null; 
+     exprNode = null;
+  .)
+= 
+  ShiftExpr<out expr, out exprNode>  
+  (. 
+     BinaryOperator oper = null; 
+     BinaryOperatorNode opNode = null;
+  .)
+  { 
+    (
+      "<"                 
+      (. 
+         oper = new LessThanOperator(t, this); 
+         opNode = new LessThanOperatorNode(t);
+      .)
+    | ">"               
+      (. 
+         oper = new GreaterThanOperator(t, this); 
+         opNode = new GreaterThanOperatorNode(t);
+      .)
+    | "<="              
+      (. 
+         oper = new LessThanOrEqualOperator(t, this); 
+         opNode = new LessThanOrEqualOperatorNode(t);
+      .)
+    | ">="              
+      (. 
+         oper = new GreaterThanOrEqualOperator(t, this); 
+         opNode = new GreaterThanOrEqualOperatorNode(t);
+      .)
+    )
+    (. 
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
+       Expression unExpr; 
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unExpr, out unaryNode>     
+    (. 
+       BinaryOperator rightExpr; 
+       BinaryOperatorNode rgNode;
+    .) 
+    ShiftExpr<out rightExpr, out rgNode>             
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
+    |
+      (
+        "is"            
+        (. 
+           oper = new IsOperator(t, this); 
+           opNode = new IsOperatorNode(t);
+        .)
+      | "as"            
+        (. 
+           oper = new AsOperator(t, this); 
+           opNode = new AsOperatorNode(t);
+        .)
+      )                   
+      (. 
+         oper.LeftOperand = expr;
+         TypeReference typeRef; 
+         TypeOrNamespaceNode typeNode;
+      .)
+      TypeInRelExpr<out typeRef, out typeNode, false>
+      (. 
+         oper.RightOperand = new TypeOperator(t, typeRef);
+         opNode.RightOperand = new TypeOperatorNode(typeNode);
+         expr = oper;
+         exprNode = opNode;
+         oper.Terminate(t);
+         opNode.Terminate(t); 
+      .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines shift operators.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+ShiftExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode> 
+  (. 
+     expr = null; 
+     exprNode = null;
+     Token start;
+  .)
+= 
+  AddExpr<out expr, out exprNode>       
+  (. 
+     BinaryOperator oper = null; 
+     BinaryOperatorNode opNode = null;
+  .)
   { IF (IsShift())
     (
-      "<<"                (. oper = new LeftShiftOperator(t, this); .)
-      | ">" ">"           (. oper = new RightShiftOperator(t, this); .)
-    )                     (. oper.LeftOperand = expr; .)
-                          
+      "<<"
+      (. 
+         oper = new LeftShiftOperator(t, this); 
+         opNode = new LeftShiftOperatorNode(t);
+      .)
+    | ">" 
+      (. start = t; .)
+      ">"           
+      (. 
+         oper = new RightShiftOperator(t, this); 
+         opNode = new RightShiftOperatorNode(start, t);
+      .)
+    )                     
     (. 
+       oper.LeftOperand = expr;
+       opNode.LeftOperand = exprNode;
        Expression unExpr; 
        ExpressionNode unaryNode;
     .)
@@ -3662,25 +3793,18 @@ ShiftExpr<out BinaryOperator expr>
        BinaryOperatorNode rgNode;
     .) 
     AddExpr<out rightExpr, out rgNode>
-                          (. 
-                             if (rightExpr == null) 
-                             {
-                               oper.RightOperand = unExpr;
-                             }
-                             else
-                             {
-                               oper.RightOperand = rightExpr;
-                               rightExpr.LeftOperand = unExpr;
-                             }
-                             expr = oper;
-                             oper.Terminate(t);
-                          .)
+    (. 
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
+       expr = oper;
+       exprNode = opNode;
+    .)
   }
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines addition operators.
 //   expr: expression retrieved.
+//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 AddExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode> 
   (. 
@@ -3719,29 +3843,9 @@ AddExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
     .) 
     MulExpr<out rightExpr, out rgNode>
     (. 
-       if (rightExpr == null) 
-       {
-          oper.RightOperand = unExpr;
-       }
-       else
-       {
-          oper.RightOperand = rightExpr;
-          rightExpr.LeftOperand = unExpr;
-       }
+       BindBinaryOperator(oper, opNode, unExpr, unaryNode, rightExpr, rgNode);
        expr = oper;
-       oper.Terminate(t);
-       // :::
-       if (rgNode == null) 
-       {
-          opNode.RightOperand = unaryNode;
-       }
-       else
-       {
-          opNode.RightOperand = rgNode;
-          rgNode.LeftOperand = unaryNode;
-       }
        exprNode = opNode;
-       opNode.Terminate(t);
     .)
   }
 .
@@ -3749,6 +3853,7 @@ AddExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines multiplication operators.
 //   expr: expression retrieved.
+//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 MulExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode> 
   (. 
@@ -4402,8 +4507,9 @@ MemberDeclarator<out MemberDeclarator init>
                                   (. 
                                      Token start = la; 
                                      TypeReference typeRef;
+                                     TypeOrNamespaceNode typeNode;
                                   .)
-    PredefinedType<out typeRef>                                  
+    PredefinedType<out typeRef, out typeNode>                                  
     "."
     ident                         (. init = new MemberDeclarator(start, this, typeRef, start.val); .)
   )
