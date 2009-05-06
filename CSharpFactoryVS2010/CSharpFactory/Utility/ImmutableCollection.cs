@@ -147,7 +147,7 @@ namespace CSharpFactory.Collections
     /// <param name="item">Item to insert.</param>
     /// <param name="index">Insertion position.</param>
     // ----------------------------------------------------------------------------------
-    void IList<T>.Insert(int index, T item)
+    public void Insert(int index, T item)
     {
       CheckReadOnly();
       _Items.Insert(index, item);

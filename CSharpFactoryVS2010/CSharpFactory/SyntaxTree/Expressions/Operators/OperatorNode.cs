@@ -124,6 +124,27 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ExpressionNode RightOperand { get; internal set; }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the leftmost expression that has a null left operand including this 
+    /// operator.
+    /// </summary>
+    // --------------------------------------------------------------------------------
+    public BinaryOperatorNode LeftmostNonNull
+    {
+      get
+      {
+        var current = this;
+        do
+        {
+          if (current.LeftOperand == null) return current;
+          var next = current.LeftOperand as BinaryOperatorNode;
+          if (next == null) return current;
+          current = next;
+        } while (true);
+      }
+    }
   }
 
   // ================================================================================================

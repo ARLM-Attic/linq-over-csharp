@@ -97,63 +97,62 @@ public partial class CSharpSyntaxParser
 	public const int _unsafe = 76;
 	public const int _ushort = 77;
 	public const int _usingKW = 78;
-	public const int _var = 79;
-	public const int _virtual = 80;
-	public const int _void = 81;
-	public const int _volatile = 82;
-	public const int _while = 83;
-	public const int _and = 84;
-	public const int _andassgn = 85;
-	public const int _assgn = 86;
-	public const int _colon = 87;
-	public const int _comma = 88;
-	public const int _dec = 89;
-	public const int _divassgn = 90;
-	public const int _dot = 91;
-	public const int _dblcolon = 92;
-	public const int _eq = 93;
-	public const int _gt = 94;
-	public const int _gteq = 95;
-	public const int _inc = 96;
-	public const int _lbrace = 97;
-	public const int _lbrack = 98;
-	public const int _lpar = 99;
-	public const int _lshassgn = 100;
-	public const int _lt = 101;
-	public const int _ltlt = 102;
-	public const int _minus = 103;
-	public const int _minusassgn = 104;
-	public const int _modassgn = 105;
-	public const int _neq = 106;
-	public const int _not = 107;
-	public const int _orassgn = 108;
-	public const int _plus = 109;
-	public const int _plusassgn = 110;
-	public const int _question = 111;
-	public const int _rbrace = 112;
-	public const int _rbrack = 113;
-	public const int _rpar = 114;
-	public const int _scolon = 115;
-	public const int _tilde = 116;
-	public const int _times = 117;
-	public const int _timesassgn = 118;
-	public const int _xorassgn = 119;
-	public const int _larrow = 120;
-	public const int maxT = 145;
-	public const int _ppDefine = 146;
-	public const int _ppUndef = 147;
-	public const int _ppIf = 148;
-	public const int _ppElif = 149;
-	public const int _ppElse = 150;
-	public const int _ppEndif = 151;
-	public const int _ppLine = 152;
-	public const int _ppError = 153;
-	public const int _ppWarning = 154;
-	public const int _ppPragma = 155;
-	public const int _ppRegion = 156;
-	public const int _ppEndReg = 157;
-	public const int _cBlockCom = 158;
-	public const int _cLineCom = 159;
+	public const int _virtual = 79;
+	public const int _void = 80;
+	public const int _volatile = 81;
+	public const int _while = 82;
+	public const int _and = 83;
+	public const int _andassgn = 84;
+	public const int _assgn = 85;
+	public const int _colon = 86;
+	public const int _comma = 87;
+	public const int _dec = 88;
+	public const int _divassgn = 89;
+	public const int _dot = 90;
+	public const int _dblcolon = 91;
+	public const int _eq = 92;
+	public const int _gt = 93;
+	public const int _gteq = 94;
+	public const int _inc = 95;
+	public const int _lbrace = 96;
+	public const int _lbrack = 97;
+	public const int _lpar = 98;
+	public const int _lshassgn = 99;
+	public const int _lt = 100;
+	public const int _ltlt = 101;
+	public const int _minus = 102;
+	public const int _minusassgn = 103;
+	public const int _modassgn = 104;
+	public const int _neq = 105;
+	public const int _not = 106;
+	public const int _orassgn = 107;
+	public const int _plus = 108;
+	public const int _plusassgn = 109;
+	public const int _question = 110;
+	public const int _rbrace = 111;
+	public const int _rbrack = 112;
+	public const int _rpar = 113;
+	public const int _scolon = 114;
+	public const int _tilde = 115;
+	public const int _times = 116;
+	public const int _timesassgn = 117;
+	public const int _xorassgn = 118;
+	public const int _larrow = 119;
+	public const int maxT = 144;
+	public const int _ppDefine = 145;
+	public const int _ppUndef = 146;
+	public const int _ppIf = 147;
+	public const int _ppElif = 148;
+	public const int _ppElse = 149;
+	public const int _ppEndif = 150;
+	public const int _ppLine = 151;
+	public const int _ppError = 152;
+	public const int _ppWarning = 153;
+	public const int _ppPragma = 154;
+	public const int _ppRegion = 155;
+	public const int _ppEndReg = 156;
+	public const int _cBlockCom = 157;
+	public const int _cLineCom = 158;
 
   #endregion
 
@@ -209,46 +208,46 @@ public partial class CSharpSyntaxParser
         t = la;
         la = Scanner.Scan();
         if (la.kind <= maxT) { ++errDist; break; }
-				if (la.kind == 146) {
+				if (la.kind == 145) {
 				PragmaHandler.AddConditionalDirective(la); 
 				}
-				if (la.kind == 147) {
+				if (la.kind == 146) {
 				PragmaHandler.RemoveConditionalDirective(la); 
 				}
-				if (la.kind == 148) {
+				if (la.kind == 147) {
 				PragmaHandler.IfPragma(la); 
 				}
-				if (la.kind == 149) {
+				if (la.kind == 148) {
 				PragmaHandler.ElifPragma(la); 
 				}
-				if (la.kind == 150) {
+				if (la.kind == 149) {
 				PragmaHandler.ElsePragma(la); 
 				}
-				if (la.kind == 151) {
+				if (la.kind == 150) {
 				PragmaHandler.EndifPragma(la); 
 				}
-				if (la.kind == 152) {
+				if (la.kind == 151) {
 				PragmaHandler.LinePragma(la); 
 				}
-				if (la.kind == 153) {
+				if (la.kind == 152) {
 				PragmaHandler.ErrorPragma(la); 
 				}
-				if (la.kind == 154) {
+				if (la.kind == 153) {
 				PragmaHandler.WarningPragma(la); 
 				}
-				if (la.kind == 155) {
+				if (la.kind == 154) {
 				PragmaHandler.PragmaPragma(la); 
 				}
-				if (la.kind == 156) {
+				if (la.kind == 155) {
 				PragmaHandler.RegionPragma(la); 
 				}
-				if (la.kind == 157) {
+				if (la.kind == 156) {
 				PragmaHandler.EndregionPragma(la); 
 				}
-				if (la.kind == 158) {
+				if (la.kind == 157) {
 				CommentHandler.HandleBlockComment(la); 
 				}
-				if (la.kind == 159) {
+				if (la.kind == 158) {
 				CommentHandler.HandleLineComment(la); 
 				}
 
@@ -361,7 +360,7 @@ public partial class CSharpSyntaxParser
     /// <summary>Tokens representing type shortcuts</summary>
     private static BitArray typeKW =
       NewSet(_char, _bool, _object, _string, _sbyte, _byte, _short,
-             _ushort, _int, _uint, _long, _ulong, _float, _double, _decimal, _var);
+             _ushort, _int, _uint, _long, _ulong, _float, _double, _decimal);
 
     /// <summary>
     /// Tokens representing unary header tokens
@@ -502,7 +501,7 @@ public partial class CSharpSyntaxParser
 		// :::
 		identifier = t;
 		
-		Expect(115);
+		Expect(114);
 		externAlias.Terminate(t); 
 		// ::: 
 		parentNode.AddExternAlias(start, alias, identifier, t);
@@ -526,11 +525,11 @@ public partial class CSharpSyntaxParser
 			// :::
 			alias = t;
 			
-			Expect(86);
+			Expect(85);
 			eq = t; 
 		}
 		TypeName(out typeUsed, out nsNode);
-		Expect(115);
+		Expect(114);
 		UsingClause uc = new UsingClause(start, this, name, typeUsed);
 		CurrentElement = uc;
 		if (parent == null) File.Usings.Add(uc);
@@ -549,7 +548,7 @@ public partial class CSharpSyntaxParser
 		// :::
 		AttributeDecorationNode globAttrNode = null;
 		
-		Expect(98);
+		Expect(97);
 		PragmaHandler.SignRealToken();
 		// :::
 		globAttrNode = new AttributeDecorationNode(t);
@@ -562,7 +561,7 @@ public partial class CSharpSyntaxParser
 		// :::
 		globAttrNode.IdentifierToken = t;
 		
-		Expect(87);
+		Expect(86);
 		globAttrNode.ColonToken = t; 
 		Attribute(out attr, out attrNode);
 		attr.Scope = scope; 
@@ -572,7 +571,7 @@ public partial class CSharpSyntaxParser
 		globAttrNode.Attributes.Add(attrNode);
 		
 		while (NotFinalComma()) {
-			Expect(88);
+			Expect(87);
 			var separator = t; 
 			Attribute(out attr, out attrNode);
 			attr.Scope = scope; 
@@ -582,11 +581,11 @@ public partial class CSharpSyntaxParser
 			globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode));
 			
 		}
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 			globAttrNode.ClosingSeparator = t; 
 		}
-		Expect(113);
+		Expect(112);
 		attr.Terminate(t); 
 		// :::
 		globAttrNode.Terminate(t);
@@ -608,7 +607,7 @@ NamespaceScopeNode parentNode) {
 			// :::
 			nsDecl.NameTags.Add(t);
 			
-			while (la.kind == 91) {
+			while (la.kind == 90) {
 				Get();
 				var sepToken = t;
 				
@@ -623,7 +622,7 @@ NamespaceScopeNode parentNode) {
 			// :::
 			parentNode.NamespaceDeclarations.Add(nsDecl);
 			
-			Expect(97);
+			Expect(96);
 			nsDecl.OpenBracket = t;
 			
 			while (IsExternAliasDirective()) {
@@ -635,13 +634,13 @@ NamespaceScopeNode parentNode) {
 			while (StartOf(1)) {
 				NamespaceMemberDeclaration(ns, File, nsDecl);
 			}
-			Expect(112);
+			Expect(111);
 			ns.Terminate(t); 
 			// :::
 			nsDecl.CloseBracket = t;
 			nsDecl.Terminate(t);
 			
-			if (la.kind == 115) {
+			if (la.kind == 114) {
 				Get();
 				ns.Terminate(t); 
 				// :::
@@ -674,7 +673,7 @@ NamespaceScopeNode parentNode) {
 			  parentNode.TypeDeclarations.Add(typeDecl);
 			}
 			
-		} else SynErr(146);
+		} else SynErr(145);
 	}
 
 	void TypeName(out TypeReference typeRef, out TypeOrNamespaceNode resultNode) {
@@ -691,7 +690,7 @@ NamespaceScopeNode parentNode) {
 		// :::
 		qualifier = t;
 		
-		if (la.kind == 92) {
+		if (la.kind == 91) {
 			Get();
 			typeRef.IsGlobalScope = true; 
 			// :::
@@ -715,12 +714,12 @@ NamespaceScopeNode parentNode) {
 		  resultNode = new TypeOrNamespaceNode(qualifier, separator);
 		}
 		
-		if (la.kind == 101) {
+		if (la.kind == 100) {
 			TypeArgumentList(nextType.Arguments, out argList);
 		}
 		resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
 		
-		while (la.kind == 91) {
+		while (la.kind == 90) {
 			Get();
 			separator = t;
 			argList = null;
@@ -732,7 +731,7 @@ NamespaceScopeNode parentNode) {
 			// :::
 			identifier = t;
 			
-			if (la.kind == 101) {
+			if (la.kind == 100) {
 				TypeArgumentList(nextType.Arguments, out argList);
 			}
 			resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
@@ -751,7 +750,7 @@ NamespaceScopeNode parentNode) {
 		CurrentElement = attr;
 		attrNode.TypeName = nsNode;
 		
-		if (la.kind == 99) {
+		if (la.kind == 98) {
 			AttributeArguments(attr, attrNode);
 		}
 		attr.Terminate(t); 
@@ -759,7 +758,7 @@ NamespaceScopeNode parentNode) {
 
 	void AttributeDecorations(AttributeCollection attrs, AttributeDecorationNodeCollection attrNodes) {
 		AttributeDecorationNode attrNode; 
-		while (la.kind == 98) {
+		while (la.kind == 97) {
 			Attributes(attrs, out attrNode);
 			attrNodes.Add(attrNode); 
 		}
@@ -808,12 +807,12 @@ NamespaceScopeNode parentNode) {
 				m.Add(Modifier.@readonly, t); 
 				break;
 			}
-			case 82: {
+			case 81: {
 				Get();
 				m.Add(Modifier.@volatile, t); 
 				break;
 			}
-			case 80: {
+			case 79: {
 				Get();
 				m.Add(Modifier.@virtual, t); 
 				break;
@@ -852,7 +851,7 @@ out TypeDeclarationNode typeDecl) {
 		typeDecl = null; 
 		
 		if (StartOf(4)) {
-			if (la.kind == 121) {
+			if (la.kind == 120) {
 				Get();
 				isPartial = true; 
 			}
@@ -862,12 +861,12 @@ out TypeDeclarationNode typeDecl) {
 				StructDeclaration(m, parentType, isPartial, out td, out typeDecl);
 			} else if (la.kind == 40) {
 				InterfaceDeclaration(m, parentType, isPartial, out td, out typeDecl);
-			} else SynErr(147);
+			} else SynErr(146);
 		} else if (la.kind == 25) {
 			EnumDeclaration(m, parentType, out td, out typeDecl);
 		} else if (la.kind == 21) {
 			DelegateDeclaration(m, parentType, out td, out typeDecl);
-		} else SynErr(148);
+		} else SynErr(147);
 		if (td != null)
 		{
 		   td.SetModifiers(m.Value); 
@@ -901,13 +900,13 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		var classDecl = new ClassDeclarationNode(start, t);
 		typeDecl = classDecl;
 		
-		if (la.kind == 101) {
+		if (la.kind == 100) {
 			TypeParameterList(cd, typeDecl);
 		}
-		if (la.kind == 87) {
+		if (la.kind == 86) {
 			BaseTypeList(cd, typeDecl);
 		}
-		while (la.kind == 125) {
+		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			// :::
 			TypeParameterConstraintNode constrNode; 
@@ -920,7 +919,7 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		}
 		ClassBody(td, classDecl);
 		typeDecl.Terminate(t); 
-		if (la.kind == 115) {
+		if (la.kind == 114) {
 			Get();
 			typeDecl.Terminate(t); 
 		}
@@ -944,13 +943,13 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		var structDecl = new StructDeclarationNode(start, t);
 		typeDecl = structDecl;
 		
-		if (la.kind == 101) {
+		if (la.kind == 100) {
 			TypeParameterList(sd, typeDecl);
 		}
-		if (la.kind == 87) {
+		if (la.kind == 86) {
 			BaseTypeList(sd, typeDecl);
 		}
-		while (la.kind == 125) {
+		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
 			
@@ -962,7 +961,7 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		}
 		StructBody(td, structDecl);
 		typeDecl.Terminate(t); 
-		if (la.kind == 115) {
+		if (la.kind == 114) {
 			Get();
 			typeDecl.Terminate(t); 
 		}
@@ -983,13 +982,13 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		var intfDecl = new InterfaceDeclarationNode(start, t);
 		typeDecl = intfDecl;
 		
-		if (la.kind == 101) {
+		if (la.kind == 100) {
 			TypeParameterList(ifd, typeDecl);
 		}
-		if (la.kind == 87) {
+		if (la.kind == 86) {
 			BaseTypeList(ifd, typeDecl);
 		}
-		while (la.kind == 125) {
+		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
 			
@@ -999,16 +998,16 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 			typeDecl.TypeParameterConstraints.Add(constrNode);
 			
 		}
-		Expect(97);
+		Expect(96);
 		intfDecl.OpenBrace = t; 
 		while (StartOf(5)) {
 			InterfaceMemberDeclaration(ifd, intfDecl);
 		}
-		Expect(112);
+		Expect(111);
 		intfDecl.CloseBrace = t;
 		typeDecl.Terminate(t);
 		
-		if (la.kind == 115) {
+		if (la.kind == 114) {
 			Get();
 			typeDecl.Terminate(t); 
 		}
@@ -1029,7 +1028,7 @@ out TypeDeclarationNode typeDecl) {
 		var enumDecl = new EnumDeclarationNode(start, t);
 		typeDecl = enumDecl;
 		
-		if (la.kind == 87) {
+		if (la.kind == 86) {
 			Get();
 			TypeReference typeRef; 
 			if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
@@ -1039,14 +1038,14 @@ out TypeDeclarationNode typeDecl) {
 				TypeOrNamespaceNode itypeNode; 
 				IntegralType(out typeRef, out itypeNode);
 				ed.InterfaceList.Add(typeRef); 
-			} else SynErr(149);
+			} else SynErr(148);
 		}
 		EnumBody(ed, enumDecl);
 		ed.Terminate(t); 
 		// :::
 		typeDecl.Terminate(t);
 		
-		if (la.kind == 115) {
+		if (la.kind == 114) {
 			Get();
 			ed.Terminate(t); 
 			// :::
@@ -1072,15 +1071,15 @@ out TypeDeclarationNode typeDecl) {
 		dd.Name = t.val; 
 		typeDecl = new DelegateDeclarationNode(start, t);
 		
-		if (la.kind == 101) {
+		if (la.kind == 100) {
 			TypeParameterList(dd, typeDecl);
 		}
-		Expect(99);
+		Expect(98);
 		if (StartOf(7)) {
 			FormalParameterList(dd.FormalParameters);
 		}
-		Expect(114);
-		while (la.kind == 125) {
+		Expect(113);
+		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
 			
@@ -1090,7 +1089,7 @@ out TypeDeclarationNode typeDecl) {
 			typeDecl.TypeParameterConstraints.Add(constrNode);
 			
 		}
-		Expect(115);
+		Expect(114);
 		typeDecl.Terminate(t); 
 	}
 
@@ -1099,7 +1098,7 @@ out TypeDeclarationNode typeDecl) {
 		Token identifier;
 		AttributeDecorationNodeCollection attrNodes;
 		
-		Expect(101);
+		Expect(100);
 		if (paramNode != null) paramNode.SetOpenSign(t); 
 		TypeParameter(out tp, out attrNodes, out identifier);
 		td.AddTypeParameter(tp); 
@@ -1107,7 +1106,7 @@ out TypeDeclarationNode typeDecl) {
 		var typeParam = new TypeParameterNode(identifier, attrNodes);
 		if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
 		
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			var separator= t; 
 			TypeParameter(out tp, out attrNodes, out identifier);
@@ -1117,7 +1116,7 @@ out TypeDeclarationNode typeDecl) {
 			if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
 			
 		}
-		Expect(94);
+		Expect(93);
 		if (paramNode != null) paramNode.SetCloseSign(t); 
 	}
 
@@ -1126,13 +1125,13 @@ out TypeDeclarationNode typeDecl) {
 		// :::
 		TypeOrNamespaceNode typeNode;
 		
-		Expect(87);
+		Expect(86);
 		ClassType(out typeRef, out typeNode);
 		td.InterfaceList.Add(typeRef); 
 		// ::: 
 		typeDecl.BaseTypes.Add(typeNode);
 		
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			var separator = t; 
 			ClassType(out typeRef, out typeNode);
@@ -1148,7 +1147,7 @@ out TypeParameterConstraintNode constrNode) {
 		Token start;
 		Token identifier;
 		
-		Expect(125);
+		Expect(124);
 		start = t; 
 		Expect(1);
 		constraint = new TypeParameterConstraint(t, this); 
@@ -1156,7 +1155,7 @@ out TypeParameterConstraintNode constrNode) {
 		// :::
 		identifier = t;
 		
-		Expect(87);
+		Expect(86);
 		TypeReference typeRef; 
 		ConstraintElement element = null;
 		// :::
@@ -1168,7 +1167,7 @@ out TypeParameterConstraintNode constrNode) {
 		// ::: 
 		constrNode.ConstraintTags.Add(tag);
 		
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			var separator = t; 
 			TypeParameterConstraintTag(out element, out tag);
@@ -1181,7 +1180,7 @@ out TypeParameterConstraintNode constrNode) {
 
 	void ClassBody(TypeDeclaration td, ClassDeclarationNode typeDecl) {
 		AttributeCollection attrs = new AttributeCollection(); 
-		Expect(97);
+		Expect(96);
 		typeDecl.OpenBrace = t; 
 		while (StartOf(8)) {
 			attrs = new AttributeCollection(); 
@@ -1202,7 +1201,7 @@ out TypeParameterConstraintNode constrNode) {
 			}
 			
 		}
-		Expect(112);
+		Expect(111);
 		typeDecl.CloseBrace = t; 
 	}
 
@@ -1225,7 +1224,7 @@ out TypeParameterConstraintNode constrNode) {
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(150);
+		} else SynErr(149);
 	}
 
 	void ClassMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td,
@@ -1233,7 +1232,7 @@ out MemberDeclarationNode memNode) {
 		memNode = null; 
 		if (StartOf(9)) {
 			StructMemberDeclaration(attrs, m, td, out memNode);
-		} else if (la.kind == 116) {
+		} else if (la.kind == 115) {
 			Get();
 			var finNode = new FinalizerDeclarationNode(t);
 			memNode = finNode;
@@ -1247,26 +1246,27 @@ out MemberDeclarationNode memNode) {
 			// :::
 			finNode.IdentifierToken = t;
 			
-			Expect(99);
+			Expect(98);
 			finNode.OpenParenthesis = t; 
-			Expect(114);
+			Expect(113);
 			finNode.CloseParenthesis = t; 
-			if (la.kind == 97) {
-				Block(dd);
-			} else if (la.kind == 115) {
+			if (la.kind == 96) {
+				BlockStatementNode blockNode; 
+				Block(dd, out blockNode);
+			} else if (la.kind == 114) {
 				Get();
-			} else SynErr(151);
+			} else SynErr(150);
 			dd.Terminate(t);
 			td.AddMember(dd); 
 			// :::
 			memNode.Terminate(t);
 			
-		} else SynErr(152);
+		} else SynErr(151);
 	}
 
 	void StructBody(TypeDeclaration td, StructDeclarationNode typeDecl) {
 		AttributeCollection attrs = new AttributeCollection(); 
-		Expect(97);
+		Expect(96);
 		typeDecl.OpenBrace = t; 
 		while (StartOf(10)) {
 			attrs = new AttributeCollection(); 
@@ -1281,7 +1281,7 @@ out MemberDeclarationNode memNode) {
 			MemberDeclarationNode memNode; 
 			StructMemberDeclaration(attrs, m, td, out memNode);
 		}
-		Expect(112);
+		Expect(111);
 		typeDecl.CloseBrace = t; 
 	}
 
@@ -1299,7 +1299,7 @@ out MemberDeclarationNode memNode) {
 		} else if (la.kind == _ident && Peek(1).kind == _lpar) {
 			ConstructorDeclaration(attrs, m, td, out memNode);
 		} else if (IsPartialMethod()) {
-			Expect(121);
+			Expect(120);
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeRef, true, out typeNode);
 			MemberName(out memberRef);
@@ -1311,20 +1311,20 @@ out MemberDeclarationNode memNode) {
 				OperatorDeclaration(attrs, m, typeRef, td);
 			} else if (IsFieldDecl()) {
 				FieldMemberDeclarators(attrs, m, td, typeRef, false, Modifier.fields);
-				Expect(115);
+				Expect(114);
 			} else if (la.kind == 1) {
 				MemberName(out memberRef);
-				if (la.kind == 97) {
+				if (la.kind == 96) {
 					PropertyDeclaration(attrs, m, typeRef, memberRef, td);
-				} else if (la.kind == 91) {
+				} else if (la.kind == 90) {
 					Get();
 					IndexerDeclaration(attrs, m, typeRef, memberRef, td);
-				} else if (la.kind == 99 || la.kind == 101) {
+				} else if (la.kind == 98 || la.kind == 100) {
 					MethodDeclaration(attrs, m, typeRef, memberRef, td, true);
-				} else SynErr(153);
+				} else SynErr(152);
 			} else if (la.kind == 68) {
 				IndexerDeclaration(attrs, m, typeRef, null, td);
-			} else SynErr(154);
+			} else SynErr(153);
 		} else if (la.kind == 27 || la.kind == 37) {
 			CastOperatorDeclaration(attrs, m, td);
 		} else if (StartOf(12)) {
@@ -1342,7 +1342,7 @@ out MemberDeclarationNode memNode) {
 			  //nestedTypeNode.Modifiers = mod;
 			}
 			
-		} else SynErr(155);
+		} else SynErr(154);
 	}
 
 	void IntegralType(out TypeReference typeRef, out TypeOrNamespaceNode typeNode) {
@@ -1393,7 +1393,7 @@ out MemberDeclarationNode memNode) {
 			typeRef = new TypeReference(t, this, typeof(char)); 
 			break;
 		}
-		default: SynErr(156); break;
+		default: SynErr(155); break;
 		}
 		typeRef.Terminate(t); 
 		// :::
@@ -1402,21 +1402,21 @@ out MemberDeclarationNode memNode) {
 	}
 
 	void EnumBody(EnumDeclaration ed, EnumDeclarationNode typeDecl) {
-		Expect(97);
+		Expect(96);
 		typeDecl.OpenBrace = t; 
-		if (la.kind == 1 || la.kind == 98) {
+		if (la.kind == 1 || la.kind == 97) {
 			EnumMemberDeclaration(ed);
 			while (NotFinalComma()) {
-				Expect(88);
-				while (!(la.kind == 0 || la.kind == 1 || la.kind == 98)) {SynErr(157); Get();}
+				Expect(87);
+				while (!(la.kind == 0 || la.kind == 1 || la.kind == 97)) {SynErr(156); Get();}
 				EnumMemberDeclaration(ed);
 			}
-			if (la.kind == 88) {
+			if (la.kind == 87) {
 				Get();
 			}
 		}
-		while (!(la.kind == 0 || la.kind == 112)) {SynErr(158); Get();}
-		Expect(112);
+		while (!(la.kind == 0 || la.kind == 111)) {SynErr(157); Get();}
+		Expect(111);
 		typeDecl.CloseBrace = t; 
 	}
 
@@ -1432,7 +1432,7 @@ out MemberDeclarationNode memNode) {
 		CurrentElement = ev;
 		Expression expr;
 		
-		if (la.kind == 86) {
+		if (la.kind == 85) {
 			Get();
 			Expression(out expr, out exprNode);
 			ev.ValueExpression = expr; 
@@ -1461,33 +1461,54 @@ out MemberDeclarationNode memNode) {
 		} else if (IsLambda()) {
 			LambdaExpression lambda = new LambdaExpression(t, this); 
 			LambdaFunctionSignature(lambda);
-			Expect(120);
+			Expect(119);
 			LambdaFunctionBody(lambda);
 			expr = lambda; 
 		} else if (StartOf(13)) {
 			Unary(out leftExpr, out leftExprNode);
 			if (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq)) {
-				AssignmentOperator asgn; 
-				AssignmentOperator(out asgn);
+				BinaryOperator asgn; 
+				BinaryOperatorNode asgnNode; 
+				
+				AssignmentOperator(out asgn, out asgnNode);
 				Expression rightExpr; 
-				Expression(out rightExpr, out exprNode);
-				asgn.RightOperand = rightExpr; 
-				asgn.LeftOperand = leftExpr; 
+				ExpressionNode rightExprNode;
+				
+				Expression(out rightExpr, out rightExprNode);
+				asgn.RightOperand = rightExpr;
+				asgn.LeftOperand = leftExpr;
 				expr = asgn; 
+				// :::
+				asgnNode.RightOperand = rightExprNode;
+				asgnNode.LeftOperand = leftExprNode;
+				exprNode = asgnNode;
+				
 			} else if (StartOf(14)) {
-				BinaryOperator simpleExpr; 
-				NullCoalescingExpr(out simpleExpr, out ncsNode);
-				if (simpleExpr == null) 
+				BinaryOperator ncExpr; 
+				BinaryOperatorNode ncNode;
+				
+				NullCoalescingExpr(out ncExpr, out ncNode);
+				if (ncExpr == null) 
 				{
 				  expr = leftExpr;
 				}
 				else
 				{
-				  simpleExpr.LeftMostNonNull.LeftOperand = leftExpr;
-				  expr = simpleExpr;
+				  ncExpr.LeftMostNonNull.LeftOperand = leftExpr;
+				  expr = ncExpr;
+				}
+				// :::
+				if (ncNode == null)
+				{
+				  exprNode = leftExprNode;
+				}
+				else
+				{
+				  ncNode.LeftmostNonNull.LeftOperand = leftExprNode;
+				  exprNode = ncNode;
 				}
 				
-				if (la.kind == 111) {
+				if (la.kind == 110) {
 					Get();
 					var condExpr = new ConditionalOperator(t, this, expr);
 					ConditionalOperatorNode condNode = null;
@@ -1501,7 +1522,7 @@ out MemberDeclarationNode memNode) {
 					condExpr.TrueExpression = trueExpr; 
 					if (condNode != null) condNode.TrueExpression = trueNode; 
 					
-					Expect(87);
+					Expect(86);
 					Expression falseExpr;
 					ExpressionNode falseNode;
 					
@@ -1512,8 +1533,8 @@ out MemberDeclarationNode memNode) {
 					if (condNode != null) condNode.Terminate(t);
 					
 				}
-			} else SynErr(159);
-		} else SynErr(160);
+			} else SynErr(158);
+		} else SynErr(159);
 		if (expr != null) expr.Terminate(t); 
 		if (exprNode != null) exprNode.Terminate(t);
 		
@@ -1528,7 +1549,7 @@ out MemberDeclarationNode memNode) {
 			PrimitiveType(out typeRef, out typeNode);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			ClassType(out typeRef, out typeNode);
-		} else if (la.kind == 81) {
+		} else if (la.kind == 80) {
 			Get();
 			typeRef = new TypeReference(t, this); 
 			typeRef.Name = t.val;
@@ -1536,8 +1557,8 @@ out MemberDeclarationNode memNode) {
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(161);
-		if (la.kind == 111) {
+		} else SynErr(160);
+		if (la.kind == 110) {
 			Get();
 			typeRef.IsNullable = true; 
 			// :::
@@ -1583,7 +1604,7 @@ out MemberDeclarationNode memNode) {
 			pars.Add(fp);
 			fp.Terminate(t);
 			
-			if (la.kind == 88) {
+			if (la.kind == 87) {
 				Get();
 				FormalParameterList(pars);
 			}
@@ -1599,16 +1620,22 @@ out MemberDeclarationNode memNode) {
 			pars.Add(fp); 
 			fp.Terminate(t);
 			
-		} else SynErr(162);
+		} else SynErr(161);
 	}
 
-	void Block(IBlockOwner block) {
+	void Block(IBlockOwner block, out BlockStatementNode blockNode) {
 		CurrentElement = block.Owner as LanguageElement; 
-		Expect(97);
+		StatementNode stmtNode;
+		blockNode = null;
+		
+		Expect(96);
+		blockNode = new BlockStatementNode(t); 
 		while (StartOf(17)) {
-			Statement(block);
+			Statement(block, out stmtNode);
+			if (stmtNode != null) blockNode.Statements.Add(stmtNode); 
 		}
-		Expect(112);
+		Expect(111);
+		blockNode.Terminate(t); 
 	}
 
 	void ConstMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td,
@@ -1627,13 +1654,13 @@ out MemberDeclarationNode memNode) {
 		
 		SingleConstMember(attrs, m, td, typeRef, out tagNode);
 		constNode.ConstTags.Add(tagNode); 
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			var separator = t; 
 			SingleConstMember(attrs, m, td, typeRef, out tagNode);
 			constNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, tagNode)); 
 		}
-		Expect(115);
+		Expect(114);
 		memNode.Terminate(t); 
 	}
 
@@ -1649,20 +1676,20 @@ out MemberDeclarationNode memNode) {
 		Type(out typeRef, false, out typeNode);
 		if (IsFieldDecl()) {
 			FieldMemberDeclarators(attrs, m, td, typeRef, true, Modifier.propEvntMeths);
-			Expect(115);
+			Expect(114);
 		} else if (la.kind == 1) {
 			TypeReference memberRef; 
 			TypeName(out memberRef, out nsNode);
-			Expect(97);
+			Expect(96);
 			EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  
 			CurrentElement = ep; 
 			ep.ResultingType = typeRef; 
 			ep.ExplicitName = memberRef; 
 			td.AddMember(ep); 
 			EventAccessorDeclarations(ep);
-			Expect(112);
+			Expect(111);
 			ep.Terminate(t); 
-		} else SynErr(163);
+		} else SynErr(162);
 	}
 
 	void ConstructorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td,
@@ -1674,12 +1701,12 @@ out MemberDeclarationNode memNode) {
 		cd.SetModifiers(m.Value);
 		cd.AssignAttributes(attrs);
 		
-		Expect(99);
+		Expect(98);
 		if (StartOf(7)) {
 			FormalParameterList(cd.FormalParameters);
 		}
-		Expect(114);
-		if (la.kind == 87) {
+		Expect(113);
+		if (la.kind == 86) {
 			Get();
 			if (la.kind == 8) {
 				Get();
@@ -1687,16 +1714,17 @@ out MemberDeclarationNode memNode) {
 			} else if (la.kind == 68) {
 				Get();
 				cd.HasThis = true; 
-			} else SynErr(164);
-			Expect(99);
+			} else SynErr(163);
+			Expect(98);
 			CurrentArgumentList(cd.BaseArguments, null);
-			Expect(114);
+			Expect(113);
 		}
-		if (la.kind == 97) {
-			Block(cd);
-		} else if (la.kind == 115) {
+		if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(cd, out blockNode);
+		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(165);
+		} else SynErr(164);
 		td.AddMember(cd); 
 		cd.Terminate(t);
 		
@@ -1710,7 +1738,7 @@ out MemberDeclarationNode memNode) {
 		typeRef.Name = t.val; 
 		TypeReference nextType = typeRef;
 		
-		if (la.kind == 92) {
+		if (la.kind == 91) {
 			Get();
 			typeRef.IsGlobalScope = true; 
 			Expect(1);
@@ -1723,7 +1751,7 @@ out MemberDeclarationNode memNode) {
 			TypeArgumentList(typeRef.Arguments, out argList);
 		}
 		while (la.kind == _dot && Peek(1).kind == _ident) {
-			Expect(91);
+			Expect(90);
 			Expect(1);
 			nextType.Suffix = new TypeReference(t, this);
 			nextType.Suffix.Name = t.val;
@@ -1744,30 +1772,31 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		md.ExplicitName = memberRef;
 		md.ResultingType = typeRef;
 		
-		if (la.kind == 101) {
+		if (la.kind == 100) {
 			TypeParameterList(md, null);
 		}
-		Expect(99);
+		Expect(98);
 		if (StartOf(7)) {
 			FormalParameterList(md.FormalParameters);
 		}
-		Expect(114);
-		while (la.kind == 125) {
+		Expect(113);
+		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
 			
 			TypeParameterConstraintsClause(out constraint, out constrNode);
 			md.AddTypeParameterConstraint(constraint); 
 		}
-		if (la.kind == 97) {
-			Block(md);
+		if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(md, out blockNode);
 			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
 			md.HasBody = true;
 			
-		} else if (la.kind == 115) {
+		} else if (la.kind == 114) {
 			Get();
 			md.HasBody = false; 
-		} else SynErr(166);
+		} else SynErr(165);
 		td.AddMember(md); 
 		md.Terminate(t);
 		
@@ -1785,17 +1814,18 @@ TypeDeclaration td) {
 		Expect(49);
 		OverloadableOp(out op);
 		od.Operator = op; 
-		Expect(99);
+		Expect(98);
 		od.Name = op.ToString(); 
 		if (StartOf(7)) {
 			FormalParameterList(od.FormalParameters);
 		}
-		Expect(114);
-		if (la.kind == 97) {
-			Block(od);
-		} else if (la.kind == 115) {
+		Expect(113);
+		if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(od, out blockNode);
+		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(167);
+		} else SynErr(166);
 		td.AddMember(od); 
 		od.Terminate(t);
 		
@@ -1804,7 +1834,7 @@ TypeDeclaration td) {
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
 TypeReference typeRef, bool isEvent, Modifier toCheck) {
 		SingleFieldMember(attrs, m, td, typeRef, isEvent);
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			SingleFieldMember(attrs, m, td, typeRef, isEvent);
 		}
@@ -1819,9 +1849,9 @@ TypeReference memberRef, TypeDeclaration td) {
 		pd.ExplicitName = memberRef;
 		pd.ResultingType = typeRef;
 		
-		Expect(97);
+		Expect(96);
 		AccessorDeclarations(pd);
-		Expect(112);
+		Expect(111);
 		td.AddMember(pd); 
 		pd.Terminate(t);
 		
@@ -1845,14 +1875,14 @@ TypeReference memberRef, TypeDeclaration td) {
 		ind.ResultingType = typeRef;
 		
 		Expect(68);
-		Expect(98);
+		Expect(97);
 		if (StartOf(7)) {
 			FormalParameterList(ind.FormalParameters);
 		}
-		Expect(113);
-		Expect(97);
-		AccessorDeclarations(ind);
 		Expect(112);
+		Expect(96);
+		AccessorDeclarations(ind);
+		Expect(111);
 		td.AddMember(ind); 
 		ind.Terminate(t);
 		
@@ -1870,23 +1900,24 @@ TypeReference memberRef, TypeDeclaration td) {
 		} else if (la.kind == 27) {
 			Get();
 			cod.IsExplicit = true; 
-		} else SynErr(168);
+		} else SynErr(167);
 		Expect(49);
 		TypeOrNamespaceNode typeNode; 
 		Type(out typeRef, false, out typeNode);
 		cod.ResultingType = typeRef;
 		cod.Name = typeRef.TailName;
 		
-		Expect(99);
+		Expect(98);
 		if (StartOf(7)) {
 			FormalParameterList(cod.FormalParameters);
 		}
-		Expect(114);
-		if (la.kind == 97) {
-			Block(cod);
-		} else if (la.kind == 115) {
+		Expect(113);
+		if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(cod, out blockNode);
+		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(169);
+		} else SynErr(168);
 		td.AddMember(cod); 
 		cod.Terminate(t);
 		
@@ -1904,7 +1935,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		// :::
 		tagNode = new ConstMemberTagNode(t);
 		
-		Expect(86);
+		Expect(85);
 		td.AddMember(cd);
 		Expression expr;
 		// :::
@@ -1943,8 +1974,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "add or remove expected"); 
-		} else SynErr(170);
-		Block(accessor);
+		} else SynErr(169);
+		BlockStatementNode blockNode; 
+		Block(accessor, out blockNode);
 		accessor.Terminate(t);
 		accessor.HasBody = true;
 		accessor.SetModifiers(am.Value); 
@@ -1975,8 +2007,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "add or remove expected"); 
-			} else SynErr(171);
-			Block(accessor);
+			} else SynErr(170);
+			Block(accessor, out blockNode);
 			accessor.Terminate(t);
 			accessor.HasBody = true;
 			accessor.SetModifiers(am.Value); 
@@ -2020,7 +2052,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			  argNodes.Add(argNode);
 			}
 			
-			while (la.kind == 88) {
+			while (la.kind == 87) {
 				Get();
 				separator = t; 
 				if (la.kind == 50 || la.kind == 57) {
@@ -2076,14 +2108,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "set or get expected"); 
-		} else SynErr(172);
-		if (la.kind == 97) {
-			Block(accessor);
+		} else SynErr(171);
+		if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(accessor, out blockNode);
 			accessor.HasBody = true; 
-		} else if (la.kind == 115) {
+		} else if (la.kind == 114) {
 			Get();
 			accessor.HasBody = false; 
-		} else SynErr(173);
+		} else SynErr(172);
 		accessor.Terminate(t);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs);
@@ -2112,14 +2145,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "set or get expected"); 
-			} else SynErr(174);
-			if (la.kind == 97) {
-				Block(accessor);
+			} else SynErr(173);
+			if (la.kind == 96) {
+				BlockStatementNode blockNode; 
+				Block(accessor, out blockNode);
 				accessor.HasBody = true; 
-			} else if (la.kind == 115) {
+			} else if (la.kind == 114) {
 				Get();
 				accessor.HasBody = false; 
-			} else SynErr(175);
+			} else SynErr(174);
 			accessor.Terminate(t);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs);
@@ -2130,31 +2164,31 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	void OverloadableOp(out Operator op) {
 		op = Operator.Plus; 
 		switch (la.kind) {
-		case 109: {
+		case 108: {
 			Get();
 			break;
 		}
-		case 103: {
+		case 102: {
 			Get();
 			op = Operator.Minus; 
 			break;
 		}
-		case 107: {
+		case 106: {
 			Get();
 			op = Operator.Not; 
 			break;
 		}
-		case 116: {
+		case 115: {
 			Get();
 			op = Operator.BitwiseNot; 
 			break;
 		}
-		case 96: {
+		case 95: {
 			Get();
 			op = Operator.Increment; 
 			break;
 		}
-		case 89: {
+		case 88: {
 			Get();
 			op = Operator.Decrement; 
 			break;
@@ -2169,77 +2203,77 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			op = Operator.False; 
 			break;
 		}
-		case 117: {
+		case 116: {
 			Get();
 			op = Operator.Multiply; 
 			break;
 		}
-		case 142: {
+		case 141: {
 			Get();
 			op = Operator.Divide; 
 			break;
 		}
-		case 143: {
+		case 142: {
 			Get();
 			op = Operator.Modulus; 
 			break;
 		}
-		case 84: {
+		case 83: {
 			Get();
 			op = Operator.BitwiseAnd; 
 			break;
 		}
-		case 139: {
+		case 138: {
 			Get();
 			op = Operator.BitwiseOr; 
 			break;
 		}
-		case 140: {
+		case 139: {
 			Get();
 			op = Operator.BitwiseXor; 
 			break;
 		}
-		case 102: {
+		case 101: {
 			Get();
 			op = Operator.LeftShift; 
 			break;
 		}
-		case 93: {
+		case 92: {
 			Get();
 			op = Operator.Equal; 
 			break;
 		}
-		case 106: {
+		case 105: {
 			Get();
 			op = Operator.NotEqual; 
 			break;
 		}
-		case 94: {
+		case 93: {
 			Get();
 			op = Operator.GreaterThan; 
-			if (la.kind == 94) {
+			if (la.kind == 93) {
 				if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); 
 				Get();
 				op = Operator.RightShift; 
 			}
 			break;
 		}
-		case 101: {
+		case 100: {
 			Get();
 			op = Operator.LessThan; 
 			break;
 		}
-		case 95: {
+		case 94: {
 			Get();
 			op = Operator.GreaterThanOrEqual; 
 			break;
 		}
-		case 141: {
+		case 140: {
 			Get();
 			op = Operator.LessThanOrEqual; 
 			break;
 		}
-		default: SynErr(176); break;
+		default: SynErr(175); break;
 		}
 	}
 
@@ -2262,9 +2296,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				TypeReference memberRef = new TypeReference(t, this); 
 				memberRef.Name = t.val;
 				
-				if (la.kind == 99 || la.kind == 101) {
+				if (la.kind == 98 || la.kind == 100) {
 					MethodDeclaration(attrs, m, typeRef, memberRef, ifd, false);
-				} else if (la.kind == 97) {
+				} else if (la.kind == 96) {
 					PropertyDeclaration prop = new PropertyDeclaration(t, ifd); 
 					CurrentElement = prop; 
 					ifd.AddMember(prop); 
@@ -2274,9 +2308,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					prop.SetModifiers(m.Value); 
 					Get();
 					InterfaceAccessors(prop);
-					Expect(112);
+					Expect(111);
 					prop.Terminate(t); 
-				} else SynErr(177);
+				} else SynErr(176);
 			} else if (la.kind == 68) {
 				IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
 				CurrentElement =ind;
@@ -2286,19 +2320,19 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				ind.ResultingType = typeRef;
 				
 				Get();
-				Expect(98);
+				Expect(97);
 				if (StartOf(7)) {
 					FormalParameterList(ind.FormalParameters);
 				}
-				Expect(113);
-				Expect(97);
-				InterfaceAccessors(ind);
 				Expect(112);
+				Expect(96);
+				InterfaceAccessors(ind);
+				Expect(111);
 				ind.Terminate(t); 
-			} else SynErr(178);
+			} else SynErr(177);
 		} else if (la.kind == 26) {
 			InterfaceEventDeclaration(attrs, m, ifd);
-		} else SynErr(179);
+		} else SynErr(178);
 	}
 
 	void InterfaceAccessors(PropertyDeclaration prop) {
@@ -2323,8 +2357,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "set or get expected"); 
-		} else SynErr(180);
-		Expect(115);
+		} else SynErr(179);
+		Expect(114);
 		accessor.Terminate(t);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs); 
@@ -2353,8 +2387,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "set or get expected"); 
-			} else SynErr(181);
-			Expect(115);
+			} else SynErr(180);
+			Expect(114);
 			accessor.Terminate(t);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs); 
@@ -2376,7 +2410,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		fd.Name = t.val;
 		fd.IsEvent = true;
 		
-		Expect(115);
+		Expect(114);
 		ifd.AddMember(fd); 
 		fd.Terminate(t);
 		
@@ -2384,17 +2418,19 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void LocalVariableDeclaration(IBlockOwner block) {
 		TypeReference typeRef = null; 
-		bool isImplicit = false; 
+		bool isImplicit = false;
+		TypeOrNamespaceNode typeNode;
 		
-		if (StartOf(11)) {
-			TypeOrNamespaceNode typeNode; 
-			Type(out typeRef, false, out typeNode);
-		} else if (la.kind == 79) {
-			Get();
+		if (IsVar()) {
+			Expect(1);
 			isImplicit = true; 
-		} else SynErr(182);
+			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+			
+		} else if (StartOf(11)) {
+			Type(out typeRef, false, out typeNode);
+		} else SynErr(181);
 		LocalVariableDeclarator(block, typeRef, isImplicit);
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			LocalVariableDeclarator(block, typeRef, isImplicit);
 		}
@@ -2409,7 +2445,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		loc.Variable.ResultingType = typeRef; 
 		loc.Variable.IsImplicit = isImplicit; 
 		if (block != null) block.Statements.Add(loc); 
-		if (la.kind == 86) {
+		if (la.kind == 85) {
 			Get();
 			if (StartOf(20)) {
 				Initializer init; 
@@ -2424,12 +2460,12 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Type(out tr, false, out typeNode);
 				saIn.Type = tr; 
 				Expression expr; 
-				Expect(98);
+				Expect(97);
 				Expression(out expr, out exprNode);
 				saIn.Expression = expr; 
-				Expect(113);
+				Expect(112);
 				saIn.Terminate(t); 
-			} else SynErr(183);
+			} else SynErr(182);
 		}
 		block.Add(loc.Variable); 
 		loc.Terminate(t);
@@ -2445,30 +2481,30 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression(out expr, out exprNode);
 			ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); 
 			init = expIn; expIn.Terminate(t); 
-		} else if (la.kind == 97) {
+		} else if (la.kind == 96) {
 			ArrayInitializer arrInit; 
 			ArrayInitializer(out arrInit);
 			init = arrInit; 
-		} else SynErr(184);
+		} else SynErr(183);
 	}
 
 	void ArrayInitializer(out ArrayInitializer init) {
 		init = new ArrayInitializer(t, this); 
 		Initializer arrayInit = null; 
-		Expect(97);
+		Expect(96);
 		if (StartOf(20)) {
 			VariableInitializer(out arrayInit);
 			init.Initializers.Add(arrayInit); 
 			while (NotFinalComma()) {
-				Expect(88);
+				Expect(87);
 				VariableInitializer(out arrayInit);
 				init.Initializers.Add(arrayInit); 
 			}
-			if (la.kind == 88) {
+			if (la.kind == 87) {
 				Get();
 			}
 		}
-		Expect(112);
+		Expect(111);
 		init.Terminate(t); 
 	}
 
@@ -2477,19 +2513,19 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		attrNode = null;
 		AttributeNode attributeNode;
 		
-		Expect(98);
+		Expect(97);
 		attrNode = new AttributeDecorationNode(t); 
 		if (IsAttrTargSpec()) {
 			if (la.kind == 1) {
 				Get();
 			} else if (StartOf(22)) {
 				Keyword();
-			} else SynErr(185);
+			} else SynErr(184);
 			scope = t.val; 
 			// :::
 			attrNode.IdentifierToken = t;
 			
-			Expect(87);
+			Expect(86);
 			attrNode.ColonToken = t; 
 		}
 		AttributeDeclaration attr; 
@@ -2500,7 +2536,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		attrNode.Attributes.Add(attributeNode);
 		
 		while (la.kind == _comma && Peek(1).kind != _rbrack) {
-			Expect(88);
+			Expect(87);
 			var separator = t; 
 			Attribute(out attr, out attributeNode);
 			attr.Scope = scope;
@@ -2509,11 +2545,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			attrNode.Attributes.Add(new AttributeContinuationNode(separator, attributeNode));
 			
 		}
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 			attrNode.ClosingSeparator = t; 
 		}
-		Expect(113);
+		Expect(112);
 		attr.Terminate(t);
 		// :::
 		attrNode.Terminate(t);
@@ -2814,6 +2850,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Get();
 			break;
 		}
+		case 79: {
+			Get();
+			break;
+		}
 		case 80: {
 			Get();
 			break;
@@ -2826,11 +2866,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Get();
 			break;
 		}
-		case 83: {
-			Get();
-			break;
-		}
-		default: SynErr(186); break;
+		default: SynErr(185); break;
 		}
 	}
 
@@ -2841,7 +2877,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ExpressionNode exprNode;
 		bool nameFound = false;
 		
-		Expect(99);
+		Expect(98);
 		argsNode.OpenParenthesis = t; 
 		if (StartOf(21)) {
 			arg = new AttributeArgument(t, this); 
@@ -2851,7 +2887,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				// :::
 				identifier = t;
 				
-				Expect(86);
+				Expect(85);
 				nameFound = true; 
 				// :::
 				equal = t;
@@ -2867,7 +2903,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			argNode.Terminate(t);
 			argsNode.Arguments.Add(argNode);
 			
-			while (la.kind == 88) {
+			while (la.kind == 87) {
 				Get();
 				arg = new AttributeArgument(t, this); 
 				// :::
@@ -2879,14 +2915,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					// :::
 					identifier = t;
 					
-					Expect(86);
+					Expect(85);
 					nameFound = true; 
 					// :::
 					equal = t;
 					
 				} else if (StartOf(21)) {
 					if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); 
-				} else SynErr(187);
+				} else SynErr(186);
 				Expression(out expr, out exprNode);
 				arg.Expression = expr; 
 				attr.Arguments.Add(arg); 
@@ -2898,7 +2934,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 			}
 		}
-		Expect(114);
+		Expect(113);
 		argsNode.Terminate(t); 
 	}
 
@@ -2927,36 +2963,36 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(188);
+		} else SynErr(187);
 	}
 
 	void PointerOrArray(TypeReference typeRef, TypeOrNamespaceNode typeNode) {
 		while (IsPointerOrDims()) {
-			if (la.kind == 117) {
+			if (la.kind == 116) {
 				Get();
 				typeRef.TypeModifiers.Add(new PointerModifier());
 				// :::
 				if (typeNode != null) typeNode.TypeModifiers.Add(new PointerModifierNode(t)); 
 				
-			} else if (la.kind == 98) {
+			} else if (la.kind == 97) {
 				Get();
 				int rank = 1; 
 				// :::
 				var arrNode = new ArrayModifierNode(t);
 				
-				while (la.kind == 88) {
+				while (la.kind == 87) {
 					Get();
 					rank++; 
 					// :::
 					arrNode.AddSeparator(t);
 					
 				}
-				Expect(113);
+				Expect(112);
 				typeRef.TypeModifiers.Add(new ArrayModifier(rank)); 
 				// :::
 				arrNode.Terminate(t);
 				
-			} else SynErr(189);
+			} else SynErr(188);
 		}
 	}
 
@@ -2969,15 +3005,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			PrimitiveType(out typeRef, out typeNode);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			ClassType(out typeRef, out typeNode);
-		} else SynErr(190);
-		if (la.kind == 111) {
+		} else SynErr(189);
+		if (la.kind == 110) {
 			Get();
 			typeRef.IsNullable = true;
 			// :::
 			typeNode.NullableToken = t;
 			
 		}
-		if (la.kind == 117) {
+		if (la.kind == 116) {
 			Get();
 			typeRef.TypeModifiers.Add(new PointerModifier());
 			CompilationUnit.AddTypeToFix(typeRef); 
@@ -3000,7 +3036,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			PrimitiveType(out typeRef, out typeNode);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			ClassType(out typeRef, out typeNode);
-		} else if (la.kind == 81) {
+		} else if (la.kind == 80) {
 			Get();
 			typeRef = new TypeReference(t, this); 
 			typeRef.Name = t.val;
@@ -3008,9 +3044,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(191);
+		} else SynErr(190);
 		if (IsNullableTypeMark()) {
-			Expect(111);
+			Expect(110);
 			typeNode.NullableToken = t; 
 		}
 		PointerOrArray(typeRef, typeNode);
@@ -3037,14 +3073,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(192);
+		} else SynErr(191);
 	}
 
 	void TypeArgumentList(TypeReferenceCollection args, out TypeArgumentListNode argList) {
 		TypeReference paramType; 
 		argList = null;
 		
-		Expect(101);
+		Expect(100);
 		paramType = TypeReference.EmptyType;
 		argList = new TypeArgumentListNode(t);
 		
@@ -3053,7 +3089,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Type(out paramType, false, out typeNode);
 		}
 		args.Add(paramType); 
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			paramType = TypeReference.EmptyType; 
 			if (StartOf(11)) {
@@ -3062,63 +3098,97 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			}
 			args.Add(paramType); 
 		}
-		Expect(94);
+		Expect(93);
 		argList.Terminate(t); 
 	}
 
-	void Statement(IBlockOwner block) {
+	void Statement(IBlockOwner block, out StatementNode stmtNode) {
+		stmtNode = null; 
+		
 		if (la.kind == _ident && Peek(1).kind == _colon) {
+			Token identifier; 
 			Expect(1);
-			Expect(87);
-			Statement(block);
+			identifier = t; 
+			Expect(86);
+			var label = new LabelNode(identifier, t); 
+			Statement(block, out stmtNode);
+			if (stmtNode != null)
+			{
+			  stmtNode.Labels.AddLabel(label);
+			}
+			
 		} else if (la.kind == 17) {
-			ConstStatement(block);
+			ConstStatement(block, out stmtNode);
 		} else if (IsLocalVarDecl()) {
 			LocalVariableDeclaration(block);
-			Expect(115);
+			Expect(114);
 		} else if (StartOf(24)) {
 			EmbeddedStatement(block);
-		} else SynErr(193);
+		} else SynErr(192);
 	}
 
-	void ConstStatement(IBlockOwner block) {
+	void ConstStatement(IBlockOwner block, out StatementNode stmtNode) {
 		ExpressionNode exprNode; 
 		Expect(17);
-		TypeReference typeRef; 
+		TypeReference typeRef;
 		ConstStatement cs = new ConstStatement(t, this, block); 
-		CurrentElement = cs; 
-		TypeOrNamespaceNode typeNode; 
+		CurrentElement = cs;
+		// ::: 
+		var csNode = new ConstStatementNode(t);
+		stmtNode = csNode;
+		TypeOrNamespaceNode typeNode;
+		
 		Type(out typeRef, false, out typeNode);
+		csNode.TypeName = typeNode; 
 		Expect(1);
+		var cmTag = new ConstMemberTagNode(t);
 		cs.Name = t.val; 
-		Expect(86);
+		
+		Expect(85);
+		cmTag.EqualToken = t;
 		Expression expr; 
+		
 		Expression(out expr, out exprNode);
-		cs.Expression = expr; 
+		cs.Expression = expr;
 		if (block != null) block.Add(cs); 
 		cs.Terminate(t);
+		// :::
+		cmTag.Expression = exprNode;
+		cmTag.Terminate(t);
+		csNode.ConstTags.Add(cmTag);
 		
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			cs = new ConstStatement(t, this, block); 
+			var separator = t;
+			
 			Expect(1);
+			var cmcTag = new ConstMemberTagNode(t);
 			cs.Name = t.val; 
-			Expect(86);
+			
+			Expect(85);
+			cmcTag.EqualToken = t; 
 			Expression(out expr, out exprNode);
-			cs.Expression = expr; 
+			cs.Expression = expr;
 			if (block != null) block.Add(cs); 
 			cs.Terminate(t);
+			// :::
+			cmcTag.Expression = exprNode;
+			cmcTag.Terminate(t);
+			csNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, cmTag));
 			
 		}
-		Expect(115);
+		Expect(114);
+		csNode.Terminate(t); 
 	}
 
 	void EmbeddedStatement(IBlockOwner block) {
-		if (la.kind == 97) {
+		if (la.kind == 96) {
 			BlockStatement embedded = new BlockStatement(t, this, block); 
-			Block(embedded);
+			BlockStatementNode blockNode; 
+			Block(embedded, out blockNode);
 			if (block != null) block.Add(embedded); 
-		} else if (la.kind == 115) {
+		} else if (la.kind == 114) {
 			EmptyStatement(block);
 		} else if (la.kind == 15) {
 			CheckedBlock(block);
@@ -3128,12 +3198,12 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			UnsafeBlock(block);
 		} else if (StartOf(13)) {
 			StatementExpression(block);
-			Expect(115);
+			Expect(114);
 		} else if (la.kind == 36) {
 			IfStatement(block);
 		} else if (la.kind == 67) {
 			SwitchStatement(block);
-		} else if (la.kind == 83) {
+		} else if (la.kind == 82) {
 			WhileStatement(block);
 		} else if (la.kind == 22) {
 			DoWhileStatement(block);
@@ -3157,21 +3227,21 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			LockStatement(block);
 		} else if (la.kind == 78) {
 			UsingStatement(block);
-		} else if (la.kind == 122) {
+		} else if (la.kind == 121) {
 			Get();
 			if (la.kind == 58) {
 				YieldReturnStatement(block);
 			} else if (la.kind == 10) {
 				YieldBreakStatement(block);
-			} else SynErr(194);
-			Expect(115);
+			} else SynErr(193);
+			Expect(114);
 		} else if (la.kind == 31) {
 			FixedStatement(block);
-		} else SynErr(195);
+		} else SynErr(194);
 	}
 
 	void EmptyStatement(IBlockOwner block) {
-		Expect(115);
+		Expect(114);
 		EmptyStatement es = new EmptyStatement(t, this, block); 
 		CurrentElement = es; 
 		if (block != null) block.Add(es); 
@@ -3183,7 +3253,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = cb;
 		if (block != null) block.Add(cb);
 		
-		Block(cb);
+		BlockStatementNode blockNode; 
+		Block(cb, out blockNode);
 		cb.Terminate(t); 
 	}
 
@@ -3193,7 +3264,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = ucb;
 		if (block != null) block.Add(ucb);
 		
-		Block(ucb);
+		BlockStatementNode blockNode; 
+		Block(ucb, out blockNode);
 		ucb.Terminate(t); 
 	}
 
@@ -3203,7 +3275,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = usb;
 		if (block != null) block.Add(usb);
 		
-		Block(usb);
+		BlockStatementNode blockNode; 
+		Block(usb, out blockNode);
 		usb.Terminate(t); 
 	}
 
@@ -3218,16 +3291,18 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = es; 
 		es.Expression = expr; 
 		if (StartOf(25)) {
-			AssignmentOperator asgn; 
-			AssignmentOperator(out asgn);
+			BinaryOperator asgn; 
+			BinaryOperatorNode asgnNode; 
+			
+			AssignmentOperator(out asgn, out asgnNode);
 			es.Expression = asgn; 
 			asgn.LeftOperand = expr; 
 			Expression rightExpr; 
 			Expression(out rightExpr, out exprNode);
 			asgn.RightOperand = rightExpr; 
-		} else if (la.kind == 88 || la.kind == 114 || la.kind == 115) {
+		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
 			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
-		} else SynErr(196);
+		} else SynErr(195);
 		if (block != null) block.Add(es); 
 		es.Terminate(t); 
 	}
@@ -3237,12 +3312,12 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(36);
 		IfStatement ifs = new IfStatement(t, this, block); 
 		CurrentElement = ifs; 
-		Expect(99);
+		Expect(98);
 		if (block != null) block.Add(ifs); 
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		ifs.Condition = expr; 
-		Expect(114);
+		Expect(113);
 		ifs.CreateThenBlock(t); 
 		EmbeddedStatement(ifs.ThenStatements);
 		ifs.ThenStatements.Terminate(t); 
@@ -3260,16 +3335,16 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(67);
 		SwitchStatement sws = new SwitchStatement(t, this, block); 
 		CurrentElement = sws; 
-		Expect(99);
+		Expect(98);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		sws.Expression = expr; 
-		Expect(114);
-		Expect(97);
+		Expect(113);
+		Expect(96);
 		while (la.kind == 12 || la.kind == 20) {
 			SwitchSection(sws);
 		}
-		Expect(112);
+		Expect(111);
 		if (block != null) block.Add(sws); 
 		sws.Terminate(t);
 		
@@ -3277,15 +3352,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void WhileStatement(IBlockOwner block) {
 		ExpressionNode exprNode; 
-		Expect(83);
+		Expect(82);
 		WhileStatement whs = new WhileStatement(t, this, block); 
 		CurrentElement = whs; 
-		Expect(99);
+		Expect(98);
 		if (block != null) block.Add(whs); 
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		whs.Condition = expr; 
-		Expect(114);
+		Expect(113);
 		EmbeddedStatement(whs);
 		whs.Terminate(t); 
 	}
@@ -3297,13 +3372,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = whs; 
 		EmbeddedStatement(whs);
 		if (block != null) block.Add(whs); 
-		Expect(83);
-		Expect(99);
+		Expect(82);
+		Expect(98);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		whs.Condition = expr; 
+		Expect(113);
 		Expect(114);
-		Expect(115);
 		whs.Terminate(t); 
 	}
 
@@ -3312,24 +3387,24 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(33);
 		ForStatement fs = new ForStatement(t, this, block); 
 		CurrentElement = fs; 
-		Expect(99);
+		Expect(98);
 		if (block != null) block.Add(fs); 
 		if (StartOf(26)) {
 			fs.CreateInitializerBlock(t); 
 			ForInitializer(fs);
 		}
-		Expect(115);
+		Expect(114);
 		if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			fs.Condition = expr; 
 		}
-		Expect(115);
+		Expect(114);
 		if (StartOf(13)) {
 			ForIterator(fs);
 			fs.CreateIteratorBlock(t); 
 		}
-		Expect(114);
+		Expect(113);
 		EmbeddedStatement(fs);
 		fs.Terminate(t); 
 	}
@@ -3339,24 +3414,24 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(34);
 		ForEachStatement fes = new ForEachStatement(t, this, block); 
 		CurrentElement = fes; 
-		Expect(99);
+		Expect(98);
 		if (block != null) block.Add(fes); 
 		TypeReference typeRef; 
-		if (StartOf(11)) {
+		if (IsVar()) {
+			Expect(1);
+			fes.Variable.IsImplicit = true; 
+		} else if (StartOf(11)) {
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeRef, false, out typeNode);
 			fes.Variable.ResultingType = typeRef; 
-		} else if (la.kind == 79) {
-			Get();
-			fes.Variable.IsImplicit = true; 
-		} else SynErr(197);
+		} else SynErr(196);
 		Expect(1);
 		fes.Variable.Name = t.val; 
 		Expect(38);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		fes.Expression = expr; 
-		Expect(114);
+		Expect(113);
 		fes.Add(fes.Variable); 
 		EmbeddedStatement(fes);
 		fes.Terminate(t); 
@@ -3364,7 +3439,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void BreakStatement(IBlockOwner block) {
 		Expect(10);
-		Expect(115);
+		Expect(114);
 		BreakStatement bs = new BreakStatement(t, this, block); 
 		CurrentElement = bs; 
 		if (block != null) block.Add(bs); 
@@ -3373,7 +3448,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void ContinueStatement(IBlockOwner block) {
 		Expect(18);
-		Expect(115);
+		Expect(114);
 		ContinueStatement cs = new ContinueStatement(t, this, block); 
 		CurrentElement = cs; 
 		if (block != null) block.Add(cs); 
@@ -3397,8 +3472,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 20) {
 			Get();
 			gs.Name = t.val; 
-		} else SynErr(198);
-		Expect(115);
+		} else SynErr(197);
+		Expect(114);
 		gs.Terminate(t); 
 	}
 
@@ -3412,7 +3487,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression(out expr, out exprNode);
 			yrs.Expression = expr; 
 		}
-		Expect(115);
+		Expect(114);
 		if (block != null) block.Add(yrs); 
 		yrs.Terminate(t); 
 	}
@@ -3427,7 +3502,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression(out expr, out exprNode);
 			ts.Expression = expr; 
 		}
-		Expect(115);
+		Expect(114);
 		if (block != null) block.Add(ts); 
 		ts.Terminate(t); 
 	}
@@ -3439,21 +3514,22 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ts.CreateTryBlock(t);
 		if (block != null) block.Add(ts);
 		
-		Block(ts.TryBlock);
+		BlockStatementNode blockNode; 
+		Block(ts.TryBlock, out blockNode);
 		if (la.kind == 13) {
 			CatchClauses(ts);
 			if (la.kind == 30) {
 				Get();
 				ts.CreateFinallyBlock(t); 
-				Block(ts.FinallyBlock);
+				Block(ts.FinallyBlock, out blockNode);
 				ts.FinallyBlock.Terminate(t); 
 			}
 		} else if (la.kind == 30) {
 			Get();
 			ts.CreateFinallyBlock(t); 
-			Block(ts.FinallyBlock);
+			Block(ts.FinallyBlock, out blockNode);
 			ts.FinallyBlock.Terminate(t); 
-		} else SynErr(199);
+		} else SynErr(198);
 		ts.Terminate(t); 
 	}
 
@@ -3463,11 +3539,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		LockStatement ls = new LockStatement(t, this, block); 
 		CurrentElement = ls; 
 		if (block != null) block.Add(ls); 
-		Expect(99);
+		Expect(98);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		ls.Expression = expr; 
-		Expect(114);
+		Expect(113);
 		EmbeddedStatement(ls);
 		ls.Terminate(t); 
 	}
@@ -3479,15 +3555,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = us;
 		if (block != null) block.Add(us);
 		
-		Expect(99);
+		Expect(98);
 		if (IsLocalVarDecl()) {
 			LocalVariableDeclaration(us);
 		} else if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			us.ResourceExpression = expr; 
-		} else SynErr(200);
-		Expect(114);
+		} else SynErr(199);
+		Expect(113);
 		EmbeddedStatement(us);
 		us.Terminate(t); 
 	}
@@ -3518,7 +3594,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		FixedStatement fs = new FixedStatement(t, this, block); 
 		CurrentElement = fs; 
 		if (block != null) block.Add(fs); 
-		Expect(99);
+		Expect(98);
 		TypeReference typeRef; 
 		TypeOrNamespaceNode typeNode; 
 		Type(out typeRef, false, out typeNode);
@@ -3527,23 +3603,23 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = vas; 
 		Expect(1);
 		vas.Name = t.val; 
-		Expect(86);
+		Expect(85);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		vas.Expression = expr; 
 		fs.Assignments.Add(vas); 
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			vas = new ValueAssignmentStatement(t, this, block); 
 			CurrentElement = vas; 
 			Expect(1);
 			vas.Name = t.val; 
-			Expect(86);
+			Expect(85);
 			Expression(out expr, out exprNode);
 			vas.Expression = expr; 
 			fs.Assignments.Add(vas); 
 		}
-		Expect(114);
+		Expect(113);
 		EmbeddedStatement(fs);
 		fs.Terminate(t); 
 	}
@@ -3563,9 +3639,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			else section.Labels.Add(expr);
 			
 		}
-		Statement(section);
+		StatementNode stmtNode; 
+		Statement(section, out stmtNode);
 		while (IsNoSwitchLabelOrRBrace()) {
-			Statement(section);
+			Statement(section, out stmtNode);
 		}
 		sws.Terminate(t); 
 	}
@@ -3575,16 +3652,16 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			LocalVariableDeclaration(fs);
 		} else if (StartOf(13)) {
 			StatementExpression(fs.InitializerBlock);
-			while (la.kind == 88) {
+			while (la.kind == 87) {
 				Get();
 				StatementExpression(fs.InitializerBlock);
 			}
-		} else SynErr(201);
+		} else SynErr(200);
 	}
 
 	void ForIterator(ForStatement fs) {
 		StatementExpression(fs.IteratorBlock);
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			StatementExpression(fs.IteratorBlock);
 		}
@@ -3595,9 +3672,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(13);
 		CatchClause cc = tryStm.CreateCatchClause(t); 
 		CurrentElement = cc; 
-		if (la.kind == 97) {
-			Block(cc);
-		} else if (la.kind == 99) {
+		if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(cc, out blockNode);
+		} else if (la.kind == 98) {
 			Get();
 			TypeReference typeRef; 
 			ClassType(out typeRef, out typeNode);
@@ -3607,13 +3685,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				cc.Name = t.val; 
 				cc.CreateInstanceVariable(typeRef, t.val); 
 			}
-			Expect(114);
-			Block(cc);
+			Expect(113);
+			BlockStatementNode blockNode; 
+			Block(cc, out blockNode);
 			cc.Terminate(t); 
 			if (la.kind == 13) {
 				CatchClauses(tryStm);
 			}
-		} else SynErr(202);
+		} else SynErr(201);
 	}
 
 	void Unary(out Expression expr, out ExpressionNode exprNode) {
@@ -3625,63 +3704,63 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		if (unaryHead[la.kind] || IsTypeCast()) {
 			switch (la.kind) {
-			case 109: {
+			case 108: {
 				Get();
 				unOp = new UnaryPlusOperator(t, this); 
 				unaryOp = new UnaryPlusOperatorNode(t);
 				
 				break;
 			}
-			case 103: {
+			case 102: {
 				Get();
 				unOp = new UnaryMinusOperator(t, this); 
 				unaryOp = new UnaryMinusOperatorNode(t);
 				
 				break;
 			}
-			case 107: {
+			case 106: {
 				Get();
 				unOp = new NotOperator(t, this); 
 				unaryOp = new UnaryNotOperatorNode(t);
 				
 				break;
 			}
-			case 116: {
+			case 115: {
 				Get();
 				unOp = new BitwiseNotOperator(t, this); 
 				unaryOp = new BitwiseNotOperatorNode(t);
 				
 				break;
 			}
-			case 96: {
+			case 95: {
 				Get();
 				unOp = new PreIncrementOperator(t, this); 
 				unaryOp = new PreIncrementOperatorNode(t);
 				
 				break;
 			}
-			case 89: {
+			case 88: {
 				Get();
 				unOp = new PreDecrementOperator(t, this);
 				unaryOp = new PreDecrementOperatorNode(t);
 				
 				break;
 			}
-			case 117: {
+			case 116: {
 				Get();
 				unOp = new PointerOperator(t, this); 
 				unaryOp = new PointerOperatorNode(t);
 				
 				break;
 			}
-			case 84: {
+			case 83: {
 				Get();
 				unOp = new ReferenceOperator(t, this); 
 				unaryOp = new ReferenceOperatorNode(t);
 				
 				break;
 			}
-			case 99: {
+			case 98: {
 				Get();
 				TypeReference typeRef;
 				TypeCastOperator tcOp = new TypeCastOperator(t, this);
@@ -3692,13 +3771,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				Type(out typeRef, false, out typeNode);
 				tcNode.TypeName = typeNode; 
-				Expect(114);
+				Expect(113);
 				tcOp.Type = typeRef;
 				unOp = tcOp; 
 				
 				break;
 			}
-			default: SynErr(203); break;
+			default: SynErr(202); break;
 			}
 			Expression unaryExpr; 
 			// :::
@@ -3723,71 +3802,96 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 		} else if (StartOf(27)) {
 			Primary(out expr, out exprNode);
-		} else SynErr(204);
+		} else SynErr(203);
 	}
 
-	void AssignmentOperator(out AssignmentOperator op) {
+	void AssignmentOperator(out BinaryOperator op, out BinaryOperatorNode opNode) {
 		op = null; 
+		opNode = null;
+		
 		switch (la.kind) {
-		case 86: {
+		case 85: {
 			Get();
 			op = new AssignmentOperator(t, this); 
+			opNode = new AssignmentOperatorNode(t); 
+			
 			break;
 		}
-		case 110: {
+		case 109: {
 			Get();
 			op = new PlusAssignmentOperator(t, this); 
+			opNode = new PlusAssignmentOperatorNode(t); 
+			
+			break;
+		}
+		case 103: {
+			Get();
+			op = new MinusAssignmentOperator(t, this); 
+			opNode = new MinusAssignmentOperatorNode(t); 
+			
+			break;
+		}
+		case 117: {
+			Get();
+			op = new MultiplyAssignmentOperator(t, this); 
+			opNode = new MultiplyAssignmentOperatorNode(t); 
+			
+			break;
+		}
+		case 89: {
+			Get();
+			opNode = new DivideAssignmentOperatorNode(t); 
+			
 			break;
 		}
 		case 104: {
 			Get();
-			op = new MinusAssignmentOperator(t, this); 
+			op = new ModuloAssignmentOperator(t, this); 
+			opNode = new ModuloAssignmentOperatorNode(t); 
+			
+			break;
+		}
+		case 84: {
+			Get();
+			op = new AndAssignmentOperator(t, this); 
+			opNode = new AndAssignmentOperatorNode(t); 
+			
+			break;
+		}
+		case 107: {
+			Get();
+			op = new OrAssignmentOperator(t, this); 
+			opNode = new OrAssignmentOperatorNode(t); 
+			
 			break;
 		}
 		case 118: {
 			Get();
-			op = new MultiplyAssignmentOperator(t, this); 
-			break;
-		}
-		case 90: {
-			Get();
-			op = new DivideAssignmentOperator(t, this); 
-			break;
-		}
-		case 105: {
-			Get();
-			op = new ModuloAssignmentOperator(t, this); 
-			break;
-		}
-		case 85: {
-			Get();
-			op = new AndAssignmentOperator(t, this); 
-			break;
-		}
-		case 108: {
-			Get();
-			op = new OrAssignmentOperator(t, this); 
-			break;
-		}
-		case 119: {
-			Get();
 			op = new XorAssignmentOperator(t, this); 
+			opNode = new XorAssignmentOperatorNode(t); 
+			
 			break;
 		}
-		case 100: {
+		case 99: {
 			Get();
 			op = new LeftShiftAssignmentOperator(t, this); 
+			opNode = new LeftShiftAssignmentOperatorNode(t); 
+			
 			break;
 		}
-		case 94: {
+		case 93: {
 			Get();
 			int pos = t.pos; 
-			Expect(95);
-			if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment"); 
+			var start = t;
+			
+			Expect(94);
+			if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment");
 			op = new RightShiftAssignmentOperator(t, this); 
+			opNode = new RightShiftAssignmentOperatorNode(start, t); 
+			
 			break;
 		}
-		default: SynErr(205); break;
+		default: SynErr(204); break;
 		}
 	}
 
@@ -3798,26 +3902,26 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (la.kind == 12) {
 			Get();
 			Expression(out expr, out exprNode);
-			Expect(87);
+			Expect(86);
 		} else if (la.kind == 20) {
 			Get();
-			Expect(87);
-		} else SynErr(206);
+			Expect(86);
+		} else SynErr(205);
 	}
 
 	void LambdaFunctionSignature(LambdaExpression lambda) {
 		if (la.kind == _ident) {
 			Expect(1);
-		} else if (la.kind == 99) {
+		} else if (la.kind == 98) {
 			Get();
 			if (IsExplicitLambdaParameter(la)) {
 				ExplicitLambdaParameterList(lambda);
 			} else if (la.kind != _rpar) {
 				ImplicitLambdaParameterList(lambda);
-			} else if (la.kind == 114) {
-			} else SynErr(207);
-			Expect(114);
-		} else SynErr(208);
+			} else if (la.kind == 113) {
+			} else SynErr(206);
+			Expect(113);
+		} else SynErr(207);
 	}
 
 	void ExplicitLambdaParameterList(LambdaExpression lambda) {
@@ -3838,7 +3942,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(1);
 		fp.Name = t.val; 
 		lambda.FormalParameters.Add(fp); 
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 			ExplicitLambdaParameterList(lambda);
 		}
@@ -3849,7 +3953,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		FormalParameter fp = new FormalParameter(t, this); 
 		fp.Name = t.val; 
 		lambda.FormalParameters.Add(fp); 
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 			ImplicitLambdaParameterList(lambda);
 		}
@@ -3861,14 +3965,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			lambda.Expression = expr; 
-		} else if (la.kind == 97) {
-			Block(lambda);
-		} else SynErr(209);
+		} else if (la.kind == 96) {
+			BlockStatementNode blockNode; 
+			Block(lambda, out blockNode);
+		} else SynErr(208);
 	}
 
 	void FromClause(out FromClause fromClause) {
 		ExpressionNode exprNode; 
-		Expect(123);
+		Expect(122);
 		Token typeToken = la; 
 		Token start = t; 
 		TypeReference typeRef; 
@@ -3878,7 +3983,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Type(out typeRef, false, out typeNode);
 			fromClause.Type = typeRef; 
 		} else if (la.kind == 1) {
-		} else SynErr(210);
+		} else SynErr(209);
 		Expect(1);
 		fromClause.Name = t.val; 
 		Expect(38);
@@ -3892,43 +3997,43 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		while (StartOf(28)) {
 			QueryBodyClause(body);
 		}
-		if (la.kind == 133) {
+		if (la.kind == 132) {
 			SelectClause(body);
-		} else if (la.kind == 134) {
+		} else if (la.kind == 133) {
 			GroupClause(body);
-		} else SynErr(211);
-		if (la.kind == 129) {
+		} else SynErr(210);
+		if (la.kind == 128) {
 			QueryContinuation(body);
 		}
 	}
 
 	void QueryBodyClause(QueryBody body) {
-		if (la.kind == 123) {
+		if (la.kind == 122) {
 			FromClause fromClause; 
 			FromClause(out fromClause);
 			body.Clauses.Add(fromClause); 
-		} else if (la.kind == 124) {
+		} else if (la.kind == 123) {
 			LetClause letClause; 
 			LetClause(out letClause);
 			body.Clauses.Add(letClause); 
-		} else if (la.kind == 125) {
+		} else if (la.kind == 124) {
 			WhereClause whereClause; 
 			WhereClause(out whereClause);
 			body.Clauses.Add(whereClause); 
-		} else if (la.kind == 126) {
+		} else if (la.kind == 125) {
 			JoinClause joinClause; 
 			JoinClause(out joinClause);
 			body.Clauses.Add(joinClause); 
-		} else if (la.kind == 130) {
+		} else if (la.kind == 129) {
 			OrderByClause obClause; 
 			OrderByClause(out obClause);
 			body.Clauses.Add(obClause); 
-		} else SynErr(212);
+		} else SynErr(211);
 	}
 
 	void SelectClause(QueryBody body) {
 		ExpressionNode exprNode; 
-		Expect(133);
+		Expect(132);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		body.Select = new SelectClause(t, this); 
@@ -3938,12 +4043,12 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void GroupClause(QueryBody body) {
 		ExpressionNode exprNode; 
-		Expect(134);
+		Expect(133);
 		Expression grExpr; 
 		Expression(out grExpr, out exprNode);
 		body.GroupBy = new GroupByClause(t, this); 
 		body.GroupBy.Expression = grExpr; 
-		Expect(135);
+		Expect(134);
 		Expression byExpr; 
 		Expression(out byExpr, out exprNode);
 		body.GroupBy.ByExpression = byExpr; 
@@ -3951,7 +4056,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	}
 
 	void QueryContinuation(QueryBody body) {
-		Expect(129);
+		Expect(128);
 		Expect(1);
 		body.IntoIdentifier = t.val; 
 		body.ContinuationBody = new QueryBody(); 
@@ -3960,11 +4065,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void LetClause(out LetClause letClause) {
 		ExpressionNode exprNode; 
-		Expect(124);
+		Expect(123);
 		letClause = new LetClause(t, this); 
 		Expect(1);
 		letClause.Name = t.val; 
-		Expect(86);
+		Expect(85);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		letClause.Expression = expr; 
@@ -3973,7 +4078,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void WhereClause(out WhereClause whereClause) {
 		ExpressionNode exprNode; 
-		Expect(125);
+		Expect(124);
 		whereClause = new WhereClause(t, this); 
 		Expression expr; 
 		Expression(out expr, out exprNode);
@@ -3983,7 +4088,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void JoinClause(out JoinClause joinClause) {
 		ExpressionNode exprNode; 
-		Expect(126);
+		Expect(125);
 		Token typeToken = la; 
 		TypeReference typeRef; 
 		joinClause = new JoinClause(t, this); 
@@ -3992,22 +4097,22 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Type(out typeRef, false, out typeNode);
 			joinClause.Type = typeRef; 
 		} else if (la.kind == 1) {
-		} else SynErr(213);
+		} else SynErr(212);
 		Expect(1);
 		joinClause.Name = t.val; 
 		Expect(38);
 		Expression inExpr; 
 		Expression(out inExpr, out exprNode);
 		joinClause.InExpression = inExpr; 
-		Expect(127);
+		Expect(126);
 		Expression onExpr; 
 		Expression(out onExpr, out exprNode);
 		joinClause.OnExpression = onExpr; 
-		Expect(128);
+		Expect(127);
 		Expression eqExpr; 
 		Expression(out eqExpr, out exprNode);
 		joinClause.EqualsExpression = eqExpr; 
-		if (la.kind == 129) {
+		if (la.kind == 128) {
 			Get();
 			Expect(1);
 			joinClause.IntoIdentifier = t.val; 
@@ -4016,10 +4121,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	}
 
 	void OrderByClause(out OrderByClause obClause) {
-		Expect(130);
+		Expect(129);
 		obClause = new OrderByClause(t, this); 
 		OrderingClause(obClause);
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			OrderingClause(obClause);
 		}
@@ -4032,8 +4137,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		Expression(out expr, out exprNode);
 		OrderingClause oc = new OrderingClause(t, this); 
-		if (la.kind == 131 || la.kind == 132) {
-			if (la.kind == 131) {
+		if (la.kind == 130 || la.kind == 131) {
+			if (la.kind == 130) {
 				Get();
 				oc.Ascending = true; 
 			} else {
@@ -4050,7 +4155,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		
 		OrExpr(out expr, out exprNode);
-		while (la.kind == 136) {
+		while (la.kind == 135) {
 			Get();
 			var oper = new NullCoalescingOperator(t, this); 
 			var opNode = new NullCoalescingOperatorNode(t);
@@ -4076,7 +4181,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		
 		AndExpr(out expr, out exprNode);
-		while (la.kind == 137) {
+		while (la.kind == 136) {
 			Get();
 			var oper = new OrOperator(t, this); 
 			var opNode = new LogicalOrOperatorNode(t);
@@ -4102,7 +4207,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		
 		BitOrExpr(out expr, out exprNode);
-		while (la.kind == 138) {
+		while (la.kind == 137) {
 			Get();
 			var oper = new AndOperator(t, this); 
 			var opNode = new LogicalAndOperatorNode(t);
@@ -4128,7 +4233,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		
 		BitXorExpr(out expr, out exprNode);
-		while (la.kind == 139) {
+		while (la.kind == 138) {
 			Get();
 			var oper = new BitwiseOrOperator(t, this); 
 			var opNode = new BitwiseOrOperatorNode(t);
@@ -4154,7 +4259,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		
 		BitAndExpr(out expr, out exprNode);
-		while (la.kind == 140) {
+		while (la.kind == 139) {
 			Get();
 			var oper = new BitwiseXorOperator(t, this); 
 			var opNode = new BitwiseXorOperatorNode(t);
@@ -4180,7 +4285,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		
 		EqlExpr(out expr, out exprNode);
-		while (la.kind == 84) {
+		while (la.kind == 83) {
 			Get();
 			var oper = new BitwiseAndOperator(t, this); 
 			var opNode = new BitwiseAndOperatorNode(t);
@@ -4209,8 +4314,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		BinaryOperator oper = null; 
 		BinaryOperatorNode opNode = null;
 		
-		while (la.kind == 93 || la.kind == 106) {
-			if (la.kind == 106) {
+		while (la.kind == 92 || la.kind == 105) {
+			if (la.kind == 105) {
 				Get();
 				oper = new EqualOperator(t, this); 
 				opNode = new EqualOperatorNode(t);
@@ -4248,27 +4353,27 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		while (StartOf(29)) {
 			if (StartOf(30)) {
-				if (la.kind == 101) {
+				if (la.kind == 100) {
 					Get();
 					oper = new LessThanOperator(t, this); 
 					opNode = new LessThanOperatorNode(t);
 					
-				} else if (la.kind == 94) {
+				} else if (la.kind == 93) {
 					Get();
 					oper = new GreaterThanOperator(t, this); 
 					opNode = new GreaterThanOperatorNode(t);
 					
-				} else if (la.kind == 141) {
+				} else if (la.kind == 140) {
 					Get();
 					oper = new LessThanOrEqualOperator(t, this); 
 					opNode = new LessThanOrEqualOperatorNode(t);
 					
-				} else if (la.kind == 95) {
+				} else if (la.kind == 94) {
 					Get();
 					oper = new GreaterThanOrEqualOperator(t, this); 
 					opNode = new GreaterThanOrEqualOperatorNode(t);
 					
-				} else SynErr(214);
+				} else SynErr(213);
 				oper.LeftOperand = expr;
 				opNode.LeftOperand = exprNode;
 				Expression unExpr; 
@@ -4294,7 +4399,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					oper = new AsOperator(t, this); 
 					opNode = new AsOperatorNode(t);
 					
-				} else SynErr(215);
+				} else SynErr(214);
 				oper.LeftOperand = expr;
 				TypeReference typeRef; 
 				TypeOrNamespaceNode typeNode;
@@ -4321,19 +4426,19 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		BinaryOperatorNode opNode = null;
 		
 		while (IsShift()) {
-			if (la.kind == 102) {
+			if (la.kind == 101) {
 				Get();
 				oper = new LeftShiftOperator(t, this); 
 				opNode = new LeftShiftOperatorNode(t);
 				
-			} else if (la.kind == 94) {
+			} else if (la.kind == 93) {
 				Get();
 				start = t; 
-				Expect(94);
+				Expect(93);
 				oper = new RightShiftOperator(t, this); 
 				opNode = new RightShiftOperatorNode(start, t);
 				
-			} else SynErr(216);
+			} else SynErr(215);
 			oper.LeftOperand = expr;
 			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
@@ -4359,8 +4464,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		BinaryOperator oper = null; 
 		BinaryOperatorNode opNode = null;
 		
-		while (la.kind == 103 || la.kind == 109) {
-			if (la.kind == 109) {
+		while (la.kind == 102 || la.kind == 108) {
+			if (la.kind == 108) {
 				Get();
 				oper = new AddOperator(t, this); 
 				opNode = new AddOperatorNode(t);
@@ -4394,13 +4499,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		exprNode = null;
 		BinaryOperatorNode opNode = null;
 		
-		while (la.kind == 117 || la.kind == 142 || la.kind == 143) {
-			if (la.kind == 117) {
+		while (la.kind == 116 || la.kind == 141 || la.kind == 142) {
+			if (la.kind == 116) {
 				Get();
 				oper = new MultiplyOperator(t, this); 
 				opNode = new MultiplyOperatorNode(t);
 				
-			} else if (la.kind == 142) {
+			} else if (la.kind == 141) {
 				Get();
 				oper = new DivideOperator(t, this); 
 				opNode = new DivideOperatorNode(t);
@@ -4439,7 +4544,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Literal(out innerExpr, out innerNode);
 			break;
 		}
-		case 99: {
+		case 98: {
 			Get();
 			var pExprNode = new ParenthesisExpressionNode(t); 
 			
@@ -4447,7 +4552,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			pExprNode.Expression = innerNode;
 			innerNode = pExprNode;
 			
-			Expect(114);
+			Expect(113);
 			if (innerExpr != null) innerExpr.BracketsUsed = true; 
 			pExprNode.Terminate(t);
 			
@@ -4503,14 +4608,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			SizeOfOperator(out innerExpr, out innerNode);
 			break;
 		}
-		default: SynErr(217); break;
+		default: SynErr(216); break;
 		}
 		Expression curExpr = innerExpr; 
 		var curExprNode = innerNode;
 		
 		while (StartOf(31)) {
 			switch (la.kind) {
-			case 96: {
+			case 95: {
 				Get();
 				curExpr = new PostIncrementOperator(t, this, innerExpr); 
 				var incNode = new PostIncrementOperatorNode(t);
@@ -4519,7 +4624,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				break;
 			}
-			case 89: {
+			case 88: {
 				Get();
 				curExpr = new PostDecrementOperator(t, this, innerExpr); 
 				var decNode = new PostDecrementOperatorNode(t);
@@ -4528,7 +4633,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				break;
 			}
-			case 144: {
+			case 143: {
 				Get();
 				NamedLiteral nl; 
 				SimpleNameNode snlNode;
@@ -4542,7 +4647,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				break;
 			}
-			case 91: {
+			case 90: {
 				Get();
 				NamedLiteral nl; 
 				SimpleNameNode snlNode;
@@ -4556,21 +4661,21 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				break;
 			}
-			case 99: {
+			case 98: {
 				Get();
 				ArgumentListOperator alop = new ArgumentListOperator(t, this, innerExpr); 
 				var invNode = new MethodInvocationOperatorNode(t);
 				invNode.ScopeOperand = curExprNode;
 				
 				CurrentArgumentList(alop.Arguments, invNode.Arguments);
-				Expect(114);
+				Expect(113);
 				curExpr = alop; 
 				invNode.Terminate(t);
 				curExprNode = invNode;
 				
 				break;
 			}
-			case 98: {
+			case 97: {
 				Get();
 				ArrayIndexerOperator aiop = new ArrayIndexerOperator(t, this, innerExpr); 
 				var indNode = new ArrayIndexerInvocationOperatorNode(t);
@@ -4578,7 +4683,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				ArrayIndexer(aiop, indNode.Arguments);
 				curExpr = aiop; 
-				Expect(113);
+				Expect(112);
 				indNode.Terminate(t); 
 				break;
 			}
@@ -4645,7 +4750,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 			break;
 		}
-		default: SynErr(218); break;
+		default: SynErr(217); break;
 		}
 	}
 
@@ -4730,13 +4835,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			pml = new PrimitiveNamedLiteral(t, this, typeof(ushort)); 
 			break;
 		}
-		default: SynErr(219); break;
+		default: SynErr(218); break;
 		}
 		expr = pml; 
 		var pnNode = new PrimitiveNamedNode(t);
 		exprNode = pnNode;
 		
-		Expect(91);
+		Expect(90);
 		pnNode.SeparatorToken = t; 
 		Expect(1);
 		pml.Name = t.val;
@@ -4760,7 +4865,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		var nlNode = new ScopedNameNode(t);
 		exprNode = nlNode;
 		
-		if (la.kind == 92) {
+		if (la.kind == 91) {
 			Get();
 			nl.IsGlobalScope = true; 
 			nlNode.QualifierSeparatorToken = t;
@@ -4787,16 +4892,16 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		NewOperator nop = new NewOperator(t, this); 
 		expr = nop; 
 		TypeReference typeRef; 
-		if (la.kind == 97) {
+		if (la.kind == 96) {
 			AnonymousObjectInitializer(nop);
 		} else if (StartOf(32)) {
 			TypeOrNamespaceNode typeNode; 
 			NonArrayType(out typeRef, out typeNode);
 			NewOperatorWithType(nop, typeRef);
-		} else if (la.kind == 98) {
+		} else if (la.kind == 97) {
 			ImplicitArrayCreation(nop);
 			nop.Kind = NewOperatorKind.UntypedArrayInitialization; 
-		} else SynErr(220);
+		} else SynErr(219);
 	}
 
 	void TypeOfOperator(out Expression expr, out ExpressionNode exprNode) {
@@ -4805,7 +4910,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		var topNode = new TypeofOperatorNode(t);
 		exprNode = topNode;
 		
-		Expect(99);
+		Expect(98);
 		expr = top; 
 		topNode.OpenParenthesis = t;
 		TypeReference typeRef; 
@@ -4815,7 +4920,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		top.Type = typeRef; 
 		topNode.TypeName = typeNode;
 		
-		Expect(114);
+		Expect(113);
 		top.Terminate(t); 
 		topNode.CloseParenthesis = t;
 		exprNode.Terminate(t);
@@ -4828,7 +4933,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		var copNode = new CheckedOperatorNode(t);
 		exprNode = copNode;
 		
-		Expect(99);
+		Expect(98);
 		expr = cop; 
 		copNode.OpenParenthesis = t;
 		Expression innerExpr;
@@ -4838,7 +4943,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		cop.Operand = innerExpr; 
 		copNode.Expression = innerNode;
 		
-		Expect(114);
+		Expect(113);
 		cop.Terminate(t); 
 		copNode.CloseParenthesis = t;
 		exprNode.Terminate(t);
@@ -4851,7 +4956,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		var uopNode = new UncheckedOperatorNode(t);
 		exprNode = uopNode;
 		
-		Expect(99);
+		Expect(98);
 		expr = uop;
 		uopNode.OpenParenthesis = t;
 		Expression innerExpr; 
@@ -4861,7 +4966,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		uop.Operand = innerExpr; 
 		uopNode.Expression = innerNode;
 		
-		Expect(114);
+		Expect(113);
 		uop.Terminate(t); 
 		uopNode.CloseParenthesis = t;
 		exprNode.Terminate(t);
@@ -4871,14 +4976,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	void DefaultOperator(out Expression expr) {
 		Expect(20);
 		DefaultOperator dop = new DefaultOperator(t, this); 
-		Expect(99);
+		Expect(98);
 		expr = dop; 
 		Expression innerExpr; 
 		ExpressionNode primNode;
 		
 		Primary(out innerExpr, out primNode);
 		dop.Operand = innerExpr; 
-		Expect(114);
+		Expect(113);
 		dop.Terminate(t); 
 	}
 
@@ -4886,21 +4991,22 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(21);
 		AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this); 
 		CurrentElement = adop; 
-		if (la.kind == 99) {
+		if (la.kind == 98) {
 			FormalParameter param; 
 			Get();
 			if (StartOf(33)) {
 				AnonymousMethodParameter(out param);
 				adop.FormalParameters.Add(param); 
-				while (la.kind == 88) {
+				while (la.kind == 87) {
 					Get();
 					AnonymousMethodParameter(out param);
 					adop.FormalParameters.Add(param); 
 				}
 			}
-			Expect(114);
+			Expect(113);
 		}
-		Block(adop);
+		BlockStatementNode blockNode; 
+		Block(adop, out blockNode);
 		expr = adop; 
 		adop.Terminate(t); 
 	}
@@ -4911,7 +5017,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		var sopNode = new SizeofOperatorNode(t);
 		exprNode = sopNode;
 		
-		Expect(99);
+		Expect(98);
 		expr = sop; 
 		sopNode.OpenParenthesis = t;
 		TypeReference typeRef; 
@@ -4921,7 +5027,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		sop.Type = typeRef; 
 		sopNode.TypeName = typeNode;
 		
-		Expect(114);
+		Expect(113);
 		sop.Terminate(t); 
 		sopNode.CloseParenthesis = t;
 		exprNode.Terminate(t);
@@ -4960,7 +5066,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		  argNodes.Add(argNode);
 		}
 		
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			separator = t; 
 			Expression(out expr, out exprNode);
@@ -4978,13 +5084,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	}
 
 	void AnonymousObjectInitializer(NewOperator nop) {
-		Expect(97);
+		Expect(96);
 		MemberDeclaratorList mInitList; 
 		MemberDeclaratorList(out mInitList);
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 		}
-		Expect(112);
+		Expect(111);
 	}
 
 	void NewOperatorWithType(NewOperator nop, TypeReference typeRef) {
@@ -4992,57 +5098,57 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		nop.Type = typeRef; 
 		ExpressionNode exprNode;
 		
-		if (la.kind == 99) {
+		if (la.kind == 98) {
 			Get();
 			CurrentArgumentList(nop.Arguments, null);
-			Expect(114);
-			if (la.kind == 97) {
+			Expect(113);
+			if (la.kind == 96) {
 				Initializer init; 
 				ObjectOrCollectionInitializer(out init);
 				nop.Initializer = init; 
 			}
-		} else if (la.kind == 97) {
+		} else if (la.kind == 96) {
 			Initializer init; 
 			ObjectOrCollectionInitializer(out init);
 			nop.Initializer = init; 
 		} else if (IsDims()) {
 			nop.Kind = NewOperatorKind.TypedArrayInitialization; 
-			Expect(98);
+			Expect(97);
 			nop.RunningDimensions = 1; 
-			while (la.kind == 88) {
+			while (la.kind == 87) {
 				Get();
 				nop.RunningDimensions++; 
 			}
-			Expect(113);
+			Expect(112);
 			ArrayInitializer(out arrayInit);
 			nop.Initializer = arrayInit; 
-		} else if (la.kind == 98) {
+		} else if (la.kind == 97) {
 			Get();
 			Expression dimExpr; 
 			Expression(out dimExpr, out exprNode);
 			nop.Dimensions.Add(dimExpr); 
-			while (la.kind == 88) {
+			while (la.kind == 87) {
 				Get();
 				Expression(out dimExpr, out exprNode);
 				nop.Dimensions.Add(dimExpr); 
 			}
-			Expect(113);
+			Expect(112);
 			while (IsDims()) {
-				Expect(98);
+				Expect(97);
 				nop.RunningDimensions = 1; 
-				while (la.kind == 88) {
+				while (la.kind == 87) {
 					Get();
 					nop.RunningDimensions++; 
 				}
-				Expect(113);
+				Expect(112);
 			}
 			nop.Kind = NewOperatorKind.TypedArrayCreation; 
-			if (la.kind == 97) {
+			if (la.kind == 96) {
 				ArrayInitializer(out arrayInit);
 				nop.Initializer = arrayInit; 
 				nop.Kind = NewOperatorKind.TypedArrayInitialization; 
 			}
-		} else SynErr(221);
+		} else SynErr(220);
 		nop.Terminate(t); 
 	}
 
@@ -5050,14 +5156,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ArrayInitializer arrayInit;
 		nop.IsImplicitArray = true;
 		
-		Expect(98);
+		Expect(97);
 		nop.RunningDimensions = 1; 
-		while (la.kind == 88) {
+		while (la.kind == 87) {
 			Get();
 			nop.RunningDimensions++; 
 		}
-		Expect(113);
-		if (la.kind == 97) {
+		Expect(112);
+		if (la.kind == 96) {
 			ArrayInitializer(out arrayInit);
 			nop.Initializer = arrayInit; 
 		}
@@ -5070,7 +5176,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		MemberDeclarator(out mInit);
 		initList.Initializers.Add(mInit); 
 		while (NotFinalComma()) {
-			Expect(88);
+			Expect(87);
 			MemberDeclarator(out mInit);
 			initList.Initializers.Add(mInit); 
 		}
@@ -5085,7 +5191,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (IsMemberInitializer()) {
 			Expect(1);
 			Token start = t; 
-			Expect(86);
+			Expect(85);
 			Expression(out expr, out exprNode);
 			init = new MemberDeclarator(start, this, expr, start.val); 
 		} else if (StartOf(27)) {
@@ -5100,25 +5206,25 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			TypeOrNamespaceNode typeNode;
 			
 			PredefinedType(out typeRef, out typeNode);
-			Expect(91);
+			Expect(90);
 			Expect(1);
 			init = new MemberDeclarator(start, this, typeRef, start.val); 
-		} else SynErr(222);
+		} else SynErr(221);
 	}
 
 	void ObjectOrCollectionInitializer(out Initializer init) {
-		Expect(97);
+		Expect(96);
 		init = null; 
 		if (IsEmptyMemberInitializer()) {
-			Expect(112);
+			Expect(111);
 		} else if (IsMemberInitializer()) {
 			MemberInitializerList mInitList; 
 			MemberInitializerList(out mInitList);
 			init = mInitList; 
 		} else if (StartOf(20)) {
 			CollectionInitializer(out init);
-		} else SynErr(223);
-		Expect(112);
+		} else SynErr(222);
+		Expect(111);
 	}
 
 	void MemberInitializerList(out MemberInitializerList initList) {
@@ -5128,11 +5234,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		MemberInitializer(out mInit);
 		initList.Initializers.Add(mInit); 
 		while (NotFinalComma()) {
-			Expect(88);
+			Expect(87);
 			MemberInitializer(out mInit);
 			initList.Initializers.Add(mInit); 
 		}
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 		}
 		initList.Terminate(t); 
@@ -5156,11 +5262,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ElementInitializer(out elementInit);
 		collInit.Initializers.Add(elementInit); 
 		while (NotFinalComma()) {
-			Expect(88);
+			Expect(87);
 			ElementInitializer(out elementInit);
 			collInit.Initializers.Add(elementInit); 
 		}
-		if (la.kind == 88) {
+		if (la.kind == 87) {
 			Get();
 		}
 		init.Terminate(t); 
@@ -5173,19 +5279,19 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (IsValueInitializer()) {
 			Expression(out expr, out exprNode);
 			init = new ExpressionInitializer(t, this, expr); 
-		} else if (la.kind == 97) {
+		} else if (la.kind == 96) {
 			ExpressionListInitializer listInit = new ExpressionListInitializer(t, this); 
 			init = listInit; 
 			Get();
 			Expression(out expr, out exprNode);
 			listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
-			while (la.kind == 88) {
+			while (la.kind == 87) {
 				Get();
 				Expression(out expr, out exprNode);
 				listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
 			}
-			Expect(112);
-		} else SynErr(224);
+			Expect(111);
+		} else SynErr(223);
 		if (init != null) init.Terminate(t); 
 	}
 
@@ -5193,17 +5299,17 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ExpressionNode exprNode; 
 		Expect(1);
 		Token startToken = t; 
-		Expect(86);
+		Expect(85);
 		Expression expr; 
 		init = null; 
 		if (IsValueInitializer()) {
 			Expression(out expr, out exprNode);
 			init = new MemberInitializer(startToken, this, expr); 
-		} else if (la.kind == 97) {
+		} else if (la.kind == 96) {
 			Initializer compoundInit; 
 			ObjectOrCollectionInitializer(out compoundInit);
 			init = new MemberInitializer(startToken, this, compoundInit); 
-		} else SynErr(225);
+		} else SynErr(224);
 		init.Terminate(t); 
 	}
 
@@ -5238,7 +5344,7 @@ TypeReference typeRef, bool isEvent) {
 		fd.Name = t.val;
 		fd.IsEvent = isEvent;
 		
-		if (la.kind == 86) {
+		if (la.kind == 85) {
 			Get();
 			Initializer init; 
 			VariableInitializer(out init);
@@ -5285,9 +5391,9 @@ out Token identifier) {
 			element = new ConstraintElement(t, this, ConstraintClassification.New); 
 			var start = t;
 			
-			Expect(99);
+			Expect(98);
 			var openPar = t; 
-			Expect(114);
+			Expect(113);
 			tag = new ParameterConstraintTagNode(start, openPar, t); 
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			Token elemToken = t; 
@@ -5300,7 +5406,7 @@ out Token identifier) {
 			// :::
 			tag = new ParameterConstraintTagNode(typeNode);       
 			
-		} else SynErr(226);
+		} else SynErr(225);
 	}
 
 
@@ -5340,41 +5446,41 @@ out Token identifier) {
     // --------------------------------------------------------------------------------
 	  private bool[,] _StartupSet = 
     {
-		{T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,T,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,T,x, T,x,x,x, T,x,x,x, x,x,x,T, x,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,x,x, x,x,x,x, x,T,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, T,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, T,x,x,x, T,x,x,x, x,T,x,T, T,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,T,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, T,x,x,x, T,x,x,x, x,T,x,T, T,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,x, T,T,x,x, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, T,x,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, T,x,x,x, x,T,T,T, x,x,x,x, x,T,T,T, x,x,T,x, x,T,x,T, T,T,T,T, x,T,x,x, x,x,x,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, x,x,x},
-		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,T,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,T, x,T,x,T, T,x,x,x, x,T,x,x, x,x,x,x, T,T,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,T, T,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,T,x, x,x,x,x, x,T,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, T,x,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, T,T,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,x,x,x, T,x,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,x,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,T, T,x,x,x, x,T,x,x, x,x,x,x, T,T,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,T, T,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,T,x, x,x,T,x, x,x,x,x, T,x,x,x, T,T,x,x, T,x,T,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,T, x,T,x,x, T,x,x,x, x,T,x,x, x,x,x,x, T,x,x,T, x,x,x,T, x,x,x,T, x,T,x,x, x,x,x,x, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,T, x,x,x,x, T,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x}
+		{T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,T,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,T,x, T,x,x,x, T,x,x,x, x,x,x,T, x,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,x,x, x,x,x,x, x,T,T,x, T,T,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, T,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, T,x,x,x, T,x,x,x, x,T,x,T, T,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,x, T,T,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, x,x,x,x, T,x,x,x, x,T,x,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,T,x, x,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,T,x, x,T,x,T, x,x,T,x, T,T,x,T, x,T,x,T, x,T,T,T, T,x,x,x, T,x,x,x, x,T,x,T, T,T,x,x, T,x,T,x, T,x,x,T, x,T,T,T, T,x,x,T, T,T,x,x, T,T,T,x, x,x,x,x, x,T,T,x, T,T,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, x,x,x,x, T,T,T,x, x,x,x,x, T,T,T,x, x,T,x,x, T,x,T,T, T,T,T,x, T,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x},
+		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,T,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,x, T,x,T,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,T,T, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,T,x, x,x,x,x, x,T,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,x,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,T,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,T,T, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,T,x,x, x,T,x,x, x,x,x,T, x,x,x,T, T,x,x,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, T,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x}
 
 	  };
 
@@ -5466,154 +5572,153 @@ out Token identifier) {
 			case 76: s = "unsafe expected"; break;
 			case 77: s = "ushort expected"; break;
 			case 78: s = "usingKW expected"; break;
-			case 79: s = "var expected"; break;
-			case 80: s = "virtual expected"; break;
-			case 81: s = "void expected"; break;
-			case 82: s = "volatile expected"; break;
-			case 83: s = "while expected"; break;
-			case 84: s = "and expected"; break;
-			case 85: s = "andassgn expected"; break;
-			case 86: s = "assgn expected"; break;
-			case 87: s = "colon expected"; break;
-			case 88: s = "comma expected"; break;
-			case 89: s = "dec expected"; break;
-			case 90: s = "divassgn expected"; break;
-			case 91: s = "dot expected"; break;
-			case 92: s = "dblcolon expected"; break;
-			case 93: s = "eq expected"; break;
-			case 94: s = "gt expected"; break;
-			case 95: s = "gteq expected"; break;
-			case 96: s = "inc expected"; break;
-			case 97: s = "lbrace expected"; break;
-			case 98: s = "lbrack expected"; break;
-			case 99: s = "lpar expected"; break;
-			case 100: s = "lshassgn expected"; break;
-			case 101: s = "lt expected"; break;
-			case 102: s = "ltlt expected"; break;
-			case 103: s = "minus expected"; break;
-			case 104: s = "minusassgn expected"; break;
-			case 105: s = "modassgn expected"; break;
-			case 106: s = "neq expected"; break;
-			case 107: s = "not expected"; break;
-			case 108: s = "orassgn expected"; break;
-			case 109: s = "plus expected"; break;
-			case 110: s = "plusassgn expected"; break;
-			case 111: s = "question expected"; break;
-			case 112: s = "rbrace expected"; break;
-			case 113: s = "rbrack expected"; break;
-			case 114: s = "rpar expected"; break;
-			case 115: s = "scolon expected"; break;
-			case 116: s = "tilde expected"; break;
-			case 117: s = "times expected"; break;
-			case 118: s = "timesassgn expected"; break;
-			case 119: s = "xorassgn expected"; break;
-			case 120: s = "larrow expected"; break;
-			case 121: s = "\"partial\" expected"; break;
-			case 122: s = "\"yield\" expected"; break;
-			case 123: s = "\"from\" expected"; break;
-			case 124: s = "\"let\" expected"; break;
-			case 125: s = "\"where\" expected"; break;
-			case 126: s = "\"join\" expected"; break;
-			case 127: s = "\"on\" expected"; break;
-			case 128: s = "\"equals\" expected"; break;
-			case 129: s = "\"into\" expected"; break;
-			case 130: s = "\"orderby\" expected"; break;
-			case 131: s = "\"ascending\" expected"; break;
-			case 132: s = "\"descending\" expected"; break;
-			case 133: s = "\"select\" expected"; break;
-			case 134: s = "\"group\" expected"; break;
-			case 135: s = "\"by\" expected"; break;
-			case 136: s = "\"??\" expected"; break;
-			case 137: s = "\"||\" expected"; break;
-			case 138: s = "\"&&\" expected"; break;
-			case 139: s = "\"|\" expected"; break;
-			case 140: s = "\"^\" expected"; break;
-			case 141: s = "\"<=\" expected"; break;
-			case 142: s = "\"/\" expected"; break;
-			case 143: s = "\"%\" expected"; break;
-			case 144: s = "\"->\" expected"; break;
-			case 145: s = "??? expected"; break;
-			case 146: s = "invalid NamespaceMemberDeclaration"; break;
+			case 79: s = "virtual expected"; break;
+			case 80: s = "void expected"; break;
+			case 81: s = "volatile expected"; break;
+			case 82: s = "while expected"; break;
+			case 83: s = "and expected"; break;
+			case 84: s = "andassgn expected"; break;
+			case 85: s = "assgn expected"; break;
+			case 86: s = "colon expected"; break;
+			case 87: s = "comma expected"; break;
+			case 88: s = "dec expected"; break;
+			case 89: s = "divassgn expected"; break;
+			case 90: s = "dot expected"; break;
+			case 91: s = "dblcolon expected"; break;
+			case 92: s = "eq expected"; break;
+			case 93: s = "gt expected"; break;
+			case 94: s = "gteq expected"; break;
+			case 95: s = "inc expected"; break;
+			case 96: s = "lbrace expected"; break;
+			case 97: s = "lbrack expected"; break;
+			case 98: s = "lpar expected"; break;
+			case 99: s = "lshassgn expected"; break;
+			case 100: s = "lt expected"; break;
+			case 101: s = "ltlt expected"; break;
+			case 102: s = "minus expected"; break;
+			case 103: s = "minusassgn expected"; break;
+			case 104: s = "modassgn expected"; break;
+			case 105: s = "neq expected"; break;
+			case 106: s = "not expected"; break;
+			case 107: s = "orassgn expected"; break;
+			case 108: s = "plus expected"; break;
+			case 109: s = "plusassgn expected"; break;
+			case 110: s = "question expected"; break;
+			case 111: s = "rbrace expected"; break;
+			case 112: s = "rbrack expected"; break;
+			case 113: s = "rpar expected"; break;
+			case 114: s = "scolon expected"; break;
+			case 115: s = "tilde expected"; break;
+			case 116: s = "times expected"; break;
+			case 117: s = "timesassgn expected"; break;
+			case 118: s = "xorassgn expected"; break;
+			case 119: s = "larrow expected"; break;
+			case 120: s = "\"partial\" expected"; break;
+			case 121: s = "\"yield\" expected"; break;
+			case 122: s = "\"from\" expected"; break;
+			case 123: s = "\"let\" expected"; break;
+			case 124: s = "\"where\" expected"; break;
+			case 125: s = "\"join\" expected"; break;
+			case 126: s = "\"on\" expected"; break;
+			case 127: s = "\"equals\" expected"; break;
+			case 128: s = "\"into\" expected"; break;
+			case 129: s = "\"orderby\" expected"; break;
+			case 130: s = "\"ascending\" expected"; break;
+			case 131: s = "\"descending\" expected"; break;
+			case 132: s = "\"select\" expected"; break;
+			case 133: s = "\"group\" expected"; break;
+			case 134: s = "\"by\" expected"; break;
+			case 135: s = "\"??\" expected"; break;
+			case 136: s = "\"||\" expected"; break;
+			case 137: s = "\"&&\" expected"; break;
+			case 138: s = "\"|\" expected"; break;
+			case 139: s = "\"^\" expected"; break;
+			case 140: s = "\"<=\" expected"; break;
+			case 141: s = "\"/\" expected"; break;
+			case 142: s = "\"%\" expected"; break;
+			case 143: s = "\"->\" expected"; break;
+			case 144: s = "??? expected"; break;
+			case 145: s = "invalid NamespaceMemberDeclaration"; break;
+			case 146: s = "invalid TypeDeclaration"; break;
 			case 147: s = "invalid TypeDeclaration"; break;
-			case 148: s = "invalid TypeDeclaration"; break;
-			case 149: s = "invalid EnumDeclaration"; break;
-			case 150: s = "invalid ClassType"; break;
+			case 148: s = "invalid EnumDeclaration"; break;
+			case 149: s = "invalid ClassType"; break;
+			case 150: s = "invalid ClassMemberDeclaration"; break;
 			case 151: s = "invalid ClassMemberDeclaration"; break;
-			case 152: s = "invalid ClassMemberDeclaration"; break;
+			case 152: s = "invalid StructMemberDeclaration"; break;
 			case 153: s = "invalid StructMemberDeclaration"; break;
 			case 154: s = "invalid StructMemberDeclaration"; break;
-			case 155: s = "invalid StructMemberDeclaration"; break;
-			case 156: s = "invalid IntegralType"; break;
+			case 155: s = "invalid IntegralType"; break;
+			case 156: s = "this symbol not expected in EnumBody"; break;
 			case 157: s = "this symbol not expected in EnumBody"; break;
-			case 158: s = "this symbol not expected in EnumBody"; break;
+			case 158: s = "invalid Expression"; break;
 			case 159: s = "invalid Expression"; break;
-			case 160: s = "invalid Expression"; break;
-			case 161: s = "invalid Type"; break;
-			case 162: s = "invalid FormalParameterList"; break;
-			case 163: s = "invalid EventDeclaration"; break;
+			case 160: s = "invalid Type"; break;
+			case 161: s = "invalid FormalParameterList"; break;
+			case 162: s = "invalid EventDeclaration"; break;
+			case 163: s = "invalid ConstructorDeclaration"; break;
 			case 164: s = "invalid ConstructorDeclaration"; break;
-			case 165: s = "invalid ConstructorDeclaration"; break;
-			case 166: s = "invalid MethodDeclaration"; break;
-			case 167: s = "invalid OperatorDeclaration"; break;
+			case 165: s = "invalid MethodDeclaration"; break;
+			case 166: s = "invalid OperatorDeclaration"; break;
+			case 167: s = "invalid CastOperatorDeclaration"; break;
 			case 168: s = "invalid CastOperatorDeclaration"; break;
-			case 169: s = "invalid CastOperatorDeclaration"; break;
+			case 169: s = "invalid EventAccessorDeclarations"; break;
 			case 170: s = "invalid EventAccessorDeclarations"; break;
-			case 171: s = "invalid EventAccessorDeclarations"; break;
+			case 171: s = "invalid AccessorDeclarations"; break;
 			case 172: s = "invalid AccessorDeclarations"; break;
 			case 173: s = "invalid AccessorDeclarations"; break;
 			case 174: s = "invalid AccessorDeclarations"; break;
-			case 175: s = "invalid AccessorDeclarations"; break;
-			case 176: s = "invalid OverloadableOp"; break;
+			case 175: s = "invalid OverloadableOp"; break;
+			case 176: s = "invalid InterfaceMemberDeclaration"; break;
 			case 177: s = "invalid InterfaceMemberDeclaration"; break;
 			case 178: s = "invalid InterfaceMemberDeclaration"; break;
-			case 179: s = "invalid InterfaceMemberDeclaration"; break;
+			case 179: s = "invalid InterfaceAccessors"; break;
 			case 180: s = "invalid InterfaceAccessors"; break;
-			case 181: s = "invalid InterfaceAccessors"; break;
-			case 182: s = "invalid LocalVariableDeclaration"; break;
-			case 183: s = "invalid LocalVariableDeclarator"; break;
-			case 184: s = "invalid VariableInitializer"; break;
-			case 185: s = "invalid Attributes"; break;
-			case 186: s = "invalid Keyword"; break;
-			case 187: s = "invalid AttributeArguments"; break;
-			case 188: s = "invalid PrimitiveType"; break;
-			case 189: s = "invalid PointerOrArray"; break;
-			case 190: s = "invalid NonArrayType"; break;
-			case 191: s = "invalid TypeInRelExpr"; break;
-			case 192: s = "invalid PredefinedType"; break;
-			case 193: s = "invalid Statement"; break;
+			case 181: s = "invalid LocalVariableDeclaration"; break;
+			case 182: s = "invalid LocalVariableDeclarator"; break;
+			case 183: s = "invalid VariableInitializer"; break;
+			case 184: s = "invalid Attributes"; break;
+			case 185: s = "invalid Keyword"; break;
+			case 186: s = "invalid AttributeArguments"; break;
+			case 187: s = "invalid PrimitiveType"; break;
+			case 188: s = "invalid PointerOrArray"; break;
+			case 189: s = "invalid NonArrayType"; break;
+			case 190: s = "invalid TypeInRelExpr"; break;
+			case 191: s = "invalid PredefinedType"; break;
+			case 192: s = "invalid Statement"; break;
+			case 193: s = "invalid EmbeddedStatement"; break;
 			case 194: s = "invalid EmbeddedStatement"; break;
-			case 195: s = "invalid EmbeddedStatement"; break;
-			case 196: s = "invalid StatementExpression"; break;
-			case 197: s = "invalid ForEachStatement"; break;
-			case 198: s = "invalid GotoStatement"; break;
-			case 199: s = "invalid TryFinallyBlock"; break;
-			case 200: s = "invalid UsingStatement"; break;
-			case 201: s = "invalid ForInitializer"; break;
-			case 202: s = "invalid CatchClauses"; break;
+			case 195: s = "invalid StatementExpression"; break;
+			case 196: s = "invalid ForEachStatement"; break;
+			case 197: s = "invalid GotoStatement"; break;
+			case 198: s = "invalid TryFinallyBlock"; break;
+			case 199: s = "invalid UsingStatement"; break;
+			case 200: s = "invalid ForInitializer"; break;
+			case 201: s = "invalid CatchClauses"; break;
+			case 202: s = "invalid Unary"; break;
 			case 203: s = "invalid Unary"; break;
-			case 204: s = "invalid Unary"; break;
-			case 205: s = "invalid AssignmentOperator"; break;
-			case 206: s = "invalid SwitchLabel"; break;
+			case 204: s = "invalid AssignmentOperator"; break;
+			case 205: s = "invalid SwitchLabel"; break;
+			case 206: s = "invalid LambdaFunctionSignature"; break;
 			case 207: s = "invalid LambdaFunctionSignature"; break;
-			case 208: s = "invalid LambdaFunctionSignature"; break;
-			case 209: s = "invalid LambdaFunctionBody"; break;
-			case 210: s = "invalid FromClause"; break;
-			case 211: s = "invalid QueryBody"; break;
-			case 212: s = "invalid QueryBodyClause"; break;
-			case 213: s = "invalid JoinClause"; break;
+			case 208: s = "invalid LambdaFunctionBody"; break;
+			case 209: s = "invalid FromClause"; break;
+			case 210: s = "invalid QueryBody"; break;
+			case 211: s = "invalid QueryBodyClause"; break;
+			case 212: s = "invalid JoinClause"; break;
+			case 213: s = "invalid RelExpr"; break;
 			case 214: s = "invalid RelExpr"; break;
-			case 215: s = "invalid RelExpr"; break;
-			case 216: s = "invalid ShiftExpr"; break;
-			case 217: s = "invalid Primary"; break;
-			case 218: s = "invalid Literal"; break;
-			case 219: s = "invalid PrimitiveNamedLiteral"; break;
-			case 220: s = "invalid NewOperator"; break;
-			case 221: s = "invalid NewOperatorWithType"; break;
-			case 222: s = "invalid MemberDeclarator"; break;
-			case 223: s = "invalid ObjectOrCollectionInitializer"; break;
-			case 224: s = "invalid ElementInitializer"; break;
-			case 225: s = "invalid MemberInitializer"; break;
-			case 226: s = "invalid TypeParameterConstraintTag"; break;
+			case 215: s = "invalid ShiftExpr"; break;
+			case 216: s = "invalid Primary"; break;
+			case 217: s = "invalid Literal"; break;
+			case 218: s = "invalid PrimitiveNamedLiteral"; break;
+			case 219: s = "invalid NewOperator"; break;
+			case 220: s = "invalid NewOperatorWithType"; break;
+			case 221: s = "invalid MemberDeclarator"; break;
+			case 222: s = "invalid ObjectOrCollectionInitializer"; break;
+			case 223: s = "invalid ElementInitializer"; break;
+			case 224: s = "invalid MemberInitializer"; break;
+			case 225: s = "invalid TypeParameterConstraintTag"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

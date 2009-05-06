@@ -1,7 +1,7 @@
 // ================================================================================================
-// ConstMemberDeclarationNode.cs
+// StatementNode.cs
 //
-// Created: 2009.04.14, by Istvan Novak (DeepDiver)
+// Created: 2009.05.06, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
@@ -10,60 +10,63 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a const member declaration node.
+  /// This abstract node is intended to be the root of all C# language statements.
   /// </summary>
   // ================================================================================================
-  public class ConstMemberDeclarationNode : MemberDeclarationNode
+  public abstract class StatementNode : SyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConstMemberDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="StatementNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberDeclarationNode(Token start)
+    protected StatementNode(Token start)
       : base(start)
     {
-      ConstTags = new ConstMemberTagNodeCollection();
+      Labels = new LabelNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection const tags.
+    /// Gets or sets the labels belonging to this statement.
     /// </summary>
+    /// <value>The labels.</value>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberTagNodeCollection ConstTags { get; private set; }
+    public LabelNodeCollection Labels { get; private set; }
   }
 
   // ================================================================================================
   /// <summary>
-  /// This class represents a const member tag.
+  /// This node describes a label before a statement.
   /// </summary>
   // ================================================================================================
-  public class ConstMemberTagNode : SyntaxNode, IIdentifierSupport
+  public sealed class LabelNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConstMemberTagNode"/> class.
+    /// Initializes a new instance of the <see cref="LabelNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Label identifier token.</param>
+    /// <param name="colon">The colon token of the label.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberTagNode(Token start)
-      : base(start)
+    public LabelNode(Token identifier, Token colon)
+      : base(identifier)
     {
-      IdentifierToken = start;
+      IdentifierToken = identifier;
+      ColonToken = colon;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the identifier token.
+    /// Gets the identifier token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; internal set; }
+    public Token IdentifierToken { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the identifier name.
+    /// Gets the alias identifier.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public string Identifier
@@ -86,57 +89,37 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the equal token.
+    /// Gets or sets the colon token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token EqualToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the expression belonging to this const member.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public Token ColonToken { get; private set; }
   }
 
   // ================================================================================================
   /// <summary>
-  /// This class represents a const member continuation tag.
+  /// This class represents a collection of label nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class ConstMemberContinuationTagNode : ConstMemberTagNode, IContinuationTag
+  public sealed class LabelNodeCollection : ImmutableCollection<LabelNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConstMemberContinuationTagNode"/> class.
+    /// Adds the label to the first position of the collection..
     /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="tag">The tag to obtain proerties form.</param>
+    /// <param name="labelNode">The label node to add.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberContinuationTagNode(Token separator, ConstMemberTagNode tag)
-      : base(separator)
+    public void AddLabel(LabelNode labelNode)
     {
-      SeparatorToken = separator;
-      IdentifierToken = tag.IdentifierToken;
-      EqualToken = tag.EqualToken;
-      Expression = tag.Expression;
-      Terminate(tag.TerminatingToken);
+      Insert(0, labelNode);
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the token separating the continuation tag from the preceding tag.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; internal set; }
   }
 
   // ================================================================================================
   /// <summary>
-  /// This class declares a collection of const member tags.
+  /// This class represents a collection of statements.
   /// </summary>
   // ================================================================================================
-  public sealed class ConstMemberTagNodeCollection : ImmutableCollection<ConstMemberTagNode>
+  public sealed class StatementNodeCollection : ImmutableCollection<StatementNode>
   {
   }
 }

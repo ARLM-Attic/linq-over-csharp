@@ -206,7 +206,7 @@ public partial class CSharpSyntaxParser
     /// <summary>Tokens representing type shortcuts</summary>
     private static BitArray typeKW =
       NewSet(_char, _bool, _object, _string, _sbyte, _byte, _short,
-             _ushort, _int, _uint, _long, _ulong, _float, _double, _decimal, _var);
+             _ushort, _int, _uint, _long, _ulong, _float, _double, _decimal);
 
     /// <summary>
     /// Tokens representing unary header tokens

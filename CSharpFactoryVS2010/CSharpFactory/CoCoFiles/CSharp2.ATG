@@ -161,7 +161,6 @@ TOKENS
   unsafe     = "unsafe".
   ushort     = "ushort".
   usingKW    = "using".
-  var        = "var".
   virtual    = "virtual".
   void       = "void".
   volatile   = "volatile".
@@ -931,7 +930,8 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
     ")" 
     (. finNode.CloseParenthesis = t; .)
     ( 
-      Block<dd> | ";" 
+      (. BlockStatementNode blockNode; .)
+      Block<dd, out blockNode> | ";" 
     )
     (. 
        dd.Terminate(t);
@@ -1138,7 +1138,11 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
       ) "("
         CurrentArgumentList<cd.BaseArguments, null>
         ")"
-    ] ( Block<cd> | ";" )   (. 
+    ] ( 
+        (. BlockStatementNode blockNode; .)
+        Block<cd, out blockNode> 
+      | ";" 
+      )   (. 
                                td.AddMember(cd); 
                                cd.Terminate(t);
                             .)
@@ -1237,7 +1241,9 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
     (. md.AddTypeParameterConstraint(constraint); .)
   } 
   ( 
-    Block<md>                                       (. 
+    (. BlockStatementNode blockNode; .)
+    Block<md, out blockNode>
+                                           (. 
                                                        if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
                                                        md.HasBody = true;
                                                     .)
@@ -1275,7 +1281,11 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
     "("                                 
       [ FormalParameterList<cod.FormalParameters> ]   
     ")"                                 
-    ( Block<cod> | ";" )                (. 
+    ( 
+      (. BlockStatementNode blockNode; .)
+      Block<cod, out blockNode> 
+    | ";" 
+    )                (. 
                                            td.AddMember(cod); 
                                            cod.Terminate(t);
                                         .)
@@ -1303,7 +1313,11 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
   "("                              (. od.Name = op.ToString(); .)
     [ FormalParameterList<od.FormalParameters> ]
   ")"
-  ( Block<od> | ";" )              (. 
+  ( 
+    (. BlockStatementNode blockNode; .)
+    Block<od, out blockNode> 
+  | ";" 
+  )              (. 
                                       td.AddMember(od); 
                                       od.Terminate(t);
                                    .)
@@ -1447,15 +1461,22 @@ InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDecla
 // Declares a local variable within a block.
 // +block: Block the variable is declared within.
 // ------------------------------------------------------------------------------------
-LocalVariableDeclaration<IBlockOwner block> (. 
-                                               TypeReference typeRef = null; 
-                                               bool isImplicit = false; 
-                                            .)
+LocalVariableDeclaration<IBlockOwner block> 
+  (. 
+     TypeReference typeRef = null; 
+     bool isImplicit = false;
+     TypeOrNamespaceNode typeNode;
+  .)
 =
   (
-    (. TypeOrNamespaceNode typeNode; .)
+    IF (IsVar())
+    ident
+    (. 
+       isImplicit = true; 
+       typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+    .)
+  |
     Type<out typeRef, false, out typeNode>
-    | "var"                   (. isImplicit = true; .)
   )
   LocalVariableDeclarator<block, typeRef, isImplicit>
   { "," LocalVariableDeclarator<block, typeRef, isImplicit> }
@@ -1678,7 +1699,9 @@ AccessorDeclarations<PropertyDeclaration prop>
   | ident                             (. Error("UNDEF", la, "set or get expected"); .)
   ) 
   (
-    Block<accessor>                   (. accessor.HasBody = true; .)
+    (. BlockStatementNode blockNode; .)
+    Block<accessor, out blockNode>
+                       (. accessor.HasBody = true; .)
   | ";"                               (. accessor.HasBody = false; .)
   )                                   (. 
                                          accessor.Terminate(t);
@@ -1708,7 +1731,8 @@ AccessorDeclarations<PropertyDeclaration prop>
     | ident                           (. Error("UNDEF", la, "set or get expected"); .)
     ) 
     (
-      Block<accessor>                 (. accessor.HasBody = true; .)
+      (. BlockStatementNode blockNode; .)
+      Block<accessor, out blockNode>                 (. accessor.HasBody = true; .)
     | ";"                             (. accessor.HasBody = false; .)
     )                                 (. 
                                          accessor.Terminate(t);
@@ -1743,7 +1767,9 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
                                           (. CurrentElement = accessor; .)
   | ident                                 (. Error("UNDEF", la, "add or remove expected"); .)
   ) 
-  Block<accessor>                         (. 
+  (. BlockStatementNode blockNode; .)
+  Block<accessor, out blockNode>
+                           (. 
                                              accessor.Terminate(t);
                                              accessor.HasBody = true;
                                              accessor.SetModifiers(am.Value); 
@@ -1772,7 +1798,8 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
                                           .)
     | ident                               (. Error("UNDEF", la, "add or remove expected"); .)
     ) 
-    Block<accessor>                       (. 
+    Block<accessor, out blockNode>
+                           (. 
                                              accessor.Terminate(t);
                                              accessor.HasBody = true;
                                              accessor.SetModifiers(am.Value); 
@@ -2449,11 +2476,27 @@ TypeName<out TypeReference typeRef, out TypeOrNamespaceNode resultNode>
 // Defines a statement.
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
-Statement<IBlockOwner block>
+Statement<IBlockOwner block, out StatementNode stmtNode>
+  (. 
+     stmtNode = null; 
+  .)
 = 
-  IF (la.kind == _ident && Peek(1).kind == _colon) ident ":" Statement<block>
-  | ConstStatement<block>
-  | IF (IsLocalVarDecl()) LocalVariableDeclaration<block> ";"
+    IF (la.kind == _ident && Peek(1).kind == _colon) 
+    (. Token identifier; .)
+    ident 
+    (. identifier = t; .)
+    ":" 
+    (. var label = new LabelNode(identifier, t); .)
+    Statement<block, out stmtNode>
+    (. 
+       if (stmtNode != null)
+       {
+         stmtNode.Labels.AddLabel(label);
+       }
+    .)
+  | ConstStatement<block, out stmtNode>
+  | IF (IsLocalVarDecl()) 
+    LocalVariableDeclaration<block> ";"
   | EmbeddedStatement<block>
 .
 
@@ -2465,7 +2508,10 @@ EmbeddedStatement<IBlockOwner block>
 =   
     // --- Block nested into a statement
                     (. BlockStatement embedded = new BlockStatement(t, this, block); .)
-    Block<embedded> (. if (block != null) block.Add(embedded); .)
+
+    (. BlockStatementNode blockNode; .)
+    Block<embedded, out blockNode> 
+    (. if (block != null) block.Add(embedded); .)
   | EmptyStatement<block>
   | CheckedBlock<block>
   | UncheckedBlock<block>
@@ -2489,13 +2535,26 @@ EmbeddedStatement<IBlockOwner block>
   | FixedStatement<block>
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Defines a block of statements.
-// +block: Block holding the statements within.
-// ------------------------------------------------------------------------------------
-Block<IBlockOwner block> (. CurrentElement = block.Owner as LanguageElement; .)
+//   block: Block holding the statements within.
+//   blockNode: Block node holding statements.
+// ------------------------------------------------------------------------------------------------
+Block<IBlockOwner block, out BlockStatementNode blockNode> 
+  (. 
+     CurrentElement = block.Owner as LanguageElement; 
+     StatementNode stmtNode;
+     blockNode = null;
+  .)
 =
-  "{" { Statement<block> } "}"
+  "{" 
+  (. blockNode = new BlockStatementNode(t); .)
+  { 
+    Statement<block, out stmtNode> 
+    (. if (stmtNode != null) blockNode.Statements.Add(stmtNode); .)
+  } 
+  "}"
+  (. blockNode.Terminate(t); .)
 .
 
 
@@ -2525,32 +2584,68 @@ SwitchStatement<IBlockOwner block>
 // Defines a constant statement.
 // +block: Block holding the statements within.
 // ------------------------------------------------------------------------------------
-ConstStatement<IBlockOwner block>
-                         (. ExpressionNode exprNode; .)
+ConstStatement<IBlockOwner block, out StatementNode stmtNode>
+  (. ExpressionNode exprNode; .)
 =
-  "const"                (. TypeReference typeRef; .)
-                         (. ConstStatement cs = new ConstStatement(t, this, block); .)
-                         (. CurrentElement = cs; .)
-  (. TypeOrNamespaceNode typeNode; .)
+  "const"                
+  (. 
+     TypeReference typeRef;
+     ConstStatement cs = new ConstStatement(t, this, block); 
+     CurrentElement = cs;
+     // ::: 
+     var csNode = new ConstStatementNode(t);
+     stmtNode = csNode;
+     TypeOrNamespaceNode typeNode;
+  .)
   Type<out typeRef, false, out typeNode> 
-  ident                  (. cs.Name = t.val; .)
-  "="                    (. Expression expr; .)
+  (. csNode.TypeName = typeNode; .)
+  ident
+  (. 
+     var cmTag = new ConstMemberTagNode(t);
+     cs.Name = t.val; 
+  .)
+  "="                    
+  (. 
+     cmTag.EqualToken = t;
+     Expression expr; 
+  .)
   Expression<out expr, out exprNode>   
-                         (. cs.Expression = expr; .)
-                         (. 
-                            if (block != null) block.Add(cs); 
-                            cs.Terminate(t);
-                         .)
-  { ","                  (. cs = new ConstStatement(t, this, block); .)
-    ident                (. cs.Name = t.val; .)
+  (. 
+     cs.Expression = expr;
+     if (block != null) block.Add(cs); 
+     cs.Terminate(t);
+     // :::
+     cmTag.Expression = exprNode;
+     cmTag.Terminate(t);
+     csNode.ConstTags.Add(cmTag);
+  .)
+  { 
+    ","
+    (. 
+       cs = new ConstStatement(t, this, block); 
+       var separator = t;
+    .)
+    ident                
+    (. 
+       var cmcTag = new ConstMemberTagNode(t);
+       cs.Name = t.val; 
+    .)
     "=" 
+    (. cmcTag.EqualToken = t; .)
     Expression<out expr, out exprNode> 
-                         (. cs.Expression = expr; .)
-                         (. 
-                            if (block != null) block.Add(cs); 
-                            cs.Terminate(t);
-                         .)
-  } ";".                 
+    (. 
+       cs.Expression = expr;
+       if (block != null) block.Add(cs); 
+       cs.Terminate(t);
+       // :::
+       cmcTag.Expression = exprNode;
+       cmcTag.Terminate(t);
+       csNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, cmTag));
+    .)
+  } 
+  ";"
+  (. csNode.Terminate(t); .)
+.                 
 
 // ------------------------------------------------------------------------------------
 // Defines an empty statement (";").
@@ -2576,7 +2671,8 @@ CheckedBlock<IBlockOwner block>
                    CurrentElement = cb;
                    if (block != null) block.Add(cb);
                 .)
-    Block<cb>   (. cb.Terminate(t); .)
+    (. BlockStatementNode blockNode; .)
+    Block<cb, out blockNode>   (. cb.Terminate(t); .)
   )
 .
 
@@ -2593,7 +2689,8 @@ UncheckedBlock<IBlockOwner block>
                    CurrentElement = ucb;
                    if (block != null) block.Add(ucb);
                 .)
-    Block<ucb>  (. ucb.Terminate(t); .)
+    (. BlockStatementNode blockNode; .)
+    Block<ucb, out blockNode>  (. ucb.Terminate(t); .)
   )
 .
 
@@ -2608,7 +2705,8 @@ UnsafeBlock<IBlockOwner block>
               CurrentElement = usb;
               if (block != null) block.Add(usb);
            .)
-  Block<usb> (. usb.Terminate(t); .)
+   (. BlockStatementNode blockNode; .)
+   Block<usb, out blockNode> (. usb.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2700,11 +2798,14 @@ ForEachStatement<IBlockOwner block>
                                 (. CurrentElement = fes; .)
   "("                           (. if (block != null) block.Add(fes); .)
                                 (. TypeReference typeRef; .)
-    (         
+    ( 
+      IF (IsVar())
+      ident
+      (. fes.Variable.IsImplicit = true; .)
+    |        
       (. TypeOrNamespaceNode typeNode; .)
       Type<out typeRef, false, out typeNode>
                                 (. fes.Variable.ResultingType = typeRef; .)
-      | "var"                   (. fes.Variable.IsImplicit = true; .)
     )
     ident                       (. fes.Variable.Name = t.val; .)
     "in"                        (. Expression expr; .)
@@ -2771,15 +2872,17 @@ TryFinallyBlock<IBlockOwner block>
                    ts.CreateTryBlock(t);
                    if (block != null) block.Add(ts);
                 .)
-  Block<ts.TryBlock> 
+  (. BlockStatementNode blockNode; .)
+  Block<ts.TryBlock, out blockNode> 
   ( 
     CatchClauses<ts>
     [ 
       "finally" (. ts.CreateFinallyBlock(t); .) 
-      Block<ts.FinallyBlock> (. ts.FinallyBlock.Terminate(t); .)
+      Block<ts.FinallyBlock, out blockNode> (. ts.FinallyBlock.Terminate(t); .)
     ] 
-  | "finally" (. ts.CreateFinallyBlock(t); .) 
-    Block<ts.FinallyBlock>   (. ts.FinallyBlock.Terminate(t); .)
+  | "finally" (. ts.CreateFinallyBlock(t); .)
+    Block<ts.FinallyBlock, out blockNode>
+    (. ts.FinallyBlock.Terminate(t); .)
   )                          (. ts.Terminate(t); .) 
 .    
 
@@ -2935,8 +3038,13 @@ StatementExpression<IBlockOwner block>
   (. ExpressionStatement es = new ExpressionStatement(t, this, block); .)
                                         (. CurrentElement = es; .)
                                         (. es.Expression = expr; .)
-  ( (. AssignmentOperator asgn; .)
-    AssignmentOperator<out asgn>        (. es.Expression = asgn; .)
+  ( 
+    (. 
+       BinaryOperator asgn; 
+       BinaryOperatorNode asgnNode; 
+    .)
+    AssignmentOperator<out asgn, out asgnNode>
+    (. es.Expression = asgn; .)
                                         (. asgn.LeftOperand = expr; .)
                                         (. Expression rightExpr; .)
     Expression<out rightExpr, out exprNode>
@@ -2946,25 +3054,77 @@ StatementExpression<IBlockOwner block>
                                         (. es.Terminate(t); .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Defines assignment operators.
-// +operateor: Assignement operator 
-// ------------------------------------------------------------------------------------
-AssignmentOperator<out AssignmentOperator op> (. op = null; .)
+//   op: Assignement operator 
+//   opNode: Assignement operator node
+// ------------------------------------------------------------------------------------------------
+AssignmentOperator<out BinaryOperator op, out BinaryOperatorNode opNode> 
+  (. 
+     op = null; 
+     opNode = null;
+  .)
 =
-    "="     (. op = new AssignmentOperator(t, this); .)
-  | "+="    (. op = new PlusAssignmentOperator(t, this); .)
-  | "-="    (. op = new MinusAssignmentOperator(t, this); .)
-  | "*="    (. op = new MultiplyAssignmentOperator(t, this); .)
-  | "/="    (. op = new DivideAssignmentOperator(t, this); .)
-  | "%="    (. op = new ModuloAssignmentOperator(t, this); .)
-  | "&="    (. op = new AndAssignmentOperator(t, this); .)
-  | "|="    (. op = new OrAssignmentOperator(t, this); .)
-  | "^="    (. op = new XorAssignmentOperator(t, this); .)
-  | "<<="   (. op = new LeftShiftAssignmentOperator(t, this); .)
-  | ">"     (. int pos = t.pos; .)
-    ">="    (. if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment"); .)
-            (. op = new RightShiftAssignmentOperator(t, this); .)
+    "="     
+    (. 
+       op = new AssignmentOperator(t, this); 
+       opNode = new AssignmentOperatorNode(t); 
+    .)
+  | "+="    
+    (. 
+       op = new PlusAssignmentOperator(t, this); 
+       opNode = new PlusAssignmentOperatorNode(t); 
+    .)
+  | "-="    
+    (. 
+       op = new MinusAssignmentOperator(t, this); 
+       opNode = new MinusAssignmentOperatorNode(t); 
+    .)
+  | "*="    
+    (. 
+       op = new MultiplyAssignmentOperator(t, this); 
+       opNode = new MultiplyAssignmentOperatorNode(t); 
+    .)
+  | "/="    
+    (. 
+       opNode = new DivideAssignmentOperatorNode(t); 
+    .)
+  | "%="    
+    (. 
+       op = new ModuloAssignmentOperator(t, this); 
+       opNode = new ModuloAssignmentOperatorNode(t); 
+    .)
+  | "&="    
+    (. 
+       op = new AndAssignmentOperator(t, this); 
+       opNode = new AndAssignmentOperatorNode(t); 
+    .)
+  | "|="    
+    (. 
+       op = new OrAssignmentOperator(t, this); 
+       opNode = new OrAssignmentOperatorNode(t); 
+    .)
+  | "^="    
+    (. 
+       op = new XorAssignmentOperator(t, this); 
+       opNode = new XorAssignmentOperatorNode(t); 
+    .)
+  | "<<="   
+    (. 
+       op = new LeftShiftAssignmentOperator(t, this); 
+       opNode = new LeftShiftAssignmentOperatorNode(t); 
+    .)
+  | ">"     
+    (. 
+       int pos = t.pos; 
+       var start = t;
+    .)
+    ">="    
+    (. 
+       if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment");
+       op = new RightShiftAssignmentOperator(t, this); 
+       opNode = new RightShiftAssignmentOperatorNode(start, t); 
+    .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2988,10 +3148,11 @@ SwitchSection<SwitchStatement sws>
                            else section.Labels.Add(expr);
                           .)
   }
-  Statement<section> 
+  (. StatementNode stmtNode; .)
+  Statement<section, out stmtNode> 
   { 
     IF (IsNoSwitchLabelOrRBrace()) 
-    Statement<section> 
+    Statement<section, out stmtNode> 
   }                       (. sws.Terminate(t); .)
 .
 
@@ -3038,7 +3199,8 @@ CatchClauses<TryStatement tryStm>
   "catch"                   (. CatchClause cc = tryStm.CreateCatchClause(t); .)    
                             (. CurrentElement = cc; .)  
   (                         
-    Block<cc>
+    (. BlockStatementNode blockNode; .)
+    Block<cc, out blockNode>
   | 
     "("                     (. TypeReference typeRef; .)
     ClassType<out typeRef, out typeNode>  (. cc.ExceptionType = typeRef; .)
@@ -3046,7 +3208,9 @@ CatchClauses<TryStatement tryStm>
       ident                 (. cc.Name = t.val; .)
                             (. cc.CreateInstanceVariable(typeRef, t.val); .)
     ] 
-    ")" Block<cc>           (. cc.Terminate(t); .)
+    ")" 
+    (. BlockStatementNode blockNode; .)
+    Block<cc, out blockNode>           (. cc.Terminate(t); .)
     [ CatchClauses<tryStm> ]
   )
 .
@@ -3115,7 +3279,9 @@ LambdaFunctionBody<LambdaExpression lambda>
   (                         (. Expression expr; .)
     Expression<out expr, out exprNode>    
                             (. lambda.Expression = expr; .)
-    |Block<lambda>
+  |
+    (. BlockStatementNode blockNode; .)
+    Block<lambda, out blockNode>
   )
 .
 
@@ -3342,25 +3508,51 @@ Expression<out Expression expr, out ExpressionNode exprNode>
   Unary<out leftExpr, out leftExprNode>
   (
     IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
-                                  (. AssignmentOperator asgn; .)
-    AssignmentOperator<out asgn>  (. Expression rightExpr; .)
-    Expression<out rightExpr, out exprNode>
-                                  (. asgn.RightOperand = rightExpr; .)
-                                  (. asgn.LeftOperand = leftExpr; .)
-                                  (. expr = asgn; .)
-  | (. BinaryOperator simpleExpr; .)
-    NullCoalescingExpr<out simpleExpr, out ncsNode> 
-                                  (. 
-                                     if (simpleExpr == null) 
-                                     {
-                                       expr = leftExpr;
-                                     }
-                                     else
-                                     {
-                                       simpleExpr.LeftMostNonNull.LeftOperand = leftExpr;
-                                       expr = simpleExpr;
-                                     }
-                                  .)
+    (. 
+       BinaryOperator asgn; 
+       BinaryOperatorNode asgnNode; 
+    .)
+    AssignmentOperator<out asgn, out asgnNode>  
+    (. 
+       Expression rightExpr; 
+       ExpressionNode rightExprNode;
+    .)
+    Expression<out rightExpr, out rightExprNode>
+    (. 
+       asgn.RightOperand = rightExpr;
+       asgn.LeftOperand = leftExpr;
+       expr = asgn; 
+       // :::
+       asgnNode.RightOperand = rightExprNode;
+       asgnNode.LeftOperand = leftExprNode;
+       exprNode = asgnNode;
+    .)
+  | (. 
+       BinaryOperator ncExpr; 
+       BinaryOperatorNode ncNode;
+    .)
+    NullCoalescingExpr<out ncExpr, out ncNode> 
+    (. 
+       if (ncExpr == null) 
+       {
+         expr = leftExpr;
+       }
+       else
+       {
+         ncExpr.LeftMostNonNull.LeftOperand = leftExpr;
+         expr = ncExpr;
+       }
+       // :::
+       if (ncNode == null)
+       {
+         exprNode = leftExprNode;
+       }
+       else
+       {
+         ncNode.LeftmostNonNull.LeftOperand = leftExprNode;
+         exprNode = ncNode;
+       }
+    .)
     [ 
       "?"                            
       (. 
@@ -4732,7 +4924,8 @@ AnonymousDelegate<out Expression expr>
     ] 
     ")" 
   ] 
-  Block<adop>           (. expr = adop; .)
+  (. BlockStatementNode blockNode; .)
+  Block<adop, out blockNode>           (. expr = adop; .)
                         (. adop.Terminate(t); .)
 .
 

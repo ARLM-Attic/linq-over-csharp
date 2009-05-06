@@ -339,7 +339,7 @@ namespace CSharpFactory.ParserFiles
     {
       Token pt = Lookahead;
       Scanner.ResetPeek();
-      return IsType(ref pt) && pt.kind == _ident;
+      return (IsType(ref pt) || pt.val == "var") && pt.kind == _ident;
     }
 
     // --------------------------------------------------------------------------------
@@ -459,6 +459,21 @@ namespace CSharpFactory.ParserFiles
       return typeKW[pt1.kind] &&
               (pt2.kind == _rpar ||
               (pt2.kind == _question && Scanner.Peek().kind == _rpar));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token is "var"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsVar()
+    {
+      if (Lookahead.kind != _ident || Lookahead.val != "var") return false;
+      var pt = Peek(1);
+      return pt.val != "." && pt.val != "::";
     }
 
     // --------------------------------------------------------------------------------
