@@ -1,47 +1,35 @@
 // ================================================================================================
-// LocalVariableNode.cs
+// ExpressionInitializerNode.cs
 //
 // Created: 2009.05.06, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.ParserFiles;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable declaration
+  /// This class represents an expression initializer.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public sealed class ExpressionInitializerNode : VariableInitializerNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
+    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
-      : base(typeNode.StartToken)
+    public ExpressionInitializerNode(Token start)
+      : base(start)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type.
+    /// Gets or sets the expression of the initializer.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is an implicit type declaration.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
-    {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.val == "var"; }
-    }
-
+    public ExpressionNode Expression { get; private set; }
   }
 }

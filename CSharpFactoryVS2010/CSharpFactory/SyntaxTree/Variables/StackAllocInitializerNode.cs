@@ -1,27 +1,43 @@
 // ================================================================================================
-// LocalVariableNode.cs
+// StackAllocInitializerNode.cs
 //
 // Created: 2009.05.06, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.ParserFiles;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable declaration
+  /// This class represents a "stackalloc" initializer.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public sealed class StackAllocInitializerNode : VariableInitializerNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
+    /// Initializes a new instance of the <see cref="StackAllocInitializerNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
-      : base(typeNode.StartToken)
+    public StackAllocInitializerNode(Token start)
+      : base(start)
     {
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the "stackalloc" token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token StackAllocToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the open square token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token OpenSquareToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,16 +48,9 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is an implicit type declaration.
+    /// Gets or sets the close square token.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
-    {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.val == "var"; }
-    }
-
+    public Token CloseSquareToken { get; internal set; }
   }
 }

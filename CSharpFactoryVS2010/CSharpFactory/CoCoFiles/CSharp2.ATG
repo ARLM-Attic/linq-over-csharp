@@ -1461,11 +1461,12 @@ InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDecla
 // Declares a local variable within a block.
 // +block: Block the variable is declared within.
 // ------------------------------------------------------------------------------------
-LocalVariableDeclaration<IBlockOwner block> 
+LocalVariableDeclaration<IBlockOwner block, out LocalVariableNode varNode> 
   (. 
      TypeReference typeRef = null; 
      bool isImplicit = false;
-     TypeOrNamespaceNode typeNode;
+     TypeOrNamespaceNode typeNode = null;
+     varNode = null;
   .)
 =
   (
@@ -1478,6 +1479,7 @@ LocalVariableDeclaration<IBlockOwner block>
   |
     Type<out typeRef, false, out typeNode>
   )
+  (. if (typeNode != null) varNode = new LocalVariableNode(typeNode); .)
   LocalVariableDeclarator<block, typeRef, isImplicit>
   { "," LocalVariableDeclarator<block, typeRef, isImplicit> }
 .
@@ -1498,7 +1500,8 @@ LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplici
         (. loc.Variable.IsImplicit = isImplicit; .)
         (. if (block != null) block.Statements.Add(loc); .)       
   [
-    "=" 
+    "="
+    (. var start = t; .) 
     (   (. Initializer init; .)
       VariableInitializer<out init> (. loc.Variable.Initializer = init; .)
       | "stackalloc" 
@@ -1545,11 +1548,20 @@ VariableInitializer<out Initializer init>
 // ------------------------------------------------------------------------------------
 ArrayInitializer<out ArrayInitializer init> (. init = new ArrayInitializer(t, this); .)
 = (. Initializer arrayInit = null; .)
-  "{" [ 
-  VariableInitializer<out arrayInit> (. init.Initializers.Add(arrayInit); .)
-  {IF (NotFinalComma()) ","
-  VariableInitializer<out arrayInit> (. init.Initializers.Add(arrayInit); .)
-  } [ "," ] ] "}" (. init.Terminate(t); .)
+  "{" 
+  [ 
+    VariableInitializer<out arrayInit> 
+    (. init.Initializers.Add(arrayInit); .)
+    {
+      IF (NotFinalComma()) ","
+      VariableInitializer<out arrayInit> 
+      (. init.Initializers.Add(arrayInit); .)
+    } 
+    [ 
+      "," 
+    ] 
+  ] 
+  "}" (. init.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2496,7 +2508,8 @@ Statement<IBlockOwner block, out StatementNode stmtNode>
     .)
   | ConstStatement<block, out stmtNode>
   | IF (IsLocalVarDecl()) 
-    LocalVariableDeclaration<block> ";"
+    (. LocalVariableNode varNode; .)
+    LocalVariableDeclaration<block, out varNode> ";"
   | EmbeddedStatement<block>
 .
 
@@ -2917,7 +2930,9 @@ UsingStatement<IBlockOwner block>
            .)
   "(" 
   (
-    IF (IsLocalVarDecl()) LocalVariableDeclaration<us>  
+    IF (IsLocalVarDecl()) 
+    (. LocalVariableNode varNode; .)
+    LocalVariableDeclaration<us, out varNode>  
   |                             (. Expression expr; .)
     Expression<out expr, out exprNode>        
                                 (. us.ResourceExpression = expr; .)
@@ -3176,7 +3191,9 @@ SwitchLabel<out Expression expr>
 // ------------------------------------------------------------------------------------
 ForInitializer<ForStatement fs>
 =
-  IF (IsLocalVarDecl()) LocalVariableDeclaration<fs>
+    IF (IsLocalVarDecl()) 
+    (. LocalVariableNode varNode; .)
+    LocalVariableDeclaration<fs, out varNode>
   | StatementExpression<fs.InitializerBlock> { "," StatementExpression<fs.InitializerBlock> }
 .
 

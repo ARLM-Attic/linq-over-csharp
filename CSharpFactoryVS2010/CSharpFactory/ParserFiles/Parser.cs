@@ -2416,10 +2416,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 	}
 
-	void LocalVariableDeclaration(IBlockOwner block) {
+	void LocalVariableDeclaration(IBlockOwner block, out LocalVariableNode varNode) {
 		TypeReference typeRef = null; 
 		bool isImplicit = false;
-		TypeOrNamespaceNode typeNode;
+		TypeOrNamespaceNode typeNode = null;
+		varNode = null;
 		
 		if (IsVar()) {
 			Expect(1);
@@ -2429,6 +2430,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (StartOf(11)) {
 			Type(out typeRef, false, out typeNode);
 		} else SynErr(181);
+		if (typeNode != null) varNode = new LocalVariableNode(typeNode); 
 		LocalVariableDeclarator(block, typeRef, isImplicit);
 		while (la.kind == 87) {
 			Get();
@@ -3120,7 +3122,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 17) {
 			ConstStatement(block, out stmtNode);
 		} else if (IsLocalVarDecl()) {
-			LocalVariableDeclaration(block);
+			LocalVariableNode varNode; 
+			LocalVariableDeclaration(block, out varNode);
 			Expect(114);
 		} else if (StartOf(24)) {
 			EmbeddedStatement(block);
@@ -3557,7 +3560,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		Expect(98);
 		if (IsLocalVarDecl()) {
-			LocalVariableDeclaration(us);
+			LocalVariableNode varNode; 
+			LocalVariableDeclaration(us, out varNode);
 		} else if (StartOf(21)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
@@ -3649,7 +3653,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void ForInitializer(ForStatement fs) {
 		if (IsLocalVarDecl()) {
-			LocalVariableDeclaration(fs);
+			LocalVariableNode varNode; 
+			LocalVariableDeclaration(fs, out varNode);
 		} else if (StartOf(13)) {
 			StatementExpression(fs.InitializerBlock);
 			while (la.kind == 87) {

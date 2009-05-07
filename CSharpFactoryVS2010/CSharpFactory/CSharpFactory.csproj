@@ -112,8 +112,13 @@
       <DependentUpon>ErrorCodes.resx</DependentUpon>
     </Compile>
     <Compile Include="SemanticsTree\CompilationMessageNode.cs" />
+    <Compile Include="SemanticsTree\CompilationModel\CompilationEntity.cs" />
+    <Compile Include="SemanticsTree\CompilationModel\CompilationModel.cs" />
+    <Compile Include="SemanticsTree\CompilationModel\NamespaceItem.cs" />
+    <Compile Include="SemanticsTree\CompilationModel\TypeDeclarationItem.cs" />
     <Compile Include="SemanticsTree\ISemanticsNodeCollection.cs" />
     <Compile Include="SemanticsTree\ISemanticsTree.cs" />
+    <Compile Include="SemanticsTree\ReferenceItems\SyntaxNodeReference.cs" />
     <Compile Include="SemanticsTree\SemanticsNode.cs" />
     <Compile Include="SemanticsTree\SemanticsTree.cs" />
     <Compile Include="Semantics\TypeAbstraction\ArrayType.cs" />
@@ -448,7 +453,11 @@
     <Compile Include="SyntaxTree\Types\TypeParameterConstraintNode.cs" />
     <Compile Include="SyntaxTree\Types\TypeParameters.cs" />
     <Compile Include="SyntaxTree\Types\TypeWithMembersDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Variables\ExpressionInitializerNode.cs" />
     <Compile Include="SyntaxTree\Variables\LocalVariableNode.cs" />
+    <Compile Include="SyntaxTree\Variables\LocalVariableTagNode.cs" />
+    <Compile Include="SyntaxTree\Variables\StackAllocInitializerNode.cs" />
+    <Compile Include="SyntaxTree\Variables\VariableInitializerNode.cs" />
     <Compile Include="Utility\EventArguments.cs" />
     <Compile Include="Utility\ImmutableChangedException.cs" />
     <Compile Include="Utility\IReadOnlySupport.cs" />
