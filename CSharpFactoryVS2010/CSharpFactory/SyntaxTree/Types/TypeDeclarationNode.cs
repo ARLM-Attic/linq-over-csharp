@@ -3,7 +3,6 @@
 //
 // Created: 2009.04.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
@@ -92,14 +91,5 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public MemberDeclarationNodeCollection MemberDeclarations { get; private set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This type represents a collection of type declaration nodes.
-  /// </summary>
-  // ================================================================================================
-  public sealed class TypeDeclarationNodeCollection : ImmutableCollection<TypeDeclarationNode>
-  {
   }
 }

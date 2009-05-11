@@ -17,13 +17,13 @@ namespace CSharpFactory.Semantics
     /// Gets the collection of errors belonging to the semantics tree.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    CompilationMessages Errors { get; }
+    CompilationMessageCollection Errors { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the collection of warnings belonging to the semantics tree.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    CompilationMessages Warnings { get; }
+    CompilationMessageCollection Warnings { get; }
   }
 }

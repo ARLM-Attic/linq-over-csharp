@@ -40,42 +40,4 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public ArgumentNodeCollection Arguments { get; private set; }
   }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a method invocation operator node.
-  /// </summary>
-  // ================================================================================================
-  public sealed class MethodInvocationOperatorNode : InvocationOperatorNode
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MethodInvocationOperatorNode"/> class.
-    /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    // ----------------------------------------------------------------------------------------------
-    public MethodInvocationOperatorNode(Token start)
-      : base(start)
-    {
-    }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents an array indexer invocation operator node.
-  /// </summary>
-  // ================================================================================================
-  public sealed class ArrayIndexerInvocationOperatorNode : InvocationOperatorNode
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayIndexerInvocationOperatorNode"/> class.
-    /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    // ----------------------------------------------------------------------------------------------
-    public ArrayIndexerInvocationOperatorNode(Token start)
-      : base(start)
-    {
-    }
-  }
 }

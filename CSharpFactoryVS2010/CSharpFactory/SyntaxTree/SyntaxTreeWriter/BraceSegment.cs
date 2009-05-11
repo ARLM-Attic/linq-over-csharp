@@ -104,14 +104,14 @@ namespace CSharpFactory.Syntax
     {
       switch (style)
       {
-        case BracingStyle.NextLineBSD:
+        case BracingStyle.NextLineBsd:
           serializer.ForceNewLine();
           serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           serializer.IncrementIndentation();
           break;
-        case BracingStyle.NextLineGNU:
+        case BracingStyle.NextLineGnu:
           serializer.ForceNewLine();
           serializer.IncrementIndentation();
           serializer.ApplyIndentation();
@@ -153,13 +153,13 @@ namespace CSharpFactory.Syntax
     {
       switch (style)
       {
-        case BracingStyle.NextLineBSD:
+        case BracingStyle.NextLineBsd:
           serializer.DecrementIndentation();
           serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           break;
-        case BracingStyle.NextLineGNU:
+        case BracingStyle.NextLineGnu:
           serializer.DecrementIndentation();
           serializer.ApplyIndentation();
           serializer.Append(Token);

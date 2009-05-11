@@ -163,7 +163,7 @@ namespace CSharpFactory.ProjectModel
     /// Gets the list of errors.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CompilationMessages Errors 
+    public CompilationMessageCollection Errors 
     {
       get { return SemanticsTree.Errors;  }
     }
@@ -173,7 +173,7 @@ namespace CSharpFactory.ProjectModel
     /// Gets the list of warnings.
     /// </summary>
     // --------------------------------------------------------------------------------
-    public CompilationMessages Warnings
+    public CompilationMessageCollection Warnings
     {
       get { return SemanticsTree.Warnings; }
     }
@@ -1099,7 +1099,7 @@ namespace CSharpFactory.ProjectModel
       var importedAssemblies = new Dictionary<string, AssemblyResolutionTree>();
 
       // --- Go through all referenced assemblies, skip ohter kind of referencies.
-      foreach (ReferencedUnit reference in ReferencedUnits)
+      foreach (var reference in ReferencedUnits)
       {
         TypeResolutionTree resolutionTree;
         NamespaceHierarchy hierarchy;
@@ -1917,7 +1917,7 @@ namespace CSharpFactory.ProjectModel
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
     // --------------------------------------------------------------------------------
-    private CompilationMessageNode SignError(CompilationMessages messageCollection, string code, ParserFiles.Token errorPoint, string description,
+    private CompilationMessageNode SignError(CompilationMessageCollection messageCollection, string code, ParserFiles.Token errorPoint, string description,
                                               params object[] parameters)
     {
       var message = new CompilationMessageNode(SourceFileNode, code, errorPoint, description) 

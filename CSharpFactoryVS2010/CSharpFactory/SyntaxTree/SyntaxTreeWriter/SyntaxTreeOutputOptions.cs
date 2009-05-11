@@ -65,7 +65,7 @@ namespace CSharpFactory.Syntax
             KeepLineBreaks = true,
             IndentationWidth = 2,
 
-            TypeAndNamespaceBraces = BracingStyle.NextLineBSD,
+            TypeAndNamespaceBraces = BracingStyle.NextLineBsd,
 
             SpaceAroundAssignmentOps = true,
           };
@@ -394,66 +394,4 @@ namespace CSharpFactory.Syntax
 
     #endregion
   }
-
-  #region BracingStyle enumeration
-
-  // ================================================================================================
-  /// <summary>
-  /// This enumeration defines the output styles used for bracing.
-  /// </summary>
-  // ================================================================================================
-  public enum BracingStyle
-  {
-    /// <summary>
-    /// At next line with the current indentation position.
-    /// </summary>
-    NextLineBSD,
-    /// <summary>
-    /// At next line indented with one position.
-    /// </summary>
-    NextLineGNU,
-    /// <summary>
-    /// At next line indented with one position, and child items are indented together with the brace.
-    /// </summary>
-    NextLineWhitesmiths,
-    /// <summary>
-    /// Directly at the end of the line with no space.
-    /// </summary>
-    EndOfLineNoSpace,
-    /// <summary>
-    /// Directly at the end of the line with one space.
-    /// </summary>
-    EndOfLineKAndR
-  }
-
-  #endregion 
-
-  #region ForceBracingStyle
-
-  // ================================================================================================
-  /// <summary>
-  /// This enumeration defines how braces should be forced.
-  /// </summary>
-  // ================================================================================================
-  public enum ForceBracingStyle
-  {
-    /// <summary>
-    /// Remove braces if possible
-    /// </summary>
-    Remove,
-    /// <summary>
-    /// Keep braces as those are used in the original source
-    /// </summary>
-    DoNotChange,
-    /// <summary>
-    /// Add braces even if those are not used in the original source
-    /// </summary>
-    Add,
-    /// <summary>
-    /// Use braces only if single-statement block spread across multiple lines
-    /// </summary>
-    UseForMultiline
-  }
-
-  #endregion
 }

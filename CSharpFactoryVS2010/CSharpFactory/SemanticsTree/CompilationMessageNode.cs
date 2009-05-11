@@ -4,8 +4,6 @@
 // Created: 2009.04.05, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.Collections.Generic;
-using System.Linq;
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 using CSharpFactory.Syntax;
 
@@ -132,32 +130,6 @@ namespace CSharpFactory.Semantics
     // ----------------------------------------------------------------------------------------------
     {
       RedirectedSourceFile = fileName;
-    }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of comilation message nodes.
-  /// </summary>
-  // ================================================================================================
-  public sealed class CompilationMessages : ImmutableCollection<CompilationMessageNode>,
-    ISemanticsNodeCollection
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Removes all compilation messages from the collection that belong to the specified source file 
-    /// node.
-    /// </summary>
-    /// <param name="sourceFileNode">The source file node.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void RemoveNodes(SourceFileNode sourceFileNode)
-    {
-      var messagesToRemove =
-        from message in this
-        where message.SourceFileNode == sourceFileNode
-        select message;
-      foreach (var message in messagesToRemove)
-        Remove(message);
     }
   }
 }

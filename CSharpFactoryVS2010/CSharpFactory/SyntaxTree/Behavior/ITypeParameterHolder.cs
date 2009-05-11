@@ -1,7 +1,7 @@
 // ================================================================================================
-// TypeParameters.cs
+// ITypeParameterHolder.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
@@ -70,68 +70,5 @@ namespace CSharpFactory.Syntax
     /// <value>The type parameter constraints.</value>
     // ----------------------------------------------------------------------------------------------
     TypeParameterConstraintNodeCollection TypeParameterConstraints { get; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This node represents a type parameter with its attributes.
-  /// </summary>
-  // ================================================================================================
-  public class TypeParameterNode : NameTagNode, IAttributedDeclaration
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TypeParameterNode"/> class.
-    /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    /// <param name="attrNodes">Attributes of the type parameter.</param>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterNode(Token start, AttributeDecorationNodeCollection attrNodes)
-      : base(start)
-    {
-      AttributeDecorations = attrNodes;
-    }
-
-    #region Implementation of IAttributedDeclaration
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the attribute decorations belonging to this declaration.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public AttributeDecorationNodeCollection AttributeDecorations { get; internal set; }
-
-    #endregion
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This type represents a type parameter continuation node.
-  /// </summary>
-  // ================================================================================================
-  public class TypeParameterContinuationNode : TypeParameterNode, IContinuationTag
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TypeParameterContinuationNode"/> class.
-    /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    /// <param name="identifier">The identifier.</param>
-    /// <param name="attrNodes">Attributes of the type parameter.</param>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterContinuationNode(Token start, Token identifier,
-      AttributeDecorationNodeCollection attrNodes)
-      : base(start, attrNodes)
-    {
-      SeparatorToken = start;
-      IdentifierToken = identifier;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the separator token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; private set; }
   }
 }

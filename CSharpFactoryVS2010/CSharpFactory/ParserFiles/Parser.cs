@@ -1160,7 +1160,7 @@ out TypeParameterConstraintNode constrNode) {
 		ConstraintElement element = null;
 		// :::
 		constrNode = new TypeParameterConstraintNode(start, identifier, t);
-		ParameterConstraintTagNode tag;
+		TypeParameterConstraintTagNode tag;
 		
 		TypeParameterConstraintTag(out element, out tag);
 		constraint.AddConstraintElement(element); 
@@ -1173,7 +1173,7 @@ out TypeParameterConstraintNode constrNode) {
 			TypeParameterConstraintTag(out element, out tag);
 			constraint.AddConstraintElement(element); 
 			// ::: 
-			constrNode.ConstraintTags.Add(new ParameterConstraintTagContinuationNode(separator, tag));
+			constrNode.ConstraintTags.Add(new TypeParameterConstraintTagContinuationNode(separator, tag));
 			
 		}
 	}
@@ -2449,6 +2449,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (block != null) block.Statements.Add(loc); 
 		if (la.kind == 85) {
 			Get();
+			var start = t; 
 			if (StartOf(20)) {
 				Initializer init; 
 				VariableInitializer(out init);
@@ -5375,7 +5376,7 @@ out Token identifier) {
 		
 	}
 
-	void TypeParameterConstraintTag(out ConstraintElement element, out ParameterConstraintTagNode tag) {
+	void TypeParameterConstraintTag(out ConstraintElement element, out TypeParameterConstraintTagNode tag) {
 		element = null;
 		tag = null;
 		
@@ -5383,13 +5384,13 @@ out Token identifier) {
 			Get();
 			element = new ConstraintElement(t, this, ConstraintClassification.Class); 
 			// :::
-			tag = new ParameterConstraintTagNode(t);       
+			tag = new TypeParameterConstraintTagNode(t);       
 			
 		} else if (la.kind == 66) {
 			Get();
 			element = new ConstraintElement(t, this, ConstraintClassification.Struct); 
 			// :::
-			tag = new ParameterConstraintTagNode(t);       
+			tag = new TypeParameterConstraintTagNode(t);       
 			
 		} else if (la.kind == 46) {
 			Get();
@@ -5399,7 +5400,7 @@ out Token identifier) {
 			Expect(98);
 			var openPar = t; 
 			Expect(113);
-			tag = new ParameterConstraintTagNode(start, openPar, t); 
+			tag = new TypeParameterConstraintTagNode(start, openPar, t); 
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			Token elemToken = t; 
 			TypeReference typeRef; 
@@ -5409,7 +5410,7 @@ out Token identifier) {
 			ClassType(out typeRef, out typeNode);
 			element = new ConstraintElement(elemToken, this, typeRef); 
 			// :::
-			tag = new ParameterConstraintTagNode(typeNode);       
+			tag = new TypeParameterConstraintTagNode(typeNode);       
 			
 		} else SynErr(225);
 	}

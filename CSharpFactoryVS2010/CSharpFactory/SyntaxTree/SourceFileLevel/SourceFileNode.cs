@@ -4,7 +4,6 @@
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.IO;
-using CSharpFactory.Collections;
 
 namespace CSharpFactory.Syntax
 {
@@ -73,29 +72,6 @@ namespace CSharpFactory.Syntax
       var serializer = new OutputItemSerializer(options);
       serializer.Append(GetOutputSegment());
       return serializer.OutputItems;
-    }
-
-    #endregion
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This type defines a collection of source file nodes in the syntax tree.
-  /// </summary>
-  // ================================================================================================
-  public sealed class SourceFileNodeCollection : ImmutableIndexedCollection<SourceFileNode>
-  {
-    #region Overrides of ImmutableIndexedCollection<SourceFileNode>
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the key of the specified item.
-    /// </summary>
-    /// <param name="item">Item used to determine the key.</param>
-    // ----------------------------------------------------------------------------------------------
-    protected override string GetKeyOfItem(SourceFileNode item)
-    {
-      return item.FullName;
     }
 
     #endregion

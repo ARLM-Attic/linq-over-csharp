@@ -3,7 +3,6 @@
 //
 // Created: 2009.03.26, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
@@ -31,7 +30,7 @@ namespace CSharpFactory.Syntax
     public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start): base(start)
     {
       Parent = parent;
-      NameTags = new NameTagCollection();
+      NameTags = new NameTagNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -46,7 +45,7 @@ namespace CSharpFactory.Syntax
     /// Gets the nametags decribing the full name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public NameTagCollection NameTags { get; private set; }
+    public NameTagNodeCollection NameTags { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -85,15 +84,5 @@ namespace CSharpFactory.Syntax
         result.Append(TerminatingToken);
       return result;
     }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This type represents a collection of namespace declaration nodes.
-  /// </summary>
-  // ================================================================================================
-  public sealed class NamespaceDeclarationNodeCollection : 
-    ImmutableCollection<NamespaceDeclarationNode>
-  {
   }
 }

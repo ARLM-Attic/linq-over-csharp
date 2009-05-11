@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Diagnostics;
 using CSharpFactory.ProjectContent;
 using CSharpFactory.ProjectModel;
@@ -78,6 +79,22 @@ namespace SampleCompilation
       Console.WriteLine("Resolved to namespace: {0}", project.ResolvedToNamespace);
       Console.WriteLine("Resolved to hierarchy: {0}", project.ResolvedToHierarchy);
       Console.WriteLine("Resolved to simple name: {0}", project.ResolvedToName);
+      Console.WriteLine();
+
+      // --- List source files with more than one type declarations
+
+      var multiTypedFiles =
+        from file in project.Files
+        where file.NestedNamespaces.Count > 1 ||
+              (file.NestedNamespaces.Count == 1 &&
+               file.NestedNamespaces[0].TypeDeclarations.Count > 1)
+        select file;
+      Console.WriteLine("Files with multiple types {0} from {1}:", 
+        multiTypedFiles.Count(), project.Files.Count);
+      foreach (var file in multiTypedFiles)
+      {
+        Console.WriteLine("  {0}", file.FullName);
+      }
       Console.WriteLine();
     }
   }

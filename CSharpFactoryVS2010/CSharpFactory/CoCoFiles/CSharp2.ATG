@@ -5203,7 +5203,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint,
      ConstraintElement element = null;
      // :::
      constrNode = new TypeParameterConstraintNode(start, identifier, t);
-     ParameterConstraintTagNode tag;
+     TypeParameterConstraintTagNode tag;
   .)
   TypeParameterConstraintTag<out element, out tag>
   (. 
@@ -5218,7 +5218,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint,
     (. 
        constraint.AddConstraintElement(element); 
        // ::: 
-       constrNode.ConstraintTags.Add(new ParameterConstraintTagContinuationNode(separator, tag));
+       constrNode.ConstraintTags.Add(new TypeParameterConstraintTagContinuationNode(separator, tag));
     .)
   }
 .
@@ -5228,7 +5228,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraint constraint,
 //   element: Type parameter constrtaint tag.
 //   tag: Type parameter constrtaint tag.
 // ------------------------------------------------------------------------------------------------
-TypeParameterConstraintTag<out ConstraintElement element, out ParameterConstraintTagNode tag> 
+TypeParameterConstraintTag<out ConstraintElement element, out TypeParameterConstraintTagNode tag> 
   (.
     element = null;
     tag = null;
@@ -5238,14 +5238,14 @@ TypeParameterConstraintTag<out ConstraintElement element, out ParameterConstrain
   (. 
      element = new ConstraintElement(t, this, ConstraintClassification.Class); 
      // :::
-     tag = new ParameterConstraintTagNode(t);       
+     tag = new TypeParameterConstraintTagNode(t);       
   .)
   |
   "struct"                   
   (. 
      element = new ConstraintElement(t, this, ConstraintClassification.Struct); 
      // :::
-     tag = new ParameterConstraintTagNode(t);       
+     tag = new TypeParameterConstraintTagNode(t);       
   .)
   |
   "new"                      
@@ -5256,7 +5256,7 @@ TypeParameterConstraintTag<out ConstraintElement element, out ParameterConstrain
   "(" 
   (. var openPar = t; .)
   ")" 
-  (. tag = new ParameterConstraintTagNode(start, openPar, t); .)
+  (. tag = new TypeParameterConstraintTagNode(start, openPar, t); .)
   |
   (. 
      Token elemToken = t; 
@@ -5268,7 +5268,7 @@ TypeParameterConstraintTag<out ConstraintElement element, out ParameterConstrain
   (. 
      element = new ConstraintElement(elemToken, this, typeRef); 
      // :::
-     tag = new ParameterConstraintTagNode(typeNode);       
+     tag = new TypeParameterConstraintTagNode(typeNode);       
   .)
 .
 

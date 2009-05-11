@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
-
 namespace CSharpFactory.Semantics
 {
   // ================================================================================================
@@ -40,18 +38,5 @@ namespace CSharpFactory.Semantics
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public NamespaceCollection Namespaces { get; private set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of compilation models.
-  /// </summary>
-  // ================================================================================================
-  public sealed class CompilationModelCollection : ImmutableIndexedCollection<CompilationModel>
-  {
-    protected override string GetKeyOfItem(CompilationModel item)
-    {
-      return item.Name;
-    }
   }
 }

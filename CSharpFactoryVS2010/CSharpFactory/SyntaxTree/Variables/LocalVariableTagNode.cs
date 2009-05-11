@@ -3,7 +3,6 @@
 //
 // Created: 2009.05.06, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
@@ -72,41 +71,5 @@ namespace CSharpFactory.Syntax
     /// </value>
     // ----------------------------------------------------------------------------------------------
     public bool HasInitializer { get { return Initializer != null; } }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a continuation tag in a local variable declaration.
-  /// </summary>
-  // ================================================================================================
-  public class LocalVariableContinuationTagNode : LocalVariableTagNode, IContinuationTag
-  {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableContinuationTagNode"/> class.
-    /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    // ----------------------------------------------------------------------------------------------
-    public LocalVariableContinuationTagNode(Token start)
-      : base(start)
-    {
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the token separating the continuation tag from the preceding tag.
-    /// </summary>
-    /// <value></value>
-    // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; internal set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of local variable tags.
-  /// </summary>
-  // ================================================================================================
-  public sealed class LocalVariableTagNodeCollection : ImmutableCollection<LocalVariableTagNode>
-  {
   }
 }

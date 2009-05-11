@@ -3,7 +3,6 @@
 //
 // Created: 2009.04.08, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
@@ -32,14 +31,5 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode TypeName { get; internal set; }
-  }
-
-  // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of member declarations.
-  /// </summary>
-  // ================================================================================================
-  public sealed class MemberDeclarationNodeCollection : ImmutableCollection<MemberDeclarationNode>
-  {
   }
 }

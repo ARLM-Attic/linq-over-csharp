@@ -22,8 +22,8 @@ namespace CSharpFactory.Semantics
     // ----------------------------------------------------------------------------------------------
     public SemanticsTree()
     {
-      Errors = new CompilationMessages();
-      Warnings = new CompilationMessages();
+      Errors = new CompilationMessageCollection();
+      Warnings = new CompilationMessageCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -31,14 +31,14 @@ namespace CSharpFactory.Semantics
     /// Gets the collection of errors belonging to the semantics tree.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public CompilationMessages Errors { get; private set; }
+    public CompilationMessageCollection Errors { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the collection of warnings belonging to the semantics tree.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public CompilationMessages Warnings { get; private set; }
+    public CompilationMessageCollection Warnings { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
