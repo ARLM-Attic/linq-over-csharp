@@ -18,7 +18,9 @@ namespace CSharpFactory.ProjectModel
     /// <summary>Parameter passed by reference</summary>
     Ref,
     /// <summary>Extension method parameter</summary>
-    This
+    This,
+    /// <summary>"params" parameter modifier</summary>
+    Params
   }
 
   // ==================================================================================

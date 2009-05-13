@@ -34,7 +34,6 @@ namespace CSharpFactory.ParserFiles
         rightExpr.LeftOperand = unExpr;
       }
       oper.Terminate(t);
-      // :::
       if (rgNode == null)
       {
         opNode.RightOperand = unaryNode;
@@ -45,6 +44,34 @@ namespace CSharpFactory.ParserFiles
         rgNode.LeftOperand = unaryNode;
       }
       opNode.Terminate(t);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Terminates the specified node.
+    /// </summary>
+    /// <param name="node">The node to terminate.</param>
+    /// <remarks>
+    /// If the node is null, the operation aborts silently.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public void Terminate(SyntaxNode node)
+    {
+      if (node != null) node.Terminate(t);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Terminates the specified language element.
+    /// </summary>
+    /// <param name="element">The element to terminate.</param>
+    /// <remarks>
+    /// If the element is null, the operation aborts silently.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public void Terminate(LanguageElement element)
+    {
+      if (element != null) element.Terminate(t);
     }
   }
 }

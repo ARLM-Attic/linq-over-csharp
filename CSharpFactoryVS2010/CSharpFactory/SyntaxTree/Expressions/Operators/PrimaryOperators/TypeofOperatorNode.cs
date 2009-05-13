@@ -12,7 +12,7 @@ namespace CSharpFactory.Syntax
   /// This class represents the "typeof" operator.
   /// </summary>
   // ================================================================================================
-  public class TypeofOperatorNode : EmbeddedTypeNode
+  public class TypeofOperatorNode : EmbeddedTypeOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

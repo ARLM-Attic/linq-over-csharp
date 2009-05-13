@@ -1,7 +1,7 @@
 // ================================================================================================
-// ExpressionInitializerNode.cs
+// MemberDeclaratorContinuationNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,31 +9,34 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an expression initializer.
+  /// This class represents a continuation of a member declarator.
   /// </summary>
   // ================================================================================================
-  public sealed class ExpressionInitializerNode : VariableInitializerNode
+  public class MemberDeclaratorContinuationNode : MemberDeclaratorNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="MemberDeclaratorContinuationNode"/> class.
     /// </summary>
-    /// <param name="expression">Initializer expression.</param>
+    /// <param name="separator">Separator token.</param>
+    /// <param name="node">Node representing the continuation.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionInitializerNode(ExpressionNode expression)
-      : base(expression == null ? new Token() : expression.StartToken)
-      // TODO: Revise initialization
+    public MemberDeclaratorContinuationNode(Token separator, MemberDeclaratorNode node)
+      : base(separator)
     {
-      Expression = expression;
-      Terminate(expression == null ? new Token() : expression.TerminatingToken);
-      // TODO: Revise termination here
+      Kind = node.Kind;
+      IdentifierToken = node.IdentifierToken;
+      EqualToken = node.EqualToken;
+      Expression = node.Expression;
+      DotSeparator = node.DotSeparator;
+      TypeName = node.TypeName;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the initializer.
+    /// Gets the separator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public Token SeparatorToken { get; private set; }  
   }
 }

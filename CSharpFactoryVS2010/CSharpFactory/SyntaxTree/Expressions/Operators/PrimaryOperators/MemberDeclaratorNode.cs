@@ -1,7 +1,7 @@
 // ================================================================================================
-// LocalVariableTagNode.cs
+// MemberDeclaratorNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,22 +9,51 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a tag in a local variable declaration.
+  /// This class represents a member declarator node.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableTagNode : SyntaxNode, IIdentifierSupport
+  public class MemberDeclaratorNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableTagNode"/> class.
+    /// Kind of member declarator
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public enum DeclaratorKind
+    {
+      /// <summary>
+      /// An "ident = expression" form is used.
+      /// </summary>
+      Expression,
+      
+      /// <summary>
+      /// A simple name is used.
+      /// </summary>
+      SimpleName,
+      
+      /// <summary>
+      /// A member access is used.
+      /// </summary>
+      MemberAccess
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MemberDeclaratorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableTagNode(Token start)
+    public MemberDeclaratorNode(Token start)
       : base(start)
     {
-      IdentifierToken = start;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the kind of declarator used.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public DeclaratorKind Kind { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,7 +61,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The identifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; protected set; }
+    public Token IdentifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -57,20 +86,32 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the initializer.
+    /// Gets or sets the equal token.
     /// </summary>
-    /// <value>The initializer.</value>
+    /// <value>The equal token.</value>
     // ----------------------------------------------------------------------------------------------
-    public VariableInitializerNode Initializer { get; internal set; }
+    public Token EqualToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance has initializer.
+    /// Gets or sets the expression (in case of "Expression" and "SimpleName" declarators).
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance has initializer; otherwise, <c>false</c>.
-    /// </value>
+    /// <value>The expression.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasInitializer { get { return Initializer != null; } }
+    public ExpressionNode Expression { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the dot separator.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token DotSeparator { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of the type (in case of "MemberAccess" declarator).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode TypeName { get; internal set; }
   }
 }

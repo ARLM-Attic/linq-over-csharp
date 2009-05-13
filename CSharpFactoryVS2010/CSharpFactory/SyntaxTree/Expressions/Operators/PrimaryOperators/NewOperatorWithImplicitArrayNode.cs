@@ -1,55 +1,59 @@
 // ================================================================================================
-// LocalVariableNode.cs
+// NewOperatorWithImplicitArrayNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.Collections;
+using CSharpFactory.ParserFiles;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable declaration
+  /// This class represents a "new" operator with implicit array declaration.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public class NewOperatorWithImplicitArrayNode : NewOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
+    /// Initializes a new instance of the <see cref="NewOperatorWithImplicitArrayNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
-      : base(typeNode.StartToken)
+    public NewOperatorWithImplicitArrayNode(Token start)
+      : base(start)
     {
-      VariableTags = new LocalVariableTagNodeCollection();
+      Commas = new ImmutableCollection<Token>();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type.
+    /// Gets or sets the initializer used to implicit array initialization.
     /// </summary>
+    /// <value>The initializer.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public ArrayInitializerNode Initializer { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is an implicit type declaration.
+    /// Gets or sets the opening square bracket.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
-    {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.val == "var"; }
-    }
+    public Token OpenSquareBracket { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets variable tags within this variable declaration.
+    /// Gets the collection of comma tokens.
     /// </summary>
-    /// <value>The variables.</value>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableTagNodeCollection VariableTags { get; private set; }
+    public ImmutableCollection<Token> Commas { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the closing square bracket.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token CloseSquareBracket { get; internal set; }
   }
 }

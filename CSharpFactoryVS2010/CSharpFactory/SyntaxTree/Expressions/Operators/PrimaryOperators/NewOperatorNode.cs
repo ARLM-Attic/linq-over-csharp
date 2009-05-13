@@ -1,7 +1,7 @@
 // ================================================================================================
-// ArrayInitializerNode.cs
+// NewOperatorNode.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,28 +9,20 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an array initializer.
+  /// This abstract class is intended to be the base class of all kinds of a "new" operator.
   /// </summary>
   // ================================================================================================
-  public class ArrayInitializerNode : VariableInitializerNode
+  public abstract class NewOperatorNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="NewOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayInitializerNode(Token start)
+    protected NewOperatorNode(Token start)
       : base(start)
     {
-      Items = new ArrayItemInitializerNodeCollection();
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the items of this initializer.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ArrayItemInitializerNodeCollection Items { get; private set; }
   }
 }

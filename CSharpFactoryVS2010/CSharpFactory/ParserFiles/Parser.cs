@@ -502,7 +502,7 @@ public partial class CSharpSyntaxParser
 		identifier = t;
 		
 		Expect(114);
-		externAlias.Terminate(t); 
+		Terminate(externAlias); 
 		// ::: 
 		parentNode.AddExternAlias(start, alias, identifier, t);
 		
@@ -534,7 +534,7 @@ public partial class CSharpSyntaxParser
 		CurrentElement = uc;
 		if (parent == null) File.Usings.Add(uc);
 		else parent.Usings.Add(uc); 
-		uc.Terminate(t);
+		Terminate(uc);
 		// :::
 		if (alias == null)
 		  parentNode.AddUsing(start, nsNode, t);
@@ -586,9 +586,9 @@ public partial class CSharpSyntaxParser
 			globAttrNode.ClosingSeparator = t; 
 		}
 		Expect(112);
-		attr.Terminate(t); 
+		Terminate(attr); 
 		// :::
-		globAttrNode.Terminate(t);
+		Terminate(globAttrNode);
 		SourceFileNode.GlobalAttributes.Add(globAttrNode);
 		
 	}
@@ -635,16 +635,16 @@ NamespaceScopeNode parentNode) {
 				NamespaceMemberDeclaration(ns, File, nsDecl);
 			}
 			Expect(111);
-			ns.Terminate(t); 
+			Terminate(ns); 
 			// :::
 			nsDecl.CloseBracket = t;
-			nsDecl.Terminate(t);
+			Terminate(nsDecl);
 			
 			if (la.kind == 114) {
 				Get();
-				ns.Terminate(t); 
+				Terminate(ns); 
 				// :::
-				nsDecl.Terminate(t);
+				Terminate(nsDecl);
 				
 			}
 		} else if (StartOf(2)) {
@@ -753,7 +753,7 @@ NamespaceScopeNode parentNode) {
 		if (la.kind == 98) {
 			AttributeArguments(attr, attrNode);
 		}
-		attr.Terminate(t); 
+		Terminate(attr); 
 	}
 
 	void AttributeDecorations(AttributeCollection attrs, AttributeDecorationNodeCollection attrNodes) {
@@ -871,7 +871,7 @@ out TypeDeclarationNode typeDecl) {
 		{
 		   td.SetModifiers(m.Value); 
 		   td.AssignAttributes(attrs);
-		   td.Terminate(t);
+		   Terminate(td);
 		}
 		// :::
 		if (typeDecl != null)
@@ -879,7 +879,7 @@ out TypeDeclarationNode typeDecl) {
 		  typeDecl.IsPartial = isPartial;
 		  typeDecl.DeclaringNamespace = parentNs;
 		  typeDecl.DeclaringType = declaringType;
-		  typeDecl.Terminate(t);
+		  Terminate(typeDecl);
 		}
 		
 	}
@@ -918,10 +918,10 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 			
 		}
 		ClassBody(td, classDecl);
-		typeDecl.Terminate(t); 
+		Terminate(typeDecl); 
 		if (la.kind == 114) {
 			Get();
-			typeDecl.Terminate(t); 
+			Terminate(typeDecl); 
 		}
 	}
 
@@ -960,10 +960,10 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 			
 		}
 		StructBody(td, structDecl);
-		typeDecl.Terminate(t); 
+		Terminate(typeDecl); 
 		if (la.kind == 114) {
 			Get();
-			typeDecl.Terminate(t); 
+			Terminate(typeDecl); 
 		}
 	}
 
@@ -1005,11 +1005,11 @@ out TypeDeclaration td, out TypeDeclarationNode typeDecl) {
 		}
 		Expect(111);
 		intfDecl.CloseBrace = t;
-		typeDecl.Terminate(t);
+		Terminate(typeDecl);
 		
 		if (la.kind == 114) {
 			Get();
-			typeDecl.Terminate(t); 
+			Terminate(typeDecl); 
 		}
 	}
 
@@ -1041,15 +1041,15 @@ out TypeDeclarationNode typeDecl) {
 			} else SynErr(148);
 		}
 		EnumBody(ed, enumDecl);
-		ed.Terminate(t); 
+		Terminate(ed); 
 		// :::
-		typeDecl.Terminate(t);
+		Terminate(typeDecl);
 		
 		if (la.kind == 114) {
 			Get();
-			ed.Terminate(t); 
+			Terminate(ed); 
 			// :::
-			typeDecl.Terminate(t);
+			Terminate(typeDecl);
 			
 		}
 	}
@@ -1075,10 +1075,12 @@ out TypeDeclarationNode typeDecl) {
 			TypeParameterList(dd, typeDecl);
 		}
 		Expect(98);
+		var parList = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(dd.FormalParameters);
+			FormalParameterList(dd.FormalParameters, parList);
 		}
 		Expect(113);
+		Terminate(parList); 
 		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
@@ -1090,7 +1092,7 @@ out TypeDeclarationNode typeDecl) {
 			
 		}
 		Expect(114);
-		typeDecl.Terminate(t); 
+		Terminate(typeDecl); 
 	}
 
 	void TypeParameterList(ITypeParameterOwner td, ITypeParameterHolder paramNode) {
@@ -1220,7 +1222,7 @@ out TypeParameterConstraintNode constrNode) {
 				Get();
 				typeRef = new TypeReference(t, this, typeof(string)); 
 			}
-			typeRef.Terminate(t); 
+			Terminate(typeRef); 
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
@@ -1256,10 +1258,10 @@ out MemberDeclarationNode memNode) {
 			} else if (la.kind == 114) {
 				Get();
 			} else SynErr(150);
-			dd.Terminate(t);
+			Terminate(dd);
 			td.AddMember(dd); 
 			// :::
-			memNode.Terminate(t);
+			Terminate(memNode);
 			
 		} else SynErr(151);
 	}
@@ -1395,7 +1397,7 @@ out MemberDeclarationNode memNode) {
 		}
 		default: SynErr(155); break;
 		}
-		typeRef.Terminate(t); 
+		Terminate(typeRef); 
 		// :::
 		typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 		
@@ -1439,7 +1441,7 @@ out MemberDeclarationNode memNode) {
 		}
 		ev.AssignAttributes(attrs);
 		ed.Values.Add(ev);
-		ev.Terminate(t);
+		Terminate(ev);
 		
 	}
 
@@ -1529,14 +1531,14 @@ out MemberDeclarationNode memNode) {
 					Expression(out falseExpr, out falseNode);
 					condExpr.FalseExpression = falseExpr;
 					if (condNode != null) condNode.FalseExpression = falseNode; 
-					condExpr.Terminate(t); 
-					if (condNode != null) condNode.Terminate(t);
+					Terminate(condExpr); 
+					if (condNode != null) Terminate(condNode);
 					
 				}
 			} else SynErr(158);
 		} else SynErr(159);
-		if (expr != null) expr.Terminate(t); 
-		if (exprNode != null) exprNode.Terminate(t);
+		if (expr != null) Terminate(expr); 
+		if (exprNode != null) Terminate(exprNode);
 		
 	}
 
@@ -1567,60 +1569,22 @@ out MemberDeclarationNode memNode) {
 		}
 		PointerOrArray(typeRef, typeNode);
 		CompilationUnit.AddTypeToFix(typeRef);
-		typeRef.Terminate(t); 
+		Terminate(typeRef); 
 		
 	}
 
-	void FormalParameterList(FormalParameterCollection pars) {
-		TypeReference typeRef = null; 
-		AttributeCollection attrs = new AttributeCollection();
-		// :::
-		ExpressionNode exprNode;
-		var attrNodes = new AttributeDecorationNodeCollection();
-		
-		AttributeDecorations(attrs, attrNodes);
-		FormalParameter fp = new FormalParameter(t, this); 
-		fp.AssignAttributes(attrs);
-		
-		if (StartOf(16)) {
-			if (la.kind == 50 || la.kind == 57 || la.kind == 68) {
-				if (la.kind == 57) {
-					Get();
-					fp.Kind = FormalParameterKind.Ref; 
-				} else if (la.kind == 50) {
-					Get();
-					fp.Kind = FormalParameterKind.Out; 
-				} else {
-					Get();
-					fp.Kind = FormalParameterKind.This; 
-				}
-			}
-			TypeOrNamespaceNode typeNode; 
-			Type(out typeRef, false, out typeNode);
-			fp.Type = typeRef; 
-			Expect(1);
-			fp.Name = t.val; 
-			fp.Type = typeRef;
-			pars.Add(fp);
-			fp.Terminate(t);
-			
-			if (la.kind == 87) {
-				Get();
-				FormalParameterList(pars);
-			}
-		} else if (la.kind == 52) {
+	void FormalParameterList(FormalParameterCollection pars, FormalParameterListNode parsNode) {
+		FormalParameterNode node; 
+		FormalParameterTag(pars, out node);
+		if (parsNode != null && node != null) parsNode.Items.Add(node); 
+		while (la.kind == 87) {
 			Get();
-			fp.HasParams = true; 
-			TypeOrNamespaceNode typeNode; 
-			Type(out typeRef, false, out typeNode);
-			if (!typeRef.IsArray) { Error("UNDEF", la, "params argument must be an array"); } 
-			Expect(1);
-			fp.Name = t.val; 
-			fp.Type = typeRef; 
-			pars.Add(fp); 
-			fp.Terminate(t);
+			var separator = t; 
+			FormalParameterTag(pars, out node);
+			if (parsNode != null && node != null) 
+			 parsNode.Items.Add(new FormalParameterContinuationNode(separator, node)); 
 			
-		} else SynErr(161);
+		}
 	}
 
 	void Block(IBlockOwner block, out BlockStatementNode blockNode) {
@@ -1630,12 +1594,12 @@ out MemberDeclarationNode memNode) {
 		
 		Expect(96);
 		blockNode = new BlockStatementNode(t); 
-		while (StartOf(17)) {
+		while (StartOf(16)) {
 			Statement(block, out stmtNode);
 			if (stmtNode != null) blockNode.Statements.Add(stmtNode); 
 		}
 		Expect(111);
-		blockNode.Terminate(t); 
+		Terminate(blockNode); 
 	}
 
 	void ConstMemberDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td,
@@ -1661,7 +1625,7 @@ out MemberDeclarationNode memNode) {
 			constNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, tagNode)); 
 		}
 		Expect(114);
-		memNode.Terminate(t); 
+		Terminate(memNode); 
 	}
 
 	void EventDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
@@ -1688,8 +1652,8 @@ out MemberDeclarationNode memNode) {
 			td.AddMember(ep); 
 			EventAccessorDeclarations(ep);
 			Expect(111);
-			ep.Terminate(t); 
-		} else SynErr(162);
+			Terminate(ep); 
+		} else SynErr(161);
 	}
 
 	void ConstructorDeclaration(AttributeCollection attrs, Modifiers m, TypeDeclaration td,
@@ -1702,10 +1666,12 @@ out MemberDeclarationNode memNode) {
 		cd.AssignAttributes(attrs);
 		
 		Expect(98);
+		var parList = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(cd.FormalParameters);
+			FormalParameterList(cd.FormalParameters, parList);
 		}
 		Expect(113);
+		Terminate(parList); 
 		if (la.kind == 86) {
 			Get();
 			if (la.kind == 8) {
@@ -1714,7 +1680,7 @@ out MemberDeclarationNode memNode) {
 			} else if (la.kind == 68) {
 				Get();
 				cd.HasThis = true; 
-			} else SynErr(163);
+			} else SynErr(162);
 			Expect(98);
 			CurrentArgumentList(cd.BaseArguments, null);
 			Expect(113);
@@ -1724,9 +1690,9 @@ out MemberDeclarationNode memNode) {
 			Block(cd, out blockNode);
 		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(164);
+		} else SynErr(163);
 		td.AddMember(cd); 
-		cd.Terminate(t);
+		Terminate(cd);
 		
 	}
 
@@ -1776,10 +1742,12 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 			TypeParameterList(md, null);
 		}
 		Expect(98);
+		var parList = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(md.FormalParameters);
+			FormalParameterList(md.FormalParameters, parList);
 		}
 		Expect(113);
+		Terminate(parList); 
 		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
@@ -1796,9 +1764,9 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else if (la.kind == 114) {
 			Get();
 			md.HasBody = false; 
-		} else SynErr(165);
+		} else SynErr(164);
 		td.AddMember(md); 
-		md.Terminate(t);
+		Terminate(md);
 		
 	}
 
@@ -1815,19 +1783,22 @@ TypeDeclaration td) {
 		OverloadableOp(out op);
 		od.Operator = op; 
 		Expect(98);
+		var parList = new FormalParameterListNode(t);
 		od.Name = op.ToString(); 
+		
 		if (StartOf(7)) {
-			FormalParameterList(od.FormalParameters);
+			FormalParameterList(od.FormalParameters, parList);
 		}
 		Expect(113);
+		Terminate(parList); 
 		if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(od, out blockNode);
 		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(166);
+		} else SynErr(165);
 		td.AddMember(od); 
-		od.Terminate(t);
+		Terminate(od);
 		
 	}
 
@@ -1853,7 +1824,7 @@ TypeReference memberRef, TypeDeclaration td) {
 		AccessorDeclarations(pd);
 		Expect(111);
 		td.AddMember(pd); 
-		pd.Terminate(t);
+		Terminate(pd);
 		
 	}
 
@@ -1876,15 +1847,17 @@ TypeReference memberRef, TypeDeclaration td) {
 		
 		Expect(68);
 		Expect(97);
+		var parList = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(ind.FormalParameters);
+			FormalParameterList(ind.FormalParameters, parList);
 		}
 		Expect(112);
+		Terminate(parList); 
 		Expect(96);
 		AccessorDeclarations(ind);
 		Expect(111);
 		td.AddMember(ind); 
-		ind.Terminate(t);
+		Terminate(ind);
 		
 	}
 
@@ -1900,7 +1873,7 @@ TypeReference memberRef, TypeDeclaration td) {
 		} else if (la.kind == 27) {
 			Get();
 			cod.IsExplicit = true; 
-		} else SynErr(167);
+		} else SynErr(166);
 		Expect(49);
 		TypeOrNamespaceNode typeNode; 
 		Type(out typeRef, false, out typeNode);
@@ -1908,18 +1881,20 @@ TypeReference memberRef, TypeDeclaration td) {
 		cod.Name = typeRef.TailName;
 		
 		Expect(98);
+		var parList = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(cod.FormalParameters);
+			FormalParameterList(cod.FormalParameters, parList);
 		}
 		Expect(113);
+		Terminate(parList); 
 		if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(cod, out blockNode);
 		} else if (la.kind == 114) {
 			Get();
-		} else SynErr(168);
+		} else SynErr(167);
 		td.AddMember(cod); 
-		cod.Terminate(t);
+		Terminate(cod);
 		
 	}
 
@@ -1944,10 +1919,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		Expression(out expr, out exprNode);
 		cd.Expression = expr; 
-		cd.Terminate(t);
+		Terminate(cd);
 		// :::
 		tagNode.Expression = exprNode;
-		tagNode.Terminate(t);
+		Terminate(tagNode);
 		
 	}
 
@@ -1974,15 +1949,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "add or remove expected"); 
-		} else SynErr(169);
+		} else SynErr(168);
 		BlockStatementNode blockNode; 
 		Block(accessor, out blockNode);
-		accessor.Terminate(t);
+		Terminate(accessor);
 		accessor.HasBody = true;
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs); 
 		
-		if (StartOf(18)) {
+		if (StartOf(17)) {
 			attrs = new AttributeCollection(); 
 			attrNodes = new AttributeDecorationNodeCollection();
 			
@@ -2007,9 +1982,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "add or remove expected"); 
-			} else SynErr(170);
+			} else SynErr(169);
 			Block(accessor, out blockNode);
-			accessor.Terminate(t);
+			Terminate(accessor);
 			accessor.HasBody = true;
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs); 
@@ -2023,7 +1998,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Token argKind = null;
 		Token separator = null;
 		
-		if (StartOf(19)) {
+		if (StartOf(18)) {
 			if (la.kind == 50 || la.kind == 57) {
 				if (la.kind == 57) {
 					Get();
@@ -2041,14 +2016,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression(out expr, out exprNode);
 			arg.Expression = expr;
 			if (argList != null) argList.Add(arg); 
-			arg.Terminate(t);
+			Terminate(arg);
 			if (argNodes != null)
 			{
 			  var argNode = new ArgumentNode(argKind == null ? 
 			    (exprNode == null ? t : exprNode.StartToken) : argKind);
 			  argNode.KindToken = argKind;
 			  argNode.Expression = exprNode;
-			  argNode.Terminate(t);
+			  Terminate(argNode);
 			  argNodes.Add(argNode);
 			}
 			
@@ -2071,13 +2046,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Expression(out expr, out exprNode);
 				arg.Expression = expr;
 				if (argList != null) argList.Add(arg); 
-				arg.Terminate(t);
+				Terminate(arg);
 				if (argNodes != null)
 				{
 				  var argNode = new ArgumentContinuationNode(separator);
 				  argNode.KindToken = argKind;
 				  argNode.Expression = exprNode;
-				  argNode.Terminate(t);
+				  Terminate(argNode);
 				  argNodes.Add(argNode);
 				}
 				
@@ -2108,7 +2083,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "set or get expected"); 
-		} else SynErr(171);
+		} else SynErr(170);
 		if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(accessor, out blockNode);
@@ -2116,12 +2091,12 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 114) {
 			Get();
 			accessor.HasBody = false; 
-		} else SynErr(172);
-		accessor.Terminate(t);
+		} else SynErr(171);
+		Terminate(accessor);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs);
 		
-		if (StartOf(18)) {
+		if (StartOf(17)) {
 			attrs = new AttributeCollection(); 
 			attrNodes = new AttributeDecorationNodeCollection();
 			
@@ -2145,7 +2120,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "set or get expected"); 
-			} else SynErr(173);
+			} else SynErr(172);
 			if (la.kind == 96) {
 				BlockStatementNode blockNode; 
 				Block(accessor, out blockNode);
@@ -2153,8 +2128,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 114) {
 				Get();
 				accessor.HasBody = false; 
-			} else SynErr(174);
-			accessor.Terminate(t);
+			} else SynErr(173);
+			Terminate(accessor);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs);
 			
@@ -2273,7 +2248,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			op = Operator.LessThanOrEqual; 
 			break;
 		}
-		default: SynErr(175); break;
+		default: SynErr(174); break;
 		}
 	}
 
@@ -2309,8 +2284,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					Get();
 					InterfaceAccessors(prop);
 					Expect(111);
-					prop.Terminate(t); 
-				} else SynErr(176);
+					Terminate(prop); 
+				} else SynErr(175);
 			} else if (la.kind == 68) {
 				IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
 				CurrentElement =ind;
@@ -2321,18 +2296,20 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				Get();
 				Expect(97);
+				var parList = new FormalParameterListNode(t); 
 				if (StartOf(7)) {
-					FormalParameterList(ind.FormalParameters);
+					FormalParameterList(ind.FormalParameters, parList);
 				}
 				Expect(112);
+				Terminate(parList); 
 				Expect(96);
 				InterfaceAccessors(ind);
 				Expect(111);
-				ind.Terminate(t); 
-			} else SynErr(177);
+				Terminate(ind); 
+			} else SynErr(176);
 		} else if (la.kind == 26) {
 			InterfaceEventDeclaration(attrs, m, ifd);
-		} else SynErr(178);
+		} else SynErr(177);
 	}
 
 	void InterfaceAccessors(PropertyDeclaration prop) {
@@ -2357,13 +2334,13 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 1) {
 			Get();
 			Error("UNDEF", la, "set or get expected"); 
-		} else SynErr(179);
+		} else SynErr(178);
 		Expect(114);
-		accessor.Terminate(t);
+		Terminate(accessor);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs); 
 		
-		if (StartOf(18)) {
+		if (StartOf(17)) {
 			attrs = new AttributeCollection(); 
 			attrNodes = new AttributeDecorationNodeCollection();
 			
@@ -2387,9 +2364,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind == 1) {
 				Get();
 				Error("UNDEF", la, "set or get expected"); 
-			} else SynErr(180);
+			} else SynErr(179);
 			Expect(114);
-			accessor.Terminate(t);
+			Terminate(accessor);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs); 
 			
@@ -2412,7 +2389,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		Expect(114);
 		ifd.AddMember(fd); 
-		fd.Terminate(t);
+		Terminate(fd);
 		
 	}
 
@@ -2429,86 +2406,200 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 		} else if (StartOf(11)) {
 			Type(out typeRef, false, out typeNode);
-		} else SynErr(181);
+		} else SynErr(180);
 		if (typeNode != null) varNode = new LocalVariableNode(typeNode); 
-		LocalVariableDeclarator(block, typeRef, isImplicit);
+		LocalVariableTagNode varTagNode;
+		
+		LocalVariableDeclarator(block, typeRef, isImplicit, out varTagNode);
+		if (varNode != null) varNode.VariableTags.Add(varTagNode); 
 		while (la.kind == 87) {
 			Get();
-			LocalVariableDeclarator(block, typeRef, isImplicit);
+			var separator = t; 
+			LocalVariableDeclarator(block, typeRef, isImplicit, out varTagNode);
+			if (varNode != null) varNode.VariableTags.Add(
+			 new LocalVariableContinuationTagNode(separator, varTagNode)); 
+			
 		}
 	}
 
-	void LocalVariableDeclarator(IBlockOwner block, TypeReference typeRef, bool isImplicit) {
+	void LocalVariableDeclarator(IBlockOwner block, TypeReference typeRef, bool isImplicit,
+out LocalVariableTagNode varDeclNode) {
 		ExpressionNode exprNode; 
+		varDeclNode = null;
+		
 		Expect(1);
 		LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); 
 		CurrentElement = loc; 
-		loc.Name = t.val; 
-		loc.Variable.ResultingType = typeRef; 
-		loc.Variable.IsImplicit = isImplicit; 
+		loc.Name = t.val;
+		loc.Variable.ResultingType = typeRef;
+		loc.Variable.IsImplicit = isImplicit;
 		if (block != null) block.Statements.Add(loc); 
+		// :::
+		varDeclNode = new LocalVariableTagNode(t);
+		
 		if (la.kind == 85) {
 			Get();
 			var start = t; 
-			if (StartOf(20)) {
-				Initializer init; 
-				VariableInitializer(out init);
+			if (StartOf(19)) {
+				Initializer init;
+				VariableInitializerNode varInitNode; 
+				
+				VariableInitializer(out init, out varInitNode);
 				loc.Variable.Initializer = init; 
+				varDeclNode.Initializer = varInitNode;
+				
 			} else if (la.kind == 63) {
 				Get();
-				StackAllocInitializer saIn = new StackAllocInitializer(t, this); 
-				loc.Variable.Initializer = saIn; 
-				TypeReference tr; 
-				TypeOrNamespaceNode typeNode; 
+				StackAllocInitializer saIn = new StackAllocInitializer(t, this);
+				loc.Variable.Initializer = saIn;
+				TypeReference tr;
+				TypeOrNamespaceNode typeNode;
+				// :::
+				var stcInitNode = new StackAllocInitializerNode(start);
+				varDeclNode.Initializer = stcInitNode;
+				stcInitNode.StackAllocToken = t;
+				
 				Type(out tr, false, out typeNode);
-				saIn.Type = tr; 
+				saIn.Type = tr;
 				Expression expr; 
+				// :::
+				stcInitNode.TypeName = typeNode;
+				
 				Expect(97);
+				stcInitNode.OpenSquareToken = t; 
 				Expression(out expr, out exprNode);
 				saIn.Expression = expr; 
 				Expect(112);
-				saIn.Terminate(t); 
-			} else SynErr(182);
+				Terminate(saIn); 
+				// :::
+				stcInitNode.CloseSquareToken = t;
+				Terminate(stcInitNode);
+				
+			} else SynErr(181);
 		}
 		block.Add(loc.Variable); 
-		loc.Terminate(t);
+		Terminate(loc);
+		// :::
+		Terminate(varDeclNode);
 		
 	}
 
-	void VariableInitializer(out Initializer init) {
+	void VariableInitializer(out Initializer init, out VariableInitializerNode initNode) {
 		Expression expr; init = null; 
 		// :::
-		ExpressionNode exprNode;
+		initNode = null;
 		
-		if (StartOf(21)) {
+		if (StartOf(20)) {
+			ExpressionNode exprNode; 
 			Expression(out expr, out exprNode);
 			ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); 
-			init = expIn; expIn.Terminate(t); 
+			init = expIn; 
+			Terminate(expIn);
+			// :::
+			var exprInitNode = new ExpressionInitializerNode(exprNode);
+			initNode = exprInitNode;
+			
 		} else if (la.kind == 96) {
 			ArrayInitializer arrInit; 
-			ArrayInitializer(out arrInit);
+			ArrayInitializerNode arrInitNode; 
+			
+			ArrayInitializer(out arrInit, out arrInitNode);
 			init = arrInit; 
-		} else SynErr(183);
+			initNode = arrInitNode;
+			
+		} else SynErr(182);
 	}
 
-	void ArrayInitializer(out ArrayInitializer init) {
+	void ArrayInitializer(out ArrayInitializer init, out ArrayInitializerNode initNode) {
 		init = new ArrayInitializer(t, this); 
-		Initializer arrayInit = null; 
+		Initializer arrayInit = null;
+		initNode = null;
+		
 		Expect(96);
-		if (StartOf(20)) {
-			VariableInitializer(out arrayInit);
+		initNode = new ArrayInitializerNode(t); 
+		if (StartOf(19)) {
+			VariableInitializerNode varInitNode; 
+			VariableInitializer(out arrayInit, out varInitNode);
 			init.Initializers.Add(arrayInit); 
+			var initItem = new ArrayItemInitializerNode(varInitNode);
+			initNode.Items.Add(initItem);
+			
 			while (NotFinalComma()) {
 				Expect(87);
-				VariableInitializer(out arrayInit);
+				initItem.Separator = t; 
+				VariableInitializer(out arrayInit, out varInitNode);
 				init.Initializers.Add(arrayInit); 
+				initItem = new ArrayItemInitializerNode(varInitNode);
+				initNode.Items.Add(initItem);
+				
 			}
 			if (la.kind == 87) {
 				Get();
+				initItem.Separator = t; 
 			}
 		}
 		Expect(111);
-		init.Terminate(t); 
+		Terminate(init); 
+		Terminate(initNode);
+		
+	}
+
+	void FormalParameterTag(FormalParameterCollection pars, out FormalParameterNode parNode) {
+		TypeReference typeRef = null; 
+		AttributeCollection attrs = new AttributeCollection();
+		// :::
+		ExpressionNode exprNode;
+		var attrNodes = new AttributeDecorationNodeCollection();
+		parNode = null;
+		var modifier = FormalParameterModifier.In;
+		Token start = null;
+		
+		AttributeDecorations(attrs, attrNodes);
+		FormalParameter fp = new FormalParameter(t, this); 
+		fp.AssignAttributes(attrs);
+		
+		if (StartOf(21)) {
+			if (la.kind == 57) {
+				Get();
+				fp.Kind = FormalParameterKind.Ref; 
+				modifier = FormalParameterModifier.Ref;
+				
+			} else if (la.kind == 50) {
+				Get();
+				fp.Kind = FormalParameterKind.Out; 
+				modifier = FormalParameterModifier.Out;
+				
+			} else if (la.kind == 68) {
+				Get();
+				fp.Kind = FormalParameterKind.This; 
+				modifier = FormalParameterModifier.This;
+				
+			} else {
+				Get();
+				fp.Kind = FormalParameterKind.Params; 
+				fp.HasParams = true;
+				modifier = FormalParameterModifier.Params;
+				
+			}
+			start = t; 
+		}
+		TypeOrNamespaceNode typeNode; 
+		Type(out typeRef, false, out typeNode);
+		fp.Type = typeRef; 
+		if (start == null) start = typeNode.StartToken;
+		
+		Expect(1);
+		fp.Name = t.val; 
+		fp.Type = typeRef;
+		pars.Add(fp);
+		Terminate(fp);
+		// :::
+		parNode = new FormalParameterNode(start);
+		parNode.Modifier = modifier;
+		parNode.IdentifierToken = t;
+		parNode.TypeName = typeNode;
+		Terminate(parNode);
+		
 	}
 
 	void Attributes(AttributeCollection attrs, out AttributeDecorationNode attrNode) {
@@ -2523,7 +2614,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 			} else if (StartOf(22)) {
 				Keyword();
-			} else SynErr(184);
+			} else SynErr(183);
 			scope = t.val; 
 			// :::
 			attrNode.IdentifierToken = t;
@@ -2553,9 +2644,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			attrNode.ClosingSeparator = t; 
 		}
 		Expect(112);
-		attr.Terminate(t);
+		Terminate(attr);
 		// :::
-		attrNode.Terminate(t);
+		Terminate(attrNode);
 		
 	}
 
@@ -2869,7 +2960,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Get();
 			break;
 		}
-		default: SynErr(185); break;
+		default: SynErr(184); break;
 		}
 	}
 
@@ -2882,7 +2973,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		Expect(98);
 		argsNode.OpenParenthesis = t; 
-		if (StartOf(21)) {
+		if (StartOf(20)) {
 			arg = new AttributeArgument(t, this); 
 			if (IsAssignment()) {
 				Expect(1);
@@ -2900,10 +2991,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression(out expr, out exprNode);
 			arg.Expression = expr;
 			attr.Arguments.Add(arg); 
-			arg.Terminate(t);
+			Terminate(arg);
 			// :::
 			var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
-			argNode.Terminate(t);
+			Terminate(argNode);
 			argsNode.Arguments.Add(argNode);
 			
 			while (la.kind == 87) {
@@ -2923,22 +3014,22 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					// :::
 					equal = t;
 					
-				} else if (StartOf(21)) {
+				} else if (StartOf(20)) {
 					if (nameFound) Error("UNDEF", la, "no positional argument after named arguments"); 
-				} else SynErr(186);
+				} else SynErr(185);
 				Expression(out expr, out exprNode);
 				arg.Expression = expr; 
 				attr.Arguments.Add(arg); 
-				arg.Terminate(t);
+				Terminate(arg);
 				// :::
 				var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
-				argcNode.Terminate(t);
+				Terminate(argcNode);
 				argsNode.Arguments.Add(argcNode);
 				
 			}
 		}
 		Expect(113);
-		argsNode.Terminate(t); 
+		Terminate(argsNode); 
 	}
 
 	void PrimitiveType(out TypeReference typeRef, out TypeOrNamespaceNode typeNode) {
@@ -2962,11 +3053,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				typeRef = new TypeReference(t, this, typeof(bool)); 
 			}
-			typeRef.Terminate(t); 
+			Terminate(typeRef); 
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(187);
+		} else SynErr(186);
 	}
 
 	void PointerOrArray(TypeReference typeRef, TypeOrNamespaceNode typeNode) {
@@ -2993,9 +3084,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Expect(112);
 				typeRef.TypeModifiers.Add(new ArrayModifier(rank)); 
 				// :::
-				arrNode.Terminate(t);
+				Terminate(arrNode);
 				
-			} else SynErr(188);
+			} else SynErr(187);
 		}
 	}
 
@@ -3008,7 +3099,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			PrimitiveType(out typeRef, out typeNode);
 		} else if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 			ClassType(out typeRef, out typeNode);
-		} else SynErr(189);
+		} else SynErr(188);
 		if (la.kind == 110) {
 			Get();
 			typeRef.IsNullable = true;
@@ -3024,9 +3115,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			typeNode.TypeModifiers.Add(new PointerModifierNode(t));
 			
 		}
-		typeRef.Terminate(t); 
+		Terminate(typeRef); 
 		// :::
-		typeNode.Terminate(t);
+		Terminate(typeNode);
 		
 	}
 
@@ -3047,14 +3138,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(190);
+		} else SynErr(189);
 		if (IsNullableTypeMark()) {
 			Expect(110);
 			typeNode.NullableToken = t; 
 		}
 		PointerOrArray(typeRef, typeNode);
 		CompilationUnit.AddTypeToFix(typeRef);
-		typeRef.Terminate(t); 
+		Terminate(typeRef); 
 		
 	}
 
@@ -3072,11 +3163,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				typeRef = new TypeReference(t, this, typeof(string)); 
 			}
-			typeRef.Terminate(t); 
+			Terminate(typeRef); 
 			// :::
 			typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 			
-		} else SynErr(191);
+		} else SynErr(190);
 	}
 
 	void TypeArgumentList(TypeReferenceCollection args, out TypeArgumentListNode argList) {
@@ -3102,7 +3193,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			args.Add(paramType); 
 		}
 		Expect(93);
-		argList.Terminate(t); 
+		Terminate(argList); 
 	}
 
 	void Statement(IBlockOwner block, out StatementNode stmtNode) {
@@ -3128,7 +3219,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expect(114);
 		} else if (StartOf(24)) {
 			EmbeddedStatement(block);
-		} else SynErr(192);
+		} else SynErr(191);
 	}
 
 	void ConstStatement(IBlockOwner block, out StatementNode stmtNode) {
@@ -3155,10 +3246,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expression(out expr, out exprNode);
 		cs.Expression = expr;
 		if (block != null) block.Add(cs); 
-		cs.Terminate(t);
+		Terminate(cs);
 		// :::
 		cmTag.Expression = exprNode;
-		cmTag.Terminate(t);
+		Terminate(cmTag);
 		csNode.ConstTags.Add(cmTag);
 		
 		while (la.kind == 87) {
@@ -3175,15 +3266,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expression(out expr, out exprNode);
 			cs.Expression = expr;
 			if (block != null) block.Add(cs); 
-			cs.Terminate(t);
+			Terminate(cs);
 			// :::
 			cmcTag.Expression = exprNode;
-			cmcTag.Terminate(t);
+			Terminate(cmcTag);
 			csNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, cmTag));
 			
 		}
 		Expect(114);
-		csNode.Terminate(t); 
+		Terminate(csNode); 
 	}
 
 	void EmbeddedStatement(IBlockOwner block) {
@@ -3237,11 +3328,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				YieldReturnStatement(block);
 			} else if (la.kind == 10) {
 				YieldBreakStatement(block);
-			} else SynErr(193);
+			} else SynErr(192);
 			Expect(114);
 		} else if (la.kind == 31) {
 			FixedStatement(block);
-		} else SynErr(194);
+		} else SynErr(193);
 	}
 
 	void EmptyStatement(IBlockOwner block) {
@@ -3259,7 +3350,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		BlockStatementNode blockNode; 
 		Block(cb, out blockNode);
-		cb.Terminate(t); 
+		Terminate(cb); 
 	}
 
 	void UncheckedBlock(IBlockOwner block) {
@@ -3270,7 +3361,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		BlockStatementNode blockNode; 
 		Block(ucb, out blockNode);
-		ucb.Terminate(t); 
+		Terminate(ucb); 
 	}
 
 	void UnsafeBlock(IBlockOwner block) {
@@ -3281,7 +3372,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		BlockStatementNode blockNode; 
 		Block(usb, out blockNode);
-		usb.Terminate(t); 
+		Terminate(usb); 
 	}
 
 	void StatementExpression(IBlockOwner block) {
@@ -3306,9 +3397,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			asgn.RightOperand = rightExpr; 
 		} else if (la.kind == 87 || la.kind == 113 || la.kind == 114) {
 			if (isAssignment) Error("UNDEF", la, "error in assignment."); 
-		} else SynErr(195);
+		} else SynErr(194);
 		if (block != null) block.Add(es); 
-		es.Terminate(t); 
+		Terminate(es); 
 	}
 
 	void IfStatement(IBlockOwner block) {
@@ -3324,14 +3415,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(113);
 		ifs.CreateThenBlock(t); 
 		EmbeddedStatement(ifs.ThenStatements);
-		ifs.ThenStatements.Terminate(t); 
+		Terminate(ifs.ThenStatements); 
 		if (la.kind == 24) {
 			Get();
 			ifs.CreateElseBlock(t); 
 			EmbeddedStatement(ifs.ElseStatements);
-			ifs.ElseStatements.Terminate(t); 
+			Terminate(ifs.ElseStatements); 
 		}
-		ifs.Terminate(t); 
+		Terminate(ifs); 
 	}
 
 	void SwitchStatement(IBlockOwner block) {
@@ -3350,7 +3441,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		}
 		Expect(111);
 		if (block != null) block.Add(sws); 
-		sws.Terminate(t);
+		Terminate(sws);
 		
 	}
 
@@ -3366,7 +3457,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		whs.Condition = expr; 
 		Expect(113);
 		EmbeddedStatement(whs);
-		whs.Terminate(t); 
+		Terminate(whs); 
 	}
 
 	void DoWhileStatement(IBlockOwner block) {
@@ -3383,7 +3474,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		whs.Condition = expr; 
 		Expect(113);
 		Expect(114);
-		whs.Terminate(t); 
+		Terminate(whs); 
 	}
 
 	void ForStatement(IBlockOwner block) {
@@ -3398,7 +3489,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			ForInitializer(fs);
 		}
 		Expect(114);
-		if (StartOf(21)) {
+		if (StartOf(20)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			fs.Condition = expr; 
@@ -3410,7 +3501,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
-		fs.Terminate(t); 
+		Terminate(fs); 
 	}
 
 	void ForEachStatement(IBlockOwner block) {
@@ -3428,7 +3519,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeRef, false, out typeNode);
 			fes.Variable.ResultingType = typeRef; 
-		} else SynErr(196);
+		} else SynErr(195);
 		Expect(1);
 		fes.Variable.Name = t.val; 
 		Expect(38);
@@ -3438,7 +3529,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(113);
 		fes.Add(fes.Variable); 
 		EmbeddedStatement(fes);
-		fes.Terminate(t); 
+		Terminate(fes); 
 	}
 
 	void BreakStatement(IBlockOwner block) {
@@ -3447,7 +3538,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		BreakStatement bs = new BreakStatement(t, this, block); 
 		CurrentElement = bs; 
 		if (block != null) block.Add(bs); 
-		bs.Terminate(t); 
+		Terminate(bs); 
 	}
 
 	void ContinueStatement(IBlockOwner block) {
@@ -3456,7 +3547,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ContinueStatement cs = new ContinueStatement(t, this, block); 
 		CurrentElement = cs; 
 		if (block != null) block.Add(cs); 
-		cs.Terminate(t); 
+		Terminate(cs); 
 	}
 
 	void GotoStatement(IBlockOwner block) {
@@ -3476,9 +3567,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 20) {
 			Get();
 			gs.Name = t.val; 
-		} else SynErr(197);
+		} else SynErr(196);
 		Expect(114);
-		gs.Terminate(t); 
+		Terminate(gs); 
 	}
 
 	void ReturnStatement(IBlockOwner block) {
@@ -3486,14 +3577,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(58);
 		ReturnStatement yrs = new ReturnStatement(t, this, block); 
 		CurrentElement = yrs; 
-		if (StartOf(21)) {
+		if (StartOf(20)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			yrs.Expression = expr; 
 		}
 		Expect(114);
 		if (block != null) block.Add(yrs); 
-		yrs.Terminate(t); 
+		Terminate(yrs); 
 	}
 
 	void ThrowStatement(IBlockOwner block) {
@@ -3501,14 +3592,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expect(69);
 		ThrowStatement ts = new ThrowStatement(t, this, block); 
 		CurrentElement = ts; 
-		if (StartOf(21)) {
+		if (StartOf(20)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			ts.Expression = expr; 
 		}
 		Expect(114);
 		if (block != null) block.Add(ts); 
-		ts.Terminate(t); 
+		Terminate(ts); 
 	}
 
 	void TryFinallyBlock(IBlockOwner block) {
@@ -3526,15 +3617,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				ts.CreateFinallyBlock(t); 
 				Block(ts.FinallyBlock, out blockNode);
-				ts.FinallyBlock.Terminate(t); 
+				Terminate(ts.FinallyBlock); 
 			}
 		} else if (la.kind == 30) {
 			Get();
 			ts.CreateFinallyBlock(t); 
 			Block(ts.FinallyBlock, out blockNode);
-			ts.FinallyBlock.Terminate(t); 
-		} else SynErr(198);
-		ts.Terminate(t); 
+			Terminate(ts.FinallyBlock); 
+		} else SynErr(197);
+		Terminate(ts); 
 	}
 
 	void LockStatement(IBlockOwner block) {
@@ -3549,7 +3640,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ls.Expression = expr; 
 		Expect(113);
 		EmbeddedStatement(ls);
-		ls.Terminate(t); 
+		Terminate(ls); 
 	}
 
 	void UsingStatement(IBlockOwner block) {
@@ -3563,14 +3654,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (IsLocalVarDecl()) {
 			LocalVariableNode varNode; 
 			LocalVariableDeclaration(us, out varNode);
-		} else if (StartOf(21)) {
+		} else if (StartOf(20)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			us.ResourceExpression = expr; 
-		} else SynErr(199);
+		} else SynErr(198);
 		Expect(113);
 		EmbeddedStatement(us);
-		us.Terminate(t); 
+		Terminate(us); 
 	}
 
 	void YieldReturnStatement(IBlockOwner block) {
@@ -3582,7 +3673,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		CurrentElement = yrs; 
 		yrs.Expression = expr; 
 		if (block != null) block.Add(yrs); 
-		yrs.Terminate(t); 
+		Terminate(yrs); 
 	}
 
 	void YieldBreakStatement(IBlockOwner block) {
@@ -3590,7 +3681,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		YieldBreakStatement ybs = new YieldBreakStatement(t, this, block); 
 		CurrentElement = ybs; 
 		if (block != null) block.Add(ybs); 
-		ybs.Terminate(t); 
+		Terminate(ybs); 
 	}
 
 	void FixedStatement(IBlockOwner block) {
@@ -3626,7 +3717,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		}
 		Expect(113);
 		EmbeddedStatement(fs);
-		fs.Terminate(t); 
+		Terminate(fs); 
 	}
 
 	void SwitchSection(SwitchStatement sws) {
@@ -3649,7 +3740,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		while (IsNoSwitchLabelOrRBrace()) {
 			Statement(section, out stmtNode);
 		}
-		sws.Terminate(t); 
+		Terminate(sws); 
 	}
 
 	void ForInitializer(ForStatement fs) {
@@ -3662,7 +3753,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				StatementExpression(fs.InitializerBlock);
 			}
-		} else SynErr(200);
+		} else SynErr(199);
 	}
 
 	void ForIterator(ForStatement fs) {
@@ -3694,11 +3785,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expect(113);
 			BlockStatementNode blockNode; 
 			Block(cc, out blockNode);
-			cc.Terminate(t); 
+			Terminate(cc); 
 			if (la.kind == 13) {
 				CatchClauses(tryStm);
 			}
-		} else SynErr(201);
+		} else SynErr(200);
 	}
 
 	void Unary(out Expression expr, out ExpressionNode exprNode) {
@@ -3783,7 +3874,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				
 				break;
 			}
-			default: SynErr(202); break;
+			default: SynErr(201); break;
 			}
 			Expression unaryExpr; 
 			// :::
@@ -3796,7 +3887,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			  unOp.Operand = unaryExpr;
 			  expr = unOp;
 			}
-			unOp.Terminate(t);
+			Terminate(unOp);
 			// :::
 			if (unaryOp == null) exprNode = unaryNode;
 			else
@@ -3804,11 +3895,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			  unaryOp.Operand = unaryNode;
 			  exprNode = unaryOp;
 			}
-			unaryOp.Terminate(t);
+			Terminate(unaryOp);
 			
 		} else if (StartOf(27)) {
 			Primary(out expr, out exprNode);
-		} else SynErr(203);
+		} else SynErr(202);
 	}
 
 	void AssignmentOperator(out BinaryOperator op, out BinaryOperatorNode opNode) {
@@ -3897,7 +3988,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 			break;
 		}
-		default: SynErr(204); break;
+		default: SynErr(203); break;
 		}
 	}
 
@@ -3912,7 +4003,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		} else if (la.kind == 20) {
 			Get();
 			Expect(86);
-		} else SynErr(205);
+		} else SynErr(204);
 	}
 
 	void LambdaFunctionSignature(LambdaExpression lambda) {
@@ -3925,9 +4016,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			} else if (la.kind != _rpar) {
 				ImplicitLambdaParameterList(lambda);
 			} else if (la.kind == 113) {
-			} else SynErr(206);
+			} else SynErr(205);
 			Expect(113);
-		} else SynErr(207);
+		} else SynErr(206);
 	}
 
 	void ExplicitLambdaParameterList(LambdaExpression lambda) {
@@ -3967,14 +4058,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 
 	void LambdaFunctionBody(LambdaExpression lambda) {
 		ExpressionNode exprNode; 
-		if (StartOf(21)) {
+		if (StartOf(20)) {
 			Expression expr; 
 			Expression(out expr, out exprNode);
 			lambda.Expression = expr; 
 		} else if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(lambda, out blockNode);
-		} else SynErr(208);
+		} else SynErr(207);
 	}
 
 	void FromClause(out FromClause fromClause) {
@@ -3989,14 +4080,14 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Type(out typeRef, false, out typeNode);
 			fromClause.Type = typeRef; 
 		} else if (la.kind == 1) {
-		} else SynErr(209);
+		} else SynErr(208);
 		Expect(1);
 		fromClause.Name = t.val; 
 		Expect(38);
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		fromClause.Expression = expr; 
-		fromClause.Terminate(t); 
+		Terminate(fromClause); 
 	}
 
 	void QueryBody(QueryBody body) {
@@ -4007,7 +4098,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			SelectClause(body);
 		} else if (la.kind == 133) {
 			GroupClause(body);
-		} else SynErr(210);
+		} else SynErr(209);
 		if (la.kind == 128) {
 			QueryContinuation(body);
 		}
@@ -4034,7 +4125,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			OrderByClause obClause; 
 			OrderByClause(out obClause);
 			body.Clauses.Add(obClause); 
-		} else SynErr(211);
+		} else SynErr(210);
 	}
 
 	void SelectClause(QueryBody body) {
@@ -4044,7 +4135,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expression(out expr, out exprNode);
 		body.Select = new SelectClause(t, this); 
 		body.Select.Expression = expr; 
-		body.Select.Terminate(t); 
+		Terminate(body.Select); 
 	}
 
 	void GroupClause(QueryBody body) {
@@ -4058,7 +4149,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expression byExpr; 
 		Expression(out byExpr, out exprNode);
 		body.GroupBy.ByExpression = byExpr; 
-		body.GroupBy.Terminate(t); 
+		Terminate(body.GroupBy); 
 	}
 
 	void QueryContinuation(QueryBody body) {
@@ -4079,7 +4170,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		letClause.Expression = expr; 
-		letClause.Terminate(t); 
+		Terminate(letClause); 
 	}
 
 	void WhereClause(out WhereClause whereClause) {
@@ -4089,7 +4180,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		Expression expr; 
 		Expression(out expr, out exprNode);
 		whereClause.Expression = expr; 
-		whereClause.Terminate(t); 
+		Terminate(whereClause); 
 	}
 
 	void JoinClause(out JoinClause joinClause) {
@@ -4103,7 +4194,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Type(out typeRef, false, out typeNode);
 			joinClause.Type = typeRef; 
 		} else if (la.kind == 1) {
-		} else SynErr(212);
+		} else SynErr(211);
 		Expect(1);
 		joinClause.Name = t.val; 
 		Expect(38);
@@ -4123,7 +4214,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Expect(1);
 			joinClause.IntoIdentifier = t.val; 
 		}
-		joinClause.Terminate(t); 
+		Terminate(joinClause); 
 	}
 
 	void OrderByClause(out OrderByClause obClause) {
@@ -4134,7 +4225,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Get();
 			OrderingClause(obClause);
 		}
-		obClause.Terminate(t); 
+		Terminate(obClause); 
 	}
 
 	void OrderingClause(OrderByClause obClause) {
@@ -4153,7 +4244,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			}
 		}
 		oc.Expression = expr; 
-		oc.Terminate(t); 
+		Terminate(oc); 
 	}
 
 	void NullCoalescingExpr(out BinaryOperator expr, out BinaryOperatorNode exprNode) {
@@ -4379,7 +4470,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					oper = new GreaterThanOrEqualOperator(t, this); 
 					opNode = new GreaterThanOrEqualOperatorNode(t);
 					
-				} else SynErr(213);
+				} else SynErr(212);
 				oper.LeftOperand = expr;
 				opNode.LeftOperand = exprNode;
 				Expression unExpr; 
@@ -4405,7 +4496,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 					oper = new AsOperator(t, this); 
 					opNode = new AsOperatorNode(t);
 					
-				} else SynErr(214);
+				} else SynErr(213);
 				oper.LeftOperand = expr;
 				TypeReference typeRef; 
 				TypeOrNamespaceNode typeNode;
@@ -4415,8 +4506,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				opNode.RightOperand = new TypeOperatorNode(typeNode);
 				expr = oper;
 				exprNode = opNode;
-				oper.Terminate(t);
-				opNode.Terminate(t); 
+				Terminate(oper);
+				Terminate(opNode); 
 				
 			}
 		}
@@ -4444,7 +4535,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				oper = new RightShiftOperator(t, this); 
 				opNode = new RightShiftOperatorNode(start, t);
 				
-			} else SynErr(215);
+			} else SynErr(214);
 			oper.LeftOperand = expr;
 			opNode.LeftOperand = exprNode;
 			Expression unExpr; 
@@ -4530,10 +4621,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Unary(out unExpr, out unaryNode);
 			oper.RightOperand = unExpr;
 			expr = oper;
-			oper.Terminate(t);
+			Terminate(oper);
 			opNode.RightOperand = unaryNode;
 			exprNode = opNode;
-			opNode.Terminate(t);
+			Terminate(opNode);
 			
 		}
 	}
@@ -4560,7 +4651,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 			Expect(113);
 			if (innerExpr != null) innerExpr.BracketsUsed = true; 
-			pExprNode.Terminate(t);
+			Terminate(pExprNode);
 			
 			break;
 		}
@@ -4587,7 +4678,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			break;
 		}
 		case 46: {
-			NewOperator(out innerExpr);
+			NewOperator(out innerExpr, out innerNode);
 			break;
 		}
 		case 72: {
@@ -4603,18 +4694,18 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			break;
 		}
 		case 20: {
-			DefaultOperator(out innerExpr);
+			DefaultOperator(out innerExpr, out innerNode);
 			break;
 		}
 		case 21: {
-			AnonymousDelegate(out innerExpr);
+			AnonymousDelegate(out innerExpr, out innerNode);
 			break;
 		}
 		case 62: {
 			SizeOfOperator(out innerExpr, out innerNode);
 			break;
 		}
-		default: SynErr(216); break;
+		default: SynErr(215); break;
 		}
 		Expression curExpr = innerExpr; 
 		var curExprNode = innerNode;
@@ -4676,7 +4767,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				CurrentArgumentList(alop.Arguments, invNode.Arguments);
 				Expect(113);
 				curExpr = alop; 
-				invNode.Terminate(t);
+				Terminate(invNode);
 				curExprNode = invNode;
 				
 				break;
@@ -4690,11 +4781,11 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				ArrayIndexer(aiop, indNode.Arguments);
 				curExpr = aiop; 
 				Expect(112);
-				indNode.Terminate(t); 
+				Terminate(indNode); 
 				break;
 			}
 			}
-			curExpr.Terminate(t); 
+			Terminate(curExpr); 
 		}
 		expr = curExpr; 
 		exprNode = curExprNode;
@@ -4756,7 +4847,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			
 			break;
 		}
-		default: SynErr(217); break;
+		default: SynErr(216); break;
 		}
 	}
 
@@ -4841,7 +4932,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			pml = new PrimitiveNamedLiteral(t, this, typeof(ushort)); 
 			break;
 		}
-		default: SynErr(218); break;
+		default: SynErr(217); break;
 		}
 		expr = pml; 
 		var pnNode = new PrimitiveNamedNode(t);
@@ -4851,10 +4942,10 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		pnNode.SeparatorToken = t; 
 		Expect(1);
 		pml.Name = t.val;
-		pml.Terminate(t);
+		Terminate(pml);
 		// :::
 		pnNode.IdentifierToken = t;
-		pnNode.Terminate(t);
+		Terminate(pnNode);
 		
 	}
 
@@ -4887,27 +4978,35 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			TypeArgumentList(nl.TypeArguments, out argList);
 			nlNode.Arguments = argList; 
 		}
-		nl.Terminate(t); 
+		Terminate(nl); 
 		// :::
-		nlNode.Terminate(t);
+		Terminate(nlNode);
 		
 	}
 
-	void NewOperator(out Expression expr) {
+	void NewOperator(out Expression expr, out ExpressionNode exprNode) {
+		exprNode = null; 
 		Expect(46);
-		NewOperator nop = new NewOperator(t, this); 
-		expr = nop; 
+		NewOperator nop = new NewOperator(t, this);
+		expr = nop;
 		TypeReference typeRef; 
+		
 		if (la.kind == 96) {
-			AnonymousObjectInitializer(nop);
+			var anonNode = new NewOperatorWithAnonymousTypeNode(t); 
+			AnonymousObjectInitializer(nop, anonNode);
+			exprNode = anonNode; 
 		} else if (StartOf(32)) {
 			TypeOrNamespaceNode typeNode; 
 			NonArrayType(out typeRef, out typeNode);
 			NewOperatorWithType(nop, typeRef);
 		} else if (la.kind == 97) {
-			ImplicitArrayCreation(nop);
+			var impArrNode = new NewOperatorWithImplicitArrayNode(t); 
+			ImplicitArrayCreation(nop, impArrNode);
 			nop.Kind = NewOperatorKind.UntypedArrayInitialization; 
-		} else SynErr(219);
+			exprNode = impArrNode;
+			
+		} else SynErr(218);
+		Terminate(exprNode); 
 	}
 
 	void TypeOfOperator(out Expression expr, out ExpressionNode exprNode) {
@@ -4927,9 +5026,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		topNode.TypeName = typeNode;
 		
 		Expect(113);
-		top.Terminate(t); 
+		Terminate(top); 
 		topNode.CloseParenthesis = t;
-		exprNode.Terminate(t);
+		Terminate(exprNode);
 		
 	}
 
@@ -4950,9 +5049,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		copNode.Expression = innerNode;
 		
 		Expect(113);
-		cop.Terminate(t); 
+		Terminate(cop); 
 		copNode.CloseParenthesis = t;
-		exprNode.Terminate(t);
+		Terminate(exprNode);
 		
 	}
 
@@ -4973,48 +5072,77 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		uopNode.Expression = innerNode;
 		
 		Expect(113);
-		uop.Terminate(t); 
+		Terminate(uop); 
 		uopNode.CloseParenthesis = t;
-		exprNode.Terminate(t);
+		Terminate(exprNode);
 		
 	}
 
-	void DefaultOperator(out Expression expr) {
+	void DefaultOperator(out Expression expr, out ExpressionNode exprNode) {
+		exprNode = null; 
 		Expect(20);
 		DefaultOperator dop = new DefaultOperator(t, this); 
+		var defNode = new DefaultOperatorNode(t);
+		exprNode = defNode;
+		
 		Expect(98);
 		expr = dop; 
 		Expression innerExpr; 
+		// :::
+		defNode.OpenParenthesis = t;
 		ExpressionNode primNode;
 		
 		Primary(out innerExpr, out primNode);
 		dop.Operand = innerExpr; 
+		// :::
+		defNode.Expression = primNode;    
 		Expect(113);
-		dop.Terminate(t); 
+		Terminate(dop); 
+		// :::
+		defNode.CloseParenthesis = t;
+		Terminate(defNode);
+		
 	}
 
-	void AnonymousDelegate(out Expression expr) {
+	void AnonymousDelegate(out Expression expr, out ExpressionNode exprNode) {
+		exprNode = null; 
 		Expect(21);
-		AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this); 
-		CurrentElement = adop; 
+		AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this);
+		CurrentElement = adop;
+		/// :::
+		var adNode = new AnonymousDelegateNode(t);
+		exprNode = adNode;
+		
 		if (la.kind == 98) {
 			FormalParameter param; 
 			Get();
+			var parsNode = new FormalParameterListNode(t); 
+			adNode.ParameterList = parsNode;
+			
 			if (StartOf(33)) {
-				AnonymousMethodParameter(out param);
+				FormalParameterNode parNode; 
+				AnonymousMethodParameter(out param, out parNode);
 				adop.FormalParameters.Add(param); 
+				parsNode.Items.Add(parNode);
+				
 				while (la.kind == 87) {
 					Get();
-					AnonymousMethodParameter(out param);
+					var separator = t; 
+					AnonymousMethodParameter(out param, out parNode);
 					adop.FormalParameters.Add(param); 
+					parsNode.Items.Add(new FormalParameterContinuationNode(separator, parNode));
+					
 				}
 			}
 			Expect(113);
+			Terminate(parsNode); 
 		}
 		BlockStatementNode blockNode; 
 		Block(adop, out blockNode);
 		expr = adop; 
-		adop.Terminate(t); 
+		Terminate(adop); 
+		Terminate(exprNode);
+		
 	}
 
 	void SizeOfOperator(out Expression expr, out ExpressionNode exprNode) {
@@ -5034,9 +5162,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		sopNode.TypeName = typeNode;
 		
 		Expect(113);
-		sop.Terminate(t); 
+		Terminate(sop); 
 		sopNode.CloseParenthesis = t;
-		exprNode.Terminate(t);
+		Terminate(exprNode);
 		
 	}
 
@@ -5050,8 +5178,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			TypeArgumentList(expr.TypeArguments, out argList);
 			snlNode.Arguments = argList; 
 		}
-		expr.Terminate(t); 
-		snlNode.Terminate(t);
+		Terminate(expr); 
+		Terminate(snlNode);
 		
 	}
 
@@ -5068,7 +5196,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		{
 		  var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
 		  argNode.Expression = exprNode;
-		  argNode.Terminate(t);
+		  Terminate(argNode);
 		  argNodes.Add(argNode);
 		}
 		
@@ -5082,21 +5210,26 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			{
 			  var argNode = new ArgumentContinuationNode(separator);
 			  argNode.Expression = exprNode;
-			  argNode.Terminate(t);
+			  Terminate(argNode);
 			  argNodes.Add(argNode);
 			}
 			
 		}
 	}
 
-	void AnonymousObjectInitializer(NewOperator nop) {
+	void AnonymousObjectInitializer(NewOperator nop, NewOperatorWithAnonymousTypeNode anonNode) {
 		Expect(96);
+		anonNode.OpenBrace = t; 
 		MemberDeclaratorList mInitList; 
-		MemberDeclaratorList(out mInitList);
+		MemberDeclaratorList(out mInitList, anonNode);
 		if (la.kind == 87) {
 			Get();
+			anonNode.OrphanComma = t; 
 		}
 		Expect(111);
+		anonNode.CloseBrace = t; 
+		Terminate(anonNode);
+		
 	}
 
 	void NewOperatorWithType(NewOperator nop, TypeReference typeRef) {
@@ -5126,7 +5259,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				nop.RunningDimensions++; 
 			}
 			Expect(112);
-			ArrayInitializer(out arrayInit);
+			ArrayInitializerNode initNode; 
+			ArrayInitializer(out arrayInit, out initNode);
 			nop.Initializer = arrayInit; 
 		} else if (la.kind == 97) {
 			Get();
@@ -5150,72 +5284,107 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			}
 			nop.Kind = NewOperatorKind.TypedArrayCreation; 
 			if (la.kind == 96) {
-				ArrayInitializer(out arrayInit);
+				ArrayInitializerNode initNode; 
+				ArrayInitializer(out arrayInit, out initNode);
 				nop.Initializer = arrayInit; 
 				nop.Kind = NewOperatorKind.TypedArrayInitialization; 
 			}
-		} else SynErr(220);
-		nop.Terminate(t); 
+		} else SynErr(219);
+		Terminate(nop); 
 	}
 
-	void ImplicitArrayCreation(NewOperator nop) {
+	void ImplicitArrayCreation(NewOperator nop, NewOperatorWithImplicitArrayNode impArrNode) {
 		ArrayInitializer arrayInit;
 		nop.IsImplicitArray = true;
 		
 		Expect(97);
+		impArrNode.OpenSquareBracket = t;
 		nop.RunningDimensions = 1; 
+		
 		while (la.kind == 87) {
 			Get();
 			nop.RunningDimensions++; 
+			impArrNode.Commas.Add(t);
+			
 		}
 		Expect(112);
+		impArrNode.CloseSquareBracket = t; 
 		if (la.kind == 96) {
-			ArrayInitializer(out arrayInit);
+			ArrayInitializerNode initNode; 
+			ArrayInitializer(out arrayInit, out initNode);
 			nop.Initializer = arrayInit; 
+			impArrNode.Initializer = initNode;
+			
 		}
+		Terminate(impArrNode); 
 	}
 
-	void MemberDeclaratorList(out MemberDeclaratorList initList) {
+	void MemberDeclaratorList(out MemberDeclaratorList initList, NewOperatorWithAnonymousTypeNode initNode) {
 		initList = new MemberDeclaratorList(t, this);
 		MemberDeclarator mInit;
 		
-		MemberDeclarator(out mInit);
+		MemberDeclaratorNode mdNode; 
+		MemberDeclarator(out mInit, out mdNode);
 		initList.Initializers.Add(mInit); 
+		initNode.Declarators.Add(mdNode);
+		
 		while (NotFinalComma()) {
 			Expect(87);
-			MemberDeclarator(out mInit);
+			var separator = t; 
+			MemberDeclarator(out mInit, out mdNode);
 			initList.Initializers.Add(mInit); 
+			initNode.Declarators.Add(new MemberDeclaratorContinuationNode(separator, mdNode));
+			
 		}
-		initList.Terminate(t); 
+		Terminate(initList); 
 	}
 
-	void MemberDeclarator(out MemberDeclarator init) {
+	void MemberDeclarator(out MemberDeclarator init, out MemberDeclaratorNode mdNode) {
 		init = null; 
 		Expression expr = null;
 		ExpressionNode exprNode;
+		mdNode = null;
 		
 		if (IsMemberInitializer()) {
 			Expect(1);
 			Token start = t; 
+			mdNode = new MemberDeclaratorNode(t);
+			mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.Expression;
+			
 			Expect(85);
+			mdNode.EqualToken = t; 
 			Expression(out expr, out exprNode);
 			init = new MemberDeclarator(start, this, expr, start.val); 
+			mdNode.Expression = exprNode;
+			
 		} else if (StartOf(27)) {
 			Token start = la; 
 			ExpressionNode primNode;
 			
 			Primary(out expr, out primNode);
 			init = new MemberDeclarator(start, this, expr, start.val, true); 
+			mdNode = new MemberDeclaratorNode(primNode == null ? t : primNode.StartToken);
+			mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.SimpleName;
+			mdNode.Expression = primNode;
+			
 		} else if (StartOf(34)) {
 			Token start = la; 
 			TypeReference typeRef;
 			TypeOrNamespaceNode typeNode;
 			
 			PredefinedType(out typeRef, out typeNode);
+			mdNode = new MemberDeclaratorNode(typeNode.StartToken);
+			mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.MemberAccess;
+			mdNode.TypeName = typeNode;
+			
 			Expect(90);
+			mdNode.DotSeparator = t; 
 			Expect(1);
 			init = new MemberDeclarator(start, this, typeRef, start.val); 
-		} else SynErr(221);
+			mdNode.IdentifierToken = t;
+			
+		} else SynErr(220);
+		Terminate(mdNode); 
 	}
 
 	void ObjectOrCollectionInitializer(out Initializer init) {
@@ -5227,9 +5396,9 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			MemberInitializerList mInitList; 
 			MemberInitializerList(out mInitList);
 			init = mInitList; 
-		} else if (StartOf(20)) {
+		} else if (StartOf(19)) {
 			CollectionInitializer(out init);
-		} else SynErr(222);
+		} else SynErr(221);
 		Expect(111);
 	}
 
@@ -5247,7 +5416,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (la.kind == 87) {
 			Get();
 		}
-		initList.Terminate(t); 
+		Terminate(initList); 
 	}
 
 	void CollectionInitializer(out Initializer init) {
@@ -5257,7 +5426,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 		ElementInitializerList(out elInit);
 		collInit.Initializers.Add(elInit); 
-		init.Terminate(t); 
+		Terminate(init); 
 	}
 
 	void ElementInitializerList(out Initializer init) {
@@ -5275,7 +5444,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		if (la.kind == 87) {
 			Get();
 		}
-		init.Terminate(t); 
+		Terminate(init); 
 	}
 
 	void ElementInitializer(out Initializer init) {
@@ -5297,8 +5466,8 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); 
 			}
 			Expect(111);
-		} else SynErr(223);
-		if (init != null) init.Terminate(t); 
+		} else SynErr(222);
+		Terminate(init); 
 	}
 
 	void MemberInitializer(out MemberInitializer init) {
@@ -5315,28 +5484,47 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			Initializer compoundInit; 
 			ObjectOrCollectionInitializer(out compoundInit);
 			init = new MemberInitializer(startToken, this, compoundInit); 
-		} else SynErr(224);
-		init.Terminate(t); 
+		} else SynErr(223);
+		Terminate(init); 
 	}
 
-	void AnonymousMethodParameter(out FormalParameter param) {
-		param = new FormalParameter(t, this); 
+	void AnonymousMethodParameter(out FormalParameter param, out FormalParameterNode parNode) {
+		param = new FormalParameter(t, this);
+		var modifier = FormalParameterModifier.In; 
+		Token start = null;
+		parNode = null;
+		
 		if (la.kind == 50 || la.kind == 57) {
 			if (la.kind == 57) {
 				Get();
 				param.Kind = FormalParameterKind.Ref; 
+				modifier = FormalParameterModifier.Ref; 
+				
 			} else {
 				Get();
 				param.Kind = FormalParameterKind.Out; 
+				modifier = FormalParameterModifier.Out; 
+				
 			}
+			start = t; 
 		}
-		TypeReference typeRef; 
+		TypeReference typeRef;
 		TypeOrNamespaceNode typeNode; 
+		
 		Type(out typeRef, false, out typeNode);
 		param.Type = typeRef; 
+		if (start == null) start = typeNode.StartToken;
+		
 		Expect(1);
-		param.Name = t.val; 
-		param.Terminate(t); 
+		param.Name = t.val;
+		Terminate(param);
+		// :::
+		parNode = new FormalParameterNode(start);
+		parNode.Modifier = modifier;
+		parNode.IdentifierToken = t;
+		parNode.TypeName = typeNode;
+		Terminate(parNode);
+		
 	}
 
 	void SingleFieldMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
@@ -5353,11 +5541,12 @@ TypeReference typeRef, bool isEvent) {
 		if (la.kind == 85) {
 			Get();
 			Initializer init; 
-			VariableInitializer(out init);
+			VariableInitializerNode varInitNode; 
+			VariableInitializer(out init, out varInitNode);
 			fd.Initializer = init; 
 		}
 		td.AddMember(fd); 
-		fd.Terminate(t); 
+		Terminate(fd); 
 	}
 
 	void TypeParameter(out TypeParameter tp, out AttributeDecorationNodeCollection attrNodes,
@@ -5412,7 +5601,7 @@ out Token identifier) {
 			// :::
 			tag = new TypeParameterConstraintTagNode(typeNode);       
 			
-		} else SynErr(225);
+		} else SynErr(224);
 	}
 
 
@@ -5468,12 +5657,12 @@ out Token identifier) {
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,T,T, x,x,x,x, T,T,T,x, x,x,x,x, T,T,T,x, x,T,x,x, T,x,T,T, T,T,T,x, T,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x},
 		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, T,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,T,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,x, T,x,T,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,T,T, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,T,x, x,x,x,T, x,T,T,T, T,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, T,x,x,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,T,x, x,x,x,x, x,T,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
 		{x,T,T,T, T,T,x,x, T,T,T,T, x,x,T,T, x,x,T,T, T,T,T,T, x,x,x,x, x,T,x,T, T,T,T,T, T,x,x,T, x,x,x,T, T,x,T,T, T,x,x,x, x,x,x,x, x,x,T,T, x,T,T,x, x,T,x,T, T,T,T,T, T,T,T,T, T,T,T,x, x,x,T,T, x,x,x,x, T,x,x,x, x,x,x,T, T,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,T,T, T,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x},
@@ -5660,71 +5849,70 @@ out Token identifier) {
 			case 158: s = "invalid Expression"; break;
 			case 159: s = "invalid Expression"; break;
 			case 160: s = "invalid Type"; break;
-			case 161: s = "invalid FormalParameterList"; break;
-			case 162: s = "invalid EventDeclaration"; break;
+			case 161: s = "invalid EventDeclaration"; break;
+			case 162: s = "invalid ConstructorDeclaration"; break;
 			case 163: s = "invalid ConstructorDeclaration"; break;
-			case 164: s = "invalid ConstructorDeclaration"; break;
-			case 165: s = "invalid MethodDeclaration"; break;
-			case 166: s = "invalid OperatorDeclaration"; break;
+			case 164: s = "invalid MethodDeclaration"; break;
+			case 165: s = "invalid OperatorDeclaration"; break;
+			case 166: s = "invalid CastOperatorDeclaration"; break;
 			case 167: s = "invalid CastOperatorDeclaration"; break;
-			case 168: s = "invalid CastOperatorDeclaration"; break;
+			case 168: s = "invalid EventAccessorDeclarations"; break;
 			case 169: s = "invalid EventAccessorDeclarations"; break;
-			case 170: s = "invalid EventAccessorDeclarations"; break;
+			case 170: s = "invalid AccessorDeclarations"; break;
 			case 171: s = "invalid AccessorDeclarations"; break;
 			case 172: s = "invalid AccessorDeclarations"; break;
 			case 173: s = "invalid AccessorDeclarations"; break;
-			case 174: s = "invalid AccessorDeclarations"; break;
-			case 175: s = "invalid OverloadableOp"; break;
+			case 174: s = "invalid OverloadableOp"; break;
+			case 175: s = "invalid InterfaceMemberDeclaration"; break;
 			case 176: s = "invalid InterfaceMemberDeclaration"; break;
 			case 177: s = "invalid InterfaceMemberDeclaration"; break;
-			case 178: s = "invalid InterfaceMemberDeclaration"; break;
+			case 178: s = "invalid InterfaceAccessors"; break;
 			case 179: s = "invalid InterfaceAccessors"; break;
-			case 180: s = "invalid InterfaceAccessors"; break;
-			case 181: s = "invalid LocalVariableDeclaration"; break;
-			case 182: s = "invalid LocalVariableDeclarator"; break;
-			case 183: s = "invalid VariableInitializer"; break;
-			case 184: s = "invalid Attributes"; break;
-			case 185: s = "invalid Keyword"; break;
-			case 186: s = "invalid AttributeArguments"; break;
-			case 187: s = "invalid PrimitiveType"; break;
-			case 188: s = "invalid PointerOrArray"; break;
-			case 189: s = "invalid NonArrayType"; break;
-			case 190: s = "invalid TypeInRelExpr"; break;
-			case 191: s = "invalid PredefinedType"; break;
-			case 192: s = "invalid Statement"; break;
+			case 180: s = "invalid LocalVariableDeclaration"; break;
+			case 181: s = "invalid LocalVariableDeclarator"; break;
+			case 182: s = "invalid VariableInitializer"; break;
+			case 183: s = "invalid Attributes"; break;
+			case 184: s = "invalid Keyword"; break;
+			case 185: s = "invalid AttributeArguments"; break;
+			case 186: s = "invalid PrimitiveType"; break;
+			case 187: s = "invalid PointerOrArray"; break;
+			case 188: s = "invalid NonArrayType"; break;
+			case 189: s = "invalid TypeInRelExpr"; break;
+			case 190: s = "invalid PredefinedType"; break;
+			case 191: s = "invalid Statement"; break;
+			case 192: s = "invalid EmbeddedStatement"; break;
 			case 193: s = "invalid EmbeddedStatement"; break;
-			case 194: s = "invalid EmbeddedStatement"; break;
-			case 195: s = "invalid StatementExpression"; break;
-			case 196: s = "invalid ForEachStatement"; break;
-			case 197: s = "invalid GotoStatement"; break;
-			case 198: s = "invalid TryFinallyBlock"; break;
-			case 199: s = "invalid UsingStatement"; break;
-			case 200: s = "invalid ForInitializer"; break;
-			case 201: s = "invalid CatchClauses"; break;
+			case 194: s = "invalid StatementExpression"; break;
+			case 195: s = "invalid ForEachStatement"; break;
+			case 196: s = "invalid GotoStatement"; break;
+			case 197: s = "invalid TryFinallyBlock"; break;
+			case 198: s = "invalid UsingStatement"; break;
+			case 199: s = "invalid ForInitializer"; break;
+			case 200: s = "invalid CatchClauses"; break;
+			case 201: s = "invalid Unary"; break;
 			case 202: s = "invalid Unary"; break;
-			case 203: s = "invalid Unary"; break;
-			case 204: s = "invalid AssignmentOperator"; break;
-			case 205: s = "invalid SwitchLabel"; break;
+			case 203: s = "invalid AssignmentOperator"; break;
+			case 204: s = "invalid SwitchLabel"; break;
+			case 205: s = "invalid LambdaFunctionSignature"; break;
 			case 206: s = "invalid LambdaFunctionSignature"; break;
-			case 207: s = "invalid LambdaFunctionSignature"; break;
-			case 208: s = "invalid LambdaFunctionBody"; break;
-			case 209: s = "invalid FromClause"; break;
-			case 210: s = "invalid QueryBody"; break;
-			case 211: s = "invalid QueryBodyClause"; break;
-			case 212: s = "invalid JoinClause"; break;
+			case 207: s = "invalid LambdaFunctionBody"; break;
+			case 208: s = "invalid FromClause"; break;
+			case 209: s = "invalid QueryBody"; break;
+			case 210: s = "invalid QueryBodyClause"; break;
+			case 211: s = "invalid JoinClause"; break;
+			case 212: s = "invalid RelExpr"; break;
 			case 213: s = "invalid RelExpr"; break;
-			case 214: s = "invalid RelExpr"; break;
-			case 215: s = "invalid ShiftExpr"; break;
-			case 216: s = "invalid Primary"; break;
-			case 217: s = "invalid Literal"; break;
-			case 218: s = "invalid PrimitiveNamedLiteral"; break;
-			case 219: s = "invalid NewOperator"; break;
-			case 220: s = "invalid NewOperatorWithType"; break;
-			case 221: s = "invalid MemberDeclarator"; break;
-			case 222: s = "invalid ObjectOrCollectionInitializer"; break;
-			case 223: s = "invalid ElementInitializer"; break;
-			case 224: s = "invalid MemberInitializer"; break;
-			case 225: s = "invalid TypeParameterConstraintTag"; break;
+			case 214: s = "invalid ShiftExpr"; break;
+			case 215: s = "invalid Primary"; break;
+			case 216: s = "invalid Literal"; break;
+			case 217: s = "invalid PrimitiveNamedLiteral"; break;
+			case 218: s = "invalid NewOperator"; break;
+			case 219: s = "invalid NewOperatorWithType"; break;
+			case 220: s = "invalid MemberDeclarator"; break;
+			case 221: s = "invalid ObjectOrCollectionInitializer"; break;
+			case 222: s = "invalid ElementInitializer"; break;
+			case 223: s = "invalid MemberInitializer"; break;
+			case 224: s = "invalid TypeParameterConstraintTag"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

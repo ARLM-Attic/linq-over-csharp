@@ -1,55 +1,58 @@
 // ================================================================================================
-// LocalVariableNode.cs
+// NewOperatorWithAnonymousTypeNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.ParserFiles;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable declaration
+  /// This class represents a "new" operator with anonymous type declaration.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public class NewOperatorWithAnonymousTypeNode : NewOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
+    /// Initializes a new instance of the <see cref="NewOperatorWithAnonymousTypeNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="start">The start.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
-      : base(typeNode.StartToken)
+    public NewOperatorWithAnonymousTypeNode(Token start)
+      : base(start)
     {
-      VariableTags = new LocalVariableTagNodeCollection();
+      Declarators = new MemberDeclaratorNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type.
+    /// Gets or sets the opening brace token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public Token OpenBrace { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is an implicit type declaration.
+    /// Gets the declarators of this initializer.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
-    {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.val == "var"; }
-    }
+    public MemberDeclaratorNodeCollection Declarators { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets variable tags within this variable declaration.
+    /// Gets the optional orphan comma token.
     /// </summary>
-    /// <value>The variables.</value>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableTagNodeCollection VariableTags { get; private set; }
+    public Token OrphanComma { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the closing brace token.
+    /// </summary>
+    /// <value>The open brace.</value>
+    // ----------------------------------------------------------------------------------------------
+    public Token CloseBrace { get; internal set; }
   }
 }

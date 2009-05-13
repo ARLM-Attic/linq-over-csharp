@@ -12,7 +12,7 @@ namespace CSharpFactory.Syntax
   /// This type represents the "sizeof" operator
   /// </summary>
   // ================================================================================================
-  public class SizeofOperatorNode : EmbeddedTypeNode
+  public class SizeofOperatorNode : EmbeddedTypeOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

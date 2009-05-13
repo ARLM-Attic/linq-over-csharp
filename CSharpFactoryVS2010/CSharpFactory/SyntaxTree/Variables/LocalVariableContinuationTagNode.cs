@@ -18,11 +18,15 @@ namespace CSharpFactory.Syntax
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalVariableContinuationTagNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="node">Continuation tag node.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableContinuationTagNode(Token start)
-      : base(start)
+    public LocalVariableContinuationTagNode(Token separator, LocalVariableTagNode node)
+      : base(separator)
     {
+      IdentifierToken = node.IdentifierToken;
+      Initializer = node.Initializer;
+      SeparatorToken = separator;
     }
 
     // ----------------------------------------------------------------------------------------------

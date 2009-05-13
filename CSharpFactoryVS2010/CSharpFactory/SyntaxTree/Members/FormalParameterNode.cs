@@ -1,28 +1,37 @@
 // ================================================================================================
-// LocalVariableNode.cs
+// FormalParameterNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.12, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.ParserFiles;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable declaration
+  /// This class declares a formal parameter node on a formal parameter list.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public class FormalParameterNode : AttributedDeclarationNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
+    /// Initializes a new instance of the <see cref="FormalParameterNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
-      : base(typeNode.StartToken)
+    public FormalParameterNode(Token start)
+      : base(start)
     {
-      VariableTags = new LocalVariableTagNodeCollection();
+      Modifier = FormalParameterModifier.In;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the formal parameter modifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public FormalParameterModifier Modifier { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -33,23 +42,32 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is an implicit type declaration.
+    /// Gets the identifier token.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
+    public Token IdentifierToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the alias identifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
     {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.val == "var"; }
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.val; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets variable tags within this variable declaration.
+    /// Gets a value indicating whether this instance has identifier.
     /// </summary>
-    /// <value>The variables.</value>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableTagNodeCollection VariableTags { get; private set; }
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
   }
 }

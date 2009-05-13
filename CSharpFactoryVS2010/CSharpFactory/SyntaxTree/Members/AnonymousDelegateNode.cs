@@ -1,7 +1,7 @@
 // ================================================================================================
-// ExpressionInitializerNode.cs
+// AnonymousDelegateNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,31 +9,28 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an expression initializer.
+  /// This class represents an anonymous delegate.
   /// </summary>
   // ================================================================================================
-  public sealed class ExpressionInitializerNode : VariableInitializerNode
+  public class AnonymousDelegateNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="AnonymousDelegateNode"/> class.
     /// </summary>
-    /// <param name="expression">Initializer expression.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionInitializerNode(ExpressionNode expression)
-      : base(expression == null ? new Token() : expression.StartToken)
-      // TODO: Revise initialization
+    public AnonymousDelegateNode(Token start)
+      : base(start)
     {
-      Expression = expression;
-      Terminate(expression == null ? new Token() : expression.TerminatingToken);
-      // TODO: Revise termination here
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the initializer.
+    /// Gets or sets the parameter list.
     /// </summary>
+    /// <value>The parameter list.</value>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public FormalParameterListNode ParameterList { get; internal set; }
   }
 }

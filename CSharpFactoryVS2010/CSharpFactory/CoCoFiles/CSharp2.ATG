@@ -292,7 +292,7 @@ ExternAliasDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
   .)
   ";"
   (. 
-     externAlias.Terminate(t); 
+     Terminate(externAlias); 
      // ::: 
      parentNode.AddExternAlias(start, alias, identifier, t);
   .)
@@ -337,7 +337,7 @@ UsingDirective<NamespaceFragment parent, NamespaceScopeNode parentNode>
      CurrentElement = uc;
      if (parent == null) File.Usings.Add(uc);
      else parent.Usings.Add(uc); 
-     uc.Terminate(t);
+     Terminate(uc);
      // :::
      if (alias == null)
        parentNode.AddUsing(start, nsNode, t);
@@ -403,9 +403,9 @@ GlobalAttributes
   ]
   "]"                          
   (. 
-     attr.Terminate(t); 
+     Terminate(attr); 
      // :::
-     globAttrNode.Terminate(t);
+     Terminate(globAttrNode);
      SourceFileNode.GlobalAttributes.Add(globAttrNode);
   .)
 .
@@ -464,17 +464,17 @@ NamespaceMemberDeclaration<NamespaceFragment parent, SourceFile file,
   { NamespaceMemberDeclaration<ns, File, nsDecl> } 
   "}"
   (. 
-     ns.Terminate(t); 
+     Terminate(ns); 
      // :::
      nsDecl.CloseBracket = t;
-     nsDecl.Terminate(t);
+     Terminate(nsDecl);
   .)
   [ 
     ";"
     (. 
-       ns.Terminate(t); 
+       Terminate(ns); 
        // :::
-       nsDecl.Terminate(t);
+       Terminate(nsDecl);
     .)
   ]
   | 
@@ -544,7 +544,7 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
      {
         td.SetModifiers(m.Value); 
         td.AssignAttributes(attrs);
-        td.Terminate(t);
+        Terminate(td);
      }
      // :::
      if (typeDecl != null)
@@ -552,7 +552,7 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
        typeDecl.IsPartial = isPartial;
        typeDecl.DeclaringNamespace = parentNs;
        typeDecl.DeclaringType = declaringType;
-       typeDecl.Terminate(t);
+       Terminate(typeDecl);
      }
   .)                               
 .
@@ -599,10 +599,10 @@ ClassDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
        typeDecl.TypeParameterConstraints.Add(constrNode);
     .)
   } ClassBody<td, classDecl>
-  (. typeDecl.Terminate(t); .)
+  (. Terminate(typeDecl); .)
   [ 
     ";" 
-    (. typeDecl.Terminate(t); .)
+    (. Terminate(typeDecl); .)
   ]                                                       
 .
 
@@ -717,10 +717,10 @@ StructDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
     .)
   } 
   StructBody<td, structDecl>
-  (. typeDecl.Terminate(t); .)
+  (. Terminate(typeDecl); .)
   [ 
     ";" 
-    (. typeDecl.Terminate(t); .)
+    (. Terminate(typeDecl); .)
   ]                                                       
 .
 
@@ -792,16 +792,16 @@ EnumDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration td,
   ] 
   EnumBody<ed, enumDecl>                   
   (. 
-     ed.Terminate(t); 
+     Terminate(ed); 
      // :::
-     typeDecl.Terminate(t);
+     Terminate(typeDecl);
   .)
   [ 
     ";"                          
     (. 
-       ed.Terminate(t); 
+       Terminate(ed); 
        // :::
-       typeDecl.Terminate(t);
+       Terminate(typeDecl);
     .)
   ]                                                       
 .
@@ -847,7 +847,7 @@ EnumMemberDeclaration<EnumDeclaration ed>
                              (.
                                 ev.AssignAttributes(attrs);
                                 ed.Values.Add(ev);
-                                ev.Terminate(t);
+                                Terminate(ev);
                              .)
 .
 
@@ -880,8 +880,10 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
   .)
   [ TypeParameterList<dd, typeDecl> ]
   "(" 
-  [ FormalParameterList<dd.FormalParameters> ] 
+  (. var parList = new FormalParameterListNode(t); .)
+  [ FormalParameterList<dd.FormalParameters, parList> ] 
   ")"
+  (. Terminate(parList); .)
   {                                                
     (. 
        TypeParameterConstraint constraint; 
@@ -895,7 +897,7 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
     .)
   } 
   ";"                                                         
-  (. typeDecl.Terminate(t); .)
+  (. Terminate(typeDecl); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -934,10 +936,10 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
       Block<dd, out blockNode> | ";" 
     )
     (. 
-       dd.Terminate(t);
+       Terminate(dd);
        td.AddMember(dd); 
        // :::
-       memNode.Terminate(t);
+       Terminate(memNode);
     .)
 .
 
@@ -1036,7 +1038,7 @@ ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
     (. constNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, tagNode)); .)
   } 
   ";"
-  (. memNode.Terminate(t); .)
+  (. Terminate(memNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -1072,10 +1074,10 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   Expression<out expr, out exprNode>
   (. 
      cd.Expression = expr; 
-     cd.Terminate(t);
+     Terminate(cd);
      // :::
      tagNode.Expression = exprNode;
-     tagNode.Terminate(t);
+     Terminate(tagNode);
   .)
 .
 
@@ -1107,7 +1109,7 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
                                  (. ep.ExplicitName = memberRef; .)
                                  (. td.AddMember(ep); .)
     EventAccessorDeclarations<ep>
-    "}"                          (. ep.Terminate(t); .)
+    "}"                          (. Terminate(ep); .)
   )
 .
 
@@ -1128,10 +1130,12 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
                                cd.AssignAttributes(attrs);
                             .)
     "(" 
+    (. var parList = new FormalParameterListNode(t); .)
     [                                    
-      FormalParameterList<cd.FormalParameters>
+      FormalParameterList<cd.FormalParameters, parList>
     ] 
     ")" 
+    (. Terminate(parList); .)
     [                                        
       ":" ( "base"          (. cd.HasBase = true; .)
       | "this"              (. cd.HasThis = true; .)
@@ -1144,7 +1148,7 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
       | ";" 
       )   (. 
                                td.AddMember(cd); 
-                               cd.Terminate(t);
+                               Terminate(cd);
                             .)
 .
 
@@ -1170,7 +1174,7 @@ PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
      AccessorDeclarations<pd> 
   "}"             (. 
                      td.AddMember(pd); 
-                     pd.Terminate(t);
+                     Terminate(pd);
                   .)
 .
 
@@ -1200,12 +1204,17 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
                      }
                      ind.ResultingType = typeRef;
                   .)
-  "this" "[" [ FormalParameterList<ind.FormalParameters> ] "]" 
+  "this" 
+  "[" 
+  (. var parList = new FormalParameterListNode(t); .)
+  [ FormalParameterList<ind.FormalParameters, parList> ] 
+  "]" 
+  (. Terminate(parList); .)
   "{" 
       AccessorDeclarations<ind> 
   "}"             (. 
                      td.AddMember(ind); 
-                     ind.Terminate(t);
+                     Terminate(ind);
                   .)
 .
 
@@ -1229,9 +1238,11 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
                                                        md.ResultingType = typeRef;
                                                     .)
   [ TypeParameterList<md, null> ]
-  "(" [ 
-    FormalParameterList<md.FormalParameters>
-  ] ")"
+  "(" 
+  (. var parList = new FormalParameterListNode(t); .)
+  [ FormalParameterList<md.FormalParameters, parList> ] 
+  ")"
+  (. Terminate(parList); .)
   {                                                 
     (. 
        TypeParameterConstraint constraint; 
@@ -1250,7 +1261,7 @@ MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef,
     | ";"                                           (. md.HasBody = false; .)
   )                                                 (. 
                                                        td.AddMember(md); 
-                                                       md.Terminate(t);
+                                                       Terminate(md);
                                                     .)
 .
 
@@ -1278,16 +1289,18 @@ CastOperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
                                            cod.ResultingType = typeRef;
                                            cod.Name = typeRef.TailName;
                                         .)
-    "("                                 
-      [ FormalParameterList<cod.FormalParameters> ]   
-    ")"                                 
+    "("   
+    (. var parList = new FormalParameterListNode(t); .)
+      [ FormalParameterList<cod.FormalParameters, parList> ]   
+    ")"
+    (. Terminate(parList); .)
     ( 
       (. BlockStatementNode blockNode; .)
       Block<cod, out blockNode> 
     | ";" 
     )                (. 
                                            td.AddMember(cod); 
-                                           cod.Terminate(t);
+                                           Terminate(cod);
                                         .)
 .
 
@@ -1310,16 +1323,21 @@ OperatorDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRe
                                    .)
   "operator" 
   OverloadableOp<out op>           (. od.Operator = op; .)
-  "("                              (. od.Name = op.ToString(); .)
-    [ FormalParameterList<od.FormalParameters> ]
+  "("
+  (. 
+     var parList = new FormalParameterListNode(t);
+     od.Name = op.ToString(); 
+  .)
+  [ FormalParameterList<od.FormalParameters, parList> ]
   ")"
+  (. Terminate(parList); .)
   ( 
     (. BlockStatementNode blockNode; .)
     Block<od, out blockNode> 
   | ";" 
   )              (. 
                                       td.AddMember(od); 
-                                      od.Terminate(t);
+                                      Terminate(od);
                                    .)
 .
 
@@ -1369,11 +1387,11 @@ InterfaceDeclaration<Modifiers m, TypeDeclaration parentType, bool isPartial,
   "}" 
   (. 
      intfDecl.CloseBrace = t;
-     typeDecl.Terminate(t);
+     Terminate(typeDecl);
   .)
   [ 
     ";" 
-    (. typeDecl.Terminate(t); .)
+    (. Terminate(typeDecl); .)
   ]                                                       
 .
 
@@ -1413,7 +1431,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd, InterfaceDeclarationNode ty
         (. prop.ExplicitName = memberRef; .)
         (. prop.AssignAttributes(attrs); .)
         (. prop.SetModifiers(m.Value); .)
-        "{" InterfaceAccessors<prop> "}" (. prop.Terminate(t); .)
+        "{" InterfaceAccessors<prop> "}" (. Terminate(prop); .)
       )
     | (. 
          IndexerDeclaration ind = new IndexerDeclaration(t, ifd);
@@ -1423,8 +1441,13 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd, InterfaceDeclarationNode ty
          ind.Name = "";
          ind.ResultingType = typeRef;
       .)
-      "this" "[" [ FormalParameterList<ind.FormalParameters> ] "]" 
-      "{" InterfaceAccessors<ind> "}" (. ind.Terminate(t); .)
+      "this" 
+      "[" 
+      (. var parList = new FormalParameterListNode(t); .)
+      [ FormalParameterList<ind.FormalParameters, parList> ] 
+      "]" 
+      (. Terminate(parList); .)
+      "{" InterfaceAccessors<ind> "}" (. Terminate(ind); .)
     )
   | InterfaceEventDeclaration<attrs, m, ifd>
   ) 
@@ -1453,7 +1476,7 @@ InterfaceEventDeclaration<AttributeCollection attrs, Modifiers m, InterfaceDecla
         .)
   ";"   (. 
            ifd.AddMember(fd); 
-           fd.Terminate(t);
+           Terminate(fd);
         .)
 .
 
@@ -1479,136 +1502,266 @@ LocalVariableDeclaration<IBlockOwner block, out LocalVariableNode varNode>
   |
     Type<out typeRef, false, out typeNode>
   )
-  (. if (typeNode != null) varNode = new LocalVariableNode(typeNode); .)
-  LocalVariableDeclarator<block, typeRef, isImplicit>
-  { "," LocalVariableDeclarator<block, typeRef, isImplicit> }
+  (. 
+     if (typeNode != null) varNode = new LocalVariableNode(typeNode); 
+     LocalVariableTagNode varTagNode;
+  .)
+  LocalVariableDeclarator<block, typeRef, isImplicit, out varTagNode>
+  (. if (varNode != null) varNode.VariableTags.Add(varTagNode); .)
+  { 
+    "," 
+    (. var separator = t; .)
+    LocalVariableDeclarator<block, typeRef, isImplicit, out varTagNode> 
+    (. 
+       if (varNode != null) varNode.VariableTags.Add(
+         new LocalVariableContinuationTagNode(separator, varTagNode)); 
+    .)
+  }
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declares a local variable within a block with the specified type.
-// +block: Block the variable is declared within.
-// +typeRef: Type of the variable to declare.
-// +isImplicit: Indicates if the local declaration is implicit or not.
-// ------------------------------------------------------------------------------------
-LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplicit>
-        (. ExpressionNode exprNode; .)
+//   block: Block the variable is declared within.
+//   typeRef: Type of the variable to declare.
+//   isImplicit: Indicates if the local declaration is implicit or not.
+//   varDeclNode: Local variable declaration node
+// ------------------------------------------------------------------------------------------------
+LocalVariableDeclarator<IBlockOwner block, TypeReference typeRef, bool isImplicit,
+  out LocalVariableTagNode varDeclNode>
+  (. 
+     ExpressionNode exprNode; 
+     varDeclNode = null;
+  .)
 = 
-  ident (. LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); .)
-        (. CurrentElement = loc; .)
-        (. loc.Name = t.val; .)
-        (. loc.Variable.ResultingType = typeRef; .)
-        (. loc.Variable.IsImplicit = isImplicit; .)
-        (. if (block != null) block.Statements.Add(loc); .)       
+  ident 
+  (. 
+     LocalVariableDeclaration loc = new LocalVariableDeclaration(t, this, block); 
+     CurrentElement = loc; 
+     loc.Name = t.val;
+     loc.Variable.ResultingType = typeRef;
+     loc.Variable.IsImplicit = isImplicit;
+     if (block != null) block.Statements.Add(loc); 
+     // :::
+     varDeclNode = new LocalVariableTagNode(t);
+  .)       
   [
     "="
     (. var start = t; .) 
-    (   (. Initializer init; .)
-      VariableInitializer<out init> (. loc.Variable.Initializer = init; .)
-      | "stackalloc" 
-        (. StackAllocInitializer saIn = new StackAllocInitializer(t, this); .)
-        (. loc.Variable.Initializer = saIn; .)
-        (. TypeReference tr; .)
-      (. TypeOrNamespaceNode typeNode; .)
+    (   
+      (. 
+         Initializer init;
+         VariableInitializerNode varInitNode; 
+      .)
+      VariableInitializer<out init, out varInitNode> 
+      (. 
+         loc.Variable.Initializer = init; 
+         varDeclNode.Initializer = varInitNode;
+      .)
+    | 
+      "stackalloc" 
+      (. 
+         StackAllocInitializer saIn = new StackAllocInitializer(t, this);
+         loc.Variable.Initializer = saIn;
+         TypeReference tr;
+         TypeOrNamespaceNode typeNode;
+         // :::
+         var stcInitNode = new StackAllocInitializerNode(start);
+         varDeclNode.Initializer = stcInitNode;
+         stcInitNode.StackAllocToken = t;
+      .)
       Type<out tr, false, out typeNode> 
-        (. saIn.Type = tr; .)
-        (. Expression expr; .)
+      (. 
+         saIn.Type = tr;
+         Expression expr; 
+         // :::
+         stcInitNode.TypeName = typeNode;
+      .)
       "[" 
-        Expression<out expr, out exprNode> 
-        (. saIn.Expression = expr; .)
-      "]" (. saIn.Terminate(t); .)
+      (. stcInitNode.OpenSquareToken = t; .)
+      Expression<out expr, out exprNode> 
+      (. saIn.Expression = expr; .)
+      "]" 
+      (. 
+         Terminate(saIn); 
+         // :::
+         stcInitNode.CloseSquareToken = t;
+         Terminate(stcInitNode);
+      .)
     )
   ]
-        (. 
-           block.Add(loc.Variable); 
-           loc.Terminate(t);
-        .)
+  (. 
+     block.Add(loc.Variable); 
+     Terminate(loc);
+     // :::
+     Terminate(varDeclNode);
+  .)
 . 
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Creates an initializer.
-// +init: Initializer created.
-// ------------------------------------------------------------------------------------
-VariableInitializer<out Initializer init> 
-                        (. 
-                            Expression expr; init = null; 
-                            // :::
-                            ExpressionNode exprNode;
-                        .)
+//   init: Initializer created.
+//   initNode: Initializer node created.
+// ------------------------------------------------------------------------------------------------
+VariableInitializer<out Initializer init, out VariableInitializerNode initNode> 
+  (. 
+     Expression expr; init = null; 
+     // :::
+     initNode = null;
+  .)
 = 
-  Expression<out expr, out exprNode>  
-                        (. ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); .)
-                        (. init = expIn; expIn.Terminate(t); .)
-  |                     (. ArrayInitializer arrInit; .)
-    ArrayInitializer<out arrInit> (. init = arrInit; .)
+    (. ExpressionNode exprNode; .)
+    Expression<out expr, out exprNode>  
+    (. 
+       ExpressionInitializer expIn = new ExpressionInitializer(t, this, expr); 
+       init = expIn; 
+       Terminate(expIn);
+       // :::
+       var exprInitNode = new ExpressionInitializerNode(exprNode);
+       initNode = exprInitNode;
+    .)
+  | 
+    (. 
+       ArrayInitializer arrInit; 
+       ArrayInitializerNode arrInitNode; 
+    .)
+    ArrayInitializer<out arrInit, out arrInitNode> 
+    (. 
+       init = arrInit; 
+       initNode = arrInitNode;
+    .)
 .
 
-// ------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------
 // Creates an array initializer.
-// +init: Initializer created.
-// ------------------------------------------------------------------------------------
-ArrayInitializer<out ArrayInitializer init> (. init = new ArrayInitializer(t, this); .)
-= (. Initializer arrayInit = null; .)
-  "{" 
+//   init: Initializer created.
+//   initNode: Initializer node created.
+// -----------------------------------------------------------------------------------------------
+ArrayInitializer<out ArrayInitializer init, out ArrayInitializerNode initNode> 
+  (. 
+     init = new ArrayInitializer(t, this); 
+     Initializer arrayInit = null;
+     initNode = null;
+  .)
+= 
+  "{"
+  (. initNode = new ArrayInitializerNode(t); .)
   [ 
-    VariableInitializer<out arrayInit> 
-    (. init.Initializers.Add(arrayInit); .)
+    (. VariableInitializerNode varInitNode; .)
+    VariableInitializer<out arrayInit, out varInitNode> 
+    (. 
+       init.Initializers.Add(arrayInit); 
+       var initItem = new ArrayItemInitializerNode(varInitNode);
+       initNode.Items.Add(initItem);
+    .)
     {
-      IF (NotFinalComma()) ","
-      VariableInitializer<out arrayInit> 
-      (. init.Initializers.Add(arrayInit); .)
+      IF (NotFinalComma()) 
+      ","
+      (. initItem.Separator = t; .)
+      VariableInitializer<out arrayInit, out varInitNode> 
+      (. 
+         init.Initializers.Add(arrayInit); 
+         initItem = new ArrayItemInitializerNode(varInitNode);
+         initNode.Items.Add(initItem);
+    .)
     } 
     [ 
-      "," 
+      ","
+      (. initItem.Separator = t; .)
     ] 
   ] 
-  "}" (. init.Terminate(t); .)
+  "}" 
+  (. 
+     Terminate(init); 
+     Terminate(initNode);
+  .)
 .
 
-// ------------------------------------------------------------------------------------
-// Declaration of a formal parameter list
-// +pars List holding the formal parameter declarations.
-// ------------------------------------------------------------------------------------
-FormalParameterList<FormalParameterCollection pars>                                                  
-=                                      (. 
-                                          TypeReference typeRef = null; 
-                                          AttributeCollection attrs = new AttributeCollection();
-                                          // :::
-                                          ExpressionNode exprNode;
-                                          var attrNodes = new AttributeDecorationNodeCollection();
-                                       .)
+// ------------------------------------------------------------------------------------------------
+// Defines an item on the list of formal parameters.
+//   pars List holding the formal parameter declarations.
+// ------------------------------------------------------------------------------------------------
+FormalParameterTag<FormalParameterCollection pars, out FormalParameterNode parNode>
+  (. 
+     TypeReference typeRef = null; 
+     AttributeCollection attrs = new AttributeCollection();
+     // :::
+     ExpressionNode exprNode;
+     var attrNodes = new AttributeDecorationNodeCollection();
+     parNode = null;
+     var modifier = FormalParameterModifier.In;
+     Token start = null;
+  .)
+=
   AttributeDecorations<attrs, attrNodes>                                       
-                                       (. 
-                                          FormalParameter fp = new FormalParameter(t, this); 
-                                          fp.AssignAttributes(attrs);
-                                       .)
-  (                                    
-    [ 
-      "ref"                            (. fp.Kind = FormalParameterKind.Ref; .) 
-      | "out"                          (. fp.Kind = FormalParameterKind.Out; .)
-      | "this"                         (. fp.Kind = FormalParameterKind.This; .)
-    ] 
-    (. TypeOrNamespaceNode typeNode; .)
-    Type<out typeRef, false, out typeNode>
-                                       (. fp.Type = typeRef; .)
-    ident                              (. 
-                                          fp.Name = t.val; 
-                                          fp.Type = typeRef;
-                                          pars.Add(fp);
-                                          fp.Terminate(t);
-                                       .)
-    [ "," FormalParameterList<pars> ]
-  | "params" 
-    (. fp.HasParams = true; .)
-    (. TypeOrNamespaceNode typeNode; .)
-    Type<out typeRef, false, out typeNode>
-                                       (. if (!typeRef.IsArray) { Error("UNDEF", la, "params argument must be an array"); } .)
-    ident                              (. fp.Name = t.val; .)
-                                       (. fp.Type = typeRef; .)
-                                       (. 
-                                          pars.Add(fp); 
-                                          fp.Terminate(t);
-                                       .)
-  )
+  (. 
+     FormalParameter fp = new FormalParameter(t, this); 
+     fp.AssignAttributes(attrs);
+  .)
+  [ 
+    (
+      "ref"                            
+      (. 
+         fp.Kind = FormalParameterKind.Ref; 
+         modifier = FormalParameterModifier.Ref;
+      .) 
+    | "out"                          
+      (. 
+         fp.Kind = FormalParameterKind.Out; 
+         modifier = FormalParameterModifier.Out;
+      .)
+    | "this"                         
+      (. 
+         fp.Kind = FormalParameterKind.This; 
+         modifier = FormalParameterModifier.This;
+      .)
+    | "params"                    
+      (. 
+         fp.Kind = FormalParameterKind.Params; 
+         fp.HasParams = true;
+         modifier = FormalParameterModifier.Params;
+      .)
+    )
+    (. start = t; .)
+  ] 
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeRef, false, out typeNode>
+  (. 
+     fp.Type = typeRef; 
+     if (start == null) start = typeNode.StartToken;
+  .)
+  ident                              
+  (. 
+     fp.Name = t.val; 
+     fp.Type = typeRef;
+     pars.Add(fp);
+     Terminate(fp);
+     // :::
+     parNode = new FormalParameterNode(start);
+     parNode.Modifier = modifier;
+     parNode.IdentifierToken = t;
+     parNode.TypeName = typeNode;
+     Terminate(parNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a formal parameter list
+//   pars List holding the formal parameter declarations.
+// ------------------------------------------------------------------------------------------------
+FormalParameterList<FormalParameterCollection pars, FormalParameterListNode parsNode>  
+  (. FormalParameterNode node; .)                                                
+=                                    
+  FormalParameterTag<pars, out node>
+  (. if (parsNode != null && node != null) parsNode.Items.Add(node); .)
+  {
+    ","
+    (. var separator = t; .)
+    FormalParameterTag<pars, out node>
+    (. 
+       if (parsNode != null && node != null) 
+         parsNode.Items.Add(new FormalParameterContinuationNode(separator, node)); 
+    .)
+  }
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -1641,14 +1794,14 @@ CurrentArgumentList<ArgumentList argList, ArgumentNodeCollection argNodes>
     (. 
        arg.Expression = expr;
        if (argList != null) argList.Add(arg); 
-       arg.Terminate(t);
+       Terminate(arg);
        if (argNodes != null)
        {
          var argNode = new ArgumentNode(argKind == null ? 
            (exprNode == null ? t : exprNode.StartToken) : argKind);
          argNode.KindToken = argKind;
          argNode.Expression = exprNode;
-         argNode.Terminate(t);
+         Terminate(argNode);
          argNodes.Add(argNode);
        }
     .)
@@ -1671,13 +1824,13 @@ CurrentArgumentList<ArgumentList argList, ArgumentNodeCollection argNodes>
       (. 
          arg.Expression = expr;
          if (argList != null) argList.Add(arg); 
-         arg.Terminate(t);
+         Terminate(arg);
          if (argNodes != null)
          {
            var argNode = new ArgumentContinuationNode(separator);
            argNode.KindToken = argKind;
            argNode.Expression = exprNode;
-           argNode.Terminate(t);
+           Terminate(argNode);
            argNodes.Add(argNode);
          }
       .)
@@ -1716,7 +1869,7 @@ AccessorDeclarations<PropertyDeclaration prop>
                        (. accessor.HasBody = true; .)
   | ";"                               (. accessor.HasBody = false; .)
   )                                   (. 
-                                         accessor.Terminate(t);
+                                         Terminate(accessor);
                                          accessor.SetModifiers(am.Value); 
                                          accessor.AssignAttributes(attrs);
                                       .)
@@ -1747,7 +1900,7 @@ AccessorDeclarations<PropertyDeclaration prop>
       Block<accessor, out blockNode>                 (. accessor.HasBody = true; .)
     | ";"                             (. accessor.HasBody = false; .)
     )                                 (. 
-                                         accessor.Terminate(t);
+                                         Terminate(accessor);
                                          accessor.SetModifiers(am.Value); 
                                          accessor.AssignAttributes(attrs);
                                       .)
@@ -1782,7 +1935,7 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
   (. BlockStatementNode blockNode; .)
   Block<accessor, out blockNode>
                            (. 
-                                             accessor.Terminate(t);
+                                             Terminate(accessor);
                                              accessor.HasBody = true;
                                              accessor.SetModifiers(am.Value); 
                                              accessor.AssignAttributes(attrs); 
@@ -1812,7 +1965,7 @@ EventAccessorDeclarations<EventPropertyDeclaration prop>
     ) 
     Block<accessor, out blockNode>
                            (. 
-                                             accessor.Terminate(t);
+                                             Terminate(accessor);
                                              accessor.HasBody = true;
                                              accessor.SetModifiers(am.Value); 
                                              accessor.AssignAttributes(attrs); 
@@ -1844,7 +1997,7 @@ InterfaceAccessors<PropertyDeclaration prop>
                                         (. CurrentElement = accessor; .)
   | ident                               (. Error("UNDEF", la, "set or get expected"); .)
   ) ";"                                 (. 
-                                           accessor.Terminate(t);
+                                           Terminate(accessor);
                                            accessor.SetModifiers(am.Value); 
                                            accessor.AssignAttributes(attrs); 
                                         .)
@@ -1870,7 +2023,7 @@ InterfaceAccessors<PropertyDeclaration prop>
                                         .)
     | ident                             (. Error("UNDEF", la, "set or get expected"); .)
     ) ";"                               (. 
-                                           accessor.Terminate(t);
+                                           Terminate(accessor);
                                            accessor.SetModifiers(am.Value); 
                                            accessor.AssignAttributes(attrs); 
                                         .)
@@ -1928,9 +2081,9 @@ Attributes<AttributeCollection attrs, out AttributeDecorationNode attrNode>
   ] 
   "]"                          
   (.
-     attr.Terminate(t);
+     Terminate(attr);
      // :::
-     attrNode.Terminate(t);
+     Terminate(attrNode);
   .)
 .
 
@@ -1988,7 +2141,7 @@ Attribute<out AttributeDeclaration attr, out AttributeNode attrNode>
   [ 
     AttributeArguments<attr, attrNode>
   ]
-  (. attr.Terminate(t); .)
+  (. Terminate(attr); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2027,10 +2180,10 @@ AttributeArguments<AttributeDeclaration attr, AttributeNode argsNode>
       (. 
          arg.Expression = expr;
          attr.Arguments.Add(arg); 
-         arg.Terminate(t);
+         Terminate(arg);
          // :::
          var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
-         argNode.Terminate(t);
+         Terminate(argNode);
          argsNode.Arguments.Add(argNode);
       .)
       { 
@@ -2059,16 +2212,16 @@ AttributeArguments<AttributeDeclaration attr, AttributeNode argsNode>
         (.  
            arg.Expression = expr; 
            attr.Arguments.Add(arg); 
-           arg.Terminate(t);
+           Terminate(arg);
            // :::
            var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
-           argcNode.Terminate(t);
+           Terminate(argcNode);
            argsNode.Arguments.Add(argcNode);
         .)
       }
     ]
   ")"   
-  (. argsNode.Terminate(t); .)
+  (. Terminate(argsNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2134,7 +2287,7 @@ Type<out TypeReference typeRef, bool voidAllowed, out TypeOrNamespaceNode typeNo
   PointerOrArray<typeRef, typeNode>
   (. 
      CompilationUnit.AddTypeToFix(typeRef);
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
   .)
 .
 
@@ -2173,9 +2326,9 @@ NonArrayType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
     .)
   ]
   (. 
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
      // :::
-     typeNode.Terminate(t);
+     Terminate(typeNode);
   .)
 .
 
@@ -2209,7 +2362,7 @@ TypeInRelExpr<out TypeReference typeRef, out TypeOrNamespaceNode typeNode, bool 
   PointerOrArray<typeRef, typeNode>
   (. 
      CompilationUnit.AddTypeToFix(typeRef);
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
   .)
 .
 
@@ -2248,7 +2401,7 @@ PointerOrArray<TypeReference typeRef, TypeOrNamespaceNode typeNode>
       (. 
          typeRef.TypeModifiers.Add(new ArrayModifier(rank)); 
          // :::
-         arrNode.Terminate(t);
+         Terminate(arrNode);
       .)
     )
   }
@@ -2271,7 +2424,7 @@ PredefinedType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
     (. typeRef = new TypeReference(t, this, typeof(string)); .)
   )                                    
   (. 
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
      // :::
      typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
   .)                                 
@@ -2301,7 +2454,7 @@ PrimitiveType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
     (. typeRef = new TypeReference(t, this, typeof(bool)); .)
   )
   (. 
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
      // :::
      typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
   .)
@@ -2335,7 +2488,7 @@ IntegralType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
     (. typeRef = new TypeReference(t, this, typeof(char)); .)
   )               
   (. 
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
      // :::
      typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
   .)
@@ -2361,7 +2514,7 @@ ClassType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
     (. typeRef = new TypeReference(t, this, typeof(string)); .)
   )                                    
   (. 
-     typeRef.Terminate(t); 
+     Terminate(typeRef); 
      // :::
      typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
   .)                                 
@@ -2567,7 +2720,7 @@ Block<IBlockOwner block, out BlockStatementNode blockNode>
     (. if (stmtNode != null) blockNode.Statements.Add(stmtNode); .)
   } 
   "}"
-  (. blockNode.Terminate(t); .)
+  (. Terminate(blockNode); .)
 .
 
 
@@ -2589,7 +2742,7 @@ SwitchStatement<IBlockOwner block>
   } 
   "}"                     (. 
                              if (block != null) block.Add(sws); 
-                             sws.Terminate(t);
+                             Terminate(sws);
                           .)
 .
 
@@ -2626,10 +2779,10 @@ ConstStatement<IBlockOwner block, out StatementNode stmtNode>
   (. 
      cs.Expression = expr;
      if (block != null) block.Add(cs); 
-     cs.Terminate(t);
+     Terminate(cs);
      // :::
      cmTag.Expression = exprNode;
-     cmTag.Terminate(t);
+     Terminate(cmTag);
      csNode.ConstTags.Add(cmTag);
   .)
   { 
@@ -2649,15 +2802,15 @@ ConstStatement<IBlockOwner block, out StatementNode stmtNode>
     (. 
        cs.Expression = expr;
        if (block != null) block.Add(cs); 
-       cs.Terminate(t);
+       Terminate(cs);
        // :::
        cmcTag.Expression = exprNode;
-       cmcTag.Terminate(t);
+       Terminate(cmcTag);
        csNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, cmTag));
     .)
   } 
   ";"
-  (. csNode.Terminate(t); .)
+  (. Terminate(csNode); .)
 .                 
 
 // ------------------------------------------------------------------------------------
@@ -2685,7 +2838,7 @@ CheckedBlock<IBlockOwner block>
                    if (block != null) block.Add(cb);
                 .)
     (. BlockStatementNode blockNode; .)
-    Block<cb, out blockNode>   (. cb.Terminate(t); .)
+    Block<cb, out blockNode>   (. Terminate(cb); .)
   )
 .
 
@@ -2703,7 +2856,7 @@ UncheckedBlock<IBlockOwner block>
                    if (block != null) block.Add(ucb);
                 .)
     (. BlockStatementNode blockNode; .)
-    Block<ucb, out blockNode>  (. ucb.Terminate(t); .)
+    Block<ucb, out blockNode>  (. Terminate(ucb); .)
   )
 .
 
@@ -2719,7 +2872,7 @@ UnsafeBlock<IBlockOwner block>
               if (block != null) block.Add(usb);
            .)
    (. BlockStatementNode blockNode; .)
-   Block<usb, out blockNode> (. usb.Terminate(t); .)
+   Block<usb, out blockNode> (. Terminate(usb); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2736,10 +2889,10 @@ IfStatement<IBlockOwner block>
     Expression<out expr, out exprNode> 
                          (. ifs.Condition = expr; .)
   ")"                    (. ifs.CreateThenBlock(t); .)
-  EmbeddedStatement<ifs.ThenStatements> (. ifs.ThenStatements.Terminate(t); .)
+  EmbeddedStatement<ifs.ThenStatements> (. Terminate(ifs.ThenStatements); .)
   [ "else"               (. ifs.CreateElseBlock(t); .)
-    EmbeddedStatement<ifs.ElseStatements> (. ifs.ElseStatements.Terminate(t); .)
-  ]                      (. ifs.Terminate(t); .)
+    EmbeddedStatement<ifs.ElseStatements> (. Terminate(ifs.ElseStatements); .)
+  ]                      (. Terminate(ifs); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2756,7 +2909,7 @@ WhileStatement<IBlockOwner block>
     Expression<out expr, out exprNode>  
                           (. whs.Condition = expr; .)
   ")" 
-  EmbeddedStatement<whs>  (. whs.Terminate(t); .)
+  EmbeddedStatement<whs>  (. Terminate(whs); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2773,7 +2926,7 @@ DoWhileStatement<IBlockOwner block>
   "("                       (. Expression expr; .)
     Expression<out expr, out exprNode>    
                             (. whs.Condition = expr; .)
-  ")" ";"                   (. whs.Terminate(t); .)
+  ")" ";"                   (. Terminate(whs); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2797,7 +2950,7 @@ ForStatement<IBlockOwner block>
       ForIterator<fs>         (. fs.CreateIteratorBlock(t); .)
     ] 
   ")"
-  EmbeddedStatement<fs>       (. fs.Terminate(t); .)
+  EmbeddedStatement<fs>       (. Terminate(fs); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2825,7 +2978,7 @@ ForEachStatement<IBlockOwner block>
     Expression<out expr, out exprNode>
                                 (. fes.Expression = expr; .)
   ")"                           (. fes.Add(fes.Variable); .)
-  EmbeddedStatement<fes>        (. fes.Terminate(t); .)
+  EmbeddedStatement<fes>        (. Terminate(fes); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2837,7 +2990,7 @@ BreakStatement<IBlockOwner block>
   "break" ";" (. BreakStatement bs = new BreakStatement(t, this, block); .)
               (. CurrentElement = bs; .)
               (. if (block != null) block.Add(bs); .)
-              (. bs.Terminate(t); .)
+              (. Terminate(bs); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2858,7 +3011,7 @@ GotoStatement<IBlockOwner block>
                           (. gs.LabelExpression = expr; .)
   | 
     "default"             (. gs.Name = t.val; .)
-  ) ";"                   (. gs.Terminate(t); .)
+  ) ";"                   (. Terminate(gs); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2870,7 +3023,7 @@ ContinueStatement<IBlockOwner block>
   "continue" ";"  (. ContinueStatement cs = new ContinueStatement(t, this, block); .)
                   (. CurrentElement = cs; .)
                   (. if (block != null) block.Add(cs); .)
-                  (. cs.Terminate(t); .)
+                  (. Terminate(cs); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2891,12 +3044,12 @@ TryFinallyBlock<IBlockOwner block>
     CatchClauses<ts>
     [ 
       "finally" (. ts.CreateFinallyBlock(t); .) 
-      Block<ts.FinallyBlock, out blockNode> (. ts.FinallyBlock.Terminate(t); .)
+      Block<ts.FinallyBlock, out blockNode> (. Terminate(ts.FinallyBlock); .)
     ] 
   | "finally" (. ts.CreateFinallyBlock(t); .)
     Block<ts.FinallyBlock, out blockNode>
-    (. ts.FinallyBlock.Terminate(t); .)
-  )                          (. ts.Terminate(t); .) 
+    (. Terminate(ts.FinallyBlock); .)
+  )                          (. Terminate(ts); .) 
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2913,7 +3066,7 @@ LockStatement<IBlockOwner block>
     Expression<out expr, out exprNode>  
                           (. ls.Expression = expr; .)
   ")" 
-  EmbeddedStatement<ls>   (. ls.Terminate(t); .)
+  EmbeddedStatement<ls>   (. Terminate(ls); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2938,7 +3091,7 @@ UsingStatement<IBlockOwner block>
                                 (. us.ResourceExpression = expr; .)
   ) 
   ")" 
-  EmbeddedStatement<us>         (. us.Terminate(t); .)
+  EmbeddedStatement<us>         (. Terminate(us); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -2955,7 +3108,7 @@ ReturnStatement<IBlockOwner block>
                            (. yrs.Expression = expr; .)
   ]
   ";"                      (. if (block != null) block.Add(yrs); .)
-                           (. yrs.Terminate(t); .)
+                           (. Terminate(yrs); .)
                            
 .
 
@@ -2972,7 +3125,7 @@ ThrowStatement<IBlockOwner block>
     Expression<out expr, out exprNode>
                           (. ts.Expression = expr; .)
   ] ";"                   (. if (block != null) block.Add(ts); .)
-                          (. ts.Terminate(t); .)
+                          (. Terminate(ts); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -2988,7 +3141,7 @@ YieldReturnStatement<IBlockOwner block>
                            (. CurrentElement = yrs; .)
                            (. yrs.Expression = expr; .)
                            (. if (block != null) block.Add(yrs); .)
-                           (. yrs.Terminate(t); .)
+                           (. Terminate(yrs); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3000,7 +3153,7 @@ YieldBreakStatement<IBlockOwner block>
   "break"   (. YieldBreakStatement ybs = new YieldBreakStatement(t, this, block); .)
             (. CurrentElement = ybs; .) 
             (. if (block != null) block.Add(ybs); .)
-            (. ybs.Terminate(t); .)
+            (. Terminate(ybs); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3034,7 +3187,7 @@ FixedStatement<IBlockOwner block>
                               (. vas.Expression = expr; .)
                               (. fs.Assignments.Add(vas); .)
     }
-  ")" EmbeddedStatement<fs>   (. fs.Terminate(t); .)
+  ")" EmbeddedStatement<fs>   (. Terminate(fs); .)
 .    
 
 // ------------------------------------------------------------------------------------
@@ -3066,7 +3219,7 @@ StatementExpression<IBlockOwner block>
                                         (. asgn.RightOperand = rightExpr; .)
   | (. if (isAssignment) Error("UNDEF", la, "error in assignment."); .)
   )                                     (. if (block != null) block.Add(es); .)
-                                        (. es.Terminate(t); .)
+                                        (. Terminate(es); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -3168,7 +3321,7 @@ SwitchSection<SwitchStatement sws>
   { 
     IF (IsNoSwitchLabelOrRBrace()) 
     Statement<section, out stmtNode> 
-  }                       (. sws.Terminate(t); .)
+  }                       (. Terminate(sws); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3227,7 +3380,7 @@ CatchClauses<TryStatement tryStm>
     ] 
     ")" 
     (. BlockStatementNode blockNode; .)
-    Block<cc, out blockNode>           (. cc.Terminate(t); .)
+    Block<cc, out blockNode>           (. Terminate(cc); .)
     [ CatchClauses<tryStm> ]
   )
 .
@@ -3323,7 +3476,7 @@ FromClause<out FromClause fromClause>
   "in"                          (. Expression expr; .)
   Expression<out expr, out exprNode>
                                 (. fromClause.Expression = expr; .)
-                                (. fromClause.Terminate(t); .)
+                                (. Terminate(fromClause); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3371,7 +3524,7 @@ LetClause<out LetClause letClause>
   "="                   (. Expression expr; .)
   Expression<out expr, out exprNode>
                         (. letClause.Expression = expr; .)
-                        (. letClause.Terminate(t); .)
+                        (. Terminate(letClause); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3385,7 +3538,7 @@ WhereClause<out WhereClause whereClause>
                         (. Expression expr; .)
   Expression<out expr, out exprNode>  
                         (. whereClause.Expression = expr; .)
-                        (. whereClause.Terminate(t); .)
+                        (. Terminate(whereClause); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3417,7 +3570,7 @@ JoinClause<out JoinClause joinClause>
   [ 
     "into"                      
     ident                       (. joinClause.IntoIdentifier = t.val; .)
-  ]                             (. joinClause.Terminate(t); .)
+  ]                             (. Terminate(joinClause); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3431,7 +3584,7 @@ OrderByClause<out OrderByClause obClause>
   { 
     "," 
     OrderingClause<obClause> 
-  }                             (. obClause.Terminate(t); .)
+  }                             (. Terminate(obClause); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3450,7 +3603,7 @@ OrderingClause<OrderByClause obClause>
     "ascending"                 (. oc.Ascending = true; .)
     | "descending"              (. oc.Ascending = false; .)
   ]                             (. oc.Expression = expr; .)
-                                (. oc.Terminate(t); .)
+                                (. Terminate(oc); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3464,7 +3617,7 @@ SelectClause<QueryBody body>
   Expression<out expr, out exprNode>  
                         (. body.Select = new SelectClause(t, this); .)
                         (. body.Select.Expression = expr; .)
-                        (. body.Select.Terminate(t); .)
+                        (. Terminate(body.Select); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3481,7 +3634,7 @@ GroupClause<QueryBody body>
   "by"                    (. Expression byExpr; .)
   Expression<out byExpr, out exprNode>
                           (. body.GroupBy.ByExpression = byExpr; .)
-                          (. body.GroupBy.Terminate(t); .)
+                          (. Terminate(body.GroupBy); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -3595,15 +3748,15 @@ Expression<out Expression expr, out ExpressionNode exprNode>
       (. 
          condExpr.FalseExpression = falseExpr;
          if (condNode != null) condNode.FalseExpression = falseNode; 
-         condExpr.Terminate(t); 
-         if (condNode != null) condNode.Terminate(t);
+         Terminate(condExpr); 
+         if (condNode != null) Terminate(condNode);
       .)
     ]
   )
   )                               
   (. 
-     if (expr != null) expr.Terminate(t); 
-     if (exprNode != null) exprNode.Terminate(t);
+     if (expr != null) Terminate(expr); 
+     if (exprNode != null) Terminate(exprNode);
   .)
 .
 
@@ -3952,8 +4105,8 @@ RelExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
          opNode.RightOperand = new TypeOperatorNode(typeNode);
          expr = oper;
          exprNode = opNode;
-         oper.Terminate(t);
-         opNode.Terminate(t); 
+         Terminate(oper);
+         Terminate(opNode); 
       .)
   }
 .
@@ -4100,10 +4253,10 @@ MulExpr<out BinaryOperator expr, out BinaryOperatorNode exprNode>
     (. 
        oper.RightOperand = unExpr;
        expr = oper;
-       oper.Terminate(t);
+       Terminate(oper);
        opNode.RightOperand = unaryNode;
        exprNode = opNode;
-       opNode.Terminate(t);
+       Terminate(opNode);
     .)
   }
 .
@@ -4196,7 +4349,7 @@ Unary<out Expression expr, out ExpressionNode exprNode>
        unOp.Operand = unaryExpr;
        expr = unOp;
      }
-     unOp.Terminate(t);
+     Terminate(unOp);
      // :::
      if (unaryOp == null) exprNode = unaryNode;
      else
@@ -4204,7 +4357,7 @@ Unary<out Expression expr, out ExpressionNode exprNode>
        unaryOp.Operand = unaryNode;
        exprNode = unaryOp;
      }
-     unaryOp.Terminate(t);
+     Terminate(unaryOp);
   .)
   | Primary<out expr, out exprNode>
 .
@@ -4238,7 +4391,7 @@ Primary<out Expression expr, out ExpressionNode exprNode>
     ")"  
     (. 
        if (innerExpr != null) innerExpr.BracketsUsed = true; 
-       pExprNode.Terminate(t);
+       Terminate(pExprNode);
     .)
   | PrimitiveNamedLiteral<out innerExpr, out innerNode>
   | NamedLiteral<out innerExpr, out innerNode>
@@ -4252,12 +4405,12 @@ Primary<out Expression expr, out ExpressionNode exprNode>
        innerExpr = new BaseLiteral(t, this); 
        innerNode = new BaseNode(t);
     .)
-  | NewOperator<out innerExpr>
+  | NewOperator<out innerExpr, out innerNode>
   | TypeOfOperator<out innerExpr, out innerNode>
   | CheckedOperator<out innerExpr, out innerNode>
   | UncheckedOperator<out innerExpr, out innerNode>
-  | DefaultOperator<out innerExpr>
-  | AnonymousDelegate<out innerExpr>
+  | DefaultOperator<out innerExpr, out innerNode>
+  | AnonymousDelegate<out innerExpr, out innerNode>
   | SizeOfOperator<out innerExpr, out innerNode>
   )
   (. 
@@ -4316,7 +4469,7 @@ Primary<out Expression expr, out ExpressionNode exprNode>
       ")"   
       (. 
          curExpr = alop; 
-         invNode.Terminate(t);
+         Terminate(invNode);
          curExprNode = invNode;
       .)
     |       
@@ -4329,9 +4482,9 @@ Primary<out Expression expr, out ExpressionNode exprNode>
       ArrayIndexer<aiop, indNode.Arguments> 
       (. curExpr = aiop; .)
       "]"
-      (. indNode.Terminate(t); .)
+      (. Terminate(indNode); .)
   )         
-  (. curExpr.Terminate(t); .)
+  (. Terminate(curExpr); .)
   }
   (. 
      expr = curExpr; 
@@ -4426,10 +4579,10 @@ PrimitiveNamedLiteral<out Expression expr, out ExpressionNode exprNode>
   ident           
   (. 
      pml.Name = t.val;
-     pml.Terminate(t);
+     Terminate(pml);
      // :::
      pnNode.IdentifierToken = t;
-     pnNode.Terminate(t);
+     Terminate(pnNode);
   .)
 .
 
@@ -4472,9 +4625,9 @@ NamedLiteral<out Expression expr, out ExpressionNode exprNode>
     (. nlNode.Arguments = argList; .)
   ]
   (. 
-     nl.Terminate(t); 
+     Terminate(nl); 
      // :::
-     nlNode.Terminate(t);
+     Terminate(nlNode);
   .)
 .
 
@@ -4495,8 +4648,8 @@ SimpleNamedLiteral<out NamedLiteral expr, out SimpleNameNode snlNode>
     (. snlNode.Arguments = argList; .)
   ]
   (. 
-     expr.Terminate(t); 
-     snlNode.Terminate(t);
+     Terminate(expr); 
+     Terminate(snlNode);
   .)
 .
 
@@ -4527,9 +4680,9 @@ TypeOfOperator<out Expression expr, out ExpressionNode exprNode>
   .)
   ")"
   (. 
-     top.Terminate(t); 
+     Terminate(top); 
      topNode.CloseParenthesis = t;
-     exprNode.Terminate(t);
+     Terminate(exprNode);
   .)
 .
 
@@ -4560,9 +4713,9 @@ SizeOfOperator<out Expression expr, out ExpressionNode exprNode>
   .)
   ")"                        
   (. 
-     sop.Terminate(t); 
+     Terminate(sop); 
      sopNode.CloseParenthesis = t;
-     exprNode.Terminate(t);
+     Terminate(exprNode);
   .)
 .
 
@@ -4593,9 +4746,9 @@ CheckedOperator<out Expression expr, out ExpressionNode exprNode>
   .)
   ")"
   (. 
-     cop.Terminate(t); 
+     Terminate(cop); 
      copNode.CloseParenthesis = t;
-     exprNode.Terminate(t);
+     Terminate(exprNode);
   .)
 .
 
@@ -4626,9 +4779,9 @@ UncheckedOperator<out Expression expr, out ExpressionNode exprNode>
   .)
   ")"                           
   (. 
-     uop.Terminate(t); 
+     Terminate(uop); 
      uopNode.CloseParenthesis = t;
-     exprNode.Terminate(t);
+     Terminate(exprNode);
   .)
 .
 
@@ -4636,92 +4789,185 @@ UncheckedOperator<out Expression expr, out ExpressionNode exprNode>
 // Declaration of a default operator.
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
-DefaultOperator<out Expression expr>
+DefaultOperator<out Expression expr, out ExpressionNode exprNode>
+  (. exprNode = null; .)
 = 
-  "default"                 (. DefaultOperator dop = new DefaultOperator(t, this); .)
-  "("                       (. expr = dop; .)
+  "default"                 
+  (. 
+     DefaultOperator dop = new DefaultOperator(t, this); 
+     var defNode = new DefaultOperatorNode(t);
+     exprNode = defNode;
+  .)
+  "("                       
     (. 
+       expr = dop; 
        Expression innerExpr; 
+       // :::
+       defNode.OpenParenthesis = t;
        ExpressionNode primNode;
     .)
     Primary<out innerExpr, out primNode>  
-    (. dop.Operand = innerExpr; .)
-  ")"                       (. dop.Terminate(t); .)
+    (. 
+       dop.Operand = innerExpr; 
+       // :::
+       defNode.Expression = primNode;    .)
+  ")"                       
+  (. 
+     Terminate(dop); 
+     // :::
+     defNode.CloseParenthesis = t;
+     Terminate(defNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
 // Declaration of a "new" operator.
 // +expr: Expression value.
 // ------------------------------------------------------------------------------------
-NewOperator<out Expression expr>  
+NewOperator<out Expression expr, out ExpressionNode exprNode>  
+  (. exprNode = null; .)
 = 
-  "new"                           (. NewOperator nop = new NewOperator(t, this); .)
-                                  (. expr = nop; .)
-                                  (. TypeReference typeRef; .)
+  "new"
+  (. 
+     NewOperator nop = new NewOperator(t, this);
+     expr = nop;
+     TypeReference typeRef; 
+  .)
   (
-    AnonymousObjectInitializer<nop>
+    (. var anonNode = new NewOperatorWithAnonymousTypeNode(t); .)
+    AnonymousObjectInitializer<nop, anonNode>
+    (. exprNode = anonNode; .)
   |
     (. TypeOrNamespaceNode typeNode; .)
     NonArrayType<out typeRef, out typeNode>      
     NewOperatorWithType<nop, typeRef>
   |
-    ImplicitArrayCreation<nop>    (. nop.Kind = NewOperatorKind.UntypedArrayInitialization; .)
+    (. var impArrNode = new NewOperatorWithImplicitArrayNode(t); .)
+    ImplicitArrayCreation<nop, impArrNode>
+    (. 
+       nop.Kind = NewOperatorKind.UntypedArrayInitialization; 
+       exprNode = impArrNode;
+    .)
   )
+  (. Terminate(exprNode); .)
 .
 
-AnonymousObjectInitializer<NewOperator nop>
+// ------------------------------------------------------------------------------------------------
+// Represents an anonymous object initializer
+//   nop: operator element
+//   anonNode: anonymous operator node
+// ------------------------------------------------------------------------------------------------
+AnonymousObjectInitializer<NewOperator nop, NewOperatorWithAnonymousTypeNode anonNode>
 =
   "{"                                   
+  (. anonNode.OpenBrace = t; .)
   (
-    IF (!IsEmptyMemberInitializer()) (. MemberDeclaratorList mInitList; .)      
-    MemberDeclaratorList<out mInitList> 
-    [ "," ]
+    IF (!IsEmptyMemberInitializer()) 
+    (. MemberDeclaratorList mInitList; .)      
+    MemberDeclaratorList<out mInitList, anonNode> 
+    [ 
+      "," 
+      (. anonNode.OrphanComma = t; .)
+    ]
   )
   "}"
+  (. 
+     anonNode.CloseBrace = t; 
+     Terminate(anonNode);
+  .)
 .
 
-MemberDeclaratorList<out MemberDeclaratorList initList>  
-                                  (. 
-                                     initList = new MemberDeclaratorList(t, this);
-                                     MemberDeclarator mInit;
-                                  .)
+// ------------------------------------------------------------------------------------------------
+// Declaration of "new" operator member declaration list.
+//   initList: Member declarator list
+//   initNode: Anonymous operator node
+// ------------------------------------------------------------------------------------------------
+MemberDeclaratorList<out MemberDeclaratorList initList, NewOperatorWithAnonymousTypeNode initNode>  
+  (. 
+     initList = new MemberDeclaratorList(t, this);
+     MemberDeclarator mInit;
+  .)
 =                     
-  MemberDeclarator<out mInit>     (. initList.Initializers.Add(mInit); .)
+  (. MemberDeclaratorNode mdNode; .)
+  MemberDeclarator<out mInit, out mdNode>     
+  (. 
+     initList.Initializers.Add(mInit); 
+     initNode.Declarators.Add(mdNode);
+  .)
   {
-    IF (NotFinalComma()) ","
-    MemberDeclarator<out mInit>   (. initList.Initializers.Add(mInit); .)
-  }                               (. initList.Terminate(t); .)
+    IF (NotFinalComma()) 
+    ","
+    (. var separator = t; .)
+    MemberDeclarator<out mInit, out mdNode>   
+    (. 
+       initList.Initializers.Add(mInit); 
+       initNode.Declarators.Add(new MemberDeclaratorContinuationNode(separator, mdNode));
+    .)
+  } 
+  (. Terminate(initList); .)
 .
 
-MemberDeclarator<out MemberDeclarator init> 
-                                  (. 
-                                     init = null; 
-                                     Expression expr = null;
-                                     ExpressionNode exprNode;
-                                  .)
+// ------------------------------------------------------------------------------------------------
+// Declaration of a "new" operator declaration member.
+//   init: Member declarator object
+//   mdNode: Member declarator node
+// ------------------------------------------------------------------------------------------------
+MemberDeclarator<out MemberDeclarator init, out MemberDeclaratorNode mdNode> 
+  (. 
+     init = null; 
+     Expression expr = null;
+     ExpressionNode exprNode;
+     mdNode = null;
+  .)
 =
   (
     IF (IsMemberInitializer())
-    ident                         (. Token start = t; .)
-    "=" Expression<out expr, out exprNode>
-                                  (. init = new MemberDeclarator(start, this, expr, start.val); .)
+    ident                         
+    (. 
+       Token start = t; 
+       mdNode = new MemberDeclaratorNode(t);
+       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.Expression;
+    .)
+    "=" 
+    (. mdNode.EqualToken = t; .)
+    Expression<out expr, out exprNode>
+    (. 
+       init = new MemberDeclarator(start, this, expr, start.val); 
+       mdNode.Expression = exprNode;
+    .)
   | 
     (. 
        Token start = la; 
        ExpressionNode primNode;
     .)
     Primary<out expr, out primNode>
-    (. init = new MemberDeclarator(start, this, expr, start.val, true); .)
+    (. 
+       init = new MemberDeclarator(start, this, expr, start.val, true); 
+       mdNode = new MemberDeclaratorNode(primNode == null ? t : primNode.StartToken);
+       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.SimpleName;
+       mdNode.Expression = primNode;
+    .)
   |
-                                  (. 
-                                     Token start = la; 
-                                     TypeReference typeRef;
-                                     TypeOrNamespaceNode typeNode;
-                                  .)
-    PredefinedType<out typeRef, out typeNode>                                  
+    (. 
+       Token start = la; 
+       TypeReference typeRef;
+       TypeOrNamespaceNode typeNode;
+    .)
+    PredefinedType<out typeRef, out typeNode>
+    (. 
+       mdNode = new MemberDeclaratorNode(typeNode.StartToken);
+       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.MemberAccess;
+       mdNode.TypeName = typeNode;
+    .)
     "."
-    ident                         (. init = new MemberDeclarator(start, this, typeRef, start.val); .)
+    (. mdNode.DotSeparator = t; .)
+    ident                         
+    (. 
+       init = new MemberDeclarator(start, this, typeRef, start.val); 
+       mdNode.IdentifierToken = t;
+    .)
   )
+  (. Terminate(mdNode); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4758,7 +5004,9 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
         ","                       (. nop.RunningDimensions++; .)
       } 
     "]" 
-    ArrayInitializer<out arrayInit>  (. nop.Initializer = arrayInit; .)
+    (. ArrayInitializerNode initNode; .)
+    ArrayInitializer<out arrayInit, out initNode>  
+    (. nop.Initializer = arrayInit; .)
 
   | // --- New array creation
     "["                           (. Expression dimExpr; .)
@@ -4777,11 +5025,13 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
         } 
       "]" 
     }                             (. nop.Kind = NewOperatorKind.TypedArrayCreation; .)
-    [                             
-      ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+    [            
+      (. ArrayInitializerNode initNode; .)                 
+      ArrayInitializer<out arrayInit, out initNode> 
+      (. nop.Initializer = arrayInit; .)
                                       (. nop.Kind = NewOperatorKind.TypedArrayInitialization; .)
     ] 
-  )                                  (. nop.Terminate(t); .)
+  )                                  (. Terminate(nop); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4789,20 +5039,35 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
 // +nop: NewOperator delcaration
 // +typeRef: Type to create with the new operator
 // ------------------------------------------------------------------------------------
-ImplicitArrayCreation<NewOperator nop> 
-                                    (. 
-                                       ArrayInitializer arrayInit;
-                                       nop.IsImplicitArray = true;
-                                    .)
+ImplicitArrayCreation<NewOperator nop, NewOperatorWithImplicitArrayNode impArrNode> 
+  (. 
+     ArrayInitializer arrayInit;
+     nop.IsImplicitArray = true;
+  .)
 =
-  "["                               (. nop.RunningDimensions = 1; .)
+  "["
+  (. 
+     impArrNode.OpenSquareBracket = t;
+     nop.RunningDimensions = 1; 
+  .)
     { 
-      ","                           (. nop.RunningDimensions++; .)
+      ","                           
+      (. 
+         nop.RunningDimensions++; 
+         impArrNode.Commas.Add(t);
+      .)
     } 
   "]" 
-  [                             
-    ArrayInitializer<out arrayInit> (. nop.Initializer = arrayInit; .)
+  (. impArrNode.CloseSquareBracket = t; .)
+  [        
+    (. ArrayInitializerNode initNode; .)                     
+    ArrayInitializer<out arrayInit, out initNode> 
+    (. 
+       nop.Initializer = arrayInit; 
+       impArrNode.Initializer = initNode;
+    .)
   ]
+  (. Terminate(impArrNode); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4836,7 +5101,7 @@ CollectionInitializer<out Initializer init>
                                           .)
 =
   ElementInitializerList<out elInit>      (. collInit.Initializers.Add(elInit); .)
-                                          (. init.Terminate(t); .)
+                                          (. Terminate(init); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4854,7 +5119,7 @@ ElementInitializerList<out Initializer init>
   {
     IF (NotFinalComma()) ","
     ElementInitializer<out elementInit>   (. collInit.Initializers.Add(elementInit); .)
-  } [ "," ]                               (. init.Terminate(t); .)
+  } [ "," ]                               (. Terminate(init); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4880,7 +5145,7 @@ ElementInitializer<out Initializer init>
         Expression<out expr, out exprNode> (. listInit.Initializers.Add(new ExpressionInitializer(t, this, expr)); .)
       }
     "}"
-  )                                       (. if (init != null) init.Terminate(t); .)
+  )                                       (. Terminate(init); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4897,7 +5162,7 @@ MemberInitializerList<out MemberInitializerList initList>
   {
     IF (NotFinalComma()) ","
     MemberInitializer<out mInit>  (. initList.Initializers.Add(mInit); .)
-  } [ "," ]                       (. initList.Terminate(t); .)
+  } [ "," ]                       (. Terminate(initList); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4919,47 +5184,109 @@ MemberInitializer<out MemberInitializer init>
     ObjectOrCollectionInitializer<out compoundInit>
                               (. init = new MemberInitializer(startToken, this, compoundInit); .)
   )
-                              (. init.Terminate(t); .)
+                              (. Terminate(init); .)
 .
 
-// ------------------------------------------------------------------------------------
-// Declaration of a "new" operator.
-// +expr: Expression value.
-// ------------------------------------------------------------------------------------
-AnonymousDelegate<out Expression expr>  
+// ------------------------------------------------------------------------------------------------
+// Declarares an anonymous delegate with its body.
+//   expr: Anonymous delegate expression value.
+//   exprNode: Anonymous delegate expression node.
+// ------------------------------------------------------------------------------------------------
+AnonymousDelegate<out Expression expr, out ExpressionNode exprNode>  
+  (. exprNode = null; .)
 = 
-  "delegate"            (. AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this); .)
-                        (. CurrentElement = adop; .)
-  [                     (. FormalParameter param; .)
-    "(" 
+  "delegate"            
+  (. 
+     AnonymousDelegateOperator adop = new AnonymousDelegateOperator(t, this);
+     CurrentElement = adop;
+     /// :::
+     var adNode = new AnonymousDelegateNode(t);
+     exprNode = adNode;
+  .)
+  [                     
+    (. FormalParameter param; .)
+    "("
+    (. 
+       var parsNode = new FormalParameterListNode(t); 
+       adNode.ParameterList = parsNode;
+    .)
     [ 
-      AnonymousMethodParameter<out param>     (. adop.FormalParameters.Add(param); .)
+      (. FormalParameterNode parNode; .)
+      AnonymousMethodParameter<out param, out parNode>
+      (. 
+         adop.FormalParameters.Add(param); 
+         parsNode.Items.Add(parNode);
+      .)
       { 
         "," 
-        AnonymousMethodParameter<out param>   (. adop.FormalParameters.Add(param); .)
+        (. var separator = t; .)
+        AnonymousMethodParameter<out param, out parNode>   
+        (. 
+           adop.FormalParameters.Add(param); 
+           parsNode.Items.Add(new FormalParameterContinuationNode(separator, parNode));
+        .)
       } 
     ] 
     ")" 
+    (. Terminate(parsNode); .)
   ] 
   (. BlockStatementNode blockNode; .)
-  Block<adop, out blockNode>           (. expr = adop; .)
-                        (. adop.Terminate(t); .)
+  Block<adop, out blockNode>           
+  (. 
+     expr = adop; 
+     Terminate(adop); 
+     Terminate(exprNode);
+  .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of an anonymous method parameter.
-// +param: Parameter definition.
-// ------------------------------------------------------------------------------------
-AnonymousMethodParameter<out FormalParameter param> (. param = new FormalParameter(t, this); .)
+//   param: Parameter definition.
+//   parNode: Parameter definition node.
+// ------------------------------------------------------------------------------------------------
+AnonymousMethodParameter<out FormalParameter param, out FormalParameterNode parNode> 
+  (. 
+     param = new FormalParameter(t, this);
+     var modifier = FormalParameterModifier.In; 
+     Token start = null;
+     parNode = null;
+  .)
 =
-  [                             
-    "ref"                       (. param.Kind = FormalParameterKind.Ref; .) 
-    | "out"                     (. param.Kind = FormalParameterKind.Out; .) 
-  ]                             (. TypeReference typeRef; .)
-  (. TypeOrNamespaceNode typeNode; .)
-  Type<out typeRef, false, out typeNode>      (. param.Type = typeRef; .)
-  ident                         (. param.Name = t.val; .)
-                                (. param.Terminate(t); .)  
+  [
+    (
+      "ref"         
+      (. 
+         param.Kind = FormalParameterKind.Ref; 
+         modifier = FormalParameterModifier.Ref; 
+      .) 
+    | "out"                     
+      (. 
+         param.Kind = FormalParameterKind.Out; 
+         modifier = FormalParameterModifier.Out; 
+      .) 
+    )
+    (. start = t; .)
+  ]                             
+  (. 
+     TypeReference typeRef;
+     TypeOrNamespaceNode typeNode; 
+  .)
+  Type<out typeRef, false, out typeNode>      
+  (. 
+     param.Type = typeRef; 
+     if (start == null) start = typeNode.StartToken;
+  .)
+  ident                         
+  (. 
+     param.Name = t.val;
+     Terminate(param);
+     // :::
+     parNode = new FormalParameterNode(start);
+     parNode.Modifier = modifier;
+     parNode.IdentifierToken = t;
+     parNode.TypeName = typeNode;
+     Terminate(parNode);
+  .)  
 .
 
 // ------------------------------------------------------------------------------------
@@ -4982,7 +5309,7 @@ ArrayIndexer<ArrayIndexerOperator indexer, ArgumentNodeCollection argNodes>
      {
        var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
        argNode.Expression = exprNode;
-       argNode.Terminate(t);
+       Terminate(argNode);
        argNodes.Add(argNode);
      }
   .)
@@ -4997,7 +5324,7 @@ ArrayIndexer<ArrayIndexerOperator indexer, ArgumentNodeCollection argNodes>
        {
          var argNode = new ArgumentContinuationNode(separator);
          argNode.Expression = exprNode;
-         argNode.Terminate(t);
+         Terminate(argNode);
          argNodes.Add(argNode);
        }
     .)
@@ -5040,9 +5367,11 @@ SingleFieldMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
                                 fd.IsEvent = isEvent;
                              .)
   [ "="                      (. Initializer init; .)
-    VariableInitializer<out init> (. fd.Initializer = init; .) 
+    (. VariableInitializerNode varInitNode; .)
+    VariableInitializer<out init, out varInitNode> 
+    (. fd.Initializer = init; .) 
   ]                          (. td.AddMember(fd); .) 
-                             (. fd.Terminate(t); .)
+                             (. Terminate(fd); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -5172,7 +5501,7 @@ TypeArgumentList<TypeReferenceCollection args, out TypeArgumentListNode argList>
     (. args.Add(paramType); .) 
   } 
   ">"
-  (. argList.Terminate(t); .)
+  (. Terminate(argList); .)
 .
 
 // ------------------------------------------------------------------------------------------------

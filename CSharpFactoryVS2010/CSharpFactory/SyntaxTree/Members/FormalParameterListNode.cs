@@ -1,7 +1,7 @@
 // ================================================================================================
-// ExpressionInitializerNode.cs
+// FormalParameterListNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,31 +9,33 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an expression initializer.
+  /// This class represents a formal parameter list.
   /// </summary>
+  /// <remarks>
+  /// The opening bracket is represented by the starting token, the closing bracket by the 
+  /// terminating token.
+  /// </remarks>
   // ================================================================================================
-  public sealed class ExpressionInitializerNode : VariableInitializerNode
+  public class FormalParameterListNode: SyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="FormalParameterListNode"/> class.
     /// </summary>
-    /// <param name="expression">Initializer expression.</param>
+    /// <param name="start">Token providing information about the element.</param>
+    /// <summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionInitializerNode(ExpressionNode expression)
-      : base(expression == null ? new Token() : expression.StartToken)
-      // TODO: Revise initialization
+    public FormalParameterListNode(Token start)
+      : base(start)
     {
-      Expression = expression;
-      Terminate(expression == null ? new Token() : expression.TerminatingToken);
-      // TODO: Revise termination here
+      Items = new FormalParameterNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the initializer.
+    /// Gets collection of formal parameter items.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public FormalParameterNodeCollection Items { get; private set; }
   }
 }

@@ -1,5 +1,5 @@
 // ================================================================================================
-// EmbeddedTypeNode.cs
+// EmbeddedTypeOperatorNode.cs
 //
 // Created: 2009.04.19, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -12,7 +12,7 @@ namespace CSharpFactory.Syntax
   /// This class represents a base type for primary operators with an embedded type.
   /// </summary>
   // ================================================================================================
-  public abstract class EmbeddedTypeNode : PrimaryOperatorNode, IParentheses
+  public abstract class EmbeddedTypeOperatorNode : PrimaryOperatorNode, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -20,7 +20,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public EmbeddedTypeNode(Token start) : base(start)
+    protected EmbeddedTypeOperatorNode(Token start) : base(start)
     {
     }
 

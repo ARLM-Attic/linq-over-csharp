@@ -1,55 +1,41 @@
 // ================================================================================================
-// LocalVariableNode.cs
+// DefaultOperatorNode.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.ParserFiles;
+
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable declaration
+  /// This class represents a base type for primary operators with an embedded type.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public class DefaultOperatorNode : EmbeddedExpressionNode, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
+    /// Initializes a new instance of the <see cref="PrimaryOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
-      : base(typeNode.StartToken)
+    public DefaultOperatorNode(Token start) : base(start)
     {
-      VariableTags = new LocalVariableTagNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type.
+    /// Gets the opening parenthesis token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public Token OpenParenthesis { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is an implicit type declaration.
+    /// Gets the closing parenthesis token.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is implicit; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
-    {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.val == "var"; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets variable tags within this variable declaration.
-    /// </summary>
-    /// <value>The variables.</value>
-    // ----------------------------------------------------------------------------------------------
-    public LocalVariableTagNodeCollection VariableTags { get; private set; }
+    public Token CloseParenthesis { get; internal set; }
   }
 }
