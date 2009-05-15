@@ -13,8 +13,10 @@ namespace CSharpFactory.Syntax
   /// This class is intended to be the base class of or type and member declaration.
   /// </summary>
   // ================================================================================================
-  public abstract class TypeOrMemberDeclarationNode : AttributedDeclarationNode,
-    ITypeParameterHolder
+  public abstract class TypeOrMemberDeclarationNode : 
+    AttributedDeclarationNode,
+    ITypeParameterHolder, 
+    IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -35,7 +37,35 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public ModifierNodeCollection Modifiers { get; internal set; }
 
-    #region Implementation of ITypeParameterHolder
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the identifier token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token IdentifierToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the alias identifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
+    {
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.val; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -48,6 +78,16 @@ namespace CSharpFactory.Syntax
     public bool HasTypeParameters
     {
       get { return OpenSign != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of the type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Name
+    {
+      get { return IdentifierToken.val; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -100,7 +140,5 @@ namespace CSharpFactory.Syntax
     /// <value>The type parameter constraints.</value>
     // ----------------------------------------------------------------------------------------------
     public TypeParameterConstraintNodeCollection TypeParameterConstraints { get; private set; }
-
-    #endregion
   }
 }

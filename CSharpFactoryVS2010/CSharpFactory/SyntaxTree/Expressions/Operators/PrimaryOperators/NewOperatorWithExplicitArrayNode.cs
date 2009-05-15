@@ -1,7 +1,7 @@
 // ================================================================================================
-// EnumDeclarationNode.cs
+// NewOperatorWithExplicitArrayNode.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.05.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,36 +9,28 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// Represents an enum declaration.
+  /// This class represents a "new" operator with implicit array declaration.
   /// </summary>
   // ================================================================================================
-  public class EnumDeclarationNode: TypeWithBodyDeclarationNode
+  public sealed class NewOperatorWithExplicitArrayNode : NewOperatorWithArrayNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnumDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="NewOperatorWithExplicitArrayNode"/> class.
     /// </summary>
-    /// <param name="start">The start token of the declaration.</param>
-    /// <param name="name">The name of the delcaration.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumDeclarationNode(Token start, Token name)
-      : base(start, name)
+    public NewOperatorWithExplicitArrayNode(Token start)
+      : base(start)
     {
-      Values = new EnumValueNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of enumeration values.
+    /// Gets or sets the name of the type.
     /// </summary>
+    /// <value>The name of the type.</value>
     // ----------------------------------------------------------------------------------------------
-    public EnumValueNodeCollection Values { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the orphan separator token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token OrphanSeparator { get; internal set; }
+    public TypeOrNamespaceNode TypeName { get; internal set; }
   }
 }

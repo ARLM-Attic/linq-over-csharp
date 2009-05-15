@@ -1,44 +1,39 @@
 // ================================================================================================
-// EnumDeclarationNode.cs
+// IArrayDimensions.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.05.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.Collections;
 using CSharpFactory.ParserFiles;
 
 namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// Represents an enum declaration.
+  /// Defines the properties of array dimension declarations.
   /// </summary>
   // ================================================================================================
-  public class EnumDeclarationNode: TypeWithBodyDeclarationNode
+  public interface IArrayDimensions
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnumDeclarationNode"/> class.
+    /// Gets or sets the opening square bracket.
     /// </summary>
-    /// <param name="start">The start token of the declaration.</param>
-    /// <param name="name">The name of the delcaration.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumDeclarationNode(Token start, Token name)
-      : base(start, name)
-    {
-      Values = new EnumValueNodeCollection();
-    }
+    Token OpenSquareBracket { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of enumeration values.
+    /// Gets the collection of comma tokens.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public EnumValueNodeCollection Values { get; private set; }
+    ImmutableCollection<Token> Commas { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the orphan separator token.
+    /// Gets or sets the closing square bracket.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OrphanSeparator { get; internal set; }
+    Token CloseSquareBracket { get; }
   }
 }

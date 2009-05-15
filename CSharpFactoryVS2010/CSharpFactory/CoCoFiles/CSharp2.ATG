@@ -816,39 +816,66 @@ EnumBody<EnumDeclaration ed, EnumDeclarationNode typeDecl>
   "{" 
   (. typeDecl.OpenBrace = t; .)
   [ 
-    EnumMemberDeclaration<ed> 
-    {IF (NotFinalComma())  "," SYNC EnumMemberDeclaration<ed>} 
-    [ "," ] 
+    (. EnumValueNode valNode; .)
+    EnumMemberDeclaration<ed, out valNode> 
+    (. typeDecl.Values.Add(valNode); .)
+    { 
+      IF (NotFinalComma())  
+      "," 
+      (. var separator = t; .)
+      SYNC EnumMemberDeclaration<ed, out valNode>
+      (. typeDecl.Values.Add(new EnumValueContinuationNode(separator, valNode)); .)
+    } 
+    [ 
+      "," 
+      (. typeDecl.OrphanSeparator = t; .)
+    ] 
   ] 
   SYNC "}"
-  (. typeDecl.CloseBrace = t; .)
+  (. 
+     typeDecl.CloseBrace = t; 
+     Terminate(typeDecl);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Enumeration value declaration.
 //   ed: Enumeration declaration that has the member values defined here.
 // ------------------------------------------------------------------------------------------------
-EnumMemberDeclaration<EnumDeclaration ed>  
-=                            (. 
-                                 AttributeCollection attrs = new AttributeCollection(); 
-                                 // :::
-                                 ExpressionNode exprNode;
-                                 var attrNodes = new AttributeDecorationNodeCollection();
-                             .)
+EnumMemberDeclaration<EnumDeclaration ed, out EnumValueNode valNode>  
+  (. valNode = null; .)
+=                             
+  (. 
+     AttributeCollection attrs = new AttributeCollection(); 
+     var attrNodes = new AttributeDecorationNodeCollection();
+  .)
   AttributeDecorations<attrs, attrNodes>
-  ident                      (. 
-                                 EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
-                                 CurrentElement = ev;
-                                 Expression expr;
-                             .)
+  ident                      
+  (. 
+     EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
+     CurrentElement = ev;
+     Expression expr;
+     valNode = new EnumValueNode(t);
+     valNode.AttributeDecorations = attrNodes;
+  .)
   [ 
-    "=" Expression<out expr, out exprNode> (. ev.ValueExpression = expr; .)
+    "=" 
+    (.
+       valNode.EqualToken = t;
+       ExpressionNode exprNode;
+    .)
+    Expression<out expr, out exprNode> 
+    (. 
+       ev.ValueExpression = expr; 
+       valNode.Expression = exprNode;
+    .)
   ]     
-                             (.
-                                ev.AssignAttributes(attrs);
-                                ed.Values.Add(ev);
-                                Terminate(ev);
-                             .)
+  (.
+     ev.AssignAttributes(attrs);
+     ed.Values.Add(ev);
+     Terminate(ev);
+     Terminate(valNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -875,8 +902,10 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
   (. dd.ReturnType = returnType; .)
   ident
   (. 
-     dd.Name = t.val; 
-     typeDecl = new DelegateDeclarationNode(start, t);
+     dd.Name = t.val;
+     var ddNode = new DelegateDeclarationNode(start, t);
+     typeDecl = ddNode;
+     ddNode.TypeName = typeNode;
   .)
   [ TypeParameterList<dd, typeDecl> ]
   "(" 
@@ -900,12 +929,13 @@ DelegateDeclaration<Modifiers m, TypeDeclaration parentType, out TypeDeclaration
   (. Terminate(typeDecl); .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a class member.
-// +attrs: attributes of the declaration
-// +modifiers: Set of modifiers belonging to the member.
-// +td: Type declaration the member belongs to.
-// ------------------------------------------------------------------------------------
+//   attrs: attributes of the declaration
+//   modifiers: Set of modifiers belonging to the member.
+//   td: Type declaration the member belongs to.
+//   memNode: Member node declaration
+// ------------------------------------------------------------------------------------------------
 ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   out MemberDeclarationNode memNode>
   (. memNode = null; .)
@@ -933,7 +963,10 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
     (. finNode.CloseParenthesis = t; .)
     ( 
       (. BlockStatementNode blockNode; .)
-      Block<dd, out blockNode> | ";" 
+      Block<dd, out blockNode> 
+      (. finNode.Body = blockNode; .)
+    | ";"
+      (. finNode.ClosingSemicolon = t; .) 
     )
     (. 
        Terminate(dd);
@@ -963,13 +996,14 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
   | EventDeclaration<attrs, m, td, out memNode> 
   | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
       ConstructorDeclaration<attrs, m, td, out memNode> 
-    | IF (IsPartialMethod())
-      "partial"
-      (. TypeOrNamespaceNode typeNode; .)
-      Type<out typeRef, true, out typeNode>
-      MemberName<out memberRef>
-      MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
-    | 
+  | IF (IsPartialMethod())
+    "partial"
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, true, out typeNode>
+    (. TypeOrNamespaceNode nameNode; .)
+    MemberName<out memberRef, out nameNode>
+    MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
+  | 
       (. TypeOrNamespaceNode typeNode; .)
       Type<out typeRef, true, out typeNode>
     ( 
@@ -977,7 +1011,8 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       | // --- Field declaration
         IF (IsFieldDecl()) FieldMemberDeclarators<attrs, m, td, typeRef, false, Modifier.fields> ";"
       |                                          
-        MemberName<out memberRef>
+        (. TypeOrNamespaceNode nameNode; .)
+        MemberName<out memberRef, out nameNode>
         ( 
           PropertyDeclaration<attrs, m, typeRef, memberRef, td>
           | "." IndexerDeclaration<attrs, m, typeRef, memberRef, td>
@@ -1113,43 +1148,75 @@ EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   )
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a constructor member.
-// +attrs: attributes of the declaration
-// +modifiers: Set of modifiers belonging to the member.
-// +td: Type declaration the member belongs to.
-// ------------------------------------------------------------------------------------
+//   attrs: attributes of the declaration
+//   modifiers: Set of modifiers belonging to the member.
+//   td: Type declaration the member belongs to.
+//   memNode: Member declaration node
+// ------------------------------------------------------------------------------------------------
 ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   out MemberDeclarationNode memNode>
   (. memNode = null; .)
 = 
-    ident                   (. 
-                               ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
-                               CurrentElement = cd;
-                               cd.SetModifiers(m.Value);
-                               cd.AssignAttributes(attrs);
-                            .)
-    "(" 
-    (. var parList = new FormalParameterListNode(t); .)
-    [                                    
-      FormalParameterList<cd.FormalParameters, parList>
-    ] 
-    ")" 
-    (. Terminate(parList); .)
-    [                                        
-      ":" ( "base"          (. cd.HasBase = true; .)
-      | "this"              (. cd.HasThis = true; .)
-      ) "("
-        CurrentArgumentList<cd.BaseArguments, null>
-        ")"
-    ] ( 
-        (. BlockStatementNode blockNode; .)
-        Block<cd, out blockNode> 
-      | ";" 
-      )   (. 
-                               td.AddMember(cd); 
-                               Terminate(cd);
-                            .)
+  ident
+  (. 
+     ConstructorDeclaration cd = new ConstructorDeclaration(t, td);
+     CurrentElement = cd;
+     cd.SetModifiers(m.Value);
+     cd.AssignAttributes(attrs);
+     var cstNode = new ConstructorDeclarationNode(t);
+     memNode = cstNode;
+  .)
+  "(" 
+  (. var parList = new FormalParameterListNode(t); .)
+  [                                    
+    FormalParameterList<cd.FormalParameters, parList>
+    (. cstNode.FormalParameters = parList; .)
+  ] 
+  ")" 
+  (. Terminate(parList); .)
+  [                                        
+    ":" 
+    (. 
+       cstNode.Colon = t; 
+       ExpressionNode scopeNode = null;
+    .)
+    ( "base"          
+      (. 
+         cd.HasBase = true; 
+         scopeNode = new BaseNode(t);
+      .)
+    | "this"              
+      (. 
+         cd.HasThis = true; 
+         scopeNode = new ThisNode(t);
+      .)
+    ) 
+    "("
+    (.
+       var invNode = new MethodInvocationOperatorNode(t);
+       invNode.ScopeOperand = scopeNode;
+    .)
+    CurrentArgumentList<cd.BaseArguments, invNode.Arguments>
+    ")"
+    (.
+       Terminate(invNode);
+       cstNode.Initializer = invNode;
+    .)
+  ] 
+  ( 
+    (. BlockStatementNode blockNode; .)
+    Block<cd, out blockNode>
+    (. cstNode.Body = blockNode; .) 
+  | ";" 
+    (. cstNode.ClosingSemicolon = t; .)
+  )   
+  (. 
+     td.AddMember(cd); 
+     Terminate(cd);
+     Terminate(memNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1765,10 +1832,29 @@ FormalParameterList<FormalParameterCollection pars, FormalParameterListNode pars
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a formal parameter list
+// Declaration of a current parameter list
 //   argList: List holding the actual parameter declarations.
 // ------------------------------------------------------------------------------------------------
 CurrentArgumentList<ArgumentList argList, ArgumentNodeCollection argNodes> 
+=
+  [
+    (. ArgumentNode argNode; .)
+    CurrentArgumentItem<argList, out argNode>
+    (. if (argNodes != null) argNodes.Add(argNode); .)
+    {
+      ","
+      (. var separator = t; .)
+      CurrentArgumentItem<argList, out argNode>
+      (. if (argNodes != null) argNodes.Add(new ArgumentContinuationNode(separator, argNode)); .)
+    }
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an item of the current parameter list
+//   argList: List holding the actual parameter declarations.
+// ------------------------------------------------------------------------------------------------
+CurrentArgumentItem<ArgumentList argList, out ArgumentNode argNode> 
   (. 
      ExpressionNode exprNode; 
      Argument arg = new Argument(t, this);
@@ -1776,67 +1862,31 @@ CurrentArgumentList<ArgumentList argList, ArgumentNodeCollection argNodes>
      Token separator = null;
   .)
 =
-  [
-    [           
-      "ref"     
-      (. 
-         arg.Kind = FormalParameterKind.Ref; 
-         argKind = t;
-      .)
-    | "out"   
-      (. 
-         arg.Kind = FormalParameterKind.Out; 
-         argKind = t;
-      .)
-    ]           
-    (. Expression expr; .)
-    Expression<out expr, out exprNode>
+  [           
+    "ref"     
     (. 
-       arg.Expression = expr;
-       if (argList != null) argList.Add(arg); 
-       Terminate(arg);
-       if (argNodes != null)
-       {
-         var argNode = new ArgumentNode(argKind == null ? 
-           (exprNode == null ? t : exprNode.StartToken) : argKind);
-         argNode.KindToken = argKind;
-         argNode.Expression = exprNode;
-         Terminate(argNode);
-         argNodes.Add(argNode);
-       }
+       arg.Kind = FormalParameterKind.Ref; 
+       argKind = t;
     .)
-    {
-      ","
-      (. separator = t; .)
-      [           
-        "ref"     
-        (. 
-           arg.Kind = FormalParameterKind.Ref; 
-           argKind = t;
-        .)
-      | "out"   
-        (. 
-           arg.Kind = FormalParameterKind.Out; 
-           argKind = t;
-        .)
-      ]           
-      Expression<out expr, out exprNode>
-      (. 
-         arg.Expression = expr;
-         if (argList != null) argList.Add(arg); 
-         Terminate(arg);
-         if (argNodes != null)
-         {
-           var argNode = new ArgumentContinuationNode(separator);
-           argNode.KindToken = argKind;
-           argNode.Expression = exprNode;
-           Terminate(argNode);
-           argNodes.Add(argNode);
-         }
-      .)
-    }
-  ]
-.  
+  | "out"   
+    (. 
+       arg.Kind = FormalParameterKind.Out; 
+       argKind = t;
+    .)
+  ]           
+  (. Expression expr; .)
+  Expression<out expr, out exprNode>
+  (. 
+     arg.Expression = expr;
+     if (argList != null) argList.Add(arg); 
+     Terminate(arg);
+     argNode = new ArgumentNode(argKind == null ? 
+       (exprNode == null ? t : exprNode.StartToken) : argKind);
+     argNode.KindToken = argKind;
+     argNode.Expression = exprNode;
+     Terminate(argNode);
+  .)
+.
 
 // ------------------------------------------------------------------------------------
 // Declaration of a property accessors.
@@ -2524,39 +2574,85 @@ ClassType<out TypeReference typeRef, out TypeOrNamespaceNode typeNode>
 // Declaration of a compound member name
 // +typeRef: An instance to a member reference
 // ------------------------------------------------------------------------------------
-MemberName<out TypeReference typeRef>                                              
-=                                        (.
-                                            // :::
-                                            TypeArgumentListNode argList = null;
-                                         .)
-  ident                                  (. 
-                                            typeRef = new TypeReference(t, this);
-                                            typeRef.Name = t.val; 
-                                            TypeReference nextType = typeRef;
-                                         .)
+MemberName<out TypeReference typeRef, out TypeOrNamespaceNode resultNode>                                              
+  (.
+     // :::
+     resultNode = null;
+     Token qualifier = null;
+     Token separator = null;
+     Token identifier = null;
+     TypeArgumentListNode argList = null;
+  .)
+=                                         
+  ident
+  (. 
+     typeRef = new TypeReference(t, this);
+     typeRef.Name = t.val; 
+     TypeReference nextType = typeRef;
+     // :::
+     qualifier = t;
+  .)
   [ 
-    "::"                                 (. typeRef.IsGlobalScope = true; .)
-    ident                                (. 
-                                            typeRef.Suffix = new TypeReference(t, this);
-                                            typeRef.Suffix.Name = t.val; 
-                                            nextType = typeRef.Suffix;
-                                         .)
+    "::"
+    (. 
+       typeRef.IsGlobalScope = true; 
+       // :::
+       separator = t;
+    .)
+    ident                           
+    (. 
+       typeRef.Suffix = new TypeReference(t, this);
+       typeRef.Suffix.Name = t.val; 
+       nextType = typeRef.Suffix;
+       // :::
+       identifier = t;
+    .)
   ]
+  (.
+     if (separator == null)
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier);
+       identifier = qualifier;
+     }
+     else
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier, separator);
+     }
+  .)
   [ 
     IF (la.kind == _lt && IsPartOfMemberName()) 
       TypeArgumentList<typeRef.Arguments, out argList> 
   ]
-  { IF (la.kind == _dot && Peek(1).kind == _ident)
-      "." ident                          (. 
-                                            nextType.Suffix = new TypeReference(t, this);
-                                            nextType.Suffix.Name = t.val;
-                                            nextType = nextType.Suffix;
-                                         .)
+  (.
+     // :::
+     resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
+  .)                                    
+  { 
+    IF (la.kind == _dot && Peek(1).kind == _ident)
+    "." 
+    (.
+       // :::
+       separator = t;
+       argList = null;
+    .)
+    ident
+    (. 
+       nextType.Suffix = new TypeReference(t, this);
+       nextType.Suffix.Name = t.val;
+       nextType = nextType.Suffix;
+       // :::
+       identifier = t;
+    .)
     [ 
       IF (la.kind == _lt && IsPartOfMemberName()) 
         TypeArgumentList<typeRef.Arguments, out argList>
     ]
+    (.
+       // :::
+       resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
+    .)                                    
   }
+  (. Terminate(resultNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2635,6 +2731,7 @@ TypeName<out TypeReference typeRef, out TypeOrNamespaceNode resultNode>
        resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
     .)                                    
   }
+  (. Terminate(resultNode); .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -4832,6 +4929,7 @@ NewOperator<out Expression expr, out ExpressionNode exprNode>
      NewOperator nop = new NewOperator(t, this);
      expr = nop;
      TypeReference typeRef; 
+     var newToken = t;
   .)
   (
     (. var anonNode = new NewOperatorWithAnonymousTypeNode(t); .)
@@ -4976,11 +5074,11 @@ MemberDeclarator<out MemberDeclarator init, out MemberDeclaratorNode mdNode>
 // +typeRef: Type to create with the new operator
 // ------------------------------------------------------------------------------------
 NewOperatorWithType<NewOperator nop, TypeReference typeRef> 
-                                   (. 
-                                      ArrayInitializer arrayInit;
-                                      nop.Type = typeRef; 
-                                      ExpressionNode exprNode;
-                                   .)
+  (. 
+     ArrayInitializer arrayInit;
+     nop.Type = typeRef; 
+     ExpressionNode exprNode;
+  .)
 =
   (
     // --- Simple constructor call
@@ -4998,16 +5096,10 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
       ObjectOrCollectionInitializer<out init> 
                                   (. nop.Initializer = init; .)
   | // --- Array initialization
-    IF (IsDims())                 (. nop.Kind = NewOperatorKind.TypedArrayInitialization; .)
-    "["                           (. nop.RunningDimensions = 1; .)
-      { 
-        ","                       (. nop.RunningDimensions++; .)
-      } 
-    "]" 
-    (. ArrayInitializerNode initNode; .)
-    ArrayInitializer<out arrayInit, out initNode>  
-    (. nop.Initializer = arrayInit; .)
-
+    IF (IsDims())                 
+    (. var newOpNode = new NewOperatorWithExplicitArrayNode(t); .)
+    ImplicitArrayCreation<nop, newOpNode>
+    (. nop.Kind = NewOperatorKind.TypedArrayInitialization; .)
   | // --- New array creation
     "["                           (. Expression dimExpr; .)
     Expression<out dimExpr, out exprNode>
@@ -5039,7 +5131,7 @@ NewOperatorWithType<NewOperator nop, TypeReference typeRef>
 // +nop: NewOperator delcaration
 // +typeRef: Type to create with the new operator
 // ------------------------------------------------------------------------------------
-ImplicitArrayCreation<NewOperator nop, NewOperatorWithImplicitArrayNode impArrNode> 
+ImplicitArrayCreation<NewOperator nop, NewOperatorWithArrayNodeBase impArrNode> 
   (. 
      ArrayInitializer arrayInit;
      nop.IsImplicitArray = true;

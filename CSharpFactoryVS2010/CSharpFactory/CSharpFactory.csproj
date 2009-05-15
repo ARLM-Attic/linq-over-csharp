@@ -334,6 +334,7 @@
     <Compile Include="SolutionHierarchy\IProjectContainer.cs" />
     <Compile Include="SolutionHierarchy\ISemanticTree.cs" />
     <Compile Include="SolutionHierarchy\ISolution.cs" />
+    <Compile Include="SyntaxTree\Behavior\IArrayDimensions.cs" />
     <Compile Include="SyntaxTree\Behavior\IContinuationTag.cs" />
     <Compile Include="SyntaxTree\Behavior\IIdentifierSupport.cs" />
     <Compile Include="SyntaxTree\Behavior\IParentheses.cs" />
@@ -417,6 +418,8 @@
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\MemberDeclaratorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\MethodInvocationOperatorNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\NewOperatorNode.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\NewOperatorWithArrayNodeBase.cs" />
+    <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\NewOperatorWithExplicitArrayNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\NewOperatorWithImplicitArrayNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\ParenthesisExpressionNode.cs" />
     <Compile Include="SyntaxTree\Expressions\Operators\PrimaryOperators\SizeofOperatorNode.cs" />
@@ -443,6 +446,10 @@
     <Compile Include="SyntaxTree\Members\ConstMemberDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\ConstMemberTagNode.cs" />
     <Compile Include="SyntaxTree\Members\ConstMemberTagNodeCollection.cs" />
+    <Compile Include="SyntaxTree\Members\ConstructorDeclarationNode.cs" />
+    <Compile Include="SyntaxTree\Members\EnumValueContinuationNode.cs" />
+    <Compile Include="SyntaxTree\Members\EnumValueNode.cs" />
+    <Compile Include="SyntaxTree\Members\EnumValueNodeCollection.cs" />
     <Compile Include="SyntaxTree\Members\FinalizerDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\FormalParameterContinuationNode.cs" />
     <Compile Include="SyntaxTree\Members\FormalParameterListNode.cs" />
@@ -452,7 +459,6 @@
     <Compile Include="SyntaxTree\Members\MemberDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\MemberDeclarationNodeCollection.cs" />
     <Compile Include="SyntaxTree\Members\MemberWithBodyDeclarationNode.cs" />
-    <Compile Include="SyntaxTree\Members\MemberWithNameDeclarationNode.cs" />
     <Compile Include="SyntaxTree\Members\MethodDeclarationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\AttributeArgumentContinuationNode.cs" />
     <Compile Include="SyntaxTree\SourceFileLevel\AttributeArgumentNode.cs" />

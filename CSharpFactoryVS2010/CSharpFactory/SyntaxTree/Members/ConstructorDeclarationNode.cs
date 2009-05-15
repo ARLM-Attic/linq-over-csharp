@@ -1,7 +1,7 @@
 // ================================================================================================
-// MemberWithNameDeclarationNode.cs
+// ConstructorDeclarationNode.cs
 //
-// Created: 2009.04.14, by Istvan Novak (DeepDiver)
+// Created: 2009.05.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,50 +9,46 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a type member declaration with a name.
+  /// This class represents a constructor declaration.
   /// </summary>
   // ================================================================================================
-  public abstract class MemberWithNameDeclarationNode : MemberDeclarationNode, IIdentifierSupport
+  public class ConstructorDeclarationNode : MethodDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemberWithNameDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="ConstructorDeclarationNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected MemberWithNameDeclarationNode(Token start)
+    public ConstructorDeclarationNode(Token start)
       : base(start)
     {
+      IdentifierToken = start;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the identifier token.
+    /// Gets or sets the colon token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; internal set; }
+    public Token Colon { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the identifier name.
+    /// Gets or sets the initializer token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string Identifier
-    {
-      get { return IdentifierToken == null ? string.Empty : IdentifierToken.val; }
-    }
+    public ExpressionNode Initializer { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance has identifier.
+    /// Gets a value indicating whether this instance has initializer.
     /// </summary>
     /// <value>
-    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// 	<c>true</c> if this instance has initializer; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier
-    {
-      get { return IdentifierToken != null; }
-    }
+    public bool HasInitializer { get { return Initializer != null; } }
+
   }
 }

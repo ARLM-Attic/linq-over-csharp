@@ -27,6 +27,20 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="ArgumentContinuationNode"/> class.
+    /// </summary>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="node">Argument node</param>
+    // ----------------------------------------------------------------------------------------------
+    public ArgumentContinuationNode(Token separator, ArgumentNode node)
+      : base(separator)
+    {
+      KindToken = node.KindToken;
+      Expression = node.Expression;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the separator token.
     /// </summary>
     /// <value>The separator token.</value>

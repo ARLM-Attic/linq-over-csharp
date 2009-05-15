@@ -1,7 +1,7 @@
 // ================================================================================================
-// DelegateDeclarationNode.cs
+// EnumValueNode.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.05.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,30 +9,22 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// Represents a delegate declaration.
+  /// This class represents a member of an enumeration type.
   /// </summary>
   // ================================================================================================
-  public class DelegateDeclarationNode: TypeDeclarationNode, IIdentifierSupport
+  public class EnumValueNode : AttributedDeclarationNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="DelegateDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="EnumValueNode"/> class.
     /// </summary>
-    /// <param name="start">The start token of the declaration.</param>
-    /// <param name="name">The name of the delcaration.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public DelegateDeclarationNode(Token start, Token name)
-      : base(start, name)
+    public EnumValueNode(Token start)
+      : base(start)
     {
-      IdentifierToken = name;
+      IdentifierToken = start;
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the name of the type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -40,7 +32,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The identifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; private set; }
+    public Token IdentifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -65,9 +57,16 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the formal parameters.
+    /// Gets or sets the equal token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
+    public Token EqualToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the optional expression of the enumeration value.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionNode Expression { get; internal set; }
   }
 }

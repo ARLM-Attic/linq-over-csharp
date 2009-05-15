@@ -24,7 +24,7 @@ namespace CSharpFactory.Syntax
     protected TypeDeclarationNode(Token start, Token name)
       : base(start)
     {
-      NameToken = name;
+      IdentifierToken = name;
       BaseTypes = new TypeOrNamespaceNodeCollection();
       NestedTypes = new TypeDeclarationNodeCollection();
       MemberDeclarations = new MemberDeclarationNodeCollection();
@@ -53,23 +53,6 @@ namespace CSharpFactory.Syntax
     /// </value>
     // ----------------------------------------------------------------------------------------------
     public bool IsPartial { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the token representing the nameof the type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token NameToken { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the name of the type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string Name
-    {
-      get { return NameToken.val; }
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -1,7 +1,7 @@
 // ================================================================================================
-// EnumDeclarationNode.cs
+// EnumValueContinuationNode.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.05.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,36 +9,32 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// Represents an enum declaration.
+  /// This class represents a continuation of an enumeration value.
   /// </summary>
   // ================================================================================================
-  public class EnumDeclarationNode: TypeWithBodyDeclarationNode
+  public class EnumValueContinuationNode: EnumValueNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnumDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="EnumValueContinuationNode"/> class.
     /// </summary>
-    /// <param name="start">The start token of the declaration.</param>
-    /// <param name="name">The name of the delcaration.</param>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="node">The enumeration value node.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumDeclarationNode(Token start, Token name)
-      : base(start, name)
+    public EnumValueContinuationNode(Token separator, EnumValueNode node)
+      : base(separator)
     {
-      Values = new EnumValueNodeCollection();
+      SeparatorToken = separator;
+      IdentifierToken = node.IdentifierToken;
+      EqualToken = node.EqualToken;
+      Expression = node.Expression;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of enumeration values.
+    /// Gets the token separating the continuation tag from the preceding tag.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public EnumValueNodeCollection Values { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the orphan separator token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token OrphanSeparator { get; internal set; }
+    public Token SeparatorToken { get; internal set; }
   }
 }

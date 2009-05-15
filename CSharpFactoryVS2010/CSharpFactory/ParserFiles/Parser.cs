@@ -737,6 +737,7 @@ NamespaceScopeNode parentNode) {
 			resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
 			
 		}
+		Terminate(resultNode); 
 	}
 
 	void Attribute(out AttributeDeclaration attr, out AttributeNode attrNode) {
@@ -1068,8 +1069,10 @@ out TypeDeclarationNode typeDecl) {
 		Type(out returnType, true, out typeNode);
 		dd.ReturnType = returnType; 
 		Expect(1);
-		dd.Name = t.val; 
-		typeDecl = new DelegateDeclarationNode(start, t);
+		dd.Name = t.val;
+		var ddNode = new DelegateDeclarationNode(start, t);
+		typeDecl = ddNode;
+		ddNode.TypeName = typeNode;
 		
 		if (la.kind == 100) {
 			TypeParameterList(dd, typeDecl);
@@ -1255,8 +1258,10 @@ out MemberDeclarationNode memNode) {
 			if (la.kind == 96) {
 				BlockStatementNode blockNode; 
 				Block(dd, out blockNode);
+				finNode.Body = blockNode; 
 			} else if (la.kind == 114) {
 				Get();
+				finNode.ClosingSemicolon = t; 
 			} else SynErr(150);
 			Terminate(dd);
 			td.AddMember(dd); 
@@ -1304,7 +1309,8 @@ out MemberDeclarationNode memNode) {
 			Expect(120);
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeRef, true, out typeNode);
-			MemberName(out memberRef);
+			TypeOrNamespaceNode nameNode; 
+			MemberName(out memberRef, out nameNode);
 			MethodDeclaration(attrs, m, typeRef, memberRef, td, true);
 		} else if (StartOf(11)) {
 			TypeOrNamespaceNode typeNode; 
@@ -1315,7 +1321,8 @@ out MemberDeclarationNode memNode) {
 				FieldMemberDeclarators(attrs, m, td, typeRef, false, Modifier.fields);
 				Expect(114);
 			} else if (la.kind == 1) {
-				MemberName(out memberRef);
+				TypeOrNamespaceNode nameNode; 
+				MemberName(out memberRef, out nameNode);
 				if (la.kind == 96) {
 					PropertyDeclaration(attrs, m, typeRef, memberRef, td);
 				} else if (la.kind == 90) {
@@ -1407,25 +1414,31 @@ out MemberDeclarationNode memNode) {
 		Expect(96);
 		typeDecl.OpenBrace = t; 
 		if (la.kind == 1 || la.kind == 97) {
-			EnumMemberDeclaration(ed);
+			EnumValueNode valNode; 
+			EnumMemberDeclaration(ed, out valNode);
+			typeDecl.Values.Add(valNode); 
 			while (NotFinalComma()) {
 				Expect(87);
+				var separator = t; 
 				while (!(la.kind == 0 || la.kind == 1 || la.kind == 97)) {SynErr(156); Get();}
-				EnumMemberDeclaration(ed);
+				EnumMemberDeclaration(ed, out valNode);
+				typeDecl.Values.Add(new EnumValueContinuationNode(separator, valNode)); 
 			}
 			if (la.kind == 87) {
 				Get();
+				typeDecl.OrphanSeparator = t; 
 			}
 		}
 		while (!(la.kind == 0 || la.kind == 111)) {SynErr(157); Get();}
 		Expect(111);
 		typeDecl.CloseBrace = t; 
+		Terminate(typeDecl);
+		
 	}
 
-	void EnumMemberDeclaration(EnumDeclaration ed) {
+	void EnumMemberDeclaration(EnumDeclaration ed, out EnumValueNode valNode) {
+		valNode = null; 
 		AttributeCollection attrs = new AttributeCollection(); 
-		// :::
-		ExpressionNode exprNode;
 		var attrNodes = new AttributeDecorationNodeCollection();
 		
 		AttributeDecorations(attrs, attrNodes);
@@ -1433,15 +1446,23 @@ out MemberDeclarationNode memNode) {
 		EnumValueDeclaration ev = new EnumValueDeclaration(t, this); 
 		CurrentElement = ev;
 		Expression expr;
+		valNode = new EnumValueNode(t);
+		valNode.AttributeDecorations = attrNodes;
 		
 		if (la.kind == 85) {
 			Get();
+			valNode.EqualToken = t;
+			ExpressionNode exprNode;
+			
 			Expression(out expr, out exprNode);
 			ev.ValueExpression = expr; 
+			valNode.Expression = exprNode;
+			
 		}
 		ev.AssignAttributes(attrs);
 		ed.Values.Add(ev);
 		Terminate(ev);
+		Terminate(valNode);
 		
 	}
 
@@ -1664,69 +1685,119 @@ out MemberDeclarationNode memNode) {
 		CurrentElement = cd;
 		cd.SetModifiers(m.Value);
 		cd.AssignAttributes(attrs);
+		var cstNode = new ConstructorDeclarationNode(t);
+		memNode = cstNode;
 		
 		Expect(98);
 		var parList = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(cd.FormalParameters, parList);
+			cstNode.FormalParameters = parList; 
 		}
 		Expect(113);
 		Terminate(parList); 
 		if (la.kind == 86) {
 			Get();
+			cstNode.Colon = t; 
+			ExpressionNode scopeNode = null;
+			
 			if (la.kind == 8) {
 				Get();
 				cd.HasBase = true; 
+				scopeNode = new BaseNode(t);
+				
 			} else if (la.kind == 68) {
 				Get();
 				cd.HasThis = true; 
+				scopeNode = new ThisNode(t);
+				
 			} else SynErr(162);
 			Expect(98);
-			CurrentArgumentList(cd.BaseArguments, null);
+			var invNode = new MethodInvocationOperatorNode(t);
+			invNode.ScopeOperand = scopeNode;
+			
+			CurrentArgumentList(cd.BaseArguments, invNode.Arguments);
 			Expect(113);
+			Terminate(invNode);
+			cstNode.Initializer = invNode;
+			
 		}
 		if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(cd, out blockNode);
+			cstNode.Body = blockNode; 
 		} else if (la.kind == 114) {
 			Get();
+			cstNode.ClosingSemicolon = t; 
 		} else SynErr(163);
 		td.AddMember(cd); 
 		Terminate(cd);
+		Terminate(memNode);
 		
 	}
 
-	void MemberName(out TypeReference typeRef) {
+	void MemberName(out TypeReference typeRef, out TypeOrNamespaceNode resultNode) {
+		resultNode = null;
+		Token qualifier = null;
+		Token separator = null;
+		Token identifier = null;
 		TypeArgumentListNode argList = null;
 		
 		Expect(1);
 		typeRef = new TypeReference(t, this);
 		typeRef.Name = t.val; 
 		TypeReference nextType = typeRef;
+		// :::
+		qualifier = t;
 		
 		if (la.kind == 91) {
 			Get();
 			typeRef.IsGlobalScope = true; 
+			// :::
+			separator = t;
+			
 			Expect(1);
 			typeRef.Suffix = new TypeReference(t, this);
 			typeRef.Suffix.Name = t.val; 
 			nextType = typeRef.Suffix;
+			// :::
+			identifier = t;
 			
 		}
+		if (separator == null)
+		{
+		  resultNode = new TypeOrNamespaceNode(qualifier);
+		  identifier = qualifier;
+		}
+		else
+		{
+		  resultNode = new TypeOrNamespaceNode(qualifier, separator);
+		}
+		
 		if (la.kind == _lt && IsPartOfMemberName()) {
 			TypeArgumentList(typeRef.Arguments, out argList);
 		}
+		resultNode.AddTypeTag(new TypeTagNode(identifier, argList));
+		
 		while (la.kind == _dot && Peek(1).kind == _ident) {
 			Expect(90);
+			separator = t;
+			argList = null;
+			
 			Expect(1);
 			nextType.Suffix = new TypeReference(t, this);
 			nextType.Suffix.Name = t.val;
 			nextType = nextType.Suffix;
+			// :::
+			identifier = t;
 			
 			if (la.kind == _lt && IsPartOfMemberName()) {
 				TypeArgumentList(typeRef.Arguments, out argList);
 			}
+			resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList));
+			
 		}
+		Terminate(resultNode); 
 	}
 
 	void MethodDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
@@ -1993,69 +2064,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 	}
 
 	void CurrentArgumentList(ArgumentList argList, ArgumentNodeCollection argNodes) {
-		ExpressionNode exprNode; 
-		Argument arg = new Argument(t, this);
-		Token argKind = null;
-		Token separator = null;
-		
 		if (StartOf(18)) {
-			if (la.kind == 50 || la.kind == 57) {
-				if (la.kind == 57) {
-					Get();
-					arg.Kind = FormalParameterKind.Ref; 
-					argKind = t;
-					
-				} else {
-					Get();
-					arg.Kind = FormalParameterKind.Out; 
-					argKind = t;
-					
-				}
-			}
-			Expression expr; 
-			Expression(out expr, out exprNode);
-			arg.Expression = expr;
-			if (argList != null) argList.Add(arg); 
-			Terminate(arg);
-			if (argNodes != null)
-			{
-			  var argNode = new ArgumentNode(argKind == null ? 
-			    (exprNode == null ? t : exprNode.StartToken) : argKind);
-			  argNode.KindToken = argKind;
-			  argNode.Expression = exprNode;
-			  Terminate(argNode);
-			  argNodes.Add(argNode);
-			}
-			
+			ArgumentNode argNode; 
+			CurrentArgumentItem(argList, out argNode);
+			if (argNodes != null) argNodes.Add(argNode); 
 			while (la.kind == 87) {
 				Get();
-				separator = t; 
-				if (la.kind == 50 || la.kind == 57) {
-					if (la.kind == 57) {
-						Get();
-						arg.Kind = FormalParameterKind.Ref; 
-						argKind = t;
-						
-					} else {
-						Get();
-						arg.Kind = FormalParameterKind.Out; 
-						argKind = t;
-						
-					}
-				}
-				Expression(out expr, out exprNode);
-				arg.Expression = expr;
-				if (argList != null) argList.Add(arg); 
-				Terminate(arg);
-				if (argNodes != null)
-				{
-				  var argNode = new ArgumentContinuationNode(separator);
-				  argNode.KindToken = argKind;
-				  argNode.Expression = exprNode;
-				  Terminate(argNode);
-				  argNodes.Add(argNode);
-				}
-				
+				var separator = t; 
+				CurrentArgumentItem(argList, out argNode);
+				if (argNodes != null) argNodes.Add(new ArgumentContinuationNode(separator, argNode)); 
 			}
 		}
 	}
@@ -2599,6 +2616,38 @@ out LocalVariableTagNode varDeclNode) {
 		parNode.IdentifierToken = t;
 		parNode.TypeName = typeNode;
 		Terminate(parNode);
+		
+	}
+
+	void CurrentArgumentItem(ArgumentList argList, out ArgumentNode argNode) {
+		ExpressionNode exprNode; 
+		Argument arg = new Argument(t, this);
+		Token argKind = null;
+		Token separator = null;
+		
+		if (la.kind == 50 || la.kind == 57) {
+			if (la.kind == 57) {
+				Get();
+				arg.Kind = FormalParameterKind.Ref; 
+				argKind = t;
+				
+			} else {
+				Get();
+				arg.Kind = FormalParameterKind.Out; 
+				argKind = t;
+				
+			}
+		}
+		Expression expr; 
+		Expression(out expr, out exprNode);
+		arg.Expression = expr;
+		if (argList != null) argList.Add(arg); 
+		Terminate(arg);
+		argNode = new ArgumentNode(argKind == null ? 
+		  (exprNode == null ? t : exprNode.StartToken) : argKind);
+		argNode.KindToken = argKind;
+		argNode.Expression = exprNode;
+		Terminate(argNode);
 		
 	}
 
@@ -4990,6 +5039,7 @@ out LocalVariableTagNode varDeclNode) {
 		NewOperator nop = new NewOperator(t, this);
 		expr = nop;
 		TypeReference typeRef; 
+		var newToken = t;
 		
 		if (la.kind == 96) {
 			var anonNode = new NewOperatorWithAnonymousTypeNode(t); 
@@ -5251,17 +5301,9 @@ out LocalVariableTagNode varDeclNode) {
 			ObjectOrCollectionInitializer(out init);
 			nop.Initializer = init; 
 		} else if (IsDims()) {
+			var newOpNode = new NewOperatorWithExplicitArrayNode(t); 
+			ImplicitArrayCreation(nop, newOpNode);
 			nop.Kind = NewOperatorKind.TypedArrayInitialization; 
-			Expect(97);
-			nop.RunningDimensions = 1; 
-			while (la.kind == 87) {
-				Get();
-				nop.RunningDimensions++; 
-			}
-			Expect(112);
-			ArrayInitializerNode initNode; 
-			ArrayInitializer(out arrayInit, out initNode);
-			nop.Initializer = arrayInit; 
 		} else if (la.kind == 97) {
 			Get();
 			Expression dimExpr; 
@@ -5293,7 +5335,7 @@ out LocalVariableTagNode varDeclNode) {
 		Terminate(nop); 
 	}
 
-	void ImplicitArrayCreation(NewOperator nop, NewOperatorWithImplicitArrayNode impArrNode) {
+	void ImplicitArrayCreation(NewOperator nop, NewOperatorWithArrayNodeBase impArrNode) {
 		ArrayInitializer arrayInit;
 		nop.IsImplicitArray = true;
 		
