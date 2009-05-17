@@ -1,7 +1,7 @@
 // ================================================================================================
-// VariableDeclarationStatementNode.cs
+// ConstDeclarationNode.cs
 //
-// Created: 2009.05.08, by Istvan Novak (DeepDiver)
+// Created: 2009.04.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,23 +9,18 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a "const" statement.
+  /// This class represents a const member declaration node.
   /// </summary>
-  /// <remarks>
-  /// Syntax:
-  ///   ConstStatementNode:
-  ///     "const" TypeOrNamespaceNode ConstTagNode { ConstMemberTagContinuationNode } ";"
-  /// </remarks>
   // ================================================================================================
-  public sealed class VariableDeclarationStatementNode : StatementNode
+  public class ConstDeclarationNode : MemberDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="VariableDeclarationStatementNode"/> class.
+    /// Initializes a new instance of the <see cref="ConstDeclarationNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public VariableDeclarationStatementNode(Token start)
+    public ConstDeclarationNode(Token start)
       : base(start)
     {
       ConstTags = new ConstTagNodeCollection();
@@ -33,14 +28,7 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type belonging to this const statement.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the const tags.
+    /// Gets the collection const tags.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ConstTagNodeCollection ConstTags { get; private set; }

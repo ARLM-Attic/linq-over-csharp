@@ -1,7 +1,7 @@
 // ================================================================================================
-// MethodDeclarationNode.cs
+// EventPropertyDeclarationNode.cs
 //
-// Created: 2009.04.19, by Istvan Novak (DeepDiver)
+// Created: 2009.05.17, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,47 +9,34 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a method declaration.
+  /// This class represents a property declaration node.
   /// </summary>
   // ================================================================================================
-  public class MethodDeclarationNode : MemberWithBodyDeclarationNode, IParentheses
+  public class EventPropertyDeclarationNode: PropertyDeclarationNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MethodDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="EventPropertyDeclarationNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public MethodDeclarationNode(Token start)
+    public EventPropertyDeclarationNode(Token start)
       : base(start)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the opening parenthesis token.
+    /// Retrieves the "add" accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis
-    {
-      get { return FormalParameters.StartToken; }
-    }
+    public AccessorNode AddAccessor { get { return FindAccessor("add"); } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the node representing formal parameters.
+    /// Retrieves the "remove" accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the closing parenthesis token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis 
-    { 
-      get { return FormalParameters.TerminatingToken; } 
-    }
+    public AccessorNode RemoveAccessor { get { return FindAccessor("remove"); } }
   }
 }

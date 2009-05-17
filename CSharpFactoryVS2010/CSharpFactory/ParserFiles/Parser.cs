@@ -847,6 +847,7 @@ NamespaceScopeNode parentNode) {
 out TypeDeclaration td, NamespaceScopeNode parentNs, TypeDeclarationNode declaringType,
 out TypeDeclarationNode typeDecl) {
 		td = null;
+		Token partialToken = null;
 		bool isPartial = false;
 		// :::
 		typeDecl = null; 
@@ -854,7 +855,9 @@ out TypeDeclarationNode typeDecl) {
 		if (StartOf(4)) {
 			if (la.kind == 120) {
 				Get();
-				isPartial = true; 
+				partialToken = t; 
+				isPartial = true;
+				
 			}
 			if (la.kind == 16) {
 				ClassDeclaration(m, parentType, isPartial, out td, out typeDecl);
@@ -877,7 +880,7 @@ out TypeDeclarationNode typeDecl) {
 		// :::
 		if (typeDecl != null)
 		{
-		  typeDecl.IsPartial = isPartial;
+		  typeDecl.PartialToken = partialToken;
 		  typeDecl.DeclaringNamespace = parentNs;
 		  typeDecl.DeclaringType = declaringType;
 		  Terminate(typeDecl);
@@ -1252,9 +1255,9 @@ out MemberDeclarationNode memNode) {
 			finNode.IdentifierToken = t;
 			
 			Expect(98);
-			finNode.OpenParenthesis = t; 
+			finNode.FormalParameters = new FormalParameterListNode(t); 
 			Expect(113);
-			finNode.CloseParenthesis = t; 
+			Terminate(finNode.FormalParameters); 
 			if (la.kind == 96) {
 				BlockStatementNode blockNode; 
 				Block(dd, out blockNode);
@@ -1307,29 +1310,50 @@ out MemberDeclarationNode memNode) {
 			ConstructorDeclaration(attrs, m, td, out memNode);
 		} else if (IsPartialMethod()) {
 			Expect(120);
+			var partialToken = t;
 			TypeOrNamespaceNode typeNode; 
+			
 			Type(out typeRef, true, out typeNode);
 			TypeOrNamespaceNode nameNode; 
 			MemberName(out memberRef, out nameNode);
-			MethodDeclaration(attrs, m, typeRef, memberRef, td, true);
+			var metNode = new MethodDeclarationNode(partialToken);
+			metNode.TypeName = typeNode;
+			metNode.MemberName = nameNode;
+			memNode = metNode;
+			
+			MethodDeclaration(attrs, m, typeRef, memberRef, td, metNode);
 		} else if (StartOf(11)) {
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeRef, true, out typeNode);
 			if (la.kind == 49) {
 				OperatorDeclaration(attrs, m, typeRef, td);
 			} else if (IsFieldDecl()) {
-				FieldMemberDeclarators(attrs, m, td, typeRef, false, Modifier.fields);
+				var fiNode = new FieldDeclarationNode(typeNode.StartToken); 
+				fiNode.TypeName = typeNode;
+				memNode = fiNode;
+				
+				FieldMemberDeclarators(attrs, m, td, typeRef, false, fiNode);
 				Expect(114);
+				Terminate(memNode); 
 			} else if (la.kind == 1) {
 				TypeOrNamespaceNode nameNode; 
 				MemberName(out memberRef, out nameNode);
 				if (la.kind == 96) {
-					PropertyDeclaration(attrs, m, typeRef, memberRef, td);
+					var propNode = new PropertyDeclarationNode(typeNode.StartToken);
+					propNode.TypeName = typeNode; 
+					propNode.MemberName = nameNode;
+					
+					PropertyDeclaration(attrs, m, typeRef, memberRef, td, propNode);
 				} else if (la.kind == 90) {
 					Get();
 					IndexerDeclaration(attrs, m, typeRef, memberRef, td);
 				} else if (la.kind == 98 || la.kind == 100) {
-					MethodDeclaration(attrs, m, typeRef, memberRef, td, true);
+					var metNode = new MethodDeclarationNode(typeNode.StartToken);
+					metNode.TypeName = typeNode;
+					metNode.MemberName = nameNode;
+					memNode = metNode;
+					
+					MethodDeclaration(attrs, m, typeRef, memberRef, td, metNode);
 				} else SynErr(152);
 			} else if (la.kind == 68) {
 				IndexerDeclaration(attrs, m, typeRef, null, td);
@@ -1629,13 +1653,13 @@ out MemberDeclarationNode memNode) {
 		Expect(17);
 		TypeReference typeRef; 
 		// :::
-		var constNode = new ConstMemberDeclarationNode(t);
+		var constNode = new ConstDeclarationNode(t);
 		memNode = constNode;
 		TypeOrNamespaceNode typeNode;
 		
 		Type(out typeRef, false, out typeNode);
 		memNode.TypeName = typeNode; 
-		ConstMemberTagNode tagNode;
+		ConstTagNode tagNode;
 		
 		SingleConstMember(attrs, m, td, typeRef, out tagNode);
 		constNode.ConstTags.Add(tagNode); 
@@ -1643,7 +1667,7 @@ out MemberDeclarationNode memNode) {
 			Get();
 			var separator = t; 
 			SingleConstMember(attrs, m, td, typeRef, out tagNode);
-			constNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, tagNode)); 
+			constNode.ConstTags.Add(new ConstContinuationTagNode(separator, tagNode)); 
 		}
 		Expect(114);
 		Terminate(memNode); 
@@ -1653,27 +1677,41 @@ out MemberDeclarationNode memNode) {
 out MemberDeclarationNode memNode) {
 		TypeReference typeRef; 
 		// :::
-		TypeOrNamespaceNode nsNode = null;
 		memNode = null;
+		TypeOrNamespaceNode typeNode;
 		
 		Expect(26);
-		TypeOrNamespaceNode typeNode; 
+		var eventToken = t; 
 		Type(out typeRef, false, out typeNode);
 		if (IsFieldDecl()) {
-			FieldMemberDeclarators(attrs, m, td, typeRef, true, Modifier.propEvntMeths);
+			var fiNode = new FieldDeclarationNode(eventToken); 
+			memNode = fiNode;
+			fiNode.TypeName = typeNode;
+			
+			FieldMemberDeclarators(attrs, m, td, typeRef, true, fiNode);
 			Expect(114);
+			Terminate(fiNode); 
 		} else if (la.kind == 1) {
+			var evpNode = new EventPropertyDeclarationNode(t) ;
+			memNode = evpNode;
 			TypeReference memberRef; 
-			TypeName(out memberRef, out nsNode);
+			
+			TypeName(out memberRef, out typeNode);
+			evpNode.TypeName = typeNode; 
 			Expect(96);
-			EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  
-			CurrentElement = ep; 
-			ep.ResultingType = typeRef; 
-			ep.ExplicitName = memberRef; 
+			evpNode.OpenBrace = t;
+			EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);
+			CurrentElement = ep;
+			ep.ResultingType = typeRef;
+			ep.ExplicitName = memberRef;
 			td.AddMember(ep); 
-			EventAccessorDeclarations(ep);
+			
+			EventAccessorDeclarations(ep, evpNode);
 			Expect(111);
 			Terminate(ep); 
+			evpNode.CloseBrace = t;
+			Terminate(evpNode);
+			
 		} else SynErr(161);
 	}
 
@@ -1801,7 +1839,7 @@ out MemberDeclarationNode memNode) {
 	}
 
 	void MethodDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
-TypeReference memberRef, TypeDeclaration td, bool allowBody) {
+TypeReference memberRef, TypeDeclaration td, MethodDeclarationNode metNode) {
 		MethodDeclaration md = new MethodDeclaration(t, td);
 		CurrentElement = md;
 		md.SetModifiers(m.Value);
@@ -1810,27 +1848,29 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		md.ResultingType = typeRef;
 		
 		if (la.kind == 100) {
-			TypeParameterList(md, null);
+			TypeParameterList(md, metNode);
 		}
 		Expect(98);
-		var parList = new FormalParameterListNode(t); 
+		metNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(md.FormalParameters, parList);
+			FormalParameterList(md.FormalParameters, metNode.FormalParameters);
 		}
 		Expect(113);
-		Terminate(parList); 
+		Terminate(metNode.FormalParameters); 
 		while (la.kind == 124) {
 			TypeParameterConstraint constraint; 
 			TypeParameterConstraintNode constrNode; 
 			
 			TypeParameterConstraintsClause(out constraint, out constrNode);
 			md.AddTypeParameterConstraint(constraint); 
+			metNode.TypeParameterConstraints.Add(constrNode);
+			
 		}
 		if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(md, out blockNode);
-			if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
-			md.HasBody = true;
+			md.HasBody = true; 
+			metNode.Body = blockNode;
 			
 		} else if (la.kind == 114) {
 			Get();
@@ -1838,6 +1878,7 @@ TypeReference memberRef, TypeDeclaration td, bool allowBody) {
 		} else SynErr(164);
 		td.AddMember(md); 
 		Terminate(md);
+		Terminate(metNode); 
 		
 	}
 
@@ -1874,16 +1915,20 @@ TypeDeclaration td) {
 	}
 
 	void FieldMemberDeclarators(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-TypeReference typeRef, bool isEvent, Modifier toCheck) {
-		SingleFieldMember(attrs, m, td, typeRef, isEvent);
+TypeReference typeRef, bool isEvent, FieldDeclarationNode fiNode) {
+		FieldTagNode tagNode; 
+		SingleFieldMember(attrs, m, td, typeRef, isEvent, out tagNode);
+		fiNode.FieldTags.Add(tagNode); 
 		while (la.kind == 87) {
 			Get();
-			SingleFieldMember(attrs, m, td, typeRef, isEvent);
+			var separator = t; 
+			SingleFieldMember(attrs, m, td, typeRef, isEvent, out tagNode);
+			fiNode.FieldTags.Add(new FieldContinuationTagNode(separator, tagNode)); 
 		}
 	}
 
 	void PropertyDeclaration(AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
-TypeReference memberRef, TypeDeclaration td) {
+TypeReference memberRef, TypeDeclaration td, PropertyDeclarationNodeBase propNode) {
 		PropertyDeclaration pd = new PropertyDeclaration(t, td);
 		CurrentElement = pd;
 		pd.SetModifiers(m.Value);
@@ -1892,10 +1937,13 @@ TypeReference memberRef, TypeDeclaration td) {
 		pd.ResultingType = typeRef;
 		
 		Expect(96);
-		AccessorDeclarations(pd);
+		propNode.OpenBrace = t; 
+		AccessorDeclarations(pd, propNode);
 		Expect(111);
 		td.AddMember(pd); 
 		Terminate(pd);
+		propNode.CloseBrace = t;
+		Terminate(propNode);
 		
 	}
 
@@ -1925,7 +1973,8 @@ TypeReference memberRef, TypeDeclaration td) {
 		Expect(112);
 		Terminate(parList); 
 		Expect(96);
-		AccessorDeclarations(ind);
+		var propNode = new PropertyDeclarationNode(t); 
+		AccessorDeclarations(ind, propNode);
 		Expect(111);
 		td.AddMember(ind); 
 		Terminate(ind);
@@ -1970,7 +2019,7 @@ TypeReference memberRef, TypeDeclaration td) {
 	}
 
 	void SingleConstMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-TypeReference typeRef, out ConstMemberTagNode tagNode) {
+TypeReference typeRef, out ConstTagNode tagNode) {
 		Expect(1);
 		ConstDeclaration cd = new ConstDeclaration(t, td); 
 		CurrentElement = cd;
@@ -1979,7 +2028,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		cd.ResultingType = typeRef;
 		cd.Name = t.val;
 		// :::
-		tagNode = new ConstMemberTagNode(t);
+		tagNode = new ConstTagNode(t);
 		
 		Expect(85);
 		td.AddMember(cd);
@@ -1997,7 +2046,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		
 	}
 
-	void EventAccessorDeclarations(EventPropertyDeclaration prop) {
+	void EventAccessorDeclarations(EventPropertyDeclaration prop, PropertyDeclarationNodeBase propNode) {
 		AttributeCollection attrs = new AttributeCollection();
 		AccessorDeclaration accessor = null;
 		// :::
@@ -2011,22 +2060,28 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ModifierList(am, mod);
 		if ("add".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); 
+			accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
 			CurrentElement = accessor; 
+			
 		} else if ("remove".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop); 
+			accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
 			CurrentElement = accessor; 
-		} else if (la.kind == 1) {
-			Get();
-			Error("UNDEF", la, "add or remove expected"); 
+			
 		} else SynErr(168);
+		var accNode = new AccessorNode(t);
+		accNode.AttributeDecorations = attrNodes;
+		accNode.Modifiers = mod;
 		BlockStatementNode blockNode; 
+		
 		Block(accessor, out blockNode);
 		Terminate(accessor);
 		accessor.HasBody = true;
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs); 
+		accNode.Body = blockNode;
+		Terminate(accNode);
+		propNode.FirstAccessor = accNode;
 		
 		if (StartOf(17)) {
 			attrs = new AttributeCollection(); 
@@ -2040,25 +2095,27 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			ModifierList(am, mod);
 			if ("add".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
 				accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if ("remove".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
 				accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
-			} else if (la.kind == 1) {
-				Get();
-				Error("UNDEF", la, "add or remove expected"); 
 			} else SynErr(169);
+			accNode = new AccessorNode(t);
+			accNode.AttributeDecorations = attrNodes;
+			accNode.Modifiers = mod;
+			
 			Block(accessor, out blockNode);
 			Terminate(accessor);
 			accessor.HasBody = true;
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs); 
+			accNode.Body = blockNode;
+			Terminate(accNode);
+			propNode.SecondAccessor = accNode;
 			
 		}
 	}
@@ -2077,7 +2134,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		}
 	}
 
-	void AccessorDeclarations(PropertyDeclaration prop) {
+	void AccessorDeclarations(PropertyDeclaration prop, PropertyDeclarationNodeBase propNode) {
 		AttributeCollection attrs = new AttributeCollection();
 		AccessorDeclaration accessor = null;
 		// :::
@@ -2091,27 +2148,36 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		ModifierList(am, mod);
 		if ("get".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); 
+			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 			CurrentElement = accessor; 
+			
 		} else if ("set".Equals(la.val)) {
 			Expect(1);
-			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); 
+			accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 			CurrentElement = accessor; 
-		} else if (la.kind == 1) {
-			Get();
-			Error("UNDEF", la, "set or get expected"); 
+			
 		} else SynErr(170);
+		var accNode = new AccessorNode(t);
+		accNode.AttributeDecorations = attrNodes;
+		accNode.Modifiers = mod;
+		propNode.FirstAccessor = accNode;
+		BlockStatementNode blockNode;
+		
 		if (la.kind == 96) {
-			BlockStatementNode blockNode; 
 			Block(accessor, out blockNode);
 			accessor.HasBody = true; 
+			accNode.Body = blockNode;
+			
 		} else if (la.kind == 114) {
 			Get();
 			accessor.HasBody = false; 
+			accNode.ClosingSemicolon = t;
+			
 		} else SynErr(171);
 		Terminate(accessor);
 		accessor.SetModifiers(am.Value); 
 		accessor.AssignAttributes(attrs);
+		Terminate(accNode);
 		
 		if (StartOf(17)) {
 			attrs = new AttributeCollection(); 
@@ -2124,31 +2190,35 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 			ModifierList(am, mod);
 			if ("get".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
 				accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
 			} else if ("set".Equals(la.val)) {
 				Expect(1);
-				if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
 				accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
 				CurrentElement = accessor;
 				
-			} else if (la.kind == 1) {
-				Get();
-				Error("UNDEF", la, "set or get expected"); 
 			} else SynErr(172);
+			accNode = new AccessorNode(t);
+			accNode.AttributeDecorations = attrNodes;
+			accNode.Modifiers = mod;
+			propNode.SecondAccessor = accNode;
+			
 			if (la.kind == 96) {
-				BlockStatementNode blockNode; 
 				Block(accessor, out blockNode);
 				accessor.HasBody = true; 
+				accNode.Body = blockNode;
+				
 			} else if (la.kind == 114) {
 				Get();
 				accessor.HasBody = false; 
+				accNode.ClosingSemicolon = t;
+				
 			} else SynErr(173);
 			Terminate(accessor);
 			accessor.SetModifiers(am.Value); 
 			accessor.AssignAttributes(attrs);
+			Terminate(accNode);
 			
 		}
 	}
@@ -2277,6 +2347,7 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 		// :::
 		var mod = new ModifierNodeCollection();
 		var attrNodes = new AttributeDecorationNodeCollection();
+		Token identifier;
 		
 		AttributeDecorations(attrs, attrNodes);
 		ModifierList(m, mod);
@@ -2287,9 +2358,15 @@ TypeReference typeRef, out ConstMemberTagNode tagNode) {
 				Get();
 				TypeReference memberRef = new TypeReference(t, this); 
 				memberRef.Name = t.val;
+				identifier = t;
 				
 				if (la.kind == 98 || la.kind == 100) {
-					MethodDeclaration(attrs, m, typeRef, memberRef, ifd, false);
+					var metNode = new MethodDeclarationNode(typeNode.StartToken);
+					metNode.TypeName = typeNode;
+					metNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
+					// memNode = metNode;
+					
+					MethodDeclaration(attrs, m, typeRef, memberRef, ifd, metNode);
 				} else if (la.kind == 96) {
 					PropertyDeclaration prop = new PropertyDeclaration(t, ifd); 
 					CurrentElement = prop; 
@@ -3285,7 +3362,7 @@ out LocalVariableTagNode varDeclNode) {
 		Type(out typeRef, false, out typeNode);
 		csNode.TypeName = typeNode; 
 		Expect(1);
-		var cmTag = new ConstMemberTagNode(t);
+		var cmTag = new ConstTagNode(t);
 		cs.Name = t.val; 
 		
 		Expect(85);
@@ -3307,7 +3384,7 @@ out LocalVariableTagNode varDeclNode) {
 			var separator = t;
 			
 			Expect(1);
-			var cmcTag = new ConstMemberTagNode(t);
+			var cmcTag = new ConstTagNode(t);
 			cs.Name = t.val; 
 			
 			Expect(85);
@@ -3319,7 +3396,7 @@ out LocalVariableTagNode varDeclNode) {
 			// :::
 			cmcTag.Expression = exprNode;
 			Terminate(cmcTag);
-			csNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, cmTag));
+			csNode.ConstTags.Add(new ConstContinuationTagNode(separator, cmTag));
 			
 		}
 		Expect(114);
@@ -5570,7 +5647,7 @@ out LocalVariableTagNode varDeclNode) {
 	}
 
 	void SingleFieldMember(AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-TypeReference typeRef, bool isEvent) {
+TypeReference typeRef, bool isEvent, out FieldTagNode fiNode) {
 		Expect(1);
 		FieldDeclaration fd = new FieldDeclaration(t, td); 
 		CurrentElement = fd;
@@ -5579,16 +5656,23 @@ TypeReference typeRef, bool isEvent) {
 		fd.ResultingType = typeRef;
 		fd.Name = t.val;
 		fd.IsEvent = isEvent;
+		fiNode = new FieldTagNode(t);
 		
 		if (la.kind == 85) {
 			Get();
-			Initializer init; 
+			fiNode.EqualToken = t;
+			Initializer init;
 			VariableInitializerNode varInitNode; 
+			
 			VariableInitializer(out init, out varInitNode);
 			fd.Initializer = init; 
+			fiNode.Initializer = varInitNode;
+			
 		}
-		td.AddMember(fd); 
+		td.AddMember(fd);
 		Terminate(fd); 
+		Terminate(fiNode);
+		
 	}
 
 	void TypeParameter(out TypeParameter tp, out AttributeDecorationNodeCollection attrNodes,

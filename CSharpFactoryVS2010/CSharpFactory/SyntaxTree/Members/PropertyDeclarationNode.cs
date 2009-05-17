@@ -1,7 +1,7 @@
 // ================================================================================================
-// ConstMemberContinuationTagNode.cs
+// PropertyDeclarationNode.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.05.17, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,33 +9,34 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a const member continuation tag.
+  /// This class represents a property declaration node.
   /// </summary>
   // ================================================================================================
-  public sealed class ConstMemberContinuationTagNode : ConstMemberTagNode, IContinuationTag
+  public class PropertyDeclarationNode: PropertyDeclarationNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConstMemberContinuationTagNode"/> class.
+    /// Initializes a new instance of the <see cref="PropertyDeclarationNode"/> class.
     /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="tag">The tag to obtain proerties form.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberContinuationTagNode(Token separator, ConstMemberTagNode tag)
-      : base(separator)
+    public PropertyDeclarationNode(Token start)
+      : base(start)
     {
-      SeparatorToken = separator;
-      IdentifierToken = tag.IdentifierToken;
-      EqualToken = tag.EqualToken;
-      Expression = tag.Expression;
-      Terminate(tag.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the token separating the continuation tag from the preceding tag.
+    /// Retrieves the "get" accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; internal set; }
+    public AccessorNode GetAccessor { get { return FindAccessor("get"); } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Retrieves the "set" accessor.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public AccessorNode SetAccessor { get { return FindAccessor("set"); } }
   }
 }

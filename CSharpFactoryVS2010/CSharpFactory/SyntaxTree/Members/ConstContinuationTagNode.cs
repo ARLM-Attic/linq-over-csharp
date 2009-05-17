@@ -1,7 +1,7 @@
 // ================================================================================================
-// ConstMemberDeclarationNode.cs
+// ConstContinuationTagNode.cs
 //
-// Created: 2009.04.14, by Istvan Novak (DeepDiver)
+// Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,28 +9,33 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a const member declaration node.
+  /// This class represents a const member continuation tag.
   /// </summary>
   // ================================================================================================
-  public class ConstMemberDeclarationNode : MemberDeclarationNode
+  public sealed class ConstContinuationTagNode : ConstTagNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConstMemberDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="ConstContinuationTagNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="tag">The tag to obtain proerties form.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberDeclarationNode(Token start)
-      : base(start)
+    public ConstContinuationTagNode(Token separator, ConstTagNode tag)
+      : base(separator)
     {
-      ConstTags = new ConstMemberTagNodeCollection();
+      SeparatorToken = separator;
+      IdentifierToken = tag.IdentifierToken;
+      EqualToken = tag.EqualToken;
+      Expression = tag.Expression;
+      Terminate(tag.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection const tags.
+    /// Gets the token separating the continuation tag from the preceding tag.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberTagNodeCollection ConstTags { get; private set; }
+    public Token SeparatorToken { get; internal set; }
   }
 }

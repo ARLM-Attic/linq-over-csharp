@@ -46,16 +46,6 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance is partial type declaration.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is partial; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsPartial { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

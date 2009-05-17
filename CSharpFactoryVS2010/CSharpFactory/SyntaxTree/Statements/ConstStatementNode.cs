@@ -14,7 +14,7 @@ namespace CSharpFactory.Syntax
   /// <remarks>
   /// Syntax:
   ///   ConstStatementNode:
-  ///     "const" TypeOrNamespaceNode ConstMemberTagNode { ConstMemberTagContinuationNode } ";"
+  ///     "const" TypeOrNamespaceNode ConstTagNode { ConstMemberTagContinuationNode } ";"
   /// </remarks>
   // ================================================================================================
   public sealed class ConstStatementNode : StatementNode
@@ -28,7 +28,7 @@ namespace CSharpFactory.Syntax
     public ConstStatementNode(Token start)
       : base(start)
     {
-      ConstTags = new ConstMemberTagNodeCollection();
+      ConstTags = new ConstTagNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -43,6 +43,6 @@ namespace CSharpFactory.Syntax
     /// Gets or sets the const tags.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ConstMemberTagNodeCollection ConstTags { get; private set; }
+    public ConstTagNodeCollection ConstTags { get; private set; }
   }
 }

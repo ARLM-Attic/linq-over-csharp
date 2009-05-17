@@ -85,7 +85,7 @@ namespace CSharpFactory.Syntax
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string Name
+    public virtual string Name
     {
       get { return IdentifierToken.val; }
     }
@@ -140,5 +140,15 @@ namespace CSharpFactory.Syntax
     /// <value>The type parameter constraints.</value>
     // ----------------------------------------------------------------------------------------------
     public TypeParameterConstraintNodeCollection TypeParameterConstraints { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is partial type declaration.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is partial; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public Token PartialToken { get; internal set; }
   }
 }

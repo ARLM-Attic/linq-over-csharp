@@ -1,7 +1,7 @@
 // ================================================================================================
-// MethodDeclarationNode.cs
+// FieldDeclarationNode.cs
 //
-// Created: 2009.04.19, by Istvan Novak (DeepDiver)
+// Created: 2009.05.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ParserFiles;
 
@@ -9,47 +9,38 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a method declaration.
+  /// This class represents a field member declaration
   /// </summary>
   // ================================================================================================
-  public class MethodDeclarationNode : MemberWithBodyDeclarationNode, IParentheses
+  public class FieldDeclarationNode : MemberDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MethodDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="FieldDeclarationNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public MethodDeclarationNode(Token start)
+    public FieldDeclarationNode(Token start)
       : base(start)
     {
+      FieldTags = new FieldTagNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the opening parenthesis token.
+    /// Gets a value indicating whether this instance is event field.
     /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is event field; otherwise, <c>false</c>.
+    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis
-    {
-      get { return FormalParameters.StartToken; }
-    }
+    public bool IsEventField { get { return StartToken.val == "event"; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the node representing formal parameters.
+    /// Gets the field tags belonging to this declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the closing parenthesis token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis 
-    { 
-      get { return FormalParameters.TerminatingToken; } 
-    }
+    public FieldTagNodeCollection FieldTags { get; private set; }
   }
 }

@@ -521,6 +521,7 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
   out TypeDeclarationNode typeDecl>            
   (. 
      td = null;
+     Token partialToken = null;
      bool isPartial = false;
      // :::
      typeDecl = null; 
@@ -529,7 +530,10 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
   (                                                             
     [ 
       "partial"                                      
-      (. isPartial = true; .)
+      (. 
+         partialToken = t; 
+         isPartial = true;
+      .)
     ]
     ( 
       ClassDeclaration<m, parentType, isPartial, out td, out typeDecl> |                                                           
@@ -549,7 +553,7 @@ TypeDeclaration<AttributeCollection attrs, TypeDeclaration parentType, Modifiers
      // :::
      if (typeDecl != null)
      {
-       typeDecl.IsPartial = isPartial;
+       typeDecl.PartialToken = partialToken;
        typeDecl.DeclaringNamespace = parentNs;
        typeDecl.DeclaringType = declaringType;
        Terminate(typeDecl);
@@ -958,9 +962,9 @@ ClassMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
        finNode.IdentifierToken = t;
     .)
     "(" 
-    (. finNode.OpenParenthesis = t; .)
+    (. finNode.FormalParameters = new FormalParameterListNode(t); .)
     ")" 
-    (. finNode.CloseParenthesis = t; .)
+    (. Terminate(finNode.FormalParameters); .)
     ( 
       (. BlockStatementNode blockNode; .)
       Block<dd, out blockNode> 
@@ -998,25 +1002,54 @@ StructMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration 
       ConstructorDeclaration<attrs, m, td, out memNode> 
   | IF (IsPartialMethod())
     "partial"
-    (. TypeOrNamespaceNode typeNode; .)
+    (. 
+       var partialToken = t;
+       TypeOrNamespaceNode typeNode; 
+    .)
     Type<out typeRef, true, out typeNode>
     (. TypeOrNamespaceNode nameNode; .)
     MemberName<out memberRef, out nameNode>
-    MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
+    (.
+       var metNode = new MethodDeclarationNode(partialToken);
+       metNode.TypeName = typeNode;
+       metNode.MemberName = nameNode;
+       memNode = metNode;
+    .)
+    MethodDeclaration<attrs, m, typeRef, memberRef, td, metNode>
   | 
-      (. TypeOrNamespaceNode typeNode; .)
-      Type<out typeRef, true, out typeNode>
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeRef, true, out typeNode>
     ( 
       OperatorDeclaration<attrs, m, typeRef, td>
       | // --- Field declaration
-        IF (IsFieldDecl()) FieldMemberDeclarators<attrs, m, td, typeRef, false, Modifier.fields> ";"
+        IF (IsFieldDecl()) 
+        (. 
+           var fiNode = new FieldDeclarationNode(typeNode.StartToken); 
+           fiNode.TypeName = typeNode;
+           memNode = fiNode;
+        .)
+        FieldMemberDeclarators<attrs, m, td, typeRef, false, fiNode> 
+        ";"
+        (. Terminate(memNode); .)
       |                                          
         (. TypeOrNamespaceNode nameNode; .)
         MemberName<out memberRef, out nameNode>
         ( 
-          PropertyDeclaration<attrs, m, typeRef, memberRef, td>
-          | "." IndexerDeclaration<attrs, m, typeRef, memberRef, td>
-          | MethodDeclaration<attrs, m, typeRef, memberRef, td, true>
+          (. 
+             var propNode = new PropertyDeclarationNode(typeNode.StartToken);
+             propNode.TypeName = typeNode; 
+             propNode.MemberName = nameNode;
+          .)
+          PropertyDeclaration<attrs, m, typeRef, memberRef, td, propNode>
+        | "." IndexerDeclaration<attrs, m, typeRef, memberRef, td>
+        | 
+          (.
+             var metNode = new MethodDeclarationNode(typeNode.StartToken);
+             metNode.TypeName = typeNode;
+             metNode.MemberName = nameNode;
+             memNode = metNode;
+          .)
+          MethodDeclaration<attrs, m, typeRef, memberRef, td, metNode>
         )
       | IndexerDeclaration<attrs, m, typeRef, null, td>
     )
@@ -1055,14 +1088,14 @@ ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
   (. 
      TypeReference typeRef; 
      // :::
-     var constNode = new ConstMemberDeclarationNode(t);
+     var constNode = new ConstDeclarationNode(t);
      memNode = constNode;
      TypeOrNamespaceNode typeNode;
   .)
   Type<out typeRef, false, out typeNode>
   (. 
      memNode.TypeName = typeNode; 
-     ConstMemberTagNode tagNode;
+     ConstTagNode tagNode;
   .)
   SingleConstMember<attrs, m, td, typeRef, out tagNode>
   (. constNode.ConstTags.Add(tagNode); .)
@@ -1070,7 +1103,7 @@ ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
     "," 
     (. var separator = t; .)
     SingleConstMember<attrs, m, td, typeRef, out tagNode> 
-    (. constNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, tagNode)); .)
+    (. constNode.ConstTags.Add(new ConstContinuationTagNode(separator, tagNode)); .)
   } 
   ";"
   (. Terminate(memNode); .)
@@ -1085,7 +1118,7 @@ ConstMemberDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 //   tagNode: const member tag declaration.
 // ------------------------------------------------------------------------------------------------
 SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-  TypeReference typeRef, out ConstMemberTagNode tagNode>
+  TypeReference typeRef, out ConstTagNode tagNode>
 =
   ident
   (. 
@@ -1096,7 +1129,7 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
      cd.ResultingType = typeRef;
      cd.Name = t.val;
      // :::
-     tagNode = new ConstMemberTagNode(t);
+     tagNode = new ConstTagNode(t);
   .)
   "="
   (. 
@@ -1116,35 +1149,59 @@ SingleConstMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td,
   .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a event member.
-// +attrs: attributes of the declaration
-// +modifiers: Set of modifiers belonging to the member.
-// +td: Type declaration the member belongs to.
-// ------------------------------------------------------------------------------------
+//   attrs: attributes of the declaration
+//   modifiers: Set of modifiers belonging to the member.
+//   td: Type declaration the member belongs to.
+//   memNode: Type declaration node
+// ------------------------------------------------------------------------------------------------
 EventDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
   out MemberDeclarationNode memNode>
   (. 
      TypeReference typeRef; 
      // :::
-     TypeOrNamespaceNode nsNode = null;
      memNode = null;
+     TypeOrNamespaceNode typeNode;
   .)
 =
-  "event" 
-  (. TypeOrNamespaceNode typeNode; .)
+  "event"
+  (. var eventToken = t; .)
   Type<out typeRef, false, out typeNode>
-  ( IF (IsFieldDecl()) 
-    FieldMemberDeclarators<attrs, m, td, typeRef, true, Modifier.propEvntMeths> ";"
-  |                              (. TypeReference memberRef; .)
-    TypeName<out memberRef, out nsNode> 
-    "{"                          (. EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);  .)   
-                                 (. CurrentElement = ep; .)
-                                 (. ep.ResultingType = typeRef; .) 
-                                 (. ep.ExplicitName = memberRef; .)
-                                 (. td.AddMember(ep); .)
-    EventAccessorDeclarations<ep>
-    "}"                          (. Terminate(ep); .)
+  ( 
+    IF (IsFieldDecl()) 
+    (. 
+       var fiNode = new FieldDeclarationNode(eventToken); 
+       memNode = fiNode;
+       fiNode.TypeName = typeNode;
+    .)
+    FieldMemberDeclarators<attrs, m, td, typeRef, true, fiNode> 
+    ";"
+    (. Terminate(fiNode); .)
+  |                              
+    (. 
+       var evpNode = new EventPropertyDeclarationNode(t) ;
+       memNode = evpNode;
+       TypeReference memberRef; 
+    .)
+    TypeName<out memberRef, out typeNode> 
+    (. evpNode.TypeName = typeNode; .)
+    "{"
+    (. 
+       evpNode.OpenBrace = t;
+       EventPropertyDeclaration ep = new EventPropertyDeclaration(t, td);
+       CurrentElement = ep;
+       ep.ResultingType = typeRef;
+       ep.ExplicitName = memberRef;
+       td.AddMember(ep); 
+    .)
+    EventAccessorDeclarations<ep, evpNode>
+    "}"
+    (. 
+       Terminate(ep); 
+       evpNode.CloseBrace = t;
+       Terminate(evpNode);
+    .)
   )
 .
 
@@ -1228,21 +1285,26 @@ ConstructorDeclaration<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 // +td: Type declaration the member belongs to.
 // ------------------------------------------------------------------------------------
 PropertyDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
-  TypeReference memberRef, TypeDeclaration td>
-=                 (. 
-                     PropertyDeclaration pd = new PropertyDeclaration(t, td);
-                     CurrentElement = pd;
-                     pd.SetModifiers(m.Value);
-                     pd.AssignAttributes(attrs);
-                     pd.ExplicitName = memberRef;
-                     pd.ResultingType = typeRef;
-                  .)
+  TypeReference memberRef, TypeDeclaration td, PropertyDeclarationNodeBase propNode>
+  (. 
+     PropertyDeclaration pd = new PropertyDeclaration(t, td);
+     CurrentElement = pd;
+     pd.SetModifiers(m.Value);
+     pd.AssignAttributes(attrs);
+     pd.ExplicitName = memberRef;
+     pd.ResultingType = typeRef;
+  .)
+=                  
   "{" 
-     AccessorDeclarations<pd> 
-  "}"             (. 
-                     td.AddMember(pd); 
-                     Terminate(pd);
-                  .)
+  (. propNode.OpenBrace = t; .)
+  AccessorDeclarations<pd, propNode> 
+  "}"             
+  (. 
+     td.AddMember(pd); 
+     Terminate(pd);
+     propNode.CloseBrace = t;
+     Terminate(propNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1278,58 +1340,66 @@ IndexerDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef
   "]" 
   (. Terminate(parList); .)
   "{" 
-      AccessorDeclarations<ind> 
+      (. var propNode = new PropertyDeclarationNode(t); .)
+      AccessorDeclarations<ind, propNode> 
   "}"             (. 
                      td.AddMember(ind); 
                      Terminate(ind);
                   .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a method member.
-// +attrs: attributes of the declaration
-// +modifiers: Set of modifiers belonging to the member.
-// +typeRef: type of the property
-// +memberRef: member name reference.
-// +td: Type declaration the member belongs to.
-// +allowBody: indicates if method body is allowd or not.
-// ------------------------------------------------------------------------------------
+//   attrs: attributes of the declaration
+//   modifiers: Set of modifiers belonging to the member.
+//   typeRef: type of the property
+//   memberRef: member name reference.
+//   td: Type declaration the member belongs to.
+//   metNode: method declaration node
+// ------------------------------------------------------------------------------------------------
 MethodDeclaration<AttributeCollection attrs, Modifiers m, TypeReference typeRef, 
-  TypeReference memberRef, TypeDeclaration td, bool allowBody>
-=                                                   (. 
-                                                       MethodDeclaration md = new MethodDeclaration(t, td);
-                                                       CurrentElement = md;
-                                                       md.SetModifiers(m.Value);
-                                                       md.AssignAttributes(attrs);
-                                                       md.ExplicitName = memberRef;
-                                                       md.ResultingType = typeRef;
-                                                    .)
-  [ TypeParameterList<md, null> ]
+  TypeReference memberRef, TypeDeclaration td, MethodDeclarationNode metNode>
+  (. 
+     MethodDeclaration md = new MethodDeclaration(t, td);
+     CurrentElement = md;
+     md.SetModifiers(m.Value);
+     md.AssignAttributes(attrs);
+     md.ExplicitName = memberRef;
+     md.ResultingType = typeRef;
+  .)
+=                                                    
+  [ TypeParameterList<md, metNode> ]
   "(" 
-  (. var parList = new FormalParameterListNode(t); .)
-  [ FormalParameterList<md.FormalParameters, parList> ] 
+  (. metNode.FormalParameters = new FormalParameterListNode(t); .)
+  [ FormalParameterList<md.FormalParameters, metNode.FormalParameters> ] 
   ")"
-  (. Terminate(parList); .)
+  (. Terminate(metNode.FormalParameters); .)
   {                                                 
     (. 
        TypeParameterConstraint constraint; 
        TypeParameterConstraintNode constrNode; 
     .)
     TypeParameterConstraintsClause<out constraint, out constrNode>  
-    (. md.AddTypeParameterConstraint(constraint); .)
+    (. 
+       md.AddTypeParameterConstraint(constraint); 
+       metNode.TypeParameterConstraints.Add(constrNode);
+    .)
   } 
   ( 
     (. BlockStatementNode blockNode; .)
     Block<md, out blockNode>
-                                           (. 
-                                                       if (!allowBody || m.Has(Modifier.@abstract)) { Error("UNDEF", la, "Body declaration is not allowed here!"); } 
-                                                       md.HasBody = true;
-                                                    .)
-    | ";"                                           (. md.HasBody = false; .)
-  )                                                 (. 
-                                                       td.AddMember(md); 
-                                                       Terminate(md);
-                                                    .)
+    (. 
+       md.HasBody = true; 
+       metNode.Body = blockNode;
+    .)
+  | ";"
+    (. md.HasBody = false; .)
+  )
+  (. 
+     td.AddMember(md); 
+     Terminate(md);
+     Terminate(metNode); 
+  .)
 .
 
 // ------------------------------------------------------------------------------------
@@ -1476,6 +1546,7 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd, InterfaceDeclarationNode ty
      // :::
      var mod = new ModifierNodeCollection();
      var attrNodes = new AttributeDecorationNodeCollection();
+     Token identifier;
   .)
 =                              
   AttributeDecorations<attrs, attrNodes>
@@ -1484,12 +1555,20 @@ InterfaceMemberDeclaration<InterfaceDeclaration ifd, InterfaceDeclarationNode ty
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeRef, true, out typeNode>
     (                          
-      ident                   (.
-                                 TypeReference memberRef = new TypeReference(t, this); 
-                                 memberRef.Name = t.val;
-                              .)
+      ident                   
+      (.
+         TypeReference memberRef = new TypeReference(t, this); 
+         memberRef.Name = t.val;
+         identifier = t;
+      .)
       ( 
-        MethodDeclaration<attrs, m, typeRef, memberRef, ifd, false>        
+        (.
+           var metNode = new MethodDeclarationNode(typeNode.StartToken);
+           metNode.TypeName = typeNode;
+           metNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
+           // memNode = metNode;
+        .)
+        MethodDeclaration<attrs, m, typeRef, memberRef, ifd, metNode>        
       | // --- Interface property
         (. PropertyDeclaration prop = new PropertyDeclaration(t, ifd); .)
         (. CurrentElement = prop; .)
@@ -1892,134 +1971,206 @@ CurrentArgumentItem<ArgumentList argList, out ArgumentNode argNode>
 // Declaration of a property accessors.
 // +prop: property holding the accessor.
 // ------------------------------------------------------------------------------------
-AccessorDeclarations<PropertyDeclaration prop>                                    
-                               (. 
-                                   AttributeCollection attrs = new AttributeCollection();
-                                   AccessorDeclaration accessor = null;
-                                   // :::
-                                   var attrNodes = new AttributeDecorationNodeCollection();
-                               .)
+AccessorDeclarations<PropertyDeclaration prop, PropertyDeclarationNodeBase propNode>
+  (. 
+     AttributeCollection attrs = new AttributeCollection();
+     AccessorDeclaration accessor = null;
+     // :::
+     var attrNodes = new AttributeDecorationNodeCollection();
+  .)
 = 
   AttributeDecorations<attrs, attrNodes>
-                               (. 
-                                   Modifiers am = new Modifiers(this); 
-                                   // :::
-                                   var mod = new ModifierNodeCollection();
-                               .)
+  (. 
+     Modifiers am = new Modifiers(this); 
+     // :::
+     var mod = new ModifierNodeCollection();
+  .)
   ModifierList<am, mod>                    
-  ( IF ("get".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
-                                      (. CurrentElement = accessor; .)
-  | IF ("set".Equals(la.val)) ident   (. accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
-                                      (. CurrentElement = accessor; .)
-  | ident                             (. Error("UNDEF", la, "set or get expected"); .)
+  ( 
+    IF ("get".Equals(la.val)) 
+    ident   
+    (. 
+       accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+       CurrentElement = accessor; 
+    .)
+  | 
+    IF ("set".Equals(la.val)) 
+    ident   
+    (. 
+       accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+       CurrentElement = accessor; 
+    .)
   ) 
+  (.
+     var accNode = new AccessorNode(t);
+     accNode.AttributeDecorations = attrNodes;
+     accNode.Modifiers = mod;
+     propNode.FirstAccessor = accNode;
+     BlockStatementNode blockNode;
+  .)
   (
-    (. BlockStatementNode blockNode; .)
     Block<accessor, out blockNode>
-                       (. accessor.HasBody = true; .)
-  | ";"                               (. accessor.HasBody = false; .)
-  )                                   (. 
-                                         Terminate(accessor);
-                                         accessor.SetModifiers(am.Value); 
-                                         accessor.AssignAttributes(attrs);
-                                      .)
-  [                                   (. 
-                                          attrs = new AttributeCollection(); 
-                                          attrNodes = new AttributeDecorationNodeCollection();
-                                      .)
+    (. 
+       accessor.HasBody = true; 
+       accNode.Body = blockNode;
+    .)
+  | ";"                               
+    (. 
+       accessor.HasBody = false; 
+       accNode.ClosingSemicolon = t;
+    .)
+  )                                   
+  (. 
+     Terminate(accessor);
+     accessor.SetModifiers(am.Value); 
+     accessor.AssignAttributes(attrs);
+     Terminate(accNode);
+  .)
+  [                                   
+    (. 
+       attrs = new AttributeCollection(); 
+       attrNodes = new AttributeDecorationNodeCollection();
+    .)
     AttributeDecorations<attrs, attrNodes>
-                               (. 
-                                   am = new Modifiers(this); 
-                                   mod = new ModifierNodeCollection();
-                               .)
+    (. 
+       am = new Modifiers(this); 
+       mod = new ModifierNodeCollection();
+    .)
     ModifierList<am, mod>                  
-    ( IF ("get".Equals(la.val)) ident (. 
-                                         if (prop.HasGetter) Error("UNDEF", la, "get already declared");  
-                                         accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
-                                         CurrentElement = accessor;
-                                      .)
-    | IF ("set".Equals(la.val)) ident (. 
-                                         if (prop.HasSetter) Error("UNDEF", la, "set already declared");  
-                                         accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
-                                         CurrentElement = accessor;
-                                      .)
-    | ident                           (. Error("UNDEF", la, "set or get expected"); .)
+    ( 
+      IF ("get".Equals(la.val)) 
+      ident 
+      (. 
+         accessor = prop.Getter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+         CurrentElement = accessor;
+      .)
+    | 
+      IF ("set".Equals(la.val)) 
+      ident 
+      (. 
+         accessor = prop.Setter = new AccessorDeclaration(t, prop.DeclaringType, prop);
+         CurrentElement = accessor;
+      .)
     ) 
+    (.
+       accNode = new AccessorNode(t);
+       accNode.AttributeDecorations = attrNodes;
+       accNode.Modifiers = mod;
+       propNode.SecondAccessor = accNode;
+    .)
     (
-      (. BlockStatementNode blockNode; .)
-      Block<accessor, out blockNode>                 (. accessor.HasBody = true; .)
-    | ";"                             (. accessor.HasBody = false; .)
-    )                                 (. 
-                                         Terminate(accessor);
-                                         accessor.SetModifiers(am.Value); 
-                                         accessor.AssignAttributes(attrs);
-                                      .)
+      Block<accessor, out blockNode>
+      (. 
+         accessor.HasBody = true; 
+         accNode.Body = blockNode;
+      .)
+    | ";"
+      (. 
+         accessor.HasBody = false; 
+         accNode.ClosingSemicolon = t;
+      .)
+    ) 
+    (. 
+       Terminate(accessor);
+       accessor.SetModifiers(am.Value); 
+       accessor.AssignAttributes(attrs);
+       Terminate(accNode);
+    .)
   ]
 .
 
-// ------------------------------------------------------------------------------------
-// Declaration of an event property accessors.
-// +prop: event property holding the accessor.
-// ------------------------------------------------------------------------------------
-EventAccessorDeclarations<EventPropertyDeclaration prop>                                                 
-                               (. 
-                                   AttributeCollection attrs = new AttributeCollection();
-                                   AccessorDeclaration accessor = null;
-                                   // :::
-                                   var attrNodes = new AttributeDecorationNodeCollection();
-                               .)
+// ------------------------------------------------------------------------------------------------
+// Declaration of event property accessors.
+//   prop: event property holding the accessor.
+//   propNode event property node holding the accessor.
+// ------------------------------------------------------------------------------------------------
+EventAccessorDeclarations<EventPropertyDeclaration prop, PropertyDeclarationNodeBase propNode>                                                 
+  (. 
+     AttributeCollection attrs = new AttributeCollection();
+     AccessorDeclaration accessor = null;
+     // :::
+     var attrNodes = new AttributeDecorationNodeCollection();
+  .)
 = 
   AttributeDecorations<attrs, attrNodes>
-                               (. 
-                                   Modifiers am = new Modifiers(this); 
-                                   // :::
-                                   var mod = new ModifierNodeCollection();
-                               .)
+  (. 
+     Modifiers am = new Modifiers(this); 
+     // :::
+     var mod = new ModifierNodeCollection();
+  .)
   ModifierList<am, mod>                    
-  ( IF ("add".Equals(la.val)) ident       (. accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
-                                          (. CurrentElement = accessor; .)
-  | IF ("remove".Equals(la.val)) ident    (. accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop); .)
-                                          (. CurrentElement = accessor; .)
-  | ident                                 (. Error("UNDEF", la, "add or remove expected"); .)
+  ( 
+    IF ("add".Equals(la.val)) 
+    ident       
+    (. 
+       accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
+       CurrentElement = accessor; 
+    .)
+  | IF ("remove".Equals(la.val)) 
+    ident    
+    (. 
+       accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
+       CurrentElement = accessor; 
+    .)
   ) 
-  (. BlockStatementNode blockNode; .)
+  (. 
+     var accNode = new AccessorNode(t);
+     accNode.AttributeDecorations = attrNodes;
+     accNode.Modifiers = mod;
+     BlockStatementNode blockNode; 
+  .)
   Block<accessor, out blockNode>
-                           (. 
-                                             Terminate(accessor);
-                                             accessor.HasBody = true;
-                                             accessor.SetModifiers(am.Value); 
-                                             accessor.AssignAttributes(attrs); 
-                                          .)
-  [                                       (. 
-                                              attrs = new AttributeCollection(); 
-                                              attrNodes = new AttributeDecorationNodeCollection();
-                                          .)
+  (. 
+     Terminate(accessor);
+     accessor.HasBody = true;
+     accessor.SetModifiers(am.Value); 
+     accessor.AssignAttributes(attrs); 
+     accNode.Body = blockNode;
+     Terminate(accNode);
+     propNode.FirstAccessor = accNode;
+  .)
+  [
+    (. 
+       attrs = new AttributeCollection(); 
+       attrNodes = new AttributeDecorationNodeCollection();
+    .)
     AttributeDecorations<attrs, attrNodes>
-                               (. 
-                                   am = new Modifiers(this); 
-                                   // :::
-                                   mod = new ModifierNodeCollection();
-                               .)
+    (. 
+       am = new Modifiers(this); 
+       // :::
+       mod = new ModifierNodeCollection();
+    .)
     ModifierList<am, mod>                      
-    ( IF ("add".Equals(la.val)) ident     (. 
-                                             if (prop.HasAdder) Error("UNDEF", la, "add already declared");  
-                                             accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
-                                             CurrentElement = accessor;
-                                          .)
-    | IF ("remove".Equals(la.val)) ident  (. 
-                                             if (prop.HasRemover) Error("UNDEF", la, "set already declared");  
-                                             accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
-                                             CurrentElement = accessor;
-                                          .)
-    | ident                               (. Error("UNDEF", la, "add or remove expected"); .)
+    ( 
+      IF ("add".Equals(la.val)) 
+      ident     
+      (. 
+         accessor = prop.Adder = new AccessorDeclaration(t, prop.DeclaringType, prop);
+         CurrentElement = accessor;
+      .)
+    | 
+      IF ("remove".Equals(la.val)) 
+      ident  
+      (. 
+         accessor = prop.Remover = new AccessorDeclaration(t, prop.DeclaringType, prop);
+         CurrentElement = accessor;
+      .)
     ) 
+    (. 
+       accNode = new AccessorNode(t);
+       accNode.AttributeDecorations = attrNodes;
+       accNode.Modifiers = mod;
+    .)
     Block<accessor, out blockNode>
-                           (. 
-                                             Terminate(accessor);
-                                             accessor.HasBody = true;
-                                             accessor.SetModifiers(am.Value); 
-                                             accessor.AssignAttributes(attrs); 
-                                          .)
+    (. 
+       Terminate(accessor);
+       accessor.HasBody = true;
+       accessor.SetModifiers(am.Value); 
+       accessor.AssignAttributes(attrs); 
+       accNode.Body = blockNode;
+       Terminate(accNode);
+       propNode.SecondAccessor = accNode;
+    .)
   ]
 .
 
@@ -2864,7 +3015,7 @@ ConstStatement<IBlockOwner block, out StatementNode stmtNode>
   (. csNode.TypeName = typeNode; .)
   ident
   (. 
-     var cmTag = new ConstMemberTagNode(t);
+     var cmTag = new ConstTagNode(t);
      cs.Name = t.val; 
   .)
   "="                    
@@ -2890,7 +3041,7 @@ ConstStatement<IBlockOwner block, out StatementNode stmtNode>
     .)
     ident                
     (. 
-       var cmcTag = new ConstMemberTagNode(t);
+       var cmcTag = new ConstTagNode(t);
        cs.Name = t.val; 
     .)
     "=" 
@@ -2903,7 +3054,7 @@ ConstStatement<IBlockOwner block, out StatementNode stmtNode>
        // :::
        cmcTag.Expression = exprNode;
        Terminate(cmcTag);
-       csNode.ConstTags.Add(new ConstMemberContinuationTagNode(separator, cmTag));
+       csNode.ConstTags.Add(new ConstContinuationTagNode(separator, cmTag));
     .)
   } 
   ";"
@@ -5432,10 +5583,17 @@ ArrayIndexer<ArrayIndexerOperator indexer, ArgumentNodeCollection argNodes>
 // +isEvent: Flags, if the field is an event field or not.
 // ------------------------------------------------------------------------------------
 FieldMemberDeclarators<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-  TypeReference typeRef, bool isEvent, Modifier toCheck>
+  TypeReference typeRef, bool isEvent, FieldDeclarationNode fiNode>
 = 
-  SingleFieldMember<attrs, m, td, typeRef, isEvent>
-  { "," SingleFieldMember<attrs, m, td, typeRef, isEvent> }
+  (. FieldTagNode tagNode; .)
+  SingleFieldMember<attrs, m, td, typeRef, isEvent, out tagNode>
+  (. fiNode.FieldTags.Add(tagNode); .)
+  { 
+    "," 
+    (. var separator = t; .)
+    SingleFieldMember<attrs, m, td, typeRef, isEvent, out tagNode>
+    (. fiNode.FieldTags.Add(new FieldContinuationTagNode(separator, tagNode)); .)
+  }
 .
 
 // ------------------------------------------------------------------------------------
@@ -5447,23 +5605,37 @@ FieldMemberDeclarators<AttributeCollection attrs, Modifiers m, TypeDeclaration t
 // +isEvent: Flags, if the field is an event field or not.
 // ------------------------------------------------------------------------------------
 SingleFieldMember<AttributeCollection attrs, Modifiers m, TypeDeclaration td, 
-  TypeReference typeRef, bool isEvent>
+  TypeReference typeRef, bool isEvent, out FieldTagNode fiNode>
 = 
-  ident                      (. 
-                                FieldDeclaration fd = new FieldDeclaration(t, td); 
-                                CurrentElement = fd;
-                                fd.SetModifiers(m.Value);
-                                fd.AssignAttributes(attrs);
-                                fd.ResultingType = typeRef;
-                                fd.Name = t.val;
-                                fd.IsEvent = isEvent;
-                             .)
-  [ "="                      (. Initializer init; .)
-    (. VariableInitializerNode varInitNode; .)
+  ident                      
+  (. 
+     FieldDeclaration fd = new FieldDeclaration(t, td); 
+     CurrentElement = fd;
+     fd.SetModifiers(m.Value);
+     fd.AssignAttributes(attrs);
+     fd.ResultingType = typeRef;
+     fd.Name = t.val;
+     fd.IsEvent = isEvent;
+     fiNode = new FieldTagNode(t);
+  .)
+  [ 
+    "="                      
+    (. 
+       fiNode.EqualToken = t;
+       Initializer init;
+       VariableInitializerNode varInitNode; 
+    .)
     VariableInitializer<out init, out varInitNode> 
-    (. fd.Initializer = init; .) 
-  ]                          (. td.AddMember(fd); .) 
-                             (. Terminate(fd); .)
+    (. 
+       fd.Initializer = init; 
+       fiNode.Initializer = varInitNode;
+    .) 
+  ]                          
+  (. 
+     td.AddMember(fd);
+     Terminate(fd); 
+     Terminate(fiNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------

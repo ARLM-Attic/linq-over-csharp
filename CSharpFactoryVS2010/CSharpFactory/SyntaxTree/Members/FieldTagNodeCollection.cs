@@ -1,7 +1,7 @@
 // ================================================================================================
-// ConstMemberTagNodeCollection.cs
+// FieldTagNodeCollection.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.05.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.Collections;
 
@@ -9,10 +9,10 @@ namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This class declares a collection of const member tags.
+  /// This class represents a collection of field member tag nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class ConstMemberTagNodeCollection : ImmutableCollection<ConstMemberTagNode>
+  public class FieldTagNodeCollection : ImmutableCollection<FieldTagNode>
   {
   }
 }
