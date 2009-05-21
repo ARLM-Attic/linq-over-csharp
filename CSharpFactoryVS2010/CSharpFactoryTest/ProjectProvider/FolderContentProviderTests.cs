@@ -3,7 +3,7 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.ProjectContent;
+using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.ProjectProvider

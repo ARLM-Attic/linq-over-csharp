@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using CSharpFactory.CodeExplorer.Entities;
 using CSharpFactory.CodeExplorer.TreeNodes;
-using CSharpFactory.ProjectContent;
+using CSharpTreeBuilder.ProjectContent;
 using CSharpFactory.ProjectModel;
 using System.Reflection;
 

@@ -1,17 +1,18 @@
 // ================================================================================================
-// ISemanticTree.cs
+// TypeOrNamespaceNodeCollection.cs
 //
-// Created: 2009.03.04, by Istvan Novak (DeepDiver)
+// Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.SolutionHierarchy
+using CSharpTreeBuilder.Collections;
+
+namespace CSharpFactory.Syntax
 {
   // ================================================================================================
   /// <summary>
-  /// This interface represents the semantic tree of a project
+  /// This class represents a collection of TypeOrNamespaceNode instances.
   /// </summary>
   // ================================================================================================
-  public interface ISemanticTree
+  public sealed class TypeOrNamespaceNodeCollection : ImmutableCollection<TypeOrNamespaceNode>
   {
-    
   }
 }

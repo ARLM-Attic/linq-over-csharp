@@ -1,0 +1,313 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CSharpTreeBuilder</RootNamespace>
+    <AssemblyName>CSharpTreeBuilder</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CSharpAstBuilder\Token.cs" />
+    <Compile Include="Helpers\EventArguments.cs" />
+    <Compile Include="Helpers\ImmutableChangedException.cs" />
+    <Compile Include="Helpers\ImmutableCollection.cs" />
+    <Compile Include="Helpers\ImmutableIndexedCollection.cs" />
+    <Compile Include="Helpers\IReadOnlySupport.cs" />
+    <Compile Include="Helpers\StringHelper.cs" />
+    <Compile Include="ProjectContent\CSharp9ProjectContentProvider.cs" />
+    <Compile Include="ProjectContent\EmptyContentProvider.cs" />
+    <Compile Include="ProjectContent\FolderContentProvider.cs" />
+    <Compile Include="ProjectContent\PhysicalSourceFile.cs" />
+    <Compile Include="ProjectContent\Project.cs" />
+    <Compile Include="ProjectContent\ProjectProviderBase.cs" />
+    <Compile Include="ProjectContent\ReferencedAssembly.cs" />
+    <Compile Include="ProjectContent\ReferencedCompliation.cs" />
+    <Compile Include="ProjectContent\ReferencedUnit.cs" />
+    <Compile Include="ProjectContent\SourceFileBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="CSharpAst\Behavior\IArrayDimensions.cs" />
+    <Compile Include="CSharpAst\Behavior\IAttributedDeclaration.cs" />
+    <Compile Include="CSharpAst\Behavior\IContinuationTag.cs" />
+    <Compile Include="CSharpAst\Behavior\IIdentifierSupport.cs" />
+    <Compile Include="CSharpAst\Behavior\IParentheses.cs" />
+    <Compile Include="CSharpAst\Behavior\ITypeArguments.cs" />
+    <Compile Include="CSharpAst\Behavior\ITypeParameterHolder.cs" />
+    <Compile Include="CSharpAst\Expressions\ExpressionNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\AddOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\AndAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\AsOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\AssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\AssignmentOperatorNodeBase.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\BitwiseAndOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\BitwiseOrOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\BitwiseXorOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\DivideAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\DivideOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\EqualOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\GreaterThanOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\GreaterThanOrEqualOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\IsOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\LeftShiftAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\LeftShiftOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\LessThanOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\LessThanOrEqualOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\LogicalAndOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\LogicalOrOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\MinusAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\ModuloAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\ModuloOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\MultiplyAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\MultiplyOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\NotEqualOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\NullCoalescingOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\OrAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\PlusAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\RightShiftAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\RightShiftOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\SubtractOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\XorAssignmentOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\LiteralNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\BaseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\BooleanNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\CharNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\DecimalNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\DoubleNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\FalseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\Int32Node.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\Int64Node.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\IntegerConstantNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\NullNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\PrimitiveNamedNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\RealConstantNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\ScopedNameNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\SimpleNameNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\SingleNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\StringNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\ThisNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\TrueNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\TypeOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\UInt32Node.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\UInt64Node.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\OperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentContinuationNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNodeCollection.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArrayIndexerInvocationOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CheckedOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CheckedOperatorNodeBase.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ConditionalOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CTypeMemberAccessOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\DefaultOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\EmbeddedExpressionNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\EmbeddedTypeOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberAccessOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberAccessOperatorNodeBase.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberDeclaratorContinuationNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberDeclaratorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberDeclaratorNodeCollection.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MethodInvocationOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithAnonymousTypeNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithArrayNodeBase.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithExplicitArrayNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithImplicitArrayNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ParenthesisExpressionNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SizeofOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\TypeofOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\UncheckedOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\BitwiseNotOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PointerOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PostDecrementOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PostIncrementOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PreDecrementOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PreIncrementOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\ReferenceOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\TypecastOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryMinusOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryNotOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryPlusOperatorNode.cs" />
+    <Compile Include="CSharpAst\ISyntaxTree.cs" />
+    <Compile Include="CSharpAst\Members\AccessorNode.cs" />
+    <Compile Include="CSharpAst\Members\AnonymousDelegateNode.cs" />
+    <Compile Include="CSharpAst\Members\ConstContinuationTagNode.cs" />
+    <Compile Include="CSharpAst\Members\ConstDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\ConstructorDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\ConstTagNode.cs" />
+    <Compile Include="CSharpAst\Members\ConstTagNodeCollection.cs" />
+    <Compile Include="CSharpAst\Members\EnumValueContinuationNode.cs" />
+    <Compile Include="CSharpAst\Members\EnumValueNode.cs" />
+    <Compile Include="CSharpAst\Members\EnumValueNodeCollection.cs" />
+    <Compile Include="CSharpAst\Members\EventPropertyDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\FieldContinuationTagNode.cs" />
+    <Compile Include="CSharpAst\Members\FieldDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\FieldTagNode.cs" />
+    <Compile Include="CSharpAst\Members\FieldTagNodeCollection.cs" />
+    <Compile Include="CSharpAst\Members\FinalizerDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\FormalParameterContinuationNode.cs" />
+    <Compile Include="CSharpAst\Members\FormalParameterListNode.cs" />
+    <Compile Include="CSharpAst\Members\FormalParameterModifier.cs" />
+    <Compile Include="CSharpAst\Members\FormalParameterNode.cs" />
+    <Compile Include="CSharpAst\Members\FormalParameterNodeCollection.cs" />
+    <Compile Include="CSharpAst\Members\MemberDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\MemberDeclarationNodeCollection.cs" />
+    <Compile Include="CSharpAst\Members\MemberWithBodyDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\MethodDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\PropertyDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\PropertyDeclarationNodeBase.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentContinuationNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeContinuationNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeDecorationNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeDecorationNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\ExternAliasNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\NamespaceDeclarationNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\NamespaceDeclarationNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\NamespaceScopeNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\SourceFileNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\SourceFileNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\UsingNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\UsingWithAliasNode.cs" />
+    <Compile Include="CSharpAst\Statements\BlockStatementNode.cs" />
+    <Compile Include="CSharpAst\Statements\ConstStatementNode.cs" />
+    <Compile Include="CSharpAst\Statements\LabelNode.cs" />
+    <Compile Include="CSharpAst\Statements\LabelNodeCollection.cs" />
+    <Compile Include="CSharpAst\Statements\StatementNode.cs" />
+    <Compile Include="CSharpAst\Statements\StatementNodeCollection.cs" />
+    <Compile Include="CSharpAst\Statements\VariableDeclarationStatementNode.cs" />
+    <Compile Include="CSharpAst\SyntaxNode.cs" />
+    <Compile Include="CSharpAst\SyntaxTree.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\BraceSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\BracingStyle.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\ControlSegments.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\ForceBracingStyle.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\ForceNewLineSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\IndentationItem.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\IndentationSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\MandatoryWhiteSpaceSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\OutputItem.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\OutputItemCollection.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\OutputItemSerializer.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\OutputSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceAroundSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SyntaxTreeOutputOptions.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SyntaxTreeTextWriter.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SyntaxTreeWriter.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\TextOutputItem.cs" />
+    <Compile Include="CSharpAst\Types\ArrayModifierNode.cs" />
+    <Compile Include="CSharpAst\Types\AttributedDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\ClassDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\DelegateDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\EnumDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\InterfaceDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\ModifierNode.cs" />
+    <Compile Include="CSharpAst\Types\ModifierNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\ModifierType.cs" />
+    <Compile Include="CSharpAst\Types\NameTagContinuationNode.cs" />
+    <Compile Include="CSharpAst\Types\NameTagNode.cs" />
+    <Compile Include="CSharpAst\Types\NameTagNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\PointerModifierNode.cs" />
+    <Compile Include="CSharpAst\Types\StructDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeArgumentContinuationTag.cs" />
+    <Compile Include="CSharpAst\Types\TypeArgumentListNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeArgumentTag.cs" />
+    <Compile Include="CSharpAst\Types\TypeDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeDeclarationNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeModifierNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeOrMemberDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeOrNamespaceContinuationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeOrNamespaceNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeOrNamespaceNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterConstraintNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterConstraintNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterConstraintTagContinuationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterConstraintTagNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterConstraintTagNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterContinuationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeTagContinuationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeTagNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeWithBodyDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeWithMembersDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Variables\ArrayInitializerNode.cs" />
+    <Compile Include="CSharpAst\Variables\ArrayItemInitializerNode.cs" />
+    <Compile Include="CSharpAst\Variables\ArrayItemInitializerNodeCollection.cs" />
+    <Compile Include="CSharpAst\Variables\ExpressionInitializerNode.cs" />
+    <Compile Include="CSharpAst\Variables\LocalVariableContinuationTagNode.cs" />
+    <Compile Include="CSharpAst\Variables\LocalVariableNode.cs" />
+    <Compile Include="CSharpAst\Variables\LocalVariableTagNode.cs" />
+    <Compile Include="CSharpAst\Variables\LocalVariableTagNodeCollection.cs" />
+    <Compile Include="CSharpAst\Variables\StackAllocInitializerNode.cs" />
+    <Compile Include="CSharpAst\Variables\VariableInitializerNode.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CSharpAst\Expressions\Initializers\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

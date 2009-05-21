@@ -332,7 +332,6 @@
     <Compile Include="Semantics\TypeResolution\TypeResolutionTree.cs" />
     <Compile Include="SolutionHierarchy\IProject.cs" />
     <Compile Include="SolutionHierarchy\IProjectContainer.cs" />
-    <Compile Include="SolutionHierarchy\ISemanticTree.cs" />
     <Compile Include="SolutionHierarchy\ISolution.cs" />
     <Compile Include="SyntaxTree\Behavior\IArrayDimensions.cs" />
     <Compile Include="SyntaxTree\Behavior\IContinuationTag.cs" />

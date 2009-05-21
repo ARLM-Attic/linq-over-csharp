@@ -3,6 +3,7 @@
 //
 // Created: 2009.02.25, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpFactory.Semantics;
 using CSharpFactory.Syntax;
 
 namespace CSharpFactory.SolutionHierarchy
@@ -34,6 +35,6 @@ namespace CSharpFactory.SolutionHierarchy
     /// Semantic tree representing the project
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    ISemanticTree SemanticTree { get; }
+    ISemanticsTree SemanticTree { get; }
   }
 }

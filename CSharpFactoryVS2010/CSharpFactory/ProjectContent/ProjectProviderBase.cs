@@ -8,7 +8,7 @@ using CSharpFactory.Collections;
 using CSharpFactory.ProjectModel;
 using CSharpFactory.SolutionHierarchy;
 
-namespace CSharpFactory.ProjectContent
+namespace CSharpTreeBuilder.ProjectContent
 {
   // ================================================================================================
   /// <summary>
