@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,10 +26,15 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IAttributedDeclaration Members
+
     /// <summary>
     /// Gets the attribute decorations belonging to this declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public AttributeDecorationNodeCollection AttributeDecorations { get; internal set; }
+
+    #endregion
   }
 }

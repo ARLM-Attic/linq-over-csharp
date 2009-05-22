@@ -6,7 +6,7 @@
 using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -28,7 +28,7 @@ namespace CSharpFactory.Syntax
     /// <param name="identifier">The identifier.</param>
     /// <param name="argumentListNode">The argument list node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeTagContinuationNode(Token start, Token identifier, 
+    public TypeTagContinuationNode(Token start, Token identifier,
                                    TypeArgumentListNode argumentListNode)
       : base(start, argumentListNode)
     {
@@ -38,12 +38,17 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IContinuationTag Members
+
     /// <summary>
     /// Gets or sets the separator token.
     /// </summary>
     /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; private set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

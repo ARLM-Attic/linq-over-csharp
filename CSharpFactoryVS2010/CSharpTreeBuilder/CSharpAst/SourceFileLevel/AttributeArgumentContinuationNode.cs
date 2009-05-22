@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -28,17 +28,22 @@ namespace CSharpFactory.Syntax
     /// <param name="equal">The equal token.</param>
     /// <param name="expression">The expression node.</param>
     // ----------------------------------------------------------------------------------------------
-    public AttributeArgumentContinuationNode(Token separator, Token identifier, Token equal, 
+    public AttributeArgumentContinuationNode(Token separator, Token identifier, Token equal,
                                              ExpressionNode expression) : base(identifier, equal, expression)
     {
       StartToken = separator;
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IContinuationTag Members
+
     /// <summary>
     /// Gets the separator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; internal set; }
+
+    #endregion
   }
 }

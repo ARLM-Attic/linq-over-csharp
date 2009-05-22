@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -31,10 +31,15 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IContinuationTag Members
+
     /// <summary>
     /// Gets the separator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; private set; }
+
+    #endregion
   }
 }

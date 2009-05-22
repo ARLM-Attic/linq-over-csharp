@@ -19,7 +19,7 @@ namespace CSharpTreeBuilder.ProjectContent
     /// <param name="project">Compilation unit instance</param>
     /// <param name="name">Name</param>
     // ----------------------------------------------------------------------------------------------
-    public ReferencedCompilation(Project project, string name)
+    public ReferencedCompilation(CSharpProject project, string name)
       : base(name)
     {
       Project = project;
@@ -43,7 +43,7 @@ namespace CSharpTreeBuilder.ProjectContent
     /// Gets the compilation unit referenced by this instance.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Project Project { get; private set; }
+    public CSharpProject Project { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

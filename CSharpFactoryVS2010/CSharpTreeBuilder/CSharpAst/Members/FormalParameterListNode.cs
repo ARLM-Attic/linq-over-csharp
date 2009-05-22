@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -16,7 +16,7 @@ namespace CSharpFactory.Syntax
   /// terminating token.
   /// </remarks>
   // ================================================================================================
-  public class FormalParameterListNode: SyntaxNode
+  public class FormalParameterListNode : SyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

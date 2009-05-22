@@ -6,7 +6,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpFactory.Collections;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpFactory.Semantics
 {

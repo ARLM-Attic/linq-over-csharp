@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// Represents an enum declaration.
   /// </summary>
   // ================================================================================================
-  public class EnumDeclarationNode: TypeWithBodyDeclarationNode
+  public class EnumDeclarationNode : TypeWithBodyDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

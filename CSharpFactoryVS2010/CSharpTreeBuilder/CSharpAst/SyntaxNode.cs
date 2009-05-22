@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -43,7 +43,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public int EndLine
     {
-      get { return TerminatingToken.Line; }  
+      get { return TerminatingToken.Line; }
     }
 
     // ----------------------------------------------------------------------------------------------

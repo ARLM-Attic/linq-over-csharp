@@ -5,7 +5,7 @@
 // ================================================================================================
 using System.Collections.Generic;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -25,7 +25,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public OutputSegment(params object[] elements)
     {
-      _Elements = new List<object>(elements);  
+      _Elements = new List<object>(elements);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ namespace CSharpFactory.Syntax
     /// Gets or sets the output segment elements.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<object> OutputSegmentElements 
+    public IEnumerable<object> OutputSegmentElements
     {
       get { return _Elements; }
     }

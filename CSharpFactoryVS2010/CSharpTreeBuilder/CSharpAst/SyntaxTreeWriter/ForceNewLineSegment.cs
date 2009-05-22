@@ -3,7 +3,7 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -24,7 +24,9 @@ namespace CSharpFactory.Syntax
     /// Avoid external instantiation
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private ForceNewLineSegment() {}
+    private ForceNewLineSegment()
+    {
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// Represents an interface class declaration.
   /// </summary>
   // ================================================================================================
-  public class InterfaceDeclarationNode: TypeWithMembersDeclarationNode
+  public class InterfaceDeclarationNode : TypeWithMembersDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

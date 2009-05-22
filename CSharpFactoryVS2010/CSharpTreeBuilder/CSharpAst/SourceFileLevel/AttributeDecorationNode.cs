@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -36,6 +36,32 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the colon token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token ColonToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the attributes.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<AttributeNode> Attributes { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the optional closing separator.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token ClosingSeparator { get; internal set; }
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -52,14 +78,6 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value; }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the colon token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token ColonToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this instance has an identifier.
     /// </summary>
@@ -67,20 +85,11 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has an identifier; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier { get { return IdentifierToken != null; } }
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the attributes.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<AttributeNode> Attributes { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the optional closing separator.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token ClosingSeparator { get; internal set; }
+    #endregion
   }
 }

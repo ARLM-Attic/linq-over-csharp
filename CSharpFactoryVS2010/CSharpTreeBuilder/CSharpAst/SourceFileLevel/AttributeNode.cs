@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -19,7 +19,7 @@ namespace CSharpFactory.Syntax
   ///       [ "(" [ AttributeArgumentNode ] { AttributeArgumentContinuationNode }  ")" ]
   /// </remarks>
   // ================================================================================================
-  public class AttributeNode : SyntaxNode , IParentheses
+  public class AttributeNode : SyntaxNode, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -42,18 +42,6 @@ namespace CSharpFactory.Syntax
     public TypeOrNamespaceNode TypeName { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the opening parenthesis token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the closing parenthesis token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis { get { return TerminatingToken; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -84,5 +72,25 @@ namespace CSharpFactory.Syntax
     {
       get { return DefinesArguments && Arguments != null && Arguments.Count > 0; }
     }
+
+    #region IParentheses Members
+
+    /// <summary>
+    /// Gets the opening parenthesis token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token OpenParenthesis { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the closing parenthesis token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token CloseParenthesis
+    {
+      get { return TerminatingToken; }
+    }
+
+    #endregion
   }
 }

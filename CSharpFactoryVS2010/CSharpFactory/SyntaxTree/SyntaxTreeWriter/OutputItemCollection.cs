@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using CSharpFactory.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -64,7 +64,10 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has qualifier; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasQualifier { get { return QualifierToken != null; } }
+    public bool HasQualifier
+    {
+      get { return QualifierToken != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -94,6 +97,34 @@ namespace CSharpFactory.Syntax
     public ImmutableCollection<TypeTagNode> TypeTags { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the nullable token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token NullableToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is nullable.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is nullable; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsNullable
+    {
+      get { return NullableToken != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type modifiers.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<TypeModifierNode> TypeModifiers { get; private set; }
+
     /// <summary>
     /// Adds the type tag.
     /// </summary>
@@ -121,30 +152,6 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the nullable token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token NullableToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance is nullable.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is nullable; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsNullable { get { return NullableToken != null; } }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type modifiers.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<TypeModifierNode> TypeModifiers { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>
@@ -154,8 +161,8 @@ namespace CSharpFactory.Syntax
     public override OutputSegment GetOutputSegment()
     {
       return HasQualifier
-        ? new OutputSegment(QualifierToken, QualifierSeparatorToken)
-        : new OutputSegment(TypeTags);
+               ? new OutputSegment(QualifierToken, QualifierSeparatorToken)
+               : new OutputSegment(TypeTags);
     }
   }
 }

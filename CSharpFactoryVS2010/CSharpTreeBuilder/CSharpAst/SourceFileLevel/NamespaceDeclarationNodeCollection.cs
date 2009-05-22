@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This type represents a collection of namespace declaration nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class NamespaceDeclarationNodeCollection : 
+  public sealed class NamespaceDeclarationNodeCollection :
     ImmutableCollection<NamespaceDeclarationNode>
   {
   }

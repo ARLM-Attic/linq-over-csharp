@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -30,7 +30,7 @@ namespace CSharpFactory.Syntax
     /// <param name="typeName">Name of the type.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingWithAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token equalToken, 
+    public UsingWithAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token equalToken,
                               TypeOrNamespaceNode typeName, Token terminating)
       : base(parent, start, typeName, terminating)
     {
@@ -52,7 +52,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The alias.</value>
     // ----------------------------------------------------------------------------------------------
-    public string Alias { get { return AliasToken.Value; } }
+    public string Alias
+    {
+      get { return AliasToken.Value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

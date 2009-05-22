@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -14,7 +14,7 @@ namespace CSharpFactory.Syntax
   /// namespaces can be declared.
   /// </summary>
   // ================================================================================================
-  public abstract class NamespaceScopeNode: SyntaxNode
+  public abstract class NamespaceScopeNode : SyntaxNode
   {
     #region Lifecycle methods
 
@@ -24,7 +24,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NamespaceScopeNode(Token start): base(start)
+    protected NamespaceScopeNode(Token start) : base(start)
     {
       UsingNodes = new ImmutableCollection<UsingNode>();
       UsingWithAliasNodes = new ImmutableCollection<UsingWithAliasNode>();
@@ -104,7 +104,7 @@ namespace CSharpFactory.Syntax
     /// <returns>The newly created using node.</returns>
     // ----------------------------------------------------------------------------------------------
     public UsingNode AddUsingWithAlias(Token start, Token alias, Token equalToken,
-      TypeOrNamespaceNode typeName, Token terminating)
+                                       TypeOrNamespaceNode typeName, Token terminating)
     {
       var node = new UsingWithAliasNode(this, start, alias, equalToken, typeName, terminating);
       UsingNodes.Add(node);
@@ -122,8 +122,8 @@ namespace CSharpFactory.Syntax
     /// <param name="terminating">The terminating token.</param>
     /// <returns></returns>
     // ----------------------------------------------------------------------------------------------
-    public ExternAliasNode AddExternAlias(Token start, Token alias, Token identifier, 
-      Token terminating)
+    public ExternAliasNode AddExternAlias(Token start, Token alias, Token identifier,
+                                          Token terminating)
     {
       var node = new ExternAliasNode(this, start, alias, identifier, terminating);
       ExternAliaseNodes.Add(node);

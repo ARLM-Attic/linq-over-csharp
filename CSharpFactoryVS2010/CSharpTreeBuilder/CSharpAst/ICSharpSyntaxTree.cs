@@ -1,34 +1,30 @@
 // ================================================================================================
-// SyntaxTree.cs
+// ICSharpSyntaxTree.cs
 //
-// Created: 2009.03.13, by Istvan Novak (DeepDiver)
+// Created: 2009.03.04, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents the syntax tree as a result of the syntax parsing of a C# compilation 
-  /// unit.
+  /// This interface represents the syntax tree belonging to a project.
   /// </summary>
   // ================================================================================================
-  public class SyntaxTree: ISyntaxTree
+  public interface ICSharpSyntaxTree
   {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SyntaxTree"/> class.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SyntaxTree()
-    {
-      SourceFileNodes = new SourceFileNodeCollection();
-    }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the source file nodes belonging to the syntax tree
     /// </summary>
     /// <value>The source file nodes.</value>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNodeCollection SourceFileNodes { get; private set; }
+    SourceFileNodeCollection SourceFileNodes { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resets the syntax tree so that it could be built fromthe beginning.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    void Reset();
   }
 }

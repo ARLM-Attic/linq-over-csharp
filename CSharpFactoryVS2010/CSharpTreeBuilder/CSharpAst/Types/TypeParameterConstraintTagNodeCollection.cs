@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// Defines a collection of TypeParameterConstraintTagNode instances.
   /// </summary>
   // ================================================================================================
-  public sealed class TypeParameterConstraintTagNodeCollection : 
+  public sealed class TypeParameterConstraintTagNodeCollection :
     ImmutableCollection<TypeParameterConstraintTagNode>
   {
   }

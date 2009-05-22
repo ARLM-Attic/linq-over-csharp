@@ -1,5 +1,5 @@
 using CSharpFactory.ProjectModel;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.LanguageElements

@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using CSharpTreeBuilder.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,6 +26,9 @@ namespace CSharpFactory.Syntax
     #region Public members
 
     // ----------------------------------------------------------------------------------------------
+
+    #region ICollection<OutputItem> Members
+
     /// <summary>
     /// Returns an enumerator that iterates through the collection.
     /// </summary>
@@ -182,7 +185,12 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public bool IsReadOnly { get; private set; }
 
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
+
+    #region IReadOnlySupport Members
+
     /// <summary>
     /// Sets the object's state to read-only.
     /// </summary>
@@ -196,6 +204,8 @@ namespace CSharpFactory.Syntax
     {
       IsReadOnly = true;
     }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

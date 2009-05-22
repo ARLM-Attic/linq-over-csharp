@@ -6,22 +6,16 @@
 using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This node represents a modifier.
   /// </summary>
   // ================================================================================================
-  public class ModifierNode: SyntaxNode
+  public class ModifierNode : SyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the value of this modifier.
-    /// </summary>
-    /// <value>The value.</value>
-    // ----------------------------------------------------------------------------------------------
-    public ModifierType Value { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -81,5 +75,12 @@ namespace CSharpFactory.Syntax
           throw new InvalidOperationException();
       }
     }
+
+    /// <summary>
+    /// Gets the value of this modifier.
+    /// </summary>
+    /// <value>The value.</value>
+    // ----------------------------------------------------------------------------------------------
+    public ModifierType Value { get; private set; }
   }
 }

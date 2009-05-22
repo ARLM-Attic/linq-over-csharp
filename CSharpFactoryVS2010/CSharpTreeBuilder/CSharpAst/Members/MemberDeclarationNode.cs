@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -59,8 +59,8 @@ namespace CSharpFactory.Syntax
       get
       {
         return MemberName != null && MemberName.TypeTags.Count > 0
-            ? MemberName.TypeTags[MemberName.TypeTags.Count - 1].Identifier
-            : Identifier;
+                 ? MemberName.TypeTags[MemberName.TypeTags.Count - 1].Identifier
+                 : Identifier;
       }
     }
   }

@@ -4,7 +4,7 @@
 // Reviewed: 2009.03.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ProjectModel;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CSharpParserTest.LanguageElements

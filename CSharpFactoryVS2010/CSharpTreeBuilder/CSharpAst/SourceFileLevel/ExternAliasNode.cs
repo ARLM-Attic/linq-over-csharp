@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -17,7 +17,7 @@ namespace CSharpFactory.Syntax
   ///     "extern" "alias" identifier ";"
   /// </remarks>
   // ================================================================================================
-  public sealed class ExternAliasNode: SyntaxNode, IIdentifierSupport
+  public sealed class ExternAliasNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -29,8 +29,8 @@ namespace CSharpFactory.Syntax
     /// <param name="identifier">The identifier token.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExternAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token identifier, 
-      Token terminating) : base(start)
+    public ExternAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token identifier,
+                           Token terminating) : base(start)
     {
       Parent = parent;
       AliasToken = alias;
@@ -53,6 +53,9 @@ namespace CSharpFactory.Syntax
     public Token AliasToken { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -64,8 +67,8 @@ namespace CSharpFactory.Syntax
     /// Gets the alias identifier.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string Identifier 
-    { 
+    public string Identifier
+    {
       get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value; }
     }
 
@@ -81,6 +84,8 @@ namespace CSharpFactory.Syntax
     {
       get { return IdentifierToken != null; }
     }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

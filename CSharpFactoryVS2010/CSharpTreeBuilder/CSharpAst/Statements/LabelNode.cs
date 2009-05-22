@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -28,7 +28,16 @@ namespace CSharpFactory.Syntax
       ColonToken = colon;
     }
 
+    /// <summary>
+    /// Gets or sets the colon token.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public Token ColonToken { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -58,11 +67,8 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken != null; }
     }
 
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the colon token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token ColonToken { get; private set; }
   }
 }

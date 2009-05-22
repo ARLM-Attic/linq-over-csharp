@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// Represents a delegate declaration.
   /// </summary>
   // ================================================================================================
-  public class DelegateDeclarationNode: TypeDeclarationNode, IIdentifierSupport
+  public class DelegateDeclarationNode : TypeDeclarationNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -34,7 +34,16 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode TypeName { get; internal set; }
 
+    /// <summary>
+    /// Gets or sets the formal parameters.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public FormalParameterListNode FormalParameters { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -48,7 +57,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The identifier name.</value>
     // ----------------------------------------------------------------------------------------------
-    public string Identifier { get { return IdentifierToken.Value; } }
+    public string Identifier
+    {
+      get { return IdentifierToken.Value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -63,11 +75,8 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken != null; }
     }
 
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the formal parameters.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
   }
 }

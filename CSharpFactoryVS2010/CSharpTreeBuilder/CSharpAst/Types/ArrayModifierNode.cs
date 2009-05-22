@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -40,15 +40,6 @@ namespace CSharpFactory.Syntax
     public ImmutableCollection<Token> Separators { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a new separator token.
-    /// </summary>
-    /// <param name="t">The token to add.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddSeparator(Token t)
-    {
-      Separators.Add(t);
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -58,6 +49,16 @@ namespace CSharpFactory.Syntax
     public int Rank
     {
       get { return Separators.Count + 1; }
+    }
+
+    /// <summary>
+    /// Adds a new separator token.
+    /// </summary>
+    /// <param name="t">The token to add.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddSeparator(Token t)
+    {
+      Separators.Add(t);
     }
   }
 }

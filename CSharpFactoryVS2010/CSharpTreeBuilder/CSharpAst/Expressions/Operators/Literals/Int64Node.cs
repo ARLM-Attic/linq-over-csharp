@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -32,6 +32,6 @@ namespace CSharpFactory.Syntax
     /// Gets the value of the constant.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public long Value { get; internal set; }   
+    public long Value { get; internal set; }
   }
 }

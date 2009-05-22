@@ -7,7 +7,7 @@ using System.Text;
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,7 +26,7 @@ namespace CSharpFactory.Syntax
       get
       {
         var sb = new StringBuilder();
-        foreach (var tag in this)
+        foreach (NameTagNode tag in this)
         {
           if (tag is NameTagContinuationNode) sb.Append(".");
           sb.Append(tag.Identifier);
@@ -59,7 +59,7 @@ namespace CSharpFactory.Syntax
     /// The newly created NameTagContinuationNode instance.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public NameTagContinuationNode Add(Token start, Token identifier )
+    public NameTagContinuationNode Add(Token start, Token identifier)
     {
       var result = new NameTagContinuationNode(start, identifier);
       Add(result);

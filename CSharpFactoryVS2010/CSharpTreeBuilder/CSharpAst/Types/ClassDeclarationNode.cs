@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// Represents a class declaration.
   /// </summary>
   // ================================================================================================
-  public class ClassDeclarationNode: TypeWithMembersDeclarationNode
+  public class ClassDeclarationNode : TypeWithMembersDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

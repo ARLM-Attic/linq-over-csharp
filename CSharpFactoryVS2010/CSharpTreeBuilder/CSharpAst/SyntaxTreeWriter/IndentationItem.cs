@@ -3,7 +3,7 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -60,7 +60,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public override int GetLength(SyntaxTreeOutputOptions options)
     {
-      return Depth * options.IndentationWidth;
+      return Depth*options.IndentationWidth;
     }
 
     #endregion

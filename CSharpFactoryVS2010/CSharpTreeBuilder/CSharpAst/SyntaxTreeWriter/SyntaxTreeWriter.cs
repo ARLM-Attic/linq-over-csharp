@@ -6,7 +6,7 @@
 using System;
 using CSharpTreeBuilder.ProjectContent;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -23,8 +23,8 @@ namespace CSharpFactory.Syntax
     /// <param name="provider">The project provider instance.</param>
     /// <param name="options">The options used for output.</param>
     // ----------------------------------------------------------------------------------------------
-    protected SyntaxTreeWriter(ISyntaxTree tree, ProjectProviderBase provider, 
-      SyntaxTreeOutputOptions options)
+    protected SyntaxTreeWriter(ICSharpSyntaxTree tree, ProjectProviderBase provider,
+                               SyntaxTreeOutputOptions options)
     {
       if (tree == null) throw new ArgumentNullException("tree");
       SyntaxTree = tree;
@@ -40,8 +40,8 @@ namespace CSharpFactory.Syntax
     /// <param name="tree">The syntax tree this writer uses.</param>
     /// <param name="provider">The project provider instance.</param>
     // ----------------------------------------------------------------------------------------------
-    protected SyntaxTreeWriter(ISyntaxTree tree, ProjectProviderBase provider) :
-      this (tree, provider, null)
+    protected SyntaxTreeWriter(ICSharpSyntaxTree tree, ProjectProviderBase provider) :
+      this(tree, provider, null)
     {
     }
 
@@ -51,7 +51,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The syntax tree.</value>
     // ----------------------------------------------------------------------------------------------
-    public ISyntaxTree SyntaxTree { get; private set; }
+    public ICSharpSyntaxTree SyntaxTree { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -76,9 +76,9 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public virtual void WriteTree()
     {
-      foreach (var sourceFile in SyntaxTree.SourceFileNodes)
+      foreach (SourceFileNode sourceFile in SyntaxTree.SourceFileNodes)
       {
-        var outputForSource = CreateOutput(sourceFile);
+        OutputItemCollection outputForSource = CreateOutput(sourceFile);
         WriteOutput(sourceFile, outputForSource);
       }
     }
@@ -104,5 +104,4 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     protected abstract void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items);
   }
-
 }

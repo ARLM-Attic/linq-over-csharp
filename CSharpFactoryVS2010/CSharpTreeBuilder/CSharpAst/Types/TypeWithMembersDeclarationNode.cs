@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a common base class for type declarations having members.
   /// </summary>
   // ================================================================================================
-  public abstract class TypeWithMembersDeclarationNode: TypeWithBodyDeclarationNode
+  public abstract class TypeWithMembersDeclarationNode : TypeWithBodyDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

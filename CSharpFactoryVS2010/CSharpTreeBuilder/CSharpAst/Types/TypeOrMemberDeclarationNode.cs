@@ -6,16 +6,16 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class is intended to be the base class of or type and member declaration.
   /// </summary>
   // ================================================================================================
-  public abstract class TypeOrMemberDeclarationNode : 
+  public abstract class TypeOrMemberDeclarationNode :
     AttributedDeclarationNode,
-    ITypeParameterHolder, 
+    ITypeParameterHolder,
     IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
@@ -37,7 +37,28 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public ModifierNodeCollection Modifiers { get; internal set; }
 
+    /// <summary>
+    /// Gets or sets the name of the type.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public virtual string Name
+    {
+      get { return IdentifierToken.Value; }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this instance is partial type declaration.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is partial; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public Token PartialToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -67,7 +88,12 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken != null; }
     }
 
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
+
+    #region ITypeParameterHolder Members
+
     /// <summary>
     /// Gets a value indicating whether this instance has type parameters.
     /// </summary>
@@ -81,14 +107,6 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the name of the type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual string Name
-    {
-      get { return IdentifierToken.Value; }
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -141,14 +159,8 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public TypeParameterConstraintNodeCollection TypeParameterConstraints { get; private set; }
 
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance is partial type declaration.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is partial; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public Token PartialToken { get; internal set; }
   }
 }

@@ -6,7 +6,7 @@
 using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -16,50 +16,13 @@ namespace CSharpFactory.Syntax
   public class BraceSegment : ControlSegment
   {
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Defines the type of the brace to use during formatting.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private enum BraceType
-    {
-      OpenType, 
-      CloseType
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Opening brace for types and namespaces.
-    /// </summary>
-    /// <param name="token">The brace token.</param>
-    /// <returns>
-    /// The newly created brace segment
-    /// </returns>
-    // ----------------------------------------------------------------------------------------------
-    public static BraceSegment OpenType(Token token)
-    {
-      return new BraceSegment(token, BraceType.OpenType); 
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Closing brace for types and namespaces.
-    /// </summary>
-    /// <param name="token">The brace token.</param>
-    /// <returns>
-    /// The newly created brace segment
-    /// </returns>
-    // ----------------------------------------------------------------------------------------------
-    public static BraceSegment CloseType(Token token)
-    {
-      return new BraceSegment(token, BraceType.CloseType);
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Avoid external instantiation
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private BraceSegment(Token t, BraceType type) 
+    private BraceSegment(Token t, BraceType type)
     {
       Token = t;
       Type = type;
@@ -79,6 +42,33 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     private BraceType Type { get; set; }
 
+    /// <summary>
+    /// Opening brace for types and namespaces.
+    /// </summary>
+    /// <param name="token">The brace token.</param>
+    /// <returns>
+    /// The newly created brace segment
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static BraceSegment OpenType(Token token)
+    {
+      return new BraceSegment(token, BraceType.OpenType);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Closing brace for types and namespaces.
+    /// </summary>
+    /// <param name="token">The brace token.</param>
+    /// <returns>
+    /// The newly created brace segment
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static BraceSegment CloseType(Token token)
+    {
+      return new BraceSegment(token, BraceType.CloseType);
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Controls the state of the specified OutputItemSerializer.
@@ -87,7 +77,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public override void Control(OutputItemSerializer serializer)
     {
-      if (Type == BraceType.OpenType) 
+      if (Type == BraceType.OpenType)
         OpenBrace(serializer, serializer.OutputOptions.TypeAndNamespaceBraces);
       else if (Type == BraceType.CloseType)
         CloseBrace(serializer, serializer.OutputOptions.TypeAndNamespaceBraces);
@@ -188,5 +178,19 @@ namespace CSharpFactory.Syntax
           throw new ArgumentOutOfRangeException("style");
       }
     }
+
+    #region Nested type: BraceType
+
+    /// <summary>
+    /// Defines the type of the brace to use during formatting.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private enum BraceType
+    {
+      OpenType,
+      CloseType
+    }
+
+    #endregion
   }
 }

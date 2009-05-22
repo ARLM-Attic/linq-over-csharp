@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -77,7 +77,7 @@ namespace CSharpFactory.Syntax
     {
       get
       {
-        var current = this;
+        BinaryOperatorNode current = this;
         do
         {
           if (current.LeftOperand == null) return current;

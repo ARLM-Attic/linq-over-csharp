@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -41,7 +41,10 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has qualifier; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasQualifier { get { return QualifierToken != null; } }
+    public bool HasQualifier
+    {
+      get { return QualifierToken != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

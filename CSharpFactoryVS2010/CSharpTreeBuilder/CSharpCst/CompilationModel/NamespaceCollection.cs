@@ -1,23 +1,32 @@
 // ================================================================================================
-// ISyntaxTree.cs
+// NamespaceCollection.cs
 //
-// Created: 2009.03.04, by Istvan Novak (DeepDiver)
+// Created: 2009.05.10, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.Syntax
+using CSharpTreeBuilder.Collections;
+
+namespace CSharpTreeBuilder.Cst
 {
   // ================================================================================================
   /// <summary>
-  /// This interface represents the syntax tree belonging to a project.
+  /// This class represents a collection of <see cref="NamespaceItem"/> instances.
   /// </summary>
+  /// <remarks>
+  /// This collection can be indexed with the name of the namespace.
+  /// </remarks>
   // ================================================================================================
-  public interface ISyntaxTree
+  public sealed class NamespaceCollection : ImmutableIndexedCollection<NamespaceItem>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the source file nodes belonging to the syntax tree
+    /// Gets the key of the specified item.
     /// </summary>
-    /// <value>The source file nodes.</value>
+    /// <param name="item">Item used to determine the key.</param>
+    /// <returns>The name of the namespace item.</returns>
     // ----------------------------------------------------------------------------------------------
-    SourceFileNodeCollection SourceFileNodes { get; }
+    protected override string GetKeyOfItem(NamespaceItem item)
+    {
+      return item.Name;
+    }
   }
 }

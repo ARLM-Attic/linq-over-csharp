@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,6 +26,9 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IParentheses Members
+
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -38,5 +41,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; internal set; }
+
+    #endregion
   }
 }

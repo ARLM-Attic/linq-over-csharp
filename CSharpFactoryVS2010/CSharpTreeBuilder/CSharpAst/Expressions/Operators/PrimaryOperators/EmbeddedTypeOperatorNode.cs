@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -24,7 +24,16 @@ namespace CSharpFactory.Syntax
     {
     }
 
+    /// <summary>
+    /// Gets the type embedded into this operator.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode TypeName { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IParentheses Members
+
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -38,11 +47,8 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; internal set; }
 
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type embedded into this operator.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
   }
 }

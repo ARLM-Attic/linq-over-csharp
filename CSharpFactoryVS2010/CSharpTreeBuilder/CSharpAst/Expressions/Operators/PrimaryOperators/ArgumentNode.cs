@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -37,20 +37,29 @@ namespace CSharpFactory.Syntax
     /// Gets a value indicating whether this instance is "in" kind.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsIn { get { return KindToken == null; } }
+    public bool IsIn
+    {
+      get { return KindToken == null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this instance is "out" kind.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsOut { get { return KindToken != null && KindToken.Value == "out"; } }
+    public bool IsOut
+    {
+      get { return KindToken != null && KindToken.Value == "out"; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this instance is "ref" kind.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsRef { get { return KindToken != null && KindToken.Value == "ref"; } }
+    public bool IsRef
+    {
+      get { return KindToken != null && KindToken.Value == "ref"; }
+    }
   }
 }

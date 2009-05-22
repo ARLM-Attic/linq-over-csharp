@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class declares and accessor that can be used in properties and event properties.
   /// </summary>
   // ================================================================================================
-  public class AccessorNode: MemberWithBodyDeclarationNode
+  public class AccessorNode : MemberWithBodyDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

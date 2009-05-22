@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,7 +26,23 @@ namespace CSharpFactory.Syntax
       IdentifierToken = start;
     }
 
+    /// <summary>
+    /// Gets or sets the equal token.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public Token EqualToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the optional expression of the enumeration value.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionNode Expression { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -40,7 +56,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value>The identifier name.</value>
     // ----------------------------------------------------------------------------------------------
-    public string Identifier { get { return IdentifierToken.Value; } }
+    public string Identifier
+    {
+      get { return IdentifierToken.Value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -55,18 +74,8 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken != null; }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the equal token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token EqualToken { get; internal set; }
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the optional expression of the enumeration value.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
   }
 }

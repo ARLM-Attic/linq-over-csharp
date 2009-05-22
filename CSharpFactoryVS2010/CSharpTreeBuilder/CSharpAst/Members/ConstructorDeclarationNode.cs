@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -48,7 +48,9 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has initializer; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasInitializer { get { return Initializer != null; } }
-
+    public bool HasInitializer
+    {
+      get { return Initializer != null; }
+    }
   }
 }

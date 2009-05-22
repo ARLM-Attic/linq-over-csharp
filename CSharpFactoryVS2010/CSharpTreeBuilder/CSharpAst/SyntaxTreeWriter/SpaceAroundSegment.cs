@@ -6,7 +6,7 @@
 using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -19,28 +19,6 @@ namespace CSharpFactory.Syntax
     private readonly SpaceType Type;
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// This enumeration defines the types of "space around" segments.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private enum SpaceType
-    {
-      AssignmentOp,
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Represents a space around assignment operators.
-    /// </summary>
-    /// <param name="token">Assignment operator token.</param>
-    /// <returns>
-    /// The newly created "space around" segment.
-    /// </returns>
-    // ----------------------------------------------------------------------------------------------
-    public static SpaceAroundSegment AssignmentOp(Token token)
-    {
-      return new SpaceAroundSegment(token, SpaceType.AssignmentOp);  
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -53,6 +31,19 @@ namespace CSharpFactory.Syntax
     {
       Token = token;
       Type = type;
+    }
+
+    /// <summary>
+    /// Represents a space around assignment operators.
+    /// </summary>
+    /// <param name="token">Assignment operator token.</param>
+    /// <returns>
+    /// The newly created "space around" segment.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SpaceAroundSegment AssignmentOp(Token token)
+    {
+      return new SpaceAroundSegment(token, SpaceType.AssignmentOp);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -76,5 +67,18 @@ namespace CSharpFactory.Syntax
       serializer.Append(Token);
       if (useSpace) serializer.Append(" ");
     }
+
+    #region Nested type: SpaceType
+
+    /// <summary>
+    /// This enumeration defines the types of "space around" segments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private enum SpaceType
+    {
+      AssignmentOp,
+    }
+
+    #endregion
   }
 }

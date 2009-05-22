@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -27,7 +27,7 @@ namespace CSharpFactory.Syntax
     /// <param name="parent">The parent node.</param>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start): base(start)
+    public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start) : base(start)
     {
       Parent = parent;
       NameTags = new NameTagNodeCollection();

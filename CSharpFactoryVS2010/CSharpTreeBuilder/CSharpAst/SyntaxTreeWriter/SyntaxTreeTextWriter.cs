@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using CSharpTreeBuilder.ProjectContent;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -18,8 +18,8 @@ namespace CSharpFactory.Syntax
   {
     #region Private fields
 
-    private int _CurrentRow;
     private int _CurrentColumn;
+    private int _CurrentRow;
 
     #endregion
 
@@ -33,7 +33,7 @@ namespace CSharpFactory.Syntax
     /// <param name="provider">The project provider instance.</param>
     /// <param name="options">The options used for output.</param>
     // ----------------------------------------------------------------------------------------------
-    public SyntaxTreeTextWriter(ISyntaxTree tree, ProjectProviderBase provider, SyntaxTreeOutputOptions options)
+    public SyntaxTreeTextWriter(ICSharpSyntaxTree tree, ProjectProviderBase provider, SyntaxTreeOutputOptions options)
       : base(tree, provider, options)
     {
       WorkingFolder = @".\Output";
@@ -46,7 +46,7 @@ namespace CSharpFactory.Syntax
     /// <param name="tree">The tree.</param>
     /// <param name="provider">The provider.</param>
     // ----------------------------------------------------------------------------------------------
-    public SyntaxTreeTextWriter(ISyntaxTree tree, ProjectProviderBase provider)
+    public SyntaxTreeTextWriter(ICSharpSyntaxTree tree, ProjectProviderBase provider)
       : this(tree, provider, null)
     {
     }
@@ -72,19 +72,19 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     protected override void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items)
     {
-      var expectedPrefix = ProjectProvider.WorkingFolder.Trim();
+      string expectedPrefix = ProjectProvider.WorkingFolder.Trim();
       if (!expectedPrefix.EndsWith("\\")) expectedPrefix += "\\";
       expectedPrefix = expectedPrefix.ToLower();
-      var outputFolder = Path.IsPathRooted(WorkingFolder)
-                           ? WorkingFolder
-                           : Path.Combine(ProjectProvider.WorkingFolder, WorkingFolder);
-      var outputFile = sourceFile.FullName + ".out.cs";
+      string outputFolder = Path.IsPathRooted(WorkingFolder)
+                              ? WorkingFolder
+                              : Path.Combine(ProjectProvider.WorkingFolder, WorkingFolder);
+      string outputFile = sourceFile.FullName + ".out.cs";
       if (sourceFile.FullName.ToLower().StartsWith(expectedPrefix))
       {
         outputFile = Path.Combine(outputFolder,
                                   sourceFile.FullName.Substring(expectedPrefix.Length));
       }
-      var path = Path.GetDirectoryName(outputFile);
+      string path = Path.GetDirectoryName(outputFile);
       if (!Directory.Exists(path)) Directory.CreateDirectory(path);
       TextWriter tw = File.CreateText(outputFile);
       WriteItems(items, tw);
@@ -106,7 +106,7 @@ namespace CSharpFactory.Syntax
     {
       _CurrentRow = 0;
       _CurrentColumn = 0;
-      foreach (var item in items)
+      foreach (OutputItem item in items)
       {
         WriteLeadingLines(item, writer);
         WriteLeadingWhitespace(item, writer);
@@ -141,7 +141,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     private void WriteLeadingWhitespace(OutputItem item, TextWriter writer)
     {
-      var whiteSpaceLength = item.Column - _CurrentColumn;
+      int whiteSpaceLength = item.Column - _CurrentColumn;
       if (whiteSpaceLength > 0)
       {
         writer.Write(string.Empty.PadRight(whiteSpaceLength, ' '));

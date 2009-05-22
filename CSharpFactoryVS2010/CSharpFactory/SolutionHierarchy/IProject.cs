@@ -4,7 +4,7 @@
 // Created: 2009.02.25, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.Semantics;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpFactory.SolutionHierarchy
 {

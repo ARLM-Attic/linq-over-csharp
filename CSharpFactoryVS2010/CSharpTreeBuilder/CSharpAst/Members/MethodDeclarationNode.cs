@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,6 +26,16 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the node representing formal parameters.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public FormalParameterListNode FormalParameters { get; internal set; }
+
+    #region IParentheses Members
+
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -37,19 +47,14 @@ namespace CSharpFactory.Syntax
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the node representing formal parameters.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the closing parenthesis token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis 
-    { 
-      get { return FormalParameters.TerminatingToken; } 
+    public Token CloseParenthesis
+    {
+      get { return FormalParameters.TerminatingToken; }
     }
+
+    #endregion
   }
 }

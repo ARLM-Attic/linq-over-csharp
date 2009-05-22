@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a continuation of a field member tag.
   /// </summary>
   // ================================================================================================
-  public class FieldContinuationTagNode: FieldTagNode, IContinuationTag
+  public class FieldContinuationTagNode : FieldTagNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -21,7 +21,7 @@ namespace CSharpFactory.Syntax
     /// <param name="separatorToken">The separator token.</param>
     /// <param name="node">The node.</param>
     // ----------------------------------------------------------------------------------------------
-    public FieldContinuationTagNode(Token separatorToken, FieldTagNode node) : 
+    public FieldContinuationTagNode(Token separatorToken, FieldTagNode node) :
       base(node.StartToken)
     {
       IdentifierToken = node.IdentifierToken;
@@ -31,12 +31,16 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IContinuationTag Members
+
     /// <summary>
     /// Gets or sets the separator token.
     /// </summary>
     /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; private set; }
-    
+
+    #endregion
   }
 }

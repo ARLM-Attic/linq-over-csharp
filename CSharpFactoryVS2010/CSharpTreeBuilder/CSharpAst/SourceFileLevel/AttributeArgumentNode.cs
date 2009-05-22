@@ -6,7 +6,7 @@
 using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -28,7 +28,7 @@ namespace CSharpFactory.Syntax
     /// <param name="equal">The equal token.</param>
     /// <param name="expression">The expression node.</param>
     // ----------------------------------------------------------------------------------------------
-    public AttributeArgumentNode(Token identifier, Token equal, ExpressionNode expression) : 
+    public AttributeArgumentNode(Token identifier, Token equal, ExpressionNode expression) :
       base(identifier)
     {
       IdentifierToken = identifier;
@@ -36,7 +36,22 @@ namespace CSharpFactory.Syntax
       Expression = expression;
     }
 
+    /// <summary>
+    /// Gets the equal token.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public Token EqualToken { get; private set; }
+
+    /// <summary>
+    /// Gets the expression node of this argument.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionNode Expression { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -54,11 +69,6 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the equal token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token EqualToken { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -68,13 +78,13 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has an identifier; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier { get { return IdentifierToken != null; } }
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the expression node of this argument.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
   }
 }

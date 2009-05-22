@@ -3,7 +3,7 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -22,7 +22,7 @@ namespace CSharpFactory.Syntax
     /// Default (singleton) instance of this whitespace segment.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public static readonly MandatoryWhiteSpaceSegment Default = 
+    public static readonly MandatoryWhiteSpaceSegment Default =
       new MandatoryWhiteSpaceSegment();
 
     // ----------------------------------------------------------------------------------------------
@@ -30,7 +30,9 @@ namespace CSharpFactory.Syntax
     /// Avoid external instantiation
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private MandatoryWhiteSpaceSegment() { }
+    private MandatoryWhiteSpaceSegment()
+    {
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

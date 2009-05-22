@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a property declaration node.
   /// </summary>
   // ================================================================================================
-  public class EventPropertyDeclarationNode: PropertyDeclarationNodeBase
+  public class EventPropertyDeclarationNode : PropertyDeclarationNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -30,13 +30,19 @@ namespace CSharpFactory.Syntax
     /// Retrieves the "add" accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AccessorNode AddAccessor { get { return FindAccessor("add"); } }
+    public AccessorNode AddAccessor
+    {
+      get { return FindAccessor("add"); }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Retrieves the "remove" accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AccessorNode RemoveAccessor { get { return FindAccessor("remove"); } }
+    public AccessorNode RemoveAccessor
+    {
+      get { return FindAccessor("remove"); }
+    }
   }
 }

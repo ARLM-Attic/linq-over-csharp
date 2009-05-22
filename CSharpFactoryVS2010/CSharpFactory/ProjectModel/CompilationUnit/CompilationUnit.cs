@@ -7,7 +7,7 @@ using CSharpFactory.ParserFiles;
 using CSharpFactory.ParserFiles.PPExpressions;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpFactory.Semantics;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpFactory.ProjectModel
 {

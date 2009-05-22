@@ -3,7 +3,7 @@
 //
 // Created: 2009.03.27, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -20,11 +20,6 @@ namespace CSharpFactory.Syntax
     public static readonly IndentationSegment Apply = new IndentationSegment();
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Increment the current indentation level.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Increment = new IndentationSegment();
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -33,12 +28,20 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public static readonly IndentationSegment Decrement = new IndentationSegment();
 
+    /// <summary>
+    /// Increment the current indentation level.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public static readonly IndentationSegment Increment = new IndentationSegment();
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Avoid external instantiation
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private IndentationSegment() { }
+    private IndentationSegment()
+    {
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

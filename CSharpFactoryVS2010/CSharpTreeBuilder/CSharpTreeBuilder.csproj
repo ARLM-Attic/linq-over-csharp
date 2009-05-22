@@ -49,7 +49,25 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSharpAstBuilder\CSharpParser.Common.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
+    <Compile Include="CSharpCst\CompilationMessageCollection.cs" />
+    <Compile Include="CSharpCst\CompilationMessageNode.cs" />
+    <Compile Include="CSharpCst\CompilationModel\CompilationEntity.cs" />
+    <Compile Include="CSharpCst\CompilationModel\CompilationModel.cs" />
+    <Compile Include="CSharpCst\CompilationModel\CompilationModelCollection.cs" />
+    <Compile Include="CSharpCst\CompilationModel\GlobalNamespaceItem.cs" />
+    <Compile Include="CSharpCst\CompilationModel\NamedCompilationEntity.cs" />
+    <Compile Include="CSharpCst\CompilationModel\NamespaceCollection.cs" />
+    <Compile Include="CSharpCst\CompilationModel\NamespaceItem.cs" />
+    <Compile Include="CSharpCst\CompilationModel\TypeDeclarationCollection.cs" />
+    <Compile Include="CSharpCst\CompilationModel\TypeDeclarationItem.cs" />
+    <Compile Include="CSharpCst\ISemanticsNodeCollection.cs" />
+    <Compile Include="CSharpCst\ICSharpSemanticsTree.cs" />
+    <Compile Include="CSharpCst\ReferenceItems\SyntaxNodeReference.cs" />
+    <Compile Include="CSharpCst\ReferenceItems\SyntaxNodeReferenceCollection.cs" />
+    <Compile Include="CSharpCst\SemanticsNode.cs" />
+    <Compile Include="CSharpCst\CSharpSemanticsTree.cs" />
     <Compile Include="Helpers\EventArguments.cs" />
     <Compile Include="Helpers\ImmutableChangedException.cs" />
     <Compile Include="Helpers\ImmutableCollection.cs" />
@@ -60,7 +78,7 @@
     <Compile Include="ProjectContent\EmptyContentProvider.cs" />
     <Compile Include="ProjectContent\FolderContentProvider.cs" />
     <Compile Include="ProjectContent\PhysicalSourceFile.cs" />
-    <Compile Include="ProjectContent\Project.cs" />
+    <Compile Include="ProjectContent\CSharpProject.cs" />
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
     <Compile Include="ProjectContent\ReferencedAssembly.cs" />
     <Compile Include="ProjectContent\ReferencedCompliation.cs" />
@@ -173,7 +191,7 @@
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryNotOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryPlusOperatorNode.cs" />
-    <Compile Include="CSharpAst\ISyntaxTree.cs" />
+    <Compile Include="CSharpAst\ICSharpSyntaxTree.cs" />
     <Compile Include="CSharpAst\Members\AccessorNode.cs" />
     <Compile Include="CSharpAst\Members\AnonymousDelegateNode.cs" />
     <Compile Include="CSharpAst\Members\ConstContinuationTagNode.cs" />
@@ -223,7 +241,7 @@
     <Compile Include="CSharpAst\Statements\StatementNodeCollection.cs" />
     <Compile Include="CSharpAst\Statements\VariableDeclarationStatementNode.cs" />
     <Compile Include="CSharpAst\SyntaxNode.cs" />
-    <Compile Include="CSharpAst\SyntaxTree.cs" />
+    <Compile Include="CSharpAst\CSharpSyntaxTree.cs" />
     <Compile Include="CSharpAst\SyntaxTreeWriter\BraceSegment.cs" />
     <Compile Include="CSharpAst\SyntaxTreeWriter\BracingStyle.cs" />
     <Compile Include="CSharpAst\SyntaxTreeWriter\ControlSegments.cs" />

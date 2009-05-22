@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -33,12 +33,6 @@ namespace CSharpFactory.Syntax
     Token OpenSign { get; }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the open sign token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    // ----------------------------------------------------------------------------------------------
-    void SetOpenSign(Token token);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -48,12 +42,6 @@ namespace CSharpFactory.Syntax
     Token CloseSign { get; }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the close sign token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    // ----------------------------------------------------------------------------------------------
-    void SetCloseSign(Token token);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -70,5 +58,19 @@ namespace CSharpFactory.Syntax
     /// <value>The type parameter constraints.</value>
     // ----------------------------------------------------------------------------------------------
     TypeParameterConstraintNodeCollection TypeParameterConstraints { get; }
+
+    /// <summary>
+    /// Sets the open sign token.
+    /// </summary>
+    /// <param name="token">The token.</param>
+    // ----------------------------------------------------------------------------------------------
+    void SetOpenSign(Token token);
+
+    /// <summary>
+    /// Sets the close sign token.
+    /// </summary>
+    /// <param name="token">The token.</param>
+    // ----------------------------------------------------------------------------------------------
+    void SetCloseSign(Token token);
   }
 }

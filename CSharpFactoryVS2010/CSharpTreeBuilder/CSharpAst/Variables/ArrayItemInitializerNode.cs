@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -20,7 +20,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="initializer">The initializer.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayItemInitializerNode(VariableInitializerNode initializer) : 
+    public ArrayItemInitializerNode(VariableInitializerNode initializer) :
       base(initializer.StartToken)
     {
       Initializer = initializer;

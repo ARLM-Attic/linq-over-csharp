@@ -4,7 +4,7 @@
 // Created: 2009.04.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpFactory.ProjectModel;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpFactory.ParserFiles
 {

@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,7 +26,7 @@ namespace CSharpFactory.Syntax
     /// <param name="separator">The separator.</param>
     /// <param name="node">The node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceContinuationNode(Token separator, TypeOrNamespaceNode node) : 
+    public TypeOrNamespaceContinuationNode(Token separator, TypeOrNamespaceNode node) :
       base(separator)
     {
       SeparatorToken = separator;

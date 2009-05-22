@@ -3,7 +3,7 @@
 //
 // Created: 2009.05.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpFactory.Semantics
 {

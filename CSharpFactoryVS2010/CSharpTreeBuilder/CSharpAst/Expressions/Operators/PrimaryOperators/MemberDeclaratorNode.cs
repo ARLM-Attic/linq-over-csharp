@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -15,6 +15,9 @@ namespace CSharpFactory.Syntax
   public class MemberDeclaratorNode : SyntaxNode, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
+
+    #region DeclaratorKind enum
+
     /// <summary>
     /// Kind of member declarator
     /// </summary>
@@ -25,17 +28,19 @@ namespace CSharpFactory.Syntax
       /// An "ident = expression" form is used.
       /// </summary>
       Expression,
-      
+
       /// <summary>
       /// A simple name is used.
       /// </summary>
       SimpleName,
-      
+
       /// <summary>
       /// A member access is used.
       /// </summary>
       MemberAccess
     }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -56,33 +61,6 @@ namespace CSharpFactory.Syntax
     public DeclaratorKind Kind { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the identifier token.
-    /// </summary>
-    /// <value>The identifier token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the identifier name.
-    /// </summary>
-    /// <value>The identifier name.</value>
-    // ----------------------------------------------------------------------------------------------
-    public string Identifier { get { return IdentifierToken.Value; } }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance has identifier.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier
-    {
-      get { return IdentifierToken != null; }
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -113,5 +91,40 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode TypeName { get; internal set; }
+
+    #region IIdentifierSupport Members
+
+    /// <summary>
+    /// Gets or sets the identifier token.
+    /// </summary>
+    /// <value>The identifier token.</value>
+    // ----------------------------------------------------------------------------------------------
+    public Token IdentifierToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the identifier name.
+    /// </summary>
+    /// <value>The identifier name.</value>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
+    {
+      get { return IdentifierToken.Value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
+
+    #endregion
   }
 }

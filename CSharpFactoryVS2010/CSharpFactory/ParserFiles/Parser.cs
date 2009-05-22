@@ -1,7 +1,7 @@
 using System.Text;
 using System.Collections;
 using CSharpFactory.ProjectModel;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 using System;
 

@@ -7,7 +7,7 @@ using System;
 using System.Globalization;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -38,18 +38,18 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public static RealConstantNode Create(Token t)
     {
-      var valueSrt = t.Value.ToLower();
+      string valueSrt = t.Value.ToLower();
       if (valueSrt.EndsWith("f"))
-        return new SingleNode(t, Single.Parse(valueSrt.Substring(0, valueSrt.Length - 1), 
-          NumberStyles.Float, CultureInfo.InvariantCulture));
+        return new SingleNode(t, Single.Parse(valueSrt.Substring(0, valueSrt.Length - 1),
+                                              NumberStyles.Float, CultureInfo.InvariantCulture));
       if (valueSrt.EndsWith("m"))
-        return new DecimalNode(t, Decimal.Parse(valueSrt.Substring(0, valueSrt.Length - 1), 
-          NumberStyles.Float, CultureInfo.InvariantCulture));
+        return new DecimalNode(t, Decimal.Parse(valueSrt.Substring(0, valueSrt.Length - 1),
+                                                NumberStyles.Float, CultureInfo.InvariantCulture));
       if (valueSrt.EndsWith("d"))
-        return new DoubleNode(t, Double.Parse(valueSrt.Substring(0, valueSrt.Length - 1), 
-          NumberStyles.Float, CultureInfo.InvariantCulture));
-      return new DoubleNode(t, Double.Parse(valueSrt, NumberStyles.Float, 
-        CultureInfo.InvariantCulture));
+        return new DoubleNode(t, Double.Parse(valueSrt.Substring(0, valueSrt.Length - 1),
+                                              NumberStyles.Float, CultureInfo.InvariantCulture));
+      return new DoubleNode(t, Double.Parse(valueSrt, NumberStyles.Float,
+                                            CultureInfo.InvariantCulture));
     }
   }
 }

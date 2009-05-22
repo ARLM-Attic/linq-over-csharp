@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// Represents a struct declaration.
   /// </summary>
   // ================================================================================================
-  public class StructDeclarationNode: TypeWithMembersDeclarationNode
+  public class StructDeclarationNode : TypeWithMembersDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

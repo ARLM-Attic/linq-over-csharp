@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -38,7 +38,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance has body; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasBody { get { return Body != null; } }
+    public bool HasBody
+    {
+      get { return Body != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

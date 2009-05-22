@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -35,7 +35,24 @@ namespace CSharpFactory.Syntax
       ConstraintTags = new TypeParameterConstraintTagNodeCollection();
     }
 
+    /// <summary>
+    /// Gets the ":" token.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public Token ColonToken { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the constraint tags.
+    /// </summary>
+    /// <value>The constraint tags.</value>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterConstraintTagNodeCollection ConstraintTags { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets the type parameter name token.
     /// </summary>
@@ -49,7 +66,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     public string Identifier
     {
-      get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value;}
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -65,19 +82,8 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken != null; }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the ":" token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token ColonToken { get; private set; }
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the constraint tags.
-    /// </summary>
-    /// <value>The constraint tags.</value>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterConstraintTagNodeCollection ConstraintTags { get; internal set; }
   }
 }

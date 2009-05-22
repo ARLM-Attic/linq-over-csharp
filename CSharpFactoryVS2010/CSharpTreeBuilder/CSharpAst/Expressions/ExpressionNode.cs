@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This node represents an expression.
   /// </summary>
   // ================================================================================================
-  public abstract class ExpressionNode: SyntaxNode
+  public abstract class ExpressionNode : SyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

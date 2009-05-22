@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -36,6 +36,9 @@ namespace CSharpFactory.Syntax
     public ArrayInitializerNode Initializer { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IArrayDimensions Members
+
     /// <summary>
     /// Gets or sets the opening square bracket.
     /// </summary>
@@ -55,5 +58,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseSquareBracket { get; internal set; }
+
+    #endregion
   }
 }

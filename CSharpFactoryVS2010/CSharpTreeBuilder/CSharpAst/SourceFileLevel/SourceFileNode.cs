@@ -5,14 +5,14 @@
 // ================================================================================================
 using System.IO;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This type defines a source file node in the syntax tree.
   /// </summary>
   // ================================================================================================
-  public sealed class SourceFileNode: NamespaceScopeNode
+  public sealed class SourceFileNode : NamespaceScopeNode
   {
     #region Lifecycle methods
 
@@ -22,7 +22,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="fullName">The full name of the source file.</param>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode(string fullName): base(null)
+    public SourceFileNode(string fullName) : base(null)
     {
       Name = Path.GetFileName(fullName);
       FullName = fullName;
@@ -55,7 +55,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public AttributeDecorationNodeCollection GlobalAttributes { get; private set; }
-    
+
     #endregion
 
     #region Output methods

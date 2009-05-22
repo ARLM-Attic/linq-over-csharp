@@ -6,7 +6,7 @@
 using System.Collections;
 using CSharpFactory.ParserFiles;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

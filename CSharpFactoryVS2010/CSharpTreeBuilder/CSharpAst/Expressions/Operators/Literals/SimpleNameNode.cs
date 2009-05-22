@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -25,7 +25,16 @@ namespace CSharpFactory.Syntax
     {
     }
 
+    /// <summary>
+    /// Gets the separator token.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
+    public Token SeparatorToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -55,14 +64,14 @@ namespace CSharpFactory.Syntax
       get { return IdentifierToken != null; }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the separator token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; internal set; }
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region ITypeArguments Members
+
     /// <summary>
     /// Gets the node providing type arguments.
     /// </summary>
@@ -81,5 +90,7 @@ namespace CSharpFactory.Syntax
     {
       get { return Arguments != null; }
     }
+
+    #endregion
   }
 }

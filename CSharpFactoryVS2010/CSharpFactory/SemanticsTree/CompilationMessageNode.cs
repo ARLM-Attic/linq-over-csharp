@@ -5,7 +5,7 @@
 // ================================================================================================
 using System.Collections.Generic;
 using CSharpFactory.ParserFiles;
-using CSharpFactory.Syntax;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpFactory.Semantics
 {

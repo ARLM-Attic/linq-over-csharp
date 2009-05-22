@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a collection of attribute decoration nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class AttributeDecorationNodeCollection : 
+  public sealed class AttributeDecorationNodeCollection :
     ImmutableCollection<AttributeDecorationNode>
   {
   }

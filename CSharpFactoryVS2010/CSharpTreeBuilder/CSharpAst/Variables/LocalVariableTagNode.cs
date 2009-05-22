@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -26,36 +26,6 @@ namespace CSharpFactory.Syntax
       IdentifierToken = start;
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the identifier token.
-    /// </summary>
-    /// <value>The identifier token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; protected set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the identifier name.
-    /// </summary>
-    /// <value>The identifier name.</value>
-    // ----------------------------------------------------------------------------------------------
-    public string Identifier { get { return IdentifierToken.Value; } }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance has identifier.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier
-    {
-      get { return IdentifierToken != null; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the initializer.
     /// </summary>
@@ -71,6 +41,48 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance has initializer; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasInitializer { get { return Initializer != null; } }
+    public bool HasInitializer
+    {
+      get { return Initializer != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+
+    #region IIdentifierSupport Members
+
+    /// <summary>
+    /// Gets or sets the identifier token.
+    /// </summary>
+    /// <value>The identifier token.</value>
+    // ----------------------------------------------------------------------------------------------
+    public Token IdentifierToken { get; protected set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the identifier name.
+    /// </summary>
+    /// <value>The identifier name.</value>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
+    {
+      get { return IdentifierToken.Value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
+
+    #endregion
+
+    // ----------------------------------------------------------------------------------------------
   }
 }

@@ -7,7 +7,7 @@ using System;
 using CSharpFactory.ParserFiles;
 using CSharpFactory.Utility;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

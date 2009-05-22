@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -53,7 +53,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <param name="typeNode">The type node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterConstraintTagNode(TypeOrNamespaceNode typeNode) : 
+    public TypeParameterConstraintTagNode(TypeOrNamespaceNode typeNode) :
       base(typeNode.StartToken)
     {
       ConstraintToken = StartToken;
@@ -73,7 +73,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is "class" constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsClass { get { return ConstraintToken.Value == "class"; } }
+    public bool IsClass
+    {
+      get { return ConstraintToken.Value == "class"; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -81,7 +84,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is "struct" constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsStruct { get { return ConstraintToken.Value == "struct"; } }
+    public bool IsStruct
+    {
+      get { return ConstraintToken.Value == "struct"; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -89,7 +95,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is "new" constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsNew { get { return ConstraintToken.Value == "new"; } }
+    public bool IsNew
+    {
+      get { return ConstraintToken.Value == "new"; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -97,7 +106,10 @@ namespace CSharpFactory.Syntax
     /// </summary>
     /// <value><c>true</c> if this instance is type name constraint tag; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsTypeName { get { return TypeName != null; } }
+    public bool IsTypeName
+    {
+      get { return TypeName != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -107,6 +119,9 @@ namespace CSharpFactory.Syntax
     public TypeOrNamespaceNode TypeName { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IParentheses Members
+
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -119,5 +134,7 @@ namespace CSharpFactory.Syntax
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; protected set; }
+
+    #endregion
   }
 }

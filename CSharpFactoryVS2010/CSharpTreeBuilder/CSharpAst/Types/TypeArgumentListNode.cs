@@ -6,7 +6,7 @@
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -19,7 +19,7 @@ namespace CSharpFactory.Syntax
   // ================================================================================================
   public class TypeArgumentListNode : SyntaxNode
   {
-    private ImmutableCollection<TypeArgumentTag> _Args = 
+    private ImmutableCollection<TypeArgumentTag> _Args =
       new ImmutableCollection<TypeArgumentTag>();
 
     // ----------------------------------------------------------------------------------------------
@@ -43,12 +43,10 @@ namespace CSharpFactory.Syntax
 
     internal void AddArgument(TypeArgumentTag tag)
     {
-      
     }
 
     internal void AddArgumentContinuation(Token separator, TypeArgumentTag tag)
     {
-
     }
   }
 }

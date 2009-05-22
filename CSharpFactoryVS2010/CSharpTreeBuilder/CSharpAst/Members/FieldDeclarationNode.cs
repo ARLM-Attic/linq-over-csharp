@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -34,7 +34,10 @@ namespace CSharpFactory.Syntax
     /// 	<c>true</c> if this instance is event field; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsEventField { get { return StartToken.Value == "event"; } }
+    public bool IsEventField
+    {
+      get { return StartToken.Value == "event"; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

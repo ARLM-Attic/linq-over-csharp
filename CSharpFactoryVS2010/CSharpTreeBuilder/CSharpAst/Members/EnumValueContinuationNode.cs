@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a continuation of an enumeration value.
   /// </summary>
   // ================================================================================================
-  public class EnumValueContinuationNode: EnumValueNode, IContinuationTag
+  public class EnumValueContinuationNode : EnumValueNode, IContinuationTag
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -31,10 +31,15 @@ namespace CSharpFactory.Syntax
     }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IContinuationTag Members
+
     /// <summary>
     /// Gets the token separating the continuation tag from the preceding tag.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token SeparatorToken { get; internal set; }
+
+    #endregion
   }
 }

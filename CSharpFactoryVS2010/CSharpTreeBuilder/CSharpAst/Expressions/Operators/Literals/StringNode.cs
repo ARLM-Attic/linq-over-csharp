@@ -4,10 +4,10 @@
 // Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
-using CSharpTreeBuilder.CSharpAstBuilder;
 using CSharpFactory.Utility;
+using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

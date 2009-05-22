@@ -6,7 +6,7 @@
 using System.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -18,9 +18,9 @@ namespace CSharpFactory.Syntax
   {
     #region Private fields
 
-    private bool _MandatoryWhiteSpaceNeeded;
     private int _IndentationDepth;
     private int _LastRowPosition;
+    private bool _MandatoryWhiteSpaceNeeded;
 
     #endregion
 
@@ -88,7 +88,7 @@ namespace CSharpFactory.Syntax
     public void Append(OutputSegment segment)
     {
       if (segment == null) return;
-      foreach (var element in segment.OutputSegmentElements)
+      foreach (object element in segment.OutputSegmentElements)
       {
         Append(element);
       }
@@ -130,14 +130,14 @@ namespace CSharpFactory.Syntax
       var enumerable = element as IEnumerable;
       if (enumerable != null)
       {
-        foreach (var item in enumerable) Append(item);
+        foreach (object item in enumerable) Append(item);
       }
 
       // --- Handle control segments
       var controlSegment = element as ControlSegment;
       if (controlSegment != null)
       {
-        controlSegment.Control(this);  
+        controlSegment.Control(this);
       }
 
       // --- Append a nested output segment
@@ -160,7 +160,7 @@ namespace CSharpFactory.Syntax
     // ----------------------------------------------------------------------------------------------
     internal void SignMandatoryWhiteSpace()
     {
-      _MandatoryWhiteSpaceNeeded = true;  
+      _MandatoryWhiteSpaceNeeded = true;
     }
 
     // ----------------------------------------------------------------------------------------------

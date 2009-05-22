@@ -5,14 +5,14 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class declares a finalizer member.
   /// </summary>
   // ================================================================================================
-  public class FinalizerDeclarationNode: MethodDeclarationNode
+  public class FinalizerDeclarationNode : MethodDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

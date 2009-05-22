@@ -3,9 +3,7 @@
 //
 // Created: 2009.05.01, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.CSharpAstBuilder;
-
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

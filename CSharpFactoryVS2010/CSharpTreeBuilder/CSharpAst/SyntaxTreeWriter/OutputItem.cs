@@ -5,7 +5,7 @@
 // ================================================================================================
 using System;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -42,6 +42,9 @@ namespace CSharpFactory.Syntax
     public int Column { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
+
+    #region IComparable<OutputItem> Members
+
     /// <summary>
     /// Compares the current object with another object of the same type.
     /// </summary>
@@ -57,9 +60,11 @@ namespace CSharpFactory.Syntax
     public int CompareTo(OutputItem other)
     {
       return Row == other.Row
-        ? Column - other.Column
-        : Row - other.Row;
+               ? Column - other.Column
+               : Row - other.Row;
     }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

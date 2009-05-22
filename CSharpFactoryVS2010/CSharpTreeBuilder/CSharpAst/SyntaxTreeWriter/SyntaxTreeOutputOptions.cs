@@ -6,39 +6,37 @@
 using System;
 using CSharpTreeBuilder.Collections;
 
-namespace CSharpFactory.Syntax
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
   /// This class represents the options used when outputting a syntax tree.
   /// </summary>
   // ================================================================================================
-  public class SyntaxTreeOutputOptions: IReadOnlySupport
+  public class SyntaxTreeOutputOptions : IReadOnlySupport
   {
     #region Private fields
 
     // --- Generic formatting fields
-    private bool _UseOriginalPositions;
-    private bool _UseTabs;
-    private bool _KeepLineBreaks;
-    private int _Indentation;
-
-    // --- Bracing styles
-    private BracingStyle _TypeAndNamespaceBraces;
-    private BracingStyle _MethodBraces;
     private BracingStyle _AnonymousMethodBraces;
     private BracingStyle _CaseLabelBraces;
-    private BracingStyle _InitializerBraces;
-    private BracingStyle _OtherBraces;
-    private ForceBracingStyle _ForceBracesInIfElse;
+    private ForceBracingStyle _ForceBracesInFixed;
     private ForceBracingStyle _ForceBracesInFor;
     private ForceBracingStyle _ForceBracesInForEach;
-    private ForceBracingStyle _ForceBracesInWhile;
+    private ForceBracingStyle _ForceBracesInIfElse;
     private ForceBracingStyle _ForceBracesInUsing;
-    private ForceBracingStyle _ForceBracesInFixed;
+    private ForceBracingStyle _ForceBracesInWhile;
+    private int _Indentation;
+    private BracingStyle _InitializerBraces;
+    private bool _KeepLineBreaks;
+    private BracingStyle _MethodBraces;
+    private BracingStyle _OtherBraces;
 
     // --- Space options
     private bool _SpaceAroundAssignmentOps;
+    private BracingStyle _TypeAndNamespaceBraces;
+    private bool _UseOriginalPositions;
+    private bool _UseTabs;
 
     #endregion
 
@@ -64,9 +62,7 @@ namespace CSharpFactory.Syntax
             UseOriginalPositions = false,
             KeepLineBreaks = true,
             IndentationWidth = 2,
-
             TypeAndNamespaceBraces = BracingStyle.NextLineBsd,
-
             SpaceAroundAssignmentOps = true,
           };
       Default.MakeReadOnly();
