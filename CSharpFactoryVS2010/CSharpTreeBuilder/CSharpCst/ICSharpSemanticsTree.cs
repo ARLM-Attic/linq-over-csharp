@@ -12,5 +12,11 @@ namespace CSharpTreeBuilder.Cst
   // ================================================================================================
   public interface ICSharpSemanticsTree
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resets the semantics tree so that it could be built from the beginning.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    void Reset();
   }
 }

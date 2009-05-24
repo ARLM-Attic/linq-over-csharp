@@ -132,9 +132,9 @@ namespace CSharpTreeBuilder.ProjectContent
     {
       // --- Init trees, clear messages
       SyntaxTree.Reset();
+      SemanticsTree.Reset();
       Errors.Clear();
       Warnings.Clear();
-      // TODO: Reset the semantics tree
 
       // --- Create a syntax tree for each source file
       foreach (var sourceFile in ProjectProvider.SourceFiles)
@@ -151,6 +151,9 @@ namespace CSharpTreeBuilder.ProjectContent
     // --------------------------------------------------------------------------------------------
     public void BuildSemanticTree()
     {
+      // --- Init the semantics tree, but leave existing messages
+      SemanticsTree.Reset();
+
       // TODO: Implement semantics tree creation
     }
 

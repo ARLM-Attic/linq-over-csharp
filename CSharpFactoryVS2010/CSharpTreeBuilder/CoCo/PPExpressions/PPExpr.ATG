@@ -1,0 +1,120 @@
+COMPILER CS2PPExpr
+
+  private PPExpression _Expression;
+
+  // --------------------------------------------------------------------------------
+  /// <summary>
+  /// Gets the expression parsed.
+  /// </summary>
+  // --------------------------------------------------------------------------------
+  public PPExpression Expression
+  {
+    get { return _Expression; }
+  }
+    
+// ================================================================================
+// Scanner description
+// ================================================================================
+
+CHARACTERS
+
+  tab                = '\u0009'. /*  9 = tabulator */
+  eol                = '\u000a'. /* 10 = line feed */
+  cr                 = '\u000d'. /* 13 = carriage return */
+  newLine            = cr + eol. /* Line separator character (U+2028) + Paragraph separator character (U+2029) */
+
+  startLetter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '\u00aa' + '\u00b5' + '\u00ba' + '\u00c0' .. '\u00d6' + '\u00d8' .. '\u00f6' + '\u00f8' .. '\u00ff'.
+  partLetter         = '0' .. '9' + 'A' .. 'Z' + 'a' .. 'z' + '_' + '\u00a0' + '\u00aa' + '\u00b5' + '\u00ba' + '\u00c0' .. '\u00d6' + '\u00d8' .. '\u00f6' + '\u00f8' .. '\u00ff'.
+
+  digit              = "0123456789".  
+  hexDigit           = digit + "ABCDEFabcdef".
+  notDigit           = ANY - digit.
+
+  ws                 = " " + tab + '\u000b' + '\u000c'. /* Any character with Unicode class Zs */
+
+TOKENS
+
+  ident =
+    ['@']
+    ( startLetter
+    | '\\'
+      ( 'u' hexDigit hexDigit hexDigit hexDigit
+      | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+      )
+    )
+    { partLetter
+    | '\\'
+      ( 'u' hexDigit hexDigit hexDigit hexDigit
+      | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+      )
+    }.
+
+  /*----- keyword names needed in LL(1) resolvers -----*/
+
+  false      = "false".
+  true       = "true".
+
+  /*----- operators and special characters needed in LL(1) resolvers --------------*/
+  and        = "&&".
+  eq         = "==".
+  lpar       = "(".
+  neq        = "!=".
+  not        = "!".
+  or         = "||".
+  rpar       = ")".
+
+PRAGMAS
+
+IGNORE eol + cr + tab
+
+PRODUCTIONS
+
+// ====================================================================================
+// This is the definition of C# 2.0 preprocessor expression grammar.
+// The definition contains the grammar syntax definition with the corresponding 
+// semantic actions.
+// This is main entry point of the grammar parser.
+// ====================================================================================
+CS2PPExpr = PPExpression<out _Expression>.
+
+PPExpression<out PPExpression expr>     (. expr = null; .)
+=                                   
+  Unary<out expr>                       (. PPBinaryOperator oper = null; .)
+                                        (. PPExpression rightExpr; .)
+  {
+    "||"                                (. oper = new PPOrOperator(); .)
+                                        (. oper.LeftOperand = expr; .)
+    Unary<out rightExpr>                (. oper.RightOperand = rightExpr; .)
+                                        (. expr = oper; .)
+  }        
+  { 
+    "&&"                                (. oper = new PPAndOperator(); .)
+                                        (. oper.LeftOperand = expr; .)
+    Unary<out rightExpr>                (. oper.RightOperand = rightExpr; .)
+                                        (. expr = oper; .)
+  }
+  { 
+    (
+      "=="                              (. oper = new PPEqualOperator(); .)
+    | "!="                              (. oper = new PPNotEqualOperator(); .)
+    )                                   (. oper.LeftOperand = expr; .)
+    Unary<out rightExpr>                (. oper.RightOperand = rightExpr; .)
+                                        (. expr = oper; .)
+  }
+.
+
+Unary<out PPExpression expr>            (. expr = null; .)
+=
+    Primary<out expr>
+  | "!"                                 (. PPExpression operand; .)
+    Unary<out operand>                  (. expr = new PPNotOperator(operand); .)
+.
+
+Primary<out PPExpression expr>          (. expr = null; .)
+=   true                                (. expr = new PPTrueLiteral(); .)
+  | false                               (. expr = new PPFalseLiteral(); .)
+  | ident                               (. expr = new PPSymbol(t.val); .)
+  | "(" PPExpression<out expr> ")"
+.
+
+END CS2PPExpr.

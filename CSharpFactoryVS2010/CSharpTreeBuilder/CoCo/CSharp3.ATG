@@ -1,0 +1,4028 @@
+using System.Text;
+using System.Collections;
+using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpAstBuilder;
+
+COMPILER CS3
+
+// ================================================================================
+// Scanner description
+// ================================================================================
+
+CHARACTERS
+
+  tab                = '\u0009'. /*  9 = tabulator */
+  eol                = '\u000a'. /* 10 = line feed */
+  cr                 = '\u000d'. /* 13 = carriage return */
+  newLine            = cr + eol. /* Line separator character (U+2028) + Paragraph separator character (U+2029) */
+
+  startLetter        = 'A' .. 'Z' + 'a' .. 'z' + '_' + '\u00aa' + '\u00b5' + '\u00ba' + '\u00c0' .. '\u00d6' + '\u00d8' .. '\u00f6' + '\u00f8' .. '\u00ff'.
+  partLetter         = '0' .. '9' + 'A' .. 'Z' + 'a' .. 'z' + '_' + '\u00a0' + '\u00aa' + '\u00b5' + '\u00ba' + '\u00c0' .. '\u00d6' + '\u00d8' .. '\u00f6' + '\u00f8' .. '\u00ff'.
+
+  digit              = "0123456789".  
+  hexDigit           = digit + "ABCDEFabcdef".
+  notDigit           = ANY - digit.
+
+  char               = ANY - "'" - '\\' - newLine.
+  verbatimStringChar = ANY - '"'.
+  regularStringChar  = ANY - '"' - '\\' - newLine.
+  notNewLine         = ANY - newLine .
+  ws                 = " " + tab + '\u000b' + '\u000c'. /* Any character with Unicode class Zs */
+  blockComCh         = ANY - '*' - '/'.
+
+TOKENS
+
+  ident =
+    ['@']
+    ( startLetter
+    | '\\'
+      ( 'u' hexDigit hexDigit hexDigit hexDigit
+      | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+      )
+    )
+    { partLetter
+    | '\\'
+      ( 'u' hexDigit hexDigit hexDigit hexDigit
+      | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+      )
+    }.
+  /*--------------------------------------------------------------------------------*/
+  intCon =
+    ( digit {digit} | digit {digit} CONTEXT ("." notDigit)
+    | ("0x" | "0X") hexDigit {hexDigit}
+    )
+    ["U" | "u" | "L" | "l" | "UL" | "Ul" | "uL" | "ul" | "LU" | "Lu" | "lU" | "lu"].
+  /*--------------------------------------------------------------------------------*/
+  realCon =
+    "." digit {digit} 
+    [("e" | "E") ["+" | "-"] digit {digit}] 
+    ["F" | "f" | "D" | "d" | "M" | "m"]
+  | digit {digit} 
+    ( "." digit {digit} 
+      [("e" | "E" ) ["+" | "-"] digit {digit} ] 
+      ["F" | "f" | "D" | "d" | "M" | "m"]
+    | ("e" | "E") ["+" | "-"] digit {digit}
+      ["F" | "f" | "D" | "d" | "M" | "m"]
+    | "F" | "f" | "D" | "d" | "M" | "m"
+    ).
+  /*--------------------------------------------------------------------------------*/
+  charCon =
+    "'" ( char
+        | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+        | "\\x" hexDigit [hexDigit] [hexDigit] [hexDigit]
+        | "\\u" hexDigit hexDigit hexDigit hexDigit
+        | "\\U" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+        ) 
+    "'".
+  /*--------------------------------------------------------------------------------*/
+  stringCon =
+    "\""  { regularStringChar
+          | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
+          | "\\x" hexDigit [hexDigit] [hexDigit] [hexDigit]
+          | "\\u" hexDigit hexDigit hexDigit hexDigit
+          | "\\U" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
+          } 
+    "\""
+  | "@\"" {verbatimStringChar | "\"\""} "\"".
+
+
+  /*----- keyword names needed in LL(1) resolvers -----*/
+  
+  abstract   = "abstract".
+  as         = "as".
+  base       = "base".
+  bool       = "bool".
+  break      = "break".
+  byte       = "byte".
+  case       = "case".
+  catch      = "catch".
+  char       = "char".
+  checked    = "checked".
+  class      = "class".
+  const      = "const".
+  continue   = "continue".
+  decimal    = "decimal".
+  default    = "default".
+  delegate   = "delegate".
+  do         = "do".
+  double     = "double".
+  else       = "else".
+  enum       = "enum".
+  event      = "event".
+  explicit   = "explicit".
+  extern     = "extern".
+  false      = "false".
+  finally    = "finally".
+  fixed      = "fixed".
+  float      = "float".
+  for        = "for".
+  foreach    = "foreach".
+  goto       = "goto".
+  if         = "if".
+  implicit   = "implicit".
+  in         = "in".
+  int        = "int".
+  interface  = "interface".
+  internal   = "internal".
+  is         = "is".
+  lock       = "lock".
+  long       = "long".
+  namespace  = "namespace".
+  new        = "new".
+  null       = "null".
+  object     = "object".
+  operator   = "operator".
+  out        = "out".
+  override   = "override".
+  params     = "params".
+  private    = "private".
+  protected  = "protected".
+  public     = "public".
+  readonly   = "readonly".
+  ref        = "ref".
+  return     = "return".
+  sbyte      = "sbyte".
+  sealed     = "sealed".
+  short      = "short".
+  sizeof     = "sizeof".
+  stackalloc = "stackalloc".
+  static     = "static".
+  string     = "string".
+  struct     = "struct".
+  switch     = "switch".
+  this       = "this".
+  throw      = "throw".
+  true       = "true".
+  try        = "try".
+  typeof     = "typeof".
+  uint       = "uint".
+  ulong      = "ulong".
+  unchecked  = "unchecked".
+  unsafe     = "unsafe".
+  ushort     = "ushort".
+  usingKW    = "using".
+  virtual    = "virtual".
+  void       = "void".
+  volatile   = "volatile".
+  while      = "while".
+  
+
+  /*----- operators and special characters needed in LL(1) resolvers --------------*/
+  and        = "&".
+  andassgn   = "&=".
+  assgn      = "=".
+  colon      = ":".
+  comma      = ",".
+  dec        = "--".
+  divassgn   = "/=".
+  dot        = ".".
+  dblcolon   = "::".
+  eq         = "==".
+  gt         = ">".
+  gteq       = ">=".
+  inc        = "++".
+  lbrace     = "{".
+  lbrack     = "[".
+  lpar       = "(".
+  lshassgn   = "<<=".
+  lt         = "<".
+  ltlt       = "<<".
+  minus      = "-".
+  minusassgn = "-=".
+  modassgn   = "%=".
+  neq        = "!=".
+  not        = "!".
+  orassgn    = "|=".
+  plus       = "+".
+  plusassgn  = "+=".
+  question   = "?".
+  rbrace     = "}".
+  rbrack     = "]".
+  rpar       = ")".
+  scolon     = ";".
+  tilde      = "~".
+  times      = "*".
+  timesassgn = "*=".
+  xorassgn   = "^=".
+  larrow     = "=>".
+
+PRAGMAS
+
+// Preprocessor directives.                                               
+// The exact parsing of their syntax is left for later processing        
+
+  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     //(. PragmaHandler.AddConditionalDirective(la); .)
+  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      //(. PragmaHandler.RemoveConditionalDirective(la); .)
+  ppIf      = "#" {ws} "if" {notNewLine} newLine.         //(. PragmaHandler.IfPragma(la); .)
+  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       //(. PragmaHandler.ElifPragma(la); .) 
+  ppElse    = "#" {ws} "else" {notNewLine} newLine.       //(. PragmaHandler.ElsePragma(la); .) 
+  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      //(. PragmaHandler.EndifPragma(la); .) 
+  ppLine    = "#" {ws} "line" {notNewLine} newLine.       //(. PragmaHandler.LinePragma(la); .) 
+  ppError   = "#" {ws} "error" {notNewLine} newLine.      //(. PragmaHandler.ErrorPragma(la); .) 
+  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    //(. PragmaHandler.WarningPragma(la); .) 
+  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     //(. PragmaHandler.PragmaPragma(la); .) 
+  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     //(. PragmaHandler.RegionPragma(la); .) 
+  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  //(. PragmaHandler.EndregionPragma(la); .) 
+
+// Pragma for comments
+  
+  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  //(. CommentHandler.HandleBlockComment(la); .)
+  cLineCom  = "//" { notNewLine } newLine.                                  //(. CommentHandler.HandleLineComment(la); .)
+
+IGNORE eol + cr + tab
+
+PRODUCTIONS
+
+// ================================================================================================
+// This is the definition of C# 3.0 grammar. The definition contains the grammar syntax definition 
+// with the corresponding semantic actions. This is main entry point of the grammar parser.
+// ================================================================================================
+CS3
+=                                                               
+  { 
+    IF (IsExternAliasDirective()) ExternAliasDirective<SourceFileNode>
+  }
+  {
+    UsingDirective<SourceFileNode>
+  }
+  {
+    IF (IsGlobalAttrTarget()) GlobalAttributes
+  }
+  {
+    NamespaceMemberDeclaration<SourceFileNode>
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// "extern alias" directive that is used in conjunction with a file or with a namespace
+//   parentNode: Parent namespace scope (either a source file or a namespace) of the "extern alias" 
+//     directive.
+// ------------------------------------------------------------------------------------------------
+ExternAliasDirective<NamespaceScopeNode parentNode>
+(.
+   Token start;
+   Token alias;
+   Token identifier;
+.)
+=
+  "extern"   
+  (. 
+     // TODO: PragmaHandler.SignRealToken(); 
+     start = t;
+  .)
+  ident
+  (. 
+     if (t.val != "alias") Error1003(t, "alias"); 
+     alias = t;
+  .)
+  ident      
+  (. identifier = t; .)
+  ";"
+  (. parentNode.AddExternAlias(start, alias, identifier, t); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// "using" directive that is used in conjunction with a source file or a namespace.
+//   parentNode: Parent namespace scope (either a source file or a namespace) of the "using" 
+//     directive.
+// ------------------------------------------------------------------------------------------------
+UsingDirective<NamespaceScopeNode parentNode>
+(.
+   Token alias = null;
+   Token eq = null;
+   TypeOrNamespaceNode nsNode = null;
+.)                                     
+=                           
+  "using"
+  (. 
+     Token start = t;
+     // PragmaHandler.SignRealToken();
+  .)
+  [ IF (IsAssignment()) 
+    ident                 
+    (. alias = t; .)
+    "="
+    (. eq = t; .)
+  ]
+  TypeName<out nsNode> 
+  ";"
+  (. 
+     if (alias == null)
+       parentNode.AddUsing(start, nsNode, t);
+     else
+       parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Global attributes belonging to a file. This element accepts only attributes with "assembly" or 
+// "module" scope. All global attributes are assigned to the current source file node, so this
+// production does not have any input parameter.
+// ------------------------------------------------------------------------------------------------
+GlobalAttributes
+=
+  (. AttributeDecorationNode globAttrNode = null; .)
+  "["
+  (. 
+     // --- We sign that the first real (not pragma) token arrived.
+     // PragmaHandler.SignRealToken();
+     globAttrNode = new AttributeDecorationNode(t);
+  .)
+  ident                        
+  (. globAttrNode.IdentifierToken = t; .) 
+  ":"
+  (. globAttrNode.ColonToken = t; .)
+  (. AttributeNode attrNode; .)
+  Attribute<out attrNode>
+  (. globAttrNode.Attributes.Add(attrNode); .)
+  { 
+    IF (NotFinalComma()) ","   
+    (. var separator = t; .)
+    Attribute<out attrNode> 
+    (. globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode)); .)
+  } 
+  [ 
+    ","
+    (. globAttrNode.ClosingSeparator = t; .) 
+  ]
+  "]"                          
+  (. 
+     Terminate(globAttrNode);
+     SourceFileNode.GlobalAttributes.Add(globAttrNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a namespace member (type or nested namespace).
+//   parentNode: Parent namespace scope (either a source file or a namespace) of the namespace 
+//     member declaration.
+// ------------------------------------------------------------------------------------------------
+NamespaceMemberDeclaration<NamespaceScopeNode parentNode>  
+=
+  "namespace"    
+  (. 
+     // --- We sign that the first real (not pragma) token arrived.
+     // PragmaHandler.SignRealToken();
+     Token startToken = t; 
+     var nsDecl = new NamespaceDeclarationNode(parentNode, t);
+  .)
+  ident
+  (. nsDecl.NameTags.Add(t); .)
+  {              
+    "."
+    (. var sepToken = t; .)
+    ident
+    (. nsDecl.NameTags.Add(sepToken, t); .)
+  } 
+  (. parentNode.NamespaceDeclarations.Add(nsDecl); .)
+  "{"
+  (. nsDecl.OpenBracket = t; .)
+  { IF (IsExternAliasDirective()) ExternAliasDirective<nsDecl> } 
+  { UsingDirective<nsDecl> } 
+  { NamespaceMemberDeclaration<nsDecl> } 
+  "}"
+  (. 
+     nsDecl.CloseBracket = t;
+     Terminate(nsDecl);
+  .)
+  [ 
+    ";"
+    (. Terminate(nsDecl); .)
+  ]
+  | 
+    (. 
+       var mod = new ModifierNodeCollection();
+       var attrNodes = new AttributeDecorationNodeCollection();
+    .)  
+    AttributeDecorations<attrNodes>
+    ModifierList<mod> 
+    (. TypeDeclarationNode typeDecl; .)
+    TypeDeclaration<null, out typeDecl>
+    (.
+       if (typeDecl != null)
+       {
+         typeDecl.AttributeDecorations = attrNodes;
+         typeDecl.Modifiers = mod;
+         typeDecl.DeclaringNamespace = parentNode;
+         parentNode.TypeDeclarations.Add(typeDecl);
+       }
+    .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Type declaration within a file or a namespace.
+// ------------------------------------------------------------------------------------------------
+TypeDeclaration<TypeDeclarationNode declaringType, out TypeDeclarationNode typeDecl>            
+= 
+  (. 
+     typeDecl = null; 
+     Token partialToken = null;
+  .)
+  (                                                             
+    [ 
+      "partial"                                      
+      (. partialToken = t; .)
+    ]
+    ( 
+      ClassDeclaration<out typeDecl> |                                                           
+      StructDeclaration<out typeDecl> |                                                           
+      InterfaceDeclaration<out typeDecl>                                                           
+    )                                                          
+    | EnumDeclaration<out typeDecl> 
+    | DelegateDeclaration<out typeDecl>
+  )
+  (. 
+     if (typeDecl != null)
+     {
+       typeDecl.PartialToken = partialToken;
+       typeDecl.DeclaringType = declaringType;
+       Terminate(typeDecl);
+     }
+  .)                               
+.
+
+// ------------------------------------------------------------------------------------------------
+// Class declaration.
+//   typeDecl: Resulting type declaration syntax node.
+// ------------------------------------------------------------------------------------------------
+ClassDeclaration<out TypeDeclarationNode typeDecl>
+=
+  "class"                                            
+  (. var start = t; .)
+  ident    
+  (. 
+     var classDecl = new ClassDeclarationNode(start, t);
+     typeDecl = classDecl;
+  .)
+  [ TypeParameterList<typeDecl> ] 
+  [ BaseTypeList<typeDecl> ]
+  {                                                  
+    (. TypeParameterConstraintNode constrNode; .)
+    TypeParameterConstraintsClause<out constrNode>   
+    (. typeDecl.TypeParameterConstraints.Add(constrNode); .)
+  } ClassBody<classDecl>
+  (. Terminate(typeDecl); .)
+  [ 
+    ";" 
+    (. Terminate(typeDecl); .)
+  ]                                                       
+.
+
+// ------------------------------------------------------------------------------------------------
+// Base type and interface declaration of a class, struct or interface.
+//   typeDecl: Type declaration node inheriting from base types defined here.
+// ------------------------------------------------------------------------------------------------
+BaseTypeList<TypeDeclarationNode typeDecl>
+=
+  (. TypeOrNamespaceNode typeNode; .)
+  ":"                        
+  ClassType<out typeNode>     
+  (. typeDecl.BaseTypes.Add(typeNode); .)
+  { 
+    ","  
+    (. var separator = t; .)
+    ClassType<out typeNode>    
+    (. typeDecl.BaseTypes.Add(new TypeOrNamespaceContinuationNode(separator, typeNode)); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Body declaration of a class.
+//   typeDecl: Class declaration node for the body defined here.
+// ------------------------------------------------------------------------------------------------
+ClassBody<ClassDeclarationNode typeDecl>
+=
+  "{" 
+  (. typeDecl.OpenBrace = t; .)
+  {
+    (. var attrNodes = new AttributeDecorationNodeCollection(); .)
+    AttributeDecorations<attrNodes>
+    (. var mod = new ModifierNodeCollection(); .)                          
+    ModifierList<mod>
+    (. MemberDeclarationNode memNode; .)
+    ClassMemberDeclaration<typeDecl, out memNode>
+    (. 
+       if (memNode != null) 
+       {
+         memNode.AttributeDecorations = attrNodes;
+         memNode.Modifiers = mod;
+         typeDecl.MemberDeclarations.Add(memNode); 
+       }
+    .)
+  }
+  "}"
+  (. typeDecl.CloseBrace = t; .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Structure declaration within a file a namespace.
+//   modifiers: Set of modifiers belonging to the type.
+//   parentType: Parent type declaration
+//   partial: Flag indicating if this is a partial type definition or not.
+//   td: Resulting type declaration.
+//   typeDecl: Resulting type declaration syntax node.
+// ------------------------------------------------------------------------------------------------
+StructDeclaration<out TypeDeclarationNode typeDecl>
+=
+  "struct"
+  (. var start = t; .)
+  ident
+  (. 
+     var structDecl = new StructDeclarationNode(start, t);
+     typeDecl = structDecl;
+  .)
+  [ TypeParameterList<typeDecl> ]
+  [ BaseTypeList<typeDecl> ]
+  {                                                
+    (. TypeParameterConstraintNode constrNode; .)
+    TypeParameterConstraintsClause<out constrNode> 
+    (. typeDecl.TypeParameterConstraints.Add(constrNode); .)
+  } 
+  StructBody<structDecl>
+  (. Terminate(typeDecl); .)
+  [ 
+    ";" 
+    (. Terminate(typeDecl); .)
+  ]                                                       
+.
+
+// ------------------------------------------------------------------------------------------------
+// Body declaration of a structure.
+// ------------------------------------------------------------------------------------------------
+StructBody<StructDeclarationNode typeDecl>
+=
+  "{" 
+  (. typeDecl.OpenBrace = t; .)
+  {
+    (. var attrNodes = new AttributeDecorationNodeCollection(); .)
+    AttributeDecorations<attrNodes>
+    (. var mod = new ModifierNodeCollection(); .)                             
+    ModifierList<mod>
+    (. MemberDeclarationNode memNode; .)
+    StructMemberDeclaration<typeDecl, out memNode>
+  }
+  "}"   
+  (. typeDecl.CloseBrace = t; .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Enumerated type declaration within a file or a namespace
+//   typeDecl: Resulting type declaration syntax node.
+// ------------------------------------------------------------------------------------------------
+EnumDeclaration<out TypeDeclarationNode typeDecl>
+=
+  "enum"                         
+  (. var start = t; .)
+  ident                          
+  (. 
+     var enumDecl = new EnumDeclarationNode(start, t);
+     typeDecl = enumDecl;
+  .)
+  [ 
+    ":"                          
+    (. TypeOrNamespaceNode typeNode; .)
+    ( ClassType<out typeNode> | IntegralType<out typeNode> )
+  ] 
+  EnumBody<enumDecl>                   
+  (. Terminate(typeDecl); .)
+  [ 
+    ";"                          
+    (. Terminate(typeDecl); .)
+  ]                                                       
+.
+
+// ------------------------------------------------------------------------------------------------
+// Body declaration of an enumerated type.
+//   ed: Enumeration declaration that has the body defined here.
+//   typeDecl: Enumeration declaration for the body defined here.
+// ------------------------------------------------------------------------------------------------
+EnumBody<EnumDeclarationNode typeDecl>
+=
+  "{" 
+  (. typeDecl.OpenBrace = t; .)
+  [ 
+    (. EnumValueNode valNode; .)
+    EnumMemberDeclaration<out valNode> 
+    (. typeDecl.Values.Add(valNode); .)
+    { 
+      IF (NotFinalComma())  
+      "," 
+      (. var separator = t; .)
+      SYNC EnumMemberDeclaration<out valNode>
+      (. typeDecl.Values.Add(new EnumValueContinuationNode(separator, valNode)); .)
+    } 
+    [ 
+      "," 
+      (. typeDecl.OrphanSeparator = t; .)
+    ] 
+  ] 
+  SYNC "}"
+  (. 
+     typeDecl.CloseBrace = t; 
+     Terminate(typeDecl);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Enumeration value declaration.
+//   ed: Enumeration declaration that has the member values defined here.
+// ------------------------------------------------------------------------------------------------
+EnumMemberDeclaration<out EnumValueNode valNode>  
+=                             
+  (. 
+     valNode = null;
+     var attrNodes = new AttributeDecorationNodeCollection();
+  .)
+  AttributeDecorations<attrNodes>
+  ident                      
+  (. 
+     valNode = new EnumValueNode(t);
+     valNode.AttributeDecorations = attrNodes;
+  .)
+  [ 
+    "=" 
+    (.
+       valNode.EqualToken = t;
+       ExpressionNode exprNode;
+    .)
+    Expression<out exprNode> 
+    (. valNode.Expression = exprNode; .)
+  ]     
+  (. Terminate(valNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Delegate type declaration within a file a namespace.
+// ------------------------------------------------------------------------------------------------
+DelegateDeclaration<out TypeDeclarationNode typeDecl>
+=
+  "delegate"                                       
+  (. 
+     var start = t;
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeNode>
+  ident
+  (. 
+     var ddNode = new DelegateDeclarationNode(start, t);
+     typeDecl = ddNode;
+     ddNode.TypeName = typeNode;
+  .)
+  [ TypeParameterList<typeDecl> ]
+  "(" 
+  (. var parList = new FormalParameterListNode(t); .)
+  [ FormalParameterList<parList> ] 
+  ")"
+  (. Terminate(parList); .)
+  {                                                
+    (. TypeParameterConstraintNode constrNode; .)
+    TypeParameterConstraintsClause<out constrNode> 
+    (. typeDecl.TypeParameterConstraints.Add(constrNode); .)
+  } 
+  ";"                                                         
+  (. Terminate(typeDecl); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a class member.
+//   typeDecl: type declaring this class member
+//   memNode: Member node declaration
+// ------------------------------------------------------------------------------------------------
+ClassMemberDeclaration<TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode>
+  (. memNode = null; .)
+=
+  StructMemberDeclaration<typeDecl, out memNode>
+  | 
+    "~" 
+    (. 
+       var finNode = new FinalizerDeclarationNode(t);
+       memNode = finNode;
+    .)
+    ident   
+    (. finNode.IdentifierToken = t; .)
+    "(" 
+    (. finNode.FormalParameters = new FormalParameterListNode(t); .)
+    ")" 
+    (. Terminate(finNode.FormalParameters); .)
+    ( 
+      (. BlockStatementNode blockNode; .)
+      Block<out blockNode> 
+      (. finNode.Body = blockNode; .)
+    | ";"
+      (. finNode.ClosingSemicolon = t; .) 
+    )
+    (. Terminate(memNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a structure member.
+//   typeDecl: type declaring the member
+//   memNode: member declaration node
+// ------------------------------------------------------------------------------------------------
+StructMemberDeclaration<TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode>        
+=                                             
+  (. memNode = null; .)
+  (                                                                          
+    ConstMemberDeclaration<out memNode> 
+  | EventDeclaration<out memNode> 
+  | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
+      ConstructorDeclaration<out memNode> 
+  | IF (IsPartialMethod())
+    "partial"
+    (. 
+       var partialToken = t;
+       TypeOrNamespaceNode typeNode; 
+    .)
+    Type<out typeNode>
+    (. TypeOrNamespaceNode nameNode; .)
+    MemberName<out nameNode>
+    (.
+       var metNode = new MethodDeclarationNode(partialToken);
+       metNode.TypeName = typeNode;
+       metNode.MemberName = nameNode;
+       memNode = metNode;
+    .)
+    MethodDeclaration<metNode>
+  | 
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>
+    ( 
+      OperatorDeclaration
+      | // --- Field declaration
+        IF (IsFieldDecl()) 
+        (. 
+           var fiNode = new FieldDeclarationNode(typeNode.StartToken); 
+           fiNode.TypeName = typeNode;
+           memNode = fiNode;
+        .)
+        FieldMemberDeclarators<fiNode> 
+        ";"
+        (. Terminate(memNode); .)
+      |                                          
+        (. TypeOrNamespaceNode nameNode; .)
+        MemberName<out nameNode>
+        ( 
+          (. 
+             var propNode = new PropertyDeclarationNode(typeNode.StartToken);
+             propNode.TypeName = typeNode; 
+             propNode.MemberName = nameNode;
+          .)
+          PropertyDeclaration<propNode>
+        | "." IndexerDeclaration
+        | 
+          (.
+             var metNode = new MethodDeclarationNode(typeNode.StartToken);
+             metNode.TypeName = typeNode;
+             metNode.MemberName = nameNode;
+             memNode = metNode;
+          .)
+          MethodDeclaration<metNode>
+        )
+      | IndexerDeclaration
+    )
+    | CastOperatorDeclaration
+    |                                               
+      (. TypeDeclarationNode nestedTypeNode; .)
+      TypeDeclaration<typeDecl, out nestedTypeNode> 
+      (. 
+         if (nestedTypeNode != null)
+         {
+           // TODO: Handle attributes and modifiers
+           //nestedTypeNode.AttributeDecorations = attrNodes;
+           //nestedTypeNode.Modifiers = mod;
+           //nestedTypeNode.DeclaringNamespace = 
+           //NestedTypeNode.DeclaringType =
+         }
+      .)
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a "const" member.
+//   memNode: Member declaration node.
+// ------------------------------------------------------------------------------------------------
+ConstMemberDeclaration<out MemberDeclarationNode memNode>
+=                                    
+  (. memNode = null; .)
+  "const"
+  (. 
+     var constNode = new ConstDeclarationNode(t);
+     memNode = constNode;
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeNode>
+  (. 
+     memNode.TypeName = typeNode; 
+     ConstTagNode tagNode;
+  .)
+  SingleConstMember<out tagNode>
+  (. constNode.ConstTags.Add(tagNode); .)
+  {
+    "," 
+    (. var separator = t; .)
+    SingleConstMember<out tagNode> 
+    (. constNode.ConstTags.Add(new ConstContinuationTagNode(separator, tagNode)); .)
+  } 
+  ";"
+  (. Terminate(memNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a single "const" member.
+//   tagNode: const member tag declaration.
+// ------------------------------------------------------------------------------------------------
+SingleConstMember<out ConstTagNode tagNode>
+=
+  ident
+  (. tagNode = new ConstTagNode(t); .)
+  "="
+  (. 
+     tagNode.EqualToken = t;
+     ExpressionNode exprNode;
+  .)
+  Expression<out exprNode>
+  (. 
+     tagNode.Expression = exprNode;
+     Terminate(tagNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a event member.
+//   memNode: Type declaration node
+// ------------------------------------------------------------------------------------------------
+EventDeclaration<out MemberDeclarationNode memNode>
+  (. memNode = null; .)
+=
+  (. TypeOrNamespaceNode typeNode; .)
+  "event"
+  (. var eventToken = t; .)
+  Type<out typeNode>
+  ( 
+    IF (IsFieldDecl()) 
+    (. 
+       var fiNode = new FieldDeclarationNode(eventToken); 
+       memNode = fiNode;
+       fiNode.TypeName = typeNode;
+    .)
+    FieldMemberDeclarators<fiNode> 
+    ";"
+    (. Terminate(fiNode); .)
+  |                              
+    (. 
+       var evpNode = new EventPropertyDeclarationNode(t) ;
+       memNode = evpNode;
+    .)
+    TypeName<out typeNode> 
+    (. evpNode.TypeName = typeNode; .)
+    "{"
+    (. evpNode.OpenBrace = t; .)
+    EventAccessorDeclarations<evpNode>
+    "}"
+    (. 
+       evpNode.CloseBrace = t;
+       Terminate(evpNode);
+    .)
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a constructor member.
+//   memNode: Member declaration node
+// ------------------------------------------------------------------------------------------------
+ConstructorDeclaration<out MemberDeclarationNode memNode>
+= 
+  (. memNode = null; .)
+  ident
+  (. 
+     var cstNode = new ConstructorDeclarationNode(t);
+     memNode = cstNode;
+  .)
+  "(" 
+  (. cstNode.FormalParameters = new FormalParameterListNode(t); .)
+  [                                    
+    FormalParameterList<cstNode.FormalParameters>
+  ] 
+  ")" 
+  (. Terminate(cstNode.FormalParameters); .)
+  [                                        
+    ":" 
+    (. 
+       cstNode.Colon = t; 
+       ExpressionNode scopeNode = null;
+    .)
+    ( "base"          
+      (. scopeNode = new BaseNode(t); .)
+    | "this"              
+      (. scopeNode = new ThisNode(t); .)
+    ) 
+    "("
+    (.
+       var invNode = new MethodInvocationOperatorNode(t);
+       invNode.ScopeOperand = scopeNode;
+    .)
+    CurrentArgumentList<invNode.Arguments>
+    ")"
+    (.
+       Terminate(invNode);
+       cstNode.Initializer = invNode;
+    .)
+  ] 
+  ( 
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+    (. cstNode.Body = blockNode; .) 
+  | ";" 
+    (. cstNode.ClosingSemicolon = t; .)
+  )   
+  (. Terminate(memNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a property member.
+// ------------------------------------------------------------------------------------------------
+PropertyDeclaration<PropertyDeclarationNodeBase propNode>
+=                  
+  "{" 
+  (. propNode.OpenBrace = t; .)
+  AccessorDeclarations<propNode> 
+  "}"             
+  (. 
+     propNode.CloseBrace = t;
+     Terminate(propNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an indexer member.
+// ------------------------------------------------------------------------------------------------
+IndexerDeclaration
+=
+  "this" 
+  "[" 
+  (. var parList = new FormalParameterListNode(t); .)
+  [ FormalParameterList<parList> ] 
+  "]" 
+  (. Terminate(parList); .)
+  "{" 
+      (. var propNode = new PropertyDeclarationNode(t); .)
+      AccessorDeclarations<propNode> 
+  "}"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a method member.
+//   metNode: method declaration node
+// ------------------------------------------------------------------------------------------------
+MethodDeclaration<MethodDeclarationNode metNode>
+=                                                    
+  [ TypeParameterList<metNode> ]
+  "(" 
+  (. metNode.FormalParameters = new FormalParameterListNode(t); .)
+  [ FormalParameterList<metNode.FormalParameters> ] 
+  ")"
+  (. Terminate(metNode.FormalParameters); .)
+  {                                                 
+    (. TypeParameterConstraintNode constrNode; .)
+    TypeParameterConstraintsClause<out constrNode>  
+    (. metNode.TypeParameterConstraints.Add(constrNode); .)
+  } 
+  ( 
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+    (. metNode.Body = blockNode; .)
+  | ";"
+    (. metNode.ClosingSemicolon = t; .)
+  )
+  (. Terminate(metNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a cast operator.
+// ------------------------------------------------------------------------------------------------
+CastOperatorDeclaration
+=
+  ( 
+    "implicit"                        
+  | "explicit"
+  ) 
+  "operator"                        
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeNode>
+  "("   
+  (. var parList = new FormalParameterListNode(t); .)
+  [ FormalParameterList<parList> ]   
+  ")"
+  (. Terminate(parList); .)
+  ( 
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode> 
+  | ";" 
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an operator overload member.
+// ------------------------------------------------------------------------------------
+OperatorDeclaration
+=
+  "operator" 
+  OverloadableOp
+  "("
+  (. 
+     var parList = new FormalParameterListNode(t);
+  .)
+  [ FormalParameterList<parList> ]
+  ")"
+  (. Terminate(parList); .)
+  ( 
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode> 
+  | ";" 
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface.
+//   modifiers: Set of modifiers belonging to the type.
+//   parentType: Parent type declaration
+//   isPartial: indicates partial modifier.
+//   td: Resulting type declaration.
+//   typeDecl: Resulting type declaration syntax node.
+// ------------------------------------------------------------------------------------
+InterfaceDeclaration<out TypeDeclarationNode typeDecl>
+=
+  "interface"       
+  (. var start = t; .)
+  ident            
+  (. 
+     var intfDecl = new InterfaceDeclarationNode(start, t);
+     typeDecl = intfDecl;
+  .)
+  [ TypeParameterList<typeDecl> ]
+  [ BaseTypeList<typeDecl> ]
+  {                                                   
+    (. TypeParameterConstraintNode constrNode; .)
+    TypeParameterConstraintsClause<out constrNode>    
+    (. typeDecl.TypeParameterConstraints.Add(constrNode); .)
+  }
+  "{" 
+  (. intfDecl.OpenBrace = t; .)
+  { InterfaceMemberDeclaration<intfDecl> } 
+  "}" 
+  (. 
+     intfDecl.CloseBrace = t;
+     Terminate(typeDecl);
+  .)
+  [ 
+    ";" 
+    (. Terminate(typeDecl); .)
+  ]                                                       
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an interface member.
+// ------------------------------------------------------------------------------------------------
+InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
+=                              
+  (. 
+     var mod = new ModifierNodeCollection();
+     var attrNodes = new AttributeDecorationNodeCollection();
+     Token identifier;
+  .)
+  AttributeDecorations<attrNodes>
+  ModifierList<mod>
+  ( 
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>
+    (                          
+      ident                   
+      (. identifier = t; .)
+      ( 
+        (.
+           var metNode = new MethodDeclarationNode(typeNode.StartToken);
+           metNode.TypeName = typeNode;
+           metNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
+           // memNode = metNode;
+        .)
+        MethodDeclaration<metNode>        
+      | // --- Interface property
+        "{" 
+        InterfaceAccessors
+        "}" 
+      )
+    |  
+      "this" 
+      "[" 
+      (. var parList = new FormalParameterListNode(t); .)
+      [ FormalParameterList<parList> ] 
+      "]" 
+      (. Terminate(parList); .)
+      "{" 
+      InterfaceAccessors
+      "}" 
+    )
+  | InterfaceEventDeclaration
+  ) 
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface event member.
+// +attrs: attributes of the declaration
+// +modifiers: Set of modifiers belonging to the member.
+// +idf: declaration representing the interface type.
+// ------------------------------------------------------------------------------------
+InterfaceEventDeclaration
+=
+  "event" 
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeNode> 
+  ident 
+  ";"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declares a local variable within a block.
+// ------------------------------------------------------------------------------------------------
+LocalVariableDeclaration<out LocalVariableNode varNode> 
+=
+  (. 
+     TypeOrNamespaceNode typeNode = null;
+     varNode = null;
+  .)
+  (
+    IF (IsVar())
+    ident
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+  |
+    Type<out typeNode>
+  )
+  (. 
+     if (typeNode != null) varNode = new LocalVariableNode(typeNode); 
+     LocalVariableTagNode varTagNode;
+  .)
+  LocalVariableDeclarator<out varTagNode>
+  (. if (varNode != null) varNode.VariableTags.Add(varTagNode); .)
+  { 
+    "," 
+    (. var separator = t; .)
+    LocalVariableDeclarator<out varTagNode> 
+    (. 
+       if (varNode != null) varNode.VariableTags.Add(
+         new LocalVariableContinuationTagNode(separator, varTagNode)); 
+    .)
+  }
+  (. Terminate(varNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declares a local variable within a block with the specified type.
+// ------------------------------------------------------------------------------------------------
+LocalVariableDeclarator<out LocalVariableTagNode varDeclNode>
+= 
+  ident 
+  (. varDeclNode = new LocalVariableTagNode(t); .)       
+  [
+    "="
+    (. var start = t; .) 
+    (   
+      (. VariableInitializerNode varInitNode; .)
+      VariableInitializer<out varInitNode> 
+      (. varDeclNode.Initializer = varInitNode; .)
+    | 
+      "stackalloc" 
+      (. 
+         var stcInitNode = new StackAllocInitializerNode(start);
+         varDeclNode.Initializer = stcInitNode;
+         stcInitNode.StackAllocToken = t;
+      .)
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out typeNode> 
+      (. stcInitNode.TypeName = typeNode; .)
+      "[" 
+      (. 
+         stcInitNode.OpenSquareToken = t;
+         ExpressionNode exprNode; 
+      .)
+      Expression<out exprNode> 
+      (. stcInitNode.Expression = exprNode; .)
+      "]" 
+      (. 
+         stcInitNode.CloseSquareToken = t;
+         Terminate(stcInitNode);
+      .)
+    )
+  ]
+  (. Terminate(varDeclNode); .)
+. 
+
+// ------------------------------------------------------------------------------------------------
+// Creates an initializer.
+// ------------------------------------------------------------------------------------------------
+VariableInitializer<out VariableInitializerNode initNode> 
+  (. 
+     initNode = null; 
+     ExpressionNode exprNode; 
+  .)
+= 
+    Expression<out exprNode>  
+    (. 
+       var exprInitNode = new ExpressionInitializerNode(exprNode);
+       initNode = exprInitNode;
+    .)
+  | 
+    (. ArrayInitializerNode arrInitNode; .)
+    ArrayInitializer<out arrInitNode> 
+    (. initNode = arrInitNode; .)
+.
+
+// -----------------------------------------------------------------------------------------------
+// Creates an array initializer.
+// -----------------------------------------------------------------------------------------------
+ArrayInitializer<out ArrayInitializerNode initNode> 
+= 
+  (. initNode = null; .)
+  "{"
+  (. initNode = new ArrayInitializerNode(t); .)
+  [ 
+    (. VariableInitializerNode varInitNode; .)
+    VariableInitializer<out varInitNode> 
+    (. 
+       var initItem = new ArrayItemInitializerNode(varInitNode);
+       initNode.Items.Add(initItem);
+    .)
+    {
+      IF (NotFinalComma()) 
+      ","
+      (. initItem.Separator = t; .)
+      VariableInitializer<out varInitNode> 
+      (. 
+         initItem = new ArrayItemInitializerNode(varInitNode);
+         initNode.Items.Add(initItem);
+    .)
+    } 
+    [ 
+      ","
+      (. initItem.Separator = t; .)
+    ] 
+  ] 
+  "}" 
+  (. Terminate(initNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines an item on the list of formal parameters.
+// ------------------------------------------------------------------------------------------------
+FormalParameterTag<out FormalParameterNode parNode>
+=
+  (. 
+     ExpressionNode exprNode;
+     var attrNodes = new AttributeDecorationNodeCollection();
+     parNode = null;
+     var modifier = FormalParameterModifier.In;
+     Token start = null;
+  .)
+  AttributeDecorations<attrNodes>                                       
+  [ 
+    (
+      "ref"                            
+      (. modifier = FormalParameterModifier.Ref; .) 
+    | "out"                          
+      (. modifier = FormalParameterModifier.Out; .)
+    | "this"                         
+      (. modifier = FormalParameterModifier.This; .)
+    | "params"                    
+      (. modifier = FormalParameterModifier.Params; .)
+    )
+    (. start = t; .)
+  ] 
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeNode>
+  (. if (start == null) start = typeNode.StartToken; .)
+  ident                              
+  (. 
+     parNode = new FormalParameterNode(start);
+     parNode.Modifier = modifier;
+     parNode.IdentifierToken = t;
+     parNode.TypeName = typeNode;
+     Terminate(parNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a formal parameter list
+//   parsNode List holding the formal parameter declarations.
+// ------------------------------------------------------------------------------------------------
+FormalParameterList<FormalParameterListNode parsNode>  
+  (. FormalParameterNode node; .)                                                
+=                                    
+  FormalParameterTag<out node>
+  (. if (parsNode != null && node != null) parsNode.Items.Add(node); .)
+  {
+    ","
+    (. var separator = t; .)
+    FormalParameterTag<out node>
+    (. 
+       if (parsNode != null && node != null) 
+         parsNode.Items.Add(new FormalParameterContinuationNode(separator, node)); 
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a current parameter list
+// ------------------------------------------------------------------------------------------------
+CurrentArgumentList<ArgumentNodeCollection argNodes> 
+=
+  [
+    (. ArgumentNode argNode; .)
+    CurrentArgumentItem<out argNode>
+    (. if (argNodes != null) argNodes.Add(argNode); .)
+    {
+      ","
+      (. var separator = t; .)
+      CurrentArgumentItem<out argNode>
+      (. if (argNodes != null) argNodes.Add(new ArgumentContinuationNode(separator, argNode)); .)
+    }
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an item of the current parameter list
+// ------------------------------------------------------------------------------------------------
+CurrentArgumentItem<out ArgumentNode argNode> 
+=
+  (. 
+     ExpressionNode exprNode; 
+     Token argKind = null;
+     Token separator = null;
+  .)
+  [           
+    ( "ref" | "out" )
+    (. argKind = t; .)
+  ]           
+  Expression<out exprNode>
+  (. 
+     argNode = new ArgumentNode(argKind == null ? 
+       (exprNode == null ? t : exprNode.StartToken) : argKind);
+     argNode.KindToken = argKind;
+     argNode.Expression = exprNode;
+     Terminate(argNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a property accessors.
+// ------------------------------------------------------------------------------------------------
+AccessorDeclarations<PropertyDeclarationNodeBase propNode>
+= 
+  (. var attrNodes = new AttributeDecorationNodeCollection(); .)
+  AttributeDecorations<attrNodes>
+  (. var mod = new ModifierNodeCollection(); .)
+  ModifierList<mod>                    
+  ident   
+  (.
+     var accNode = new AccessorNode(t);
+     accNode.AttributeDecorations = attrNodes;
+     accNode.Modifiers = mod;
+     propNode.FirstAccessor = accNode;
+     BlockStatementNode blockNode;
+  .)
+  (
+    Block<out blockNode>
+    (. accNode.Body = blockNode; .)
+  | ";"                               
+    (. accNode.ClosingSemicolon = t; .)
+  )                                   
+  (. Terminate(accNode); .)
+  [                                   
+    (. attrNodes = new AttributeDecorationNodeCollection(); .)
+    AttributeDecorations<attrNodes>
+    (. mod = new ModifierNodeCollection(); .)
+    ModifierList<mod>                  
+    ident 
+    (.
+       accNode = new AccessorNode(t);
+       accNode.AttributeDecorations = attrNodes;
+       accNode.Modifiers = mod;
+       propNode.SecondAccessor = accNode;
+    .)
+    (
+      Block<out blockNode>
+      (. accNode.Body = blockNode; .)
+    | ";"
+      (. accNode.ClosingSemicolon = t; .)
+    ) 
+    (. Terminate(accNode); .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of event property accessors.
+// ------------------------------------------------------------------------------------------------
+EventAccessorDeclarations<PropertyDeclarationNodeBase propNode>                                                 
+= 
+  (. var attrNodes = new AttributeDecorationNodeCollection(); .)
+  AttributeDecorations<attrNodes>
+  (. var mod = new ModifierNodeCollection(); .)
+  ModifierList<mod>                    
+  ident       
+  (. 
+     var accNode = new AccessorNode(t);
+     accNode.AttributeDecorations = attrNodes;
+     accNode.Modifiers = mod;
+     BlockStatementNode blockNode; 
+  .)
+  Block<out blockNode>
+  (. 
+     accNode.Body = blockNode;
+     Terminate(accNode);
+     propNode.FirstAccessor = accNode;
+  .)
+  [
+    (. attrNodes = new AttributeDecorationNodeCollection(); .)
+    AttributeDecorations<attrNodes>
+    (. mod = new ModifierNodeCollection(); .)
+    ModifierList<mod>                      
+    ident     
+    (. 
+       accNode = new AccessorNode(t);
+       accNode.AttributeDecorations = attrNodes;
+       accNode.Modifiers = mod;
+    .)
+    Block<out blockNode>
+    (. 
+       accNode.Body = blockNode;
+       Terminate(accNode);
+       propNode.SecondAccessor = accNode;
+    .)
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of an interface accessors.
+// +prop: event property holding the accessor.
+// ------------------------------------------------------------------------------------
+InterfaceAccessors
+= 
+  (. var attrNodes = new AttributeDecorationNodeCollection(); .)
+  AttributeDecorations<attrNodes>
+  (. var mod = new ModifierNodeCollection(); .)
+  ModifierList<mod>                    
+  ident
+  ";"
+  [
+    (. attrNodes = new AttributeDecorationNodeCollection(); .)
+    AttributeDecorations<attrNodes>
+    (. mod = new ModifierNodeCollection(); .)
+    ModifierList<mod>                    
+    ident
+    ";"
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of attributes.
+// ------------------------------------------------------------------------------------------------
+Attributes<out AttributeDecorationNode attrNode>
+  (. 
+     string scope = ""; 
+     attrNode = null;
+     AttributeNode attributeNode;
+  .)
+=
+  "["
+  (. attrNode = new AttributeDecorationNode(t); .)
+  [ IF (IsAttrTargSpec()) 
+    ( ident | Keyword )       
+    (. attrNode.IdentifierToken = t; .)
+    ":"
+    (. attrNode.ColonToken = t; .)
+  ] 
+  Attribute<out attributeNode>
+  (. attrNode.Attributes.Add(attributeNode); .)
+  { 
+    IF (la.kind == _comma && Peek(1).kind != _rbrack) 
+    ","
+    (.  var separator = t; .)
+    Attribute<out attributeNode>
+    (. attrNode.Attributes.Add(new AttributeContinuationNode(separator, attributeNode)); .)
+  } 
+  [ 
+    ","
+    (. attrNode.ClosingSeparator = t; .)
+  ] 
+  "]"                          
+  (. Terminate(attrNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of attributes.
+// ------------------------------------------------------------------------------------------------
+AttributeDecorations<AttributeDecorationNodeCollection attrNodes>
+  (.  AttributeDecorationNode attrNode; .)
+=
+  {
+    Attributes<out attrNode>
+    (. attrNodes.Add(attrNode); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declarations tokens that function as keywords.
+// ------------------------------------------------------------------------------------------------
+Keyword
+=
+  "abstract" | "as" | "base" | "bool" | "break" | "byte" | "case" | "catch"
+  | "char" | "checked" | "class" | "const" | "continue" | "decimal" | "default"
+  | "delegate" | "do" | "double" | "else" | "enum" | "event" | "explicit"
+  | "extern" | "false" | "finally" | "fixed" | "float" | "for" | "foreach"
+  | "goto" | "if" | "implicit" | "in" | "int" | "interface" | "internal" | "is"
+  | "lock" | "long" | "namespace" | "new" | "null" | "object" | "operator"
+  | "out" | "override" | "params" | "private" | "protected" | "public"
+  | "readonly" | "ref" | "return" | "sbyte" | "sealed" | "short" | "sizeof"
+  | "stackalloc" | "static" | "string" | "struct" | "switch" | "this" | "throw"
+  | "true" | "try" | "typeof" | "uint" | "ulong" | "unchecked" | "unsafe"
+  | "ushort" | "using" | "virtual" | "void" | "volatile" | "while"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an attribute.
+//   attrNode: Attribute declaration syntax node.
+// ------------------------------------------------------------------------------------------------
+Attribute<out AttributeNode attrNode> 
+= 
+  (. 
+     attrNode = new AttributeNode(t);
+     TypeOrNamespaceNode nsNode = null;
+  .)
+  TypeName<out nsNode>      
+  (. attrNode.TypeName = nsNode; .)
+  [ 
+    AttributeArguments<attrNode>
+  ]
+  (. Terminate(attrNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declares the list of attribute arguments.
+// ------------------------------------------------------------------------------------------------
+AttributeArguments<AttributeNode argsNode> 
+=                           
+  (.  
+     Token identifier = null;
+     Token equal = null;
+     ExpressionNode exprNode;
+  .)
+  "("                          
+  (.  argsNode.OpenParenthesis = t; .)
+    [                          
+      [ IF (IsAssignment()) ident
+        (. identifier = t; .)
+        "="
+        (. equal = t; .)
+      ]
+      Expression<out exprNode>           
+      (. 
+         var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
+         Terminate(argNode);
+         argsNode.Arguments.Add(argNode);
+      .)
+      { 
+        ","
+        (. var separator = t; .)
+        ( IF (IsAssignment()) ident
+          (. identifier = t; .)
+          "="
+          (. equal = t; .)
+        |                    
+        ) 
+        Expression<out exprNode> 
+        (.  
+           var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
+           Terminate(argcNode);
+           argsNode.Arguments.Add(argcNode);
+        .)
+      }
+    ]
+  ")"   
+  (. Terminate(argsNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Modifiers that can be assigned to types and members.
+//   m: List of modifier flags.
+//   mods: List of modifier flags.
+// ------------------------------------------------------------------------------------------------
+ModifierList<ModifierNodeCollection mods>
+=
+{
+  (
+      "new"
+    | "public"
+    | "protected"
+    | "internal" 
+    | "private"  
+    | "unsafe"   
+    | "static"   
+    | "readonly" 
+    | "volatile" 
+    | "virtual"  
+    | "sealed"   
+    | "override" 
+    | "abstract" 
+    | "extern"   
+  )                                  
+  (. mods.Add(t); .)
+}
+.
+
+// ------------------------------------------------------------------------------------------------
+// Reference for a type
+//   typeRef: Type reference
+//   voidAllowed: indicates if "void" is an acceptable type or not.
+//   typeNode: Type reference syntax node
+// ------------------------------------------------------------------------------------------------
+Type<out TypeOrNamespaceNode typeNode>    
+=                                                    
+  (. typeNode = null; .)      
+  ( 
+     PrimitiveType<out typeNode>
+  |  ClassType<out typeNode>                                               
+  |  "void"                                           
+     (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+  )
+  [ 
+    "?"                                              
+    (. typeNode.NullableToken = t; .)                                              
+  ]
+  PointerOrArray<typeNode>
+  (. Terminate(typeNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Reference for a type
+// ------------------------------------------------------------------------------------------------
+NonArrayType<out TypeOrNamespaceNode typeNode>    
+=                                                    
+  (. typeNode = null; .)      
+  ( 
+    PrimitiveType<out typeNode>
+  | 
+    ClassType<out typeNode>
+  )
+  [ 
+    "?"
+    (. typeNode.NullableToken = t; .)                                              
+  ]
+  [
+    "*"                         
+    (. typeNode.TypeModifiers.Add(new PointerModifierNode(t)); .)
+  ]
+  (. Terminate(typeNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Reference for a type in a relational expression
+// ------------------------------------------------------------------------------------------------
+TypeInRelExpr<out TypeOrNamespaceNode typeNode>    
+=                                                    
+  (. typeNode = null; .)      
+  ( PrimitiveType<out typeNode>
+  | ClassType<out typeNode>                                               
+  | "void"                                           
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+  )
+  [ IF (IsNullableTypeMark())
+    "?" 
+    (. typeNode.NullableToken = t; .)                                             
+  ]
+  PointerOrArray<typeNode>
+  (. Terminate(typeNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Sets the appropriate flags of a type reference if the declaration shows it is
+// a pointer or array.
+// ------------------------------------------------------------------------------------------------
+PointerOrArray<TypeOrNamespaceNode typeNode>
+=
+  { IF (IsPointerOrDims())
+    ( 
+      "*"
+      (. if (typeNode != null) typeNode.TypeModifiers.Add(new PointerModifierNode(t)); .)  
+    | 
+      "["                     
+      (. var arrNode = new ArrayModifierNode(t); .)
+      { 
+        ","                 
+        (. arrNode.AddSeparator(t); .)
+      } 
+      "]"                     
+      (. Terminate(arrNode); .)
+    )
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Types that are taken into account as primitive types.
+// ------------------------------------------------------------------------------------------------
+PredefinedType<out TypeOrNamespaceNode typeNode> 
+  (. typeNode = null; .)
+=
+  PrimitiveType<out typeNode> | 
+  ( "object" | "string" )                                    
+  (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
+.
+
+// ------------------------------------------------------------------------------------------------
+// Types that are taken into account as primitive types.
+//   typeNode: Type reference node.
+// ------------------------------------------------------------------------------------------------
+PrimitiveType<out TypeOrNamespaceNode typeNode> 
+  (. typeNode = null; .)
+=
+    IntegralType<out typeNode> 
+  | 
+    ( "float" | "double" | "decimal" | "bool" )
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Types that are taken into account as integral types.
+//   typeRef: Type reference.
+//   typeNode: Type reference node.
+// ------------------------------------------------------------------------------------------------
+IntegralType<out TypeOrNamespaceNode typeNode> 
+= 
+  (
+    "sbyte"       
+  | "byte"
+  | "short" 
+  | "ushort"
+  | "int"
+  | "uint"
+  | "long"    
+  | "ulong"     
+  | "char"     
+  )               
+  (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Types that are taken into account as class types.
+//   typeRef: Type reference.
+//   typeNode: Type reference node.
+// ------------------------------------------------------------------------------------------------
+ClassType<out TypeOrNamespaceNode typeNode>   
+  (. typeNode = null; .)
+=                 
+    TypeName<out typeNode> 
+  |               
+    ( "object" | "string" )                                    
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a compound member name
+// +typeRef: An instance to a member reference
+// ------------------------------------------------------------------------------------
+MemberName<out TypeOrNamespaceNode resultNode>                                              
+  (.
+     resultNode = null;
+     Token qualifier = null;
+     Token separator = null;
+     Token identifier = null;
+     TypeArgumentListNode argList = null;
+  .)
+=                                         
+  ident
+  (. qualifier = t; .)
+  [ 
+    "::"
+    (. separator = t; .)
+    ident                           
+    (. identifier = t; .)
+  ]
+  (.
+     if (separator == null)
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier);
+       identifier = qualifier;
+     }
+     else
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier, separator);
+     }
+  .)
+  [ 
+    IF (la.kind == _lt && IsPartOfMemberName()) 
+      TypeArgumentList<out argList> 
+  ]
+  (. resultNode.AddTypeTag(new TypeTagNode(identifier, argList)); .)                                    
+  { 
+    IF (la.kind == _dot && Peek(1).kind == _ident)
+    "." 
+    (.
+       separator = t;
+       argList = null;
+    .)
+    ident
+    (. identifier = t; .)
+    [ 
+      IF (la.kind == _lt && IsPartOfMemberName()) 
+        TypeArgumentList<out argList>
+    ]
+    (. resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList)); .)                                    
+  }
+  (. Terminate(resultNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a compound type name
+//   typeNode: Type reference node.
+// ------------------------------------------------------------------------------------------------
+TypeName<out TypeOrNamespaceNode resultNode>                             
+=               
+  (.
+     resultNode = null;
+     Token qualifier = null;
+     Token separator = null;
+     Token identifier = null;
+     TypeArgumentListNode argList = null;
+  .)
+  ident
+  (. qualifier = t; .)
+  [ 
+    "::"
+    (. separator = t; .)
+    ident
+    (. identifier = t; .)
+  ]
+  (.
+     if (separator == null)
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier);
+       identifier = qualifier;
+     }
+     else
+     {
+       resultNode = new TypeOrNamespaceNode(qualifier, separator);
+     }
+  .)
+  [ TypeArgumentList<out argList> ]
+  (. resultNode.AddTypeTag(new TypeTagNode(identifier, argList)); .)                                    
+  {
+    "."
+    (.
+       separator = t;
+       argList = null;
+    .)
+    ident 
+    (. identifier = t; .)
+    [ TypeArgumentList<out argList> ]   
+    (. resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList)); .)                                    
+  }
+  (. Terminate(resultNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a statement.
+// ------------------------------------------------------------------------------------------------
+Statement<out StatementNode stmtNode>
+  (. stmtNode = null; .)
+= 
+    IF (la.kind == _ident && Peek(1).kind == _colon) 
+    (. Token identifier; .)
+    ident 
+    (. identifier = t; .)
+    ":" 
+    (. var label = new LabelNode(identifier, t); .)
+    Statement<out stmtNode>
+    (. 
+       if (stmtNode != null)
+       {
+         stmtNode.Labels.AddLabel(label);
+       }
+    .)
+  | ConstStatement<out stmtNode>
+  | IF (IsLocalVarDecl()) 
+    (. LocalVariableNode varNode; .)
+    LocalVariableDeclaration<out varNode> ";"
+  | EmbeddedStatement
+.
+
+// ------------------------------------------------------------------------------------
+// Defines statements that can be nested in other statements.
+// +block: Block holding the statements within.
+// ------------------------------------------------------------------------------------
+EmbeddedStatement
+=   
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode> 
+  | EmptyStatement
+  | CheckedBlock
+  | UncheckedBlock
+  | UnsafeBlock
+  | StatementExpression ";"
+  | IfStatement
+  | SwitchStatement
+  | WhileStatement
+  | DoWhileStatement
+  | ForStatement
+  | ForEachStatement
+  | BreakStatement
+  | ContinueStatement
+  | GotoStatement
+  | ReturnStatement
+  | ThrowStatement
+  | TryFinallyBlock
+  | LockStatement
+  | UsingStatement
+  | "yield" ( YieldReturnStatement | YieldBreakStatement ) ";"
+  | FixedStatement
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a block of statements.
+//   blockNode: Block node holding statements.
+// ------------------------------------------------------------------------------------------------
+Block<out BlockStatementNode blockNode> 
+=
+  (. 
+     StatementNode stmtNode;
+     blockNode = null;
+  .)
+  "{" 
+  (. blockNode = new BlockStatementNode(t); .)
+  { 
+    Statement<out stmtNode> 
+    (. if (stmtNode != null) blockNode.Statements.Add(stmtNode); .)
+  } 
+  "}"
+  (. Terminate(blockNode); .)
+.
+
+
+// ------------------------------------------------------------------------------------------------
+// Defines a switch statement.
+// ------------------------------------------------------------------------------------------------
+SwitchStatement
+=
+  (. ExpressionNode exprNode; .)
+  "switch"
+  "("
+  Expression<out exprNode>    
+  ")" 
+  "{" 
+  { 
+    SwitchSection
+  } 
+  "}"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a constant statement.
+// ------------------------------------------------------------------------------------------------
+ConstStatement<out StatementNode stmtNode>
+  (. ExpressionNode exprNode; .)
+=
+  "const"                
+  (. 
+     var csNode = new ConstStatementNode(t);
+     stmtNode = csNode;
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeNode> 
+  (. csNode.TypeName = typeNode; .)
+  ident
+  (. var cmTag = new ConstTagNode(t); .)
+  "="                    
+  (. cmTag.EqualToken = t; .)
+  Expression<out exprNode>   
+  (. 
+     cmTag.Expression = exprNode;
+     Terminate(cmTag);
+     csNode.ConstTags.Add(cmTag);
+  .)
+  { 
+    ","
+    (. var separator = t; .)
+    ident                
+    (. var cmcTag = new ConstTagNode(t); .)
+    "=" 
+    (. cmcTag.EqualToken = t; .)
+    Expression<out exprNode> 
+    (. 
+       cmcTag.Expression = exprNode;
+       Terminate(cmcTag);
+       csNode.ConstTags.Add(new ConstContinuationTagNode(separator, cmTag));
+    .)
+  } 
+  ";"
+  (. Terminate(csNode); .)
+.                 
+
+// ------------------------------------------------------------------------------------------------
+// Defines an empty statement (";").
+// ------------------------------------------------------------------------------------------------
+EmptyStatement
+=
+  ";"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "checked" block
+// ------------------------------------------------------------------------------------------------
+CheckedBlock
+=
+  (
+    IF (la.kind == _checked && Peek(1).kind == _lbrace) 
+    "checked"
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines an "unchecked" block
+// ------------------------------------------------------------------------------------------------
+UncheckedBlock
+=
+  (
+    IF (la.kind == _unchecked && Peek(1).kind == _lbrace) 
+    "unchecked"
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines an "unsafe" block
+// ------------------------------------------------------------------------------------------------
+UnsafeBlock
+=
+  "unsafe" 
+   (. BlockStatementNode blockNode; .)
+   Block<out blockNode>
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines an "if" statement
+// ------------------------------------------------------------------------------------------------
+IfStatement
+=   
+  (. ExpressionNode exprNode; .)
+  "if"
+  "("
+  Expression<out exprNode> 
+  ")"
+  EmbeddedStatement
+  [ 
+    "else"
+    EmbeddedStatement
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "while" statement
+// ------------------------------------------------------------------------------------------------
+WhileStatement
+= 
+  (. ExpressionNode exprNode; .)
+  "while"
+  "("
+  Expression<out exprNode>  
+  ")" 
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "do...while" statement
+// ------------------------------------------------------------------------------------------------
+DoWhileStatement
+  (. ExpressionNode exprNode; .)
+=   
+  "do"
+  EmbeddedStatement
+  "while" 
+  "("
+  Expression<out exprNode>    
+  ")" 
+  ";"
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "for" statement
+// ------------------------------------------------------------------------------------------------
+ForStatement
+= 
+  "for"
+  "("
+  [
+    ForInitializer
+  ] 
+  ";" 
+  [
+    (. ExpressionNode exprNode; .)
+    Expression<out exprNode>    
+  ] 
+  ";" 
+  [ 
+    ForIterator
+  ] 
+  ")"
+  EmbeddedStatement
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "foreach" statement
+// ------------------------------------------------------------------------------------------------
+ForEachStatement
+=
+  (. ExpressionNode exprNode; .)
+  "foreach"
+  "("
+  ( 
+    IF (IsVar())
+    ident
+  |        
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>
+    )
+    ident
+    "in"
+    Expression<out exprNode>
+  ")"
+  EmbeddedStatement
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "break" statement
+// ------------------------------------------------------------------------------------------------
+BreakStatement
+=
+  "break" 
+  ";"
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "goto" statement
+// ------------------------------------------------------------------------------------------------
+GotoStatement
+=
+  (. ExpressionNode exprNode; .)
+  "goto"
+  ( 
+    ident
+  | 
+    "case"
+    Expression<out exprNode>  
+  | 
+    "default"
+  ) 
+  ";"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "continue" statement
+// ------------------------------------------------------------------------------------------------
+ContinueStatement
+=
+  "continue" 
+  ";"
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "try...catch...finally" statement
+// ------------------------------------------------------------------------------------------------
+TryFinallyBlock
+=
+  "try"
+  (. BlockStatementNode blockNode; .)
+  Block<out blockNode> 
+  ( 
+    CatchClauses
+    [ 
+      "finally" 
+      Block<out blockNode>
+    ] 
+  | "finally"
+    Block<out blockNode>
+  )
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "lock" statement
+// ------------------------------------------------------------------------------------------------
+LockStatement
+=   
+  (. ExpressionNode exprNode; .)
+  "lock"
+  "("
+    Expression<out exprNode>  
+  ")" 
+  EmbeddedStatement
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "using" statement
+// ------------------------------------------------------------------------------------------------
+UsingStatement
+=
+  (. ExpressionNode exprNode; .)
+  "using"
+  "(" 
+  (
+    IF (IsLocalVarDecl()) 
+    (. LocalVariableNode varNode; .)
+    LocalVariableDeclaration<out varNode>  
+  |
+    Expression<out exprNode>        
+  ) 
+  ")" 
+  EmbeddedStatement
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "return" statement.
+// ------------------------------------------------------------------------------------------------
+ReturnStatement
+=
+  (. ExpressionNode exprNode; .)
+  "return"
+  [
+    Expression<out exprNode>     
+  ]
+  ";"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "throw" statement.
+// ------------------------------------------------------------------------------------------------
+ThrowStatement
+=
+  (. ExpressionNode exprNode; .)
+  "throw"
+  [
+    Expression<out exprNode>
+  ] 
+  ";"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "yield return" statement.
+// ------------------------------------------------------------------------------------------------
+YieldReturnStatement
+=
+  (. ExpressionNode exprNode; .)
+  "return"
+  Expression<out exprNode>
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "yield break" statement.
+// ------------------------------------------------------------------------------------------------
+YieldBreakStatement
+=
+  "break"
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a "fixed" statement
+// ------------------------------------------------------------------------------------------------
+FixedStatement
+= 
+  (. ExpressionNode exprNode; .)
+  "fixed"
+  "("
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>
+    ident
+    "="
+    Expression<out exprNode>
+    { 
+      ","
+      ident
+      "=" 
+      Expression<out exprNode>
+    }
+  ")" 
+  EmbeddedStatement
+.    
+
+// ------------------------------------------------------------------------------------------------
+// Defines a statement expression
+// ------------------------------------------------------------------------------------------------
+StatementExpression
+  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
+=
+  (. ExpressionNode unaryNode; .)
+  Unary<out unaryNode>
+  ( 
+    (. BinaryOperatorNode asgnNode; .)
+    AssignmentOperator<out asgnNode>
+    (. ExpressionNode exprNode; .)
+    Expression<out exprNode>
+  | (. if (isAssignment) Error("UNDEF", la, "error in assignment."); .)
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines assignment operators.
+//   opNode: Assignement operator node
+// ------------------------------------------------------------------------------------------------
+AssignmentOperator<out BinaryOperatorNode opNode> 
+  (. opNode = null; .)
+=
+    "="     
+    (. opNode = new AssignmentOperatorNode(t); .)
+  | "+="    
+    (. opNode = new PlusAssignmentOperatorNode(t); .)
+  | "-="    
+    (. opNode = new MinusAssignmentOperatorNode(t); .)
+  | "*="    
+    (. opNode = new MultiplyAssignmentOperatorNode(t); .)
+  | "/="    
+    (. opNode = new DivideAssignmentOperatorNode(t); .)
+  | "%="    
+    (. opNode = new ModuloAssignmentOperatorNode(t); .)
+  | "&="    
+    (. opNode = new AndAssignmentOperatorNode(t); .)
+  | "|="    
+    (. opNode = new OrAssignmentOperatorNode(t); .)
+  | "^="    
+    (. opNode = new XorAssignmentOperatorNode(t); .)
+  | "<<="   
+    (. opNode = new LeftShiftAssignmentOperatorNode(t); .)
+  | ">"     
+    (. 
+       int pos = t.pos; 
+       var start = t;
+    .)
+    ">="    
+    (. 
+       if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment");
+       opNode = new RightShiftAssignmentOperatorNode(start, t); 
+    .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Represents a section of a switch statement.
+// ------------------------------------------------------------------------------------------------
+SwitchSection
+=
+  SwitchLabel
+  { 
+    IF (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) 
+    SwitchLabel
+  }
+  (. StatementNode stmtNode; .)
+  Statement<out stmtNode> 
+  { 
+    IF (IsNoSwitchLabelOrRBrace()) 
+    Statement<out stmtNode> 
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Represents a label of a switch statement.
+// ------------------------------------------------------------------------------------------------
+SwitchLabel
+= 
+    (. ExpressionNode exprNode; .)
+    "case" Expression<out exprNode> 
+    ":"
+  | 
+    "default" 
+    ":"                 
+.
+
+// ------------------------------------------------------------------------------------------------
+// Represents the initializer of a for statement.
+// ------------------------------------------------------------------------------------------------
+ForInitializer
+=
+    IF (IsLocalVarDecl()) 
+    (. LocalVariableNode varNode; .)
+    LocalVariableDeclaration<out varNode>
+  | StatementExpression
+    { 
+      "," 
+      StatementExpression
+    }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Represents the iterator of a for statement.
+// ------------------------------------------------------------------------------------------------
+ForIterator
+=
+  StatementExpression
+  { 
+    "," 
+    StatementExpression
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Represents catch clauses in a try..catch..finally statement.
+// ------------------------------------------------------------------------------------------------
+CatchClauses
+=                                                     
+  (. TypeOrNamespaceNode typeNode; .)
+  "catch"
+  (                         
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+  | 
+    "("
+    ClassType<out typeNode>
+    [ 
+      ident
+    ] 
+    ")" 
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+    [ 
+      CatchClauses 
+    ]
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets the signature of the specified lambda expression.
+// ------------------------------------------------------------------------------------------------
+LambdaFunctionSignature
+=
+  (
+    IF (la.kind == _ident)
+    ident
+  |
+    "("
+    (
+      IF (IsExplicitLambdaParameter(la))
+      ExplicitLambdaParameterList
+    |
+      IF (la.kind != _rpar)
+      ImplicitLambdaParameterList
+    |
+    )
+    ")"
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets the explicit parameter list of the specified lambda expression.
+// ------------------------------------------------------------------------------------------------
+ExplicitLambdaParameterList
+=
+  [
+    "ref"
+    | "out"
+  ]
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeNode>  
+  ident
+  [ 
+    "," 
+    ExplicitLambdaParameterList
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets the implicit parameter list of the specified lambda expression.
+// ------------------------------------------------------------------------------------------------
+ImplicitLambdaParameterList
+=
+  ident
+  [ 
+    "," 
+    ImplicitLambdaParameterList 
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets the body of a lambda expression.
+// ------------------------------------------------------------------------------------------------
+LambdaFunctionBody
+=
+  (. ExpressionNode exprNode; .)
+  (
+    Expression<out exprNode>    
+  |
+    (. BlockStatementNode blockNode; .)
+    Block<out blockNode>
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a from clause for a query expression
+// ------------------------------------------------------------------------------------------------
+FromClause
+  (. ExpressionNode exprNode; .)
+=
+  "from"
+  (. Token typeToken = la; .)
+  (                             
+    IF (IsType(ref typeToken) && typeToken.val != "in")
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>
+  |
+  )                             
+  ident
+  "in"
+  Expression<out exprNode>
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets the body of a query expression.
+// ------------------------------------------------------------------------------------------------
+QueryBody
+=
+  { QueryBodyClause }
+  (
+    SelectClause
+    | GroupClause
+  )
+  [ 
+    QueryContinuation 
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a query body clause
+// ------------------------------------------------------------------------------------------------
+QueryBodyClause
+=
+  (
+    FromClause
+  | LetClause
+  | WhereClause
+  | JoinClause
+  | OrderByClause
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a let clause
+// ------------------------------------------------------------------------------------------------
+LetClause
+=
+  (. ExpressionNode exprNode; .)
+  "let"
+  ident
+  "="  
+  Expression<out exprNode>
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a where clause
+// ------------------------------------------------------------------------------------------------
+WhereClause
+=
+  (. ExpressionNode exprNode; .)
+  "where"
+  Expression<out exprNode>  
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a join clause
+// ------------------------------------------------------------------------------------------------
+JoinClause
+=
+  (. ExpressionNode exprNode; .)
+  "join"
+  (. Token typeToken = la; .)
+  (                     
+    IF (IsType(ref typeToken) && typeToken.val != "in")
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>
+  |
+  )
+  ident
+  "in" 
+  Expression<out exprNode>
+  "on"
+  Expression<out exprNode>
+  "equals" 
+  Expression<out exprNode>
+  [ 
+    "into"                      
+    ident
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets an order by clause
+// ------------------------------------------------------------------------------------------------
+OrderByClause
+=
+  "orderby"
+  OrderingClause
+  { 
+    "," 
+    OrderingClause
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets an ordering clause
+// ------------------------------------------------------------------------------------------------
+OrderingClause
+=
+  (. ExpressionNode exprNode; .)
+  Expression<out exprNode>
+  [                             
+    "ascending"
+    | "descending"
+  ]               
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a select clause
+// ------------------------------------------------------------------------------------------------
+SelectClause
+=
+  (. ExpressionNode exprNode; .)
+  "select"
+  Expression<out exprNode>  
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a group by clause
+// ------------------------------------------------------------------------------------------------
+GroupClause
+  (. ExpressionNode exprNode; .)
+=
+  "group"
+  Expression<out exprNode>
+  "by"
+  Expression<out exprNode>
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a query continuation clause
+// ------------------------------------------------------------------------------------------------
+QueryContinuation
+=
+  "into"
+  ident
+  QueryBody
+.
+
+// ------------------------------------------------------------------------------------------------
+// Retrieves an expression.
+//   exprNode: expression onde retrieved.
+// ------------------------------------------------------------------------------------------------
+Expression<out ExpressionNode exprNode>   
+  (. 
+     exprNode = null;
+     ExpressionNode leftExprNode;
+     BinaryOperatorNode ncsNode = null;
+  .)
+=
+  (
+    IF (IsQueryExpression())      
+    FromClause
+    QueryBody
+  |
+    IF (IsLambda())               
+    LambdaFunctionSignature
+    "=>"
+    LambdaFunctionBody
+  |
+  Unary<out leftExprNode>
+  (
+    IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
+    (. BinaryOperatorNode asgnNode; .)
+    AssignmentOperator<out asgnNode>  
+    (. ExpressionNode rightExprNode; .)
+    Expression<out rightExprNode>
+    (. 
+       asgnNode.RightOperand = rightExprNode;
+       asgnNode.LeftOperand = leftExprNode;
+       exprNode = asgnNode;
+    .)
+  | (. BinaryOperatorNode ncNode; .)
+    NullCoalescingExpr<out ncNode> 
+    (. 
+       if (ncNode == null)
+       {
+         exprNode = leftExprNode;
+       }
+       else
+       {
+         ncNode.LeftmostNonNull.LeftOperand = leftExprNode;
+         exprNode = ncNode;
+       }
+    .)
+    [ 
+      "?"                            
+      (. 
+         ConditionalOperatorNode condNode = null;
+         if (exprNode != null) condNode = new ConditionalOperatorNode(exprNode);
+         exprNode = condNode;
+         ExpressionNode trueNode;
+      .)
+      Expression<out trueNode>
+      (. if (condNode != null) condNode.TrueExpression = trueNode; .)
+      ":"                         
+      (. ExpressionNode falseNode; .)
+      Expression<out falseNode>
+      (. 
+         if (condNode != null) 
+         {
+           condNode.FalseExpression = falseNode; 
+           Terminate(condNode);
+         }
+      .)
+    ]
+  )
+  )                               
+  (. if (exprNode != null) Terminate(exprNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a null coalescing operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+NullCoalescingExpr<out BinaryOperatorNode exprNode>
+=                     
+  (. exprNode = null; .)
+  OrExpr<out exprNode>    
+  { 
+    "??"                  
+    (. 
+       var opNode = new NullCoalescingOperatorNode(t);
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>
+    (. BinaryOperatorNode rgNode; .) 
+    OrExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a logical or operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+OrExpr<out BinaryOperatorNode exprNode>
+= 
+  (. exprNode = null; .)
+  AndExpr<out exprNode>    
+  { 
+    "||"                  
+    (. 
+       var opNode = new LogicalOrOperatorNode(t);
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    AndExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a logical and operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+AndExpr<out BinaryOperatorNode exprNode>
+= 
+  (. exprNode = null; .)
+  BitOrExpr<out exprNode>    
+  { 
+    "&&"                  
+    (. 
+       var opNode = new LogicalAndOperatorNode(t);
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    BitOrExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a bitwise or operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+BitOrExpr<out BinaryOperatorNode exprNode>
+= 
+  (. exprNode = null; .)
+  BitXorExpr<out exprNode>    
+  { 
+    "|"
+    (. 
+       var opNode = new BitwiseOrOperatorNode(t);
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    BitXorExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a bitwise xor operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+BitXorExpr<out BinaryOperatorNode exprNode> 
+= 
+  (. exprNode = null; .)
+  BitAndExpr<out exprNode>    
+  { 
+    "^"                   
+    (. 
+       var opNode = new BitwiseXorOperatorNode(t);
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    BitAndExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines a bitwise and operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+BitAndExpr<out BinaryOperatorNode exprNode> 
+= 
+  (. exprNode = null; .)
+  EqlExpr<out exprNode>    
+  { 
+    "&"                   
+    (. 
+       var opNode = new BitwiseAndOperatorNode(t);
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    EqlExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines an "==" or "!=" operator.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+EqlExpr<out BinaryOperatorNode exprNode>
+= 
+  (. exprNode = null; .)
+  RelExpr<out exprNode>       
+  (. BinaryOperatorNode opNode = null; .)
+  {           
+    (                     
+      "!="                
+      (. opNode = new EqualOperatorNode(t); .)
+    | "=="              
+      (. opNode = new EqualOperatorNode(t); .)
+    )
+    (. 
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    RelExpr<out rgNode> 
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines relational and typecheck operators.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+RelExpr<out BinaryOperatorNode exprNode> 
+= 
+  (. exprNode = null; .)
+  ShiftExpr<out exprNode>  
+  (. BinaryOperatorNode opNode = null; .)
+  { 
+    (
+      "<"                 
+      (. opNode = new LessThanOperatorNode(t); .)
+    | ">"               
+      (. opNode = new GreaterThanOperatorNode(t); .)
+    | "<="              
+      (. opNode = new LessThanOrEqualOperatorNode(t); .)
+    | ">="              
+      (. opNode = new GreaterThanOrEqualOperatorNode(t); .)
+    )
+    (. 
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    ShiftExpr<out rgNode>             
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+    |
+      (
+        "is"            
+        (. opNode = new IsOperatorNode(t); .)
+      | "as"            
+        (. opNode = new AsOperatorNode(t); .)
+      )                   
+      (. TypeOrNamespaceNode typeNode; .)
+      TypeInRelExpr<out typeNode>
+      (. 
+         opNode.RightOperand = new TypeOperatorNode(typeNode);
+         exprNode = opNode;
+         Terminate(opNode); 
+      .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines shift operators.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+ShiftExpr<out BinaryOperatorNode exprNode> 
+= 
+  (. 
+     exprNode = null;
+     Token start;
+  .)
+  AddExpr<out exprNode>       
+  (. BinaryOperatorNode opNode = null; .)
+  { IF (IsShift())
+    (
+      "<<"
+      (. opNode = new LeftShiftOperatorNode(t); .)
+    | ">" 
+      (. start = t; .)
+      ">"           
+      (. opNode = new RightShiftOperatorNode(start, t); .)
+    )                     
+    (. 
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    AddExpr<out rgNode>
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines addition operators.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+AddExpr<out BinaryOperatorNode exprNode> 
+= 
+  (. exprNode = null; .)
+  MulExpr<out exprNode>       
+  (. BinaryOperatorNode opNode = null; .)
+  {
+    ( 
+      "+"                 
+      (. opNode = new AddOperatorNode(t); .)
+    | "-"               
+      (. opNode = new SubtractOperatorNode(t); .)
+    )                     
+    (. 
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. BinaryOperatorNode rgNode; .) 
+    MulExpr<out rgNode>
+    (. 
+       BindBinaryOperator(opNode, unaryNode, rgNode);
+       exprNode = opNode;
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines multiplication operators.
+//   expr: expression retrieved.
+//   exprNode: expression node retrieved
+// ------------------------------------------------------------------------------------------------
+MulExpr<out BinaryOperatorNode exprNode> 
+=                          
+  (. 
+     exprNode = null;
+     BinaryOperatorNode opNode = null;
+  .)
+  {
+    (
+      "*"                 
+      (. opNode = new MultiplyOperatorNode(t); .)
+    | "/"               
+      (. opNode = new DivideOperatorNode(t); .)
+    | "%"               
+      (. opNode = new ModuloOperatorNode(t); .)
+    )                     
+    (. 
+       opNode.LeftOperand = exprNode;
+       ExpressionNode unaryNode;
+    .)
+    Unary<out unaryNode>     
+    (. 
+       opNode.RightOperand = unaryNode;
+       exprNode = opNode;
+       Terminate(opNode);
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Retrieves an unary expression.
+//   exprNode: Expression node retrieved.
+// ------------------------------------------------------------------------------------------------
+Unary<out ExpressionNode exprNode>   
+  (. exprNode = null; .) 
+=
+  (. UnaryOperatorNode unaryOp = null; .)
+  (
+    IF (unaryHead[la.kind] || IsTypeCast())
+    ( 
+      "+"     
+      (. unaryOp = new UnaryPlusOperatorNode(t); .)
+    | "-"   
+      (. unaryOp = new UnaryMinusOperatorNode(t);.)
+    | "!"   
+      (. unaryOp = new UnaryNotOperatorNode(t); .)
+    | "~"   
+      (. unaryOp = new BitwiseNotOperatorNode(t); .)
+    | "++"  
+      (. unaryOp = new PreIncrementOperatorNode(t); .)
+    | "--"  
+      (. unaryOp = new PreDecrementOperatorNode(t); .)
+    | "*"   
+      (. unaryOp = new PointerOperatorNode(t); .)
+    | "&"   
+      (. unaryOp = new ReferenceOperatorNode(t); .)
+    | "("   
+      (. 
+         TypeOrNamespaceNode typeNode; 
+         var tcNode = new TypecastOperatorNode(t);
+         unaryOp = tcNode;
+      .)
+      Type<out typeNode> 
+      (. tcNode.TypeName = typeNode; .)
+      ")"
+      (. Terminate(tcNode); .)
+    )
+  )
+  (. ExpressionNode unaryNode; .)
+  Unary<out unaryNode>
+  (. 
+     if (unaryOp == null) exprNode = unaryNode;
+     else
+     {
+       unaryOp.Operand = unaryNode;
+       exprNode = unaryOp;
+     }
+     Terminate(unaryOp);
+  .)
+  | 
+    Primary<out exprNode>
+.
+
+// ------------------------------------------------------------------------------------------------
+// Retrieves a primary expression.
+//   exprNode: Expression node retrieved.
+// ------------------------------------------------------------------------------------------------
+Primary<out ExpressionNode exprNode>
+=
+  (. 
+     ExpressionNode innerNode = null;
+     exprNode = null;
+  .)
+  ( 
+    Literal<out innerNode>             
+  | 
+    "("
+    (. var pExprNode = new ParenthesisExpressionNode(t); .) 
+    Expression<out innerNode>
+    (. 
+       pExprNode.Expression = innerNode;
+       innerNode = pExprNode;
+    .)
+    ")"  
+    (. Terminate(pExprNode); .)
+  | PrimitiveNamedLiteral<out innerNode>
+  | NamedLiteral<out innerNode>
+  | "this" 
+    (. innerNode = new ThisNode(t); .)
+  | "base" 
+    (. innerNode = new BaseNode(t); .)
+  | NewOperator<out innerNode>
+  | TypeOfOperator<out innerNode>
+  | CheckedOperator<out innerNode>
+  | UncheckedOperator<out innerNode>
+  | DefaultOperator<out innerNode>
+  | AnonymousDelegate<out innerNode>
+  | SizeOfOperator<out innerNode>
+  )
+  (. var curExprNode = innerNode; .)
+  { 
+  (
+      "++"  
+      (. 
+         var incNode = new PostIncrementOperatorNode(t);
+         incNode.Operand = curExprNode;
+         curExprNode = incNode;
+      .) 
+    | "--"  
+      (. 
+         var decNode = new PostDecrementOperatorNode(t);
+         decNode.Operand = curExprNode;
+         curExprNode = decNode;
+      .) 
+    | "->"  
+      (. 
+         SimpleNameNode snlNode;
+         var ctypeNode = new CTypeMemberAccessOperatorNode(t);
+      .)
+      SimpleNamedLiteral<out snlNode>
+      (. 
+         ctypeNode.ScopeOperand = curExprNode;
+         ctypeNode.MemberName = snlNode;
+         curExprNode = ctypeNode;
+      .)
+    | "."   
+      (. 
+         SimpleNameNode snlNode;
+         var maNode = new MemberAccessOperatorNode(t);
+      .)
+      SimpleNamedLiteral<out snlNode>
+      (. 
+         maNode.ScopeOperand = curExprNode;
+         maNode.MemberName = snlNode;
+         curExprNode = maNode;
+      .)
+    | "("   
+      (. 
+         var invNode = new MethodInvocationOperatorNode(t);
+         invNode.ScopeOperand = curExprNode;
+      .)
+      CurrentArgumentList<invNode.Arguments>
+      ")"   
+      (. 
+         Terminate(invNode);
+         curExprNode = invNode;
+      .)
+    |       
+      "["
+      (. 
+         var indNode = new ArrayIndexerInvocationOperatorNode(t);
+         indNode.ScopeOperand = curExprNode;
+      .)
+      ArrayIndexer<indNode.Arguments> 
+      "]"
+      (. Terminate(indNode); .)
+  )         
+  }
+  (. exprNode = curExprNode; .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declaration of a literal expression.
+//   valNode: Expression node retrieved.
+// ------------------------------------------------------------------------------------
+Literal<out ExpressionNode valNode>
+  (. valNode = null; .)
+= 
+    intCon        
+    (. valNode = IntegerConstantNode.Create(t); .)
+  | realCon     
+    (. valNode = RealConstantNode.Create(t); .)
+  | charCon     
+    (. valNode = new CharNode(t); .)
+  | stringCon   
+    (. valNode = new StringNode(t); .)
+  | "true"
+    (. valNode = new TrueNode(t); .)
+  | "false"     
+    (. valNode = new FalseNode(t); .)
+  | "null"      
+    (. valNode = new NullNode(t); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a primitive named literal expression.
+//   exprNode: Literal expression node.
+// ------------------------------------------------------------------------------------------------
+PrimitiveNamedLiteral<out ExpressionNode exprNode>  
+=            
+  (. exprNode = null; .)
+  (   "bool"
+    | "byte"
+    | "char"
+    | "decimal"
+    | "double"
+    | "float"
+    | "int"
+    | "long"
+    | "object"
+    | "sbyte"
+    | "short"
+    | "string"
+    | "uint"
+    | "ulong"
+    | "ushort"
+  )               
+  (. 
+     var pnNode = new PrimitiveNamedNode(t);
+     exprNode = pnNode;
+  .)
+  "." 
+  (. pnNode.SeparatorToken = t; .)
+  ident           
+  (. 
+     pnNode.IdentifierToken = t;
+     Terminate(pnNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a named literal expression.
+//   exprNode: Literal expression node.
+// ------------------------------------------------------------------------------------------------
+NamedLiteral<out ExpressionNode exprNode>  
+=              
+  (. exprNode = null; .)
+  ident        
+  (. 
+     var nlNode = new ScopedNameNode(t);
+     exprNode = nlNode;
+  .)
+  [ 
+    "::"       
+    (. 
+       nlNode.QualifierSeparatorToken = t;
+       nlNode.QualifierToken = nlNode.IdentifierToken;
+    .)
+    ident      
+    (. nlNode.IdentifierToken = t; .)
+  ] 
+  (. TypeArgumentListNode argList; .)
+  [ 
+    IF (IsGeneric()) TypeArgumentList<out argList>
+    (. nlNode.Arguments = argList; .)
+  ]
+  (. Terminate(nlNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a simple named literal expression.
+//   expr: Named literal expression node.
+// ------------------------------------------------------------------------------------------------
+SimpleNamedLiteral<out SimpleNameNode snlNode> 
+=
+  ident        
+  (. snlNode = new SimpleNameNode(t); .)
+  (. TypeArgumentListNode argList; .)
+  [ 
+    IF (IsGeneric()) TypeArgumentList<out argList>
+    (. snlNode.Arguments = argList; .)
+  ]
+  (. Terminate(snlNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a typeof operator.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+TypeOfOperator<out ExpressionNode exprNode>
+= 
+  "typeof"                   
+  (. 
+     var topNode = new TypeofOperatorNode(t);
+     exprNode = topNode;
+  .)
+  "("                        
+  (. 
+     topNode.OpenParenthesis = t;
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeNode>
+  (. topNode.TypeName = typeNode; .)
+  ")"
+  (. 
+     topNode.CloseParenthesis = t;
+     Terminate(exprNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a sizeof operator.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+SizeOfOperator<out ExpressionNode exprNode>
+= 
+  "sizeof"                   
+  (. 
+     var sopNode = new SizeofOperatorNode(t);
+     exprNode = sopNode;
+  .)
+  "("                        
+  (. 
+     sopNode.OpenParenthesis = t;
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeNode>  
+  (. sopNode.TypeName = typeNode; .)
+  ")"                        
+  (. 
+     sopNode.CloseParenthesis = t;
+     Terminate(exprNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a checked operator.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+CheckedOperator<out ExpressionNode exprNode>
+= 
+  "checked"                     
+  (. 
+     var copNode = new CheckedOperatorNode(t);
+     exprNode = copNode;
+  .)
+  "("                           
+  (. 
+     copNode.OpenParenthesis = t;
+     ExpressionNode innerNode;
+  .)
+  Expression<out innerNode>   
+  (. copNode.Expression = innerNode; .)
+  ")"
+  (. 
+     copNode.CloseParenthesis = t;
+     Terminate(exprNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an unchecked operator.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+UncheckedOperator<out ExpressionNode exprNode>
+= 
+  "unchecked"                   
+  (. 
+     var uopNode = new UncheckedOperatorNode(t);
+     exprNode = uopNode;
+  .)
+  "("                           
+  (. 
+     uopNode.OpenParenthesis = t;
+     ExpressionNode innerNode;
+  .)
+  Expression<out innerNode>
+  (. uopNode.Expression = innerNode; .)
+  ")"                           
+  (. 
+     uopNode.CloseParenthesis = t;
+     Terminate(exprNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a default operator.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+DefaultOperator<out ExpressionNode exprNode>
+= 
+  "default"                 
+  (. 
+     var defNode = new DefaultOperatorNode(t);
+     exprNode = defNode;
+  .)
+  "("                       
+    (. 
+       defNode.OpenParenthesis = t;
+       ExpressionNode primNode;
+    .)
+    Primary<out primNode>  
+    (. defNode.Expression = primNode; .)
+  ")"                       
+  (. 
+     defNode.CloseParenthesis = t;
+     Terminate(defNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a "new" operator.
+//   exprNode: Expression node.
+// ------------------------------------------------------------------------------------------------
+NewOperator<out ExpressionNode exprNode>  
+= 
+  (. exprNode = null; .)
+  "new"
+  (. var newToken = t; .)
+  (
+    (. var anonNode = new NewOperatorWithAnonymousTypeNode(t); .)
+    AnonymousObjectInitializer<anonNode>
+    (. exprNode = anonNode; .)
+  |
+    (. TypeOrNamespaceNode typeNode; .)
+    NonArrayType<out typeNode>      
+    NewOperatorWithType
+  |
+    (. var impArrNode = new NewOperatorWithImplicitArrayNode(t); .)
+    ImplicitArrayCreation<impArrNode>
+    (. exprNode = impArrNode; .)
+  )
+  (. Terminate(exprNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Represents an anonymous object initializer
+//   anonNode: anonymous operator node
+// ------------------------------------------------------------------------------------------------
+AnonymousObjectInitializer<NewOperatorWithAnonymousTypeNode anonNode>
+=
+  "{"                                   
+  (. anonNode.OpenBrace = t; .)
+  (
+    IF (!IsEmptyMemberInitializer()) 
+    MemberDeclaratorList<anonNode> 
+    [ 
+      "," 
+      (. anonNode.OrphanComma = t; .)
+    ]
+  )
+  "}"
+  (. 
+     anonNode.CloseBrace = t; 
+     Terminate(anonNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of "new" operator member declaration list.
+//   initNode: Anonymous operator node
+// ------------------------------------------------------------------------------------------------
+MemberDeclaratorList<NewOperatorWithAnonymousTypeNode initNode>  
+=                     
+  (. MemberDeclaratorNode mdNode; .)
+  MemberDeclarator<out mdNode>     
+  (. initNode.Declarators.Add(mdNode); .)
+  {
+    IF (NotFinalComma()) 
+    ","
+    (. var separator = t; .)
+    MemberDeclarator<out mdNode>   
+    (. initNode.Declarators.Add(new MemberDeclaratorContinuationNode(separator, mdNode)); .)
+  } 
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a "new" operator declaration member.
+//   mdNode: Member declarator node
+// ------------------------------------------------------------------------------------------------
+MemberDeclarator<out MemberDeclaratorNode mdNode> 
+=
+  (. 
+     ExpressionNode exprNode;
+     mdNode = null;
+  .)
+  (
+    IF (IsMemberInitializer())
+    ident                         
+    (. 
+       Token start = t; 
+       mdNode = new MemberDeclaratorNode(t);
+       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.Expression;
+    .)
+    "=" 
+    (. mdNode.EqualToken = t; .)
+    Expression<out exprNode>
+    (. mdNode.Expression = exprNode; .)
+  | 
+    (. 
+       Token start = la; 
+       ExpressionNode primNode;
+    .)
+    Primary<out primNode>
+    (. 
+       mdNode = new MemberDeclaratorNode(primNode == null ? t : primNode.StartToken);
+       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.SimpleName;
+       mdNode.Expression = primNode;
+    .)
+  |
+    (. TypeOrNamespaceNode typeNode; .)
+    PredefinedType<out typeNode>
+    (. 
+       mdNode = new MemberDeclaratorNode(typeNode.StartToken);
+       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.MemberAccess;
+       mdNode.TypeName = typeNode;
+    .)
+    "."
+    (. mdNode.DotSeparator = t; .)
+    ident                         
+    (. mdNode.IdentifierToken = t; .)
+  )
+  (. Terminate(mdNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a "new" operator with explicit type.
+// ------------------------------------------------------------------------------------------------
+NewOperatorWithType
+=
+  (. ExpressionNode exprNode; .)
+  (
+    // --- Simple constructor call
+    "(" 
+    CurrentArgumentList<null>
+    ")"
+    // --- Optional initializer list
+    [                             
+      ObjectOrCollectionInitializer
+    ]
+
+  | // --- Implicit default constructor call
+    ObjectOrCollectionInitializer
+  | // --- Array initialization
+    IF (IsDims())                 
+    (. var newOpNode = new NewOperatorWithExplicitArrayNode(t); .)
+    ImplicitArrayCreation<newOpNode>
+  | // --- New array creation
+    "["
+    Expression<out exprNode>
+    { 
+      "," 
+      Expression<out exprNode>
+    } 
+    "]" 
+    { IF (IsDims()) 
+      "["
+        { 
+          ","
+        } 
+      "]" 
+    }
+    [            
+      (. ArrayInitializerNode initNode; .)                 
+      ArrayInitializer<out initNode> 
+    ] 
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an implicit array creation
+//   typeRef: Type to create with the new operator
+// ------------------------------------------------------------------------------------------------
+ImplicitArrayCreation<NewOperatorWithArrayNodeBase impArrNode> 
+=
+  "["
+  (. impArrNode.OpenSquareBracket = t; .)
+    { 
+      ","                           
+      (. impArrNode.Commas.Add(t); .)
+    } 
+  "]" 
+  (. impArrNode.CloseSquareBracket = t; .)
+  [        
+    (. ArrayInitializerNode initNode; .)                     
+    ArrayInitializer<out initNode> 
+    (. impArrNode.Initializer = initNode; .)
+  ]
+  (. Terminate(impArrNode); .)
+.
+
+// ------------------------------------------------------------------------------------
+// Declares an object or collection initializer used with "new" operator
+// +init: initializer resulted from parsing
+// ------------------------------------------------------------------------------------
+ObjectOrCollectionInitializer
+=
+  "{"
+  
+  (
+    IF (IsEmptyMemberInitializer()) "}"   
+  |
+    IF (IsMemberInitializer()) 
+    MemberInitializerList
+  |
+    CollectionInitializer
+  )
+  "}"
+.
+
+// ------------------------------------------------------------------------------------
+// Declares a collection initializer used with "new" operator
+// +init: initializer resulted from parsing
+// ------------------------------------------------------------------------------------
+CollectionInitializer
+=
+  ElementInitializerList
+.
+
+// ------------------------------------------------------------------------------------
+// Declares an element initializer list of a collection used with "new" operator
+// +init: initializer resulted from parsing
+// ------------------------------------------------------------------------------------
+ElementInitializerList
+=
+  ElementInitializer
+  {
+    IF (NotFinalComma()) ","
+    ElementInitializer
+  } 
+  [ 
+    "," 
+  ]
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declares an element initializer of a collection used with "new" operator
+// ------------------------------------------------------------------------------------------------
+ElementInitializer
+=
+  (. ExpressionNode exprNode; .)
+  (
+    IF (IsValueInitializer())
+    Expression<out exprNode>
+  | 
+    "{"
+      Expression<out exprNode>
+      {
+        ","
+        Expression<out exprNode>
+      }
+    "}"
+  )
+.
+
+// ------------------------------------------------------------------------------------
+// A member initialization list declaration
+// +initList: member initializer list
+// ------------------------------------------------------------------------------------
+MemberInitializerList
+=                     
+  MemberInitializer
+  {
+    IF (NotFinalComma()) ","
+    MemberInitializer
+  } 
+  [ 
+    "," 
+  ]
+.
+
+// ------------------------------------------------------------------------------------
+// A member initialization declaration
+// +init: member initializer
+// ------------------------------------------------------------------------------------
+MemberInitializer
+=
+  ident
+  "="  
+  (
+    IF (IsValueInitializer())
+    (. ExpressionNode exprNode; .)
+    Expression<out exprNode>
+  |                           
+    ObjectOrCollectionInitializer
+  )
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declarares an anonymous delegate with its body.
+//   exprNode: Anonymous delegate expression node.
+// ------------------------------------------------------------------------------------------------
+AnonymousDelegate<out ExpressionNode exprNode>  
+= 
+  "delegate"            
+  (. 
+     var adNode = new AnonymousDelegateNode(t);
+     exprNode = adNode;
+  .)
+  [                     
+    "("
+    (. 
+       var parsNode = new FormalParameterListNode(t); 
+       adNode.ParameterList = parsNode;
+    .)
+    [ 
+      (. FormalParameterNode parNode; .)
+      AnonymousMethodParameter<out parNode>
+      (. parsNode.Items.Add(parNode); .)
+      { 
+        "," 
+        (. var separator = t; .)
+        AnonymousMethodParameter<out parNode>   
+        (. parsNode.Items.Add(new FormalParameterContinuationNode(separator, parNode)); .)
+      } 
+    ] 
+    ")" 
+    (. Terminate(parsNode); .)
+  ] 
+  (. BlockStatementNode blockNode; .)
+  Block<out blockNode>           
+  (. Terminate(exprNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an anonymous method parameter.
+//   parNode: Parameter definition node.
+// ------------------------------------------------------------------------------------------------
+AnonymousMethodParameter<out FormalParameterNode parNode> 
+=
+  (. 
+     var modifier = FormalParameterModifier.In; 
+     Token start = null;
+     parNode = null;
+  .)
+  [
+    (
+      "ref"         
+      (. modifier = FormalParameterModifier.Ref; .) 
+    | "out"                     
+      (. modifier = FormalParameterModifier.Out; .) 
+    )
+    (. start = t; .)
+  ]                             
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeNode>      
+  (. if (start == null) start = typeNode.StartToken; .)
+  ident                         
+  (. 
+     parNode = new FormalParameterNode(start);
+     parNode.Modifier = modifier;
+     parNode.IdentifierToken = t;
+     parNode.TypeName = typeNode;
+     Terminate(parNode);
+  .)  
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of an array indxer operator.
+//   argNode: Expression value.
+// ------------------------------------------------------------------------------------------------
+ArrayIndexer<ArgumentNodeCollection argNodes> 
+= 
+  (. 
+     ExpressionNode exprNode; 
+     Token separator = null;
+  .) 
+  Expression<out exprNode>
+  (. 
+     if (argNodes != null)
+     {
+       var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
+       argNode.Expression = exprNode;
+       Terminate(argNode);
+       argNodes.Add(argNode);
+     }
+  .)
+  { 
+    "," 
+    (. separator = t; .)
+    Expression<out exprNode>
+    (. 
+       if (argNodes != null)
+       {
+         var argNode = new ArgumentContinuationNode(separator);
+         argNode.Expression = exprNode;
+         Terminate(argNode);
+         argNodes.Add(argNode);
+       }
+    .)
+  } 
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a field member variable.
+// ------------------------------------------------------------------------------------------------
+FieldMemberDeclarators<FieldDeclarationNode fiNode>
+= 
+  (. FieldTagNode tagNode; .)
+  SingleFieldMember<out tagNode>
+  (. fiNode.FieldTags.Add(tagNode); .)
+  { 
+    "," 
+    (. var separator = t; .)
+    SingleFieldMember<out tagNode>
+    (. fiNode.FieldTags.Add(new FieldContinuationTagNode(separator, tagNode)); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a single field member.
+// ------------------------------------------------------------------------------------------------
+SingleFieldMember<out FieldTagNode fiNode>
+= 
+  ident                      
+  (. fiNode = new FieldTagNode(t); .)
+  [ 
+    "="                      
+    (. 
+       fiNode.EqualToken = t;
+       VariableInitializerNode varInitNode; 
+    .)
+    VariableInitializer<out varInitNode> 
+    (. fiNode.Initializer = varInitNode; .) 
+  ]                          
+  (. Terminate(fiNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Defines the operators that can be overloaded.
+// +op: overloaddable operator.
+// ------------------------------------------------------------------------------------------------
+OverloadableOp
+=                          
+    "+"                                     
+  | "-"
+  | "!"
+  | "~"
+  | "++"
+  | "--"
+  | "true"
+  | "false"
+  | "*"    
+  | "/"    
+  | "%"
+  | "&"
+  | "|"
+  | "^"
+  | "<<"
+  | "=="
+  | "!="
+  | ">" 
+        [                       
+          (. if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); .)
+          ">"                   
+        ]
+  | "<"                         
+  | ">="                        
+  | "<="                        
+.
+
+// ------------------------------------------------------------------------------------------------
+// Type parameter declarations for generic types.
+//   paramNode: syntax node holding type parameters.
+// ------------------------------------------------------------------------------------------------
+TypeParameterList<ITypeParameterHolder paramNode>
+=                            
+  (. 
+     Token identifier;
+     AttributeDecorationNodeCollection attrNodes;
+  .)
+  "<"                        
+  (. if (paramNode != null) paramNode.SetOpenSign(t); .)
+  TypeParameter<out attrNodes, out identifier>      
+  (. 
+     var typeParam = new TypeParameterNode(identifier, attrNodes);
+     if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
+  .)
+  { 
+    "," 
+    (. var separator= t; .)
+    TypeParameter<out attrNodes, out identifier>      
+    (. 
+       typeParam = new TypeParameterContinuationNode(separator, identifier, attrNodes);
+       if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
+    .)
+  } 
+  ">"
+  (. if (paramNode != null) paramNode.SetCloseSign(t); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a type parameter.
+//   attrNodes: Attributes belonging to the type parameter
+//   identifier: Token representing the type parameter
+// ------------------------------------------------------------------------------------------------
+TypeParameter<out AttributeDecorationNodeCollection attrNodes, out Token identifier>
+=                         
+  (. attrNodes = new AttributeDecorationNodeCollection(); .)
+  AttributeDecorations<attrNodes>
+  ident
+  (. identifier = t; .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a type argument list.
+//   argList: List of type arguments defined here.
+// ------------------------------------------------------------------------------------------------
+TypeArgumentList<out TypeArgumentListNode argList>  
+= 
+  (. argList = null; .) 
+  // --- We are a bit sloppy here and allow the type arguments to be "empty" everywhere. This 
+  // --- results in unbound-type-names. In fact this is only allowed in typeof statements, 
+  // --- see ECMA-334: 14.5.11 and 25.5.
+  "<"
+  (. argList = new TypeArgumentListNode(t); .)
+  [ 
+    (. TypeOrNamespaceNode typeNode; .)
+    Type<out typeNode>           
+  ]                              
+  { 
+    ","
+    [ 
+      (. TypeOrNamespaceNode typeNode; .)
+      Type<out typeNode>           
+    ]
+  } 
+  ">"
+  (. Terminate(argList); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Declaration of a type parameter constraint belonging to a type, a method or a 
+// delegate.
+//   constrNode: Declaration of the constraint.
+// ------------------------------------------------------------------------------------------------
+TypeParameterConstraintsClause<out TypeParameterConstraintNode constrNode>   
+=
+  (. 
+     Token start;
+     Token identifier;
+  .)      
+  "where"
+  (. start = t; .)
+  ident                        
+  (. identifier = t; .)
+  ":"
+  (. 
+     constrNode = new TypeParameterConstraintNode(start, identifier, t);
+     TypeParameterConstraintTagNode tag;
+  .)
+  TypeParameterConstraintTag<out tag>
+  (. constrNode.ConstraintTags.Add(tag); .)
+  {
+    "," 
+    (. var separator = t; .)
+    TypeParameterConstraintTag<out tag>
+    (. constrNode.ConstraintTags.Add(new TypeParameterConstraintTagContinuationNode(separator, tag)); .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
+// Obtains a type parameter constraint tag.
+//   tag: Type parameter constrtaint tag.
+// ------------------------------------------------------------------------------------------------
+TypeParameterConstraintTag<out TypeParameterConstraintTagNode tag> 
+  (. tag = null; .)
+=
+  "class"                    
+  (. tag = new TypeParameterConstraintTagNode(t); .)
+  |
+  "struct"                   
+  (. tag = new TypeParameterConstraintTagNode(t); .)
+  |
+  "new"                      
+  (. var start = t; .)
+  "(" 
+  (. var openPar = t; .)
+  ")" 
+  (. tag = new TypeParameterConstraintTagNode(start, openPar, t); .)
+  |
+  (. TypeOrNamespaceNode typeNode; .)
+  ClassType<out typeNode>     
+  (. tag = new TypeParameterConstraintTagNode(typeNode); .)
+.
+
+END CS3.

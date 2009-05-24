@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.22, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Ast;
-
 namespace CSharpTreeBuilder.Cst
 {
   // ================================================================================================
@@ -13,25 +11,14 @@ namespace CSharpTreeBuilder.Cst
   /// </summary>
   // ================================================================================================
   public class CSharpSemanticsTree : 
-    ICSharpSemanticsTree,
-    ISemanticsNodeCollection
+    ICSharpSemanticsTree
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="CSharpSemanticsTree"/> class.
+    /// Resets the semantics tree so that it could be built from the beginning.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public CSharpSemanticsTree()
-    {
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Removes all nodes from the collection that belong to the specified source file node.
-    /// </summary>
-    /// <param name="sourceFileNode">The source file node.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void RemoveNodes(SourceFileNode sourceFileNode)
+    public void Reset()
     {
     }
   }

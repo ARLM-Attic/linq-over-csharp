@@ -18,45 +18,73 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   // ==================================================================================
   public class Token
   {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>Points to the next token.</summary>
-    // ----------------------------------------------------------------------------------------------
-    private Token _Next;
+    // --- We use these fields because CoCo generates these names into the Scanner.cs and Parser.cs.
+    // --- Removing these fields is subject of refactoring.
+    
+    // ReSharper disable InconsistentNaming
+    internal int kind;
+    internal string val;
+    internal int pos;
+    internal int col;
+    internal int line;
+    internal Token next;
+    // ReSharper restore InconsistentNaming
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Kind of token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Kind { get; internal set; }
+    public int Kind 
+    { 
+      get { return kind; }
+      internal set { kind = value; }
+    }
+
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Token position in the source text (starting at 0).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Position { get; internal set; }
+    public int Position
+    {
+      get { return pos; } 
+      internal set { pos = value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Token column (starting at 0).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Column { get; internal set; }
+    public int Column
+    {
+      get { return col; } 
+      internal set { col = value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Token line (starting at 1).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Line { get; internal set; }
+    public int Line
+    {
+      get { return line; } 
+      internal set { line = value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Token value.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string Value { get; internal set; }
+    public string Value
+    {
+      get { return val; } 
+      internal set { val = value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -72,11 +100,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     //-----------------------------------------------------------------------------------
     public Token Next
     {
-      get { return _Next; }
+      get { return next; }
       set
       {
-        _Next = value;
-        if (value != null) _Next.Previous = this;
+        next = value;
+        if (value != null) next.Previous = this;
       }
     }
 

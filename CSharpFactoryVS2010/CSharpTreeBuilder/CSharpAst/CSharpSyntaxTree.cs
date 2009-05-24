@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resets the syntax tree so that it could be built fromthe beginning.
+    /// Resets the syntax tree so that it could be built from the beginning.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public void Reset()
