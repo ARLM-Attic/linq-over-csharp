@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.Ast
   /// TerminatingToken.
   /// </remarks>
   // ================================================================================================
-  public sealed class AttributeDecorationNode : SyntaxNode, IIdentifierSupport
+  public sealed class AttributeDecorationNode : SyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -36,15 +36,28 @@ namespace CSharpTreeBuilder.Ast
     }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the target token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token TargetToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the colon token.
+    /// Gets the target information.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token ColonToken { get; internal set; }
+    public string Target
+    {
+      get { return TargetToken == null ? string.Empty : TargetToken.Value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has explicit target.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasExplicitTarget { get { return TargetToken != null; } }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -59,37 +72,5 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token ClosingSeparator { get; internal set; }
-
-    #region IIdentifierSupport Members
-
-    /// <summary>
-    /// Gets the identifier token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the identifier name.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string Identifier
-    {
-      get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value; }
-    }
-
-    /// <summary>
-    /// Gets a value indicating whether this instance has an identifier.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance has an identifier; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier
-    {
-      get { return IdentifierToken != null; }
-    }
-
-    #endregion
   }
 }

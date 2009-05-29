@@ -307,10 +307,10 @@ UsingDirective<NamespaceScopeNode parentNode>
   TypeName<out nsNode> 
   ";"
   (. 
-     if (alias == null)
-       parentNode.AddUsing(start, nsNode, t);
-     else
-       parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+     var node = (alias == null)
+       ? parentNode.AddUsing(start, nsNode, t)
+       : parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+     Terminate(node);
   .)
 .
 
@@ -329,17 +329,23 @@ GlobalAttributes
      globAttrNode = new AttributeDecorationNode(t);
   .)
   ident                        
-  (. globAttrNode.IdentifierToken = t; .) 
+  (. globAttrNode.TargetToken = t; .) 
   ":"
-  (. globAttrNode.ColonToken = t; .)
+  (. var separator = t; .)
   (. AttributeNode attrNode; .)
   Attribute<out attrNode>
-  (. globAttrNode.Attributes.Add(attrNode); .)
+  (. 
+     attrNode.SeparatorToken = separator;
+     globAttrNode.Attributes.Add(attrNode); 
+  .)
   { 
     IF (NotFinalComma()) ","   
-    (. var separator = t; .)
+    (. separator = t; .)
     Attribute<out attrNode> 
-    (. globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode)); .)
+    (. 
+       attrNode.SeparatorToken = separator;
+       globAttrNode.Attributes.Add(attrNode); 
+    .)
   } 
   [ 
     ","
@@ -1489,24 +1495,30 @@ Attributes<out AttributeDecorationNode attrNode>
      string scope = ""; 
      attrNode = null;
      AttributeNode attributeNode;
+     Token separator = null;
   .)
 =
   "["
   (. attrNode = new AttributeDecorationNode(t); .)
   [ IF (IsAttrTargSpec()) 
     ( ident | Keyword )       
-    (. attrNode.IdentifierToken = t; .)
+    (. attrNode.TargetToken = t; .)
     ":"
-    (. attrNode.ColonToken = t; .)
+    (. separator = t; .)
   ] 
   Attribute<out attributeNode>
-  (. attrNode.Attributes.Add(attributeNode); .)
+  (. 
+     attrNode.SeparatorToken = separator;
+     attrNode.Attributes.Add(attributeNode); 
+  .)
   { 
     IF (la.kind == _comma && Peek(1).kind != _rbrack) 
     ","
-    (.  var separator = t; .)
     Attribute<out attributeNode>
-    (. attrNode.Attributes.Add(new AttributeContinuationNode(separator, attributeNode)); .)
+    (. 
+       attrNode.SeparatorToken = separator;
+       attrNode.Attributes.Add(attributeNode); 
+    .)
   } 
   [ 
     ","
@@ -1553,7 +1565,7 @@ Keyword
 Attribute<out AttributeNode attrNode> 
 = 
   (. 
-     attrNode = new AttributeNode(t);
+     attrNode = new AttributeNode(la);
      TypeOrNamespaceNode nsNode = null;
   .)
   TypeName<out nsNode>      
@@ -1833,7 +1845,7 @@ MemberName<out TypeOrNamespaceNode resultNode>
       IF (la.kind == _lt && IsPartOfMemberName()) 
         TypeArgumentList<out argList>
     ]
-    (. resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList)); .)                                    
+    (. resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); .)                                    
   }
   (. Terminate(resultNode); .)
 .
@@ -1881,7 +1893,7 @@ TypeName<out TypeOrNamespaceNode resultNode>
     ident 
     (. identifier = t; .)
     [ TypeArgumentList<out argList> ]   
-    (. resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList)); .)                                    
+    (. resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); .)                                    
   }
   (. Terminate(resultNode); .)
 .

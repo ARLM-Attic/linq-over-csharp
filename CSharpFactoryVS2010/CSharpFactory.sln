@@ -6,6 +6,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeExplorer", "CodeExplorer\CodeExplorer.csproj", "{B6CE447F-577A-476F-9CF8-6266B360EE3A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{41EA02CF-A4DB-4D20-AD2C-CBE02A5E5C25}"
+	ProjectSection(SolutionItems) = preProject
+		CSharpFactory.vsmdi = CSharpFactory.vsmdi
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpFactory", "CSharpFactory\CSharpFactory.csproj", "{DAC84C34-6834-4398-AE6B-24559581D0E4}"
 EndProject
@@ -13,9 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpFactoryTest", "CSharp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTreeBuilder", "CSharpTreeBuilder\CSharpTreeBuilder.csproj", "{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTreeBuilderTest", "CSharpTreeBuilderTest\CSharpTreeBuilderTest.csproj", "{769D51D9-B4FB-49FB-945D-D0D1255E98E6}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 6
+		SccNumberOfProjects = 7
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs03.codeplex.com/
 		SccLocalPath0 = .
@@ -34,6 +40,12 @@ Global
 		SccProjectUniqueName5 = CSharpTreeBuilder\\CSharpTreeBuilder.csproj
 		SccProjectName5 = CSharpTreeBuilder
 		SccLocalPath5 = CSharpTreeBuilder
+		SccProjectUniqueName6 = CSharpTreeBuilderTest\\CSharpTreeBuilderTest.csproj
+		SccProjectName6 = CSharpTreeBuilderTest
+		SccLocalPath6 = CSharpTreeBuilderTest
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = CSharpFactory.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +72,10 @@ Global
 		{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

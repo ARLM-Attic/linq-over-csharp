@@ -25,12 +25,25 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="AttributeNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public AttributeNode(Token start)
-      : base(start)
+    public AttributeNode(Token identifier)
+      : base(identifier)
     {
       Arguments = new ImmutableCollection<AttributeArgumentNode>();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AttributeNode"/> class.
+    /// </summary>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
+    // ----------------------------------------------------------------------------------------------
+    public AttributeNode(Token separator, Token identifier)
+      : this(identifier)
+    {
+      SeparatorToken = separator;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -40,8 +53,6 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode TypeName { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -73,8 +84,7 @@ namespace CSharpTreeBuilder.Ast
       get { return DefinesArguments && Arguments != null && Arguments.Count > 0; }
     }
 
-    #region IParentheses Members
-
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -90,7 +100,5 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return TerminatingToken; }
     }
-
-    #endregion
   }
 }

@@ -267,10 +267,10 @@ public partial class CSharpParser
 		}
 		TypeName(out nsNode);
 		Expect(114);
-		if (alias == null)
-		 parentNode.AddUsing(start, nsNode, t);
-		else
-		  parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+		var node = (alias == null)
+		 ? parentNode.AddUsing(start, nsNode, t)
+		 : parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+		Terminate(node);
 		
 	}
 
@@ -280,17 +280,21 @@ public partial class CSharpParser
 		globAttrNode = new AttributeDecorationNode(t);
 		
 		Expect(1);
-		globAttrNode.IdentifierToken = t; 
+		globAttrNode.TargetToken = t; 
 		Expect(86);
-		globAttrNode.ColonToken = t; 
+		var separator = t; 
 		AttributeNode attrNode; 
 		Attribute(out attrNode);
+		attrNode.SeparatorToken = separator;
 		globAttrNode.Attributes.Add(attrNode); 
+		
 		while (NotFinalComma()) {
 			Expect(87);
-			var separator = t; 
+			separator = t; 
 			Attribute(out attrNode);
-			globAttrNode.Attributes.Add(new AttributeContinuationNode(separator, attrNode)); 
+			attrNode.SeparatorToken = separator;
+			globAttrNode.Attributes.Add(attrNode); 
+			
 		}
 		if (la.kind == 87) {
 			Get();
@@ -394,13 +398,13 @@ public partial class CSharpParser
 			if (la.kind == 100) {
 				TypeArgumentList(out argList);
 			}
-			resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList)); 
+			resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); 
 		}
 		Terminate(resultNode); 
 	}
 
 	void Attribute(out AttributeNode attrNode) {
-		attrNode = new AttributeNode(t);
+		attrNode = new AttributeNode(la);
 		TypeOrNamespaceNode nsNode = null;
 		
 		TypeName(out nsNode);
@@ -1195,7 +1199,7 @@ public partial class CSharpParser
 			if (la.kind == _lt && IsPartOfMemberName()) {
 				TypeArgumentList(out argList);
 			}
-			resultNode.AddTypeTag(new TypeTagContinuationNode(separator, identifier, argList)); 
+			resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); 
 		}
 		Terminate(resultNode); 
 	}
@@ -1737,6 +1741,7 @@ public partial class CSharpParser
 		string scope = ""; 
 		attrNode = null;
 		AttributeNode attributeNode;
+		Token separator = null;
 		
 		Expect(97);
 		attrNode = new AttributeDecorationNode(t); 
@@ -1746,17 +1751,20 @@ public partial class CSharpParser
 			} else if (StartOf(22)) {
 				Keyword();
 			} else SynErr(177);
-			attrNode.IdentifierToken = t; 
+			attrNode.TargetToken = t; 
 			Expect(86);
-			attrNode.ColonToken = t; 
+			separator = t; 
 		}
 		Attribute(out attributeNode);
+		attrNode.SeparatorToken = separator;
 		attrNode.Attributes.Add(attributeNode); 
+		
 		while (la.kind == _comma && Peek(1).kind != _rbrack) {
 			Expect(87);
-			var separator = t; 
 			Attribute(out attributeNode);
-			attrNode.Attributes.Add(new AttributeContinuationNode(separator, attributeNode)); 
+			attrNode.SeparatorToken = separator;
+			attrNode.Attributes.Add(attributeNode); 
+			
 		}
 		if (la.kind == 87) {
 			Get();

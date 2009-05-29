@@ -23,18 +23,29 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="NameTagNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public NameTagNode(Token start)
-      : base(start)
+    public NameTagNode(Token identifier)
+      : base(identifier)
     {
-      IdentifierToken = start;
+      IdentifierToken = identifier;
+      Terminate(identifier);
     }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NameTagNode"/> class.
+    /// </summary>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
+    // ----------------------------------------------------------------------------------------------
+    public NameTagNode(Token separator, Token identifier)
+      : this(identifier)
+    {
+      SeparatorToken = separator;
+    }
 
-    #region IIdentifierSupport Members
-
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -66,8 +77,6 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #endregion
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the output segment representing this syntax node.
@@ -78,7 +87,10 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override OutputSegment GetOutputSegment()
     {
-      return new OutputSegment(IdentifierToken);
+      return new OutputSegment(
+        SeparatorToken,
+        IdentifierToken
+        );
     }
   }
 }

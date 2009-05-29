@@ -4,6 +4,7 @@
 // Created: 2009.05.22, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.Collections;
+using System.IO;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -21,6 +22,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <summary>Represents the "true" value in the token set table.</summary>
     const bool T = true;
 
+    // ReSharper disable InconsistentNaming
     /// <summary>Represents the "false" value in the token set table.</summary>
     const bool x = false;
 
@@ -38,6 +40,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     /// <summary>Represents the current distance from the last error.</summary>
     private int errDist = MinimumDistanceOfSeparateErrors;
+    // ReSharper restore InconsistentNaming
 
     #endregion
 
@@ -49,6 +52,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     
     #region Fields used by the parser
 
+    // ReSharper disable InconsistentNaming
     /// <summary>Token ID for #if preprocessor directive.</summary>
     public const int ppIfKind = _ppIf;
     /// <summary>Token ID for #elif preprocessor directive.</summary>
@@ -59,6 +63,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     public const int ppEndifKind = _ppEndif;
     /// <summary>Token ID for EOF.</summary>
     public const int EOFKind = _EOF;
+    // ReSharper restore InconsistentNaming
 
     #endregion
 
@@ -189,51 +194,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       return _StartupSet[tokenKind, la.kind];
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Expects the next token to be as defined by tokenKind. If the expected token is
-    /// not found, steps forward in the input stream the find the token with type
-    /// of "follow".
-    /// </summary>
-    /// <param name="tokenKind">Expected kind of token.</param>
-    /// <param name="follow">Kind of week token to follow the parsing from.</param>
-    /// <remarks>
-    /// If the token does not match with the kind specified, raises a syntax error.
-    /// </remarks>
-    // --------------------------------------------------------------------------------
-    void ExpectWeak(int tokenKind, int follow)
-    {
-      if (la.kind == tokenKind) Get();
-      else
-      {
-        SynErr(tokenKind);
-        while (!StartOf(follow)) Get();
-      }
-    }
-
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Searches for a week separator.
-    /// </summary>
-    /// <param name="tokenKind"></param>
-    /// <param name="syFol"></param>
-    /// <param name="repFol"></param>
-    /// <returns></returns>
-    // --------------------------------------------------------------------------------
-    bool WeakSeparator(int tokenKind, int syFol, int repFol)
-    {
-      var s = new bool[maxT + 1];
-      if (la.kind == tokenKind) { Get(); return true; }
-      if (StartOf(repFol)) return false;
-      for (int i = 0; i <= maxT; i++)
-      {
-        s[i] = _StartupSet[syFol, i] || _StartupSet[repFol, i] || _StartupSet[0, i];
-      }
-      SynErr(tokenKind);
-      while (!s[la.kind]) Get();
-      return StartOf(syFol);
-    }
-	
     #region Token sets
 
     // --------------------------------------------------------------------------------
@@ -250,6 +210,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       return a;
     }
 
+    // ReSharper disable InconsistentNaming
     /// <summary>Tokens representing unary operators</summary>
     private static BitArray unaryOp =
       NewSet(_plus, _minus, _not, _tilde, _inc, _dec, _true, _false);
@@ -314,6 +275,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       assgnOps = NewSet(_assgn, _plusassgn, _minusassgn, _timesassgn, _divassgn,
                      _modassgn, _andassgn, _orassgn, _xorassgn, _lshassgn);
                  // rshassgn: ">" ">="  no whitespace allowed
+    // ReSharper restore InconsistentNaming
 
     // --------------------------------------------------------------------------------
     /// <summary>
@@ -325,9 +287,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     Token Peek(int n)
     {
       Scanner.ResetPeek();
-      Token x = la;
-      while (n > 0) { x = Scanner.Peek(); n--; }
-      return x;
+      var token = la;
+      while (n > 0) { token = Scanner.Peek(); n--; }
+      return token;
     }
 
     #endregion
@@ -382,8 +344,19 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // --------------------------------------------------------------------------------------------
     public static SourceFileNode BuildAstForSourceFile(SourceFileBase sourceFile)
     {
-      // TODO: Implement this method
-      return new SourceFileNode(sourceFile.FullName);
+      var resultNode = new SourceFileNode(sourceFile.FullName);
+      var stream = File.OpenText(sourceFile.FullName).BaseStream;
+      try
+      {
+        var scanner = new Scanner(stream);
+        var parser = new CSharpParser(scanner, resultNode);
+        parser.Parse();
+      }
+      finally
+      {
+        stream.Close();
+      }
+      return resultNode;
     }
 
     // ----------------------------------------------------------------------------------------------

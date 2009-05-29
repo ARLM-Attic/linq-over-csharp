@@ -64,6 +64,7 @@
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeNodeCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
     <Compile Include="CSharpCst\CompilationModel\CompilationEntity.cs" />
@@ -233,7 +234,6 @@
     <Compile Include="CSharpAst\Members\PropertyDeclarationNodeBase.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentContinuationNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNode.cs" />
-    <Compile Include="CSharpAst\SourceFileLevel\AttributeContinuationNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeDecorationNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeDecorationNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeNode.cs" />
@@ -280,7 +280,6 @@
     <Compile Include="CSharpAst\Types\ModifierNode.cs" />
     <Compile Include="CSharpAst\Types\ModifierNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\ModifierType.cs" />
-    <Compile Include="CSharpAst\Types\NameTagContinuationNode.cs" />
     <Compile Include="CSharpAst\Types\NameTagNode.cs" />
     <Compile Include="CSharpAst\Types\NameTagNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\PointerModifierNode.cs" />
@@ -302,7 +301,6 @@
     <Compile Include="CSharpAst\Types\TypeParameterConstraintTagNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterContinuationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterNode.cs" />
-    <Compile Include="CSharpAst\Types\TypeTagContinuationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeTagNode.cs" />
     <Compile Include="CSharpAst\Types\TypeWithBodyDeclarationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeWithMembersDeclarationNode.cs" />

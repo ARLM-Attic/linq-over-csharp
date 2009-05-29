@@ -23,20 +23,34 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeTagNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Identifier token.</param>
     /// <param name="argumentListNode">The argument list node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeTagNode(Token start, TypeArgumentListNode argumentListNode)
-      : base(start)
+    public TypeTagNode(Token identifier, TypeArgumentListNode argumentListNode)
+      : base(identifier)
     {
-      IdentifierToken = start;
+      IdentifierToken = identifier;
       Arguments = argumentListNode;
+      Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TypeTagNode"/> class.
+    /// </summary>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="identifier">Identifier token.</param>
+    /// <param name="argumentListNode">The argument list node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public TypeTagNode(Token separator, Token identifier, TypeArgumentListNode argumentListNode)
+      : this(identifier, argumentListNode)
+    {
+      SeparatorToken = separator;
+    }
 
     #region IIdentifierSupport Members
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -70,10 +84,9 @@ namespace CSharpTreeBuilder.Ast
 
     #endregion
 
-    // ----------------------------------------------------------------------------------------------
-
     #region ITypeArguments Members
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the node providing type arguments.
     /// </summary>
@@ -107,6 +120,7 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
+        SeparatorToken,
         IdentifierToken,
         Arguments
         );

@@ -26,10 +26,12 @@ namespace CSharpTreeBuilder.Ast
       get
       {
         var sb = new StringBuilder();
+        var first = true;
         foreach (NameTagNode tag in this)
         {
-          if (tag is NameTagContinuationNode) sb.Append(".");
+          if (!first) sb.Append(".");
           sb.Append(tag.Identifier);
+          first = false;
         }
         return sb.ToString();
       }
@@ -37,31 +39,29 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a new NameTagNode with the specified start token.
+    /// Adds a new NameTagNode with the specified identifier token.
     /// </summary>
-    /// <param name="start">The start token.</param>
+    /// <param name="identifier">The identifier token.</param>
     /// <returns>The newly created NameTagNode instance.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NameTagNode Add(Token start)
+    public NameTagNode Add(Token identifier)
     {
-      var result = new NameTagNode(start);
+      var result = new NameTagNode(identifier);
       Add(result);
       return result;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a new NameTagContinuationNode with the specified start and identifier tokens.
+    /// Adds a new NameTagNode with the specified identifier token.
     /// </summary>
-    /// <param name="start">The start token.</param>
+    /// <param name="separator">The separator token.</param>
     /// <param name="identifier">The identifier token.</param>
-    /// <returns>
-    /// The newly created NameTagContinuationNode instance.
-    /// </returns>
+    /// <returns>The newly created NameTagNode instance.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NameTagContinuationNode Add(Token start, Token identifier)
+    public NameTagNode Add(Token separator, Token identifier)
     {
-      var result = new NameTagContinuationNode(start, identifier);
+      var result = new NameTagNode(separator, identifier);
       Add(result);
       return result;
     }
