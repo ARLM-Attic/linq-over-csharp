@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This type represents a type modifier (pointer or array modifier).
   /// </summary>
   // ================================================================================================
-  public abstract class TypeModifierNode : SyntaxNode
+  public abstract class TypeModifierNode : SyntaxNode<TypeOrMemberDeclarationNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -1,7 +1,7 @@
 // ================================================================================================
-// SpaceAroundSegment.cs
+// SpaceAfterSegment.cs
 //
-// Created: 2009.03.27, by Istvan Novak (DeepDiver)
+// Created: 2009.05.29, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
@@ -10,39 +10,49 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This segment handles spaces aroung tokens.
+  /// This segment handles spaces after tokens.
   /// </summary>
   // ================================================================================================
-  public class SpaceAroundSegment : ControlSegment
+  public class SpaceAfterSegment : ControlSegment
   {
-    private readonly Token Token;
     private readonly SpaceType Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SpaceAroundSegment"/> class.
+    /// Initializes a new instance of the <see cref="SpaceAfterSegment"/> class.
     /// </summary>
     /// <param name="token">The token surrounding with spaces.</param>
     /// <param name="type">The type of token surrounded.</param>
     // ----------------------------------------------------------------------------------------------
-    private SpaceAroundSegment(Token token, SpaceType type)
+    private SpaceAfterSegment(SpaceType type)
     {
-      Token = token;
       Type = type;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Represents a space around assignment operators.
+    /// Represents a "space before colon in attributes" operator.
     /// </summary>
-    /// <param name="token">Assignment operator token.</param>
     /// <returns>
-    /// The newly created "space around" segment.
+    /// The newly created "space before" segment.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public static SpaceAroundSegment AssignmentOp(Token token)
+    public static SpaceAfterSegment AfterColonInAttributes()
     {
-      return new SpaceAroundSegment(token, SpaceType.AssignmentOp);
+      return new SpaceAfterSegment(SpaceType.AfterColonInAttributes);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Represents a "space before colon in attributes" operator.
+    /// </summary>
+    /// <returns>
+    /// The newly created "space before" segment.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SpaceAfterSegment AfterComma()
+    {
+      return new SpaceAfterSegment(SpaceType.AfterComma);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -56,14 +66,15 @@ namespace CSharpTreeBuilder.Ast
       bool useSpace;
       switch (Type)
       {
-        case SpaceType.AssignmentOp:
-          useSpace = serializer.OutputOptions.SpaceAroundAssignmentOps;
+        case SpaceType.AfterColonInAttributes:
+          useSpace = serializer.OutputOptions.SpaceAfterColonInAttributes;
+          break;
+        case SpaceType.AfterComma:
+          useSpace = serializer.OutputOptions.SpaceAfterComma;
           break;
         default:
           throw new ArgumentOutOfRangeException();
       }
-      if (useSpace) serializer.Append(" ");
-      serializer.Append(Token);
       if (useSpace) serializer.Append(" ");
     }
   }

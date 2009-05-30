@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.Ast
   ///     [ identifier "=" ] ExpressionNode
   /// </remarks>
   // ================================================================================================
-  public class AttributeArgumentNode : SyntaxNode, IIdentifierSupport
+  public class AttributeArgumentNode : SyntaxNode<AttributeNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -34,8 +34,10 @@ namespace CSharpTreeBuilder.Ast
       IdentifierToken = identifier;
       EqualToken = equal;
       Expression = expression;
+      Terminate(Expression.TerminatingToken);
     }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the equal token.
     /// </summary>
@@ -49,9 +51,6 @@ namespace CSharpTreeBuilder.Ast
     public ExpressionNode Expression { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -69,8 +68,6 @@ namespace CSharpTreeBuilder.Ast
     }
 
     // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this instance has an identifier.
     /// </summary>
@@ -82,9 +79,5 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return IdentifierToken != null; }
     }
-
-    #endregion
-
-    // ----------------------------------------------------------------------------------------------
   }
 }

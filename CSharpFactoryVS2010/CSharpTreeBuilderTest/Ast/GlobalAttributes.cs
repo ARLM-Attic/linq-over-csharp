@@ -68,12 +68,12 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(nameTag.Identifier, "ComVisible");
       Assert.AreEqual(nameTag.IdentifierToken.Line, 4);
       Assert.AreEqual(nameTag.IdentifierToken.Column, 12);
-      Assert.AreEqual(aNode.OpenParenthesis.Value, "(");
-      Assert.AreEqual(aNode.OpenParenthesis.Line, 4);
-      Assert.AreEqual(aNode.OpenParenthesis.Column, 22);
-      Assert.AreEqual(aNode.CloseParenthesis.Value, ")");
-      Assert.AreEqual(aNode.CloseParenthesis.Line, 4);
-      Assert.AreEqual(aNode.CloseParenthesis.Column, 28);
+      Assert.AreEqual(aNode.Arguments.StartToken.Value, "(");
+      Assert.AreEqual(aNode.Arguments.StartToken.Line, 4);
+      Assert.AreEqual(aNode.Arguments.StartToken.Column, 22);
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Value, ")");
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Line, 4);
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Column, 28);
 
       attrNode = file.GlobalAttributes[4];
       Assert.AreEqual(attrNode.StartToken.Value, "[");
@@ -97,12 +97,12 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(nameTag.Identifier, "AssemblyConfiguration");
       Assert.AreEqual(nameTag.IdentifierToken.Line, 8);
       Assert.AreEqual(nameTag.IdentifierToken.Column, 12);
-      Assert.AreEqual(aNode.OpenParenthesis.Value, "(");
-      Assert.AreEqual(aNode.OpenParenthesis.Line, 8);
-      Assert.AreEqual(aNode.OpenParenthesis.Column, 33);
-      Assert.AreEqual(aNode.CloseParenthesis.Value, ")");
-      Assert.AreEqual(aNode.CloseParenthesis.Line, 8);
-      Assert.AreEqual(aNode.CloseParenthesis.Column, 36);
+      Assert.AreEqual(aNode.Arguments.StartToken.Value, "(");
+      Assert.AreEqual(aNode.Arguments.StartToken.Line, 8);
+      Assert.AreEqual(aNode.Arguments.StartToken.Column, 33);
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Value, ")");
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Line, 8);
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Column, 36);
 
       aNode = attrNode.Attributes[1];
       Assert.AreEqual(aNode.StartToken.Value, "Guid");
@@ -118,12 +118,12 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(nameTag.Identifier, "Guid");
       Assert.AreEqual(nameTag.IdentifierToken.Line, 8);
       Assert.AreEqual(nameTag.IdentifierToken.Column, 39);
-      Assert.AreEqual(aNode.OpenParenthesis.Value, "(");
-      Assert.AreEqual(aNode.OpenParenthesis.Line, 8);
-      Assert.AreEqual(aNode.OpenParenthesis.Column, 43);
-      Assert.AreEqual(aNode.CloseParenthesis.Value, ")");
-      Assert.AreEqual(aNode.CloseParenthesis.Line, 8);
-      Assert.AreEqual(aNode.CloseParenthesis.Column, 82);
+      Assert.AreEqual(aNode.Arguments.StartToken.Value, "(");
+      Assert.AreEqual(aNode.Arguments.StartToken.Line, 8);
+      Assert.AreEqual(aNode.Arguments.StartToken.Column, 43);
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Value, ")");
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Line, 8);
+      Assert.AreEqual(aNode.Arguments.TerminatingToken.Column, 82);
     }
     [TestMethod]
 

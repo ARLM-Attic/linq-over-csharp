@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   ///     "class" | "struct" | "new" "(" ")" | TypeOrNamespaceNode
   /// </remarks>
   // ================================================================================================
-  public class TypeParameterConstraintTagNode : SyntaxNode, IParentheses
+  public class TypeParameterConstraintTagNode : SyntaxNode<TypeOrMemberDeclarationNode>, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

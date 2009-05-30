@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents an item of an array initializer.
   /// </summary>
   // ================================================================================================
-  public class ArrayItemInitializerNode : SyntaxNode
+  public class ArrayItemInitializerNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -37,6 +37,10 @@ namespace CSharpTreeBuilder.Ast
     private BracingStyle _TypeAndNamespaceBraces;
     private bool _UseOriginalPositions;
     private bool _UseTabs;
+    private bool _SpaceBeforeColonInAttributes;
+    private bool _SpaceAfterColonInAttributes;
+    private bool _SpaceBeforeComma;
+    private bool _SpaceAfterComma;
 
     #endregion
 
@@ -64,6 +68,10 @@ namespace CSharpTreeBuilder.Ast
             IndentationWidth = 2,
             TypeAndNamespaceBraces = BracingStyle.NextLineBsd,
             SpaceAroundAssignmentOps = true,
+            SpaceBeforeColonInAttributes = false,
+            SpaceAfterColonInAttributes = true,
+            SpaceBeforeComma = false,
+            SpaceAfterComma = true,
           };
       Default.MakeReadOnly();
     }
@@ -360,9 +368,6 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Gets or sets a value indicating whether space should be kept around assignment operators.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if space should be kept around assignment operators; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
     public bool SpaceAroundAssignmentOps
     {
@@ -371,6 +376,66 @@ namespace CSharpTreeBuilder.Ast
       {
         CheckReadonly();
         _SpaceAroundAssignmentOps = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put before colon in attributes.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceBeforeColonInAttributes
+    {
+      get { return _SpaceBeforeColonInAttributes; }
+      set
+      {
+        CheckReadonly();
+        _SpaceBeforeColonInAttributes = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put after colon in attributes.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceAfterColonInAttributes
+    {
+      get { return _SpaceAfterColonInAttributes; }
+      set
+      {
+        CheckReadonly();
+        _SpaceAfterColonInAttributes = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put before comma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceBeforeComma
+    {
+      get { return _SpaceBeforeComma; }
+      set
+      {
+        CheckReadonly();
+        _SpaceBeforeComma = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put after comma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceAfterComma
+    {
+      get { return _SpaceAfterComma; }
+      set
+      {
+        CheckReadonly();
+        _SpaceAfterComma = value;
       }
     }
 

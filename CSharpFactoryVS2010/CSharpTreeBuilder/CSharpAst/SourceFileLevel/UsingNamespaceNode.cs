@@ -1,69 +1,54 @@
 // ================================================================================================
-// UsingWithAliasNode.cs
+// UsingNamespaceNode.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a using clause with an alias.
-  /// </summary>
+  /// <summary>This class represents a using namespace directive.</summary>
   /// <remarks>
-  /// Syntax:
-  ///   UsingNode:
-  ///     "using" alias "=" TypeOrNamespaceNode ";"
+  /// 	<para>Syntax:</para>
+  /// 	<para>"<strong>using</strong>" <em>TypeOrNamespaceNode</em>
+  ///     "<strong>;</strong>"</para>
   /// </remarks>
   // ================================================================================================
-  public sealed class UsingWithAliasNode : UsingNode
+  public class UsingNamespaceNode : SyntaxNode<NamespaceScopeNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="UsingWithAliasNode"/> class.
+    /// Initializes a new instance of the <see cref="UsingNamespaceNode"/> class.
     /// </summary>
     /// <param name="parent">The parent node.</param>
-    /// <param name="start">The start token.</param>
-    /// <param name="alias">The alias token.</param>
-    /// <param name="equalToken">The equal token.</param>
-    /// <param name="typeName">Name of the type.</param>
+    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="namespaceNode">The namespace node.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingWithAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token equalToken,
-                              TypeOrNamespaceNode typeName, Token terminating)
-      : base(parent, start, typeName, terminating)
+    public UsingNamespaceNode(NamespaceScopeNode parent, Token start, TypeOrNamespaceNode namespaceNode, 
+      Token terminating)
+      : base(start)
     {
-      AliasToken = alias;
-      EqualToken = equalToken;
+      Parent = parent;
+      TypeName = namespaceNode;
+      Terminate(terminating);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the alias token.
+    /// Gets the parent of this node.
     /// </summary>
-    /// <value>The alias token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token AliasToken { get; private set; }
+    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the alias.
+    /// Gets the namespace belonging to this using directive.
     /// </summary>
-    /// <value>The alias.</value>
+    /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
-    public string Alias
-    {
-      get { return AliasToken.Value; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the equal token.
-    /// </summary>
-    /// <value>The equal token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token EqualToken { get; private set; }
+    public TypeOrNamespaceNode TypeName { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -76,11 +61,8 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
-        IndentationSegment.Apply,
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
-        AliasToken,
-        SpaceAroundSegment.AssignmentOp(EqualToken),
         TypeName,
         TerminatingToken,
         ForceNewLineSegment.Default

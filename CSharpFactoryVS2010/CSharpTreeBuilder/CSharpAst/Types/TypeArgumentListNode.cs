@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   /// respectively.
   /// </remarks>
   // ================================================================================================
-  public class TypeArgumentListNode : SyntaxNode
+  public class TypeArgumentListNode : SyntaxNode<ISyntaxNode>
   {
     private ImmutableCollection<TypeArgumentTag> _Args =
       new ImmutableCollection<TypeArgumentTag>();

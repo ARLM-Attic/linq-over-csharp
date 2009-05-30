@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -12,7 +10,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class defines a collection of enum value nodes.
   /// </summary>
   // ================================================================================================
-  public class EnumValueNodeCollection : ImmutableCollection<EnumValueNode>
+  public class EnumValueNodeCollection : SyntaxNodeCollection<EnumValueNode, EnumDeclarationNode>
   {
   }
 }

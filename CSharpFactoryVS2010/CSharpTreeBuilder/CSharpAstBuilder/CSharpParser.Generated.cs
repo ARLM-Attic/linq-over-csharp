@@ -320,7 +320,6 @@ public partial class CSharpParser
 				Expect(1);
 				nsDecl.NameTags.Add(sepToken, t); 
 			}
-			parentNode.NamespaceDeclarations.Add(nsDecl); 
 			Expect(96);
 			nsDecl.OpenBracket = t; 
 			while (IsExternAliasDirective()) {
@@ -354,6 +353,7 @@ public partial class CSharpParser
 			  typeDecl.Modifiers = mod;
 			  typeDecl.DeclaringNamespace = parentNode;
 			  parentNode.TypeDeclarations.Add(typeDecl);
+			  parentNode.InScopeDeclarations.Add(typeDecl);
 			}
 			
 		} else SynErr(145);
@@ -361,33 +361,26 @@ public partial class CSharpParser
 
 	void TypeName(out TypeOrNamespaceNode resultNode) {
 		resultNode = null;
-		Token qualifier = null;
 		Token separator = null;
 		Token identifier = null;
 		TypeArgumentListNode argList = null;
 		
 		Expect(1);
-		qualifier = t; 
+		resultNode = new TypeOrNamespaceNode(t);
+		identifier = t; 
+		
 		if (la.kind == 91) {
 			Get();
 			separator = t; 
+			resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
+			
 			Expect(1);
 			identifier = t; 
 		}
-		if (separator == null)
-		{
-		  resultNode = new TypeOrNamespaceNode(qualifier);
-		  identifier = qualifier;
-		}
-		else
-		{
-		  resultNode = new TypeOrNamespaceNode(qualifier, separator);
-		}
-		
 		if (la.kind == 100) {
 			TypeArgumentList(out argList);
 		}
-		resultNode.AddTypeTag(new TypeTagNode(identifier, argList)); 
+		resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); 
 		while (la.kind == 90) {
 			Get();
 			separator = t;
@@ -398,7 +391,7 @@ public partial class CSharpParser
 			if (la.kind == 100) {
 				TypeArgumentList(out argList);
 			}
-			resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); 
+			resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); 
 		}
 		Terminate(resultNode); 
 	}
@@ -661,33 +654,32 @@ public partial class CSharpParser
 		AttributeDecorationNodeCollection attrNodes;
 		
 		Expect(100);
-		if (paramNode != null) paramNode.SetOpenSign(t); 
+		Start(paramNode.TypeParameters); 
 		TypeParameter(out attrNodes, out identifier);
-		var typeParam = new TypeParameterNode(identifier, attrNodes);
-		if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
-		
+		paramNode.TypeParameters.Add(new TypeParameterNode(identifier, attrNodes)); 
 		while (la.kind == 87) {
 			Get();
 			var separator= t; 
 			TypeParameter(out attrNodes, out identifier);
-			typeParam = new TypeParameterContinuationNode(separator, identifier, attrNodes);
-			if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
-			
+			paramNode.TypeParameters.Add(new TypeParameterNode(separator, identifier, attrNodes)); 
 		}
 		Expect(93);
-		if (paramNode != null) paramNode.SetCloseSign(t); 
+		Terminate(paramNode.TypeParameters); 
 	}
 
 	void BaseTypeList(TypeDeclarationNode typeDecl) {
 		TypeOrNamespaceNode typeNode; 
 		Expect(86);
+		typeDecl.ColonToken = t; 
 		ClassType(out typeNode);
 		typeDecl.BaseTypes.Add(typeNode); 
 		while (la.kind == 87) {
 			Get();
 			var separator = t; 
 			ClassType(out typeNode);
-			typeDecl.BaseTypes.Add(new TypeOrNamespaceContinuationNode(separator, typeNode)); 
+			typeNode.SeparatorToken = separator;
+			typeDecl.BaseTypes.Add(typeNode); 
+			
 		}
 	}
 
@@ -921,7 +913,7 @@ public partial class CSharpParser
 				var separator = t; 
 				while (!(la.kind == 0 || la.kind == 1 || la.kind == 97)) {SynErr(156); Get();}
 				EnumMemberDeclaration(out valNode);
-				typeDecl.Values.Add(new EnumValueContinuationNode(separator, valNode)); 
+				typeDecl.Values.Add(separator, valNode); 
 			}
 			if (la.kind == 87) {
 				Get();
@@ -1162,33 +1154,26 @@ public partial class CSharpParser
 
 	void MemberName(out TypeOrNamespaceNode resultNode) {
 		resultNode = null;
-		Token qualifier = null;
 		Token separator = null;
 		Token identifier = null;
 		TypeArgumentListNode argList = null;
 		
 		Expect(1);
-		qualifier = t; 
+		resultNode = new TypeOrNamespaceNode(t);
+		identifier = t; 
+		
 		if (la.kind == 91) {
 			Get();
 			separator = t; 
+			resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
+			
 			Expect(1);
 			identifier = t; 
 		}
-		if (separator == null)
-		{
-		  resultNode = new TypeOrNamespaceNode(qualifier);
-		  identifier = qualifier;
-		}
-		else
-		{
-		  resultNode = new TypeOrNamespaceNode(qualifier, separator);
-		}
-		
 		if (la.kind == _lt && IsPartOfMemberName()) {
 			TypeArgumentList(out argList);
 		}
-		resultNode.AddTypeTag(new TypeTagNode(identifier, argList)); 
+		resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); 
 		while (la.kind == _dot && Peek(1).kind == _ident) {
 			Expect(90);
 			separator = t;
@@ -1199,7 +1184,7 @@ public partial class CSharpParser
 			if (la.kind == _lt && IsPartOfMemberName()) {
 				TypeArgumentList(out argList);
 			}
-			resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); 
+			resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); 
 		}
 		Terminate(resultNode); 
 	}
@@ -2094,7 +2079,7 @@ public partial class CSharpParser
 		ExpressionNode exprNode;
 		
 		Expect(98);
-		argsNode.OpenParenthesis = t; 
+		Start(argsNode.Arguments); 
 		if (StartOf(20)) {
 			if (IsAssignment()) {
 				Expect(1);
@@ -2103,10 +2088,7 @@ public partial class CSharpParser
 				equal = t; 
 			}
 			Expression(out exprNode);
-			var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
-			Terminate(argNode);
-			argsNode.Arguments.Add(argNode);
-			
+			argsNode.Arguments.Add(new AttributeArgumentNode(identifier, equal, exprNode)); 
 			while (la.kind == 87) {
 				Get();
 				var separator = t; 
@@ -2118,14 +2100,11 @@ public partial class CSharpParser
 				} else if (StartOf(20)) {
 				} else SynErr(179);
 				Expression(out exprNode);
-				var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
-				Terminate(argcNode);
-				argsNode.Arguments.Add(argcNode);
-				
+				argsNode.Arguments.Add(separator, new AttributeArgumentNode(identifier, equal, exprNode)); 
 			}
 		}
 		Expect(113);
-		Terminate(argsNode); 
+		Terminate(argsNode.Arguments); 
 	}
 
 	void PrimitiveType(out TypeOrNamespaceNode typeNode) {

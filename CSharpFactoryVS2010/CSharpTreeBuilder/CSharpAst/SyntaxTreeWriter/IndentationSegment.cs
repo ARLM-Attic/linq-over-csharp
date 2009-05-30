@@ -14,25 +14,17 @@ namespace CSharpTreeBuilder.Ast
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Apply the current indentation level.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Apply = new IndentationSegment();
-
-    // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Decrement the current indentation level.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Decrement = new IndentationSegment();
+    private static readonly IndentationSegment Decrement = new IndentationSegment();
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Increment the current indentation level.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Increment = new IndentationSegment();
+    private static readonly IndentationSegment Increment = new IndentationSegment();
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -51,8 +43,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void Control(OutputItemSerializer serializer)
     {
-      if (this == Apply) serializer.ApplyIndentation();
-      else if (this == Increment) serializer.IncrementIndentation();
+      if (this == Increment) serializer.IncrementIndentation();
       else if (this == Decrement) serializer.DecrementIndentation();
     }
   }

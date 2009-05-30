@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   ///     identifier [TypeArgumentListNode]
   /// </remarks>
   // ================================================================================================
-  public class TypeTagNode : SyntaxNode, IIdentifierSupport, ITypeArguments
+  public class TypeTagNode : SyntaxNode<TypeOrNamespaceNode>, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,20 +32,6 @@ namespace CSharpTreeBuilder.Ast
       IdentifierToken = identifier;
       Arguments = argumentListNode;
       Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TypeTagNode"/> class.
-    /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="identifier">Identifier token.</param>
-    /// <param name="argumentListNode">The argument list node.</param>
-    // ----------------------------------------------------------------------------------------------
-    public TypeTagNode(Token separator, Token identifier, TypeArgumentListNode argumentListNode)
-      : this(identifier, argumentListNode)
-    {
-      SeparatorToken = separator;
     }
 
     #region IIdentifierSupport Members

@@ -20,7 +20,7 @@ namespace CSharpTreeBuilder.Ast
 
     private int _IndentationDepth;
     private int _LastRowPosition;
-    private bool _MandatoryWhiteSpaceNeeded;
+    private bool _NewLineUsedRecently;
 
     #endregion
 
@@ -88,7 +88,7 @@ namespace CSharpTreeBuilder.Ast
     public void Append(OutputSegment segment)
     {
       if (segment == null) return;
-      foreach (object element in segment.OutputSegmentElements)
+      foreach (var element in segment.OutputSegmentElements)
       {
         Append(element);
       }
@@ -119,7 +119,7 @@ namespace CSharpTreeBuilder.Ast
       }
 
       // --- Append a SyntaxNode
-      var syntaxNode = element as SyntaxNode;
+      var syntaxNode = element as ISyntaxNode;
       if (syntaxNode != null)
       {
         Append(syntaxNode.GetOutputSegment());
@@ -160,7 +160,8 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     internal void SignMandatoryWhiteSpace()
     {
-      _MandatoryWhiteSpaceNeeded = true;
+      OutputItems.Add(new TextOutputItem(CurrentRow, CurrentColumn, " "));
+      CurrentColumn++;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -170,10 +171,11 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     internal void ForceNewLine()
     {
-      if (OutputOptions.UseOriginalPositions) return;
+      if (OutputOptions.UseOriginalPositions || _NewLineUsedRecently) return;
+      _NewLineUsedRecently = true;
       CurrentRow++;
       _LastRowPosition++;
-      CurrentColumn = 0;
+      CurrentColumn = OutputOptions.IndentationWidth * _IndentationDepth;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -181,11 +183,11 @@ namespace CSharpTreeBuilder.Ast
     /// Applies the current indentation
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    internal void ApplyIndentation()
+    private void ApplyIndentation()
     {
-      if (!OutputOptions.UseOriginalPositions && CurrentColumn == 0)
+      if (_NewLineUsedRecently)
       {
-        CurrentColumn += OutputOptions.IndentationWidth*_IndentationDepth;
+        CurrentColumn = OutputOptions.IndentationWidth * _IndentationDepth;
       }
     }
 
@@ -198,6 +200,7 @@ namespace CSharpTreeBuilder.Ast
     {
       _IndentationDepth++;
       if (_IndentationDepth > 100) _IndentationDepth = 100;
+      ApplyIndentation();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -209,6 +212,7 @@ namespace CSharpTreeBuilder.Ast
     {
       _IndentationDepth--;
       if (_IndentationDepth < 0) _IndentationDepth = 0;
+      ApplyIndentation();
     }
 
     #endregion
@@ -223,16 +227,10 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     private void AppendOutputItem(OutputItem item)
     {
-      // --- Insert a mandatory whitespaceif required
-      if (_MandatoryWhiteSpaceNeeded && CurrentRow >= item.Row && CurrentColumn >= item.Column)
-      {
-        OutputItems.Add(new TextOutputItem(item.Row, item.Column, " "));
-        CurrentColumn++;
-      }
       OutputItems.Add(item);
       CurrentColumn += item.GetLength(OutputOptions);
       _LastRowPosition = CurrentRow;
-      _MandatoryWhiteSpaceNeeded = false;
+      _NewLineUsedRecently = false;
     }
 
     // ----------------------------------------------------------------------------------------------

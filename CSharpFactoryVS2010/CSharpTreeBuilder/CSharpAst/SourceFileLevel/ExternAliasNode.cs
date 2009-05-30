@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   ///     "extern" "alias" identifier ";"
   /// </remarks>
   // ================================================================================================
-  public sealed class ExternAliasNode : SyntaxNode, IIdentifierSupport
+  public sealed class ExternAliasNode : SyntaxNode<NamespaceScopeNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -98,7 +98,6 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
-        IndentationSegment.Apply,
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
         AliasToken,

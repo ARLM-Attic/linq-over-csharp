@@ -39,5 +39,32 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseBrace { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segments representing the type declaration body.
+    /// </summary>
+    /// <returns>Output segments representing the type declaration body.</returns>
+    // ----------------------------------------------------------------------------------------------
+    protected virtual OutputSegment GetBodySegments()
+    {
+      return new OutputSegment(MemberDeclarations);  
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment.
+    /// </summary>
+    /// <returns></returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        base.GetOutputSegment(),
+        BraceSegment.OpenType(OpenBrace),
+        GetBodySegments(),
+        BraceSegment.CloseType(CloseBrace)
+        );
+    }
   }
 }

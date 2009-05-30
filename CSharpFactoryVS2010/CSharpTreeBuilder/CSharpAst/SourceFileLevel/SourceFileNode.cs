@@ -14,8 +14,6 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public sealed class SourceFileNode : NamespaceScopeNode
   {
-    #region Lifecycle methods
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SourceFileNode"/> class.
@@ -28,10 +26,6 @@ namespace CSharpTreeBuilder.Ast
       FullName = fullName;
       GlobalAttributes = new AttributeDecorationNodeCollection();
     }
-
-    #endregion
-
-    #region Public Properties
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -56,10 +50,6 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public AttributeDecorationNodeCollection GlobalAttributes { get; private set; }
 
-    #endregion
-
-    #region Output methods
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates the output items describing this source file.
@@ -74,6 +64,22 @@ namespace CSharpTreeBuilder.Ast
       return serializer.OutputItems;
     }
 
-    #endregion
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        ExternAliaseNodes,
+        UsingNodes,
+        GlobalAttributes,
+        InScopeDeclarations
+        );
+    }
   }
 }

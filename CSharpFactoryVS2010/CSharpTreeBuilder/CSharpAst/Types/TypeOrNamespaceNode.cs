@@ -18,17 +18,17 @@ namespace CSharpTreeBuilder.Ast
   ///     [Qualifier "::"] TypeTagNode { TypeTagContinuationNode }
   /// </remarks>
   // ================================================================================================
-  public class TypeOrNamespaceNode : SyntaxNode
+  public class TypeOrNamespaceNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeOrNamespaceNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode(Token start) : base(start)
+    public TypeOrNamespaceNode(Token identifier) : base(identifier)
     {
-      TypeTags = new ImmutableCollection<TypeTagNode>();
+      TypeTags = new TypeTagNodeCollection();
       TypeModifiers = new ImmutableCollection<TypeModifierNode>();
     }
 
@@ -36,25 +36,14 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeOrNamespaceNode"/> class.
     /// </summary>
-    /// <param name="qualifier">The qualifier.</param>
-    /// <param name="separator">The separator.</param>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode(Token qualifier, Token separator)
-      : base(qualifier)
+    public TypeOrNamespaceNode(Token separator, Token identifier)
+      : this(identifier)
     {
-      QualifierToken = qualifier;
-      QualifierSeparatorToken = separator;
-      TypeTags = new ImmutableCollection<TypeTagNode>();
-      TypeModifiers = new ImmutableCollection<TypeModifierNode>();
+      SeparatorToken = separator;
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the qualifier token.
-    /// </summary>
-    /// <value>The qualifier token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token QualifierToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -66,10 +55,10 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool HasQualifier
     {
-      get { return QualifierToken != null; }
+      get { return TypeTags.Count >= 2 && TypeTags[1].SeparatorToken.Value == "::"; }
     }
 
-    // ----------------------------------------------------------------------------------------------
+    // ---------------------------8-------------------------------------------------------------------
     /// <summary>
     /// Gets the qualifier.
     /// </summary>
@@ -77,16 +66,8 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public string Qualifier
     {
-      get { return QualifierToken == null ? string.Empty : QualifierToken.Value; }
+      get { return HasQualifier ? TypeTags[1].Identifier : string.Empty; }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the separator token.
-    /// </summary>
-    /// <value>The separator token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token QualifierSeparatorToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -94,9 +75,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The type tags.</value>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<TypeTagNode> TypeTags { get; protected set; }
-
-    // ----------------------------------------------------------------------------------------------
+    public TypeTagNodeCollection TypeTags { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -125,16 +104,6 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public ImmutableCollection<TypeModifierNode> TypeModifiers { get; private set; }
 
-    /// <summary>
-    /// Adds the type tag.
-    /// </summary>
-    /// <param name="tag">The tag.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddTypeTag(TypeTagNode tag)
-    {
-      TypeTags.Add(tag);
-    }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Create type of namespace node from the specified token used for a simple type.
@@ -145,7 +114,7 @@ namespace CSharpTreeBuilder.Ast
     public static TypeOrNamespaceNode CreateTypeNode(Token t)
     {
       var result = new TypeOrNamespaceNode(t);
-      result.AddTypeTag(new TypeTagNode(t, null));
+      result.TypeTags.Add(new TypeTagNode(t, null));
       result.Terminate(t);
       return result;
     }
@@ -160,9 +129,9 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override OutputSegment GetOutputSegment()
     {
-      return HasQualifier
-               ? new OutputSegment(QualifierToken, QualifierSeparatorToken)
-               : new OutputSegment(TypeTags);
+      return new OutputSegment(
+        TypeTags
+        );
     }
   }
 }

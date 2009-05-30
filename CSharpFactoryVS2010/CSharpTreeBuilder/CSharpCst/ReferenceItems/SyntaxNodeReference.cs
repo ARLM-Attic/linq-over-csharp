@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.Cst
     /// <param name="sourceFileNode">The source file node.</param>
     /// <param name="syntaxNode">The syntax node within the source file node.</param>
     // ----------------------------------------------------------------------------------------------
-    public SyntaxNodeReference(SourceFileNode sourceFileNode, SyntaxNode syntaxNode)
+    public SyntaxNodeReference(SourceFileNode sourceFileNode, ISyntaxNode syntaxNode)
     {
       SourceFileNode = sourceFileNode;
       SyntaxNode = syntaxNode;
@@ -51,6 +51,6 @@ namespace CSharpTreeBuilder.Cst
     /// Gets the syntax node reference.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SyntaxNode SyntaxNode { get; private set; }
+    public ISyntaxNode SyntaxNode { get; private set; }
   }
 }

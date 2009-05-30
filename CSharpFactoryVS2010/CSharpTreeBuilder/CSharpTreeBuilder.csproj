@@ -64,7 +64,19 @@
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
+    <Compile Include="CSharpAst\ISyntaxNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\ExternAliasNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\ScopeNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\UsingNodeCollection.cs" />
+    <Compile Include="CSharpAst\SyntaxNodeCollection.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceAfterSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceBeforeSegment.cs" />
+    <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceType.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterListNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeParameterNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeTagNodeCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
     <Compile Include="CSharpCst\CompilationModel\CompilationEntity.cs" />
@@ -90,6 +102,7 @@
     <Compile Include="ProjectContent\CSharp9ProjectContentProvider.cs" />
     <Compile Include="ProjectContent\EmptyContentProvider.cs" />
     <Compile Include="ProjectContent\FolderContentProvider.cs" />
+    <Compile Include="ProjectContent\ICompilationErrorHandler.cs" />
     <Compile Include="ProjectContent\PhysicalSourceFile.cs" />
     <Compile Include="ProjectContent\CSharpProject.cs" />
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
@@ -212,7 +225,6 @@
     <Compile Include="CSharpAst\Members\ConstructorDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\ConstTagNode.cs" />
     <Compile Include="CSharpAst\Members\ConstTagNodeCollection.cs" />
-    <Compile Include="CSharpAst\Members\EnumValueContinuationNode.cs" />
     <Compile Include="CSharpAst\Members\EnumValueNode.cs" />
     <Compile Include="CSharpAst\Members\EnumValueNodeCollection.cs" />
     <Compile Include="CSharpAst\Members\EventPropertyDeclarationNode.cs" />
@@ -232,7 +244,6 @@
     <Compile Include="CSharpAst\Members\MethodDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\PropertyDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\PropertyDeclarationNodeBase.cs" />
-    <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentContinuationNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeDecorationNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeDecorationNodeCollection.cs" />
@@ -243,8 +254,8 @@
     <Compile Include="CSharpAst\SourceFileLevel\NamespaceScopeNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\SourceFileNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\SourceFileNodeCollection.cs" />
-    <Compile Include="CSharpAst\SourceFileLevel\UsingNode.cs" />
-    <Compile Include="CSharpAst\SourceFileLevel\UsingWithAliasNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\UsingNamespaceNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\UsingAliasNode.cs" />
     <Compile Include="CSharpAst\Statements\BlockStatementNode.cs" />
     <Compile Include="CSharpAst\Statements\ConstStatementNode.cs" />
     <Compile Include="CSharpAst\Statements\LabelNode.cs" />
@@ -291,7 +302,6 @@
     <Compile Include="CSharpAst\Types\TypeDeclarationNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeModifierNode.cs" />
     <Compile Include="CSharpAst\Types\TypeOrMemberDeclarationNode.cs" />
-    <Compile Include="CSharpAst\Types\TypeOrNamespaceContinuationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeOrNamespaceNode.cs" />
     <Compile Include="CSharpAst\Types\TypeOrNamespaceNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterConstraintNode.cs" />
@@ -299,7 +309,6 @@
     <Compile Include="CSharpAst\Types\TypeParameterConstraintTagContinuationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterConstraintTagNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterConstraintTagNodeCollection.cs" />
-    <Compile Include="CSharpAst\Types\TypeParameterContinuationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterNode.cs" />
     <Compile Include="CSharpAst\Types\TypeTagNode.cs" />
     <Compile Include="CSharpAst\Types\TypeWithBodyDeclarationNode.cs" />

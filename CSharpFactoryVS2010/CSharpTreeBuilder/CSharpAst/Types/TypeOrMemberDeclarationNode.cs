@@ -3,7 +3,6 @@
 //
 // Created: 2009.04.03, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -26,7 +25,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected TypeOrMemberDeclarationNode(Token start) : base(start)
     {
-      TypeParameters = new ImmutableCollection<TypeParameterNode>();
+      TypeParameters = new TypeParameterListNode();
       TypeParameterConstraints = new TypeParameterConstraintNodeCollection();
     }
 
@@ -37,6 +36,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public ModifierNodeCollection Modifiers { get; internal set; }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the name of the type.
     /// </summary>
@@ -46,6 +46,7 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken.Value; }
     }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this instance is partial type declaration.
     /// </summary>
@@ -56,9 +57,6 @@ namespace CSharpTreeBuilder.Ast
     public Token PartialToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -88,12 +86,7 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #endregion
-
     // ----------------------------------------------------------------------------------------------
-
-    #region ITypeParameterHolder Members
-
     /// <summary>
     /// Gets a value indicating whether this instance has type parameters.
     /// </summary>
@@ -103,45 +96,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool HasTypeParameters
     {
-      get { return OpenSign != null; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the open sign token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token OpenSign { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the open sign token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void SetOpenSign(Token token)
-    {
-      OpenSign = token;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the close sign token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseSign { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the close sign token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void SetCloseSign(Token token)
-    {
-      CloseSign = token;
+      get { return TypeParameters.StartToken != null; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -149,7 +104,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of type parameters.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<TypeParameterNode> TypeParameters { get; private set; }
+    public TypeParameterListNode TypeParameters { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -157,10 +112,40 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The type parameter constraints.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterConstraintNodeCollection TypeParameterConstraints { get; private set; }
-
-    #endregion
+    public TypeParameterConstraintNodeCollection TypeParameterConstraints { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segments representing the base type list.
+    /// </summary>
+    /// <returns></returns>
+    // ----------------------------------------------------------------------------------------------
+    protected virtual OutputSegment GetDeclarationSegments()
+    {
+      return null;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        base.GetOutputSegment(),
+        Modifiers,
+        PartialToken,
+        StartToken,
+        MandatoryWhiteSpaceSegment.Default,
+        IdentifierToken,
+        TypeParameters,
+        GetDeclarationSegments(),
+        TypeParameterConstraints
+        );
+    }
   }
 }

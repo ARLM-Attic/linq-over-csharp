@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   ///     identifier
   /// </remarks>
   // ================================================================================================
-  public class NameTagNode : SyntaxNode, IIdentifierSupport
+  public class NameTagNode : SyntaxNode<TypeOrNamespaceNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

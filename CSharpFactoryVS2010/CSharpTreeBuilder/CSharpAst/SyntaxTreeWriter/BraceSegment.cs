@@ -96,15 +96,13 @@ namespace CSharpTreeBuilder.Ast
       {
         case BracingStyle.NextLineBsd:
           serializer.ForceNewLine();
-          serializer.ApplyIndentation();
           serializer.Append(Token);
-          serializer.ForceNewLine();
           serializer.IncrementIndentation();
+          serializer.ForceNewLine();
           break;
         case BracingStyle.NextLineGnu:
           serializer.ForceNewLine();
           serializer.IncrementIndentation();
-          serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           serializer.IncrementIndentation();
@@ -112,7 +110,6 @@ namespace CSharpTreeBuilder.Ast
         case BracingStyle.NextLineWhitesmiths:
           serializer.ForceNewLine();
           serializer.IncrementIndentation();
-          serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           break;
@@ -145,32 +142,28 @@ namespace CSharpTreeBuilder.Ast
       {
         case BracingStyle.NextLineBsd:
           serializer.DecrementIndentation();
-          serializer.ApplyIndentation();
+          serializer.ForceNewLine();
           serializer.Append(Token);
           serializer.ForceNewLine();
           break;
         case BracingStyle.NextLineGnu:
           serializer.DecrementIndentation();
-          serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           serializer.DecrementIndentation();
           break;
         case BracingStyle.NextLineWhitesmiths:
-          serializer.ApplyIndentation();
           serializer.DecrementIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           break;
         case BracingStyle.EndOfLineNoSpace:
           serializer.DecrementIndentation();
-          serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           break;
         case BracingStyle.EndOfLineKAndR:
           serializer.DecrementIndentation();
-          serializer.ApplyIndentation();
           serializer.Append(Token);
           serializer.ForceNewLine();
           break;

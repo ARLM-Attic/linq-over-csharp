@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a local variable declaration
   /// </summary>
   // ================================================================================================
-  public class LocalVariableNode : SyntaxNode
+  public class LocalVariableNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

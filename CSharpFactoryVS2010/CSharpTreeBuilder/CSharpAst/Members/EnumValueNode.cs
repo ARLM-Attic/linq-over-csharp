@@ -18,14 +18,15 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumValueNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumValueNode(Token start)
-      : base(start)
+    public EnumValueNode(Token identifier)
+      : base(identifier)
     {
-      IdentifierToken = start;
+      IdentifierToken = identifier;
     }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the equal token.
     /// </summary>
@@ -40,9 +41,6 @@ namespace CSharpTreeBuilder.Ast
     public ExpressionNode Expression { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -74,8 +72,24 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #endregion
-
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        base.GetOutputSegment(),
+        SeparatorToken,
+        ForceNewLineSegment.Default,
+        IdentifierToken,
+        EqualToken,
+        Expression
+        );
+    }
   }
 }

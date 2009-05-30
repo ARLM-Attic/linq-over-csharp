@@ -18,25 +18,34 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeParameterNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     /// <param name="attrNodes">Attributes of the type parameter.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterNode(Token start, AttributeDecorationNodeCollection attrNodes)
-      : base(start)
+    public TypeParameterNode(Token identifier, AttributeDecorationNodeCollection attrNodes)
+      : base(identifier)
     {
       AttributeDecorations = attrNodes;
     }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TypeParameterNode"/> class.
+    /// </summary>
+    /// <param name="separator">The separator token.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
+    /// <param name="attrNodes">Attributes of the type parameter.</param>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterNode(Token separator, Token identifier, AttributeDecorationNodeCollection attrNodes)
+      : this(identifier, attrNodes)
+    {
+      SeparatorToken = separator;
+    }
 
-    #region IAttributedDeclaration Members
-
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the attribute decorations belonging to this declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public AttributeDecorationNodeCollection AttributeDecorations { get; internal set; }
-
-    #endregion
   }
 }

@@ -1,16 +1,14 @@
 // ================================================================================================
-// AttributeNodeCollection.cs
+// ExternAliasNodeCollection.cs
 //
-// Created: 2009.05.29, by Istvan Novak (DeepDiver)
+// Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of attribute nodes.
-  /// </summary>
+  /// <summary>This class represents a collection of extern alias nodes.</summary>
   // ================================================================================================
-  public sealed class AttributeNodeCollection: SyntaxNodeCollection<AttributeNode, AttributeDecorationNode>
+  public class ExternAliasNodeCollection : SyntaxNodeCollection<ExternAliasNode, NamespaceScopeNode>
   {
   }
 }

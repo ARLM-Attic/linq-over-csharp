@@ -40,5 +40,21 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token OrphanSeparator { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segments representing the type declaration body.
+    /// </summary>
+    /// <returns>
+    /// Output segments representing the type declaration body.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override OutputSegment GetBodySegments()
+    {
+      return new OutputSegment(
+        Values,
+        OrphanSeparator
+        );
+    }
   }
 }

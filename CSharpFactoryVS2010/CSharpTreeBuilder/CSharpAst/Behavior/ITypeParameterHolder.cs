@@ -3,9 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-using CSharpTreeBuilder.CSharpAstBuilder;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -27,29 +24,11 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the open sign token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    Token OpenSign { get; }
-
-    // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the close sign token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    Token CloseSign { get; }
-
-    // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the collection of type parameters.
     /// </summary>
     /// <value>The type parameters.</value>
     // ----------------------------------------------------------------------------------------------
-    ImmutableCollection<TypeParameterNode> TypeParameters { get; }
+    TypeParameterListNode TypeParameters { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -58,19 +37,5 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The type parameter constraints.</value>
     // ----------------------------------------------------------------------------------------------
     TypeParameterConstraintNodeCollection TypeParameterConstraints { get; }
-
-    /// <summary>
-    /// Sets the open sign token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    // ----------------------------------------------------------------------------------------------
-    void SetOpenSign(Token token);
-
-    /// <summary>
-    /// Sets the close sign token.
-    /// </summary>
-    /// <param name="token">The token.</param>
-    // ----------------------------------------------------------------------------------------------
-    void SetCloseSign(Token token);
   }
 }

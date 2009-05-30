@@ -1,16 +1,14 @@
 // ================================================================================================
-// AttributeNodeCollection.cs
+// UsingNodeCollection.cs
 //
-// Created: 2009.05.29, by Istvan Novak (DeepDiver)
+// Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of attribute nodes.
-  /// </summary>
+  /// <summary>This class represents a collection of using directive nodes.</summary>
   // ================================================================================================
-  public sealed class AttributeNodeCollection: SyntaxNodeCollection<AttributeNode, AttributeDecorationNode>
+  public class UsingNodeCollection : SyntaxNodeCollection<UsingNamespaceNode, NamespaceScopeNode>
   {
   }
 }

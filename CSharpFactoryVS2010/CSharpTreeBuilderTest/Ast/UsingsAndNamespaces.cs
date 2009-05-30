@@ -3,6 +3,8 @@
 //
 // Created: 2009.05.29, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Collections.Generic;
+using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +25,7 @@ namespace CSharpTreeBuilderTest
 
       var sn = project.SyntaxTree.SourceFileNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 5);
-      Assert.AreEqual(sn.UsingWithAliasNodes.Count, 2);
+      Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
       var typeName = sn.UsingNodes[0].TypeName;
       Assert.IsFalse(typeName.HasQualifier);
@@ -49,8 +51,9 @@ namespace CSharpTreeBuilderTest
       tag = typeName.TypeTags[1];
       Assert.AreEqual(tag.Identifier, "Text");
 
-      Assert.AreEqual(sn.UsingWithAliasNodes[0].Alias, "AliasName");
-      typeName = sn.UsingWithAliasNodes[0].TypeName;
+      var aliasNodes = new List<UsingAliasNode>(sn.UsingWithAliasNodes);
+      Assert.AreEqual(aliasNodes[0].Alias, "AliasName");
+      typeName = aliasNodes[0].TypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 3);
       tag = typeName.TypeTags[0];
@@ -60,8 +63,8 @@ namespace CSharpTreeBuilderTest
       tag = typeName.TypeTags[2];
       Assert.AreEqual(tag.Identifier, "Encoding");
 
-      Assert.AreEqual(sn.UsingWithAliasNodes[1].Alias, "SecondAlias");
-      typeName = sn.UsingWithAliasNodes[1].TypeName;
+      Assert.AreEqual(aliasNodes[1].Alias, "SecondAlias");
+      typeName = aliasNodes[1].TypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 2);
       tag = typeName.TypeTags[0];
@@ -81,7 +84,7 @@ namespace CSharpTreeBuilderTest
 
       var sn = project.SyntaxTree.SourceFileNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 5);
-      Assert.AreEqual(sn.UsingWithAliasNodes.Count, 2);
+      Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
       // --- Check for "using System;" token positions
       var usingNode = sn.UsingNodes[0];
@@ -161,7 +164,7 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(typeTag.StartColumn, 31);
       Assert.AreEqual(typeTag.EndLine, 4);
       Assert.AreEqual(typeTag.EndColumn, 38);
-      var aliasNode = usingNode as UsingWithAliasNode;
+      var aliasNode = usingNode as UsingAliasNode;
       Assert.IsNotNull(aliasNode);
       Assert.AreEqual(aliasNode.EqualToken.Line, 4);
       Assert.AreEqual(aliasNode.EqualToken.Column, 17);

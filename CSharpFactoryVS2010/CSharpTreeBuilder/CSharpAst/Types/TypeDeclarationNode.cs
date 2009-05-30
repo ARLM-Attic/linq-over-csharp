@@ -3,6 +3,7 @@
 //
 // Created: 2009.04.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -26,9 +27,17 @@ namespace CSharpTreeBuilder.Ast
     {
       IdentifierToken = name;
       BaseTypes = new TypeOrNamespaceNodeCollection();
+      NestedDeclarations = new ImmutableCollection<TypeOrMemberDeclarationNode>();
       NestedTypes = new TypeDeclarationNodeCollection();
       MemberDeclarations = new MemberDeclarationNodeCollection();
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the colon token separating the type and its base classes.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token ColonToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -50,6 +59,13 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNodeCollection BaseTypes { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the nested declarations.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<TypeOrMemberDeclarationNode> NestedDeclarations { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -57,13 +57,13 @@ namespace CSharpTreeBuilder.Collections
 
     #region Public methods
 
-    // ----------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a new item to the list.
+    /// Adds a new item to the collection.
     /// </summary>
-    /// <param name="item">Item to add to the list.</param>
-    // ----------------------------------------------------------------------------------
-    public void Add(T item)
+    /// <param name="item">Item to add to the collection.</param>
+    // --------------------------------------------------------------------------------------------
+    public virtual void Add(T item)
     {
       if (_BeforeAdd != null)
       {

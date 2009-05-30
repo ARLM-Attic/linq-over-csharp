@@ -71,7 +71,7 @@ namespace CSharpTreeBuilder.Cst
     /// <returns>All syntax node references matching with the criteria.</returns>
     // ----------------------------------------------------------------------------------------------
     public ImmutableCollection<SyntaxNodeReference> GetReferencesFor<TNode>(bool exactMatch)
-      where TNode: SyntaxNode
+      where TNode: ISyntaxNode
     {
       var result = new SyntaxNodeReferenceCollection(this.Where(
                                                        node => node.SyntaxNode.GetType() == typeof(TNode) || 
@@ -88,7 +88,7 @@ namespace CSharpTreeBuilder.Cst
     /// <returns>All syntax node references matching with the criteria.</returns>
     // ----------------------------------------------------------------------------------------------
     public ImmutableCollection<SyntaxNodeReference> GetReferencesFor<TNode>()
-      where TNode : SyntaxNode
+      where TNode : ISyntaxNode
     {
       return GetReferencesFor<TNode>(true);
     }

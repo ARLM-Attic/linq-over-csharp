@@ -3,7 +3,6 @@
 //
 // Created: 2009.03.29, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -16,10 +15,10 @@ namespace CSharpTreeBuilder.Ast
   /// Syntax:
   ///   AttributeNode: 
   ///     TypeOrNamespaceNode 
-  ///       [ "(" [ AttributeArgumentNode ] { AttributeArgumentContinuationNode }  ")" ]
+  ///       [ "(" [ AttributeArgumentNode ] { AttributeArgumentNode }  ")" ]
   /// </remarks>
   // ================================================================================================
-  public class AttributeNode : SyntaxNode, IParentheses
+  public class AttributeNode : SyntaxNode<AttributeDecorationNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -30,20 +29,7 @@ namespace CSharpTreeBuilder.Ast
     public AttributeNode(Token identifier)
       : base(identifier)
     {
-      Arguments = new ImmutableCollection<AttributeArgumentNode>();
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AttributeNode"/> class.
-    /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="identifier">Token providing information about the element.</param>
-    // ----------------------------------------------------------------------------------------------
-    public AttributeNode(Token separator, Token identifier)
-      : this(identifier)
-    {
-      SeparatorToken = separator;
+      Arguments = new AttributeArgumentNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -61,7 +47,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool DefinesArguments
     {
-      get { return OpenParenthesis != null; }
+      get { return Arguments != null; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -69,7 +55,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the arguments belonging to this attribute.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<AttributeArgumentNode> Arguments { get; protected set; }
+    public AttributeArgumentNodeCollection Arguments { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -86,19 +72,25 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the opening parenthesis token.
+    /// Gets the output segment representing this syntax node.
     /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the closing parenthesis token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis
+    public override OutputSegment GetOutputSegment()
     {
-      get { return TerminatingToken; }
+      return new OutputSegment(
+        SeparatorToken == null
+          ? new OutputSegment(SeparatorToken)
+          : (SeparatorToken.Value == ":"
+               ? new OutputSegment(SpaceBeforeSegment.BeforeColonInAttributes(SeparatorToken),
+                                   SpaceAfterSegment.AfterColonInAttributes())
+               : new OutputSegment(SpaceBeforeSegment.BeforeComma(SeparatorToken),
+                                   SpaceAfterSegment.AfterComma())),
+        TypeName,
+        Arguments
+        );
     }
   }
 }

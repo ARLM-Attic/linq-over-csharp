@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a tag in a local variable declaration.
   /// </summary>
   // ================================================================================================
-  public class LocalVariableTagNode : SyntaxNode, IIdentifierSupport
+  public class LocalVariableTagNode : SyntaxNode<ISyntaxNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

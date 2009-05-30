@@ -1,130 +1,113 @@
 // ================================================================================================
-// MemberDeclaratorNode.cs
+// ISyntaxNode.cs
 //
-// Created: 2009.05.13, by Istvan Novak (DeepDiver)
+// Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a member declarator node.
-  /// </summary>
+  /// <summary>This interface defines the responsibilities of a node in the syntax tree.</summary>
+  /// <remarks>
+  ///     This interface is primarily implemented by <see cref="SyntaxNode"/> and
+  ///     <see cref="SyntaxNodeCollection&lt;TNode&gt;"/> but can be implemented by any
+  ///     other types to mimic syntax node behavior.
+  /// </remarks>
   // ================================================================================================
-  public class MemberDeclaratorNode : SyntaxNode<ISyntaxNode>, IIdentifierSupport
+  public interface ISyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
-
-    #region DeclaratorKind enum
-
     /// <summary>
-    /// Kind of member declarator
+    /// Gets or sets the optional leading separator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public enum DeclaratorKind
-    {
-      /// <summary>
-      /// An "ident = expression" form is used.
-      /// </summary>
-      Expression,
-
-      /// <summary>
-      /// A simple name is used.
-      /// </summary>
-      SimpleName,
-
-      /// <summary>
-      /// A member access is used.
-      /// </summary>
-      MemberAccess
-    }
-
-    #endregion
+    Token SeparatorToken { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="MemberDeclaratorNode"/> class.
+    /// Gets the line number of the syntax node.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <remarks>
+    /// Line numbers start at 1.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public MemberDeclaratorNode(Token start)
-      : base(start)
-    {
-    }
+    int StartLine { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the kind of declarator used.
+    /// Gets the ending line number of the syntax node.
     /// </summary>
+    /// <remarks>
+    /// Line numbers start at 1.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public DeclaratorKind Kind { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
+    int EndLine { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the equal token.
+    /// Gets the column number of the syntax node.
     /// </summary>
-    /// <value>The equal token.</value>
+    /// <remarks>
+    /// Column numbers start at 1.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public Token EqualToken { get; internal set; }
+    int StartColumn { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression (in case of "Expression" and "SimpleName" declarators).
+    /// Gets the ending column number of the syntax element.
     /// </summary>
-    /// <value>The expression.</value>
+    /// <remarks>
+    /// Column numbers start at 1.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    int EndColumn { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the dot separator.
+    /// Gets the start position of the language element.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token DotSeparator { get; internal set; }
+    int StartPosition { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type (in case of "MemberAccess" declarator).
+    /// Gets the ending position of the language element.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
-
-    #region IIdentifierSupport Members
-
-    /// <summary>
-    /// Gets or sets the identifier token.
-    /// </summary>
-    /// <value>The identifier token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; internal set; }
+    int EndPosition { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the identifier name.
+    /// Gets the starting token of this language element.
     /// </summary>
-    /// <value>The identifier name.</value>
     // ----------------------------------------------------------------------------------------------
-    public string Identifier
-    {
-      get { return IdentifierToken.Value; }
-    }
+    Token StartToken { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance has identifier.
+    /// Gets the terminating token of this language element.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool HasIdentifier
-    {
-      get { return IdentifierToken != null; }
-    }
+    Token TerminatingToken { get; }
 
-    #endregion
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    OutputSegment GetOutputSegment();
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Terminates this syntax node with the specified token.
+    /// </summary>
+    /// <param name="t">The t.</param>
+    // ----------------------------------------------------------------------------------------------
+    void Terminate(Token t);
   }
 }

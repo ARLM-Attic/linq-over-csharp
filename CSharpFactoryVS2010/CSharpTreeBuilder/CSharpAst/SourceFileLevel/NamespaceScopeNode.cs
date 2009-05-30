@@ -3,7 +3,8 @@
 //
 // Created: 2009.03.27, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -14,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   /// namespaces can be declared.
   /// </summary>
   // ================================================================================================
-  public abstract class NamespaceScopeNode : SyntaxNode
+  public abstract class NamespaceScopeNode : SyntaxNode<NamespaceScopeNode>
   {
     #region Lifecycle methods
 
@@ -26,11 +27,11 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected NamespaceScopeNode(Token start) : base(start)
     {
-      UsingNodes = new ImmutableCollection<UsingNode>();
-      UsingWithAliasNodes = new ImmutableCollection<UsingWithAliasNode>();
-      ExternAliaseNodes = new ImmutableCollection<ExternAliasNode>();
+      UsingNodes = new UsingNodeCollection();
+      ExternAliaseNodes = new ExternAliasNodeCollection();
       NamespaceDeclarations = new NamespaceDeclarationNodeCollection();
       TypeDeclarations = new TypeDeclarationNodeCollection();
+      InScopeDeclarations = new ScopeNodeCollection();
     }
 
     #endregion
@@ -42,21 +43,29 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the using clauses belonging to the source file (only without using alias)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<UsingNode> UsingNodes { get; private set; }
+    public UsingNodeCollection UsingNodes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the using clauses belonging to the source file (only with using alias)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<UsingWithAliasNode> UsingWithAliasNodes { get; private set; }
+    public IEnumerable<UsingAliasNode> UsingWithAliasNodes
+    {
+      get
+      {
+        return UsingNodes
+          .Where(node => node.GetType() == typeof (UsingAliasNode))
+          .Cast<UsingAliasNode>();
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the extern alias clauses belonging to the source file.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<ExternAliasNode> ExternAliaseNodes { get; private set; }
+    public ExternAliasNodeCollection ExternAliaseNodes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -74,6 +83,17 @@ namespace CSharpTreeBuilder.Ast
 
     #endregion
 
+    #region Protected members
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the in-scope declarations.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    internal ScopeNodeCollection InScopeDeclarations { get; private set; }
+
+    #endregion
+
     #region Public operations
 
     // ----------------------------------------------------------------------------------------------
@@ -85,9 +105,9 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="terminating">The terminating token.</param>
     /// <returns>The newly created using node.</returns>
     // ----------------------------------------------------------------------------------------------
-    public UsingNode AddUsing(Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
+    public UsingNamespaceNode AddUsing(Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
     {
-      var node = new UsingNode(this, start, namespaceNode, terminating);
+      var node = new UsingNamespaceNode(this, start, namespaceNode, terminating);
       UsingNodes.Add(node);
       return node;
     }
@@ -103,12 +123,11 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="terminating">The terminating token.</param>
     /// <returns>The newly created using node.</returns>
     // ----------------------------------------------------------------------------------------------
-    public UsingNode AddUsingWithAlias(Token start, Token alias, Token equalToken,
+    public UsingNamespaceNode AddUsingWithAlias(Token start, Token alias, Token equalToken,
                                        TypeOrNamespaceNode typeName, Token terminating)
     {
-      var node = new UsingWithAliasNode(this, start, alias, equalToken, typeName, terminating);
+      var node = new UsingAliasNode(this, start, alias, equalToken, typeName, terminating);
       UsingNodes.Add(node);
-      UsingWithAliasNodes.Add(node);
       return node;
     }
 
@@ -122,12 +141,10 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="terminating">The terminating token.</param>
     /// <returns></returns>
     // ----------------------------------------------------------------------------------------------
-    public ExternAliasNode AddExternAlias(Token start, Token alias, Token identifier,
+    public void AddExternAlias(Token start, Token alias, Token identifier,
                                           Token terminating)
     {
-      var node = new ExternAliasNode(this, start, alias, identifier, terminating);
-      ExternAliaseNodes.Add(node);
-      return node;
+      ExternAliaseNodes.Add(new ExternAliasNode(this, start, alias, identifier, terminating));
     }
 
     #endregion
@@ -147,7 +164,7 @@ namespace CSharpTreeBuilder.Ast
       return new OutputSegment(
         ExternAliaseNodes,
         UsingNodes,
-        NamespaceDeclarations
+        InScopeDeclarations
         );
     }
 

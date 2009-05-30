@@ -1,16 +1,22 @@
 // ================================================================================================
-// AttributeNodeCollection.cs
+// TypeParameterNodeCollection.cs
 //
-// Created: 2009.05.29, by Istvan Novak (DeepDiver)
+// Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.Collections;
+
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a collection of attribute nodes.
+  /// Represents a collection of <see cref="TypeParameterNode"/> instances.
   /// </summary>
+  /// <remarks>
+  /// This class is used to hold type parameters belonging to a type or member
+  /// definition.
+  /// </remarks>
   // ================================================================================================
-  public sealed class AttributeNodeCollection: SyntaxNodeCollection<AttributeNode, AttributeDecorationNode>
+  public class TypeParameterNodeCollection : ImmutableCollection<TypeParameterNode>
   {
   }
 }

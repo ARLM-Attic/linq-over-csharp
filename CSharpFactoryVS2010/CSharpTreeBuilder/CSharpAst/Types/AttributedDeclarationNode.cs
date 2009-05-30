@@ -12,7 +12,8 @@ namespace CSharpTreeBuilder.Ast
   /// This class is intended to be a common base class of declarations holding attributes
   /// </summary>
   // ================================================================================================
-  public abstract class AttributedDeclarationNode : SyntaxNode, IAttributedDeclaration
+  public abstract class AttributedDeclarationNode : SyntaxNode<ISyntaxNode>, 
+    IAttributedDeclaration
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -26,15 +27,25 @@ namespace CSharpTreeBuilder.Ast
     }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IAttributedDeclaration Members
-
     /// <summary>
     /// Gets the attribute decorations belonging to this declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public AttributeDecorationNodeCollection AttributeDecorations { get; internal set; }
 
-    #endregion
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        AttributeDecorations
+        );
+    }
   }
 }

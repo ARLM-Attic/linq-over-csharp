@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.Ast
   /// terminating token.
   /// </remarks>
   // ================================================================================================
-  public class FormalParameterListNode : SyntaxNode
+  public class FormalParameterListNode : SyntaxNode<TypeOrMemberDeclarationNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

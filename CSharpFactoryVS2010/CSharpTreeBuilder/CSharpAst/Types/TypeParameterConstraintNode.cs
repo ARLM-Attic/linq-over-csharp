@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   ///     "where" identifier ":" ParameterConstaintNode { TypeParameterConstraintTagContinuationNode }
   /// </remarks>
   // ================================================================================================
-  public sealed class TypeParameterConstraintNode : SyntaxNode, IIdentifierSupport
+  public sealed class TypeParameterConstraintNode : SyntaxNode<TypeOrMemberDeclarationNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

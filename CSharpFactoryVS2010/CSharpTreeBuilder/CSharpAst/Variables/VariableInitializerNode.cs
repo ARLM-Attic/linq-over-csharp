@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   /// The start token of the initializer is the "=" token.
   /// </remarks>
   // ================================================================================================
-  public abstract class VariableInitializerNode : SyntaxNode
+  public abstract class VariableInitializerNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -13,45 +13,45 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   {
     #region Private fields
 
-    private bool _SuppressErrors = false;
-
     #endregion
 
-    #region Public properties
+    #region Properties
 
-    // --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the error handler instance.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    private ICompilationErrorHandler ErrorHandler { get; set; }
+
+    // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the flag indicating if error emission is suppressed or not.
     /// </summary>
-    // --------------------------------------------------------------------------------
-    public bool SuppressErrors
-    {
-      get { return _SuppressErrors; }
-      set { _SuppressErrors = value; }
-    }
+    // --------------------------------------------------------------------------------------------
+    public bool SuppressErrors { get; set; }
 
     #endregion
 
     #region Error handling
 
-    // --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new error instance.
     /// </summary>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
     /// <param name="description">Detailed error description.</param>
-    // --------------------------------------------------------------------------------
-    public void Error(string code, Token errorPoint, string description)
+    // --------------------------------------------------------------------------------------------
+    private void Error(string code, Token errorPoint, string description)
     {
-      if (!_SuppressErrors)
+      if (!SuppressErrors && ErrorHandler != null)
       {
-        // TODO: Fix this code
-        // CompilationUnit.ErrorHandler.Error(code, errorPoint, description, null);
+        ErrorHandler.Error(code, errorPoint, description, null);
       }
     }
 
-    // --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new error instance.
     /// </summary>
@@ -59,35 +59,33 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <param name="errorPoint">Token describing the error position.</param>
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
-    // --------------------------------------------------------------------------------
-    public void Error(string code, Token errorPoint, string description,
+    // --------------------------------------------------------------------------------------------
+    private void Error(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      if (!_SuppressErrors)
+      if (!SuppressErrors && ErrorHandler != null)
       {
-        // TODO: Fix this code
-        // CompilationUnit.ErrorHandler.Error(code, errorPoint, description, parameters);
+        ErrorHandler.Error(code, errorPoint, description, parameters);
       }
     }
 
-    // --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new warning instance.
     /// </summary>
     /// <param name="code">Error code.</param>
     /// <param name="errorPoint">Token describing the error position.</param>
     /// <param name="description">Detailed error description.</param>
-    // --------------------------------------------------------------------------------
-    public void Warning(string code, Token errorPoint, string description)
+    // --------------------------------------------------------------------------------------------
+    private void Warning(string code, Token errorPoint, string description)
     {
-      if (!_SuppressErrors)
+      if (!SuppressErrors && ErrorHandler != null)
       {
-        // TODO: Fix this code
-        // CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, null);
+        ErrorHandler.Warning(code, errorPoint, description, null);
       }
     }
 
-    // --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a new error instance.
     /// </summary>
@@ -95,14 +93,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <param name="errorPoint">Token describing the error position.</param>
     /// <param name="description">Detailed error description.</param>
     /// <param name="parameters">Error parameters.</param>
-    // --------------------------------------------------------------------------------
-    public void Warning(string code, Token errorPoint, string description,
+    // --------------------------------------------------------------------------------------------
+    private void Warning(string code, Token errorPoint, string description,
       params object[] parameters)
     {
-      if (!_SuppressErrors)
+      if (!SuppressErrors && ErrorHandler != null)
       {
-        // TODO: Fix this code
-        // CompilationUnit.ErrorHandler.Warning(code, errorPoint, description, parameters);
+        ErrorHandler.Warning(code, errorPoint, description, parameters);
       }
     }
 

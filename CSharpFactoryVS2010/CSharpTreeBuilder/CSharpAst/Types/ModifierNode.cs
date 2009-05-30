@@ -13,10 +13,8 @@ namespace CSharpTreeBuilder.Ast
   /// This node represents a modifier.
   /// </summary>
   // ================================================================================================
-  public class ModifierNode : SyntaxNode
+  public class ModifierNode : SyntaxNode<ISyntaxNode>
   {
-    // ----------------------------------------------------------------------------------------------
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ModifierNode"/> class.
@@ -76,11 +74,28 @@ namespace CSharpTreeBuilder.Ast
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the value of this modifier.
     /// </summary>
     /// <value>The value.</value>
     // ----------------------------------------------------------------------------------------------
     public ModifierType Value { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        StartToken,
+        MandatoryWhiteSpaceSegment.Default
+        );
+    }
   }
 }

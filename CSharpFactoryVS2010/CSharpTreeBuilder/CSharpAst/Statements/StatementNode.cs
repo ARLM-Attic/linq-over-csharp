@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This abstract node is intended to be the root of all C# language statements.
   /// </summary>
   // ================================================================================================
-  public abstract class StatementNode : SyntaxNode
+  public abstract class StatementNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

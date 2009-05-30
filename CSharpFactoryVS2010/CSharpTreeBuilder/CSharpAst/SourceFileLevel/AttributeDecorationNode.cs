@@ -3,7 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -21,7 +20,7 @@ namespace CSharpTreeBuilder.Ast
   /// TerminatingToken.
   /// </remarks>
   // ================================================================================================
-  public sealed class AttributeDecorationNode : SyntaxNode
+  public sealed class AttributeDecorationNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,7 +31,7 @@ namespace CSharpTreeBuilder.Ast
     public AttributeDecorationNode(Token start)
       : base(start)
     {
-      Attributes = new ImmutableCollection<AttributeNode>();
+      Attributes = new AttributeNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -64,7 +63,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the attributes.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<AttributeNode> Attributes { get; internal set; }
+    public AttributeNodeCollection Attributes { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -72,5 +71,24 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token ClosingSeparator { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        StartToken,
+        TargetToken,
+        Attributes,
+        TerminatingToken,
+        ForceNewLineSegment.Default
+        );
+    }
   }
 }

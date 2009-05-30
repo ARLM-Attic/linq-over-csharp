@@ -14,7 +14,7 @@ namespace CSharpTreeBuilder.ProjectContent
   /// This class represents a C# project.
   /// </summary>
   // ================================================================================================
-  public class CSharpProject
+  public class CSharpProject: ICompilationErrorHandler
   {
     #region Lifecycle methods
 
@@ -30,6 +30,9 @@ namespace CSharpTreeBuilder.ProjectContent
       Errors = new CompilationMessageCollection();
       Warnings = new CompilationMessageCollection();
       SemanticsTree = new CSharpSemanticsTree();
+
+      // --- Set up the default error handling parameters
+      ErrorMessageFormat = "-- line {0} col {1}: {2}";
     }
 
     // --------------------------------------------------------------------------------
@@ -139,8 +142,9 @@ namespace CSharpTreeBuilder.ProjectContent
       // --- Create a syntax tree for each source file
       foreach (var sourceFile in ProjectProvider.SourceFiles)
       {
-        var sourceFileNode = CSharpParser.BuildAstForSourceFile(sourceFile);
-        if (sourceFileNode != null) SyntaxTree.SourceFileNodes.Add(sourceFileNode);
+        SourceInProgress = new SourceFileNode(sourceFile.FullName);
+        CSharpParser.BuildAstForSourceFile(SourceInProgress, this);
+        SyntaxTree.SourceFileNodes.Add(SourceInProgress);
       }
     }
 
@@ -167,6 +171,143 @@ namespace CSharpTreeBuilder.ProjectContent
     {
       BuildSyntaxTree();
       BuildSemanticTree();
+    }
+
+    #endregion
+
+    #region Implementation of ICompilationErrorHandler
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Defines the format of message to write to the output stream.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    public string ErrorMessageFormat { get ; set; }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new error to the list of errors.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="description">Detailed error description.</param>
+    // --------------------------------------------------------------------------------------------
+    void ICompilationErrorHandler.Error(string code, Token errorPoint, string description)
+    {
+      SignError(Errors, code, errorPoint, description, null);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new error to the list of errors.
+    /// </summary>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="description">Detailed error description.</param>
+    /// <param name="parameters">Error parameters.</param>
+    // --------------------------------------------------------------------------------------------
+    void ICompilationErrorHandler.Error(string code, Token errorPoint, string description, 
+      params object[] parameters)
+    {
+      SignError(Errors, code, errorPoint, description, parameters);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new warning to the list of warnings.
+    /// </summary>
+    /// <param name="code">Warning code.</param>
+    /// <param name="warningPoint">Token describing the warning position.</param>
+    /// <param name="description">Detailed warning description.</param>
+    // --------------------------------------------------------------------------------------------
+    void ICompilationErrorHandler.Warning(string code, Token warningPoint, string description)
+    {
+      SignError(Warnings, code, warningPoint, description, null);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new warning to the list of warnings.
+    /// </summary>
+    /// <param name="code">Warning code.</param>
+    /// <param name="warningPoint">Token describing the warning position.</param>
+    /// <param name="description">Detailed warning description.</param>
+    /// <param name="parameters">Warning parameters.</param>
+    // --------------------------------------------------------------------------------------------
+    void ICompilationErrorHandler.Warning(string code, Token warningPoint, string description, 
+      params object[] parameters)
+    {
+      SignError(Warnings, code, warningPoint, description, parameters);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Redirects line numbering and file name handling.
+    /// </summary>
+    /// <param name="currentLine">Current source line.</param>
+    /// <param name="lineNumber">New line number.</param>
+    /// <param name="fileName">Redirected filename.</param>
+    // --------------------------------------------------------------------------------------------
+    void ICompilationErrorHandler.Redirect(int currentLine, int lineNumber, string fileName)
+    {
+      ErrorLineOffset = lineNumber - currentLine;
+      ErrorFile = fileName;
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resets the line number and file name redirection.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    void ICompilationErrorHandler.ResetRedirection()
+    {
+      ErrorLineOffset = -1;
+      ErrorFile = null;
+    }
+
+    #endregion
+
+    #region Helper members
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the error line offset.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    private int ErrorLineOffset { get; set; }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the error file.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    private string ErrorFile { get; set; }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the source in progress.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    private SourceFileNode SourceInProgress { get; set; }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Add a new error to the list of errors.
+    /// </summary>
+    /// <param name="messageCollection">Collection where the error should be added.</param>
+    /// <param name="code">Error code.</param>
+    /// <param name="errorPoint">Token describing the error position.</param>
+    /// <param name="description">Detailed error description.</param>
+    /// <param name="parameters">Error parameters.</param>
+    // --------------------------------------------------------------------------------------------
+    private void SignError(CompilationMessageCollection messageCollection, string code, 
+      Token errorPoint, string description, params object[] parameters)
+    {
+      var message = new CompilationMessageNode(SourceInProgress, code, errorPoint, description) 
+        { Parameters = parameters };
+      message.SetErrorLineOffset(ErrorLineOffset);
+      message.RedirectSourceFile(ErrorFile);
+      messageCollection.Add(message);
     }
 
     #endregion

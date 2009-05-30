@@ -255,8 +255,6 @@ CS3
 
 // ------------------------------------------------------------------------------------------------
 // "extern alias" directive that is used in conjunction with a file or with a namespace
-//   parentNode: Parent namespace scope (either a source file or a namespace) of the "extern alias" 
-//     directive.
 // ------------------------------------------------------------------------------------------------
 ExternAliasDirective<NamespaceScopeNode parentNode>
 (.
@@ -283,8 +281,6 @@ ExternAliasDirective<NamespaceScopeNode parentNode>
 
 // ------------------------------------------------------------------------------------------------
 // "using" directive that is used in conjunction with a source file or a namespace.
-//   parentNode: Parent namespace scope (either a source file or a namespace) of the "using" 
-//     directive.
 // ------------------------------------------------------------------------------------------------
 UsingDirective<NamespaceScopeNode parentNode>
 (.
@@ -360,8 +356,6 @@ GlobalAttributes
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a namespace member (type or nested namespace).
-//   parentNode: Parent namespace scope (either a source file or a namespace) of the namespace 
-//     member declaration.
 // ------------------------------------------------------------------------------------------------
 NamespaceMemberDeclaration<NamespaceScopeNode parentNode>  
 =
@@ -380,7 +374,6 @@ NamespaceMemberDeclaration<NamespaceScopeNode parentNode>
     ident
     (. nsDecl.NameTags.Add(sepToken, t); .)
   } 
-  (. parentNode.NamespaceDeclarations.Add(nsDecl); .)
   "{"
   (. nsDecl.OpenBracket = t; .)
   { IF (IsExternAliasDirective()) ExternAliasDirective<nsDecl> } 
@@ -411,6 +404,7 @@ NamespaceMemberDeclaration<NamespaceScopeNode parentNode>
          typeDecl.Modifiers = mod;
          typeDecl.DeclaringNamespace = parentNode;
          parentNode.TypeDeclarations.Add(typeDecl);
+         parentNode.InScopeDeclarations.Add(typeDecl);
        }
     .)
 .
@@ -481,14 +475,18 @@ ClassDeclaration<out TypeDeclarationNode typeDecl>
 BaseTypeList<TypeDeclarationNode typeDecl>
 =
   (. TypeOrNamespaceNode typeNode; .)
-  ":"                        
+  ":"
+  (. typeDecl.ColonToken = t; .)                        
   ClassType<out typeNode>     
   (. typeDecl.BaseTypes.Add(typeNode); .)
   { 
     ","  
     (. var separator = t; .)
     ClassType<out typeNode>    
-    (. typeDecl.BaseTypes.Add(new TypeOrNamespaceContinuationNode(separator, typeNode)); .)
+    (. 
+       typeNode.SeparatorToken = separator;
+       typeDecl.BaseTypes.Add(typeNode); 
+    .)
   }
 .
 
@@ -615,7 +613,7 @@ EnumBody<EnumDeclarationNode typeDecl>
       "," 
       (. var separator = t; .)
       SYNC EnumMemberDeclaration<out valNode>
-      (. typeDecl.Values.Add(new EnumValueContinuationNode(separator, valNode)); .)
+      (. typeDecl.Values.Add(separator, valNode); .)
     } 
     [ 
       "," 
@@ -1570,9 +1568,7 @@ Attribute<out AttributeNode attrNode>
   .)
   TypeName<out nsNode>      
   (. attrNode.TypeName = nsNode; .)
-  [ 
-    AttributeArguments<attrNode>
-  ]
+  [ AttributeArguments<attrNode> ]
   (. Terminate(attrNode); .)
 .
 
@@ -1587,7 +1583,7 @@ AttributeArguments<AttributeNode argsNode>
      ExpressionNode exprNode;
   .)
   "("                          
-  (.  argsNode.OpenParenthesis = t; .)
+  (.  Start(argsNode.Arguments); .)
     [                          
       [ IF (IsAssignment()) ident
         (. identifier = t; .)
@@ -1595,11 +1591,7 @@ AttributeArguments<AttributeNode argsNode>
         (. equal = t; .)
       ]
       Expression<out exprNode>           
-      (. 
-         var argNode = new AttributeArgumentNode(identifier, equal, exprNode); 
-         Terminate(argNode);
-         argsNode.Arguments.Add(argNode);
-      .)
+      (. argsNode.Arguments.Add(new AttributeArgumentNode(identifier, equal, exprNode)); .)
       { 
         ","
         (. var separator = t; .)
@@ -1610,15 +1602,11 @@ AttributeArguments<AttributeNode argsNode>
         |                    
         ) 
         Expression<out exprNode> 
-        (.  
-           var argcNode = new AttributeArgumentContinuationNode(separator, identifier, equal, exprNode); 
-           Terminate(argcNode);
-           argsNode.Arguments.Add(argcNode);
-        .)
+        (. argsNode.Arguments.Add(separator, new AttributeArgumentNode(identifier, equal, exprNode)); .)
       }
     ]
   ")"   
-  (. Terminate(argsNode); .)
+  (. Terminate(argsNode.Arguments); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -1802,36 +1790,27 @@ ClassType<out TypeOrNamespaceNode typeNode>
 MemberName<out TypeOrNamespaceNode resultNode>                                              
   (.
      resultNode = null;
-     Token qualifier = null;
      Token separator = null;
      Token identifier = null;
      TypeArgumentListNode argList = null;
   .)
 =                                         
   ident
-  (. qualifier = t; .)
+  (. 
+     resultNode = new TypeOrNamespaceNode(t);
+     identifier = t; 
+  .)
   [ 
     "::"
-    (. separator = t; .)
+    (. 
+       separator = t; 
+       resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
+    .)
     ident                           
     (. identifier = t; .)
   ]
-  (.
-     if (separator == null)
-     {
-       resultNode = new TypeOrNamespaceNode(qualifier);
-       identifier = qualifier;
-     }
-     else
-     {
-       resultNode = new TypeOrNamespaceNode(qualifier, separator);
-     }
-  .)
-  [ 
-    IF (la.kind == _lt && IsPartOfMemberName()) 
-      TypeArgumentList<out argList> 
-  ]
-  (. resultNode.AddTypeTag(new TypeTagNode(identifier, argList)); .)                                    
+  [ IF (la.kind == _lt && IsPartOfMemberName()) TypeArgumentList<out argList> ]
+  (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)
   { 
     IF (la.kind == _dot && Peek(1).kind == _ident)
     "." 
@@ -1841,11 +1820,8 @@ MemberName<out TypeOrNamespaceNode resultNode>
     .)
     ident
     (. identifier = t; .)
-    [ 
-      IF (la.kind == _lt && IsPartOfMemberName()) 
-        TypeArgumentList<out argList>
-    ]
-    (. resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); .)                                    
+    [ IF (la.kind == _lt && IsPartOfMemberName()) TypeArgumentList<out argList> ]
+    (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)                                    
   }
   (. Terminate(resultNode); .)
 .
@@ -1858,32 +1834,26 @@ TypeName<out TypeOrNamespaceNode resultNode>
 =               
   (.
      resultNode = null;
-     Token qualifier = null;
      Token separator = null;
      Token identifier = null;
      TypeArgumentListNode argList = null;
   .)
   ident
-  (. qualifier = t; .)
+  (. 
+     resultNode = new TypeOrNamespaceNode(t);
+     identifier = t; 
+  .)
   [ 
     "::"
-    (. separator = t; .)
+    (. 
+       separator = t; 
+       resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
+    .)
     ident
     (. identifier = t; .)
   ]
-  (.
-     if (separator == null)
-     {
-       resultNode = new TypeOrNamespaceNode(qualifier);
-       identifier = qualifier;
-     }
-     else
-     {
-       resultNode = new TypeOrNamespaceNode(qualifier, separator);
-     }
-  .)
   [ TypeArgumentList<out argList> ]
-  (. resultNode.AddTypeTag(new TypeTagNode(identifier, argList)); .)                                    
+  (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)
   {
     "."
     (.
@@ -1893,7 +1863,7 @@ TypeName<out TypeOrNamespaceNode resultNode>
     ident 
     (. identifier = t; .)
     [ TypeArgumentList<out argList> ]   
-    (. resultNode.AddTypeTag(new TypeTagNode(separator, identifier, argList)); .)                                    
+    (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)                                    
   }
   (. Terminate(resultNode); .)
 .
@@ -3922,24 +3892,18 @@ TypeParameterList<ITypeParameterHolder paramNode>
      Token identifier;
      AttributeDecorationNodeCollection attrNodes;
   .)
-  "<"                        
-  (. if (paramNode != null) paramNode.SetOpenSign(t); .)
+  "<" 
+  (. Start(paramNode.TypeParameters); .)                      
   TypeParameter<out attrNodes, out identifier>      
-  (. 
-     var typeParam = new TypeParameterNode(identifier, attrNodes);
-     if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
-  .)
+  (. paramNode.TypeParameters.Add(new TypeParameterNode(identifier, attrNodes)); .)
   { 
     "," 
     (. var separator= t; .)
     TypeParameter<out attrNodes, out identifier>      
-    (. 
-       typeParam = new TypeParameterContinuationNode(separator, identifier, attrNodes);
-       if (paramNode != null) paramNode.TypeParameters.Add(typeParam);
-    .)
+    (. paramNode.TypeParameters.Add(new TypeParameterNode(separator, identifier, attrNodes)); .)
   } 
   ">"
-  (. if (paramNode != null) paramNode.SetCloseSign(t); .)
+  (. Terminate(paramNode.TypeParameters); .)
 .
 
 // ------------------------------------------------------------------------------------------------

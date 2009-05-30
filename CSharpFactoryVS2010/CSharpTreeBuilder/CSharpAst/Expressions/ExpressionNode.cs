@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This node represents an expression.
   /// </summary>
   // ================================================================================================
-  public abstract class ExpressionNode : SyntaxNode
+  public abstract class ExpressionNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// Describes a type argument.
   /// </summary>
   // ================================================================================================
-  public class TypeArgumentTag : SyntaxNode
+  public class TypeArgumentTag : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

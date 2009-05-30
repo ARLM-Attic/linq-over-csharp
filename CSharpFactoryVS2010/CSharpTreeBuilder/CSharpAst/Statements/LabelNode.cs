@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This node describes a label before a statement.
   /// </summary>
   // ================================================================================================
-  public sealed class LabelNode : SyntaxNode, IIdentifierSupport
+  public sealed class LabelNode : SyntaxNode<StatementNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

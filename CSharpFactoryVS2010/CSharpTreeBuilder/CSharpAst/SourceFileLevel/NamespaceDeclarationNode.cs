@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   /// Syntax:
   ///   NamespaceDeclarationNode:
   ///     "namespace" ident { "." ident } "{" 
-  ///       { ExternalAliasNode } { UsingNode } { NamespaceDeclaration } "}" [ ";" ]
+  ///       { ExternalAliasNode } { UsingNamespaceNode } { NamespaceDeclaration } "}" [ ";" ]
   /// </remarks>
   // ================================================================================================
   public sealed class NamespaceDeclarationNode : NamespaceScopeNode
@@ -30,6 +30,8 @@ namespace CSharpTreeBuilder.Ast
     public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start) : base(start)
     {
       Parent = parent;
+      parent.NamespaceDeclarations.Add(this);
+      parent.InScopeDeclarations.Add(this);
       NameTags = new NameTagNodeCollection();
     }
 
@@ -72,7 +74,6 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       var result = new OutputSegment(
-        IndentationSegment.Apply,
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
         NameTags,

@@ -46,7 +46,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     #region Project Model extension fields
 
-    private SyntaxNode _CurrentElement;
+    private ISyntaxNode _CurrentElement;
 
     #endregion
     
@@ -79,6 +79,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public CSharpParser(Scanner scanner, SourceFileNode sourceFileNode)
     {
+      SuppressErrors = false;
       Scanner = scanner;
       SourceFileNode = sourceFileNode;
       // TODO: Fix this code
@@ -103,7 +104,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Gets or sets the languauge element that is currently processed.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SyntaxNode CurrentNode
+    public ISyntaxNode CurrentNode
     {
       get { return _CurrentElement; }
       set
@@ -330,33 +331,48 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// If the node is null, the operation aborts silently.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public void Terminate(SyntaxNode node)
+    private void Terminate(ISyntaxNode node)
     {
       if (node != null) node.Terminate(t);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Starts the specified node.
+    /// </summary>
+    /// <param name="node">The node to start.</param>
+    /// <remarks>
+    /// If the node is null, the operation aborts silently.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    private void Start<TNode, TParent>(SyntaxNodeCollection<TNode, TParent> node)
+      where TNode : ISyntaxNode
+      where TParent: ISyntaxNode
+    {
+      if (node != null) node.StartToken = t;
     }
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Builds the ast for source file.
     /// </summary>
-    /// <param name="sourceFile">The source file.</param>
-    /// <returns></returns>
+    /// <param name="sourceNode">The source file node to build the AST for.</param>
+    /// <param name="errorHandler">The error handler instance.</param>
     // --------------------------------------------------------------------------------------------
-    public static SourceFileNode BuildAstForSourceFile(SourceFileBase sourceFile)
+    public static void BuildAstForSourceFile(SourceFileNode sourceNode, 
+      ICompilationErrorHandler errorHandler)
     {
-      var resultNode = new SourceFileNode(sourceFile.FullName);
-      var stream = File.OpenText(sourceFile.FullName).BaseStream;
+      var stream = File.OpenText(sourceNode.FullName).BaseStream;
       try
       {
         var scanner = new Scanner(stream);
-        var parser = new CSharpParser(scanner, resultNode);
+        var parser = new CSharpParser(scanner, sourceNode) {ErrorHandler = errorHandler};
         parser.Parse();
       }
       finally
       {
         stream.Close();
       }
-      return resultNode;
     }
 
     // ----------------------------------------------------------------------------------------------
