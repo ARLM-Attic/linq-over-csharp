@@ -3,7 +3,6 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -13,9 +12,19 @@ namespace CSharpTreeBuilder.Ast
   /// This node describes a type or namespace reference.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   TypeOrNamespaceNode:
-  ///     [Qualifier "::"] TypeTagNode { TypeTagContinuationNode }
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>[ <em>qualifier</em> "<strong>::</strong>"] <em>TypeTagNode</em> {
+  ///         "<strong>.</strong>" <em>TypeTagNode</em> }</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  /// 			<em>qualifier</em>: an item in <see cref="TypeTags"/><br/>
+  ///             "<strong>::</strong>" <em>TypeTagNode</em>: an item in <see cref="TypeTags"/><br/>
+  ///             "<strong>.</strong>" <em>TypeTagNode</em>: an item in <see cref="TypeTags"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public class TypeOrNamespaceNode : SyntaxNode<ISyntaxNode>
@@ -28,8 +37,8 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode(Token identifier) : base(identifier)
     {
-      TypeTags = new TypeTagNodeCollection();
-      TypeModifiers = new ImmutableCollection<TypeModifierNode>();
+      TypeTags = new TypeTagNodeCollection { ParentNode = this };
+      TypeModifiers = new TypeModifierNodeCollection { ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -102,7 +111,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the type modifiers.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<TypeModifierNode> TypeModifiers { get; private set; }
+    public TypeModifierNodeCollection TypeModifiers { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

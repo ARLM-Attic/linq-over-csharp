@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public sealed class NewOperatorWithExplicitArrayNode : NewOperatorWithArrayNodeBase
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NewOperatorWithExplicitArrayNode"/> class.
@@ -31,6 +34,14 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The name of the type.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
   }
 }

@@ -10,13 +10,20 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   /// <summary>This interface defines the responsibilities of a node in the syntax tree.</summary>
   /// <remarks>
-  ///     This interface is primarily implemented by <see cref="SyntaxNode"/> and
-  ///     <see cref="SyntaxNodeCollection&lt;TNode&gt;"/> but can be implemented by any
+  ///     This interface is primarily implemented by <see cref="SyntaxNode{TNode}"/> and
+  ///     <see cref="SyntaxNodeCollection{TNode, TParent}"/> but can be implemented by any
   ///     other types to mimic syntax node behavior.
   /// </remarks>
   // ================================================================================================
   public interface ISyntaxNode
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the parent node of this syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    ISyntaxNode Parent { get; set; }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the optional leading separator token.

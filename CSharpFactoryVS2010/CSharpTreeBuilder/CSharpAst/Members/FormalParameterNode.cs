@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class FormalParameterNode : AttributedDeclarationNode, IIdentifierSupport
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FormalParameterNode"/> class.
@@ -38,12 +41,17 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -72,7 +80,5 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return IdentifierToken != null; }
     }
-
-    #endregion
   }
 }

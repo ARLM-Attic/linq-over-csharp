@@ -19,7 +19,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"ExternAliasDirective\ExternAliasDirectiveOK.cs");
       Assert.IsTrue(InvokeParser(project));
       Assert.AreEqual(project.Errors.Count, 0);
-      var externs = project.SyntaxTree.SourceFileNodes[0].ExternAliaseNodes;
+      var externs = project.SyntaxTree.SourceFileNodes[0].ExternAliasNodes;
       Assert.AreEqual(externs.Count, 3);
       Assert.AreEqual(externs[0].AliasToken.Value, "alias");
       Assert.AreEqual(externs[0].Identifier, "Alias1");
@@ -53,7 +53,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(fileName);
       Assert.IsTrue(InvokeParser(project));
       Assert.AreEqual(project.Errors.Count, 0);
-      var externs = project.SyntaxTree.SourceFileNodes[0].ExternAliaseNodes;
+      var externs = project.SyntaxTree.SourceFileNodes[0].ExternAliasNodes;
       Assert.AreEqual(externs.Count, 3);
       var eaNode = externs[0];
       Assert.AreEqual(eaNode.StartToken.Value, "extern");
@@ -93,6 +93,20 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(eaNode.Identifier, "Alias3");
       Assert.AreEqual(eaNode.IdentifierToken.Line, 3);
       Assert.AreEqual(eaNode.IdentifierToken.Column, 14);
+    }
+
+    [TestMethod]
+    public void ExternAliasParentsOk()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ExternAliasDirective\ExternAliasDirectiveOK.cs");
+      Assert.IsTrue(InvokeParser(project));
+      var sn = project.SyntaxTree.SourceFileNodes[0];
+      foreach (var extNode in sn.ExternAliasNodes)
+      {
+        Assert.AreEqual(extNode.ParentNode, sn);
+      }
+
     }
   }
 }

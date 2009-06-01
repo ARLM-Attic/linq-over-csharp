@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The arguments.</value>
     // ----------------------------------------------------------------------------------------------
-    TypeArgumentListNode Arguments { get; }
+    TypeOrNamespaceNodeCollection Arguments { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

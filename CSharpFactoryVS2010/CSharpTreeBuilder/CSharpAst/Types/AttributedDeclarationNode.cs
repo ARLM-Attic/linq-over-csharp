@@ -9,12 +9,23 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class is intended to be a common base class of declarations holding attributes
+  /// This class is intended to be a common base class of declarations holding attributes.
   /// </summary>
+  /// <remarks>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             { <em>AttributeDecorationNode</em> }: <see cref="AttributeDecorations"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public abstract class AttributedDeclarationNode : SyntaxNode<ISyntaxNode>, 
     IAttributedDeclaration
   {
+    // --- Backing field
+    private AttributeDecorationNodeCollection _AttributeDecorations;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="AttributedDeclarationNode"/> class.
@@ -31,7 +42,15 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the attribute decorations belonging to this declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AttributeDecorationNodeCollection AttributeDecorations { get; internal set; }
+    public AttributeDecorationNodeCollection AttributeDecorations
+    {
+      get { return _AttributeDecorations; }
+      internal set
+      {
+        _AttributeDecorations = value;
+        _AttributeDecorations.AssignToParent(this);
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

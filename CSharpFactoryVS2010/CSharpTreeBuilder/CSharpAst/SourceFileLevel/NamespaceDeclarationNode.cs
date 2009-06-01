@@ -12,10 +12,32 @@ namespace CSharpTreeBuilder.Ast
   /// This node represents a namespace declaration.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   NamespaceDeclarationNode:
-  ///     "namespace" ident { "." ident } "{" 
-  ///       { ExternalAliasNode } { UsingNamespaceNode } { NamespaceDeclaration } "}" [ ";" ]
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>namespace</strong>" <em>identifier</em> { "<strong>.</strong>"
+  ///         <em>identifier</em> } "<strong>{</strong>" { <em>ExternAliasNode</em> } {
+  ///         <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> }<br/>
+  ///         { <em>NamespaceDeclarationNode</em> | <em>TypeDeclarationNode</em> }
+  ///         "<strong>}</strong>" [ "<strong>;</strong>" ]</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>namespace</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  /// 			<em>identifier</em> { "<strong>.</strong>" <em>identifier</em> }:
+  ///             <see cref="NameTags"/><br/>
+  ///             "<strong>{</strong>": <see cref="OpenBracket"/><br/>
+  ///             { <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>ExternAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>NamespaceDeclarationNode</em> | <em>TypeDeclarationNode</em> }: see
+  ///             <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>NamespaceDeclarationNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>TypeDeclarationNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             "<strong>}</strong>": <see cref="CloseBracket"/><br/>
+  ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/> (if
+  ///             not defined, <see cref="CloseBracket"/> is the terminating token)
+  ///         </para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public sealed class NamespaceDeclarationNode : NamespaceScopeNode
@@ -27,20 +49,12 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="parent">The parent node.</param>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start) : base(start)
+    public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start) : base(parent, start)
     {
-      Parent = parent;
       parent.NamespaceDeclarations.Add(this);
       parent.InScopeDeclarations.Add(this);
-      NameTags = new NameTagNodeCollection();
+      NameTags = new NameTagNodeCollection { ParentNode = this };
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the parent of this node.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public sealed class TypecastOperatorNode : UnaryOperatorNode
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypecastOperatorNode"/> class.
@@ -30,6 +33,14 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the name of the type used by the cast operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
   }
 }

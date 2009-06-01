@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DocumentXProject Version="5.0" CompileHelpFile="True" RefreshIfExists="False" DocumentSourceCode="False" AlwaysCopySupportFiles="True" PropertyCommentsFrom="0" RelationshipsFrom="2" DefaultRelsOnlyForCollections="True" ProjectGroupName="" HTMLHelpVersion="1" HHNamespace="CSharpTreeBuilder" HHIdentifier="CSharpTreeBuilder" H2PlugIn="True" H2PlugInNamespace="" LocaleID="0" ExcludeFiltersRegExp="False" OutputFileExtension=".html">
+    <OutputLocation OutputFolder="." HelpFileName="CSharpTreeBuilder.chm" UseFilenameAliases="False" StripMetadata="False" ClearBeforeBuild="False" RemoveOutputFilesAfterCompile="True"/>
+    <HTMLHelpOptions UseALinkMenus="False"/>
+    <OtherOptions CreateContextLinks="True" WriteHelpDescriptions="True" CopySourceCode="False" CreateWinHelpStub="False" Language="English"/>
+    <IncludeFilters IncludePrivate="False" IncludeFriend="True" IncludeProtected="True" IdentifyVisibility="False">
+        <Namespaces/>
+    </IncludeFilters>
+    <CommentExtraction UnTaggedBlocks="False" UnTaggedEnumerations="False" UnTaggedEvents="False" UnTaggedModules="False" UnTaggedUDTs="False" UnTaggedVariables="False" HelpDescriptionImport="1"/>
+    <Diagrams PageNestingLevels="2" OverviewNestingLevels="3" SupressSingleObjectDiagrams="True" DiagramStyleSource="0" ObjFillColor="0" ObjTextColor="0" ObjBorderColor="0" ColFillColor="0" ColTextColor="0" ColBorderColor="0" UseDropShadow="False" CenterCaptions="False" DiagramBold="False" BorderWidth="0" UseDiagramShapes="False"/>
+    <VariableValues>
+        <VariableValue Name="CopyrightNotice" Value="&amp;copy; DiveDeeper, 2007-2009"/>
+        <VariableValue Name="FeedbackLink" Value="&lt;a href=&quot;mailto:inovak@grepton.hu?subject=Documentation Feedback: %%FileName%%&quot;&gt;Send Feedback&lt;/a&gt;"/>
+        <VariableValue Name="DefaultTypeRequirements" Value="%%scrap:name=_COLLAPSIBLE_HEADER,idprefix=requirements,caption=$$Requirements$$%%&lt;p&gt;&lt;b&gt;Target Platforms:&lt;/b&gt; Windows XP Home Edition, Windows XP Professional, Windows Server 2003 family, Windows Vista, Windows 7&lt;/p&gt;&lt;/div&gt;"/>
+        <VariableValue Name="DefaultMemberRequirements" Value="%%scrap:name=_COLLAPSIBLE_HEADER,idprefix=requirements,caption=$$Requirements$$%%&lt;p&gt;&lt;b&gt;Target Platforms:&lt;/b&gt; Windows XP Home Edition, Windows XP Professional, Windows Server 2003 family, Windows Vista, Windows 7&lt;/p&gt;&lt;/div&gt;"/>
+    </VariableValues>
+    <AdditionalFiles/>
+    <ModelComments/>
+    <IgnoreRelationships/>
+    <NamespaceExclusions>
+        <e>CSharpTreeBuilder~CSharpTreeBuilder.Ast.BraceSegment+BraceType</e>
+        <e>CSharpTreeBuilder~CSharpTreeBuilder.CSharpAstBuilder.CSharpParser</e>
+        <e>CSharpTreeBuilder~CSharpTreeBuilder.CSharpAstBuilder.Scanner</e>
+        <e>CSharpTreeBuilder~CSharpTreeBuilder.CSharpAstBuilder.ParseFileIOException</e>
+        <e>CSharpTreeBuilder~CSharpTreeBuilder.CSharpAstBuilder.Buffer</e>
+        <e>CSharpTreeBuilder~CSharpTreeBuilder.CSharpAstBuilder.UTF8Buffer</e>
+    </NamespaceExclusions>
+    <DotNetProperties IncludeRelationshipDiagrams="True" IncludeInheritanceHierarchies="True" IncludeBaseMembers="False" StandardInterfaces="System.*,Microsoft.*" OnlyLinkInherited="True" ExternalDocs="True" UseCommentFiles="True" DrillCommentFiles="True" GenerateXMLLinks="False" XMLIsland="" NoInheritedTopics="True" NoInheritedInLists="False" CreateXMLCommentFile="True" ExcludedLanguages="VB,VBUsage,Delphi,JScript,CPP,CPP2005" GenerateAttributes="True" AttributeFilter="" AttributeFilterInclude="False" VBNETDefaultConstructor="False" LinkOverridenMembersToBaseImplementation="False" UseOverloadSummaryForMasterSummary="True" ExcludeEditorBrowsable="False" GenerateBreadCrumbs="True" IncludeAssemblyBreadCrumb="False"/>
+    <DatabaseProperties DocumentViewSource="True" DocumentTriggerSource="True" DocumentProcedureSource="True" RetainTaggedComments="False"/>
+    <XSDProperties UseCustomSettings="False" PageNestingLevels="2" SuppressSingleObjectDiagrams="True" ElementFillColor="15780518" ElementTextColor="0" ElementBorderColor="10789024" ElementBorders="True" ElementRefFillColor="12648447" ElementRefTextColor="0" ElementRefBorderColor="10789024" ElementRefBorders="True" ComplexTypeFillColor="15780518" ComplexTypeTextColor="0" ComplexTypeBorderColor="10789024" ComplexTypeBorders="True" AnyFillColor="13421772" AnyTextColor="0" AnyBorderColor="10789024" AnyBorders="True" NotationTextColor="8421504" RootLinesColor="10789024" DropShadows="False" BoldCaptions="True" GroupParticleSequenceImageFilename="C:\Program Files (x86)\Innovasys\documentx5\Configuration\Templates\XMLSchema\xDiagramImages\sequence.gif" GroupParticleChoiceImageFilename="C:\Program Files (x86)\Innovasys\documentx5\Configuration\Templates\XMLSchema\xDiagramImages\choice.gif" GroupParticleAllImageFilename="C:\Program Files (x86)\Innovasys\documentx5\Configuration\Templates\XMLSchema\xDiagramImages\all.gif"/>
+    <CommentFiles>
+        <CommentFile FileName="CSharpTreeBuilder.dxc" DocType="dx.net" ItemMoniker="C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\bin\Debug\CSharpTreeBuilder.dll"/>
+    </CommentFiles>
+    <CommunityExtensions CommunityProjectKey="" Enabled="false" ServerType="0" URL="" HostingId="" UseLocalProxyURL="false" LocalProxyURL=""/>
+    <DocType Name="dx.net" Template="Visual Studio 2008 Style" UseHelpTemplates="False">
+        <TOCSource TOCSource="0" SpecificTOCName=""/>
+        <ModelCommentProfile Version="6.0" Namespace="dx.net" Name="" Description=""/>
+    </DocType>
+    <NetAssemblies RootAssemblyName="">
+        <Assembly Version="5.0" FileName="C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\bin\Debug\CSharpTreeBuilder.dll" mRootModule="" AssemblyName="CSharpTreeBuilder" AssemblyType="1" ExamplesOnly="False" LoadIncludeFilter="" LoadExcludeFilter="" LoadPrivateItems="True"/>
+    </NetAssemblies>
+    <PropertyBag/>
+</DocumentXProject>

@@ -12,9 +12,20 @@ namespace CSharpTreeBuilder.Ast
   /// This class represnts an "extern alias" node.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   ExternAliasNode:
-  ///     "extern" "alias" identifier ";"
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>extern</strong>" '<strong>alias</strong>' <em>identifier</em>
+  ///         "<strong>;</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>extern</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  ///             '<strong>alias</strong>': <see cref="AliasToken"/><br/>
+  /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
+  ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public sealed class ExternAliasNode : SyntaxNode<NamespaceScopeNode>, IIdentifierSupport
@@ -32,18 +43,11 @@ namespace CSharpTreeBuilder.Ast
     public ExternAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token identifier,
                            Token terminating) : base(start)
     {
-      Parent = parent;
+      ParentNode = parent;
       AliasToken = alias;
       IdentifierToken = identifier;
       Terminate(terminating);
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the parent of this node.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -53,9 +57,6 @@ namespace CSharpTreeBuilder.Ast
     public Token AliasToken { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
@@ -84,8 +85,6 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return IdentifierToken != null; }
     }
-
-    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

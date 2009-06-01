@@ -10,7 +10,8 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a collection of attribute nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class AttributeNodeCollection: SyntaxNodeCollection<AttributeNode, AttributeDecorationNode>
+  public sealed class AttributeNodeCollection: 
+    SyntaxNodeCollection<AttributeNode, AttributeDecorationNode>
   {
   }
 }

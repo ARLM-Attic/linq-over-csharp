@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class TypeParameterNode : NameTagNode, IAttributedDeclaration
   {
+    // --- Backing fields
+    private AttributeDecorationNodeCollection _AttributeDecorations;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeParameterNode"/> class.
@@ -46,6 +49,14 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the attribute decorations belonging to this declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AttributeDecorationNodeCollection AttributeDecorations { get; internal set; }
+    public AttributeDecorationNodeCollection AttributeDecorations
+    {
+      get { return _AttributeDecorations; }
+      internal set
+      {
+        _AttributeDecorations = value;
+        _AttributeDecorations.AssignToParent(this);
+      }
+    }
   }
 }

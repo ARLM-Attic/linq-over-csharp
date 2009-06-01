@@ -20,6 +20,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class AttributeNode : SyntaxNode<AttributeDecorationNode>
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="AttributeNode"/> class.
@@ -29,7 +32,7 @@ namespace CSharpTreeBuilder.Ast
     public AttributeNode(Token identifier)
       : base(identifier)
     {
-      Arguments = new AttributeArgumentNodeCollection();
+      Arguments = new AttributeArgumentNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -38,7 +41,15 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

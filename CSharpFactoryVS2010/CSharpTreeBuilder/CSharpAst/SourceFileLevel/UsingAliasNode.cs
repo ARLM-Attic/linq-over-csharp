@@ -12,9 +12,21 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a using clause with an alias.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   UsingNamespaceNode:
-  ///     "using" alias "=" TypeOrNamespaceNode ";"
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>using</strong>" <em>alias</em> "<strong>=</strong>"
+  ///         <em>TypeOrNamespaceNode</em> "<strong>;</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>using</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  /// 			<em>alias</em>: <see cref="AliasToken"/><br/>
+  ///             "<strong>=</strong>": <see cref="EqualToken"/><br/>
+  /// 			<em>TypeOrNamespaceNode</em>: <see cref="UsingNamespaceNode.TypeName"/><br/>
+  ///             "<strong>;</strong>": <see cref="UsingNamespaceNode.TerminatingToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public sealed class UsingAliasNode : UsingNamespaceNode

@@ -9,9 +9,26 @@ using CSharpTreeBuilder.CSharpAstBuilder;
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This node represents a modifier.
-  /// </summary>
+  /// <summary>This node represents a modifier.</summary>
+  /// <remarks>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>( "<strong>new</strong>" | "<strong>public</strong>" |
+  ///         "<strong>protected</strong>" | "<strong>internal</strong>" |
+  ///         "<strong>private</strong>" | "<strong>unsafe</strong>" |
+  ///         "<strong>static</strong>" | "<strong>volatile</strong>" |
+  ///         "<strong>virtual</strong>" | "<strong>sealed</strong>" |
+  ///         "<strong>override</strong>" | "<strong>abstract</strong>" |
+  ///         "<strong>extern</strong>" | "<strong>readonly</strong>" )</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  /// 			<see cref="ISyntaxNode.StartToken"/> stores the token representing the
+  ///             modifier. <see cref="Value"/> stores the type of the modifier.
+  ///         </para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public class ModifierNode : SyntaxNode<ISyntaxNode>
   {

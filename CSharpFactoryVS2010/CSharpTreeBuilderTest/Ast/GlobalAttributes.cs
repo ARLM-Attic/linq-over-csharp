@@ -139,5 +139,27 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
       Assert.IsTrue(InvokeParser(project));
     }
+
+    [TestMethod]
+    public void GlobalAttributeParentsAreOk()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
+      Assert.IsTrue(InvokeParser(project));
+      var file = project.SyntaxTree.SourceFileNodes[0];
+      foreach (var attrNode in file.GlobalAttributes)
+      {
+        Assert.AreEqual(attrNode.ParentNode, file);
+        foreach (var aNode in attrNode.Attributes)
+        {
+          Assert.AreEqual(aNode.ParentNode, attrNode);
+          Assert.AreEqual(aNode.TypeName.ParentNode, aNode);
+          foreach (var aArg in aNode.Arguments)
+          {
+            Assert.AreEqual(aArg.ParentNode, aNode);
+          }
+        }
+      }
+    }
   }
 }

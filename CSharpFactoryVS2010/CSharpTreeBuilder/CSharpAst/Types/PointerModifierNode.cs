@@ -12,9 +12,16 @@ namespace CSharpTreeBuilder.Ast
   /// This type represents a pointer modifier.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   PointerModifierNode:
-  ///     "*"
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>*</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para dir="ltr">Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para dir="ltr">
+  ///             "<strong>*</strong>": <see cref="ISyntaxNode.StartToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public sealed class PointerModifierNode : TypeModifierNode

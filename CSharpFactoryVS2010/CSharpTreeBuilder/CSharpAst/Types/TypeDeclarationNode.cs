@@ -12,6 +12,20 @@ namespace CSharpTreeBuilder.Ast
   /// <summary>
   /// This class is the base class of all syntax tree nodes representing a type declaration.
   /// </summary>
+  /// <remarks>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
+  ///             "<strong>:</strong>": <see cref="ColonToken"/> (optional separator for
+  ///             base types)<br/>
+  ///             { <em>TypeOrNamespaceNode</em> }: <see cref="BaseTypes"/><br/>
+  ///             { <em>TypeOrMemberNode</em> }: <see cref="NestedDeclarations"/><br/>
+  ///             { <em>TypeDeclarationNode</em> }: <see cref="NestedTypes"/><br/>
+  ///             { <em>MemberDeclarationNode</em> }: <see cref="MemberDeclarations"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public abstract class TypeDeclarationNode : TypeOrMemberDeclarationNode
   {
@@ -26,10 +40,10 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
       IdentifierToken = name;
-      BaseTypes = new TypeOrNamespaceNodeCollection();
-      NestedDeclarations = new ImmutableCollection<TypeOrMemberDeclarationNode>();
-      NestedTypes = new TypeDeclarationNodeCollection();
-      MemberDeclarations = new MemberDeclarationNodeCollection();
+      BaseTypes = new TypeOrNamespaceNodeCollection { ParentNode = this };
+      NestedDeclarations = new TypeOrMemberNodeCollection { ParentNode = this };
+      NestedTypes = new TypeDeclarationNodeCollection { ParentNode = this };
+      MemberDeclarations = new MemberDeclarationNodeCollection { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------

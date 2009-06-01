@@ -9,8 +9,15 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class is intended to be the base class of or type and member declaration.
+  /// This abstract class is intended to be the base class of or type and member declaration.
   /// </summary>
+  /// <remarks>
+  /// 	<para>Representation:</para>
+  /// 	<para>
+  ///         { <em>TypeParameterNode</em> }: <see cref="TypeParameters"/><br/>
+  ///         { <em>TypeParameterConstraintNode</em> } : <see cref="TypeParameterConstraints"/>
+  /// 	</para>
+  /// </remarks>
   // ================================================================================================
   public abstract class TypeOrMemberDeclarationNode :
     AttributedDeclarationNode,
@@ -25,8 +32,8 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected TypeOrMemberDeclarationNode(Token start) : base(start)
     {
-      TypeParameters = new TypeParameterListNode();
-      TypeParameterConstraints = new TypeParameterConstraintNodeCollection();
+      TypeParameters = new TypeParameterListNode { ParentNode = this };
+      TypeParameterConstraints = new TypeParameterConstraintNodeCollection { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------

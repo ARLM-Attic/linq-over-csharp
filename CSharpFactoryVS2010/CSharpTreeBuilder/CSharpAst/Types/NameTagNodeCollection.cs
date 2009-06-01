@@ -4,7 +4,6 @@
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System.Text;
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -13,8 +12,20 @@ namespace CSharpTreeBuilder.Ast
   /// <summary>
   /// This class represents a collection of name tags.
   /// </summary>
+  /// <remarks>
+  /// 	<para>This class is used to keep namespace names.</para>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>{ <em>NameTagNode</em> }</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para><em>NameTagNode</em>: Collection item</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
-  public sealed class NameTagNodeCollection : ImmutableCollection<NameTagNode>
+  public sealed class NameTagNodeCollection : 
+    SyntaxNodeCollection<NameTagNode, NamespaceDeclarationNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -44,11 +55,9 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="identifier">The identifier token.</param>
     /// <returns>The newly created NameTagNode instance.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NameTagNode Add(Token identifier)
+    public void Add(Token identifier)
     {
-      var result = new NameTagNode(identifier);
-      Add(result);
-      return result;
+      Add(new NameTagNode(identifier));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -59,11 +68,9 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="identifier">The identifier token.</param>
     /// <returns>The newly created NameTagNode instance.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NameTagNode Add(Token separator, Token identifier)
+    public void Add(Token separator, Token identifier)
     {
-      var result = new NameTagNode(separator, identifier);
-      Add(result);
-      return result;
+      Add(separator, new NameTagNode(identifier));
     }
   }
 }

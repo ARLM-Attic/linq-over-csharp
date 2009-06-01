@@ -8,13 +8,21 @@ using CSharpTreeBuilder.CSharpAstBuilder;
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a type tag.
-  /// </summary>
+  /// <summary>This class represents a type tag within a compound type or namespace name.</summary>
   /// <remarks>
-  /// Syntax:
-  ///   TypeTagNode:
-  ///     identifier [TypeArgumentListNode]
+  /// 	<para>For example, in the type name "System.Text.Encodig" "System", "Text" and
+  ///     "Encoding" are represented by type tags.</para>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para><em>identifier</em> [ <em>TypeArgumentListNode</em> ]</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
+  /// 			<em>TypeArgumentListNode</em>: <see cref="Arguments"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public class TypeTagNode : SyntaxNode<TypeOrNamespaceNode>, IIdentifierSupport, ITypeArguments
@@ -26,15 +34,13 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="identifier">Identifier token.</param>
     /// <param name="argumentListNode">The argument list node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeTagNode(Token identifier, TypeArgumentListNode argumentListNode)
+    public TypeTagNode(Token identifier, TypeOrNamespaceNodeCollection argumentListNode)
       : base(identifier)
     {
       IdentifierToken = identifier;
       Arguments = argumentListNode;
       Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
     }
-
-    #region IIdentifierSupport Members
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -68,17 +74,13 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #endregion
-
-    #region ITypeArguments Members
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the node providing type arguments.
     /// </summary>
     /// <value>The arguments.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeArgumentListNode Arguments { get; private set; }
+    public TypeOrNamespaceNodeCollection Arguments { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -92,8 +94,6 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return Arguments != null && Arguments.Count > 0; }
     }
-
-    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

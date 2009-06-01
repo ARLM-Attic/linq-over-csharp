@@ -11,6 +11,26 @@ namespace CSharpTreeBuilder.Ast
   /// <summary>
   /// This type defines a source file node in the syntax tree.
   /// </summary>
+  /// <remarks>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>{ <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> } {
+  ///         <em>ExternAliasNode</em> } { <em>AttributeDecorationNode</em> }<br/>
+  ///         { <em>NamespaceDeclarationNode</em> | <em>TypeDeclarationNode</em> }</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             { <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>ExternAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>AttributeDecorationNode</em> }: <see cref="GlobalAttributes"/><br/>
+  ///             { <em>NamespaceDeclarationNode</em> | <em>TypeDeclarationNode</em> }: see
+  ///             <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>NamespaceDeclarationNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>TypeDeclarationNode</em> }: see <see cref="NamespaceScopeNode"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public sealed class SourceFileNode : NamespaceScopeNode
   {
@@ -20,11 +40,11 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <param name="fullName">The full name of the source file.</param>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode(string fullName) : base(null)
+    public SourceFileNode(string fullName) : base(null, null)
     {
       Name = Path.GetFileName(fullName);
       FullName = fullName;
-      GlobalAttributes = new AttributeDecorationNodeCollection();
+      GlobalAttributes = new AttributeDecorationNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -75,7 +95,7 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
-        ExternAliaseNodes,
+        ExternAliasNodes,
         UsingNodes,
         GlobalAttributes,
         InScopeDeclarations

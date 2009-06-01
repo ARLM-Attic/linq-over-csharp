@@ -285,20 +285,16 @@ public partial class CSharpParser
 		var separator = t; 
 		AttributeNode attrNode; 
 		Attribute(out attrNode);
-		attrNode.SeparatorToken = separator;
-		globAttrNode.Attributes.Add(attrNode); 
-		
+		globAttrNode.Attributes.Add(separator, attrNode); 
 		while (NotFinalComma()) {
 			Expect(87);
 			separator = t; 
 			Attribute(out attrNode);
-			attrNode.SeparatorToken = separator;
-			globAttrNode.Attributes.Add(attrNode); 
-			
+			globAttrNode.Attributes.Add(separator, attrNode); 
 		}
 		if (la.kind == 87) {
 			Get();
-			globAttrNode.ClosingSeparator = t; 
+			globAttrNode.OrphanSeparator = t; 
 		}
 		Expect(112);
 		Terminate(globAttrNode);
@@ -363,7 +359,7 @@ public partial class CSharpParser
 		resultNode = null;
 		Token separator = null;
 		Token identifier = null;
-		TypeArgumentListNode argList = null;
+		TypeOrNamespaceNodeCollection argList = null;
 		
 		Expect(1);
 		resultNode = new TypeOrNamespaceNode(t);
@@ -604,12 +600,13 @@ public partial class CSharpParser
 		
 		if (la.kind == 86) {
 			Get();
-			TypeOrNamespaceNode typeNode; 
+			TypeOrNamespaceNode typeNode = null; 
 			if (la.kind == 1 || la.kind == 48 || la.kind == 65) {
 				ClassType(out typeNode);
 			} else if (StartOf(6)) {
 				IntegralType(out typeNode);
 			} else SynErr(148);
+			enumDecl.EnumBase = typeNode; 
 		}
 		EnumBody(enumDecl);
 		Terminate(typeDecl); 
@@ -1156,7 +1153,7 @@ public partial class CSharpParser
 		resultNode = null;
 		Token separator = null;
 		Token identifier = null;
-		TypeArgumentListNode argList = null;
+		TypeOrNamespaceNodeCollection argList = null;
 		
 		Expect(1);
 		resultNode = new TypeOrNamespaceNode(t);
@@ -1741,19 +1738,16 @@ public partial class CSharpParser
 			separator = t; 
 		}
 		Attribute(out attributeNode);
-		attrNode.SeparatorToken = separator;
-		attrNode.Attributes.Add(attributeNode); 
-		
+		attrNode.Attributes.Add(separator, attributeNode); 
 		while (la.kind == _comma && Peek(1).kind != _rbrack) {
 			Expect(87);
+			separator = t; 
 			Attribute(out attributeNode);
-			attrNode.SeparatorToken = separator;
-			attrNode.Attributes.Add(attributeNode); 
-			
+			attrNode.Attributes.Add(separator, attributeNode); 
 		}
 		if (la.kind == 87) {
 			Get();
-			attrNode.ClosingSeparator = t; 
+			attrNode.OrphanSeparator = t; 
 		}
 		Expect(112);
 		Terminate(attrNode); 
@@ -2193,10 +2187,12 @@ public partial class CSharpParser
 		} else SynErr(184);
 	}
 
-	void TypeArgumentList(out TypeArgumentListNode argList) {
+	void TypeArgumentList(out TypeOrNamespaceNodeCollection argList) {
 		argList = null; 
 		Expect(100);
-		argList = new TypeArgumentListNode(t); 
+		argList = new TypeOrNamespaceNodeCollection(); 
+		Start(argList);
+		
 		if (StartOf(11)) {
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeNode);
@@ -3458,7 +3454,7 @@ public partial class CSharpParser
 			Expect(1);
 			nlNode.IdentifierToken = t; 
 		}
-		TypeArgumentListNode argList; 
+		TypeOrNamespaceNodeCollection argList; 
 		if (IsGeneric()) {
 			TypeArgumentList(out argList);
 			nlNode.Arguments = argList; 
@@ -3603,7 +3599,7 @@ public partial class CSharpParser
 	void SimpleNamedLiteral(out SimpleNameNode snlNode) {
 		Expect(1);
 		snlNode = new SimpleNameNode(t); 
-		TypeArgumentListNode argList; 
+		TypeOrNamespaceNodeCollection argList; 
 		if (IsGeneric()) {
 			TypeArgumentList(out argList);
 			snlNode.Arguments = argList; 

@@ -278,5 +278,109 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(nsDecl.CloseBracket.Line, 21);
       Assert.AreEqual(nsDecl.OpenBracket.Column, 5);
     }
+
+    [TestMethod]
+    public void UsingsParentIsOk()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      project.AddAssemblyReference("System.Data");
+      project.AddAssemblyReference("System.Xml");
+      Assert.IsTrue(InvokeParser(project));
+
+      var sn = project.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(sn.UsingNodes.Count, 5);
+      foreach (var usingNode in sn.UsingNodes)
+      {
+        Assert.AreEqual(usingNode.ParentNode, sn);
+        Assert.AreEqual(usingNode.TypeName.ParentNode, sn);
+      }
+
+      var nsDecl = sn.NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 3);
+      foreach (var usingNode in nsDecl.UsingNodes)
+      {
+        Assert.AreEqual(usingNode.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+      }
+      
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 1);
+      foreach (var usingNode in nsDecl.UsingNodes)
+      {
+        Assert.AreEqual(usingNode.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0].NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 2);
+      foreach (var usingNode in nsDecl.UsingNodes)
+      {
+        Assert.AreEqual(usingNode.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[1];
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 1);
+      foreach (var usingNode in nsDecl.UsingNodes)
+      {
+        Assert.AreEqual(usingNode.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[2].NamespaceDeclarations[0];
+      Assert.AreEqual(nsDecl.UsingNodes.Count, 2);
+      foreach (var usingNode in nsDecl.UsingNodes)
+      {
+        Assert.AreEqual(usingNode.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+      }
+    }
+
+    [TestMethod]
+    public void NamespaceParentsAreOk()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
+      project.AddAssemblyReference("System.Data");
+      project.AddAssemblyReference("System.Xml");
+      Assert.IsTrue(InvokeParser(project));
+
+      var sn = project.SyntaxTree.SourceFileNodes[0];
+      foreach (var nsNode in sn.NamespaceDeclarations)
+      {
+        Assert.AreEqual(nsNode.ParentNode, sn);
+      }
+
+      var nsDecl = sn.NamespaceDeclarations[0];
+      foreach (var nsNode in nsDecl.NamespaceDeclarations)
+      {
+        Assert.AreEqual(nsNode.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0];
+      foreach (var nsNode in nsDecl.NamespaceDeclarations)
+      {
+        Assert.AreEqual(nsNode.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0].NamespaceDeclarations[0];
+      foreach (var nsNode in nsDecl.NamespaceDeclarations)
+      {
+        Assert.AreEqual(nsNode.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[1];
+      foreach (var nsNode in nsDecl.NamespaceDeclarations)
+      {
+        Assert.AreEqual(nsNode.ParentNode, nsDecl);
+      }
+
+      nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[2].NamespaceDeclarations[0];
+      foreach (var nsNode in nsDecl.NamespaceDeclarations)
+      {
+        Assert.AreEqual(nsNode.ParentNode, nsDecl);
+      }
+    }
   }
 }

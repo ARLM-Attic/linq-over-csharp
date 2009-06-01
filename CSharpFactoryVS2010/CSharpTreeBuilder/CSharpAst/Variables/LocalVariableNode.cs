@@ -12,6 +12,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class LocalVariableNode : SyntaxNode<ISyntaxNode>
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
@@ -29,7 +32,15 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

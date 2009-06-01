@@ -14,6 +14,27 @@ namespace CSharpTreeBuilder.Ast
   /// This abstract class defines the behavior of a scope where exter aliases, using directives and 
   /// namespaces can be declared.
   /// </summary>
+  /// <remarks>
+  /// 	<para>This class is used to represent source files and namespace
+  ///     declarations.</para>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>{ <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> } {
+  ///         <em>ExternAliasNode</em> } { <em>NamespaceDeclarationNode</em> |
+  ///         <em>TypeDeclarationNode</em> }</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             { <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> }: <see cref="UsingNodes"/><br/>
+  ///             { <em>ExternAliasNode</em> }: <see cref="ExternAliasNodes"/><br/>
+  ///             { <em>NamespaceDeclarationNode</em> | <em>TypeDeclarationNode</em> }:
+  ///             <see cref="InScopeDeclarations"/><br/>
+  ///             { <em>NamespaceDeclarationNode</em> }: <see cref="NamespaceDeclarations"/><br/>
+  ///             { <em>TypeDeclarationNode</em> }: <see cref="TypeDeclarations"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public abstract class NamespaceScopeNode : SyntaxNode<NamespaceScopeNode>
   {
@@ -23,15 +44,18 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceScopeNode"/> class.
     /// </summary>
+    /// <param name="parent">The parent namespace scope node.</param>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NamespaceScopeNode(Token start) : base(start)
+    protected NamespaceScopeNode(NamespaceScopeNode parent, Token start)
+      : base(start)
     {
-      UsingNodes = new UsingNodeCollection();
-      ExternAliaseNodes = new ExternAliasNodeCollection();
-      NamespaceDeclarations = new NamespaceDeclarationNodeCollection();
-      TypeDeclarations = new TypeDeclarationNodeCollection();
-      InScopeDeclarations = new ScopeNodeCollection();
+      ParentNode = parent;
+      UsingNodes = new UsingNodeCollection {ParentNode = this};
+      ExternAliasNodes = new ExternAliasNodeCollection { ParentNode = this };
+      NamespaceDeclarations = new NamespaceDeclarationNodeCollection { ParentNode = this };
+      TypeDeclarations = new TypeDeclarationNodeCollection { ParentNode = this };
+      InScopeDeclarations = new ScopeNodeCollection { ParentNode = this };
     }
 
     #endregion
@@ -65,7 +89,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the extern alias clauses belonging to the source file.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExternAliasNodeCollection ExternAliaseNodes { get; private set; }
+    public ExternAliasNodeCollection ExternAliasNodes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -144,7 +168,7 @@ namespace CSharpTreeBuilder.Ast
     public void AddExternAlias(Token start, Token alias, Token identifier,
                                           Token terminating)
     {
-      ExternAliaseNodes.Add(new ExternAliasNode(this, start, alias, identifier, terminating));
+      ExternAliasNodes.Add(new ExternAliasNode(this, start, alias, identifier, terminating));
     }
 
     #endregion
@@ -162,7 +186,7 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
-        ExternAliaseNodes,
+        ExternAliasNodes,
         UsingNodes,
         InScopeDeclarations
         );

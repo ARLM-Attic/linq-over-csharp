@@ -11,6 +11,15 @@ namespace CSharpTreeBuilder.Ast
   /// <summary>
   /// This class represents type declarations having bodies.
   /// </summary>
+  /// <remarks>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>{</strong>": <see cref="OpenBrace"/><br/>
+  ///             "<strong>}</strong>": <see cref="CloseBrace"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public abstract class TypeWithBodyDeclarationNode : TypeDeclarationNode
   {

@@ -13,9 +13,17 @@ namespace CSharpTreeBuilder.Ast
   /// This type represents a pointer modifier.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   ArrayModifierNode:
-  ///     "[" { "," } "]"
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>[</strong>" { "<strong>,</strong>" } "<strong>]</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<para>
+  ///         "<strong>[</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  ///         { "<strong>,</strong>" }: <see cref="Separators"/>, each comma is an item
+  ///         in the collection<br/>
+  ///         "<strong>]</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
+  /// 	</para>
   /// </remarks>
   // ================================================================================================
   public sealed class ArrayModifierNode : TypeModifierNode
@@ -40,8 +48,6 @@ namespace CSharpTreeBuilder.Ast
     public ImmutableCollection<Token> Separators { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the rank of the array.
     /// </summary>
@@ -51,6 +57,7 @@ namespace CSharpTreeBuilder.Ast
       get { return Separators.Count + 1; }
     }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Adds a new separator token.
     /// </summary>

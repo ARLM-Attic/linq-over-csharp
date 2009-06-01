@@ -14,6 +14,10 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public abstract class MemberDeclarationNode : TypeOrMemberDeclarationNode
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+    private TypeOrNamespaceNode _MemberName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MemberDeclarationNode"/> class.
@@ -30,14 +34,31 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the type of the member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the member name of this method.
     /// </summary>
+    /// <value>The name of the member.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode MemberName { get; internal set; }
+    public TypeOrNamespaceNode MemberName
+    {
+      get { return _MemberName; }
+      internal set
+      {
+        _MemberName = value;
+        _MemberName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

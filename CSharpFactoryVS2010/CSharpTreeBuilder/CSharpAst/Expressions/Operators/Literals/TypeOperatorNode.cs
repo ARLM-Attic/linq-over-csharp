@@ -12,6 +12,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public sealed class TypeOperatorNode : LiteralNode
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="LiteralNode"/> class.
@@ -28,6 +31,14 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; private set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      private set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
   }
 }

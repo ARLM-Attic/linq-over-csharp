@@ -19,6 +19,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class TypeParameterConstraintTagNode : SyntaxNode<TypeOrMemberDeclarationNode>, IParentheses
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeParameterConstraintTagNode"/> class.
@@ -116,12 +119,17 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the constarint type name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; protected set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      protected set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IParentheses Members
-
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -134,7 +142,5 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; protected set; }
-
-    #endregion
   }
 }

@@ -12,9 +12,16 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a name tag.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   NameTagNode:
-  ///     identifier
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para><em>identifier</em></para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  /// 			<em>identifier</em>: <see cref="IdentifierToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public class NameTagNode : SyntaxNode<TypeOrNamespaceNode>, IIdentifierSupport
@@ -30,19 +37,6 @@ namespace CSharpTreeBuilder.Ast
     {
       IdentifierToken = identifier;
       Terminate(identifier);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="NameTagNode"/> class.
-    /// </summary>
-    /// <param name="separator">The separator token.</param>
-    /// <param name="identifier">Token providing information about the element.</param>
-    // ----------------------------------------------------------------------------------------------
-    public NameTagNode(Token separator, Token identifier)
-      : this(identifier)
-    {
-      SeparatorToken = separator;
     }
 
     // ----------------------------------------------------------------------------------------------

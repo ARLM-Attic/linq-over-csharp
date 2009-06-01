@@ -11,9 +11,36 @@ namespace CSharpTreeBuilder.Ast
   /// <summary>
   /// Represents an enum declaration.
   /// </summary>
+  /// <remarks>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>enum</strong>" <em>identifier</em> [ "<strong>:</strong>"
+  ///         <em>TypeOrNamespaceNode</em> ] "<strong>{</strong>" [ <em>EnumValueNode</em> {
+  ///         "<strong>,</strong>" <em>EnumValueNode</em> } [ "<strong>,</strong>" ] ]
+  ///         "<strong>}</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>enum</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  /// 			<em>identifier: <see cref="TypeOrMemberDeclarationNode.IdentifierToken"/></em><br/>
+  ///             "<strong>:</strong>": <see cref="TypeDeclarationNode.ColonToken"/><br/>
+  /// 			<em>TypeOrNamespaceNode:</em>
+  /// 			<see cref="TypeOrMemberDeclarationNode.TypeName"/><br/>
+  ///             "<strong>{</strong>": <see cref="TypeWithBodyDeclarationNode.OpenBrace"/><br/>
+  ///             { <em>EnumValueNode</em> }: <see cref="Values"/><br/>
+  ///             "<strong>,</strong>": <see cref="OrphanSeparator"/><br/>
+  ///             "<strong>}</strong>": <see cref="ISyntaxNode.TerminatingToken"/>,
+  ///             <see cref="TypeWithBodyDeclarationNode.CloseBrace"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
   public class EnumDeclarationNode : TypeWithBodyDeclarationNode
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _EnumBase;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumDeclarationNode"/> class.
@@ -25,6 +52,21 @@ namespace CSharpTreeBuilder.Ast
       : base(start, name)
     {
       Values = new EnumValueNodeCollection();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the optional enum base type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode EnumBase
+    {
+      get { return _EnumBase; }
+      internal set
+      {
+        _EnumBase = value;
+        _EnumBase.ParentNode = this;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

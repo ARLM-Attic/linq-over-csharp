@@ -346,8 +346,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     private void Start<TNode, TParent>(SyntaxNodeCollection<TNode, TParent> node)
-      where TNode : ISyntaxNode
-      where TParent: ISyntaxNode
+      where TNode : class, ISyntaxNode
+      where TParent: class, ISyntaxNode
     {
       if (node != null) node.StartToken = t;
     }

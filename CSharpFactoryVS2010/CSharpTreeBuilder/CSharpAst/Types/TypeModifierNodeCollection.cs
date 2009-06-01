@@ -1,27 +1,27 @@
 // ================================================================================================
-// NamespaceDeclarationNodeCollection.cs
+// TypeModifierNodeCollection.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.05.31, by Istvan Novak (DeepDiver)
 // ================================================================================================
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type represents a collection of namespace declaration nodes.
+  /// Represents a collection of <see cref="TypeModifierNode"/> instances.
   /// </summary>
   /// <remarks>
   /// 	<para>Syntax:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>{ <em>NamespaceDeclarationNode</em> }</para>
+  /// 		<para>{ <em>TypeModifierNode</em> }</para>
   /// 	</blockquote>
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para><em>NamespaceDeclarationNode</em>: Collection item</para>
+  /// 		<para><em>TypeModifierNode</em>: Collection item</para>
   /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
-  public sealed class NamespaceDeclarationNodeCollection :
-    SyntaxNodeCollection<NamespaceDeclarationNode, NamespaceScopeNode>
+  public class TypeModifierNodeCollection: 
+    SyntaxNodeCollection<TypeModifierNode, TypeOrNamespaceNode>
   {
   }
 }

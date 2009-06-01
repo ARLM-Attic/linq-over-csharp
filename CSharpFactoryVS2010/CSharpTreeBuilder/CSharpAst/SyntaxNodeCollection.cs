@@ -15,19 +15,42 @@ namespace CSharpTreeBuilder.Ast
   /// represent a syntax node. An instance of this collection must be a syntax node.
   /// </summary>
   /// <remarks>
-  ///     This class implements the <see cref="ISyntaxNode"/> interface so that a
-  ///     collection of other syntax node could behave as a single syntax node having a start
-  ///     token and a terminating token. For example, the list of current method parameters
-  ///     is represented by class derived from this class. The start token is the opening
-  ///     parenthesis, the terminating token is the closing paranthesis, and items of the
-  ///     collection are the current method parameters.
+  /// 	<para>
+  ///         This class implements the <see cref="ISyntaxNode"/> interface so that a
+  ///         collection of other syntax node could behave as a single syntax node having a
+  ///         start token and a terminating token. For example, the list of current method
+  ///         parameters is represented by class derived from this class. The start token is
+  ///         the opening parenthesis, the terminating token is the closing paranthesis, and
+  ///         items of the collection are the current method parameters.
+  ///     </para>
+  /// 	<para>
+  ///         Each syntax node collection can have a <see cref="ParentNode"/>. Items in
+  ///         the collection should be set up so that their parent is the same as the parent
+  ///         of the collection.
+  ///     </para>
   /// </remarks>
-  /// <typeparam name="TNode">The type of the node, that must be an <see cref="ISyntaxNode"/>.</typeparam>
+  /// <typeparam name="TNode">
+  /// The type of the node, that must be an <see cref="ISyntaxNode"/>.
+  /// </typeparam>
+  /// <typeparam name="TParent">
+  /// The type of the parent element, must implement <see cref="ISyntaxNode"/>
+  /// </typeparam>
   // ================================================================================================
   public abstract class SyntaxNodeCollection<TNode, TParent> : ImmutableCollection<TNode>, ISyntaxNode
-    where TNode: ISyntaxNode
-    where TParent: ISyntaxNode
+    where TNode: class, ISyntaxNode
+    where TParent: class, ISyntaxNode
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the parent node of this syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    ISyntaxNode ISyntaxNode.Parent
+    {
+      get { return ParentNode; }
+      set { ParentNode = value as TParent; }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the parent node of this syntax node.
@@ -174,6 +197,7 @@ namespace CSharpTreeBuilder.Ast
     public override void Add(TNode item)
     {
       base.Add(item);
+      if (item.Parent == null) item.Parent = (this as ISyntaxNode).Parent;
       if (Count == 0 && StartToken == null) StartToken = item.StartToken;
       TerminatingToken = item.TerminatingToken;
     }

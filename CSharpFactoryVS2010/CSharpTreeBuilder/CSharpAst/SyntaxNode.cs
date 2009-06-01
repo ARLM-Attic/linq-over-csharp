@@ -14,14 +14,21 @@ namespace CSharpTreeBuilder.Ast
   ///     represented by a <see cref="SourceFileNode"/> instance.
   /// </summary>
   /// <remarks>
-  ///     This node represents a logical unit of tokens composing a syntax node, like a using
-  ///     directive, a type declaration, a member declaration a statement, and so on. Any
-  ///     syntax node can encapsulate other syntax nodes, or even 
-  ///     <see cref="SyntaxNodeCollection{TNode}"/> instances.
+  /// 	<para>
+  ///         This node represents a logical unit of tokens composing a syntax node, like a
+  ///         using directive, a type declaration, a member declaration a statement, and so
+  ///         on. Any syntax node can encapsulate other syntax nodes, or even 
+  ///         <see cref="SyntaxNodeCollection{TNode, TParent}"/> instances. Syntax nodes can 
+  ///         have zero or more parents that have a type of <typeparamref name="TParent"/>. You
+  ///         can access this node through the <see cref="ParentNode"/> property.
+  ///     </para>
   /// </remarks>
+  /// <typeparam name="TParent">
+  /// Type of the parent syntax node, must implement <see cref="ISyntaxNode"/>.
+  /// </typeparam>
   // ================================================================================================
   public abstract class SyntaxNode<TParent> : ISyntaxNode
-    where TParent: ISyntaxNode
+    where TParent: class, ISyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -38,7 +45,22 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Gets or sets the parent node of this syntax node.
     /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    ISyntaxNode ISyntaxNode.Parent
+    {
+      get { return ParentNode; }
+      set { ParentNode = value as TParent; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the parent node of this syntax node.
+    /// </summary>
     /// <value>The parent node.</value>
+    /// <example>
+    /// Parent is optional. If an item is in a syntax node collections, this property
+    /// should point to the parent of the collection and not to the collection itself.
+    /// </example>
     // ----------------------------------------------------------------------------------------------
     public TParent ParentNode { get; set; }
 
@@ -213,7 +235,9 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
-      return StartToken.Value;
+      return StartToken == null 
+        ? GetType().ToString()
+        : StartToken.Value;
     }
   }
 }

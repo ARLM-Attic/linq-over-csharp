@@ -76,7 +76,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the node providing type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeArgumentListNode Arguments { get; internal set; }
+    public TypeOrNamespaceNodeCollection Arguments { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

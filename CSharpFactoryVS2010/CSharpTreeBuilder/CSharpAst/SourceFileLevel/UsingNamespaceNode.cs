@@ -11,12 +11,25 @@ namespace CSharpTreeBuilder.Ast
   /// <summary>This class represents a using namespace directive.</summary>
   /// <remarks>
   /// 	<para>Syntax:</para>
-  /// 	<para>"<strong>using</strong>" <em>TypeOrNamespaceNode</em>
-  ///     "<strong>;</strong>"</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>using</strong>" <em>TypeOrNamespaceNode</em>
+  ///         "<strong>;</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>using</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  /// 			<em>TypeOrNamespaceNode</em>: <see cref="TypeName"/><br/>
+  ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public class UsingNamespaceNode : SyntaxNode<NamespaceScopeNode>
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="UsingNamespaceNode"/> class.
@@ -30,17 +43,11 @@ namespace CSharpTreeBuilder.Ast
       Token terminating)
       : base(start)
     {
-      Parent = parent;
+      ParentNode = parent;
       TypeName = namespaceNode;
+      TypeName.ParentNode = parent;
       Terminate(terminating);
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the parent of this node.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceScopeNode Parent { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -48,7 +55,15 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; private set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      private set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

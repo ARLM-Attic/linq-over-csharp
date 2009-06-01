@@ -14,10 +14,10 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class MemberDeclaratorNode : SyntaxNode<ISyntaxNode>, IIdentifierSupport
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
-
-    #region DeclaratorKind enum
-
     /// <summary>
     /// Kind of member declarator
     /// </summary>
@@ -40,8 +40,6 @@ namespace CSharpTreeBuilder.Ast
       MemberAccess
     }
 
-    #endregion
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MemberDeclaratorNode"/> class.
@@ -59,8 +57,6 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public DeclaratorKind Kind { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -90,7 +86,15 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the name of the type (in case of "MemberAccess" declarator).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     #region IIdentifierSupport Members
 

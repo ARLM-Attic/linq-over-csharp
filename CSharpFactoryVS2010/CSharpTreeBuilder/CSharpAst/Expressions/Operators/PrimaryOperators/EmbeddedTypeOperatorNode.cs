@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public abstract class EmbeddedTypeOperatorNode : PrimaryOperatorNode, IParentheses
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="PrimaryOperatorNode"/> class.
@@ -24,16 +27,22 @@ namespace CSharpTreeBuilder.Ast
     {
     }
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the type embedded into this operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; internal set; }
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        _TypeName.ParentNode = this;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IParentheses Members
-
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -46,9 +55,5 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; internal set; }
-
-    #endregion
-
-    // ----------------------------------------------------------------------------------------------
   }
 }

@@ -13,9 +13,19 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents an argument of an attribute.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   AttributeArgumentNode:
-  ///     [ identifier "=" ] ExpressionNode
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>[ <em>identifier</em> "<strong>=</strong>" ]
+  ///         <em>ExpressionNode</em></para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
+  ///             "<strong>=</strong>": <see cref="EqualToken"/><br/>
+  /// 			<em>ExpressionNode</em>: <see cref="Expression"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public class AttributeArgumentNode : SyntaxNode<AttributeNode>, IIdentifierSupport

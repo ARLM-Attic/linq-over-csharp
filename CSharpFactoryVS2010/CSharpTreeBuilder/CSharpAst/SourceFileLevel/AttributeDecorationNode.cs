@@ -12,12 +12,27 @@ namespace CSharpTreeBuilder.Ast
   /// This node represents a global or local argument decoration.
   /// </summary>
   /// <remarks>
-  /// Syntax:
-  ///   AttributeDecorationNode:
-  ///     "[" [ identifier ":" ] AttributeNode { AttributeContinuationNode } [ "," ] "]"
-  /// 
-  /// The openining bracket is represented by StartToken, the closing bracket with
-  /// TerminatingToken.
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>[</strong>" [ <em>identifier</em> "<strong>:</strong>" ]
+  ///         <em>AttributeNode</em> { "<strong>,</strong>" <em>AttributeNode</em> } [
+  ///         "<strong>,</strong>" ] "<strong>]</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>[</strong>": <see cref="IsyntaxNode.StartToken"/><br/>
+  ///             [<br/>
+  /// 			<em>identifier</em>: <see cref="TargetToken"/><br/>
+  ///             "<strong>:</strong>": Stored in the separator token of the next
+  ///             <em>AttributeNode</em><br/>
+  ///             ]<br/>
+  /// 			<em>AttributeNode</em> { "<strong>,</strong>" <em>AttributeNode</em> }:
+  ///             <see cref="Attributes"/><br/>
+  ///             [ "<strong>,</strong>" ]: <see cref="OrphanSeparator"/><br/>
+  ///             "<strong>]</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public sealed class AttributeDecorationNode : SyntaxNode<ISyntaxNode>
@@ -31,7 +46,7 @@ namespace CSharpTreeBuilder.Ast
     public AttributeDecorationNode(Token start)
       : base(start)
     {
-      Attributes = new AttributeNodeCollection();
+      Attributes = new AttributeNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -67,10 +82,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the optional closing separator.
+    /// Gets or sets the optional orphan separator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token ClosingSeparator { get; internal set; }
+    public Token OrphanSeparator { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

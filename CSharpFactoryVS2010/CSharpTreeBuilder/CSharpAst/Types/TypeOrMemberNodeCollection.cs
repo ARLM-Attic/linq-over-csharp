@@ -1,27 +1,28 @@
 // ================================================================================================
-// NamespaceDeclarationNodeCollection.cs
+// TypeOrMemberNodeCollection.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.06.01, by Istvan Novak (DeepDiver)
 // ================================================================================================
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type represents a collection of namespace declaration nodes.
+  /// This collection represents the type or member declarations belonging to a type
+  /// declaration.
   /// </summary>
   /// <remarks>
   /// 	<para>Syntax:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>{ <em>NamespaceDeclarationNode</em> }</para>
+  /// 		<para>{ <em>TypeOrMemberDeclarationNode</em> }</para>
   /// 	</blockquote>
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para><em>NamespaceDeclarationNode</em>: Collection item</para>
+  /// 		<para><em>TypeOrMemberDeclarationNode</em>: Collection item</para>
   /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
-  public sealed class NamespaceDeclarationNodeCollection :
-    SyntaxNodeCollection<NamespaceDeclarationNode, NamespaceScopeNode>
+  public class TypeOrMemberNodeCollection : SyntaxNodeCollection
+    <TypeOrMemberDeclarationNode, TypeDeclarationNode>
   {
   }
 }

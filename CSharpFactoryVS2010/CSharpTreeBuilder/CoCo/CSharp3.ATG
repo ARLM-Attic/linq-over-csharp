@@ -239,18 +239,10 @@ PRODUCTIONS
 // ================================================================================================
 CS3
 =                                                               
-  { 
-    IF (IsExternAliasDirective()) ExternAliasDirective<SourceFileNode>
-  }
-  {
-    UsingDirective<SourceFileNode>
-  }
-  {
-    IF (IsGlobalAttrTarget()) GlobalAttributes
-  }
-  {
-    NamespaceMemberDeclaration<SourceFileNode>
-  }
+  { IF (IsExternAliasDirective()) ExternAliasDirective<SourceFileNode> }
+  { UsingDirective<SourceFileNode> }
+  { IF (IsGlobalAttrTarget()) GlobalAttributes }
+  { NamespaceMemberDeclaration<SourceFileNode> }
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -330,22 +322,16 @@ GlobalAttributes
   (. var separator = t; .)
   (. AttributeNode attrNode; .)
   Attribute<out attrNode>
-  (. 
-     attrNode.SeparatorToken = separator;
-     globAttrNode.Attributes.Add(attrNode); 
-  .)
+  (. globAttrNode.Attributes.Add(separator, attrNode); .)
   { 
     IF (NotFinalComma()) ","   
     (. separator = t; .)
     Attribute<out attrNode> 
-    (. 
-       attrNode.SeparatorToken = separator;
-       globAttrNode.Attributes.Add(attrNode); 
-    .)
+    (. globAttrNode.Attributes.Add(separator, attrNode); .)
   } 
   [ 
     ","
-    (. globAttrNode.ClosingSeparator = t; .) 
+    (. globAttrNode.OrphanSeparator = t; .) 
   ]
   "]"                          
   (. 
@@ -584,8 +570,9 @@ EnumDeclaration<out TypeDeclarationNode typeDecl>
   .)
   [ 
     ":"                          
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeOrNamespaceNode typeNode = null; .)
     ( ClassType<out typeNode> | IntegralType<out typeNode> )
+    (. enumDecl.EnumBase = typeNode; .)
   ] 
   EnumBody<enumDecl>                   
   (. Terminate(typeDecl); .)
@@ -1505,22 +1492,17 @@ Attributes<out AttributeDecorationNode attrNode>
     (. separator = t; .)
   ] 
   Attribute<out attributeNode>
-  (. 
-     attrNode.SeparatorToken = separator;
-     attrNode.Attributes.Add(attributeNode); 
-  .)
+  (. attrNode.Attributes.Add(separator, attributeNode); .)
   { 
     IF (la.kind == _comma && Peek(1).kind != _rbrack) 
     ","
+    (. separator = t; .)
     Attribute<out attributeNode>
-    (. 
-       attrNode.SeparatorToken = separator;
-       attrNode.Attributes.Add(attributeNode); 
-    .)
+    (. attrNode.Attributes.Add(separator, attributeNode); .)
   } 
   [ 
     ","
-    (. attrNode.ClosingSeparator = t; .)
+    (. attrNode.OrphanSeparator = t; .)
   ] 
   "]"                          
   (. Terminate(attrNode); .)
@@ -1792,7 +1774,7 @@ MemberName<out TypeOrNamespaceNode resultNode>
      resultNode = null;
      Token separator = null;
      Token identifier = null;
-     TypeArgumentListNode argList = null;
+     TypeOrNamespaceNodeCollection argList = null;
   .)
 =                                         
   ident
@@ -1836,7 +1818,7 @@ TypeName<out TypeOrNamespaceNode resultNode>
      resultNode = null;
      Token separator = null;
      Token identifier = null;
-     TypeArgumentListNode argList = null;
+     TypeOrNamespaceNodeCollection argList = null;
   .)
   ident
   (. 
@@ -3282,7 +3264,7 @@ NamedLiteral<out ExpressionNode exprNode>
     ident      
     (. nlNode.IdentifierToken = t; .)
   ] 
-  (. TypeArgumentListNode argList; .)
+  (. TypeOrNamespaceNodeCollection argList; .)
   [ 
     IF (IsGeneric()) TypeArgumentList<out argList>
     (. nlNode.Arguments = argList; .)
@@ -3298,7 +3280,7 @@ SimpleNamedLiteral<out SimpleNameNode snlNode>
 =
   ident        
   (. snlNode = new SimpleNameNode(t); .)
-  (. TypeArgumentListNode argList; .)
+  (. TypeOrNamespaceNodeCollection argList; .)
   [ 
     IF (IsGeneric()) TypeArgumentList<out argList>
     (. snlNode.Arguments = argList; .)
@@ -3923,14 +3905,17 @@ TypeParameter<out AttributeDecorationNodeCollection attrNodes, out Token identif
 // Declaration of a type argument list.
 //   argList: List of type arguments defined here.
 // ------------------------------------------------------------------------------------------------
-TypeArgumentList<out TypeArgumentListNode argList>  
+TypeArgumentList<out TypeOrNamespaceNodeCollection argList>  
 = 
   (. argList = null; .) 
   // --- We are a bit sloppy here and allow the type arguments to be "empty" everywhere. This 
   // --- results in unbound-type-names. In fact this is only allowed in typeof statements, 
   // --- see ECMA-334: 14.5.11 and 25.5.
   "<"
-  (. argList = new TypeArgumentListNode(t); .)
+  (. 
+     argList = new TypeOrNamespaceNodeCollection(); 
+     Start(argList);
+  .)
   [ 
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>           

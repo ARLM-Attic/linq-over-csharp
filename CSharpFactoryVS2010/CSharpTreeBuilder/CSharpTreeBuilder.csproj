@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\CSharpTreeBuilder.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -74,6 +75,8 @@
     <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceAfterSegment.cs" />
     <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceBeforeSegment.cs" />
     <Compile Include="CSharpAst\SyntaxTreeWriter\SpaceType.cs" />
+    <Compile Include="CSharpAst\Types\TypeModifierNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeOrMemberNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterListNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeTagNodeCollection.cs" />
@@ -295,9 +298,6 @@
     <Compile Include="CSharpAst\Types\NameTagNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\PointerModifierNode.cs" />
     <Compile Include="CSharpAst\Types\StructDeclarationNode.cs" />
-    <Compile Include="CSharpAst\Types\TypeArgumentContinuationTag.cs" />
-    <Compile Include="CSharpAst\Types\TypeArgumentListNode.cs" />
-    <Compile Include="CSharpAst\Types\TypeArgumentTag.cs" />
     <Compile Include="CSharpAst\Types\TypeDeclarationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeDeclarationNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeModifierNode.cs" />
