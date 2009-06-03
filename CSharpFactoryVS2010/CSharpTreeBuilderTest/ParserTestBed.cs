@@ -4,6 +4,7 @@
 // Created: 2009.05.29, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
+using System.IO;
 using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilderTest
@@ -15,11 +16,62 @@ namespace CSharpTreeBuilderTest
   // ================================================================================================
   public abstract class ParserTestBed
   {
-    protected const string WorkingFolder = 
-      @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilderTest\TestFiles";
-    protected const string AsmFolder = WorkingFolder + @"\Assemblies";
-    protected const string TempOutputFolder = WorkingFolder + @"\Temp";
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Default working drive, can be overridden with the "LOCDrive" environment variable.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected const string WorkingDrive = @"C:\";
 
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Default solution path, can be overridden with the "LOCPath" environment variable.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected const string WorkingPath = @"Work\LINQOverCSharp\CSharpFactoryVS2010";
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Folder for test files, cannot be overridden.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected const string TestFilePath = @"CSharpTreeBuilderTest\TestFiles";
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current working folder.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string WorkingFolder
+    {
+      get
+      {
+        var locDrive = Environment.GetEnvironmentVariable("LOCDrive") ?? WorkingDrive;
+        var locPath = Environment.GetEnvironmentVariable("LOCPath") ?? WorkingPath;
+        return Path.Combine(Path.Combine(locDrive, locPath), TestFilePath);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current "Assemblies" folder.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string AsmFolder
+    {
+      get { return WorkingFolder + @"\Assemblies"; }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current temporary output folder.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string TempOutputFolder
+    {
+      get { return WorkingFolder + @"\Temp"; }
+    }
+    
     // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Invokes the parser for the specified C# source file.

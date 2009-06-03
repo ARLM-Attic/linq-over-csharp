@@ -1,16 +1,66 @@
 using System;
-using CSharpTreeBuilder.ProjectContent;
+using System.IO;
 using CSharpFactory.ProjectModel;
-using CSharpFactory.Semantics;
 
 namespace CSharpParserTest
 {
   public abstract class ParserTestBed
   {
-    protected const string WorkingFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\TestFiles";
-    protected const string AsmFolder = WorkingFolder + @"\Assemblies";
-    protected const string TempOutputFolder =
-      @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpFactoryTest\TestFiles\Temp";
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Default working drive, can be overridden with the "LOCDrive" environment variable.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected const string WorkingDrive = @"C:\";
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Default solution path, can be overridden with the "LOCPath" environment variable.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected const string WorkingPath = @"Work\LINQOverCSharp\CSharpFactoryVS2010";
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Folder for test files, cannot be overridden.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected const string TestFilePath = @"CSharpFactoryTest\TestFiles";
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current working folder.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string WorkingFolder
+    {
+      get
+      {
+        var locDrive = Environment.GetEnvironmentVariable("LOCDrive") ?? WorkingDrive;
+        var locPath = Environment.GetEnvironmentVariable("LOCPath") ?? WorkingPath;
+        return Path.Combine(Path.Combine(locDrive, locPath), TestFilePath);
+      }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current "Assemblies" folder.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string AsmFolder
+    {
+      get { return WorkingFolder + @"\Assemblies"; }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the current temporary output folder.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string TempOutputFolder
+    {
+      get { return WorkingFolder + @"\Temp"; }
+    }
 
     public bool InvokeParser(string fileName)
     {

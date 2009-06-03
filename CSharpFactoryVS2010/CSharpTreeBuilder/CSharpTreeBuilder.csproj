@@ -65,6 +65,17 @@
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\FromClauseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\JoinClauseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\LetClauseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\OrderByClauseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\OrderingClauseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\OrderingClauseNodeCollection.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\QueryBodyClauseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\QueryBodyClauseNodeCollection.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\QueryBodyNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\QueryExpressionNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\WhereClauseNode.cs" />
     <Compile Include="CSharpAst\ISyntaxNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeNodeCollection.cs" />
