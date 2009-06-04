@@ -47,6 +47,10 @@ namespace CSharpTreeBuilderTest
       get
       {
         var locDrive = Environment.GetEnvironmentVariable("LOCDrive") ?? WorkingDrive;
+        if (!locDrive.EndsWith(@"\")) 
+        {
+          locDrive += @"\"; 
+        }
         var locPath = Environment.GetEnvironmentVariable("LOCPath") ?? WorkingPath;
         return Path.Combine(Path.Combine(locDrive, locPath), TestFilePath);
       }
