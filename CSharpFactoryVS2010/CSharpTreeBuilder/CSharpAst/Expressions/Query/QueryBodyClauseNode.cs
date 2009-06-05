@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.Ast.Query
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>

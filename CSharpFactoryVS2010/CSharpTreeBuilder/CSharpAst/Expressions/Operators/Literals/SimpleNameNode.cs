@@ -25,16 +25,7 @@ namespace CSharpTreeBuilder.Ast
     {
     }
 
-    /// <summary>
-    /// Gets the separator token.
-    /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets or sets the identifier token.
     /// </summary>
@@ -63,12 +54,6 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return IdentifierToken != null; }
     }
-
-    #endregion
-
-    // ----------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------
 
     #region ITypeArguments Members
 

@@ -125,7 +125,7 @@ namespace CSharpTreeBuilder.Ast
       protected set
       {
         _TypeName = value;
-        _TypeName.ParentNode = this;
+        if (_TypeName != null) _TypeName.ParentNode = this;
       }
     }
 

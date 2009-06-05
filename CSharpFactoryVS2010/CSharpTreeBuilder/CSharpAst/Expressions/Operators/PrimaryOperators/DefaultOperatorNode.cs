@@ -25,9 +25,6 @@ namespace CSharpTreeBuilder.Ast
     }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IParentheses Members
-
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>
@@ -40,7 +37,5 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; internal set; }
-
-    #endregion
   }
 }

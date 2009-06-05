@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.Ast.Query
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>This class represents the "join" clause of a query expression.</summary>
@@ -64,7 +64,7 @@ namespace CSharpTreeBuilder.Ast.Query
       internal set
       {
         _TypeName = value;
-        _TypeName.ParentNode = this;
+        if (_TypeName != null) _TypeName.ParentNode = this;
       }
     }
 

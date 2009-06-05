@@ -31,7 +31,7 @@ namespace CSharpTreeBuilder.Ast
     public ConstStatementNode(Token start)
       : base(start)
     {
-      ConstTags = new ConstTagNodeCollection();
+      ConstTags = new ConstTagNodeCollection { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ namespace CSharpTreeBuilder.Ast
       internal set
       {
         _TypeName = value;
-        _TypeName.ParentNode = this;
+        if (_TypeName != null) _TypeName.ParentNode = this;
       }
     }
 

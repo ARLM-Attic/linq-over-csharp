@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.Ast.Query
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>This class represents a C# 3.0 query expression.</summary>
@@ -46,7 +46,7 @@ namespace CSharpTreeBuilder.Ast.Query
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the body of the query expression.
+    /// Gets or sets the query body.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public QueryBodyNode QueryBody { get; internal set; }

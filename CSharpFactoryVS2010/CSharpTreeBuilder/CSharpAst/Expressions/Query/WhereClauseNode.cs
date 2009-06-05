@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.Ast.Query
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>This class represents the "where" caluse of a query expression.</summary>

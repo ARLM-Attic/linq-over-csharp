@@ -65,7 +65,7 @@ namespace CSharpTreeBuilder.Ast
       internal set
       {
         _EnumBase = value;
-        _EnumBase.ParentNode = this;
+        if (_EnumBase != null) _EnumBase.ParentNode = this;
       }
     }
 

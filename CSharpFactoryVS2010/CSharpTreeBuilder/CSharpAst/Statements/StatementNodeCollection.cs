@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -12,7 +10,8 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a collection of statements.
   /// </summary>
   // ================================================================================================
-  public sealed class StatementNodeCollection : ImmutableCollection<StatementNode>
+  public sealed class StatementNodeCollection : 
+    SyntaxNodeCollection<StatementNode, BlockStatementNode>
   {
   }
 }

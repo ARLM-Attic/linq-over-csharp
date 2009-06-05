@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.Ast.Query
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -23,6 +23,14 @@ namespace CSharpTreeBuilder.Ast.Query
     public QueryBodyNode(Token start)
       : base(start)
     {
+      BodyClauses = new QueryBodyClauseNodeCollection();
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the query body clauses.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public QueryBodyClauseNodeCollection BodyClauses { get; private set; }
   }
 }

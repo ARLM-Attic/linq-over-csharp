@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     protected StatementNode(Token start)
       : base(start)
     {
-      Labels = new LabelNodeCollection();
+      Labels = new LabelNodeCollection { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------

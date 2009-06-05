@@ -51,8 +51,6 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public NamespaceDeclarationNode(NamespaceScopeNode parent, Token start) : base(parent, start)
     {
-      parent.NamespaceDeclarations.Add(this);
-      parent.InScopeDeclarations.Add(this);
       NameTags = new NameTagNodeCollection { ParentNode = this };
     }
 

@@ -5,7 +5,7 @@
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.Ast.Query
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>This class represents the "from" clause of a query expression.</summary>
@@ -54,7 +54,7 @@ namespace CSharpTreeBuilder.Ast.Query
       internal set
       {
         _TypeName = value;
-        _TypeName.ParentNode = this;
+        if (_TypeName != null) _TypeName.ParentNode = this;
       }
     }
 
@@ -95,7 +95,7 @@ namespace CSharpTreeBuilder.Ast.Query
     /// Gets or sets the "in" token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token InToken { get; private set; }
+    public Token InToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

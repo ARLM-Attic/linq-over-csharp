@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -12,7 +10,8 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a collection of local variable tags.
   /// </summary>
   // ================================================================================================
-  public sealed class LocalVariableTagNodeCollection : ImmutableCollection<LocalVariableTagNode>
+  public sealed class LocalVariableTagNodeCollection : 
+    SyntaxNodeCollection<LocalVariableTagNode, ISyntaxNode>
   {
   }
 }

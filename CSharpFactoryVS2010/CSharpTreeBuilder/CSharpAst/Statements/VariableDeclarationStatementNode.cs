@@ -19,9 +19,6 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public sealed class VariableDeclarationStatementNode : StatementNode
   {
-    // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="VariableDeclarationStatementNode"/> class.
@@ -31,29 +28,13 @@ namespace CSharpTreeBuilder.Ast
     public VariableDeclarationStatementNode(Token start)
       : base(start)
     {
-      ConstTags = new ConstTagNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the type belonging to this const statement.
+    /// Gets or sets the declaration belonging to this statement.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
-    {
-      get { return _TypeName; }
-      internal set
-      {
-        _TypeName = value;
-        _TypeName.ParentNode = this;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the const tags.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ConstTagNodeCollection ConstTags { get; private set; }
+    public LocalVariableNode Declaration { get; internal set; }
   }
 }

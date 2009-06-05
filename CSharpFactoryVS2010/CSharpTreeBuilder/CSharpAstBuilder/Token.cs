@@ -117,5 +117,15 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       get { return Previous; }
     }
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of the token.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return Value ?? "<<null>>";
+    }
   }
 }

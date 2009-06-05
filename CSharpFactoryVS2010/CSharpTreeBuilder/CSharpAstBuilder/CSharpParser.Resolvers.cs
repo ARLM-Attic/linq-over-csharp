@@ -632,7 +632,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       Token pt1 = Scanner.Peek();
       Token pt2 = Scanner.Peek();
 
-      return Lookahead.val == "from"
+      return Lookahead.kind == _ident && Lookahead.val == "from"
              && (pt1.kind == _ident || typeKW[pt1.kind])
              && pt2.val != ";"
              && pt2.val != ","

@@ -24,7 +24,7 @@ namespace CSharpTreeBuilder.Ast
     public LocalVariableNode(TypeOrNamespaceNode typeNode)
       : base(typeNode.StartToken)
     {
-      VariableTags = new LocalVariableTagNodeCollection();
+      VariableTags = new LocalVariableTagNodeCollection { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ namespace CSharpTreeBuilder.Ast
       internal set
       {
         _TypeName = value;
-        _TypeName.ParentNode = this;
+        if (_TypeName != null) _TypeName.ParentNode = this;
       }
     }
 

@@ -374,6 +374,10 @@ NamespaceMemberDeclaration<NamespaceScopeNode parentNode>
     ";"
     (. Terminate(nsDecl); .)
   ]
+  (.
+     parentNode.NamespaceDeclarations.Add(nsDecl);
+     parentNode.InScopeDeclarations.Add(nsDecl);
+  .)
   | 
     (. 
        var mod = new ModifierNodeCollection();
@@ -1863,53 +1867,63 @@ Statement<out StatementNode stmtNode>
     ":" 
     (. var label = new LabelNode(identifier, t); .)
     Statement<out stmtNode>
-    (. 
-       if (stmtNode != null)
-       {
-         stmtNode.Labels.AddLabel(label);
-       }
-    .)
+    (. if (stmtNode != null) stmtNode.Labels.AddLabel(label); .)
   | ConstStatement<out stmtNode>
   | IF (IsLocalVarDecl()) 
     (. LocalVariableNode varNode; .)
-    LocalVariableDeclaration<out varNode> ";"
-  | EmbeddedStatement
+    LocalVariableDeclaration<out varNode>
+    (. 
+       var varDecl = new VariableDeclarationStatementNode(varNode.StartToken);
+       varDecl.Declaration = varNode;
+    .)
+    ";"
+    (. Terminate(varDecl); .)
+  | EmbeddedStatement<out stmtNode>
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Defines statements that can be nested in other statements.
-// +block: Block holding the statements within.
-// ------------------------------------------------------------------------------------
-EmbeddedStatement
+// ------------------------------------------------------------------------------------------------
+EmbeddedStatement<out StatementNode stmtNode>
+  (. stmtNode = null; .)
 =   
     (. BlockStatementNode blockNode; .)
     Block<out blockNode> 
-  | EmptyStatement
-  | CheckedBlock
-  | UncheckedBlock
-  | UnsafeBlock
-  | StatementExpression ";"
-  | IfStatement
+    (. stmtNode = blockNode; .)
+  | EmptyStatement<out stmtNode>
+  | CheckedBlock<out stmtNode>
+  | UncheckedBlock<out stmtNode>
+  | UnsafeBlock<out stmtNode>
+  | 
+    (. ExpressionNode exprNode; .)
+    (. var eNode = new ExpressionStatementNode(la); .)
+    StatementExpression<out exprNode> 
+    (. eNode.Expression = exprNode; .)
+    ";"
+    (.
+       stmtNode = eNode;
+       Terminate(eNode); 
+    .) 
+  | IfStatement<out stmtNode>
   | SwitchStatement
-  | WhileStatement
-  | DoWhileStatement
-  | ForStatement
-  | ForEachStatement
-  | BreakStatement
-  | ContinueStatement
-  | GotoStatement
-  | ReturnStatement
-  | ThrowStatement
+  | WhileStatement<out stmtNode>
+  | DoWhileStatement<out stmtNode>
+  | ForStatement<out stmtNode>
+  | ForEachStatement<out stmtNode>
+  | BreakStatement<out stmtNode>
+  | ContinueStatement<out stmtNode>
+  | GotoStatement<out stmtNode>
+  | ReturnStatement<out stmtNode>
+  | ThrowStatement<out stmtNode>
   | TryFinallyBlock
-  | LockStatement
+  | LockStatement<out stmtNode>
   | UsingStatement
-  | "yield" ( YieldReturnStatement | YieldBreakStatement ) ";"
-  | FixedStatement
+  | "yield" ( YieldReturnStatement<out stmtNode> | YieldBreakStatement<out stmtNode> )
+  | FixedStatement<out stmtNode>
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a block of statements.
-//   blockNode: Block node holding statements.
 // ------------------------------------------------------------------------------------------------
 Block<out BlockStatementNode blockNode> 
 =
@@ -1926,7 +1940,6 @@ Block<out BlockStatementNode blockNode>
   "}"
   (. Terminate(blockNode); .)
 .
-
 
 // ------------------------------------------------------------------------------------------------
 // Defines a switch statement.
@@ -1990,170 +2003,278 @@ ConstStatement<out StatementNode stmtNode>
 // ------------------------------------------------------------------------------------------------
 // Defines an empty statement (";").
 // ------------------------------------------------------------------------------------------------
-EmptyStatement
+EmptyStatement<out StatementNode stmtNode>
 =
   ";"
+  (. stmtNode = new EmptyStatementNode(t); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "checked" block
 // ------------------------------------------------------------------------------------------------
-CheckedBlock
+CheckedBlock<out StatementNode stmtNode>
 =
   (
     IF (la.kind == _checked && Peek(1).kind == _lbrace) 
     "checked"
-    (. BlockStatementNode blockNode; .)
+    (. 
+       var start = t; 
+       BlockStatementNode blockNode;
+    .)
     Block<out blockNode>
+    (. stmtNode = new CheckedStatementNode(t, blockNode); .)
   )
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines an "unchecked" block
 // ------------------------------------------------------------------------------------------------
-UncheckedBlock
+UncheckedBlock<out StatementNode stmtNode>
 =
   (
     IF (la.kind == _unchecked && Peek(1).kind == _lbrace) 
     "unchecked"
-    (. BlockStatementNode blockNode; .)
+    (. 
+       var start = t; 
+       BlockStatementNode blockNode;
+    .)
     Block<out blockNode>
+    (. stmtNode = new UncheckedStatementNode(t, blockNode); .)
   )
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines an "unsafe" block
 // ------------------------------------------------------------------------------------------------
-UnsafeBlock
+UnsafeBlock<out StatementNode stmtNode>
 =
   "unsafe" 
-   (. BlockStatementNode blockNode; .)
+    (. 
+       var start = t; 
+       BlockStatementNode blockNode;
+    .)
    Block<out blockNode>
+   (. stmtNode = new UnsafeStatementNode(t, blockNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines an "if" statement
 // ------------------------------------------------------------------------------------------------
-IfStatement
+IfStatement<out StatementNode stmtNode>
 =   
-  (. ExpressionNode exprNode; .)
   "if"
+  (. 
+     var ifNode = new IfStatementNode(t);
+     stmtNode = ifNode;
+  .)
   "("
+  (. 
+     ifNode.OpenParenthesis = t;
+     ExpressionNode exprNode; 
+  .)
   Expression<out exprNode> 
+  (. ifNode.Condition = exprNode; .)
   ")"
-  EmbeddedStatement
+  (. 
+     ifNode.CloseParenthesis = t;
+     StatementNode branchNode; 
+  .)
+  EmbeddedStatement<out branchNode>
+  (. ifNode.ThenStatement = branchNode; .)
   [ 
     "else"
-    EmbeddedStatement
+    (. ifNode.ElseToken = t; .)
+    EmbeddedStatement<out stmtNode>
+    (. ifNode.ThenStatement = branchNode; .)
   ]
+  (. Terminate(stmtNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "while" statement
 // ------------------------------------------------------------------------------------------------
-WhileStatement
+WhileStatement<out StatementNode stmtNode>
 = 
-  (. ExpressionNode exprNode; .)
   "while"
+  (. 
+     var whNode = new WhileStatementNode(t); 
+     stmtNode = whNode;
+  .)
   "("
+  (. 
+     whNode.OpenParenthesis = t;
+     ExpressionNode exprNode; 
+  .)
   Expression<out exprNode>  
   ")" 
+  (. 
+     whNode.CloseParenthesis = t;
+     StatementNode bodyNode; 
+  .)
+  EmbeddedStatement<out bodyNode>
+  (.
+     whNode.Statement = bodyNode;
+     Terminate(whNode);
+  .)
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "do...while" statement
 // ------------------------------------------------------------------------------------------------
-DoWhileStatement
-  (. ExpressionNode exprNode; .)
+DoWhileStatement<out StatementNode stmtNode>
 =   
   "do"
-  EmbeddedStatement
+  (. 
+     var dwhNode = new DoWhileStatementNode(t); 
+     stmtNode = dwhNode;
+     StatementNode bodyNode; 
+  .)
+  EmbeddedStatement<out bodyNode>
+  (. dwhNode.Statement = bodyNode; .)
   "while" 
+  (. dwhNode.WhileToken = t; .)
   "("
-  Expression<out exprNode>    
+  (. 
+     ExpressionNode exprNode;
+     dwhNode.OpenParenthesis = t; 
+  .)
+  Expression<out exprNode>
+  (. dwhNode.Condition = exprNode; .)    
   ")" 
+  (. dwhNode.CloseParenthesis = t; .)
   ";"
+  (. Terminate(stmtNode); .)
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "for" statement
 // ------------------------------------------------------------------------------------------------
-ForStatement
+ForStatement<out StatementNode stmtNode>
 = 
   "for"
+  (.
+     var forNode = new ForStatementNode(t);
+     stmtNode = forNode;
+  .)
   "("
+  (. forNode.OpenParenthesis = t; .)
   [
-    ForInitializer
+    ForInitializer<forNode>
   ] 
   ";" 
+  (. forNode.InitSeparator = t; .)
   [
     (. ExpressionNode exprNode; .)
     Expression<out exprNode>    
   ] 
   ";" 
+  (. forNode.ConditionSeparator = t; .)
   [ 
-    ForIterator
+    ForIterator<forNode>
   ] 
   ")"
-  EmbeddedStatement
+  (. 
+     forNode.CloseParenthesis = t; 
+     StatementNode bodyNode; 
+  .)
+  EmbeddedStatement<out bodyNode>
+  (.
+     forNode.Statement = bodyNode;
+     Terminate(forNode); 
+  .)
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "foreach" statement
 // ------------------------------------------------------------------------------------------------
-ForEachStatement
+ForEachStatement<out StatementNode stmtNode>
 =
-  (. ExpressionNode exprNode; .)
   "foreach"
+  (. 
+     var feNode = new ForeachStatementNode(t); 
+     stmtNode = feNode;
+  .)
   "("
+  (. 
+     feNode.OpenParenthesis = t; 
+     TypeOrNamespaceNode typeNode = null; 
+  .)
   ( 
     IF (IsVar())
     ident
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
   |        
-    (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
-    )
-    ident
-    "in"
-    Expression<out exprNode>
+  )
+  (. feNode.TypeName = typeNode; .)
+  ident
+  (. feNode.IdentifierToken = t; .)
+  "in"
+  (. 
+     feNode.InToken = t; 
+     ExpressionNode exprNode;
+  .)
+  Expression<out exprNode>
+  (. feNode.Collection = exprNode; .)
   ")"
-  EmbeddedStatement
+  (.
+     feNode.CloseParenthesis = t; 
+     StatementNode bodyNode; 
+  .)
+  EmbeddedStatement<out bodyNode>
+  (.
+     feNode.Statement = bodyNode;
+     Terminate(stmtNode); 
+  .)
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "break" statement
 // ------------------------------------------------------------------------------------------------
-BreakStatement
+BreakStatement<out StatementNode stmtNode>
 =
-  "break" 
+  "break"
+  (. stmtNode = new BreakStatementNode(t); .)
   ";"
+  (. Terminate(stmtNode); .)
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "goto" statement
 // ------------------------------------------------------------------------------------------------
-GotoStatement
+GotoStatement<out StatementNode stmtNode>
 =
-  (. ExpressionNode exprNode; .)
   "goto"
+  (. var gotoNode = new GotoStatementNode(t); .)
   ( 
     ident
+    (. gotoNode.IdentifierToken = t; .)
   | 
     "case"
+    (. 
+       gotoNode.IdentifierToken = t;
+       ExpressionNode exprNode; 
+    .)
     Expression<out exprNode>  
+    (. gotoNode.Expression = exprNode; .)
   | 
     "default"
+    (. gotoNode.IdentifierToken = t; .)
   ) 
+  (. stmtNode = gotoNode; .)
   ";"
+  (. Terminate(stmtNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "continue" statement
 // ------------------------------------------------------------------------------------------------
-ContinueStatement
+ContinueStatement<out StatementNode stmtNode>
 =
   "continue" 
+  (. stmtNode = new ContinueStatementNode(t); .)
   ";"
+  (. Terminate(stmtNode); .)
 .    
 
 // ------------------------------------------------------------------------------------------------
@@ -2178,14 +2299,30 @@ TryFinallyBlock
 // ------------------------------------------------------------------------------------------------
 // Defines a "lock" statement
 // ------------------------------------------------------------------------------------------------
-LockStatement
+LockStatement<out StatementNode stmtNode>
 =   
-  (. ExpressionNode exprNode; .)
   "lock"
+  (. 
+     var lckNode = new LockStatementNode(t); 
+     stmtNode = lckNode;
+  .)
   "("
-    Expression<out exprNode>  
+  (. 
+     lckNode.OpenParenthesis = t;
+     ExpressionNode exprNode;
+  .)
+  Expression<out exprNode>  
+  (. lckNode.Expression = exprNode; .)
   ")" 
-  EmbeddedStatement
+  (. 
+     lckNode.CloseParenthesis = t;
+     StatementNode bodyNode;;
+  .)
+  EmbeddedStatement<out bodyNode>
+  (.
+     lckNode.Statement = bodyNode;
+     Terminate(stmtNode);
+  .)
 .    
 
 // ------------------------------------------------------------------------------------------------
@@ -2204,89 +2341,144 @@ UsingStatement
     Expression<out exprNode>        
   ) 
   ")" 
-  EmbeddedStatement
+  (. StatementNode stmtNode; .)
+  EmbeddedStatement<out stmtNode>
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "return" statement.
 // ------------------------------------------------------------------------------------------------
-ReturnStatement
+ReturnStatement<out StatementNode stmtNode>
 =
-  (. ExpressionNode exprNode; .)
+  (. ExpressionNode exprNode = null; .)
   "return"
+  (. var start = t; .)
   [
     Expression<out exprNode>     
   ]
+  (. stmtNode = new ReturnStatementNode(t, exprNode); .)
   ";"
+  (. Terminate(stmtNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "throw" statement.
 // ------------------------------------------------------------------------------------------------
-ThrowStatement
+ThrowStatement<out StatementNode stmtNode>
 =
-  (. ExpressionNode exprNode; .)
+  (. ExpressionNode exprNode = null; .)
   "throw"
+  (. var start = t; .)
   [
     Expression<out exprNode>
   ] 
+  (. stmtNode = new ThrowStatementNode(t, exprNode); .)
   ";"
+  (. Terminate(stmtNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "yield return" statement.
 // ------------------------------------------------------------------------------------------------
-YieldReturnStatement
+YieldReturnStatement<out StatementNode stmtNode>
 =
   (. ExpressionNode exprNode; .)
   "return"
+  (. var start = t; .)
   Expression<out exprNode>
+  (. stmtNode = new YieldReturnStatementNode(t, exprNode); .)
+  ";"
+  (. Terminate(stmtNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "yield break" statement.
 // ------------------------------------------------------------------------------------------------
-YieldBreakStatement
+YieldBreakStatement<out StatementNode stmtNode>
 =
   "break"
+  (. stmtNode = new YieldBreakStatementNode(t); .)
+  ";"
+  (. Terminate(stmtNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines a "fixed" statement
 // ------------------------------------------------------------------------------------------------
-FixedStatement
+FixedStatement<out StatementNode stmtNode>
 = 
-  (. ExpressionNode exprNode; .)
   "fixed"
+  (.
+     var fixNode = new FixedStatementNode(t);
+     stmtNode = fixNode;
+  .)
   "("
-    (. TypeOrNamespaceNode typeNode; .)
-    Type<out typeNode>
+  (.
+     fixNode.OpenParenthesis = t; 
+     TypeOrNamespaceNode typeNode; 
+  .)
+  Type<out typeNode>
+  (. fixNode.TypeName = typeNode; .)
+  ident
+  (. var fiNode = new FixedInitializerNode(t); .)
+  "="
+  (. 
+     fiNode.EqualToken = t; 
+     ExpressionNode exprNode; 
+  .)
+  Expression<out exprNode>
+  (. 
+     fiNode.Expression = exprNode; 
+     Terminate(fiNode);
+     fixNode.Initializers.Add(fiNode);
+  .)
+  { 
+    ","
+    (. var separator = t; .)
     ident
-    "="
+    (. fiNode = new FixedInitializerNode(t); .)
+    "=" 
+    (. fiNode.EqualToken = t; .)
     Expression<out exprNode>
-    { 
-      ","
-      ident
-      "=" 
-      Expression<out exprNode>
-    }
+    (. 
+       fiNode.Expression = exprNode; 
+       Terminate(fiNode);
+       fixNode.Initializers.Add(separator, fiNode);
+    .)
+  }
   ")" 
-  EmbeddedStatement
+  (. 
+     fixNode.CloseParenthesis = t;
+     StatementNode bodyNode; 
+  .)
+  EmbeddedStatement<out bodyNode>
+  (.
+     fixNode.Statement = bodyNode;
+     Terminate(fixNode); 
+  .)
 .    
 
 // ------------------------------------------------------------------------------------------------
 // Defines a statement expression
 // ------------------------------------------------------------------------------------------------
-StatementExpression
-  (. bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); .)
+StatementExpression<out ExpressionNode exprNode>
+  (. 
+     bool isAssignment = assnStartOp[la.kind] || IsTypeCast(); 
+     exprNode = null;
+  .)
 =
   (. ExpressionNode unaryNode; .)
   Unary<out unaryNode>
   ( 
     (. BinaryOperatorNode asgnNode; .)
     AssignmentOperator<out asgnNode>
-    (. ExpressionNode exprNode; .)
-    Expression<out exprNode>
+    (. 
+       asgnNode.LeftOperand = unaryNode;
+       exprNode = asgnNode;
+       ExpressionNode rightNode; 
+    .)
+    Expression<out rightNode>
+    (. asgnNode.RightOperand = rightNode; .)
   | (. if (isAssignment) Error("UNDEF", la, "error in assignment."); .)
   )
 .
@@ -2364,27 +2556,37 @@ SwitchLabel
 // ------------------------------------------------------------------------------------------------
 // Represents the initializer of a for statement.
 // ------------------------------------------------------------------------------------------------
-ForInitializer
+ForInitializer<ForStatementNode forNode>
 =
     IF (IsLocalVarDecl()) 
     (. LocalVariableNode varNode; .)
     LocalVariableDeclaration<out varNode>
-  | StatementExpression
+    (. forNode.Initializer = varNode; .)
+  | 
+    (. ExpressionNode exprNode; .)
+    StatementExpression<out exprNode>
+    (. if (exprNode != null) forNode.Initializers.Add(exprNode); .)
     { 
       "," 
-      StatementExpression
+      (. var separator = t; .)
+      StatementExpression<out exprNode>
+      (. if (exprNode != null) forNode.Initializers.Add(separator, exprNode); .)
     }
 .
 
 // ------------------------------------------------------------------------------------------------
 // Represents the iterator of a for statement.
 // ------------------------------------------------------------------------------------------------
-ForIterator
+ForIterator<ForStatementNode forNode>
 =
-  StatementExpression
+  (. ExpressionNode exprNode; .)
+  StatementExpression<out exprNode>
+  (. if (exprNode != null) forNode.Iterators.Add(exprNode); .)
   { 
     "," 
-    StatementExpression
+    (. var separator = t; .)
+    StatementExpression<out exprNode>
+    (. if (exprNode != null) forNode.Iterators.Add(separator, exprNode); .)
   }
 .
 
@@ -2482,156 +2684,265 @@ LambdaFunctionBody
 // ------------------------------------------------------------------------------------------------
 // Gets a from clause for a query expression
 // ------------------------------------------------------------------------------------------------
-FromClause
-  (. ExpressionNode exprNode; .)
+FromClause<out FromClauseNode fromNode>
 =
-  "from"
-  (. Token typeToken = la; .)
+  // --- At this point ident is "from"
+  ident 
+  (. 
+     fromNode = new FromClauseNode(t); 
+     var typeToken = la;
+  .)
   (                             
     IF (IsType(ref typeToken) && typeToken.val != "in")
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
+    (. fromNode.TypeName = typeNode; .)
   |
   )                             
   ident
+  (. fromNode.IdentifierToken = t; .)
   "in"
+  (. 
+     fromNode.InToken = t; 
+     ExpressionNode exprNode;
+  .)
   Expression<out exprNode>
+  (. 
+     fromNode.Expression = exprNode;
+     Terminate(fromNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets the body of a query expression.
 // ------------------------------------------------------------------------------------------------
-QueryBody
+QueryBody<out QueryBodyNode bodyNode>
 =
-  { QueryBodyClause }
-  (
-    SelectClause
-    | GroupClause
-  )
-  [ 
-    QueryContinuation 
-  ]
+  (. bodyNode = new QueryBodyNode(la); .)
+  { QueryBodyClause<bodyNode> }
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a query body clause
 // ------------------------------------------------------------------------------------------------
-QueryBodyClause
+QueryBodyClause<QueryBodyNode bodyNode>
 =
   (
-    FromClause
-  | LetClause
-  | WhereClause
-  | JoinClause
-  | OrderByClause
+    IF (la.kind == _ident && la.val == "from")
+    (. FromClauseNode fromNode; .)
+    FromClause<out fromNode>
+    (. bodyNode.BodyClauses.Add(fromNode); .)
+  | 
+    IF (la.kind == _ident && la.val == "let")
+    (. LetClauseNode letNode; .)
+    LetClause<out letNode>
+    (. bodyNode.BodyClauses.Add(letNode); .)
+  | 
+    IF (la.kind == _ident && la.val == "join")
+    (. JoinClauseNode joinNode; .)
+    JoinClause<out joinNode>
+    (. bodyNode.BodyClauses.Add(joinNode); .)
+  | 
+    IF (la.kind == _ident && la.val == "orderby")
+    (. OrderByClauseNode orderNode; .)
+    OrderByClause<out orderNode>
+    (. bodyNode.BodyClauses.Add(orderNode); .)
+  | 
+    IF (la.kind == _ident && la.val == "into")
+    (. IntoClauseNode intoNode; .)
+    IntoClause<out intoNode>
+    (. bodyNode.BodyClauses.Add(intoNode); .)
+  | 
+    IF (la.kind == _ident && la.val == "select")
+    (. SelectClauseNode selectNode; .)
+    SelectClause<out selectNode>
+    (. bodyNode.BodyClauses.Add(selectNode); .)
+  | 
+    IF (la.kind == _ident && la.val == "group")
+    (. GroupByClauseNode groupNode; .)
+    GroupClause<out groupNode>
+    (. bodyNode.BodyClauses.Add(groupNode); .)
+  |
+    (. WhereClauseNode whereNode; .)
+    WhereClause<out whereNode>
+    (. bodyNode.BodyClauses.Add(whereNode); .)
+  |
+    ident
+    // --- At this point we have faced an identifier that would cause an infinite parsing loop
+    (. Error("SYNERR", t, "invalid identifier in query expression", null); .)
   )
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a let clause
 // ------------------------------------------------------------------------------------------------
-LetClause
+LetClause<out LetClauseNode letNode>
 =
   (. ExpressionNode exprNode; .)
-  "let"
+  // --- At this point ident is "let"
   ident
+  (. letNode = new LetClauseNode(t); .)
+  ident
+  (. letNode.IdentifierToken = t; .)
   "="  
+  (. letNode.EqualToken = t; .)
   Expression<out exprNode>
+  (. 
+     letNode.Expression = exprNode; 
+     Terminate(letNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a where clause
 // ------------------------------------------------------------------------------------------------
-WhereClause
+WhereClause<out WhereClauseNode whereNode>
 =
   (. ExpressionNode exprNode; .)
   "where"
-  Expression<out exprNode>  
+  (. whereNode = new WhereClauseNode(t); .)
+  Expression<out exprNode>
+  (. 
+     whereNode.Expression = exprNode; 
+     Terminate(whereNode);
+  .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Gets a where clause
+// ------------------------------------------------------------------------------------------------
+IntoClause<out IntoClauseNode intoNode>
+=
+  // --- At this point ident is "into"
+  ident
+  (. intoNode = new IntoClauseNode(t); .)
+  ident
+  (. 
+     intoNode.IdentifierToken = t; 
+     Terminate(intoNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a join clause
 // ------------------------------------------------------------------------------------------------
-JoinClause
+JoinClause<out JoinClauseNode joinNode>
 =
   (. ExpressionNode exprNode; .)
-  "join"
-  (. Token typeToken = la; .)
+  // --- At this point ident is "join"
+  ident
+  (. 
+     joinNode = new JoinClauseNode(t);
+     Token typeToken = la; 
+  .)
   (                     
     IF (IsType(ref typeToken) && typeToken.val != "in")
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
+    (. joinNode.TypeName = typeNode; .)
   |
   )
   ident
+  (. joinNode.IdentifierToken = t; .)
   "in" 
+  (. joinNode.InToken = t; .)
   Expression<out exprNode>
-  "on"
+  (. joinNode.InExpression = exprNode; .)
+  // CHECKTHIS: In the syntax tree you should check that this token is "on".
+  ident
+  (. joinNode.OnToken = t; .)
   Expression<out exprNode>
-  "equals" 
+  (. joinNode.OnExpression = exprNode; .)
+  // CHECKTHIS: In the syntax tree you should check that this token is "equals".
+  ident
+  (. joinNode.EqualsToken = t; .)
   Expression<out exprNode>
+  (. joinNode.EqualsExpression = exprNode; .)
   [ 
-    "into"                      
+    IF (la.kind == _ident && la.val == "into")
     ident
+    (. joinNode.IntoToken = t; .)
+    ident
+    (. joinNode.IntoIdentifierToken = t; .)
+    |
   ]
+  (. Terminate(joinNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets an order by clause
 // ------------------------------------------------------------------------------------------------
-OrderByClause
+OrderByClause<out OrderByClauseNode obNode>
 =
-  "orderby"
-  OrderingClause
+  (. OrderingClauseNode ordNode; .)
+  // --- At this point ident is "orderby"
+  ident
+  (. obNode = new OrderByClauseNode(t); .)
+  OrderingClause<out ordNode>
+  (. obNode.Orderings.Add(ordNode); .)
   { 
     "," 
-    OrderingClause
+    (. var separator = t; .)
+    OrderingClause<out ordNode>
+    (. obNode.Orderings.Add(separator, ordNode); .)
   }
+  (. Terminate(obNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets an ordering clause
 // ------------------------------------------------------------------------------------------------
-OrderingClause
+OrderingClause<out OrderingClauseNode ordNode>
 =
-  (. ExpressionNode exprNode; .)
+  (. 
+     ordNode = new OrderingClauseNode(la);
+     ExpressionNode exprNode;
+  .)
   Expression<out exprNode>
+  (. ordNode.Expression = exprNode; .)
   [                             
-    "ascending"
-    | "descending"
+    ( "ascending" | "descending" )
+    (. ordNode.Direction = t; .)
   ]               
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a select clause
 // ------------------------------------------------------------------------------------------------
-SelectClause
+SelectClause<out SelectClauseNode selNode>
 =
-  (. ExpressionNode exprNode; .)
-  "select"
+  // --- At this point ident is "select"
+  ident
+  (. 
+     selNode = new SelectClauseNode(t);
+     ExpressionNode exprNode; 
+  .)
   Expression<out exprNode>  
+  (. 
+     selNode.Expression = exprNode;
+     Terminate(selNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a group by clause
 // ------------------------------------------------------------------------------------------------
-GroupClause
+GroupClause<out GroupByClauseNode groupNode>
+  (. groupNode = null; .)
+=
   (. ExpressionNode exprNode; .)
-=
-  "group"
-  Expression<out exprNode>
-  "by"
-  Expression<out exprNode>
-.
-
-// ------------------------------------------------------------------------------------------------
-// Gets a query continuation clause
-// ------------------------------------------------------------------------------------------------
-QueryContinuation
-=
-  "into"
+  // --- At this point ident is "group"
   ident
-  QueryBody
+  (. groupNode = new GroupByClauseNode(t); .)
+  Expression<out exprNode>
+  (. groupNode.GroupExpression = exprNode; .)
+  "by"
+  (. groupNode.ByToken = t; .)
+  Expression<out exprNode>
+  (. 
+     groupNode.ByExpression = exprNode; 
+     Terminate(groupNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2646,9 +2957,18 @@ Expression<out ExpressionNode exprNode>
   .)
 =
   (
-    IF (IsQueryExpression())      
-    FromClause
-    QueryBody
+    IF (IsQueryExpression())
+    (.
+       var qNode = new QueryExpressionNode(la);    
+       FromClauseNode fromNode; 
+       exprNode = qNode;
+    .)
+    FromClause<out fromNode>
+    (. 
+       qNode.FromClause = fromNode; 
+       QueryBodyNode bodyNode;
+    .)
+    QueryBody<out bodyNode>
   |
     IF (IsLambda())               
     LambdaFunctionSignature
@@ -3037,9 +3357,11 @@ MulExpr<out BinaryOperatorNode exprNode>
 //   exprNode: Expression node retrieved.
 // ------------------------------------------------------------------------------------------------
 Unary<out ExpressionNode exprNode>   
-  (. exprNode = null; .) 
+  (. 
+     exprNode = null;  
+     UnaryOperatorNode unaryOp = null;
+  .)
 =
-  (. UnaryOperatorNode unaryOp = null; .)
   (
     IF (unaryHead[la.kind] || IsTypeCast())
     ( 

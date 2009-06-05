@@ -39,6 +39,7 @@ namespace CSharpTreeBuilder.Ast
     protected SyntaxNode(Token start)
     {
       StartToken = start;
+      TerminatingToken = start;
     }
 
     // ----------------------------------------------------------------------------------------------

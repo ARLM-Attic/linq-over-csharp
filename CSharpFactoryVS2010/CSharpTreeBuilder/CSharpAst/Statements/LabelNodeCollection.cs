@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -12,7 +10,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a collection of label nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class LabelNodeCollection : ImmutableCollection<LabelNode>
+  public sealed class LabelNodeCollection : SyntaxNodeCollection<LabelNode, StatementNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -41,7 +41,7 @@ namespace CSharpTreeBuilder.Ast
       internal set
       {
         _TypeName = value;
-        _TypeName.ParentNode = this;
+        if (_TypeName != null) _TypeName.ParentNode = this;
       }
     }
 

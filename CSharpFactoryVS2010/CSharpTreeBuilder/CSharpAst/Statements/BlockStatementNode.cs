@@ -28,7 +28,7 @@ namespace CSharpTreeBuilder.Ast
     public BlockStatementNode(Token start)
       : base(start)
     {
-      Statements = new StatementNodeCollection();
+      Statements = new StatementNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------

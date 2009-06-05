@@ -45,10 +45,16 @@
     <Compile Include="Ast\EnumDeclarations.cs" />
     <Compile Include="Ast\ExternAliasDirectives.cs" />
     <Compile Include="Ast\GlobalAttributes.cs" />
+    <Compile Include="Ast\QueryExpressions.cs" />
+    <Compile Include="Ast\RegressionTests.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="ParserExtensions.cs" />
     <Compile Include="ParserTestBed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="TestFiles\Regression\ExpressionBug1.cs" />
+    <None Include="TestFiles\SampleQueries\SampleHarness.cs" />
+    <None Include="TestFiles\SampleQueries\ObjectDumper.cs" />
+    <None Include="TestFiles\SampleQueries\LinqSamples.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration3.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration2.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration1.cs" />

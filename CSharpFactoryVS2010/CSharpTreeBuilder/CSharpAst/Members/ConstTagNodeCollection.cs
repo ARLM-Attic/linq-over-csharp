@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -12,7 +10,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class declares a collection of const member tags.
   /// </summary>
   // ================================================================================================
-  public sealed class ConstTagNodeCollection : ImmutableCollection<ConstTagNode>
+  public sealed class ConstTagNodeCollection : SyntaxNodeCollection<ConstTagNode, ConstStatementNode>
   {
   }
 }
