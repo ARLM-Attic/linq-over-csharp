@@ -701,7 +701,7 @@ public partial class CSharpParser
 			Get();
 			var separator = t; 
 			TypeParameterConstraintTag(out tag);
-			constrNode.ConstraintTags.Add(new TypeParameterConstraintTagContinuationNode(separator, tag)); 
+			constrNode.ConstraintTags.Add(separator, tag); 
 		}
 	}
 
@@ -963,9 +963,14 @@ public partial class CSharpParser
 			
 			QueryBody(out bodyNode);
 		} else if (IsLambda()) {
-			LambdaFunctionSignature();
+			var lambdaNode = new LambdaExpressionNode(t);
+			exprNode = lambdaNode;
+			
+			LambdaFunctionSignature(lambdaNode);
 			Expect(119);
-			LambdaFunctionBody();
+			lambdaNode.LambdaToken = t; 
+			LambdaFunctionBody(lambdaNode);
+			Terminate(lambdaNode); 
 		} else if (StartOf(13)) {
 			Unary(out leftExprNode);
 			if (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq)) {
@@ -1041,7 +1046,7 @@ public partial class CSharpParser
 			var separator = t; 
 			FormalParameterTag(out node);
 			if (parsNode != null && node != null) 
-			 parsNode.Items.Add(new FormalParameterContinuationNode(separator, node)); 
+			 parsNode.Items.Add(separator, node); 
 			
 		}
 	}
@@ -1077,7 +1082,7 @@ public partial class CSharpParser
 			Get();
 			var separator = t; 
 			SingleConstMember(out tagNode);
-			constNode.ConstTags.Add(new ConstContinuationTagNode(separator, tagNode)); 
+			constNode.ConstTags.Add(separator, tagNode); 
 		}
 		Expect(114);
 		Terminate(memNode); 
@@ -1250,7 +1255,7 @@ public partial class CSharpParser
 			Get();
 			var separator = t; 
 			SingleFieldMember(out tagNode);
-			fiNode.FieldTags.Add(new FieldContinuationTagNode(separator, tagNode)); 
+			fiNode.FieldTags.Add(separator, tagNode); 
 		}
 	}
 
@@ -1359,7 +1364,7 @@ public partial class CSharpParser
 				Get();
 				var separator = t; 
 				CurrentArgumentItem(out argNode);
-				if (argNodes != null) argNodes.Add(new ArgumentContinuationNode(separator, argNode)); 
+				if (argNodes != null) argNodes.Add(separator, argNode); 
 			}
 		}
 	}
@@ -1587,8 +1592,7 @@ public partial class CSharpParser
 			Get();
 			var separator = t; 
 			LocalVariableDeclarator(out varTagNode);
-			if (varNode != null) varNode.VariableTags.Add(
-			 new LocalVariableContinuationTagNode(separator, varTagNode)); 
+			if (varNode != null) varNode.VariableTags.Add(separator, varTagNode); 
 			
 		}
 		Terminate(varNode); 
@@ -2234,6 +2238,7 @@ public partial class CSharpParser
 			LocalVariableNode varNode; 
 			LocalVariableDeclaration(out varNode);
 			var varDecl = new VariableDeclarationStatementNode(varNode.StartToken);
+			stmtNode = varDecl;
 			varDecl.Declaration = varNode;
 			
 			Expect(114);
@@ -2271,7 +2276,7 @@ public partial class CSharpParser
 			Expression(out exprNode);
 			cmcTag.Expression = exprNode;
 			Terminate(cmcTag);
-			csNode.ConstTags.Add(new ConstContinuationTagNode(separator, cmTag));
+			csNode.ConstTags.Add(separator, cmTag);
 			
 		}
 		Expect(114);
@@ -2304,7 +2309,7 @@ public partial class CSharpParser
 		} else if (la.kind == 36) {
 			IfStatement(out stmtNode);
 		} else if (la.kind == 67) {
-			SwitchStatement();
+			SwitchStatement(out stmtNode);
 		} else if (la.kind == 82) {
 			WhileStatement(out stmtNode);
 		} else if (la.kind == 22) {
@@ -2324,11 +2329,11 @@ public partial class CSharpParser
 		} else if (la.kind == 69) {
 			ThrowStatement(out stmtNode);
 		} else if (la.kind == 71) {
-			TryFinallyBlock();
+			TryFinallyBlock(out stmtNode);
 		} else if (la.kind == 43) {
 			LockStatement(out stmtNode);
 		} else if (la.kind == 78) {
-			UsingStatement();
+			UsingStatement(out stmtNode);
 		} else if (la.kind == 121) {
 			Get();
 			if (la.kind == 58) {
@@ -2419,17 +2424,28 @@ public partial class CSharpParser
 		Terminate(stmtNode); 
 	}
 
-	void SwitchStatement() {
-		ExpressionNode exprNode; 
+	void SwitchStatement(out StatementNode stmtNode) {
 		Expect(67);
+		var swcNode = new SwitchStatementNode(t);
+		stmtNode = swcNode; 
+		
 		Expect(98);
+		swcNode.OpenParenthesis = t; 
+		ExpressionNode exprNode; 
+		
 		Expression(out exprNode);
+		swcNode.Expression = exprNode; 
 		Expect(113);
+		swcNode.CloseParenthesis = t; 
 		Expect(96);
+		swcNode.SwitchSections.StartToken = t; 
 		while (la.kind == 12 || la.kind == 20) {
-			SwitchSection();
+			SwitchSection(swcNode);
 		}
 		Expect(111);
+		Terminate(swcNode.SwitchSections); 
+		Terminate(stmtNode);
+		
 	}
 
 	void WhileStatement(out StatementNode stmtNode) {
@@ -2599,19 +2615,27 @@ public partial class CSharpParser
 		Terminate(stmtNode); 
 	}
 
-	void TryFinallyBlock() {
+	void TryFinallyBlock(out StatementNode stmtNode) {
 		Expect(71);
+		var tryNode = new TryStatementNode(t);
+		stmtNode = tryNode;
 		BlockStatementNode blockNode; 
+		
 		Block(out blockNode);
+		tryNode.TryBlock = blockNode; 
 		if (la.kind == 13) {
-			CatchClauses();
+			CatchClauses(tryNode);
 			if (la.kind == 30) {
 				Get();
+				tryNode.FinallyToken = t; 
 				Block(out blockNode);
+				tryNode.FinallyBlock = blockNode; 
 			}
 		} else if (la.kind == 30) {
 			Get();
+			tryNode.FinallyToken = t; 
 			Block(out blockNode);
+			tryNode.FinallyBlock = blockNode; 
 		} else SynErr(182);
 	}
 
@@ -2636,19 +2660,30 @@ public partial class CSharpParser
 		
 	}
 
-	void UsingStatement() {
-		ExpressionNode exprNode; 
+	void UsingStatement(out StatementNode stmtNode) {
 		Expect(78);
+		var usNode = new UsingStatementNode(t); 
+		stmtNode = usNode;
+		
 		Expect(98);
+		usNode.OpenParenthesis = t; 
 		if (IsLocalVarDecl()) {
 			LocalVariableNode varNode; 
 			LocalVariableDeclaration(out varNode);
+			usNode.Initializer = varNode; 
 		} else if (StartOf(13)) {
+			ExpressionNode exprNode; 
 			Expression(out exprNode);
+			usNode.Expression = exprNode; 
 		} else SynErr(183);
 		Expect(113);
-		StatementNode stmtNode; 
-		EmbeddedStatement(out stmtNode);
+		usNode.CloseParenthesis = t;   
+		StatementNode bodyNode; 
+		
+		EmbeddedStatement(out bodyNode);
+		usNode.Statement = bodyNode;
+		Terminate(stmtNode); 
+		
 	}
 
 	void YieldReturnStatement(out StatementNode stmtNode) {
@@ -2713,16 +2748,24 @@ public partial class CSharpParser
 		
 	}
 
-	void SwitchSection() {
-		SwitchLabel();
+	void SwitchSection(SwitchStatementNode swcNode) {
+		var ssNode = new SwitchSectionNode(la); 
+		SwitchLabelNode slNode;
+		
+		SwitchLabel(out slNode);
+		ssNode.Labels.Add(slNode); 
 		while (la.kind == _case || (la.kind == _default && Peek(1).kind == _colon)) {
-			SwitchLabel();
+			SwitchLabel(out slNode);
+			ssNode.Labels.Add(slNode); 
 		}
 		StatementNode stmtNode; 
 		Statement(out stmtNode);
+		ssNode.Statements.Add(stmtNode); 
 		while (IsNoSwitchLabelOrRBrace()) {
 			Statement(out stmtNode);
+			ssNode.Statements.Add(stmtNode); 
 		}
+		swcNode.SwitchSections.Add(ssNode); 
 	}
 
 	void ForInitializer(ForStatementNode forNode) {
@@ -2755,23 +2798,37 @@ public partial class CSharpParser
 		}
 	}
 
-	void CatchClauses() {
-		TypeOrNamespaceNode typeNode; 
+	void CatchClauses(TryStatementNode tryNode) {
 		Expect(13);
+		var ccNode = new CatchClauseNode(t); 
+		BlockStatementNode blockNode;
+		
 		if (la.kind == 96) {
-			BlockStatementNode blockNode; 
 			Block(out blockNode);
+			ccNode.Block = blockNode; 
+			Terminate(ccNode);
+			tryNode.CatchClauses.Add(ccNode);
+			
 		} else if (la.kind == 98) {
 			Get();
+			ccNode.OpenParenthesis = t; 
+			TypeOrNamespaceNode typeNode;
+			
 			ClassType(out typeNode);
+			ccNode.TypeName = typeNode; 
 			if (la.kind == 1) {
 				Get();
+				ccNode.IdentifierToken = t; 
 			}
 			Expect(113);
-			BlockStatementNode blockNode; 
+			ccNode.CloseParenthesis = t; 
 			Block(out blockNode);
+			ccNode.Block = blockNode; 
+			Terminate(ccNode);
+			tryNode.CatchClauses.Add(ccNode);
+			
 			if (la.kind == 13) {
-				CatchClauses();
+				CatchClauses(tryNode);
 			}
 		} else SynErr(185);
 	}
@@ -2919,65 +2976,95 @@ public partial class CSharpParser
 		}
 	}
 
-	void SwitchLabel() {
+	void SwitchLabel(out SwitchLabelNode slNode) {
+		slNode = new SwitchLabelNode(la); 
 		if (la.kind == 12) {
-			ExpressionNode exprNode; 
 			Get();
+			ExpressionNode exprNode; 
 			Expression(out exprNode);
-			Expect(86);
+			slNode.Expression = exprNode; 
 		} else if (la.kind == 20) {
 			Get();
-			Expect(86);
 		} else SynErr(189);
+		Expect(86);
+		Terminate(slNode); 
 	}
 
-	void LambdaFunctionSignature() {
+	void LambdaFunctionSignature(LambdaExpressionNode lambdaNode) {
 		if (la.kind == _ident) {
 			Expect(1);
+			var fpNode = new FormalParameterNode(t);
+			fpNode.IdentifierToken = t;
+			Terminate(fpNode);
+			lambdaNode.FormalParameters.Add(fpNode);
+			
 		} else if (la.kind == 98) {
 			Get();
+			lambdaNode.OpenParenthesis = t;
+			FormalParameterNode parNode; 
+			
 			if (IsExplicitLambdaParameter(la)) {
-				ExplicitLambdaParameterList();
+				ExplicitLambdaParameter(out parNode);
+				lambdaNode.FormalParameters.Add(parNode); 
+				while (la.kind == 87) {
+					Get();
+					var separator = t; 
+					ExplicitLambdaParameter(out parNode);
+					lambdaNode.FormalParameters.Add(separator, parNode); 
+				}
 			} else if (la.kind != _rpar) {
-				ImplicitLambdaParameterList();
+				Expect(1);
+				parNode = new FormalParameterNode(t);
+				parNode.IdentifierToken = t;
+				Terminate(parNode);
+				lambdaNode.FormalParameters.Add(parNode);
+				
+				while (la.kind == 87) {
+					Get();
+					var separator = t; 
+					Expect(1);
+					parNode = new FormalParameterNode(t);
+					parNode.IdentifierToken = t;
+					Terminate(parNode);
+					lambdaNode.FormalParameters.Add(separator, parNode);
+					
+				}
 			} else if (la.kind == 113) {
 			} else SynErr(190);
 			Expect(113);
+			lambdaNode.OpenParenthesis = t; 
 		} else SynErr(191);
 	}
 
-	void ExplicitLambdaParameterList() {
+	void ExplicitLambdaParameter(out FormalParameterNode fpNode) {
+		fpNode = new FormalParameterNode(la); 
 		if (la.kind == 50 || la.kind == 57) {
 			if (la.kind == 57) {
 				Get();
+				fpNode.Modifier = FormalParameterModifier.Ref; 
 			} else {
 				Get();
+				fpNode.Modifier = FormalParameterModifier.Out; 
 			}
 		}
 		TypeOrNamespaceNode typeNode; 
 		Type(out typeNode);
+		fpNode.TypeName = typeNode; 
 		Expect(1);
-		if (la.kind == 87) {
-			Get();
-			ExplicitLambdaParameterList();
-		}
+		fpNode.IdentifierToken = t; 
+		Terminate(fpNode);
+		
 	}
 
-	void ImplicitLambdaParameterList() {
-		Expect(1);
-		if (la.kind == 87) {
-			Get();
-			ImplicitLambdaParameterList();
-		}
-	}
-
-	void LambdaFunctionBody() {
-		ExpressionNode exprNode; 
+	void LambdaFunctionBody(LambdaExpressionNode lambdaNode) {
 		if (StartOf(13)) {
+			ExpressionNode exprNode; 
 			Expression(out exprNode);
+			lambdaNode.Expression = exprNode; 
 		} else if (la.kind == 96) {
 			BlockStatementNode blockNode; 
 			Block(out blockNode);
+			lambdaNode.Block = blockNode; 
 		} else SynErr(192);
 	}
 
@@ -3818,7 +3905,7 @@ public partial class CSharpParser
 					Get();
 					var separator = t; 
 					AnonymousMethodParameter(out parNode);
-					parsNode.Items.Add(new FormalParameterContinuationNode(separator, parNode)); 
+					parsNode.Items.Add(separator, parNode); 
 				}
 			}
 			Expect(113);
@@ -3876,10 +3963,10 @@ public partial class CSharpParser
 			Expression(out exprNode);
 			if (argNodes != null)
 			{
-			  var argNode = new ArgumentContinuationNode(separator);
+			  var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
 			  argNode.Expression = exprNode;
 			  Terminate(argNode);
-			  argNodes.Add(argNode);
+			  argNodes.Add(separator, argNode);
 			}
 			
 		}
@@ -3901,15 +3988,16 @@ public partial class CSharpParser
 
 	void NewOperatorWithType() {
 		ExpressionNode exprNode; 
+		ObjectOrCollectionInitializerNode initNode; 
 		if (la.kind == 98) {
 			Get();
 			CurrentArgumentList(null);
 			Expect(113);
 			if (la.kind == 96) {
-				ObjectOrCollectionInitializer();
+				ObjectOrCollectionInitializer(out initNode);
 			}
 		} else if (la.kind == 96) {
-			ObjectOrCollectionInitializer();
+			ObjectOrCollectionInitializer(out initNode);
 		} else if (IsDims()) {
 			var newOpNode = new NewOperatorWithExplicitArrayNode(t); 
 			ImplicitArrayCreation(newOpNode);
@@ -3929,8 +4017,8 @@ public partial class CSharpParser
 				Expect(112);
 			}
 			if (la.kind == 96) {
-				ArrayInitializerNode initNode; 
-				ArrayInitializer(out initNode);
+				ArrayInitializerNode arrInitNode; 
+				ArrayInitializer(out arrInitNode);
 			}
 		} else SynErr(203);
 	}
@@ -3960,7 +4048,7 @@ public partial class CSharpParser
 			Expect(87);
 			var separator = t; 
 			MemberDeclarator(out mdNode);
-			initNode.Declarators.Add(new MemberDeclaratorContinuationNode(separator, mdNode)); 
+			initNode.Declarators.Add(separator, mdNode); 
 		}
 	}
 
@@ -4002,31 +4090,38 @@ public partial class CSharpParser
 		Terminate(mdNode); 
 	}
 
-	void ObjectOrCollectionInitializer() {
+	void ObjectOrCollectionInitializer(out ObjectOrCollectionInitializerNode oiNode) {
 		Expect(96);
+		oiNode = new ObjectOrCollectionInitializerNode(t); 
 		if (IsEmptyMemberInitializer()) {
 			Expect(111);
+			Terminate(oiNode); 
 		} else if (IsMemberInitializer()) {
 			MemberInitializerList();
+			if (la.kind == 87) {
+				Get();
+				oiNode.OrphanSeparator = t; 
+			}
+			Expect(111);
+			Terminate(oiNode); 
 		} else if (StartOf(19)) {
-			CollectionInitializer();
+			ElementInitializerList();
+			if (la.kind == 87) {
+				Get();
+				oiNode.OrphanSeparator = t; 
+			}
+			Expect(111);
+			Terminate(oiNode); 
 		} else SynErr(205);
-		Expect(111);
 	}
 
 	void MemberInitializerList() {
-		MemberInitializer();
+		MemberInitializerNode miNode; 
+		MemberInitializer(out miNode);
 		while (NotFinalComma()) {
 			Expect(87);
-			MemberInitializer();
+			MemberInitializer(out miNode);
 		}
-		if (la.kind == 87) {
-			Get();
-		}
-	}
-
-	void CollectionInitializer() {
-		ElementInitializerList();
 	}
 
 	void ElementInitializerList() {
@@ -4034,9 +4129,6 @@ public partial class CSharpParser
 		while (NotFinalComma()) {
 			Expect(87);
 			ElementInitializer();
-		}
-		if (la.kind == 87) {
-			Get();
 		}
 	}
 
@@ -4055,15 +4147,21 @@ public partial class CSharpParser
 		} else SynErr(206);
 	}
 
-	void MemberInitializer() {
+	void MemberInitializer(out MemberInitializerNode miNode) {
 		Expect(1);
+		miNode = new MemberInitializerNode(t); 
 		Expect(85);
+		miNode.EqualToken = t; 
 		if (IsValueInitializer()) {
 			ExpressionNode exprNode; 
 			Expression(out exprNode);
+			miNode.Expression = exprNode; 
 		} else if (la.kind == 96) {
-			ObjectOrCollectionInitializer();
+			ObjectOrCollectionInitializerNode initNode; 
+			ObjectOrCollectionInitializer(out initNode);
+			miNode.Initializer = initNode; 
 		} else SynErr(207);
+		Terminate(miNode); 
 	}
 
 	void AnonymousMethodParameter(out FormalParameterNode parNode) {

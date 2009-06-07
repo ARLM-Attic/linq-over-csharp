@@ -1,7 +1,7 @@
 // ================================================================================================
-// BlockWrappingStatementNode.cs
+// ObjectOrCollectionInitializerNode.cs
 //
-// Created: 2009.06.05, by Istvan Novak (DeepDiver)
+// Created: 2009.06.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,32 +9,27 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a statement that simply wraps a statement block (like "checked", 
-  /// "unsafe", etc.)
+  /// 
   /// </summary>
-  /// <remarks>This class is used to be a base class for concrete statement node classes.</remarks>
   // ================================================================================================
-  public abstract class BlockWrappingStatementNode: StatementNode
+  public class ObjectOrCollectionInitializerNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="BlockWrappingStatementNode"/> class.
+    /// Initializes a new instance of the <see cref="ObjectOrCollectionInitializerNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
-    /// <param name="block">The block of statements.</param>
     // ----------------------------------------------------------------------------------------------
-    protected BlockWrappingStatementNode(Token start, BlockStatementNode block)
+    public ObjectOrCollectionInitializerNode(Token start)
       : base(start)
     {
-      Block = block;
-      Terminate(block.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the block of statements.
+    /// Gets or sets the optional orphan comma separator separator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockStatementNode Block { get; private set; }
+    public Token OrphanSeparator { get; internal set; }
   }
 }

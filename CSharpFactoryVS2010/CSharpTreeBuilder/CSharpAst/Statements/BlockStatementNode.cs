@@ -8,13 +8,21 @@ using CSharpTreeBuilder.CSharpAstBuilder;
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a block statement encapsulating other statements.
-  /// </summary>
+  /// <summary>This class represents a block statement encapsulating other statements.</summary>
   /// <remarks>
-  /// Syntax:
-  ///   BlockStatementNode:
-  ///     "{" { StatementNode } "}"
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>{</strong>" { <em>StatementNode</em> }
+  ///         "<strong>}</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>{</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  ///             { <em>StatementNode</em> }: <see cref="Statements"/><br/>
+  ///             "<strong>}</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
+  /// 		</para>
+  /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
   public sealed class BlockStatementNode : StatementNode

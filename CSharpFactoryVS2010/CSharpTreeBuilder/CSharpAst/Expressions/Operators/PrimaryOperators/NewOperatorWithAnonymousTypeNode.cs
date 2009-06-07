@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public NewOperatorWithAnonymousTypeNode(Token start)
       : base(start)
     {
-      Declarators = new MemberDeclaratorNodeCollection();
+      Declarators = new MemberDeclaratorNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------

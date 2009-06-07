@@ -3,8 +3,6 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
-
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -13,7 +11,7 @@ namespace CSharpTreeBuilder.Ast
   /// </summary>
   // ================================================================================================
   public sealed class TypeParameterConstraintTagNodeCollection :
-    ImmutableCollection<TypeParameterConstraintTagNode>
+    SyntaxNodeCollection<TypeParameterConstraintTagNode, TypeParameterConstraintNode>
   {
   }
 }

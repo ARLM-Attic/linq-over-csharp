@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     protected InvocationOperatorNode(Token start)
       : base(start)
     {
-      Arguments = new ArgumentNodeCollection();
+      Arguments = new ArgumentNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------

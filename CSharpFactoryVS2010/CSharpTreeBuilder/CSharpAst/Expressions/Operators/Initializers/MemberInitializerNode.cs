@@ -1,7 +1,7 @@
 // ================================================================================================
-// TypeParameterConstraintNode.cs
+// MemberInitializerNode.cs
 //
-// Created: 2009.04.07, by Istvan Novak (DeepDiver)
+// Created: 2009.06.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,59 +9,32 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class defines a syntax node for a type parameter constraint.
+  /// 
   /// </summary>
-  /// <remarks>
-  /// Syntax:
-  ///   TypeParameterConstraintNode:
-  ///     "where" identifier ":" ParameterConstaintNode { TypeParameterConstraintTagContinuationNode }
-  /// </remarks>
   // ================================================================================================
-  public sealed class TypeParameterConstraintNode : SyntaxNode<TypeOrMemberDeclarationNode>, IIdentifierSupport
+  public class MemberInitializerNode : SyntaxNode<ISyntaxNode>, IIdentifierSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypeParameterConstraintNode"/> class.
+    /// Initializes a new instance of the <see cref="MemberInitializerNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
-    /// <param name="identifier">The identifier token.</param>
-    /// <param name="colon">The colon token.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterConstraintNode(Token start, Token identifier, Token colon)
+    public MemberInitializerNode(Token start)
       : base(start)
     {
-      IdentifierToken = identifier;
-      ColonToken = colon;
-      ConstraintTags = new TypeParameterConstraintTagNodeCollection {ParentNode = this};
+      IdentifierToken = start;
     }
-
-    /// <summary>
-    /// Gets the ":" token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token ColonToken { get; private set; }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the constraint tags.
-    /// </summary>
-    /// <value>The constraint tags.</value>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterConstraintTagNodeCollection ConstraintTags { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
-    /// <summary>
-    /// Gets the type parameter name token.
+    /// Gets or sets the identifier token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token IdentifierToken { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type parameter name.
+    /// Gets the identifier name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public string Identifier
@@ -82,8 +55,39 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #endregion
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the equal token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token EqualToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the expression belonging to this initializer.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionNode Expression { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is expression initializer.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is expression initializer; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsExpressionInitializer
+    {
+      get { return Expression != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the initializer.
+    /// </summary>
+    /// <value>The initializer.</value>
+    // ----------------------------------------------------------------------------------------------
+    public ObjectOrCollectionInitializerNode Initializer { get; internal set; }
   }
 }

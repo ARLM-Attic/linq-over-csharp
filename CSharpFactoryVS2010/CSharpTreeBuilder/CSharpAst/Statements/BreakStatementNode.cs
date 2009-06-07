@@ -8,11 +8,22 @@ using CSharpTreeBuilder.CSharpAstBuilder;
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a break statement.
-  /// </summary>
+  /// <summary>This class represents a <strong>break</strong> statement.</summary>
+  /// <remarks>
+  /// 	<para>Syntax:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>"<strong>break</strong>" "<strong>;</strong>"</para>
+  /// 	</blockquote>
+  /// 	<para>Representation:</para>
+  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
+  /// 		<para>
+  ///             "<strong>break</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
+  ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
+  /// 		</para>
+  /// 	</blockquote>
+  /// </remarks>
   // ================================================================================================
-  public class BreakStatementNode : StatementNode
+  public sealed class BreakStatementNode : StatementNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

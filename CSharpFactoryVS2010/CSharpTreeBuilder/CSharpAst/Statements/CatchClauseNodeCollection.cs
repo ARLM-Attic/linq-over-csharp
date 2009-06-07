@@ -1,16 +1,16 @@
 // ================================================================================================
-// FieldTagNodeCollection.cs
+// CatchClauseNodeCollection.cs
 //
-// Created: 2009.05.16, by Istvan Novak (DeepDiver)
+// Created: 2009.06.05, by Istvan Novak (DeepDiver)
 // ================================================================================================
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
-  /// <summary>
-  /// This class represents a collection of field member tag nodes.
-  /// </summary>
+  /// <summary>This class represents a collection of <see cref="CatchClauseNode"/> instances.</summary>
   // ================================================================================================
-  public class FieldTagNodeCollection : SyntaxNodeCollection<FieldTagNode, ISyntaxNode>
+  public sealed class CatchClauseNodeCollection: 
+    SyntaxNodeCollection<CatchClauseNode, TryStatementNode>
   {
+    
   }
 }

@@ -1,7 +1,7 @@
 // ================================================================================================
-// BlockWrappingStatementNode.cs
+// SwitchLabelNode.cs
 //
-// Created: 2009.06.05, by Istvan Novak (DeepDiver)
+// Created: 2009.06.06, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,32 +9,40 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a statement that simply wraps a statement block (like "checked", 
-  /// "unsafe", etc.)
+  /// 
   /// </summary>
-  /// <remarks>This class is used to be a base class for concrete statement node classes.</remarks>
   // ================================================================================================
-  public abstract class BlockWrappingStatementNode: StatementNode
+  public class SwitchLabelNode : SyntaxNode<SwitchSectionNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="BlockWrappingStatementNode"/> class.
+    /// Initializes a new instance of the <see cref="SwitchLabelNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
-    /// <param name="block">The block of statements.</param>
     // ----------------------------------------------------------------------------------------------
-    protected BlockWrappingStatementNode(Token start, BlockStatementNode block)
+    public SwitchLabelNode(Token start)
       : base(start)
     {
-      Block = block;
-      Terminate(block.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the block of statements.
+    /// Gets or sets the label expression.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockStatementNode Block { get; private set; }
+    public ExpressionNode Expression { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is a "default" label.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is a "default" label; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsDefaultLabel
+    {
+      get { return StartToken != null && StartToken.Value == "default"; }
+    }
   }
 }

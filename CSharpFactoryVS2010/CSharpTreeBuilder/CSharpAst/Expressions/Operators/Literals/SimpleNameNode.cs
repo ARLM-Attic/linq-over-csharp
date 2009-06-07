@@ -55,8 +55,7 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #region ITypeArguments Members
-
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the node providing type arguments.
     /// </summary>
@@ -75,7 +74,5 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return Arguments != null; }
     }
-
-    #endregion
   }
 }

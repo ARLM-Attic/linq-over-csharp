@@ -1,59 +1,57 @@
 // ================================================================================================
-// NewOperatorWithArrayNodeBase.cs
+// TryStatementNode.cs
 //
-// Created: 2009.05.14, by Istvan Novak (DeepDiver)
+// Created: 2009.06.05, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class is a base for "new" operator with array initializers
+  /// 
   /// </summary>
   // ================================================================================================
-  public abstract class NewOperatorWithArrayNodeBase : NewOperatorNode, IArrayDimensions
+  public class TryStatementNode : StatementNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="NewOperatorWithImplicitArrayNode"/> class.
+    /// Initializes a new instance of the <see cref="TryStatementNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NewOperatorWithArrayNodeBase(Token start)
+    public TryStatementNode(Token start)
       : base(start)
     {
-      Commas = new ImmutableCollection<Token>();
+      CatchClauses = new CatchClauseNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the initializer used to implicit array initialization.
+    /// Gets or sets the try block.
     /// </summary>
-    /// <value>The initializer.</value>
     // ----------------------------------------------------------------------------------------------
-    public ArrayInitializerNode Initializer { get; internal set; }
+    public BlockStatementNode TryBlock { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the opening square bracket.
+    /// Gets or sets the catch clauses.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenSquareBracket { get; internal set; }
+    public CatchClauseNodeCollection CatchClauses { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of comma tokens.
+    /// Gets or sets the finally token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<Token> Commas { get; private set; }
+    public Token FinallyToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the closing square bracket.
+    /// Gets or sets the finally block.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token CloseSquareBracket { get; internal set; }
+    public BlockStatementNode FinallyBlock { get; internal set; }
   }
 }

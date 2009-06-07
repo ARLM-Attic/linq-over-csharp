@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public FieldDeclarationNode(Token start)
       : base(start)
     {
-      FieldTags = new FieldTagNodeCollection();
+      FieldTags = new FieldTagNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
