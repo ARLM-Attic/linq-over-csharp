@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public abstract class NewOperatorNode : PrimaryOperatorNode
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NewOperatorNode"/> class.
@@ -23,6 +26,32 @@ namespace CSharpTreeBuilder.Ast
     protected NewOperatorNode(Token start)
       : base(start)
     {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of the type.
+    /// </summary>
+    /// <value>The name of the type.</value>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        if (_TypeName != null) _TypeName.ParentNode = this;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this new operator is implicit (now explicit type used)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsImplicit
+    {
+      get { return TypeName == null; }
     }
   }
 }

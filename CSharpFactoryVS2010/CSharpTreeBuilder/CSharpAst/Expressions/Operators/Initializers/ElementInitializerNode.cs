@@ -1,7 +1,7 @@
 // ================================================================================================
-// ObjectOrCollectionInitializerNode.cs
+// ElementInitializerNode.cs
 //
-// Created: 2009.06.07, by Istvan Novak (DeepDiver)
+// Created: 2009.06.08, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -12,40 +12,32 @@ namespace CSharpTreeBuilder.Ast
   /// 
   /// </summary>
   // ================================================================================================
-  public class ObjectOrCollectionInitializerNode : SyntaxNode<ISyntaxNode>
+  public class ElementInitializerNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ObjectOrCollectionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="ElementInitializerNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ObjectOrCollectionInitializerNode(Token start)
+    public ElementInitializerNode(Token start)
       : base(start)
     {
-      MemberInitializers = new MemberInitializerNodeCollection {ParentNode = this};
-      ElementInitializers = new ElementInitializerNodeCollection {ParentNode = this};
+      ExpressionList = new InitializerExpressionNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the member initializers.
+    /// Gets or sets the expression.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public MemberInitializerNodeCollection MemberInitializers { get; private set; }
+    public ExpressionNode Expression { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the element initializers.
+    /// Gets or sets the expression list.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ElementInitializerNodeCollection ElementInitializers { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the optional orphan comma separator separator.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token OrphanSeparator { get; internal set; }
+    public InitializerExpressionNodeCollection ExpressionList { get; private set; }
   }
 }

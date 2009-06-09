@@ -1,7 +1,7 @@
 // ================================================================================================
-// LambdaExpressionNode.cs
+// NewOperatorWithConstructorNode.cs
 //
-// Created: 2009.06.07, by Istvan Novak (DeepDiver)
+// Created: 2009.06.08, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,49 +9,21 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a lambda expression.
+  /// 
   /// </summary>
-  /// <remarks>
-  /// 	<para>Syntax:</para>
-  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>( <em>identifier</em> | "<strong>(</strong>" <em>FormalParameterNode</em>
-  ///         { "<strong>,</strong>" <em>FormalParameterNode</em> } "<strong>)</strong>" )
-  ///         "<strong>=&gt;</strong>" ( <em>ExpressionNode</em> |
-  ///         <em>BlockStatementNode</em> )</para>
-  /// 	</blockquote>
-  /// 	<para>Representation:</para>
-  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>
-  ///             "<strong>(</strong>": <see cref="OpenParenthesis"/><br/>
-  ///             { <em>FormalParameterNode</em> }: <see cref="FormalParameters"/><br/>
-  ///             "<strong>)</strong>": <see cref="CloseParenthesis"/><br/>
-  ///             "<strong>=&gt;</strong>": <see cref="LambdaToken"/><br/>
-  /// 			<em>ExpressionNode</em>: <see cref="Expression"/><br/>
-  /// 			<em>BlockStatementNode</em>: <see cref="Block"/>
-  /// 		</para>
-  /// 	</blockquote>
-  /// </remarks>
   // ================================================================================================
-  public sealed class LambdaExpressionNode : ExpressionNode, IParentheses
+  public class NewOperatorWithConstructorNode : NewOperatorNode, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LambdaExpressionNode"/> class.
+    /// Initializes a new instance of the <see cref="NewOperatorWithConstructorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public LambdaExpressionNode(Token start)
+    public NewOperatorWithConstructorNode(Token start)
       : base(start)
     {
-      FormalParameters = new FormalParameterNodeCollection {ParentNode = this};
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the formal parameters of the lambda expression.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public FormalParameterNodeCollection FormalParameters { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -62,10 +34,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the lambda operator token.
+    /// Gets or sets the constructor arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token LambdaToken { get; internal set; }
+    public ArgumentNodeCollection Arguments { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -76,29 +48,36 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the lambda function.
+    /// Gets or sets the method call initializer expression belonging to the constructor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public ExpressionNode Initializer { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance represents a simple expression.
+    /// Gets or sets the optional initializer.
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance represents a simple expression; otherwise, <c>false</c>.
-    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsSimpleExpression
+    public ObjectOrCollectionInitializerNode ObjectInitializer { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is an implicit constructor call.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsImplicitCall
     {
-      get { return Expression != null; }
+      get { return OpenParenthesis == null; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the block of statements belonging to the lambda expression.
+    /// Gets a value indicating whether this instance has an initializer.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockStatementNode Block { get; internal set; }
+    public bool HasObjectInitializer
+    {
+      get { return ObjectInitializer == null; }
+    }
   }
 }

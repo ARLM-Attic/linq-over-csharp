@@ -56,7 +56,7 @@
     <None Include="TestFiles\SampleQueries\ObjectDumper.cs" />
     <None Include="TestFiles\SampleQueries\LinqSamples.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration3.cs" />
-    <None Include="TestFiles\EnumDeclaration\EnumDeclaration2.cs" />
+    <Compile Include="TestFiles\EnumDeclaration\EnumDeclaration2.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration1.cs" />
     <None Include="TestFiles\GlobalAttributes\GlobalAttributesOk.cs" />
     <None Include="TestFiles\ExternAliasDirective\ExternAliasesChecked.cs" />

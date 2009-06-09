@@ -388,14 +388,11 @@ NamespaceMemberDeclaration<NamespaceScopeNode parentNode>
     (. TypeDeclarationNode typeDecl; .)
     TypeDeclaration<null, out typeDecl>
     (.
-       if (typeDecl != null)
-       {
-         typeDecl.AttributeDecorations = attrNodes;
-         typeDecl.Modifiers = mod;
-         typeDecl.DeclaringNamespace = parentNode;
-         parentNode.TypeDeclarations.Add(typeDecl);
-         parentNode.InScopeDeclarations.Add(typeDecl);
-       }
+       typeDecl.AttributeDecorations = attrNodes;
+       typeDecl.Modifiers = mod;
+       typeDecl.DeclaringNamespace = parentNode;
+       parentNode.TypeDeclarations.Add(typeDecl);
+       parentNode.InScopeDeclarations.Add(typeDecl);
     .)
 .
 
@@ -494,7 +491,7 @@ ClassBody<ClassDeclarationNode typeDecl>
     (. var mod = new ModifierNodeCollection(); .)                          
     ModifierList<mod>
     (. MemberDeclarationNode memNode; .)
-    ClassMemberDeclaration<typeDecl, out memNode>
+    ClassMemberDeclaration<attrNodes, mod, typeDecl, out memNode>
     (. 
        if (memNode != null) 
        {
@@ -553,7 +550,7 @@ StructBody<StructDeclarationNode typeDecl>
     (. var mod = new ModifierNodeCollection(); .)                             
     ModifierList<mod>
     (. MemberDeclarationNode memNode; .)
-    StructMemberDeclaration<typeDecl, out memNode>
+    StructMemberDeclaration<attrNodes, mod, typeDecl, out memNode>
   }
   "}"   
   (. typeDecl.CloseBrace = t; .)
@@ -680,13 +677,12 @@ DelegateDeclaration<out TypeDeclarationNode typeDecl>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a class member.
-//   typeDecl: type declaring this class member
-//   memNode: Member node declaration
 // ------------------------------------------------------------------------------------------------
-ClassMemberDeclaration<TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode>
+ClassMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNodeCollection mod,
+  TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode>
   (. memNode = null; .)
 =
-  StructMemberDeclaration<typeDecl, out memNode>
+  StructMemberDeclaration<attrNodes, mod, typeDecl, out memNode>
   | 
     "~" 
     (. 
@@ -711,10 +707,9 @@ ClassMemberDeclaration<TypeDeclarationNode typeDecl, out MemberDeclarationNode m
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a structure member.
-//   typeDecl: type declaring the member
-//   memNode: member declaration node
 // ------------------------------------------------------------------------------------------------
-StructMemberDeclaration<TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode>        
+StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNodeCollection mod,
+  TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode>        
 =                                             
   (. memNode = null; .)
   (                                                                          
@@ -780,14 +775,12 @@ StructMemberDeclaration<TypeDeclarationNode typeDecl, out MemberDeclarationNode 
       (. TypeDeclarationNode nestedTypeNode; .)
       TypeDeclaration<typeDecl, out nestedTypeNode> 
       (. 
-         if (nestedTypeNode != null)
-         {
-           // TODO: Handle attributes and modifiers
-           //nestedTypeNode.AttributeDecorations = attrNodes;
-           //nestedTypeNode.Modifiers = mod;
-           //nestedTypeNode.DeclaringNamespace = 
-           //NestedTypeNode.DeclaringType =
-         }
+         nestedTypeNode.AttributeDecorations = attrNodes;
+         nestedTypeNode.Modifiers = mod;
+         nestedTypeNode.DeclaringNamespace = typeDecl.DeclaringNamespace;
+         nestedTypeNode.DeclaringType = typeDecl;
+         typeDecl.NestedDeclarations.Add(nestedTypeNode);
+         typeDecl.NestedTypes.Add(nestedTypeNode);
       .)
   )
 .
@@ -3854,10 +3847,10 @@ NewOperator<out ExpressionNode exprNode>
     (. exprNode = anonNode; .)
   |
     (. TypeOrNamespaceNode typeNode; .)
-    NonArrayType<out typeNode>      
-    NewOperatorWithType
+    NonArrayType<out typeNode>
+    NewOperatorWithType<newToken, typeNode, out exprNode>
   |
-    (. var impArrNode = new NewOperatorWithImplicitArrayNode(t); .)
+    (. var impArrNode = new NewOperatorWithArrayNode(t); .)
     ImplicitArrayCreation<impArrNode>
     (. exprNode = impArrNode; .)
   )
@@ -3957,45 +3950,95 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
 // ------------------------------------------------------------------------------------------------
 // Declaration of a "new" operator with explicit type.
 // ------------------------------------------------------------------------------------------------
-NewOperatorWithType
+NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out ExpressionNode exprNode>
+  (. exprNode = null; .)
 =
-  (. ExpressionNode exprNode; .)
   (. ObjectOrCollectionInitializerNode initNode; .)                 
   (
     // --- Simple constructor call
-    "(" 
-    CurrentArgumentList<null>
+    (. 
+       var scNode = new NewOperatorWithConstructorNode(newToken); 
+       scNode.TypeName = typeNode;
+       exprNode = scNode;
+    .)
+    "("
+    (.
+       var invNode = new MethodInvocationOperatorNode(t);
+       invNode.ScopeOperand = scNode;
+    .)
+    CurrentArgumentList<invNode.Arguments>
     ")"
+    (.
+       Terminate(invNode);
+       scNode.Initializer = invNode;
+    .)
     // --- Optional initializer list
-    [                             
+    [         
       ObjectOrCollectionInitializer<out initNode>
+      (. scNode.ObjectInitializer = initNode; .)
     ]
-
+    (. Terminate(scNode); .)
+    
   | // --- Implicit default constructor call
+    (. 
+       var scNode = new NewOperatorWithConstructorNode(newToken); 
+       scNode.TypeName = typeNode;
+       exprNode = scNode;
+    .)
     ObjectOrCollectionInitializer<out initNode>
+    (. 
+       scNode.ObjectInitializer = initNode; 
+       Terminate(scNode);
+    .)
+    
   | // --- Array initialization
     IF (IsDims())                 
-    (. var newOpNode = new NewOperatorWithExplicitArrayNode(t); .)
+    (. 
+       var newOpNode = new NewOperatorWithArrayNode(t); 
+       newOpNode.TypeName = typeNode;
+       exprNode = newOpNode;
+    .)
     ImplicitArrayCreation<newOpNode>
+    (. Terminate(newOpNode); .)
+    
   | // --- New array creation
+    (. 
+       var newOpNode = new NewOperatorWithArrayNode(newToken); 
+       newOpNode.TypeName = typeNode;
+       exprNode = newOpNode;
+       ExpressionNode initExprNode; 
+    .)
     "["
-    Expression<out exprNode>
+    (. newOpNode.SizedDimensions.StartToken = t; .)
+    Expression<out initExprNode>
+    (. newOpNode.SizedDimensions.Add(initExprNode); .)
     { 
-      "," 
-      Expression<out exprNode>
+      ","
+      (. var separator = t; .)
+      Expression<out initExprNode>
+      (. newOpNode.SizedDimensions.Add(separator, initExprNode); .)
     } 
     "]" 
+    (. Terminate(newOpNode.SizedDimensions); .)
     { IF (IsDims()) 
       "["
+       (. newOpNode.OpenSquareBracket = t; .)
         { 
           ","
+          (. newOpNode.Commas.Add(t); .)
         } 
       "]" 
+      (. newOpNode.CloseSquareBracket = t; .)
     }
     [            
       (. ArrayInitializerNode arrInitNode; .)                 
       ArrayInitializer<out arrInitNode> 
+      (. newOpNode.Initializer = arrInitNode; .)
     ] 
+    (.
+       Terminate(newOpNode);
+       exprNode = newOpNode;
+    .)
   )
 .
 
@@ -4003,7 +4046,7 @@ NewOperatorWithType
 // Declaration of an implicit array creation
 //   typeRef: Type to create with the new operator
 // ------------------------------------------------------------------------------------------------
-ImplicitArrayCreation<NewOperatorWithArrayNodeBase impArrNode> 
+ImplicitArrayCreation<NewOperatorWithArrayNode impArrNode> 
 =
   "["
   (. impArrNode.OpenSquareBracket = t; .)
@@ -4035,7 +4078,7 @@ ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
     (. Terminate(oiNode); .)
   |
     IF (IsMemberInitializer()) 
-    MemberInitializerList
+    MemberInitializerList<oiNode>
     [ 
       "," 
       (. oiNode.OrphanSeparator = t; .)
@@ -4043,7 +4086,7 @@ ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
     "}"
     (. Terminate(oiNode); .)
   |
-    ElementInitializerList
+    ElementInitializerList<oiNode>
     [ 
       "," 
       (. oiNode.OrphanSeparator = t; .)
@@ -4057,47 +4100,65 @@ ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
 // Declares an element initializer list of a collection used with "new" operator
 // +init: initializer resulted from parsing
 // ------------------------------------------------------------------------------------
-ElementInitializerList
+ElementInitializerList<ObjectOrCollectionInitializerNode ocNode>
 =
-  ElementInitializer
+  (. ElementInitializerNode eiNode; .)
+  ElementInitializer<out eiNode>
+  (. ocNode.ElementInitializers.Add(eiNode); .)
   {
-    IF (NotFinalComma()) ","
-    ElementInitializer
+    IF (NotFinalComma()) 
+    ","
+    (. var separator = t; .)
+    ElementInitializer<out eiNode>
+    (. ocNode.ElementInitializers.Add(separator, eiNode); .)
   } 
 .
 
 // ------------------------------------------------------------------------------------------------
 // Declares an element initializer of a collection used with "new" operator
 // ------------------------------------------------------------------------------------------------
-ElementInitializer
+ElementInitializer<out ElementInitializerNode eiNode>
 =
-  (. ExpressionNode exprNode; .)
+  (. 
+     eiNode = new ElementInitializerNode(la);
+     ExpressionNode exprNode; 
+  .)
   (
     IF (IsValueInitializer())
     Expression<out exprNode>
+    (. eiNode.Expression = exprNode; .)
   | 
     "{"
+    (. eiNode.ExpressionList.StartToken = t; .)
       Expression<out exprNode>
+      (. eiNode.ExpressionList.Add(exprNode); .)
       {
         ","
+        (. var separator = t; .)
         Expression<out exprNode>
+        (. eiNode.ExpressionList.Add(separator, exprNode); .)
       }
     "}"
+    (. Terminate(eiNode.ExpressionList); .)
   )
+  (. Terminate(eiNode);.)
 .
 
 // ------------------------------------------------------------------------------------
 // A member initialization list declaration
 // +initList: member initializer list
 // ------------------------------------------------------------------------------------
-MemberInitializerList
+MemberInitializerList<ObjectOrCollectionInitializerNode ocNode>
 =                  
   (. MemberInitializerNode miNode; .)   
   MemberInitializer<out miNode>
+  (. ocNode.MemberInitializers.Add(miNode); .)
   {
     IF (NotFinalComma()) 
     ","
+    (. var separator = t; .)
     MemberInitializer<out miNode>
+    (. ocNode.MemberInitializers.Add(separator, miNode); .)
   } 
 .
 

@@ -1,5 +1,5 @@
 // ================================================================================================
-// NewOperatorWithArrayNodeBase.cs
+// NewOperatorWithArrayNode.cs
 //
 // Created: 2009.05.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -13,18 +13,36 @@ namespace CSharpTreeBuilder.Ast
   /// This class is a base for "new" operator with array initializers
   /// </summary>
   // ================================================================================================
-  public abstract class NewOperatorWithArrayNodeBase : NewOperatorNode, IArrayDimensions
+  public sealed class NewOperatorWithArrayNode : NewOperatorNode, IArrayDimensions
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="NewOperatorWithImplicitArrayNode"/> class.
+    /// Initializes a new instance of the <see cref="NewOperatorWithArrayNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NewOperatorWithArrayNodeBase(Token start)
+    public NewOperatorWithArrayNode(Token start)
       : base(start)
     {
       Commas = new ImmutableCollection<Token>();
+      SizedDimensions = new SizedArrayDimensionNode {ParentNode = this};
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the sized dimensions.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SizedArrayDimensionNode SizedDimensions { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has sized dimensions.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasSizedDimensions
+    {
+      get { return SizedDimensions.Count > 0; }
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -79,5 +79,27 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
       Assert.IsTrue(InvokeParser(project));
     }
+
+    [TestMethod]
+    public void NestedEnumDeclarationIsOk()
+    {
+      var parser = new CSharpProject(WorkingFolder);
+      parser.AddFile(@"EnumDeclaration\EnumDeclaration2.cs");
+      Assert.IsTrue(InvokeParser(parser));
+      var source = parser.SyntaxTree.SourceFileNodes[0];
+      Assert.AreEqual(source.TypeDeclarations.Count, 2);
+      var typeDecl = source.TypeDeclarations[0] as StructDeclarationNode;
+      Assert.IsNotNull(typeDecl);
+      Assert.AreEqual(typeDecl.Name, "A");
+      
+      var enumDecl = typeDecl.NestedTypes[0] as EnumDeclarationNode;
+      Assert.IsNotNull(enumDecl);
+      Assert.AreEqual(enumDecl.Name, "C");
+      Assert.AreEqual(enumDecl.Modifiers.Count, 2);
+      Assert.AreEqual(enumDecl.Modifiers[0].Value, ModifierType.Public);
+      Assert.AreEqual(enumDecl.Modifiers[1].Value, ModifierType.New);
+    }
+
+
   }
 }
