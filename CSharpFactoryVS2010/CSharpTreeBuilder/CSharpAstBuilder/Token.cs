@@ -127,5 +127,25 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       return Value ?? "<<null>>";
     }
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a blank token object. Used by the parser.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    public Token()
+    {
+    }
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a token object with the specified value. All other fields are blank.
+    /// </summary>
+    /// <param name="tokenValue">The text value if the token.</param>
+    //-----------------------------------------------------------------------------------
+    public Token(string tokenValue)
+    {
+      val = tokenValue;
+    }
   }
 }

@@ -21,8 +21,8 @@ namespace CSharpTreeBuilder.Ast
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>
-  ///             { <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
   ///             { <em>ExternAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
+  ///             { <em>UsingNamespaceNode</em> | <em>UsingAliasNode</em> }: see <see cref="NamespaceScopeNode"/><br/>
   ///             { <em>AttributeDecorationNode</em> }: <see cref="GlobalAttributes"/><br/>
   ///             { <em>NamespaceDeclarationNode</em> | <em>TypeDeclarationNode</em> }: see
   ///             <see cref="NamespaceScopeNode"/><br/>
@@ -101,5 +101,31 @@ namespace CSharpTreeBuilder.Ast
         InScopeDeclarations
         );
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      // Visit extern alias nodes
+      foreach (var node in ExternAliasNodes) { node.AcceptVisitor(visitor); }
+
+      // Visit using nodes
+      foreach (var node in UsingNodes) { node.AcceptVisitor(visitor); }
+
+      // Visit extern alias nodes
+      foreach (var node in GlobalAttributes) { node.AcceptVisitor(visitor); }
+
+      // Visit in-scope declaration nodes (namespaces and types)
+      foreach (var node in InScopeDeclarations) { node.AcceptVisitor(visitor); }
+    }
+
+    #endregion
+
   }
 }

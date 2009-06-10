@@ -1,0 +1,37 @@
+﻿<#@ template language="C#" hostspecific="True" debug="True" #>
+<#@ output extension="cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ include file="CodeGenHelper\CodeGenHelper.txt" #>
+//
+// WARNING! This file is generated, do not modify it manually!
+//
+// Generated on: <#WriteLine(DateTime.Now.ToString());#>
+//
+// The template file is BlankSyntaxNodeVisitor.tt 
+//
+
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
+namespace CSharpTreeBuilder.Ast
+{
+  // ================================================================================================
+  /// <summary>
+  /// An implementation of ISyntaxNodeVisitor that implements every method as an empty virtual function.
+  /// Subclass this class if you want to create a SyntaxNodeVisitor that only handles some syntax node types.
+  /// This way you can avoid creating lots af method implementations that do nothing.
+  /// </summary>
+  // ================================================================================================
+  public class BlankSyntaxNodeVisitor : ISyntaxNodeVisitor
+  {
+<#
+	foreach (string element in CodeGenHelper.GetTypeNameList().Keys)
+	{
+		WriteLine("    public virtual void Visit({0} node) {{ }}", element);
+	}
+#>
+  }
+}
+#pragma warning restore 1591

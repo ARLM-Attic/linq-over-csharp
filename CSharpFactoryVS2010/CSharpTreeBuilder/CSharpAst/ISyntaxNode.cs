@@ -116,5 +116,13 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="t">The t.</param>
     // ----------------------------------------------------------------------------------------------
     void Terminate(Token t);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    void AcceptVisitor(ISyntaxNodeVisitor visitor);
   }
 }

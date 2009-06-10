@@ -236,5 +236,19 @@ namespace CSharpTreeBuilder.Ast
     {
       TerminatingToken = token;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public virtual void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      foreach (var node in this)
+      {
+        node.AcceptVisitor(visitor);
+      }
+    }
   }
 }

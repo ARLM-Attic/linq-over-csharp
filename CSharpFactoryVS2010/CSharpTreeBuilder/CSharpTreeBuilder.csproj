@@ -65,6 +65,12 @@
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
+    <Compile Include="CSharpAst\BlankSyntaxNodeVisitor.cs">
+      <DependentUpon>BlankSyntaxNodeVisitor.tt</DependentUpon>
+      <SubType>Code</SubType>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Include="CSharpAst\Expressions\Lambda\LambdaExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\ElementInitializerNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\ElementInitializerNodeCollection.cs" />
@@ -88,6 +94,11 @@
     <Compile Include="CSharpAst\Expressions\Query\QueryExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\SelectClauseNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\WhereClauseNode.cs" />
+    <Compile Include="CSharpAst\ISyntaxNodeVisitor.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ISyntaxNodeVisitor.tt</DependentUpon>
+    </Compile>
     <Compile Include="CSharpAst\ISyntaxNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeNodeCollection.cs" />
@@ -398,6 +409,25 @@
     <None Include="CoCo\CSharp3.ATG" />
     <None Include="CoCo\Parser.frame" />
     <None Include="CoCo\Scanner.frame" />
+    <None Include="CSharpAst\BlankSyntaxNodeVisitor.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BlankSyntaxNodeVisitor.cs</LastGenOutput>
+    </None>
+    <None Include="CSharpAst\CodeGenHelper\generate_SyntaxNode_filelist.cmd" />
+    <None Include="CSharpAst\ISyntaxNodeVisitor.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ISyntaxNodeVisitor.cs</LastGenOutput>
+    </None>
+    <Content Include="CSharpAst\CodeGenHelper\CodeGenHelper.txt">
+      <LastGenOutput>CodeGenHelper.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_filelist.txt" />
+    <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_ignore.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CSharpAst\Expressions\Initializers\" />

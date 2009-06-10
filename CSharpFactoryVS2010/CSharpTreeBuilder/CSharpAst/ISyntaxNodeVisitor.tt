@@ -1,0 +1,37 @@
+﻿<#@ template language="C#" hostspecific="True" debug="True" #>
+<#@ output extension="cs" encoding="UTF-8" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ include file="CodeGenHelper\CodeGenHelper.txt" #>
+//
+// WARNING! This file is generated, do not modify it manually!
+//
+// Generated on: <#=DateTime.Now.ToString()#>
+//
+// The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
+// You can modify SyntaxNode_filelist.txt manually, 
+// or you can regenerate it using generate_SyntaxNode_filelist.cmd.
+//
+
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
+namespace CSharpTreeBuilder.Ast
+{
+  // ================================================================================================
+  /// <summary>
+  /// Interface for traversing the CSharpSyntaxTree with Visitor pattern.
+  /// </summary>
+  // ================================================================================================
+  public interface ISyntaxNodeVisitor
+  {
+<#
+	foreach (string element in CodeGenHelper.GetTypeNameList().Keys)
+	{
+		WriteLine("    void Visit({0} node);", element);
+	}
+#>
+  }
+}
+#pragma warning restore 1591
