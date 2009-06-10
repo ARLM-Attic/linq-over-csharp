@@ -15,10 +15,10 @@ namespace CSharpTreeBuilderTest
     [TestMethod]
     public void EnumDeclarationIsOk()
     {
-      var parser = new CSharpProject(WorkingFolder);
-      parser.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(parser));
-      var source = parser.SyntaxTree.SourceFileNodes[0];
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
+      Assert.IsTrue(InvokeParser(project));
+      var source = project.SyntaxTree.SourceFileNodes[0];
       Assert.AreEqual(source.TypeDeclarations.Count, 1);
       var typeDecl = source.TypeDeclarations[0] as EnumDeclarationNode;
       Assert.IsNotNull(typeDecl);
@@ -42,10 +42,10 @@ namespace CSharpTreeBuilderTest
     [TestMethod]
     public void EnumNodeBounderiesAreOk()
     {
-      var parser = new CSharpProject(WorkingFolder);
-      parser.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(parser));
-      var source = parser.SyntaxTree.SourceFileNodes[0];
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
+      Assert.IsTrue(InvokeParser(project));
+      var source = project.SyntaxTree.SourceFileNodes[0];
       var enumDecl = source.TypeDeclarations[0] as EnumDeclarationNode;
       Assert.IsNotNull(enumDecl);
       Assert.AreEqual(enumDecl.StartToken.Value, "enum");
@@ -83,10 +83,10 @@ namespace CSharpTreeBuilderTest
     [TestMethod]
     public void NestedEnumDeclarationIsOk()
     {
-      var parser = new CSharpProject(WorkingFolder);
-      parser.AddFile(@"EnumDeclaration\EnumDeclaration2.cs");
-      Assert.IsTrue(InvokeParser(parser));
-      var source = parser.SyntaxTree.SourceFileNodes[0];
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EnumDeclaration\EnumDeclaration2.cs");
+      Assert.IsTrue(InvokeParser(project));
+      var source = project.SyntaxTree.SourceFileNodes[0];
       Assert.AreEqual(source.TypeDeclarations.Count, 2);
       var typeDecl = source.TypeDeclarations[0] as StructDeclarationNode;
       Assert.IsNotNull(typeDecl);
@@ -95,11 +95,22 @@ namespace CSharpTreeBuilderTest
       var enumDecl = typeDecl.NestedTypes[0] as EnumDeclarationNode;
       Assert.IsNotNull(enumDecl);
       Assert.AreEqual(enumDecl.Name, "C");
+      Assert.AreEqual(enumDecl.DeclaringType, typeDecl);
       Assert.AreEqual(enumDecl.Modifiers.Count, 2);
       Assert.AreEqual(enumDecl.Modifiers[0].Value, ModifierType.Public);
       Assert.AreEqual(enumDecl.Modifiers[1].Value, ModifierType.New);
+      Assert.AreEqual(enumDecl.Values.Count, 2);
+      Assert.AreEqual(enumDecl.Values[0].Identifier, "Value");
+      Assert.AreEqual(enumDecl.Values[1].Identifier, "Value2");
+
+      enumDecl = source.TypeDeclarations[1] as EnumDeclarationNode;
+      Assert.AreEqual(enumDecl.Name, "C");
+      Assert.IsNull(enumDecl.DeclaringType);
+      Assert.AreEqual(enumDecl.Modifiers.Count, 1);
+      Assert.AreEqual(enumDecl.Modifiers[0].Value, ModifierType.Public);
+      Assert.AreEqual(enumDecl.Values.Count, 2);
+      Assert.AreEqual(enumDecl.Values[0].Identifier, "EnumVal1");
+      Assert.AreEqual(enumDecl.Values[1].Identifier, "Enumval2");
     }
-
-
   }
 }

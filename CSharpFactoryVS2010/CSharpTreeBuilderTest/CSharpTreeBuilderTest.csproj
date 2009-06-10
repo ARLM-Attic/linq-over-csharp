@@ -36,12 +36,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="SoftwareApproach.TestingExtensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=8643fe5b014704ca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\OuterAssemblies\SoftwareApproach.TestingExtensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ast\ClassDeclarations.cs" />
     <Compile Include="Ast\EnumDeclarations.cs" />
     <Compile Include="Ast\ExternAliasDirectives.cs" />
     <Compile Include="Ast\GlobalAttributes.cs" />
@@ -56,6 +62,14 @@
     <None Include="TestFiles\SampleQueries\ObjectDumper.cs" />
     <None Include="TestFiles\SampleQueries\LinqSamples.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration3.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration1.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration2.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration3.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration4.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration5.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration6.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration7.cs" />
+    <None Include="TestFiles\ClassDeclaration\ClassDeclaration8.cs" />
     <Compile Include="TestFiles\EnumDeclaration\EnumDeclaration2.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclaration1.cs" />
     <None Include="TestFiles\GlobalAttributes\GlobalAttributesOk.cs" />

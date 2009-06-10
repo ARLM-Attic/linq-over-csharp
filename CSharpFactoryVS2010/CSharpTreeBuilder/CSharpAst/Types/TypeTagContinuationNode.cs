@@ -35,6 +35,7 @@ namespace CSharpTreeBuilder.Ast
       if (identifier == null) throw new ArgumentNullException("identifier");
       SeparatorToken = start;
       IdentifierToken = identifier;
+      Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------
