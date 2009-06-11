@@ -56,6 +56,15 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Creates an empty <see cref="TypeOrNamespaceNode"/> object with no token yet.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode()
+      : this(null)
+    {}
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this instance has qualifier.
     /// </summary>
     /// <value>

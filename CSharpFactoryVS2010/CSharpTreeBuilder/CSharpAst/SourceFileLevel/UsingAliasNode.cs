@@ -52,11 +52,22 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Creates a new blank <see cref="UsingAliasNode"/> object 
+    /// with no parent, no alias and empty namespace name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public UsingAliasNode()
+      : this(null, Token.Using, null, Token.Equal, null, Token.Semicolon)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the alias token.
     /// </summary>
     /// <value>The alias token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token AliasToken { get; private set; }
+    public Token AliasToken { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -55,6 +55,7 @@
     <Compile Include="Ast\ClassDeclarations.cs" />
     <Compile Include="Ast\EnumDeclarations.cs" />
     <Compile Include="Ast\ExternAliasDirectives.cs" />
+    <Compile Include="Ast\FluentInterfaceTest.cs" />
     <Compile Include="Ast\GlobalAttributes.cs" />
     <Compile Include="Ast\QueryExpressions.cs" />
     <Compile Include="Ast\RegressionTests.cs" />

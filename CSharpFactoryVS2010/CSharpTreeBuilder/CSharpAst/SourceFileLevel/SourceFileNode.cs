@@ -49,6 +49,16 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="SourceFileNode"/> class without a filename.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SourceFileNode()
+      : this(null)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the name of the source file.
     /// </summary>
     /// <value>The name.</value>
@@ -102,6 +112,18 @@ namespace CSharpTreeBuilder.Ast
         );
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a UsingNamespaceNode to the UsingNodes collection
+    /// </summary>
+    /// <param name="node">a UsingNamespaceNode</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddChild(UsingNamespaceNode node)
+    {
+      node.ParentNode = this;
+      UsingNodes.Add(node);
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------
@@ -112,6 +134,8 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
+      visitor.Visit(this);
+
       // Visit extern alias nodes
       foreach (var node in ExternAliasNodes) { node.AcceptVisitor(visitor); }
 

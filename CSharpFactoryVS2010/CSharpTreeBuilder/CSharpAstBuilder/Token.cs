@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   /// we live together to violating the convention.
   /// </remarks>
   // ==================================================================================
-  public class Token
+  public partial class Token
   {
     // --- We use these fields because CoCo generates these names into the Scanner.cs and Parser.cs.
     // --- Removing these fields is subject of refactoring.

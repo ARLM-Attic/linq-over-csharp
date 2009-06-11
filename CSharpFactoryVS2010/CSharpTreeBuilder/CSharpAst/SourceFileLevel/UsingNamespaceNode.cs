@@ -44,9 +44,29 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
       ParentNode = parent;
-      TypeName = namespaceNode;
-      TypeName.ParentNode = parent;
+
+      if (namespaceNode==null)
+      {
+        TypeName = new TypeOrNamespaceNode();
+      }
+      else
+      {
+        TypeName = namespaceNode;
+        TypeName.ParentNode = parent;
+      }
+
       Terminate(terminating);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new blank <see cref="UsingNamespaceNode"/> object 
+    /// with no parent and empty namespace name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public UsingNamespaceNode()
+      : this(null, Token.Using, null, Token.Semicolon)
+    {
     }
 
     // ----------------------------------------------------------------------------------------------

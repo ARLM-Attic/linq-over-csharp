@@ -249,7 +249,6 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public virtual void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      // The default implementation is to do nothing.
       visitor.Visit(this);
     }
   }

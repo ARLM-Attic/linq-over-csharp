@@ -64,6 +64,7 @@
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
+    <Compile Include="CSharpAstBuilder\Token.Predefined.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
     <Compile Include="CSharpAst\BlankSyntaxNodeVisitor.cs">
       <DependentUpon>BlankSyntaxNodeVisitor.tt</DependentUpon>
@@ -94,6 +95,10 @@
     <Compile Include="CSharpAst\Expressions\Query\QueryExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\SelectClauseNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\WhereClauseNode.cs" />
+    <Compile Include="CSharpAst\FluentInterface\CompilationUnitNodeExtension.cs" />
+    <Compile Include="CSharpAst\FluentInterface\TypeOrNamespaceNodeExtension.cs" />
+    <Compile Include="CSharpAst\FluentInterface\UsingAliasNodeExtension.cs" />
+    <Compile Include="CSharpAst\FluentInterface\UsingNamespaceNodeExtension.cs" />
     <Compile Include="CSharpAst\ISyntaxNodeVisitor.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
