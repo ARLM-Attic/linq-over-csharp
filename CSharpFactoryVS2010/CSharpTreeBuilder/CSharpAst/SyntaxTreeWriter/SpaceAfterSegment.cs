@@ -31,10 +31,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Represents a "space before colon in attributes" operator.
+    /// Represents a "space after colon in attributes" operator.
     /// </summary>
     /// <returns>
-    /// The newly created "space before" segment.
+    /// The newly created "space after" segment.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
     public static SpaceAfterSegment AfterColonInAttributes()
@@ -44,15 +44,41 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Represents a "space before colon in attributes" operator.
+    /// Represents a "space after comma" operator.
     /// </summary>
     /// <returns>
-    /// The newly created "space before" segment.
+    /// The newly created "space after" segment.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
     public static SpaceAfterSegment AfterComma()
     {
       return new SpaceAfterSegment(SpaceType.AfterComma);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Represents a "space after base type colon" operator.
+    /// </summary>
+    /// <returns>
+    /// The newly created "space after" segment.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SpaceAfterSegment AfterBaseTypeColon()
+    {
+      return new SpaceAfterSegment(SpaceType.AfterBaseTypeColon);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Represents a "space after type constraint colon" operator.
+    /// </summary>
+    /// <returns>
+    /// The newly created "space after" segment.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SpaceAfterSegment AfterTypeConstraintColon()
+    {
+      return new SpaceAfterSegment(SpaceType.AfterTypeConstraintColon);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -71,6 +97,12 @@ namespace CSharpTreeBuilder.Ast
           break;
         case SpaceType.AfterComma:
           useSpace = serializer.OutputOptions.SpaceAfterComma;
+          break;
+        case SpaceType.AfterBaseTypeColon:
+          useSpace = serializer.OutputOptions.SpaceAfterBaseTypeColon;
+          break;
+        case SpaceType.AfterTypeConstraintColon:
+          useSpace = serializer.OutputOptions.SpaceAfterTypeConstraintColon;
           break;
         default:
           throw new ArgumentOutOfRangeException();

@@ -114,7 +114,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the in-scope declarations.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    internal ScopeNodeCollection InScopeDeclarations { get; private set; }
+    public ScopeNodeCollection InScopeDeclarations { get; private set; }
 
     #endregion
 

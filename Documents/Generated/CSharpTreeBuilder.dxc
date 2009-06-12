@@ -1,2 +1,13 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<DocumentXComments Version="5.00" DocType="dx.Net" Moniker="C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\bin\Debug\CSharpTreeBuilder.dll" ShowInherited="False" Template="" LoadPrivate="False" LoadOnDemand="True" RelatedProject="CSharpTreeBuilder.dxp"/>
+<DocumentXComments Version="5.0" Moniker="C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\bin\Debug\CSharpTreeBuilder.dll" DocType="dx.Net" Template="" ShowInherited="False" SpellLastCheckDateTime="30.12.1899 00:00:00" TreePath="CSharpTreeBuilder" RelatedProject="CSharpTreeBuilder.dxp" RelatedHSProject="" LoadIncludeFilter="" LoadExcludeFilter="" LoadPrivate="False" LoadOnDemand="True" LoadSourceComments="False">
+    <IgnoreWordList/>
+<UserData>
+    <InPlaceEditor>
+        <dtscrollpos>0</dtscrollpos>
+        <inheritedMembers>on</inheritedMembers>
+        <protectedMembers>on</protectedMembers>
+    </InPlaceEditor>
+</UserData>
+<c eid="CSharpTreeBuilder~CSharpFactory.Utility_namespace" tid="##SUMMARY" q="" cd="39971,3353125">This namespace is a container for helper types used all around in this assembly.</c>
+<c eid="CSharpTreeBuilder~CSharpTreeBuilder.Ast_namespace" tid="##SUMMARY" q="" cd="39971,3355555556">This namespace contains all the types that build up the C# syntax tree.</c>
+    </DocumentXComments>

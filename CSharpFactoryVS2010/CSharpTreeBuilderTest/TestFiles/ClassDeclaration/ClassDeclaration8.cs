@@ -13,5 +13,5 @@ namespace MyNamespace
 }
 
 public class C<Z>: System.Collections.Generic.List<Z>
-  where Z: Hashtable, IEnumerable<string>
+  where Z: Hashtable, Dictionary<string, IEnumerable<string>>
 { }

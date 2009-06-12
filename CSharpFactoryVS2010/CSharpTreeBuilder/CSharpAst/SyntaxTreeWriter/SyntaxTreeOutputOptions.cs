@@ -41,6 +41,10 @@ namespace CSharpTreeBuilder.Ast
     private bool _SpaceAfterColonInAttributes;
     private bool _SpaceBeforeComma;
     private bool _SpaceAfterComma;
+    private bool _SpaceBeforeBaseTypeColon;
+    private bool _SpaceAfterBaseTypeColon;
+    private bool _SpaceBeforeTypeConstraintColon;
+    private bool _SpaceAfterTypeConstraintColon;
 
     #endregion
 
@@ -72,6 +76,10 @@ namespace CSharpTreeBuilder.Ast
             SpaceAfterColonInAttributes = true,
             SpaceBeforeComma = false,
             SpaceAfterComma = true,
+            SpaceBeforeBaseTypeColon = true,
+            SpaceBeforeTypeConstraintColon = false,
+            SpaceAfterBaseTypeColon = true,
+            SpaceAfterTypeConstraintColon = true,
           };
       Default.MakeReadOnly();
     }
@@ -436,6 +444,66 @@ namespace CSharpTreeBuilder.Ast
       {
         CheckReadonly();
         _SpaceAfterComma = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put before a base type colon
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceBeforeBaseTypeColon
+    {
+      get { return _SpaceBeforeBaseTypeColon; }
+      set
+      {
+        CheckReadonly();
+        _SpaceBeforeBaseTypeColon = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put after a base type colon
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceAfterBaseTypeColon
+    {
+      get { return _SpaceAfterBaseTypeColon; }
+      set
+      {
+        CheckReadonly();
+        _SpaceAfterBaseTypeColon = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put before a type constraint colon
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceBeforeTypeConstraintColon
+    {
+      get { return _SpaceBeforeTypeConstraintColon; }
+      set
+      {
+        CheckReadonly();
+        _SpaceBeforeTypeConstraintColon = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether a space should be put after a type constraint colon
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool SpaceAfterTypeConstraintColon
+    {
+      get { return _SpaceAfterTypeConstraintColon; }
+      set
+      {
+        CheckReadonly();
+        _SpaceAfterTypeConstraintColon = value;
       }
     }
 

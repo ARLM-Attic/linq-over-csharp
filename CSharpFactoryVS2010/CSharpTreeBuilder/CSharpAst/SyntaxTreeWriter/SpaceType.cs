@@ -17,6 +17,9 @@ namespace CSharpTreeBuilder.Ast
     AfterColonInAttributes,
     BeforeComma,
     AfterComma,
+    BeforeBaseTypeColon,
+    AfterBaseTypeColon,
+    BeforeTypeConstraintColon,
+    AfterTypeConstraintColon
   }
-
 }

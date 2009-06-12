@@ -64,6 +64,7 @@
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
+    <Compile Include="CSharpAstBuilder\TokenExtensions.cs" />
     <Compile Include="CSharpAstBuilder\Token.Predefined.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
     <Compile Include="CSharpAst\BlankSyntaxNodeVisitor.cs">

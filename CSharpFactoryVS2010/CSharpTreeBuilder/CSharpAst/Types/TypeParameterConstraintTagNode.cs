@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -142,5 +143,21 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token CloseParenthesis { get; protected set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      if (IsClass || IsStruct) return new OutputSegment(SeparatorToken, StartToken);
+      return IsNew
+        ? new OutputSegment(SeparatorToken, StartToken, OpenParenthesis, CloseParenthesis)
+        : new OutputSegment(SeparatorToken, TypeName);
+    }
   }
 }

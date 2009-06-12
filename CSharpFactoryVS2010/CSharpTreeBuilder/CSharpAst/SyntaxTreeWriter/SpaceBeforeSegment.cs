@@ -61,6 +61,34 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Represents a "space before base types colon" operator.
+    /// </summary>
+    /// <param name="token">Token to put space before.</param>
+    /// <returns>
+    /// The newly created "space before" segment.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SpaceBeforeSegment BeforeBaseTypeColon(Token token)
+    {
+      return new SpaceBeforeSegment(token, SpaceType.BeforeBaseTypeColon);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Represents a "space before type constraint colon" operator.
+    /// </summary>
+    /// <param name="token">Token to put space before.</param>
+    /// <returns>
+    /// The newly created "space before" segment.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SpaceBeforeSegment BeforeTypeConstraintColon(Token token)
+    {
+      return new SpaceBeforeSegment(token, SpaceType.BeforeTypeConstraintColon);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Controls the state of the specified OutputItemSerializer.
     /// </summary>
     /// <param name="serializer">The serializer to control.</param>
@@ -75,6 +103,12 @@ namespace CSharpTreeBuilder.Ast
           break;
         case SpaceType.BeforeComma:
           useSpace = serializer.OutputOptions.SpaceBeforeComma;
+          break;
+        case SpaceType.BeforeBaseTypeColon:
+          useSpace = serializer.OutputOptions.SpaceBeforeBaseTypeColon;
+          break;
+        case SpaceType.BeforeTypeConstraintColon:
+          useSpace = serializer.OutputOptions.SpaceBeforeTypeConstraintColon;
           break;
         default:
           throw new ArgumentOutOfRangeException();

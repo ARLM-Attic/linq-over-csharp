@@ -2207,12 +2207,15 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		if (StartOf(11)) {
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeNode);
+			argList.Add(typeNode); 
 		}
 		while (la.kind == 87) {
 			Get();
+			var separator = t; 
 			if (StartOf(11)) {
 				TypeOrNamespaceNode typeNode; 
 				Type(out typeNode);
+				argList.Add(separator, typeNode); 
 			}
 		}
 		Expect(93);

@@ -225,7 +225,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public virtual OutputSegment GetOutputSegment()
     {
-      return new OutputSegment(StartToken);
+      return new OutputSegment(SeparatorToken, StartToken);
     }
 
     // ----------------------------------------------------------------------------------------------

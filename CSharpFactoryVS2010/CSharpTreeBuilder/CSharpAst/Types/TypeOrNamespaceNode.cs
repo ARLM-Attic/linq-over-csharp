@@ -148,6 +148,8 @@ namespace CSharpTreeBuilder.Ast
     public override OutputSegment GetOutputSegment()
     {
       return new OutputSegment(
+        SeparatorToken,
+        SeparatorToken.IsComma() ?SpaceAfterSegment.AfterComma() : null,
         TypeTags
         );
     }

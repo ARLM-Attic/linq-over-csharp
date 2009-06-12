@@ -4412,13 +4412,16 @@ TypeArgumentList<out TypeOrNamespaceNodeCollection argList>
   .)
   [ 
     (. TypeOrNamespaceNode typeNode; .)
-    Type<out typeNode>           
+    Type<out typeNode>
+    (. argList.Add(typeNode); .)          
   ]                              
   { 
     ","
+    (. var separator = t; .)
     [ 
       (. TypeOrNamespaceNode typeNode; .)
       Type<out typeNode>           
+      (. argList.Add(separator, typeNode); .)          
     ]
   } 
   ">"

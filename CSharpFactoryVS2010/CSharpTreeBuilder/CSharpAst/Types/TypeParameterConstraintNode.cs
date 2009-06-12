@@ -3,6 +3,7 @@
 //
 // Created: 2009.04.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -50,9 +51,6 @@ namespace CSharpTreeBuilder.Ast
     public TypeParameterConstraintTagNodeCollection ConstraintTags { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IIdentifierSupport Members
-
     /// <summary>
     /// Gets the type parameter name token.
     /// </summary>
@@ -82,8 +80,25 @@ namespace CSharpTreeBuilder.Ast
       get { return IdentifierToken != null; }
     }
 
-    #endregion
-
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segment representing this syntax node.
+    /// </summary>
+    /// <returns>
+    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override OutputSegment GetOutputSegment()
+    {
+      return new OutputSegment(
+        StartToken,
+        MandatoryWhiteSpaceSegment.Default,
+        IdentifierToken,
+        SpaceBeforeSegment.BeforeTypeConstraintColon(ColonToken),
+        SpaceAfterSegment.AfterTypeConstraintColon(),
+        ConstraintTags,
+        ForceNewLineSegment.Default
+        );
+    }
   }
 }

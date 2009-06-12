@@ -3,6 +3,7 @@
 //
 // Created: 2009.04.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -94,5 +95,19 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public MemberDeclarationNodeCollection MemberDeclarations { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the output segments representing the base type list.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    protected override OutputSegment GetDeclarationSegments()
+    {
+      return new OutputSegment(
+        SpaceBeforeSegment.BeforeBaseTypeColon(ColonToken),
+        SpaceAfterSegment.AfterBaseTypeColon(),
+        BaseTypes
+        );
+    }
   }
 }

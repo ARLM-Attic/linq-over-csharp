@@ -151,6 +151,7 @@ namespace CSharpTreeBuilder.Ast
         IdentifierToken,
         TypeParameters,
         GetDeclarationSegments(),
+        ForceNewLineSegment.Default,
         TypeParameterConstraints
         );
     }
