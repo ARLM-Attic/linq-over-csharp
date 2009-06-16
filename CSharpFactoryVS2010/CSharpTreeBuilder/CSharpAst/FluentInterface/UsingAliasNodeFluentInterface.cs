@@ -5,13 +5,14 @@
   /// A fluent interface for creating UsingAliasNode objects, implemented with extension methods.
   /// </summary>
   // ================================================================================================
-  public static class UsingAliasNodeExtension
+  public static class UsingAliasNodeFluentInterface
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Adds a TypeTag to a UsingAliasNode's namespace-or-typename name.
     /// </summary>
     /// <param name="node">A UsingAliasNode node</param>
+    /// <param name="name">The name of the TypeTag</param>
     /// <returns>The UsingAliasNode is returned to enable method chaining.</returns>
     // ----------------------------------------------------------------------------------------------
     public static UsingAliasNode TypeTag(this UsingAliasNode node, string name)
@@ -20,6 +21,14 @@
       return node;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the qualifier tag of the UsingAliasNode.
+    /// </summary>
+    /// <param name="node">A UsingAliasNode node</param>
+    /// <param name="qualifier">The name of the qualifier</param>
+    /// <returns>The UsingAliasNode parameter is returned to enable method chaining.</returns>
+    // ----------------------------------------------------------------------------------------------
     public static UsingAliasNode Qualifier(this UsingAliasNode node, string qualifier)
     {
       node.TypeName.Qualifier(qualifier);

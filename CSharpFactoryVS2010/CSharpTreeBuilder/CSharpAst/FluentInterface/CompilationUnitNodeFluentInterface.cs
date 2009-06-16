@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.Ast
   /// A fluent interface for creating CompilationUnitNode objects, implemented with extension methods.
   /// </summary>
   // ================================================================================================
-  public static class CompilationUnitNodeExtension
+  public static class CompilationUnitNodeFluentInterface
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

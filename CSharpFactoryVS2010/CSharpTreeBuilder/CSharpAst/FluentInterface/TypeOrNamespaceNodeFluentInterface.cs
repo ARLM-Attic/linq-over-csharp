@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.Ast
   /// A fluent interface for creating TypeOrNamespaceNode objects, implemented with extension methods.
   /// </summary>
   // ================================================================================================
-  public static class TypeOrNamespaceNodeExtension
+  public static class TypeOrNamespaceNodeFluentInterface
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -30,8 +30,6 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="node">A TypeOrNamespaceNode node</param>
     /// <param name="qualifier">The name of the qualifier</param>
     /// <returns>The TypeOrNamespaceNode parameter is returned to enable method chaining.</returns>
-    /// <remarks>If there's no qualifier, then adds one. 
-    /// If there's already a qualifier then first deletes it, then adds the new one.</remarks>
     // ----------------------------------------------------------------------------------------------
     public static TypeOrNamespaceNode Qualifier(this TypeOrNamespaceNode node, string qualifier)
     {

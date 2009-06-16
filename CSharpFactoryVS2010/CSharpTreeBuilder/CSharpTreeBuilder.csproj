@@ -101,10 +101,10 @@
     <Compile Include="CSharpAst\Expressions\Query\QueryExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\SelectClauseNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\WhereClauseNode.cs" />
-    <Compile Include="CSharpAst\FluentInterface\CompilationUnitNodeExtension.cs" />
-    <Compile Include="CSharpAst\FluentInterface\TypeOrNamespaceNodeExtension.cs" />
-    <Compile Include="CSharpAst\FluentInterface\UsingAliasNodeExtension.cs" />
-    <Compile Include="CSharpAst\FluentInterface\UsingNamespaceNodeExtension.cs" />
+    <Compile Include="CSharpAst\FluentInterface\CompilationUnitNodeFluentInterface.cs" />
+    <Compile Include="CSharpAst\FluentInterface\TypeOrNamespaceNodeFluentInterface.cs" />
+    <Compile Include="CSharpAst\FluentInterface\UsingAliasNodeFluentInterface.cs" />
+    <Compile Include="CSharpAst\FluentInterface\UsingNamespaceNodeFluentInterface.cs" />
     <Compile Include="CSharpAst\ISyntaxNodeVisitor.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
