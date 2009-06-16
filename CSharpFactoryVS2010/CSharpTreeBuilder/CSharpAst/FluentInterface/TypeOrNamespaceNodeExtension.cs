@@ -19,14 +19,23 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public static TypeOrNamespaceNode TypeTag(this TypeOrNamespaceNode node, string name)
     {
-      var typeTagNode = new TypeTagNode(new Token(name), null);
-      node.TypeTags.Add(Token.Dot, typeTagNode);
+      node.AddTypeTag(new TypeTagNode(new Token(name), null));
       return node;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the qualifier tag of the TypeOrNamespaceNode.
+    /// </summary>
+    /// <param name="node">A TypeOrNamespaceNode node</param>
+    /// <param name="qualifier">The name of the qualifier</param>
+    /// <returns>The TypeOrNamespaceNode parameter is returned to enable method chaining.</returns>
+    /// <remarks>If there's no qualifier, then adds one. 
+    /// If there's already a qualifier then first deletes it, then adds the new one.</remarks>
+    // ----------------------------------------------------------------------------------------------
     public static TypeOrNamespaceNode Qualifier(this TypeOrNamespaceNode node, string qualifier)
     {
-      node.TypeTags.Insert(0,new TypeTagNode(new Token(qualifier),null ));
+      node.QualifierToken = new Token(qualifier);
       return node;
     }
   }

@@ -5,6 +5,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder.PPExpressions {
 
 
 
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
 // ==================================================================================
 /// <summary>
 /// This class implements the C# syntax parser functionality.
@@ -361,4 +364,7 @@ private PPExpression _Expression;
     // --------------------------------------------------------------------------------
     public FatalError(string message) : base(message) { }
   }
+  
+  #pragma warning restore 1591
+
 }

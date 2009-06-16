@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using global::System.IO;
 using AliasName = System.Text.Encoding;
 using SecondAlias = Microsoft.Win32;
 

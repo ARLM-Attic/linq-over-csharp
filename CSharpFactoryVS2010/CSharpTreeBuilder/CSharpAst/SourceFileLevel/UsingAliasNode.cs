@@ -24,7 +24,7 @@ namespace CSharpTreeBuilder.Ast
   /// 			<em>alias</em>: <see cref="AliasToken"/><br/>
   ///             "<strong>=</strong>": <see cref="EqualToken"/><br/>
   /// 			<em>TypeOrNamespaceNode</em>: <see cref="UsingNamespaceNode.TypeName"/><br/>
-  ///             "<strong>;</strong>": <see cref="UsingNamespaceNode.TerminatingToken"/>
+  ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
   /// 		</para>
   /// 	</blockquote>
   /// </remarks>
@@ -52,12 +52,25 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new blank <see cref="UsingAliasNode"/> object 
-    /// with no parent, no alias and empty namespace name.
+    /// Creates a new <see cref="UsingAliasNode"/> object 
+    /// with just an alias token, with no parent and no namespace name.
     /// </summary>
+    /// <param name="aliasToken">Token of the alias identifier.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingAliasNode()
-      : this(null, Token.Using, null, Token.Equal, null, Token.Semicolon)
+    public UsingAliasNode(Token aliasToken)
+      : this(null, Token.Using, aliasToken, Token.Equal, null, Token.Semicolon)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new <see cref="UsingAliasNode"/> object 
+    /// with just an alias name, with no parent and no namespace name.
+    /// </summary>
+    /// <param name="alias">The alias name.</param>
+    // ----------------------------------------------------------------------------------------------
+    public UsingAliasNode(string alias)
+      : this(new Token(alias))
     {
     }
 

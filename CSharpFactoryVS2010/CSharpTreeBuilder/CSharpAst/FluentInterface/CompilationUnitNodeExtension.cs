@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.Ast
+﻿using CSharpTreeBuilder.CSharpAstBuilder;
+
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -14,11 +16,26 @@
     /// <param name="node">A CompilationUnitNode node</param>
     /// <returns>The created UsingNamespaceNode is returned to enable method chaining.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static UsingNamespaceNode Using(this SourceFileNode node)
+    public static UsingNamespaceNode UsingNamespace(this SourceFileNode node)
     {
       var usingNamespaceNode = new UsingNamespaceNode();
       node.AddChild(usingNamespaceNode);
       return usingNamespaceNode;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new UsingAliasNode and adds it to a CompilationUnitNode.
+    /// </summary>
+    /// <param name="node">A CompilationUnitNode node</param>
+    /// <param name="alias">Alias name.</param>
+    /// <returns>The created UsingAliasNode is returned to enable method chaining.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static UsingNamespaceNode UsingAlias(this SourceFileNode node, string alias)
+    {
+      var usingAliasNode = new UsingAliasNode(new Token(alias));
+      node.AddChild(usingAliasNode);
+      return usingAliasNode;
     }
   }
 }

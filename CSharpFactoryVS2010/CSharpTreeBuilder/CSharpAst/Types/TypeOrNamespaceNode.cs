@@ -29,6 +29,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class TypeOrNamespaceNode : SyntaxNode<ISyntaxNode>
   {
+    // Backing field for QualifierToken property
+    private Token _QualifierToken;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeOrNamespaceNode"/> class.
@@ -65,6 +68,36 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets the qualifier token.
+    /// </summary>
+    /// <value>The qualifier token.</value>
+    // ----------------------------------------------------------------------------------------------
+    public Token QualifierToken
+    {
+      get
+      {
+        return _QualifierToken;
+      }
+      set
+      {
+        _QualifierToken = value;
+        SetSeparatorTokens();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the qualifier string.
+    /// </summary>
+    /// <value>The qualifier string.</value>
+    // ----------------------------------------------------------------------------------------------
+    public string Qualifier
+    {
+      get { return QualifierToken == null ? null : QualifierToken.Value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this instance has qualifier.
     /// </summary>
     /// <value>
@@ -73,18 +106,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool HasQualifier
     {
-      get { return TypeTags.Count >= 2 && TypeTags[1].SeparatorToken.Value == "::"; }
-    }
-
-    // ---------------------------8-------------------------------------------------------------------
-    /// <summary>
-    /// Gets the qualifier.
-    /// </summary>
-    /// <value>The qualifier.</value>
-    // ----------------------------------------------------------------------------------------------
-    public string Qualifier
-    {
-      get { return HasQualifier ? TypeTags[1].Identifier : string.Empty; }
+      get { return QualifierToken != null; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -94,6 +116,41 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The type tags.</value>
     // ----------------------------------------------------------------------------------------------
     public TypeTagNodeCollection TypeTags { get; protected set; }
+
+#warning TypeTags collection should not be publicly modified, only through AddTypeTag method, otherwise separatot tokens are not guaranteed to be set correctly
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a type tag to the TypeTags collection, and sets the separator tokens.
+    /// </summary>
+    /// <param name="typeTagNode">A type tag.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddTypeTag(TypeTagNode typeTagNode)
+    {
+      TypeTags.Add(null, typeTagNode);
+      SetSeparatorTokens();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the separator tokens to null, double-colon or dot, 
+    /// according to the number of type tags, and whether a qualifier exists.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private void SetSeparatorTokens()
+    {
+      for (int i = 0; i < TypeTags.Count; i++)
+      {
+        if (i == 0)
+        {
+          TypeTags[i].SeparatorToken = (HasQualifier ? Token.DoubleColon : null);
+        }
+        else
+        {
+          TypeTags[i].SeparatorToken = Token.Dot;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -150,6 +207,7 @@ namespace CSharpTreeBuilder.Ast
       return new OutputSegment(
         SeparatorToken,
         SeparatorToken.IsComma() ? SpaceAfterSegment.AfterComma() : null,
+        QualifierToken,
         TypeTags
         );
     }

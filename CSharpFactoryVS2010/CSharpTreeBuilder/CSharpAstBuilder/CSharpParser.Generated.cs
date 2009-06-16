@@ -9,6 +9,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder {
 
 
 
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
 // ==================================================================================
 /// <summary>
 /// This class implements the C# syntax parser functionality.
@@ -376,8 +379,8 @@ public partial class CSharpParser
 		
 		if (la.kind == 91) {
 			Get();
+			resultNode.QualifierToken = identifier;
 			separator = t; 
-			resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
 			
 			Expect(1);
 			identifier = t; 
@@ -1197,8 +1200,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		
 		if (la.kind == 91) {
 			Get();
+			resultNode.QualifierToken = identifier;
 			separator = t; 
-			resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
 			
 			Expect(1);
 			identifier = t; 
@@ -4708,5 +4711,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 
 	  #endregion
   }
+
+#pragma warning restore 1591
 
 }

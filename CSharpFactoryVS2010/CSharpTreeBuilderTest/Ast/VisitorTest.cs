@@ -24,7 +24,8 @@ namespace CSharpTreeBuilderTest.Ast
     {
       // Set up a syntax tree
       var compilationUnitNode = new SourceFileNode();
-      compilationUnitNode.Using().TypeTag("System").TypeTag("Text");
+      compilationUnitNode.UsingNamespace().TypeTag("System");
+      compilationUnitNode.UsingAlias("myAlias").TypeTag("System");
 
       /*
             // Fluent stílusban?
@@ -43,6 +44,7 @@ namespace CSharpTreeBuilderTest.Ast
       var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
       visitorMock.Setup(v => v.Visit(compilationUnitNode));
       visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[0]));
+      visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[1]));
 
       // Act
       compilationUnitNode.AcceptVisitor(visitorMock.Object);

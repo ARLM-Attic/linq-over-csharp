@@ -1864,8 +1864,8 @@ MemberName<out TypeOrNamespaceNode resultNode>
   [ 
     "::"
     (. 
+       resultNode.QualifierToken = identifier;
        separator = t; 
-       resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
     .)
     ident                           
     (. identifier = t; .)
@@ -1906,8 +1906,8 @@ TypeName<out TypeOrNamespaceNode resultNode>
   [ 
     "::"
     (. 
+       resultNode.QualifierToken = identifier;
        separator = t; 
-       resultNode.TypeTags.Add(new TypeTagNode(identifier, null));
     .)
     ident
     (. identifier = t; .)

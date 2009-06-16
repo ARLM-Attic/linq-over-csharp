@@ -24,7 +24,7 @@ namespace CSharpTreeBuilderTest
       Assert.IsTrue(InvokeParser(project));
 
       var sn = project.SyntaxTree.SourceFileNodes[0];
-      Assert.AreEqual(sn.UsingNodes.Count, 5);
+      Assert.AreEqual(sn.UsingNodes.Count, 6);
       Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
       var typeName = sn.UsingNodes[0].TypeName;
@@ -51,6 +51,15 @@ namespace CSharpTreeBuilderTest
       tag = typeName.TypeTags[1];
       Assert.AreEqual(tag.Identifier, "Text");
 
+      typeName = sn.UsingNodes[3].TypeName;
+      Assert.IsTrue(typeName.HasQualifier);
+      Assert.AreEqual("global", typeName.Qualifier);
+      Assert.AreEqual(2, typeName.TypeTags.Count);
+      tag = typeName.TypeTags[0];
+      Assert.AreEqual("System", tag.Identifier);
+      tag = typeName.TypeTags[1];
+      Assert.AreEqual("IO", tag.Identifier);
+      
       var aliasNodes = new List<UsingAliasNode>(sn.UsingWithAliasNodes);
       Assert.AreEqual(aliasNodes[0].Alias, "AliasName");
       typeName = aliasNodes[0].TypeName;
@@ -83,7 +92,7 @@ namespace CSharpTreeBuilderTest
       Assert.IsTrue(InvokeParser(project));
 
       var sn = project.SyntaxTree.SourceFileNodes[0];
-      Assert.AreEqual(sn.UsingNodes.Count, 5);
+      Assert.AreEqual(sn.UsingNodes.Count, 6);
       Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
       // --- Check for "using System;" token positions
@@ -137,42 +146,42 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(usingNode.TerminatingToken.Column, 33);
 
       // --- Check for "using AliasName = System.Text.Encoding;"
-      usingNode = sn.UsingNodes[3];
+      usingNode = sn.UsingNodes[4];
       Assert.AreEqual(usingNode.StartToken.Value, "using");
-      Assert.AreEqual(usingNode.StartLine, 4);
+      Assert.AreEqual(usingNode.StartLine, 5);
       Assert.AreEqual(usingNode.StartColumn, 1);
-      Assert.AreEqual(usingNode.EndLine, 4);
+      Assert.AreEqual(usingNode.EndLine, 5);
       Assert.AreEqual(usingNode.EndColumn, 39);
       Assert.AreEqual(usingNode.TypeName.TypeTags.Count, 3);
       typeTag = usingNode.TypeName.TypeTags[0];
       Assert.AreEqual(typeTag.StartToken.Value, "System");
-      Assert.AreEqual(typeTag.StartLine, 4);
+      Assert.AreEqual(typeTag.StartLine, 5);
       Assert.AreEqual(typeTag.StartColumn, 19);
-      Assert.AreEqual(typeTag.EndLine, 4);
+      Assert.AreEqual(typeTag.EndLine, 5);
       Assert.AreEqual(typeTag.EndColumn, 24);
       typeTag = usingNode.TypeName.TypeTags[1];
       Assert.AreEqual(typeTag.StartToken.Value, "Text");
       Assert.AreEqual(typeTag.SeparatorToken.Value, ".");
-      Assert.AreEqual(typeTag.StartLine, 4);
+      Assert.AreEqual(typeTag.StartLine, 5);
       Assert.AreEqual(typeTag.StartColumn, 26);
-      Assert.AreEqual(typeTag.EndLine, 4);
+      Assert.AreEqual(typeTag.EndLine, 5);
       Assert.AreEqual(typeTag.EndColumn, 29);
       typeTag = usingNode.TypeName.TypeTags[2];
       Assert.AreEqual(typeTag.StartToken.Value, "Encoding");
       Assert.AreEqual(typeTag.SeparatorToken.Value, ".");
-      Assert.AreEqual(typeTag.StartLine, 4);
+      Assert.AreEqual(typeTag.StartLine, 5);
       Assert.AreEqual(typeTag.StartColumn, 31);
-      Assert.AreEqual(typeTag.EndLine, 4);
+      Assert.AreEqual(typeTag.EndLine, 5);
       Assert.AreEqual(typeTag.EndColumn, 38);
       var aliasNode = usingNode as UsingAliasNode;
       Assert.IsNotNull(aliasNode);
-      Assert.AreEqual(aliasNode.EqualToken.Line, 4);
+      Assert.AreEqual(aliasNode.EqualToken.Line, 5);
       Assert.AreEqual(aliasNode.EqualToken.Column, 17);
       Assert.AreEqual(aliasNode.Alias, "AliasName");
-      Assert.AreEqual(aliasNode.AliasToken.Line, 4);
+      Assert.AreEqual(aliasNode.AliasToken.Line, 5);
       Assert.AreEqual(aliasNode.AliasToken.Column, 7);
       Assert.AreEqual(usingNode.TerminatingToken.Value, ";");
-      Assert.AreEqual(usingNode.TerminatingToken.Line, 4);
+      Assert.AreEqual(usingNode.TerminatingToken.Line, 5);
       Assert.AreEqual(usingNode.TerminatingToken.Column, 39);
     }
 
@@ -235,47 +244,47 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(sn.NamespaceDeclarations.Count, 3);
       var nsDecl = sn.NamespaceDeclarations[0];
       Assert.AreEqual(nsDecl.StartToken.Value, "namespace");
-      Assert.AreEqual(nsDecl.StartLine, 7);
+      Assert.AreEqual(nsDecl.StartLine, 8);
       Assert.AreEqual(nsDecl.StartColumn, 1);
-      Assert.AreEqual(nsDecl.EndLine, 47);
+      Assert.AreEqual(nsDecl.EndLine, 48);
       Assert.AreEqual(nsDecl.EndColumn, 1);
       Assert.AreEqual(nsDecl.NameTags.Count, 2);
       var nameTag = nsDecl.NameTags[0];
       Assert.AreEqual(nameTag.StartToken.Value, "CSharpParserTest");
-      Assert.AreEqual(nameTag.StartLine, 7);
+      Assert.AreEqual(nameTag.StartLine, 8);
       Assert.AreEqual(nameTag.StartColumn, 11);
-      Assert.AreEqual(nameTag.EndLine, 7);
+      Assert.AreEqual(nameTag.EndLine, 8);
       Assert.AreEqual(nameTag.EndColumn, 26);
       nameTag = nsDecl.NameTags[1];
       Assert.AreEqual(nameTag.StartToken.Value, "TestFiles");
       Assert.AreEqual(nameTag.SeparatorToken.Value, ".");
-      Assert.AreEqual(nameTag.StartLine, 7);
+      Assert.AreEqual(nameTag.StartLine, 8);
       Assert.AreEqual(nameTag.StartColumn, 28);
-      Assert.AreEqual(nameTag.EndLine, 7);
+      Assert.AreEqual(nameTag.EndLine, 8);
       Assert.AreEqual(nameTag.EndColumn, 36);
       Assert.AreEqual(nsDecl.OpenBracket.Value, "{");
-      Assert.AreEqual(nsDecl.OpenBracket.Line, 8);
+      Assert.AreEqual(nsDecl.OpenBracket.Line, 9);
       Assert.AreEqual(nsDecl.OpenBracket.Column, 1);
-      Assert.AreEqual(nsDecl.CloseBracket.Line, 47);
+      Assert.AreEqual(nsDecl.CloseBracket.Line, 48);
       Assert.AreEqual(nsDecl.OpenBracket.Column, 1);
 
       nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0].NamespaceDeclarations[0];
       Assert.AreEqual(nsDecl.StartToken.Value, "namespace");
-      Assert.AreEqual(nsDecl.StartLine, 17);
+      Assert.AreEqual(nsDecl.StartLine, 18);
       Assert.AreEqual(nsDecl.StartColumn, 5);
-      Assert.AreEqual(nsDecl.EndLine, 21);
+      Assert.AreEqual(nsDecl.EndLine, 22);
       Assert.AreEqual(nsDecl.EndColumn, 5);
       Assert.AreEqual(nsDecl.NameTags.Count, 1);
       nameTag = nsDecl.NameTags[0];
       Assert.AreEqual(nameTag.StartToken.Value, "Level2");
-      Assert.AreEqual(nameTag.StartLine, 17);
+      Assert.AreEqual(nameTag.StartLine, 18);
       Assert.AreEqual(nameTag.StartColumn, 15);
-      Assert.AreEqual(nameTag.EndLine, 17);
+      Assert.AreEqual(nameTag.EndLine, 18);
       Assert.AreEqual(nameTag.EndColumn, 20);
       Assert.AreEqual(nsDecl.OpenBracket.Value, "{");
-      Assert.AreEqual(nsDecl.OpenBracket.Line, 18);
+      Assert.AreEqual(nsDecl.OpenBracket.Line, 19);
       Assert.AreEqual(nsDecl.OpenBracket.Column, 5);
-      Assert.AreEqual(nsDecl.CloseBracket.Line, 21);
+      Assert.AreEqual(nsDecl.CloseBracket.Line, 22);
       Assert.AreEqual(nsDecl.OpenBracket.Column, 5);
     }
 
@@ -289,7 +298,7 @@ namespace CSharpTreeBuilderTest
       Assert.IsTrue(InvokeParser(project));
 
       var sn = project.SyntaxTree.SourceFileNodes[0];
-      Assert.AreEqual(sn.UsingNodes.Count, 5);
+      Assert.AreEqual(sn.UsingNodes.Count, 6);
       foreach (var usingNode in sn.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, sn);

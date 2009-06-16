@@ -32,6 +32,9 @@ using System;
 
 -->namespace
 
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
 // ==================================================================================
 /// <summary>
 /// This class implements the C# syntax parser functionality.
@@ -138,5 +141,7 @@ public partial class CSharpParser
 
 	  #endregion
   }
+
+#pragma warning restore 1591
 
 $$$

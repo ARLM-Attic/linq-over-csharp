@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace CSharpTreeBuilder.CSharpAstBuilder.PPExpressions {
 
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
   // ==================================================================================
   /// <summary>
   /// This class defines a Token used by the scanner and the parser.
@@ -709,5 +712,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder.PPExpressions {
        pt = tokens;
     }
   }
+
+#pragma warning restore 1591
 
 }

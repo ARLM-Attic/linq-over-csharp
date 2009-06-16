@@ -1,6 +1,4 @@
-﻿using CSharpTreeBuilder.CSharpAstBuilder;
-
-namespace CSharpTreeBuilder.Ast
+﻿namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
@@ -11,15 +9,20 @@ namespace CSharpTreeBuilder.Ast
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Sets the alias of a UsingAliasNode.
+    /// Adds a TypeTag to a UsingAliasNode's namespace-or-typename name.
     /// </summary>
-    /// <param name="node">A UsingAliasNode node.</param>
-    /// <param name="alias">Alias name.</param>
-    /// <returns>The UsingAliasNode is returned as a UsingNamespaceNode to enable method chaining.</returns>
+    /// <param name="node">A UsingAliasNode node</param>
+    /// <returns>The UsingAliasNode is returned to enable method chaining.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static UsingNamespaceNode Alias(this UsingAliasNode node, string alias)
+    public static UsingAliasNode TypeTag(this UsingAliasNode node, string name)
     {
-      node.AliasToken = new Token(alias);
+      node.TypeName.TypeTag(name);
+      return node;
+    }
+
+    public static UsingAliasNode Qualifier(this UsingAliasNode node, string qualifier)
+    {
+      node.TypeName.Qualifier(qualifier);
       return node;
     }
   }

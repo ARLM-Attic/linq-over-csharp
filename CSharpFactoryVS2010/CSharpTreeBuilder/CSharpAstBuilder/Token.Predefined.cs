@@ -18,6 +18,11 @@
     public static Token Semicolon { get { return new Token(";"); } }
 
     /// <summary>
+    /// Returns a "::" (double colon) token.
+    /// </summary>
+    public static Token DoubleColon { get { return new Token("::"); } }
+
+    /// <summary>
     /// Returns a "." (dot) token.
     /// </summary>
     public static Token Dot { get { return new Token("."); } }
