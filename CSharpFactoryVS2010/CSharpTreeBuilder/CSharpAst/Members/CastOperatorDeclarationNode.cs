@@ -1,50 +1,54 @@
 // ================================================================================================
-// IndentationSegment.cs
+// CastOperatorDeclarationNode.cs
 //
-// Created: 2009.03.27, by Istvan Novak (DeepDiver)
+// Created: 2009.06.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.CSharpAstBuilder;
+
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Controls the indentation of the source code segments
+  /// 
   /// </summary>
   // ================================================================================================
-  public class IndentationSegment : ControlSegment
+  public class CastOperatorDeclarationNode: MethodDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Decrement the current indentation level.
+    /// Initializes a new instance of the <see cref="CastOperatorDeclarationNode"/> class.
     /// </summary>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Decrement = new IndentationSegment();
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Increment the current indentation level.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Increment = new IndentationSegment();
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Avoid external instantiation
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private IndentationSegment()
+    public CastOperatorDeclarationNode(Token start) : base(start)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Controls the indentation of the specified OutputItemSerializer.
+    /// Gets a value indicating whether this operator is implicit.
     /// </summary>
-    /// <param name="serializer">The serializer to control.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Control(OutputItemSerializer serializer)
+    public bool IsImplicit 
     {
-      if (this == Increment) serializer.IncrementIndentation();
-      else if (this == Decrement) serializer.DecrementIndentation();
+      get { return StartToken.Value == "implicit"; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this operator is explicit.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsExplicit
+    {
+      get { return StartToken.Value == "explicit"; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the "operator" token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token OperatorToken { get; internal set; }
   }
 }

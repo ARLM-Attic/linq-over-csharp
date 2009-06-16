@@ -5,9 +5,9 @@ using CSharpTreeBuilder.CSharpAstBuilder;
 
 COMPILER CS3
 
-// ================================================================================
+// ================================================================================================
 // Scanner description
-// ================================================================================
+// ================================================================================================
 
 CHARACTERS
 
@@ -32,6 +32,8 @@ CHARACTERS
 
 TOKENS
 
+  // ----------------------------------------------------------------------------------------------
+
   ident =
     ['@']
     ( startLetter
@@ -46,13 +48,17 @@ TOKENS
       | 'U' hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
       )
     }.
-  /*--------------------------------------------------------------------------------*/
+
+  // ----------------------------------------------------------------------------------------------
+
   intCon =
     ( digit {digit} | digit {digit} CONTEXT ("." notDigit)
     | ("0x" | "0X") hexDigit {hexDigit}
     )
     ["U" | "u" | "L" | "l" | "UL" | "Ul" | "uL" | "ul" | "LU" | "Lu" | "lU" | "lu"].
-  /*--------------------------------------------------------------------------------*/
+
+  // ----------------------------------------------------------------------------------------------
+
   realCon =
     "." digit {digit} 
     [("e" | "E") ["+" | "-"] digit {digit}] 
@@ -65,7 +71,9 @@ TOKENS
       ["F" | "f" | "D" | "d" | "M" | "m"]
     | "F" | "f" | "D" | "d" | "M" | "m"
     ).
-  /*--------------------------------------------------------------------------------*/
+
+  // ----------------------------------------------------------------------------------------------
+
   charCon =
     "'" ( char
         | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
@@ -74,7 +82,9 @@ TOKENS
         | "\\U" hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit
         ) 
     "'".
-  /*--------------------------------------------------------------------------------*/
+
+  // ----------------------------------------------------------------------------------------------
+
   stringCon =
     "\""  { regularStringChar
           | "\\\'" | "\\\"" | "\\\\" | "\\0" | "\\a" | "\\b" | "\\f" | "\\n" | "\\r" | "\\t" | "\\v"
@@ -85,8 +95,9 @@ TOKENS
     "\""
   | "@\"" {verbatimStringChar | "\"\""} "\"".
 
-
-  /*----- keyword names needed in LL(1) resolvers -----*/
+  // ----------------------------------------------------------------------------------------------
+  // Keyword names needed in LL(1) resolvers
+  // ----------------------------------------------------------------------------------------------
   
   abstract   = "abstract".
   as         = "as".
@@ -165,9 +176,11 @@ TOKENS
   void       = "void".
   volatile   = "volatile".
   while      = "while".
-  
 
-  /*----- operators and special characters needed in LL(1) resolvers --------------*/
+  // ----------------------------------------------------------------------------------------------
+  // Operators and special characters needed in LL(1) resolvers
+  // ----------------------------------------------------------------------------------------------
+
   and        = "&".
   andassgn   = "&=".
   assgn      = "=".
@@ -208,15 +221,17 @@ TOKENS
 
 PRAGMAS
 
-// Preprocessor directives.                                               
-// The exact parsing of their syntax is left for later processing        
+  // ----------------------------------------------------------------------------------------------
+  // Preprocessor directives.                                               
+  // The exact parsing of their syntax is left for later processing.
+  // ----------------------------------------------------------------------------------------------
 
-  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     //(. PragmaHandler.AddConditionalDirective(la); .)
-  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      //(. PragmaHandler.RemoveConditionalDirective(la); .)
-  ppIf      = "#" {ws} "if" {notNewLine} newLine.         //(. PragmaHandler.IfPragma(la); .)
-  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       //(. PragmaHandler.ElifPragma(la); .) 
-  ppElse    = "#" {ws} "else" {notNewLine} newLine.       //(. PragmaHandler.ElsePragma(la); .) 
-  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      //(. PragmaHandler.EndifPragma(la); .) 
+  ppDefine  = "#" {ws} "define" {notNewLine} newLine.     (. AddConditionalDirective(la); .)
+  ppUndef   = "#" {ws} "undef" {notNewLine} newLine.      (. RemoveConditionalDirective(la); .)
+  ppIf      = "#" {ws} "if" {notNewLine} newLine.         (. IfPragma(la); .)
+  ppElif    = "#" {ws} "elif" {notNewLine} newLine.       (. ElifPragma(la); .) 
+  ppElse    = "#" {ws} "else" {notNewLine} newLine.       (. ElsePragma(la); .) 
+  ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      (. EndifPragma(la); .) 
   ppLine    = "#" {ws} "line" {notNewLine} newLine.       //(. PragmaHandler.LinePragma(la); .) 
   ppError   = "#" {ws} "error" {notNewLine} newLine.      //(. PragmaHandler.ErrorPragma(la); .) 
   ppWarning = "#" {ws} "warning" {notNewLine} newLine.    //(. PragmaHandler.WarningPragma(la); .) 
@@ -224,7 +239,9 @@ PRAGMAS
   ppRegion  = "#" {ws} "region" {notNewLine} newLine.     //(. PragmaHandler.RegionPragma(la); .) 
   ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  //(. PragmaHandler.EndregionPragma(la); .) 
 
-// Pragma for comments
+  // ----------------------------------------------------------------------------------------------
+  // Comments are handled as special pragmas
+  // ----------------------------------------------------------------------------------------------
   
   cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  //(. CommentHandler.HandleBlockComment(la); .)
   cLineCom  = "//" { notNewLine } newLine.                                  //(. CommentHandler.HandleLineComment(la); .)
@@ -257,7 +274,7 @@ ExternAliasDirective<NamespaceScopeNode parentNode>
 =
   "extern"   
   (. 
-     // TODO: PragmaHandler.SignRealToken(); 
+     SignRealToken(); 
      start = t;
   .)
   ident
@@ -283,8 +300,8 @@ UsingDirective<NamespaceScopeNode parentNode>
 =                           
   "using"
   (. 
+     SignRealToken();
      Token start = t;
-     // PragmaHandler.SignRealToken();
   .)
   [ IF (IsAssignment()) 
     ident                 
@@ -312,8 +329,7 @@ GlobalAttributes
   (. AttributeDecorationNode globAttrNode = null; .)
   "["
   (. 
-     // --- We sign that the first real (not pragma) token arrived.
-     // PragmaHandler.SignRealToken();
+     SignRealToken();
      globAttrNode = new AttributeDecorationNode(t);
   .)
   ident                        
@@ -347,8 +363,7 @@ NamespaceMemberDeclaration<NamespaceScopeNode parentNode>
 =
   "namespace"    
   (. 
-     // --- We sign that the first real (not pragma) token arrived.
-     // PragmaHandler.SignRealToken();
+     SignRealToken();
      Token startToken = t; 
      var nsDecl = new NamespaceDeclarationNode(parentNode, t);
   .)
@@ -429,8 +444,7 @@ TypeDeclaration<TypeDeclarationNode declaringType, out TypeDeclarationNode typeD
 .
 
 // ------------------------------------------------------------------------------------------------
-// Class declaration.
-//   typeDecl: Resulting type declaration syntax node.
+// Class declaration within a file, a namespace or a type declaration.
 // ------------------------------------------------------------------------------------------------
 ClassDeclaration<out TypeDeclarationNode typeDecl>
 =
@@ -457,7 +471,6 @@ ClassDeclaration<out TypeDeclarationNode typeDecl>
 
 // ------------------------------------------------------------------------------------------------
 // Base type and interface declaration of a class, struct or interface.
-//   typeDecl: Type declaration node inheriting from base types defined here.
 // ------------------------------------------------------------------------------------------------
 BaseTypeList<TypeDeclarationNode typeDecl>
 =
@@ -479,7 +492,6 @@ BaseTypeList<TypeDeclarationNode typeDecl>
 
 // ------------------------------------------------------------------------------------------------
 // Body declaration of a class.
-//   typeDecl: Class declaration node for the body defined here.
 // ------------------------------------------------------------------------------------------------
 ClassBody<ClassDeclarationNode typeDecl>
 =
@@ -506,12 +518,7 @@ ClassBody<ClassDeclarationNode typeDecl>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Structure declaration within a file a namespace.
-//   modifiers: Set of modifiers belonging to the type.
-//   parentType: Parent type declaration
-//   partial: Flag indicating if this is a partial type definition or not.
-//   td: Resulting type declaration.
-//   typeDecl: Resulting type declaration syntax node.
+// Structure declaration within a file, a namespace or a type declaration.
 // ------------------------------------------------------------------------------------------------
 StructDeclaration<out TypeDeclarationNode typeDecl>
 =
@@ -557,8 +564,7 @@ StructBody<StructDeclarationNode typeDecl>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Enumerated type declaration within a file or a namespace
-//   typeDecl: Resulting type declaration syntax node.
+// Enumerated type declaration within a file, a namespace or a type declaration.
 // ------------------------------------------------------------------------------------------------
 EnumDeclaration<out TypeDeclarationNode typeDecl>
 =
@@ -585,8 +591,6 @@ EnumDeclaration<out TypeDeclarationNode typeDecl>
 
 // ------------------------------------------------------------------------------------------------
 // Body declaration of an enumerated type.
-//   ed: Enumeration declaration that has the body defined here.
-//   typeDecl: Enumeration declaration for the body defined here.
 // ------------------------------------------------------------------------------------------------
 EnumBody<EnumDeclarationNode typeDecl>
 =
@@ -616,8 +620,7 @@ EnumBody<EnumDeclarationNode typeDecl>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Enumeration value declaration.
-//   ed: Enumeration declaration that has the member values defined here.
+// Enumeration value declaration within an enumeration type.
 // ------------------------------------------------------------------------------------------------
 EnumMemberDeclaration<out EnumValueNode valNode>  
 =                             
@@ -644,7 +647,7 @@ EnumMemberDeclaration<out EnumValueNode valNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Delegate type declaration within a file a namespace.
+// Delegate type declaration within a file, a namespace or a type declaration.
 // ------------------------------------------------------------------------------------------------
 DelegateDeclaration<out TypeDeclarationNode typeDecl>
 =
@@ -717,7 +720,9 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
   | EventDeclaration<out memNode> 
   | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
       ConstructorDeclaration<out memNode> 
-  | IF (IsPartialMethod())
+  | 
+    // --- Partial method declaration
+    IF (IsPartialMethod())
     "partial"
     (. 
        var partialToken = t;
@@ -737,8 +742,15 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
     ( 
-      OperatorDeclaration
-      | // --- Field declaration
+        // --- Overloadable operator declaration
+        (. 
+           var opNode = new OperatorDeclarationNode(typeNode.StartToken); 
+           opNode.TypeName = typeNode;
+           memNode = opNode;
+        .)
+        OperatorDeclaration<opNode>
+      | 
+        // --- Field declaration
         IF (IsFieldDecl()) 
         (. 
            var fiNode = new FieldDeclarationNode(typeNode.StartToken); 
@@ -748,7 +760,9 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         FieldMemberDeclarators<fiNode> 
         ";"
         (. Terminate(memNode); .)
-      |                                          
+      |                                  
+        // --- Members than can be used in explicit interface implementations:
+        // --- Property declaration        
         (. TypeOrNamespaceNode nameNode; .)
         MemberName<out nameNode>
         ( 
@@ -756,10 +770,22 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
              var propNode = new PropertyDeclarationNode(typeNode.StartToken);
              propNode.TypeName = typeNode; 
              propNode.MemberName = nameNode;
+             memNode = propNode;
           .)
           PropertyDeclaration<propNode>
-        | "." IndexerDeclaration
         | 
+          // --- Explicit indexer declaration
+          (.
+             var indNode = new IndexerDeclarationNode(typeNode.StartToken);
+             indNode.TypeName = typeNode;
+             indNode.MemberName = nameNode;
+             memNode = indNode;
+          .)
+          "."
+          (. indNode.MemberNameSeparator = t; .)
+          IndexerDeclaration<indNode>
+        |
+          // --- Method declaration 
           (.
              var metNode = new MethodDeclarationNode(typeNode.StartToken);
              metNode.TypeName = typeNode;
@@ -768,10 +794,17 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
           .)
           MethodDeclaration<metNode>
         )
-      | IndexerDeclaration
+      | 
+        // --- Simple indexer declaration
+        (. 
+           var indNode = new IndexerDeclarationNode(typeNode.StartToken);
+           indNode.TypeName = typeNode;
+        .)
+        IndexerDeclaration<indNode>
     )
-    | CastOperatorDeclaration
-    |                                               
+    | CastOperatorDeclaration<out memNode>
+    |                                           
+      // --- Nested type declaration    
       (. TypeDeclarationNode nestedTypeNode; .)
       TypeDeclaration<typeDecl, out nestedTypeNode> 
       (. 
@@ -787,7 +820,6 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a "const" member.
-//   memNode: Member declaration node.
 // ------------------------------------------------------------------------------------------------
 ConstMemberDeclaration<out MemberDeclarationNode memNode>
 =                                    
@@ -817,7 +849,6 @@ ConstMemberDeclaration<out MemberDeclarationNode memNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a single "const" member.
-//   tagNode: const member tag declaration.
 // ------------------------------------------------------------------------------------------------
 SingleConstMember<out ConstTagNode tagNode>
 =
@@ -837,7 +868,6 @@ SingleConstMember<out ConstTagNode tagNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a event member.
-//   memNode: Type declaration node
 // ------------------------------------------------------------------------------------------------
 EventDeclaration<out MemberDeclarationNode memNode>
   (. memNode = null; .)
@@ -876,7 +906,6 @@ EventDeclaration<out MemberDeclarationNode memNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a constructor member.
-//   memNode: Member declaration node
 // ------------------------------------------------------------------------------------------------
 ConstructorDeclaration<out MemberDeclarationNode memNode>
 = 
@@ -944,23 +973,24 @@ PropertyDeclaration<PropertyDeclarationNodeBase propNode>
 // ------------------------------------------------------------------------------------------------
 // Declaration of an indexer member.
 // ------------------------------------------------------------------------------------------------
-IndexerDeclaration
+IndexerDeclaration<IndexerDeclarationNode indNode>
 =
-  "this" 
+  "this"
+  (. indNode.ThisToken = t; .)
   "[" 
-  (. var parList = new FormalParameterListNode(t); .)
-  [ FormalParameterList<parList> ] 
+  (. indNode.FormalParameters = new FormalParameterListNode(t); .)
+  [ FormalParameterList<indNode.FormalParameters> ] 
   "]" 
-  (. Terminate(parList); .)
+  (. Terminate(indNode.FormalParameters); .)
   "{" 
-      (. var propNode = new PropertyDeclarationNode(t); .)
-      AccessorDeclarations<propNode> 
+  (. indNode.OpenBrace = t; .)
+      AccessorDeclarations<indNode> 
   "}"
+  (. indNode.CloseBrace = t; .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a method member.
-//   metNode: method declaration node
 // ------------------------------------------------------------------------------------------------
 MethodDeclaration<MethodDeclarationNode metNode>
 =                                                    
@@ -986,58 +1016,68 @@ MethodDeclaration<MethodDeclarationNode metNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a cast operator.
+// Declaration of a cast operator member.
 // ------------------------------------------------------------------------------------------------
-CastOperatorDeclaration
+CastOperatorDeclaration<out MemberDeclarationNode memNode>
+  (. memNode = null; .)
 =
   ( 
     "implicit"                        
   | "explicit"
-  ) 
+  )
+  (. 
+     var copNode = new CastOperatorDeclarationNode(t); 
+     memNode = copNode;
+  .)
   "operator"                        
-  (. TypeOrNamespaceNode typeNode; .)
+  (. 
+     copNode.OperatorToken = t; 
+     TypeOrNamespaceNode typeNode; 
+  .)
   Type<out typeNode>
+  (. copNode.TypeName = typeNode; .)
   "("   
-  (. var parList = new FormalParameterListNode(t); .)
-  [ FormalParameterList<parList> ]   
+  (. copNode.FormalParameters = new FormalParameterListNode(t); .)
+  [ FormalParameterList<copNode.FormalParameters> ]   
   ")"
-  (. Terminate(parList); .)
+  (. Terminate(copNode.FormalParameters); .)
   ( 
     (. BlockStatementNode blockNode; .)
-    Block<out blockNode> 
-  | ";" 
+    Block<out blockNode>
+    (. copNode.Body = blockNode; .)
+  | 
+    ";" 
+    (. copNode.ClosingSemicolon = t; .)
   )
+  (. Terminate(memNode); .)
 .
 
-// ------------------------------------------------------------------------------------
-// Declaration of an operator overload member.
-// ------------------------------------------------------------------------------------
-OperatorDeclaration
+// ------------------------------------------------------------------------------------------------
+// Declaration of an overloaded operator member.
+// ------------------------------------------------------------------------------------------------
+OperatorDeclaration<OperatorDeclarationNode opNode>
 =
   "operator" 
-  OverloadableOp
+  (. opNode.OperatorToken = t; .)
+  OverloadableOp<opNode>
   "("
-  (. 
-     var parList = new FormalParameterListNode(t);
-  .)
-  [ FormalParameterList<parList> ]
+  (. opNode.FormalParameters = new FormalParameterListNode(t); .)
+  [ FormalParameterList<opNode.FormalParameters> ]
   ")"
-  (. Terminate(parList); .)
+  (. Terminate(opNode.FormalParameters); .)
   ( 
     (. BlockStatementNode blockNode; .)
-    Block<out blockNode> 
-  | ";" 
+    Block<out blockNode>
+    (. opNode.Body = blockNode; .)
+  | 
+    ";" 
+    (. opNode.ClosingSemicolon = t; .)
   )
 .
 
-// ------------------------------------------------------------------------------------
-// Declaration of an interface.
-//   modifiers: Set of modifiers belonging to the type.
-//   parentType: Parent type declaration
-//   isPartial: indicates partial modifier.
-//   td: Resulting type declaration.
-//   typeDecl: Resulting type declaration syntax node.
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+// Interface declaration within a file, a namespace or a type declaration.
+// ------------------------------------------------------------------------------------------------
 InterfaceDeclaration<out TypeDeclarationNode typeDecl>
 =
   "interface"       
@@ -1077,6 +1117,7 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
      var mod = new ModifierNodeCollection();
      var attrNodes = new AttributeDecorationNodeCollection();
      Token identifier;
+     MemberDeclarationNode memNode = null;
   .)
   AttributeDecorations<attrNodes>
   ModifierList<mod>
@@ -1091,46 +1132,80 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
            var metNode = new MethodDeclarationNode(typeNode.StartToken);
            metNode.TypeName = typeNode;
            metNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
-           // memNode = metNode;
+           memNode = metNode;
         .)
         MethodDeclaration<metNode>        
       | // --- Interface property
+        (. 
+           var propNode = new PropertyDeclarationNode(typeNode.StartToken);
+           propNode.TypeName = typeNode;
+           propNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
+           memNode = propNode;
+        .)
         "{" 
-        InterfaceAccessors
+        (. propNode.OpenBrace = t; .)
+        InterfaceAccessors<propNode>
         "}" 
+        (. 
+           propNode.CloseBrace = t; 
+           Terminate(memNode);
+        .)
       )
     |  
       "this" 
+      (. 
+         var indNode = new IndexerDeclarationNode(typeNode.StartToken);
+         indNode.TypeName = typeNode;
+         indNode.ThisToken = t;
+         memNode = indNode;
+      .)
       "[" 
-      (. var parList = new FormalParameterListNode(t); .)
-      [ FormalParameterList<parList> ] 
+      (. indNode.FormalParameters = new FormalParameterListNode(t); .)
+      [ FormalParameterList<indNode.FormalParameters> ] 
       "]" 
-      (. Terminate(parList); .)
+      (. Terminate(indNode.FormalParameters); .)
       "{" 
-      InterfaceAccessors
+      (. indNode.OpenBrace = t; .)
+      InterfaceAccessors<indNode>
       "}" 
+      (. 
+         indNode.CloseBrace = t; 
+         Terminate(indNode);
+      .)
     )
-  | InterfaceEventDeclaration
+  | InterfaceEventDeclaration<out memNode>
   ) 
-.
-
-// ------------------------------------------------------------------------------------
-// Declaration of an interface event member.
-// +attrs: attributes of the declaration
-// +modifiers: Set of modifiers belonging to the member.
-// +idf: declaration representing the interface type.
-// ------------------------------------------------------------------------------------
-InterfaceEventDeclaration
-=
-  "event" 
-  (. TypeOrNamespaceNode typeNode; .)
-  Type<out typeNode> 
-  ident 
-  ";"
+  (.
+     if (memNode != null) 
+     {
+       memNode.AttributeDecorations = attrNodes;
+       memNode.Modifiers = mod;
+       typeDecl.MemberDeclarations.Add(memNode);
+     }
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declares a local variable within a block.
+// Declaration of an interface event member.
+// ------------------------------------------------------------------------------------------------
+InterfaceEventDeclaration<out MemberDeclarationNode memNode>
+=
+  "event" 
+  (. 
+     var ieNode = new InterfaceEventDeclarationNode(t);
+     memNode = ieNode;
+  .)
+  (. TypeOrNamespaceNode typeNode; .)
+  Type<out typeNode>
+  (. ieNode.TypeName = typeNode; .)
+  ident 
+  (. ieNode.IdentifierToken = t; .)
+  ";"
+  (. Terminate(memNode); .)
+.
+
+// ------------------------------------------------------------------------------------------------
+// Local variable declaration within a block.
 // ------------------------------------------------------------------------------------------------
 LocalVariableDeclaration<out LocalVariableNode varNode> 
 =
@@ -1359,7 +1434,7 @@ CurrentArgumentItem<out ArgumentNode argNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a property accessors.
+// Declaration of property accessors.
 // ------------------------------------------------------------------------------------------------
 AccessorDeclarations<PropertyDeclarationNodeBase propNode>
 = 
@@ -1446,25 +1521,44 @@ EventAccessorDeclarations<PropertyDeclarationNodeBase propNode>
   ]
 .
 
-// ------------------------------------------------------------------------------------
-// Declaration of an interface accessors.
-// +prop: event property holding the accessor.
-// ------------------------------------------------------------------------------------
-InterfaceAccessors
+// ------------------------------------------------------------------------------------------------
+// Declaration of interface property/indexer accessors.
+// ------------------------------------------------------------------------------------------------
+InterfaceAccessors<PropertyDeclarationNodeBase propNode>
 = 
   (. var attrNodes = new AttributeDecorationNodeCollection(); .)
   AttributeDecorations<attrNodes>
   (. var mod = new ModifierNodeCollection(); .)
   ModifierList<mod>                    
   ident
+  (.
+     var accNode = new AccessorNode(t);
+     accNode.AttributeDecorations = attrNodes;
+     accNode.Modifiers = mod;
+     propNode.FirstAccessor = accNode;
+  .)
   ";"
+  (. 
+     accNode.ClosingSemicolon = t; 
+     Terminate(accNode);
+  .)
   [
     (. attrNodes = new AttributeDecorationNodeCollection(); .)
     AttributeDecorations<attrNodes>
     (. mod = new ModifierNodeCollection(); .)
     ModifierList<mod>                    
     ident
+    (.
+       accNode = new AccessorNode(t);
+       accNode.AttributeDecorations = attrNodes;
+       accNode.Modifiers = mod;
+       propNode.SecondAccessor = accNode;
+    .)
     ";"
+    (. 
+       accNode.ClosingSemicolon = t; 
+       Terminate(accNode);
+    .)
   ]
 .
 
@@ -1505,7 +1599,7 @@ Attributes<out AttributeDecorationNode attrNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of attributes.
+// Declaration of attribute decorations.
 // ------------------------------------------------------------------------------------------------
 AttributeDecorations<AttributeDecorationNodeCollection attrNodes>
   (.  AttributeDecorationNode attrNode; .)
@@ -1589,8 +1683,6 @@ AttributeArguments<AttributeNode argsNode>
 
 // ------------------------------------------------------------------------------------------------
 // Modifiers that can be assigned to types and members.
-//   m: List of modifier flags.
-//   mods: List of modifier flags.
 // ------------------------------------------------------------------------------------------------
 ModifierList<ModifierNodeCollection mods>
 =
@@ -1616,10 +1708,7 @@ ModifierList<ModifierNodeCollection mods>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Reference for a type
-//   typeRef: Type reference
-//   voidAllowed: indicates if "void" is an acceptable type or not.
-//   typeNode: Type reference syntax node
+// Gets a reference to a type name with optional type parameters.
 // ------------------------------------------------------------------------------------------------
 Type<out TypeOrNamespaceNode typeNode>    
 =                                                    
@@ -1639,7 +1728,7 @@ Type<out TypeOrNamespaceNode typeNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Reference for a type
+// Gets a reference for a non-array type.
 // ------------------------------------------------------------------------------------------------
 NonArrayType<out TypeOrNamespaceNode typeNode>    
 =                                                    
@@ -1661,7 +1750,7 @@ NonArrayType<out TypeOrNamespaceNode typeNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Reference for a type in a relational expression
+// Gets a reference for a type that can be used in a relational expression
 // ------------------------------------------------------------------------------------------------
 TypeInRelExpr<out TypeOrNamespaceNode typeNode>    
 =                                                    
@@ -1680,8 +1769,7 @@ TypeInRelExpr<out TypeOrNamespaceNode typeNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Sets the appropriate flags of a type reference if the declaration shows it is
-// a pointer or array.
+// Sets the appropriate flags of a type reference if the declaration shows it is a pointer or array.
 // ------------------------------------------------------------------------------------------------
 PointerOrArray<TypeOrNamespaceNode typeNode>
 =
@@ -1708,14 +1796,14 @@ PointerOrArray<TypeOrNamespaceNode typeNode>
 PredefinedType<out TypeOrNamespaceNode typeNode> 
   (. typeNode = null; .)
 =
-  PrimitiveType<out typeNode> | 
-  ( "object" | "string" )                                    
-  (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
+    PrimitiveType<out typeNode> 
+  | 
+    ( "object" | "string" )                                    
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
 .
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
-//   typeNode: Type reference node.
 // ------------------------------------------------------------------------------------------------
 PrimitiveType<out TypeOrNamespaceNode typeNode> 
   (. typeNode = null; .)
@@ -1728,8 +1816,6 @@ PrimitiveType<out TypeOrNamespaceNode typeNode>
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as integral types.
-//   typeRef: Type reference.
-//   typeNode: Type reference node.
 // ------------------------------------------------------------------------------------------------
 IntegralType<out TypeOrNamespaceNode typeNode> 
 = 
@@ -1749,8 +1835,6 @@ IntegralType<out TypeOrNamespaceNode typeNode>
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as class types.
-//   typeRef: Type reference.
-//   typeNode: Type reference node.
 // ------------------------------------------------------------------------------------------------
 ClassType<out TypeOrNamespaceNode typeNode>   
   (. typeNode = null; .)
@@ -1761,10 +1845,9 @@ ClassType<out TypeOrNamespaceNode typeNode>
     (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declaration of a compound member name
-// +typeRef: An instance to a member reference
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 MemberName<out TypeOrNamespaceNode resultNode>                                              
   (.
      resultNode = null;
@@ -1806,7 +1889,6 @@ MemberName<out TypeOrNamespaceNode resultNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a compound type name
-//   typeNode: Type reference node.
 // ------------------------------------------------------------------------------------------------
 TypeName<out TypeOrNamespaceNode resultNode>                             
 =               
@@ -1847,7 +1929,7 @@ TypeName<out TypeOrNamespaceNode resultNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a statement.
+// Statement declaration.
 // ------------------------------------------------------------------------------------------------
 Statement<out StatementNode stmtNode>
   (. stmtNode = null; .)
@@ -1935,7 +2017,7 @@ Block<out BlockStatementNode blockNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a switch statement.
+// Defines a "switch" statement.
 // ------------------------------------------------------------------------------------------------
 SwitchStatement<out StatementNode stmtNode>
 =
@@ -1966,7 +2048,7 @@ SwitchStatement<out StatementNode stmtNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a constant statement.
+// Defines a "const" statement.
 // ------------------------------------------------------------------------------------------------
 ConstStatement<out StatementNode stmtNode>
   (. ExpressionNode exprNode; .)
@@ -2499,6 +2581,7 @@ StatementExpression<out ExpressionNode exprNode>
 =
   (. ExpressionNode unaryNode; .)
   Unary<out unaryNode>
+  (. exprNode = unaryNode; .)
   ( 
     (. BinaryOperatorNode asgnNode; .)
     AssignmentOperator<out asgnNode>
@@ -2514,8 +2597,7 @@ StatementExpression<out ExpressionNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines assignment operators.
-//   opNode: Assignement operator node
+// Defines an assignment operator.
 // ------------------------------------------------------------------------------------------------
 AssignmentOperator<out BinaryOperatorNode opNode> 
   (. opNode = null; .)
@@ -2635,7 +2717,7 @@ ForIterator<ForStatementNode forNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Represents catch clauses in a try..catch..finally statement.
+// Represents catch clauses in a "try..catch..finally" statement.
 // ------------------------------------------------------------------------------------------------
 CatchClauses<TryStatementNode tryNode>
 =                                                     
@@ -2773,7 +2855,7 @@ LambdaFunctionBody<LambdaExpressionNode lambdaNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a from clause for a query expression
+// Gets a "from" clause for a query expression
 // ------------------------------------------------------------------------------------------------
 FromClause<out FromClauseNode fromNode>
 =
@@ -2865,7 +2947,7 @@ QueryBodyClause<QueryBodyNode bodyNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a let clause
+// Gets a "let" clause
 // ------------------------------------------------------------------------------------------------
 LetClause<out LetClauseNode letNode>
 =
@@ -2885,7 +2967,7 @@ LetClause<out LetClauseNode letNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a where clause
+// Gets a "where" clause
 // ------------------------------------------------------------------------------------------------
 WhereClause<out WhereClauseNode whereNode>
 =
@@ -2900,7 +2982,7 @@ WhereClause<out WhereClauseNode whereNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a where clause
+// Gets an "into" clause
 // ------------------------------------------------------------------------------------------------
 IntoClause<out IntoClauseNode intoNode>
 =
@@ -2915,7 +2997,7 @@ IntoClause<out IntoClauseNode intoNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a join clause
+// Gets a "join" clause
 // ------------------------------------------------------------------------------------------------
 JoinClause<out JoinClauseNode joinNode>
 =
@@ -2961,7 +3043,7 @@ JoinClause<out JoinClauseNode joinNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets an order by clause
+// Gets an "orderby" clause
 // ------------------------------------------------------------------------------------------------
 OrderByClause<out OrderByClauseNode obNode>
 =
@@ -2998,7 +3080,7 @@ OrderingClause<out OrderingClauseNode ordNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a select clause
+// Gets a "select" clause
 // ------------------------------------------------------------------------------------------------
 SelectClause<out SelectClauseNode selNode>
 =
@@ -3016,7 +3098,7 @@ SelectClause<out SelectClauseNode selNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a group by clause
+// Gets a "group..by" clause
 // ------------------------------------------------------------------------------------------------
 GroupClause<out GroupByClauseNode groupNode>
   (. groupNode = null; .)
@@ -3038,7 +3120,6 @@ GroupClause<out GroupByClauseNode groupNode>
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves an expression.
-//   exprNode: expression onde retrieved.
 // ------------------------------------------------------------------------------------------------
 Expression<out ExpressionNode exprNode>   
   (. 
@@ -3125,7 +3206,6 @@ Expression<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines a null coalescing operator.
-//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 NullCoalescingExpr<out BinaryOperatorNode exprNode>
 =                     
@@ -3149,8 +3229,7 @@ NullCoalescingExpr<out BinaryOperatorNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a logical or operator.
-//   exprNode: expression node retrieved
+// Defines a "logical or" operator.
 // ------------------------------------------------------------------------------------------------
 OrExpr<out BinaryOperatorNode exprNode>
 = 
@@ -3174,8 +3253,7 @@ OrExpr<out BinaryOperatorNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a logical and operator.
-//   exprNode: expression node retrieved
+// Defines a "logical and" operator.
 // ------------------------------------------------------------------------------------------------
 AndExpr<out BinaryOperatorNode exprNode>
 = 
@@ -3199,8 +3277,7 @@ AndExpr<out BinaryOperatorNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a bitwise or operator.
-//   exprNode: expression node retrieved
+// Defines a "bitwise or" operator.
 // ------------------------------------------------------------------------------------------------
 BitOrExpr<out BinaryOperatorNode exprNode>
 = 
@@ -3224,8 +3301,7 @@ BitOrExpr<out BinaryOperatorNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a bitwise xor operator.
-//   exprNode: expression node retrieved
+// Defines a "bitwise xor" operator.
 // ------------------------------------------------------------------------------------------------
 BitXorExpr<out BinaryOperatorNode exprNode> 
 = 
@@ -3249,8 +3325,7 @@ BitXorExpr<out BinaryOperatorNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Defines a bitwise and operator.
-//   exprNode: expression node retrieved
+// Defines a "bitwise and" operator.
 // ------------------------------------------------------------------------------------------------
 BitAndExpr<out BinaryOperatorNode exprNode> 
 = 
@@ -3275,7 +3350,6 @@ BitAndExpr<out BinaryOperatorNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines an "==" or "!=" operator.
-//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 EqlExpr<out BinaryOperatorNode exprNode>
 = 
@@ -3305,7 +3379,6 @@ EqlExpr<out BinaryOperatorNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines relational and typecheck operators.
-//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 RelExpr<out BinaryOperatorNode exprNode> 
 = 
@@ -3353,7 +3426,6 @@ RelExpr<out BinaryOperatorNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines shift operators.
-//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 ShiftExpr<out BinaryOperatorNode exprNode> 
 = 
@@ -3388,7 +3460,6 @@ ShiftExpr<out BinaryOperatorNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines addition operators.
-//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 AddExpr<out BinaryOperatorNode exprNode> 
 = 
@@ -3418,8 +3489,6 @@ AddExpr<out BinaryOperatorNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines multiplication operators.
-//   expr: expression retrieved.
-//   exprNode: expression node retrieved
 // ------------------------------------------------------------------------------------------------
 MulExpr<out BinaryOperatorNode exprNode> 
 =                          
@@ -3451,7 +3520,6 @@ MulExpr<out BinaryOperatorNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves an unary expression.
-//   exprNode: Expression node retrieved.
 // ------------------------------------------------------------------------------------------------
 Unary<out ExpressionNode exprNode>   
   (. 
@@ -3507,7 +3575,6 @@ Unary<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Retrieves a primary expression.
-//   exprNode: Expression node retrieved.
 // ------------------------------------------------------------------------------------------------
 Primary<out ExpressionNode exprNode>
 =
@@ -3605,7 +3672,6 @@ Primary<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------
 // Declaration of a literal expression.
-//   valNode: Expression node retrieved.
 // ------------------------------------------------------------------------------------
 Literal<out ExpressionNode valNode>
   (. valNode = null; .)
@@ -3628,7 +3694,6 @@ Literal<out ExpressionNode valNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a primitive named literal expression.
-//   exprNode: Literal expression node.
 // ------------------------------------------------------------------------------------------------
 PrimitiveNamedLiteral<out ExpressionNode exprNode>  
 =            
@@ -3664,7 +3729,6 @@ PrimitiveNamedLiteral<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a named literal expression.
-//   exprNode: Literal expression node.
 // ------------------------------------------------------------------------------------------------
 NamedLiteral<out ExpressionNode exprNode>  
 =              
@@ -3693,7 +3757,6 @@ NamedLiteral<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a simple named literal expression.
-//   expr: Named literal expression node.
 // ------------------------------------------------------------------------------------------------
 SimpleNamedLiteral<out SimpleNameNode snlNode> 
 =
@@ -3708,8 +3771,7 @@ SimpleNamedLiteral<out SimpleNameNode snlNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a typeof operator.
-//   exprNode: Expression node.
+// Declaration of a "typeof" operator.
 // ------------------------------------------------------------------------------------------------
 TypeOfOperator<out ExpressionNode exprNode>
 = 
@@ -3733,8 +3795,7 @@ TypeOfOperator<out ExpressionNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a sizeof operator.
-//   exprNode: Expression node.
+// Declaration of a "sizeof" operator.
 // ------------------------------------------------------------------------------------------------
 SizeOfOperator<out ExpressionNode exprNode>
 = 
@@ -3758,8 +3819,7 @@ SizeOfOperator<out ExpressionNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a checked operator.
-//   exprNode: Expression node.
+// Declaration of a "checked" operator.
 // ------------------------------------------------------------------------------------------------
 CheckedOperator<out ExpressionNode exprNode>
 = 
@@ -3783,8 +3843,7 @@ CheckedOperator<out ExpressionNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of an unchecked operator.
-//   exprNode: Expression node.
+// Declaration of an "unchecked" operator.
 // ------------------------------------------------------------------------------------------------
 UncheckedOperator<out ExpressionNode exprNode>
 = 
@@ -3808,8 +3867,7 @@ UncheckedOperator<out ExpressionNode exprNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a default operator.
-//   exprNode: Expression node.
+// Declaration of a "default" operator.
 // ------------------------------------------------------------------------------------------------
 DefaultOperator<out ExpressionNode exprNode>
 = 
@@ -3834,7 +3892,6 @@ DefaultOperator<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a "new" operator.
-//   exprNode: Expression node.
 // ------------------------------------------------------------------------------------------------
 NewOperator<out ExpressionNode exprNode>  
 = 
@@ -3859,7 +3916,6 @@ NewOperator<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Represents an anonymous object initializer
-//   anonNode: anonymous operator node
 // ------------------------------------------------------------------------------------------------
 AnonymousObjectInitializer<NewOperatorWithAnonymousTypeNode anonNode>
 =
@@ -3882,7 +3938,6 @@ AnonymousObjectInitializer<NewOperatorWithAnonymousTypeNode anonNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of "new" operator member declaration list.
-//   initNode: Anonymous operator node
 // ------------------------------------------------------------------------------------------------
 MemberDeclaratorList<NewOperatorWithAnonymousTypeNode initNode>  
 =                     
@@ -3900,7 +3955,6 @@ MemberDeclaratorList<NewOperatorWithAnonymousTypeNode initNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a "new" operator declaration member.
-//   mdNode: Member declarator node
 // ------------------------------------------------------------------------------------------------
 MemberDeclarator<out MemberDeclaratorNode mdNode> 
 =
@@ -4044,7 +4098,6 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of an implicit array creation
-//   typeRef: Type to create with the new operator
 // ------------------------------------------------------------------------------------------------
 ImplicitArrayCreation<NewOperatorWithArrayNode impArrNode> 
 =
@@ -4064,10 +4117,9 @@ ImplicitArrayCreation<NewOperatorWithArrayNode impArrNode>
   (. Terminate(impArrNode); .)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declares an object or collection initializer used with "new" operator
-// +init: initializer resulted from parsing
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
 =
   "{"
@@ -4096,10 +4148,9 @@ ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
   )
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Declares an element initializer list of a collection used with "new" operator
-// +init: initializer resulted from parsing
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 ElementInitializerList<ObjectOrCollectionInitializerNode ocNode>
 =
   (. ElementInitializerNode eiNode; .)
@@ -4144,10 +4195,9 @@ ElementInitializer<out ElementInitializerNode eiNode>
   (. Terminate(eiNode);.)
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // A member initialization list declaration
-// +initList: member initializer list
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 MemberInitializerList<ObjectOrCollectionInitializerNode ocNode>
 =                  
   (. MemberInitializerNode miNode; .)   
@@ -4162,10 +4212,9 @@ MemberInitializerList<ObjectOrCollectionInitializerNode ocNode>
   } 
 .
 
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // A member initialization declaration
-// +init: member initializer
-// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 MemberInitializer<out MemberInitializerNode miNode>
 =
   ident
@@ -4187,7 +4236,6 @@ MemberInitializer<out MemberInitializerNode miNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declarares an anonymous delegate with its body.
-//   exprNode: Anonymous delegate expression node.
 // ------------------------------------------------------------------------------------------------
 AnonymousDelegate<out ExpressionNode exprNode>  
 = 
@@ -4223,7 +4271,6 @@ AnonymousDelegate<out ExpressionNode exprNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of an anonymous method parameter.
-//   parNode: Parameter definition node.
 // ------------------------------------------------------------------------------------------------
 AnonymousMethodParameter<out FormalParameterNode parNode> 
 =
@@ -4255,8 +4302,7 @@ AnonymousMethodParameter<out FormalParameterNode parNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of an array indxer operator.
-//   argNode: Expression value.
+// Declaration of an array indexer operator.
 // ------------------------------------------------------------------------------------------------
 ArrayIndexer<ArgumentNodeCollection argNodes> 
 = 
@@ -4327,40 +4373,71 @@ SingleFieldMember<out FieldTagNode fiNode>
 
 // ------------------------------------------------------------------------------------------------
 // Defines the operators that can be overloaded.
-// +op: overloaddable operator.
 // ------------------------------------------------------------------------------------------------
-OverloadableOp
-=                          
+OverloadableOp<OperatorDeclarationNode opNode>
+=  
+  ( ">"
+    (.
+       opNode.KindToken = t;
+       opNode.Kind = OverloadableOperatorType.GreaterThan;
+    .)
+    [                       
+      (. if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); .)
+      ">"
+      (.
+         opNode.SecondKindToken = t;
+         opNode.Kind = OverloadableOperatorType.RightShift;
+      .)
+    ]                        
+  )   
+  |
+  ( 
     "+"                                     
+    (. opNode.Kind = OverloadableOperatorType.Addition; .)
   | "-"
+    (. opNode.Kind = OverloadableOperatorType.Subtraction; .)
   | "!"
+    (. opNode.Kind = OverloadableOperatorType.Not; .)
   | "~"
+    (. opNode.Kind = OverloadableOperatorType.BitwiseNot; .)
   | "++"
+    (. opNode.Kind = OverloadableOperatorType.Increment; .)
   | "--"
+    (. opNode.Kind = OverloadableOperatorType.Decrement; .)
   | "true"
+    (. opNode.Kind = OverloadableOperatorType.True; .)
   | "false"
+    (. opNode.Kind = OverloadableOperatorType.False; .)
   | "*"    
+    (. opNode.Kind = OverloadableOperatorType.Multiplication; .)
   | "/"    
+    (. opNode.Kind = OverloadableOperatorType.Division; .)
   | "%"
+    (. opNode.Kind = OverloadableOperatorType.Modulo; .)
   | "&"
+    (. opNode.Kind = OverloadableOperatorType.BitwiseAnd; .)
   | "|"
+    (. opNode.Kind = OverloadableOperatorType.BitwiseOr; .)
   | "^"
+    (. opNode.Kind = OverloadableOperatorType.BitwiseXor; .)
   | "<<"
+    (. opNode.Kind = OverloadableOperatorType.LeftShift; .)
   | "=="
+    (. opNode.Kind = OverloadableOperatorType.Equal; .)
   | "!="
-  | ">" 
-        [                       
-          (. if (la.pos > t.pos+1) Error("UNDEF", la, "no whitespace allowed in right shift operator"); .)
-          ">"                   
-        ]
+    (. opNode.Kind = OverloadableOperatorType.NotEqual; .)
   | "<"                         
+    (. opNode.Kind = OverloadableOperatorType.LessThan; .)
   | ">="                        
+    (. opNode.Kind = OverloadableOperatorType.GreaterThanOrEqual; .)
   | "<="                        
+    (. opNode.Kind = OverloadableOperatorType.LessThanOrEqual; .)
+  )
+  (. opNode.KindToken = t; .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Type parameter declarations for generic types.
-//   paramNode: syntax node holding type parameters.
 // ------------------------------------------------------------------------------------------------
 TypeParameterList<ITypeParameterHolder paramNode>
 =                            
@@ -4384,8 +4461,6 @@ TypeParameterList<ITypeParameterHolder paramNode>
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a type parameter.
-//   attrNodes: Attributes belonging to the type parameter
-//   identifier: Token representing the type parameter
 // ------------------------------------------------------------------------------------------------
 TypeParameter<out AttributeDecorationNodeCollection attrNodes, out Token identifier>
 =                         
@@ -4397,7 +4472,6 @@ TypeParameter<out AttributeDecorationNodeCollection attrNodes, out Token identif
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a type argument list.
-//   argList: List of type arguments defined here.
 // ------------------------------------------------------------------------------------------------
 TypeArgumentList<out TypeOrNamespaceNodeCollection argList>  
 = 
@@ -4429,9 +4503,7 @@ TypeArgumentList<out TypeOrNamespaceNodeCollection argList>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a type parameter constraint belonging to a type, a method or a 
-// delegate.
-//   constrNode: Declaration of the constraint.
+// Declaration of a type parameter constraint belonging to a type, a method or a delegate.
 // ------------------------------------------------------------------------------------------------
 TypeParameterConstraintsClause<out TypeParameterConstraintNode constrNode>   
 =
@@ -4456,11 +4528,11 @@ TypeParameterConstraintsClause<out TypeParameterConstraintNode constrNode>
     TypeParameterConstraintTag<out tag>
     (. constrNode.ConstraintTags.Add(separator, tag); .)
   }
+  (. Terminate(constrNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Obtains a type parameter constraint tag.
-//   tag: Type parameter constrtaint tag.
 // ------------------------------------------------------------------------------------------------
 TypeParameterConstraintTag<out TypeParameterConstraintTagNode tag> 
   (. tag = null; .)

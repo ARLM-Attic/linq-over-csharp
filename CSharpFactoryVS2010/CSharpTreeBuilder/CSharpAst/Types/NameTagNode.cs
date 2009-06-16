@@ -83,6 +83,7 @@ namespace CSharpTreeBuilder.Ast
     {
       return new OutputSegment(
         SeparatorToken,
+        SeparatorToken.IsComma() ? SpaceAfterSegment.AfterComma() : null,
         IdentifierToken
         );
     }

@@ -54,13 +54,18 @@
     <Compile Include="CSharpAstBuilder\CSharpParser.Common.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Errors.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Generated.cs" />
+    <Compile Include="CSharpAstBuilder\CSharpParser.Pragmas.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Resolvers.cs" />
     <Compile Include="CSharpAstBuilder\ErrorCodes.Designer.cs">
       <DependentUpon>ErrorCodes.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="CSharpAstBuilder\IfPragmaState.cs" />
     <Compile Include="CSharpAstBuilder\ParseFileIOException.cs" />
+    <Compile Include="CSharpAstBuilder\PPExpressions\Parser.cs" />
+    <Compile Include="CSharpAstBuilder\PPExpressions\PPExpression.cs" />
+    <Compile Include="CSharpAstBuilder\PPExpressions\Scanner.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
@@ -106,6 +111,11 @@
       <DependentUpon>ISyntaxNodeVisitor.tt</DependentUpon>
     </Compile>
     <Compile Include="CSharpAst\ISyntaxNode.cs" />
+    <Compile Include="CSharpAst\Members\CastOperatorDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\IndexerDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\InterfaceEventDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\OperatorDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\OverloadableOperatorType.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeArgumentNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\AttributeNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\ExternAliasNodeCollection.cs" />

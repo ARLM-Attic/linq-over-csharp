@@ -357,20 +357,24 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Builds the ast for source file.
     /// </summary>
     /// <param name="sourceNode">The source file node to build the AST for.</param>
-    /// <param name="errorHandler">The error handler instance.</param>
+    /// <param name="project">The error handler instance.</param>
     // --------------------------------------------------------------------------------------------
     public static void BuildAstForSourceFile(SourceFileNode sourceNode, 
-      ICompilationErrorHandler errorHandler)
+      CSharpProject project)
     {
+      // --- Open the stream
       var stream = File.OpenText(sourceNode.FullName).BaseStream;
       try
       {
+        // --- Create a scanner and a parser using that scanner
         var scanner = new Scanner(stream);
-        var parser = new CSharpParser(scanner, sourceNode) {ErrorHandler = errorHandler};
+        var parser = new CSharpParser(scanner, sourceNode) {ErrorHandler = project, Project = project};
+        // --- Parse the source file
         parser.Parse();
       }
       finally
       {
+        // --- Anyway, close the source stream
         stream.Close();
       }
     }

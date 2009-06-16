@@ -57,7 +57,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected virtual OutputSegment GetBodySegments()
     {
-      return new OutputSegment(MemberDeclarations);  
+      return new OutputSegment(NestedDeclarations);  
     }
 
     // ----------------------------------------------------------------------------------------------

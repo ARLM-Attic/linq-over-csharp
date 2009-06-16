@@ -154,10 +154,14 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override OutputSegment GetOutputSegment()
     {
-      if (IsClass || IsStruct) return new OutputSegment(SeparatorToken, StartToken);
+      var separatorSegment = new OutputSegment(
+        SeparatorToken,
+        SeparatorToken.IsComma() ? SpaceAfterSegment.AfterComma() : null);
+
+      if (IsClass || IsStruct) return new OutputSegment(separatorSegment, StartToken);
       return IsNew
-        ? new OutputSegment(SeparatorToken, StartToken, OpenParenthesis, CloseParenthesis)
-        : new OutputSegment(SeparatorToken, TypeName);
+        ? new OutputSegment(separatorSegment, StartToken, OpenParenthesis, CloseParenthesis)
+        : new OutputSegment(separatorSegment, TypeName);
     }
   }
 }

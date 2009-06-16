@@ -1,50 +1,56 @@
 // ================================================================================================
-// IndentationSegment.cs
+// OperatorDeclarationNode.cs
 //
-// Created: 2009.03.27, by Istvan Novak (DeepDiver)
+// Created: 2009.06.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.CSharpAstBuilder;
+
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Controls the indentation of the source code segments
+  /// 
   /// </summary>
   // ================================================================================================
-  public class IndentationSegment : ControlSegment
+  public class OperatorDeclarationNode : MethodDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Decrement the current indentation level.
+    /// Initializes a new instance of the <see cref="OperatorDeclarationNode"/> class.
     /// </summary>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Decrement = new IndentationSegment();
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Increment the current indentation level.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Increment = new IndentationSegment();
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Avoid external instantiation
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private IndentationSegment()
+    public OperatorDeclarationNode(Token start)
+      : base(start)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Controls the indentation of the specified OutputItemSerializer.
+    /// Gets or sets the operator token.
     /// </summary>
-    /// <param name="serializer">The serializer to control.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Control(OutputItemSerializer serializer)
-    {
-      if (this == Increment) serializer.IncrementIndentation();
-      else if (this == Decrement) serializer.DecrementIndentation();
-    }
+    public Token OperatorToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the token representing the kind of the operator.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token KindToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the second token representing the kind of the operator.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token SecondKindToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the kind of the operator.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public OverloadableOperatorType Kind { get; internal set; }
   }
 }

@@ -276,7 +276,5 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
       Assert.IsTrue(InvokeParser(project));
     }
-
-
   }
 }

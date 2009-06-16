@@ -1,5 +1,8 @@
-﻿using System.Collections;
-using CSharpTreeBuilder.Ast;
+﻿// ================================================================================================
+// CSharpParser.Errors.cs
+//
+// Created: 2009.06.14, by Istvan Novak (DeepDiver)
+// ================================================================================================
 using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpAstBuilder

@@ -3,6 +3,8 @@
 //
 // Created: 2009.05.21, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
+using System.Collections.Generic;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.Cst;
 using CSharpTreeBuilder.CSharpAstBuilder;
@@ -30,6 +32,7 @@ namespace CSharpTreeBuilder.ProjectContent
       Errors = new CompilationMessageCollection();
       Warnings = new CompilationMessageCollection();
       SemanticsTree = new CSharpSemanticsTree();
+      ConditionalSymbols = new List<string>();
 
       // --- Set up the default error handling parameters
       ErrorMessageFormat = "-- line {0} col {1}: {2}";
@@ -122,9 +125,39 @@ namespace CSharpTreeBuilder.ProjectContent
     // --------------------------------------------------------------------------------------------
     public CSharpSemanticsTree SemanticsTree { get; private set; }
 
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the list of conditional symbols.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    public List<string> ConditionalSymbols { get; private set; }
+
     #endregion
 
     #region Public methods
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a conditional compilation symbol to the list of existing symbols.
+    /// </summary>
+    /// <param name="symbol">Symbols to add.</param>
+    // --------------------------------------------------------------------------------------------
+    public void AddConditionalCompilationSymbol(string symbol)
+    {
+      ProjectProvider.AddConditionalSymbol(symbol);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a list of conditional compilation symbol to the list of existing symbols.
+    /// </summary>
+    /// <param name="symbols">Array of symbols to add.</param>
+    // --------------------------------------------------------------------------------------------
+    public void AddConditionalCompilationSymbols(String[] symbols)
+    {
+      foreach (var symbol in symbols)
+        AddConditionalCompilationSymbol(symbol);
+    }
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
@@ -135,6 +168,8 @@ namespace CSharpTreeBuilder.ProjectContent
     {
       // --- Init trees, clear messages
       SyntaxTree.Reset();
+      ConditionalSymbols.Clear();
+      foreach (var item in ProjectProvider.ConditionalSymbols) ConditionalSymbols.Add(item);
       SemanticsTree.Reset();
       Errors.Clear();
       Warnings.Clear();

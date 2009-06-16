@@ -198,7 +198,7 @@ namespace CSharpTreeBuilder.Ast
     {
       base.Add(item);
       if (item.Parent == null) item.Parent = (this as ISyntaxNode).Parent;
-      if (Count == 0 && StartToken == null) StartToken = item.StartToken;
+      if (Count == 1 && StartToken == null) StartToken = item.StartToken;
       TerminatingToken = item.TerminatingToken;
     }
 

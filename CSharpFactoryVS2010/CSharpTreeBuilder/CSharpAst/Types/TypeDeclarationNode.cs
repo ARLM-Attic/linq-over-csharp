@@ -3,7 +3,6 @@
 //
 // Created: 2009.04.07, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
 

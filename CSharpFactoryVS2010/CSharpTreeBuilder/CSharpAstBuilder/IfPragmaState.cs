@@ -1,50 +1,49 @@
 // ================================================================================================
-// IndentationSegment.cs
+// IfPragmaState.cs
 //
-// Created: 2009.03.27, by Istvan Novak (DeepDiver)
+// Created: 2009.06.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
-namespace CSharpTreeBuilder.Ast
+namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// Controls the indentation of the source code segments
+  /// This class describes the processing state of a #if..#elif..#else..#endif
+  /// pragma block.
   /// </summary>
   // ================================================================================================
-  public class IndentationSegment : ControlSegment
+  internal sealed class IfPragmaState
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Decrement the current indentation level.
+    /// Token holding the error/success position information.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Decrement = new IndentationSegment();
+    public Token PragmaPosition;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Increment the current indentation level.
+    /// Flag indicating that the "true" condition block is already found or not.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public static readonly IndentationSegment Increment = new IndentationSegment();
+    public bool TrueBlockFound;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Avoid external instantiation
+    /// Flag indicating that the #else block is already found or not.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private IndentationSegment()
+    public bool ElseBlockFound;
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new #if pragma state using the specified token.
+    /// </summary>
+    /// <param name="pragmaPosition"></param>
+    // ----------------------------------------------------------------------------------------------
+    public IfPragmaState(Token pragmaPosition)
     {
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Controls the indentation of the specified OutputItemSerializer.
-    /// </summary>
-    /// <param name="serializer">The serializer to control.</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void Control(OutputItemSerializer serializer)
-    {
-      if (this == Increment) serializer.IncrementIndentation();
-      else if (this == Decrement) serializer.DecrementIndentation();
+      PragmaPosition = pragmaPosition;
+      TrueBlockFound = false;
     }
   }
 }

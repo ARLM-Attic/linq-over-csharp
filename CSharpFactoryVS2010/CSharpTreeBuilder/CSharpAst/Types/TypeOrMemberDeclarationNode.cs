@@ -152,7 +152,9 @@ namespace CSharpTreeBuilder.Ast
         TypeParameters,
         GetDeclarationSegments(),
         ForceNewLineSegment.Default,
-        TypeParameterConstraints
+        IndentationSegment.Increment,
+        TypeParameterConstraints,
+        IndentationSegment.Decrement
         );
     }
   }
