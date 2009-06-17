@@ -1,7 +1,7 @@
 // ================================================================================================
-// ReferenceOperatorNode.cs
+// DefinePragmaNode.cs
 //
-// Created: 2009.04.15, by Istvan Novak (DeepDiver)
+// Created: 2009.06.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,18 +9,18 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a reference operator.
+  /// This class represents a "#define" pragma node.
   /// </summary>
   // ================================================================================================
-  public sealed class ReferenceOperatorNode : UnaryOperatorNode
+  public class DefinePragmaNode : PragmaNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReferenceOperatorNode"/> class.
+    /// Initializes a new instance of the <see cref="DefinePragmaNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ReferenceOperatorNode(Token start)
+    public DefinePragmaNode(Token start)
       : base(start)
     {
     }

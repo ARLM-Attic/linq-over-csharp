@@ -1,7 +1,7 @@
 // ================================================================================================
-// FormalParameterListNode.cs
+// EndRegionPragmaNode.cs
 //
-// Created: 2009.05.13, by Istvan Novak (DeepDiver)
+// Created: 2009.06.17, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,32 +9,30 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a formal parameter list.
+  /// This class represents the "#endregion" pragma node.
   /// </summary>
-  /// <remarks>
-  /// The opening bracket is represented by the starting token, the closing bracket by the 
-  /// terminating token.
-  /// </remarks>
   // ================================================================================================
-  public class FormalParameterListNode : SyntaxNode<TypeOrMemberDeclarationNode>
+  public class EndRegionPragmaNode : PragmaNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="FormalParameterListNode"/> class.
+    /// Initializes a new instance of the <see cref="EndRegionPragmaNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
+    /// <param name="regionPragma">The "#region" pragma belonging to this "#endregion".</param>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode(Token start)
+    public EndRegionPragmaNode(Token start, RegionPragmaNode regionPragma)
       : base(start)
     {
-      Items = new FormalParameterNodeCollection {ParentNode = this};
+      RegionPragma = regionPragma;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets collection of formal parameter items.
+    /// Gets or sets the #region pragma belonging to this "#endregion".
     /// </summary>
+    /// <value>The region pragma.</value>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterNodeCollection Items { get; private set; }
+    public RegionPragmaNode RegionPragma { get; private set; }
   }
 }

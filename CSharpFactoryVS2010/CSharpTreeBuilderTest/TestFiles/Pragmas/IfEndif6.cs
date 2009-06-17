@@ -11,7 +11,7 @@ class PurchaseTransaction
     Console.WriteLine("This");
     Console.WriteLine("This");
 #else
-    Console.WriteLine();
+    Environment.Exit(1);
 #endif
   }
 }

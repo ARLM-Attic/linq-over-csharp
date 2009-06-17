@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.Ast
   /// 			<em>identifier: <see cref="TypeOrMemberDeclarationNode.IdentifierToken"/></em><br/>
   ///             "<strong>:</strong>": <see cref="TypeDeclarationNode.ColonToken"/><br/>
   /// 			<em>TypeOrNamespaceNode:</em>
-  /// 			<see cref="TypeOrMemberDeclarationNode.TypeName"/><br/>
+  /// 			<see cref="TypeDeclarationNode.BaseTypes"/><br/>
   ///             "<strong>{</strong>": <see cref="TypeWithBodyDeclarationNode.OpenBrace"/><br/>
   ///             { <em>EnumValueNode</em> }: <see cref="Values"/><br/>
   ///             "<strong>,</strong>": <see cref="OrphanSeparator"/><br/>

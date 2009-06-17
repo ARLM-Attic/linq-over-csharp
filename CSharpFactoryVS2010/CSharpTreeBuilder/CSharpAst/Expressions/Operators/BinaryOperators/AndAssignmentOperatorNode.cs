@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class defines an and assignment ("&=") operator node.
+  /// This class defines an "and assignment" operator node.
   /// </summary>
   // ================================================================================================
   public class AndAssignmentOperatorNode : AssignmentOperatorNodeBase

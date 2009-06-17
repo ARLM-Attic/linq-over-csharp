@@ -40,6 +40,7 @@ namespace CSharpTreeBuilder.Ast
     {
       StartToken = start;
       TerminatingToken = start;
+      Validate();
     }
 
     // ----------------------------------------------------------------------------------------------

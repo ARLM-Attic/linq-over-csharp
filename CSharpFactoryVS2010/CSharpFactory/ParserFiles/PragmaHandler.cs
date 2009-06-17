@@ -353,7 +353,7 @@ namespace CSharpFactory.ParserFiles
     {
       if (_IfPragmaStack.Count > 0)
       {
-        IfPragmaState status = _IfPragmaStack.Peek();
+        var status = _IfPragmaStack.Peek();
         if (symbol.kind == CSharpSyntaxParser.ppEndifKind || !status.ElseBlockFound)
           return false;
       }

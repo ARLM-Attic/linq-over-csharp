@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>
-  ///             "<strong>[</strong>": <see cref="IsyntaxNode.StartToken"/><br/>
+  ///             "<strong>[</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
   ///             [<br/>
   /// 			<em>identifier</em>: <see cref="TargetToken"/><br/>
   ///             "<strong>:</strong>": Stored in the separator token of the next

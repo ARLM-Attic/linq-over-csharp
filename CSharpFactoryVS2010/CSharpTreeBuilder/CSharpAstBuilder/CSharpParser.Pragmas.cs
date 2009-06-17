@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpAstBuilder.PPExpressions;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -47,6 +48,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Stores state information about #region pragmas.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private readonly Stack<RegionPragmaNode> _RegionStack = new Stack<RegionPragmaNode>();
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Signs that the first real token occurred in the source file.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -63,13 +71,14 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void AddConditionalDirective(Token pragma)
     {
-      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      var definePragma = new DefinePragmaNode(pragma);
+      if (!RegisterPragma(definePragma)) return;
       if (_FirstRealTokenOccurred)
       {
         Error1032(Lookahead);
         return;
       }
-      var symbol = GetPreprocessorSymbol(pragma.val).Trim();
+      var symbol = definePragma.PreprocessorSymbol;
       if (!Project.ConditionalSymbols.Contains(symbol)) Project.ConditionalSymbols.Add(symbol);
     }
 
@@ -81,13 +90,14 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void RemoveConditionalDirective(Token pragma)
     {
-      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      var undefPragma = new UndefPragmaNode(pragma);
+      if (!RegisterPragma(undefPragma)) return;
       if (_FirstRealTokenOccurred)
       {
         Error1032(Lookahead);
         return;
       }
-      Project.ConditionalSymbols.Remove(GetPreprocessorSymbol(pragma.Value).Trim());
+      Project.ConditionalSymbols.Remove(undefPragma.PreprocessorSymbol);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -98,23 +108,25 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public void IfPragma(Token pragma)
     {
-      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      var ifPragma = new IfPragmaNode(pragma);
+      if (!RegisterPragma(ifPragma)) return;
 
       // ---Evaluate the pragma, if failed we skip it.
       var evalStatus = EvaluatePragmaCondition(pragma);
       if (evalStatus == PPEvaluationStatus.Failed) return;
 
       // --- Prepare the pragma status
-      var newIfPragma = new IfPragmaState(pragma)
-                          {
-                            TrueBlockFound = evalStatus == PPEvaluationStatus.True
-                          };
+      var newIfPragma = new IfPragmaState(ifPragma, evalStatus == PPEvaluationStatus.True);
       _IfPragmaStack.Push(newIfPragma);
 
       // --- Skip the whole #if block, if evaluates to false.
-      if (!newIfPragma.TrueBlockFound)
+      if (newIfPragma.TrueBlockFound)
       {
-        SkipFalseBlock();
+        ifPragma.EvaluatesToTrue = true;
+      }
+      else
+      {
+        SkipFalseBlock(ifPragma);
       }
     }
 
@@ -126,9 +138,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public void ElifPragma(Token pragma)
     {
-      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      var elifPragma = new ElseIfPragmaNode(pragma);
+      if (!RegisterPragma(elifPragma)) return;
       if (CheckUnexpectedPragma(pragma)) return;
       var status = _IfPragmaStack.Peek();
+      status.IfPragma.ElseIfPragmas.Add(elifPragma);
       if (!status.TrueBlockFound)
       {
         // --- Evaluate the #elif condition 
@@ -136,9 +150,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         status.TrueBlockFound = evalStatus == PPEvaluationStatus.True;
 
         // --- If this is the true block, we do not skip it.
-        if (status.TrueBlockFound) return;
+        if (status.TrueBlockFound)
+        {
+          elifPragma.EvaluatesToTrue = true;
+          return;
+        }
       }
-      SkipFalseBlock();
+      SkipFalseBlock(elifPragma);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -149,13 +167,19 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public void ElsePragma(Token pragma)
     {
-      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      var elsePragma = new ElsePragmaNode(pragma);
+      if (!RegisterPragma(elsePragma)) return;
       if (CheckUnexpectedPragma(pragma)) return;
       var status = _IfPragmaStack.Peek();
       status.ElseBlockFound = true;
+      status.IfPragma.ElsePragma = elsePragma;
       if (status.TrueBlockFound)
       {
-        SkipFalseBlock();
+        SkipFalseBlock(elsePragma);
+      }
+      else
+      {
+        elsePragma.EvaluatesToTrue = true;
       }
     }
 
@@ -167,9 +191,143 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public void EndifPragma(Token pragma)
     {
-      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      var endifPragma = new EndIfPragmaNode(pragma);
+      if (!RegisterPragma(endifPragma)) return;
       if (CheckUnexpectedPragma(pragma)) return;
-      _IfPragmaStack.Pop();
+      var status = _IfPragmaStack.Pop();
+      status.IfPragma.EndIfPragma = endifPragma;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Handles the #line pragma.
+    /// </summary>
+    /// <param name="pragma">Pragma expression</param>
+    // ----------------------------------------------------------------------------------------------
+    public void LinePragma(Token pragma)
+    {
+      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      string linePragmaText = GetPreprocessorText(pragma.val);
+      if (linePragmaText.Length > 0)
+      {
+        int endLine;
+        string lineSymbol = GetLiteral(linePragmaText, 0, out endLine);
+        int endFile;
+        string fileSymbol = GetLiteral(linePragmaText, endLine, out endFile);
+
+        if (lineSymbol == "default" && string.IsNullOrEmpty(fileSymbol))
+        {
+          ErrorHandler.ResetRedirection();
+          return;
+        }
+        if (HasDigitOnly(lineSymbol))
+        {
+          if (String.IsNullOrEmpty(fileSymbol))
+          {
+            ErrorHandler.Redirect(pragma.line, Int32.Parse(lineSymbol), null);
+            return;
+          }
+          if (IsQuotedFileName(fileSymbol))
+          {
+            ErrorHandler.Redirect(pragma.line, Int32.Parse(lineSymbol),
+                                  fileSymbol.Substring(1, fileSymbol.Length - 2));
+            return;
+          }
+        }
+      }
+      Error1576(pragma);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Handles the #error pragma.
+    /// </summary>
+    /// <param name="pragma">Pragma expression</param>
+    // ----------------------------------------------------------------------------------------------
+    public void ErrorPragma(Token pragma)
+    {
+      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      Error1029(pragma, GetPreprocessorText(pragma.val));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Handles the #warning pragma.
+    /// </summary>
+    /// <param name="pragma">Pragma expression</param>
+    // ----------------------------------------------------------------------------------------------
+    public void WarningPragma(Token pragma)
+    {
+      if (!CheckPragmaIsFirstInLine(pragma)) return;
+      ErrorHandler.Warning("CS1030", pragma, "#warning: " + GetPreprocessorText(pragma.val));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Handles the #pragma pragma.
+    /// </summary>
+    /// <param name="pragma">Pragma expression</param>
+    // ----------------------------------------------------------------------------------------------
+    public void PragmaPragma(Token pragma)
+    {
+      RegisterPragma(new PragmaPragmaNode(pragma));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Handles the #region pragma.
+    /// </summary>
+    /// <param name="pragma">Pragma expression</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RegionPragma(Token pragma)
+    {
+      var parentRegion = _RegionStack.Count == 0 ? null : _RegionStack.Peek();
+      var regionPragma = new RegionPragmaNode(pragma, parentRegion);
+      if (!RegisterPragma(regionPragma)) return;
+      _RegionStack.Push(regionPragma);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Handles the #endregion pragma.
+    /// </summary>
+    /// <param name="pragma">Pragma expression</param>
+    // ----------------------------------------------------------------------------------------------
+    public void EndRegionPragma(Token pragma)
+    {
+      var hostRegion = _RegionStack.Count == 0 ? null : _RegionStack.Peek();
+      var endRegion = new EndRegionPragmaNode(pragma, hostRegion);
+      if (!RegisterPragma(endRegion)) return;
+      if (hostRegion == null)
+      {
+        Error1028(pragma);
+        endRegion.Invalidate();
+        return;
+      }
+      hostRegion.EndRegion = endRegion;
+      _RegionStack.Pop();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Registers a pragma with the current source file.
+    /// </summary>
+    /// <param name="pragma">Syntax node representing the pragma.</param>
+    /// <returns>
+    /// True, if pragma is successfully registered, false, if pragma is not the first token in the
+    /// current line.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    private bool RegisterPragma(PragmaNode pragma)
+    {
+      SourceFileNode.Pragmas.Add(pragma);
+      var pragmaOk = CheckTokenIsFirstInLine(pragma.StartToken);
+      if (!pragmaOk)
+      {
+        pragma.Invalidate();
+        Error1040(pragma.StartToken);
+      }
+      return pragmaOk;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -203,34 +361,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       }
       Error1028(symbol);
       return true;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the first symbol after the preprocessor directive.
-    /// </summary>
-    /// <param name="symbol">Symbol representing the preprocessor directive</param>
-    /// <returns>
-    /// Preprocessor tag
-    /// </returns>
-    /// <remarks>
-    /// input:        "#" {ws} directive ws {ws} {not-newline} {newline}
-    /// valid input:  "#" {ws} directive ws {ws} {non-ws} {ws} {newline}
-    /// output:       {non-ws}
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    private static string GetPreprocessorSymbol(string symbol)
-    {
-      var start = 1;
-      // skip {ws}
-      start = EndOf(symbol, start, true);
-      // skip directive  
-      start = EndOf(symbol, start, false);
-      // skip ws {ws}
-      start = EndOf(symbol, start, true);
-      // search end of symbol
-      var end = EndOf(symbol, start, false);
-      return symbol.Substring(start, end - start);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -334,19 +464,21 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Skips a false conditional block.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private void SkipFalseBlock()
+    private void SkipFalseBlock(ConditionalPragmaNode pragmaNode)
     {
       Scanner.SkipMode = true;
       try
       {
-        int state = 0;
-        Token cur = Scanner.PeekWithPragma();
+        var state = 0;
+        var cur = Scanner.PeekWithPragma();
+        var firstFound = false;
         while(true)
         {
           switch (cur.kind)
           {
             case ppIfKind:
               ++state;
+              SetSkipBoundaries(pragmaNode, cur, ref firstFound);
               break;
             case ppEndifKind:
               if (state == 0)
@@ -354,23 +486,27 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
                 return;
               }
               --state;
+              SetSkipBoundaries(pragmaNode, cur, ref firstFound);
               break;
             case ppElifKind:
               if (state == 0) 
               {
                 return;
               }
+              SetSkipBoundaries(pragmaNode, cur, ref firstFound);
               break;
             case ppElseKind:
               if (state == 0)
               {
                 return;
               }
+              SetSkipBoundaries(pragmaNode, cur, ref firstFound);
               break;
             case EOFKind:
               Error("INCFIL", cur, "Incomplete file.");
               return;
             default:
+              SetSkipBoundaries(pragmaNode, cur, ref firstFound);
               break;
           }
 
@@ -385,5 +521,78 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the skipped token boundaries.
+    /// </summary>
+    /// <param name="pragmaNode">The pragma node.</param>
+    /// <param name="token">The token.</param>
+    /// <param name="firstFound">True means the first token has already been found.</param>
+    // ----------------------------------------------------------------------------------------------
+    private static void SetSkipBoundaries(ConditionalPragmaNode pragmaNode, Token token, 
+      ref bool firstFound)
+    {
+      if (!firstFound)
+      {
+        pragmaNode.SetFirstSkippedToken(token);
+        pragmaNode.SetLastSkippedToken(token);
+        firstFound = true;
+      }
+      else
+      {
+        pragmaNode.SetLastSkippedToken(token);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the literal string starting at the specified position. Skips whitespaces
+    /// before the string. Literal ends at the first whitespace character.
+    /// </summary>
+    /// <param name="symbol">Original symbol.</param>
+    /// <param name="start">Start index of the literal.</param>
+    /// <param name="end">Index of the character following the literal.</param>
+    /// <returns>Literal string found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static string GetLiteral(string symbol, int start, out int end)
+    {
+      start = EndOf(symbol, start, true);
+      end = EndOf(symbol, start, false);
+      return symbol.Substring(start, end - start);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified symbol contains only decimal digits.
+    /// </summary>
+    /// <param name="symbol">Symbol to check.</param>
+    /// <returns>
+    /// True, if the symbol contains only decimal digits; otherwise, false.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static bool HasDigitOnly(string symbol)
+    {
+      foreach (var c in symbol)
+        if (!Char.IsDigit(c)) return false;
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the specified symbol is a quoted file name.
+    /// </summary>
+    /// <param name="symbol">Symbol to check.</param>
+    /// <returns>
+    /// True, if the symbol is a qouted file name; otherwise, false.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public static bool IsQuotedFileName(string symbol)
+    {
+      if (symbol == null || symbol.Length < 2) return false;
+      if (!symbol.StartsWith("\"") || !symbol.EndsWith("\"")) return false;
+      foreach (var c in symbol.Substring(1, symbol.Length - 2))
+        if (c == '\"') return false;
+      return true;
+    }
   }
 }

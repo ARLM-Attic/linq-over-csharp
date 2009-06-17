@@ -71,7 +71,7 @@
     <None Include="TestFiles\TypeMembers\BasicMembersOk.cs" />
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
-    <None Include="TestFiles\Pragmas\RegionOk.cs" />
+    <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\Pragmas\PragmaAfterNonWhiteSpace.cs" />
     <None Include="TestFiles\Pragmas\OpenRegion.cs" />
     <None Include="TestFiles\Pragmas\LinePragma.cs" />

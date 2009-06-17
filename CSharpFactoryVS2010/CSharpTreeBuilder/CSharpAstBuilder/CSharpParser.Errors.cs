@@ -270,11 +270,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         string.Format("'{0}' is a '{1}' but is used like a '{2}'", name, construct1, construct2));
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Error CS0128: A local variable named '{0}' is already defined in this scope.
-    /// </summary>
-    /// <param name="localVariable">Local variable already declared</param>
+    //// --------------------------------------------------------------------------------
+    ///// <summary>
+    ///// Error CS0128: A local variable named '{0}' is already defined in this scope.
+    ///// </summary>
+    ///// <param name="localVariable">Local variable already declared</param>
     // --------------------------------------------------------------------------------
     // TODO: Fix this code
     //public void Error0128(LocalVariable localVariable)
@@ -296,15 +296,15 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       Error("CS0132", token, "'{0}': a static constructor must be parameterless", name);
     }
 
-    // --------------------------------------------------------------------------------
-    /// <summary>
-    /// Error CS0136: A local variable named '{0}' cannot be declared in this scope
-    /// because it would give a different meaning to '{0}', which is already used
-    /// in a '{1}' scope to denote something else.
-    /// </summary>
-    /// <param name="localVariable">Local variable already declared</param>
-    /// <param name="scope">Declaration scope</param>
-    // --------------------------------------------------------------------------------
+    //// --------------------------------------------------------------------------------
+    ///// <summary>
+    ///// Error CS0136: A local variable named '{0}' cannot be declared in this scope
+    ///// because it would give a different meaning to '{0}', which is already used
+    ///// in a '{1}' scope to denote something else.
+    ///// </summary>
+    ///// <param name="localVariable">Local variable already declared</param>
+    ///// <param name="scope">Declaration scope</param>
+    //// --------------------------------------------------------------------------------
     // TODO: Fix this code
     //public void Error0136(LocalVariable localVariable, string scope)
     //{

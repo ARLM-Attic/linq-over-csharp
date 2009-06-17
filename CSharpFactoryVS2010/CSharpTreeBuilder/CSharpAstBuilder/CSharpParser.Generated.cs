@@ -204,16 +204,22 @@ public partial class CSharpParser
 				EndifPragma(la); 
 				}
 				if (la.kind == 142) {
+				LinePragma(la); 
 				}
 				if (la.kind == 143) {
+				ErrorPragma(la); 
 				}
 				if (la.kind == 144) {
+				WarningPragma(la); 
 				}
 				if (la.kind == 145) {
+				PragmaPragma(la); 
 				}
 				if (la.kind == 146) {
+				RegionPragma(la); 
 				}
 				if (la.kind == 147) {
+				EndRegionPragma(la); 
 				}
 				if (la.kind == 148) {
 				}
@@ -974,7 +980,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	void Expression(out ExpressionNode exprNode) {
 		exprNode = null;
 		ExpressionNode leftExprNode;
-		BinaryOperatorNode ncsNode = null;
 		
 		if (IsQueryExpression()) {
 			var qNode = new QueryExpressionNode(la);    
@@ -1788,7 +1793,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	}
 
 	void FormalParameterTag(out FormalParameterNode parNode) {
-		ExpressionNode exprNode;
 		var attrNodes = new AttributeDecorationNodeCollection();
 		parNode = null;
 		var modifier = FormalParameterModifier.In;
@@ -1826,7 +1830,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	void CurrentArgumentItem(out ArgumentNode argNode) {
 		ExpressionNode exprNode; 
 		Token argKind = null;
-		Token separator = null;
 		
 		if (la.kind == 50 || la.kind == 57) {
 			if (la.kind == 57) {
@@ -1846,8 +1849,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	}
 
 	void Attributes(out AttributeDecorationNode attrNode) {
-		string scope = ""; 
-		attrNode = null;
 		AttributeNode attributeNode;
 		Token separator = null;
 		

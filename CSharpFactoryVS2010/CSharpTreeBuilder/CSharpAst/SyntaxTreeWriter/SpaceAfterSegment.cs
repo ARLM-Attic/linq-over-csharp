@@ -21,7 +21,6 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="SpaceAfterSegment"/> class.
     /// </summary>
-    /// <param name="token">The token surrounding with spaces.</param>
     /// <param name="type">The type of token surrounded.</param>
     // ----------------------------------------------------------------------------------------------
     private SpaceAfterSegment(SpaceType type)

@@ -1,52 +1,50 @@
 // ================================================================================================
-// IfPragmaState.cs
+// IfPragmaNode.cs
 //
-// Created: 2009.06.13, by Istvan Novak (DeepDiver)
+// Created: 2009.06.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpAstBuilder;
 
-namespace CSharpTreeBuilder.CSharpAstBuilder
+namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class describes the processing state of a #if..#elif..#else..#endif
-  /// pragma block.
+  /// This class represents an "#if" pragma node.
   /// </summary>
   // ================================================================================================
-  internal sealed class IfPragmaState
+  public class IfPragmaNode : ConditionalPragmaNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the "#if" pragma instance represented by this state.
+    /// Initializes a new instance of the <see cref="IfPragmaNode"/> class.
     /// </summary>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public IfPragmaNode IfPragma;
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Flag indicating that the "true" condition block is already found or not.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool TrueBlockFound;
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Flag indicating that the #else block is already found or not.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool ElseBlockFound;
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a new #if pragma state using the specified token.
-    /// </summary>
-    /// <param name="ifPragma">The "#if" pragma represented by this state.</param>
-    /// <param name="trueBlockFound">if set to <c>true</c> if true block found.</param>
-    // ----------------------------------------------------------------------------------------------
-    public IfPragmaState(IfPragmaNode ifPragma,bool trueBlockFound)
+    public IfPragmaNode(Token start)
+      : base(start)
     {
-      IfPragma = ifPragma;
-      TrueBlockFound = trueBlockFound;
+      ElseIfPragmas = new ElseIfPragmaNodeCollection {ParentNode = this};
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the collection of "#elif" pragmas belonging to this #if pragma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ElseIfPragmaNodeCollection ElseIfPragmas { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the "#else" pragmas belonging to this #if pragma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ElsePragmaNode ElsePragma { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the "#endif" pragmas belonging to this #if pragma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public EndIfPragmaNode EndIfPragma { get; internal set; }
   }
 }

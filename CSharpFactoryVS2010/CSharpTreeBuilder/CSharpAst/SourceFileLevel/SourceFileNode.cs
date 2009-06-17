@@ -3,6 +3,7 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Collections.Generic;
 using System.IO;
 
 namespace CSharpTreeBuilder.Ast
@@ -45,6 +46,7 @@ namespace CSharpTreeBuilder.Ast
       Name = Path.GetFileName(fullName);
       FullName = fullName;
       GlobalAttributes = new AttributeDecorationNodeCollection {ParentNode = this};
+      Pragmas = new PragmaNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -79,6 +81,31 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public AttributeDecorationNodeCollection GlobalAttributes { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the collection of pragmas belonging to this source file.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public PragmaNodeCollection Pragmas { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of top level "#region" pragmas belonging to this source file.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<RegionPragmaNode> Regions
+    {
+      get
+      {
+        foreach (var pragma in Pragmas)
+        {
+          var regionPragma = pragma as RegionPragmaNode;
+          if (regionPragma != null && regionPragma.ParentRegion == null) 
+            yield return regionPragma;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

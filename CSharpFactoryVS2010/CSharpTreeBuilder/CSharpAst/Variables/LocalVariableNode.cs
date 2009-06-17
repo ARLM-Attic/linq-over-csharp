@@ -19,9 +19,9 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalVariableNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="typeNode">The type node.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
+    public LocalVariableNode(ISyntaxNode typeNode)
       : base(typeNode.StartToken)
     {
       VariableTags = new LocalVariableTagNodeCollection { ParentNode = this };

@@ -232,12 +232,12 @@ PRAGMAS
   ppElif    = "#" {ws} "elif" {notNewLine} newLine.       (. ElifPragma(la); .) 
   ppElse    = "#" {ws} "else" {notNewLine} newLine.       (. ElsePragma(la); .) 
   ppEndif   = "#" {ws} "endif" {notNewLine} newLine.      (. EndifPragma(la); .) 
-  ppLine    = "#" {ws} "line" {notNewLine} newLine.       //(. PragmaHandler.LinePragma(la); .) 
-  ppError   = "#" {ws} "error" {notNewLine} newLine.      //(. PragmaHandler.ErrorPragma(la); .) 
-  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    //(. PragmaHandler.WarningPragma(la); .) 
-  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     //(. PragmaHandler.PragmaPragma(la); .) 
-  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     //(. PragmaHandler.RegionPragma(la); .) 
-  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  //(. PragmaHandler.EndregionPragma(la); .) 
+  ppLine    = "#" {ws} "line" {notNewLine} newLine.       (. LinePragma(la); .) 
+  ppError   = "#" {ws} "error" {notNewLine} newLine.      (. ErrorPragma(la); .) 
+  ppWarning = "#" {ws} "warning" {notNewLine} newLine.    (. WarningPragma(la); .) 
+  ppPragma  = "#" {ws} "pragma" {notNewLine} newLine.     (. PragmaPragma(la); .) 
+  ppRegion  = "#" {ws} "region" {notNewLine} newLine.     (. RegionPragma(la); .) 
+  ppEndReg  = "#" {ws} "endregion" {notNewLine} newLine.  (. EndRegionPragma(la); .) 
 
   // ----------------------------------------------------------------------------------------------
   // Comments are handled as special pragmas
@@ -1338,7 +1338,6 @@ ArrayInitializer<out ArrayInitializerNode initNode>
 FormalParameterTag<out FormalParameterNode parNode>
 =
   (. 
-     ExpressionNode exprNode;
      var attrNodes = new AttributeDecorationNodeCollection();
      parNode = null;
      var modifier = FormalParameterModifier.In;
@@ -1417,7 +1416,6 @@ CurrentArgumentItem<out ArgumentNode argNode>
   (. 
      ExpressionNode exprNode; 
      Token argKind = null;
-     Token separator = null;
   .)
   [           
     ( "ref" | "out" )
@@ -1567,8 +1565,6 @@ InterfaceAccessors<PropertyDeclarationNodeBase propNode>
 // ------------------------------------------------------------------------------------------------
 Attributes<out AttributeDecorationNode attrNode>
   (. 
-     string scope = ""; 
-     attrNode = null;
      AttributeNode attributeNode;
      Token separator = null;
   .)
@@ -3125,7 +3121,6 @@ Expression<out ExpressionNode exprNode>
   (. 
      exprNode = null;
      ExpressionNode leftExprNode;
-     BinaryOperatorNode ncsNode = null;
   .)
 =
   (

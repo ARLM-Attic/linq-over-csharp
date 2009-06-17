@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class defines a bitwise and ("&") operator node.
+  /// This class defines a bitwise and operator node.
   /// </summary>
   // ================================================================================================
   public class BitwiseAndOperatorNode : BinaryOperatorNode

@@ -12,14 +12,23 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public enum SpaceType
   {
+    /// <summary>Assignment operator</summary>
     AssignmentOp,
+    /// <summary>Before colon token in attributes</summary>
     BeforeColonInAttributes,
+    /// <summary>After colon token in attributes</summary>
     AfterColonInAttributes,
+    /// <summary>Before comma token</summary>
     BeforeComma,
+    /// <summary>After comma token</summary>
     AfterComma,
+    /// <summary>Before colon token preceding base type list</summary>
     BeforeBaseTypeColon,
+    /// <summary>After colon token preceding base type list</summary>
     AfterBaseTypeColon,
+    /// <summary>Before colon token preceding constraint tag list</summary>
     BeforeTypeConstraintColon,
+    /// <summary>After colon token preceding constraint tag list</summary>
     AfterTypeConstraintColon
   }
 }

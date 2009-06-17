@@ -19,6 +19,7 @@ namespace CSharpTreeBuilder.Ast
     /// Initializes a new instance of the <see cref="RightShiftOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
+    /// <param name="secondAngle">The second angle token.</param>
     // ----------------------------------------------------------------------------------------------
     public RightShiftOperatorNode(Token start, Token secondAngle)
       : base(start)

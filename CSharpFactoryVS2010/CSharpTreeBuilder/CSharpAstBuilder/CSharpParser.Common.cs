@@ -83,7 +83,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       Scanner = scanner;
       SourceFileNode = sourceFileNode;
       // TODO: Fix this code
-      //PragmaHandler = new PragmaHandler(this);
       //CommentHandler = new CommentHandler(this);
     }
 
@@ -120,11 +119,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the last comment that is not assigned to any language element.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
     // TODO: Fix this code
     //public CommentInfo OrphanComment { get; set; }
 
@@ -134,22 +128,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Scanner Scanner { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the pragma handler used by this parser.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    // TODO: Fix this code
-    //internal PragmaHandler PragmaHandler { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the comment handler used by this parser.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    // TODO: Fix this code
-    //internal CommentHandler CommentHandler { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

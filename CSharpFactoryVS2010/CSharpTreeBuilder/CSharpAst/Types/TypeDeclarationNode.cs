@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>
-  /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
+  /// 			<em>identifier</em>: <see cref="TypeOrMemberDeclarationNode.IdentifierToken"/><br/>
   ///             "<strong>:</strong>": <see cref="ColonToken"/> (optional separator for
   ///             base types)<br/>
   ///             { <em>TypeOrNamespaceNode</em> }: <see cref="BaseTypes"/><br/>
