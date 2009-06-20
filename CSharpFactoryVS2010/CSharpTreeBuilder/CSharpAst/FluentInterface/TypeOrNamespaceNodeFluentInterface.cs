@@ -14,12 +14,32 @@ namespace CSharpTreeBuilder.Ast
     /// Creates a new TypeTag and adds it to a TypeOrNamespaceNode.
     /// </summary>
     /// <param name="node">A TypeOrNamespaceNode node</param>
-    /// <param name="name">The name of the TypeTag</param>
+    /// <param name="names">Any number of name parts.</param>
     /// <returns>The TypeOrNamespaceNode parameter is returned to enable method chaining.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static TypeOrNamespaceNode TypeTag(this TypeOrNamespaceNode node, string name)
+    public static TypeOrNamespaceNode TypeTag(this TypeOrNamespaceNode node, params string[] names)
     {
-      node.AddTypeTag(new TypeTagNode(new Token(name), null));
+      foreach (var name in names)
+      {
+        node.AddTypeTag(new TypeTagNode(new Token(name), null));
+      }
+      return node;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new TypeTag and adds it to a TypeOrNamespaceNode.
+    /// </summary>
+    /// <param name="node">A TypeOrNamespaceNode node</param>
+    /// <param name="typeTagNodes">Any number of TypeTagNode objects.</param>
+    /// <returns>The TypeOrNamespaceNode parameter is returned to enable method chaining.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static TypeOrNamespaceNode TypeTag(this TypeOrNamespaceNode node, params TypeTagNode[] typeTagNodes)
+    {
+      foreach (var typeTagNode in typeTagNodes)
+      {
+        node.AddTypeTag(typeTagNode);
+      }
       return node;
     }
 

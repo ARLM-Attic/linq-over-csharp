@@ -103,6 +103,7 @@
     <Compile Include="CSharpAst\Expressions\Query\WhereClauseNode.cs" />
     <Compile Include="CSharpAst\FluentInterface\CompilationUnitNodeFluentInterface.cs" />
     <Compile Include="CSharpAst\FluentInterface\TypeOrNamespaceNodeFluentInterface.cs" />
+    <Compile Include="CSharpAst\FluentInterface\TypeTagNodeFluentInterface.cs" />
     <Compile Include="CSharpAst\FluentInterface\UsingAliasNodeFluentInterface.cs" />
     <Compile Include="CSharpAst\FluentInterface\UsingNamespaceNodeFluentInterface.cs" />
     <Compile Include="CSharpAst\ISyntaxNodeVisitor.cs">

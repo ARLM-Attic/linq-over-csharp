@@ -12,12 +12,12 @@
     /// Adds a TypeTag to a UsingNamespaceNode's namespace-or-typename name.
     /// </summary>
     /// <param name="node">A UsingNamespaceNode node</param>
-    /// <param name="name">The name of the TypeTag</param>
+    /// <param name="names">Any number of name parts.</param>
     /// <returns>The UsingNamespaceNode is returned to enable method chaining.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static UsingNamespaceNode TypeTag(this UsingNamespaceNode node, string name)
+    public static UsingNamespaceNode TypeTag(this UsingNamespaceNode node, params string[] names)
     {
-      node.TypeName.TypeTag(name);
+      node.TypeName.TypeTag(names);
       return node;
     }
 

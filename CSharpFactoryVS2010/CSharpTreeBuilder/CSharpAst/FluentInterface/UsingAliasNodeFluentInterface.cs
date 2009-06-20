@@ -12,15 +12,29 @@
     /// Adds a TypeTag to a UsingAliasNode's namespace-or-typename name.
     /// </summary>
     /// <param name="node">A UsingAliasNode node</param>
-    /// <param name="name">The name of the TypeTag</param>
+    /// <param name="names">Any number of name parts.</param>
     /// <returns>The UsingAliasNode is returned to enable method chaining.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static UsingAliasNode TypeTag(this UsingAliasNode node, string name)
+    public static UsingAliasNode TypeTag(this UsingAliasNode node, params string[] names)
     {
-      node.TypeName.TypeTag(name);
+      node.TypeName.TypeTag(names);
       return node;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a TypeTag to a UsingAliasNode's namespace-or-typename name.
+    /// </summary>
+    /// <param name="node">A UsingAliasNode node</param>
+    /// <param name="typeTagNodes">Any number of TypeTageNode objects.</param>
+    /// <returns>The UsingAliasNode is returned to enable method chaining.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static UsingAliasNode TypeTag(this UsingAliasNode node, params TypeTagNode[] typeTagNodes)
+    {
+      node.TypeName.TypeTag(typeTagNodes);
+      return node;
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Sets the qualifier tag of the UsingAliasNode.

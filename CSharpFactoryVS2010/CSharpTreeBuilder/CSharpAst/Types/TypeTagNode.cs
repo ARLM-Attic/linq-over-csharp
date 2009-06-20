@@ -31,15 +31,41 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeTagNode"/> class.
     /// </summary>
-    /// <param name="identifier">Identifier token.</param>
+    /// <param name="identifierToken">Identifier token.</param>
     /// <param name="argumentListNode">The argument list node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeTagNode(Token identifier, TypeOrNamespaceNodeCollection argumentListNode)
-      : base(identifier)
+    public TypeTagNode(Token identifierToken, TypeOrNamespaceNodeCollection argumentListNode)
+      : base(identifierToken)
     {
-      IdentifierToken = identifier;
+      IdentifierToken = identifierToken;
       Arguments = argumentListNode;
+      if (Arguments == null)
+      {
+        Arguments = new TypeOrNamespaceNodeCollection();
+      }
       Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TypeTagNode"/> class with only an identifier token.
+    /// </summary>
+    /// <param name="identifierToken">Identifier token.</param>
+    // ----------------------------------------------------------------------------------------------
+    public TypeTagNode(Token identifierToken)
+      : this(identifierToken, null)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TypeTagNode"/> class with only an identifier string.
+    /// </summary>
+    /// <param name="identifier">Identifier string.</param>
+    // ----------------------------------------------------------------------------------------------
+    public TypeTagNode(string identifier)
+      : this(new Token(identifier), null)
+    {
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -48,7 +74,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The identifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; protected set; }
+    public Token IdentifierToken { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -81,6 +107,47 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The arguments.</value>
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNodeCollection Arguments { get; private set; }
+
+#warning Arguments collection should not be publicly modified, only through AddTypeTag method, otherwise separatot tokens are not guaranteed to be set correctly
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a type to the Arguments collection, and sets the separator tokens.
+    /// </summary>
+    /// <param name="typeOrNamespaceNode">A type.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddArgument(TypeOrNamespaceNode typeOrNamespaceNode)
+    {
+      Arguments.Add(typeOrNamespaceNode);
+      SetSeparatorTokens();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the type arguments' separator tokens to null or comma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private void SetSeparatorTokens()
+    {
+      if (Arguments.Count>0)
+      {
+        Arguments.StartToken = Token.LessThan;
+        Arguments.Terminate(Token.GreatherThan);
+        Terminate(Token.GreatherThan);
+      }
+
+      for (int i = 0; i < Arguments.Count; i++)
+      {
+        if (i == 0)
+        {
+          Arguments[i].SeparatorToken = null;
+        }
+        else
+        {
+          Arguments[i].SeparatorToken = Token.Comma;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

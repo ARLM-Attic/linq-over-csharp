@@ -28,8 +28,23 @@
     public static Token Dot { get { return new Token("."); } }
 
     /// <summary>
+    /// Returns a "," (comma) token.
+    /// </summary>
+    public static Token Comma { get { return new Token(","); } }
+
+    /// <summary>
     /// Returns a "=" (equal) token.
     /// </summary>
     public static Token Equal { get { return new Token("="); } }
+
+    /// <summary>
+    /// Returns a "&lt;" (less than) token.
+    /// </summary>
+    public static Token LessThan { get { return new Token("<"); } }
+
+    /// <summary>
+    /// Returns a "&gt;" (greater than) token.
+    /// </summary>
+    public static Token GreatherThan { get { return new Token(">"); } }
   }
 }
