@@ -211,5 +211,32 @@ namespace CSharpTreeBuilder.Ast
         TypeTags
         );
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+            
+      foreach (var tag in TypeTags)
+      {
+        tag.AcceptVisitor(visitor);
+      }
+
+      foreach (var modifier in TypeModifiers)
+      {
+        modifier.AcceptVisitor(visitor);
+      }
+
+#warning Seems like ArrayModifierNodes are missing!
+    }
+
+    #endregion
   }
 }

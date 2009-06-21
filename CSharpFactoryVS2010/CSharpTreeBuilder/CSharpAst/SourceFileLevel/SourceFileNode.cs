@@ -3,6 +3,7 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -164,16 +165,28 @@ namespace CSharpTreeBuilder.Ast
       visitor.Visit(this);
 
       // Visit extern alias nodes
-      foreach (var node in ExternAliasNodes) { node.AcceptVisitor(visitor); }
+      foreach (var node in ExternAliasNodes)
+      {
+        node.AcceptVisitor(visitor);
+      }
 
       // Visit using nodes
-      foreach (var node in UsingNodes) { node.AcceptVisitor(visitor); }
+      foreach (var node in UsingNodes)
+      {
+        node.AcceptVisitor(visitor);
+      }
 
       // Visit extern alias nodes
-      foreach (var node in GlobalAttributes) { node.AcceptVisitor(visitor); }
+      foreach (var node in GlobalAttributes)
+      {
+        node.AcceptVisitor(visitor);
+      }
 
       // Visit in-scope declaration nodes (namespaces and types)
-      foreach (var node in InScopeDeclarations) { node.AcceptVisitor(visitor); }
+      foreach (var node in InScopeDeclarations)
+      {
+        node.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

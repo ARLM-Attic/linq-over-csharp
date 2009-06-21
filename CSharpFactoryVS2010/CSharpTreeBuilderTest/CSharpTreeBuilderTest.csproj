@@ -72,6 +72,7 @@
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\Visitor\TypeOrNamespaceNodeVisitorTest.cs" />
     <None Include="TestFiles\Pragmas\PragmaAfterNonWhiteSpace.cs" />
     <None Include="TestFiles\Pragmas\OpenRegion.cs" />
     <None Include="TestFiles\Pragmas\LinePragma.cs" />
@@ -89,7 +90,7 @@
     <None Include="TestFiles\StructDeclaration\StructDeclaration3.cs" />
     <None Include="TestFiles\StructDeclaration\StructDeclaration2.cs" />
     <None Include="TestFiles\StructDeclaration\StructDeclaration1.cs" />
-    <None Include="TestFiles\Visitor\SourceFileNodeVisitorTest.cs" />
+    <None Include="TestFiles\Visitor\CompilationUnitNodeVisitorTest.cs" />
     <None Include="TestFiles\Regression\ExpressionBug1.cs" />
     <None Include="TestFiles\SampleQueries\SampleHarness.cs" />
     <None Include="TestFiles\SampleQueries\ObjectDumper.cs" />
