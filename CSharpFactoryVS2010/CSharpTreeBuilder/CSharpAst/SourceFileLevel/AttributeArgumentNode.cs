@@ -101,6 +101,10 @@ namespace CSharpTreeBuilder.Ast
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
       visitor.Visit(this);
+
+      #warning Expression visiting missing. Continue after expression object model refactoring.
+
+      //if (Expression != null) { Expression.AcceptVisitor(visitor); }
     }
 
     #endregion

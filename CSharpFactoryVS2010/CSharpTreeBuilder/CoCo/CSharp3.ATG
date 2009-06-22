@@ -818,6 +818,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
            var indNode = new IndexerDeclarationNode(typeNode.StartToken);
            SetCommentOwner(indNode);
            indNode.TypeName = typeNode;
+           memNode = indNode;
         .)
         IndexerDeclaration<indNode>
     )

@@ -902,6 +902,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				var indNode = new IndexerDeclarationNode(typeNode.StartToken);
 				SetCommentOwner(indNode);
 				indNode.TypeName = typeNode;
+				memNode = indNode;
 				
 				IndexerDeclaration(indNode);
 			} else SynErr(144);
