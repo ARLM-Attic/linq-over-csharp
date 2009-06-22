@@ -38,35 +38,7 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      foreach (var decoration in AttributeDecorations)
-      {
-        decoration.AcceptVisitor(visitor);
-      }
-
-      foreach (var typeParameter in TypeParameters)
-      {
-        typeParameter.AcceptVisitor(visitor);
-      }
-
-      foreach (var type in BaseTypes)
-      {
-        type.AcceptVisitor(visitor);
-      }
-
-      foreach (var constraint in TypeParameterConstraints)
-      {
-        constraint.AcceptVisitor(visitor);
-      }
-
-      foreach (var memberDeclaration in MemberDeclarations)
-      {
-        memberDeclaration.AcceptVisitor(visitor);
-      }
-
-      foreach (var nestedType in NestedTypes)
-      {
-        nestedType.AcceptVisitor(visitor);
-      }
+      base.AcceptVisitor(visitor);
     }
 
     #endregion

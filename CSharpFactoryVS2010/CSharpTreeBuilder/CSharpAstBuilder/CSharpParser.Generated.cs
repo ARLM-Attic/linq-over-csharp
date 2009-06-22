@@ -663,12 +663,12 @@ public partial class CSharpParser
 			TypeParameterList(typeDecl);
 		}
 		Expect(98);
-		var parList = new FormalParameterListNode(t); 
+		ddNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
-			FormalParameterList(parList);
+			FormalParameterList(ddNode.FormalParameters);
 		}
 		Expect(113);
-		Terminate(parList); 
+		Terminate(ddNode.FormalParameters); 
 		while (la.kind == 122) {
 			TypeParameterConstraintNode constrNode; 
 			TypeParameterConstraintsClause(out constrNode);
@@ -820,6 +820,13 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			ModifierList(mod);
 			MemberDeclarationNode memNode; 
 			StructMemberDeclaration(attrNodes, mod, typeDecl, out memNode);
+			if (memNode != null) 
+			{
+			  memNode.AttributeDecorations = attrNodes;
+			  memNode.Modifiers = mod;
+			  typeDecl.MemberDeclarations.Add(memNode); 
+			}
+			
 		}
 		Expect(111);
 		typeDecl.CloseBrace = t; 

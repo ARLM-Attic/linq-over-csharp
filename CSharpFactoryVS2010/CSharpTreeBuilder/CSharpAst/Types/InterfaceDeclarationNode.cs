@@ -37,6 +37,8 @@ namespace CSharpTreeBuilder.Ast
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
       visitor.Visit(this);
+
+      base.AcceptVisitor(visitor);
     }
 
     #endregion

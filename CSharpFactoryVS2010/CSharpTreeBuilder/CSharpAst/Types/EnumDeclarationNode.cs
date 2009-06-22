@@ -110,6 +110,21 @@ namespace CSharpTreeBuilder.Ast
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
       visitor.Visit(this);
+
+      foreach (var attributeDecoration in AttributeDecorations)
+      {
+        attributeDecoration.AcceptVisitor(visitor);
+      }
+
+      if (EnumBase != null)
+      {
+        EnumBase.AcceptVisitor(visitor);
+      }
+
+      foreach (var value in Values)
+      {
+        value.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

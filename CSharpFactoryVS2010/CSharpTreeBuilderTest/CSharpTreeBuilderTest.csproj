@@ -72,6 +72,10 @@
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <Compile Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />
+    <None Include="TestFiles\Visitor\EnumDeclarationNodeVisitorTest.cs" />
+    <None Include="TestFiles\Visitor\InterfaceDeclarationNodeVisitorTest.cs" />
+    <None Include="TestFiles\Visitor\StructDeclarationNodeVisitorTest.cs" />
     <None Include="TestFiles\Visitor\ClassDeclarationNodeVisitorTest.cs" />
     <None Include="TestFiles\Visitor\TypeOrNamespaceNodeVisitorTest.cs" />
     <None Include="TestFiles\Pragmas\PragmaAfterNonWhiteSpace.cs" />

@@ -566,6 +566,14 @@ StructBody<StructDeclarationNode typeDecl>
     ModifierList<mod>
     (. MemberDeclarationNode memNode; .)
     StructMemberDeclaration<attrNodes, mod, typeDecl, out memNode>
+    (. 
+       if (memNode != null) 
+       {
+         memNode.AttributeDecorations = attrNodes;
+         memNode.Modifiers = mod;
+         typeDecl.MemberDeclarations.Add(memNode); 
+       }
+    .)
   }
   "}"   
   (. typeDecl.CloseBrace = t; .)
@@ -676,10 +684,10 @@ DelegateDeclaration<out TypeDeclarationNode typeDecl>
   .)
   [ TypeParameterList<typeDecl> ]
   "(" 
-  (. var parList = new FormalParameterListNode(t); .)
-  [ FormalParameterList<parList> ] 
+  (. ddNode.FormalParameters = new FormalParameterListNode(t); .)
+  [ FormalParameterList<ddNode.FormalParameters> ] 
   ")"
-  (. Terminate(parList); .)
+  (. Terminate(ddNode.FormalParameters); .)
   {                                                
     (. TypeParameterConstraintNode constrNode; .)
     TypeParameterConstraintsClause<out constrNode> 

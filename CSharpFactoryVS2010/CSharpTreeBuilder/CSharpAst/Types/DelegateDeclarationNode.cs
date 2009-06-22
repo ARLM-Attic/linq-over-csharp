@@ -63,6 +63,31 @@ namespace CSharpTreeBuilder.Ast
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
       visitor.Visit(this);
+
+      foreach (var attributeDecoration in AttributeDecorations)
+      {
+        attributeDecoration.AcceptVisitor(visitor);
+      }
+
+      if (TypeName!=null)
+      {
+        TypeName.AcceptVisitor(visitor);
+      }
+
+      foreach (var typeParameter in TypeParameters)
+      {
+        typeParameter.AcceptVisitor(visitor);
+      }
+
+      foreach (var typeParameterConstraint in TypeParameterConstraints)
+      {
+        typeParameterConstraint.AcceptVisitor(visitor);
+      }
+
+      if(FormalParameters!=null)
+      {
+        FormalParameters.AcceptVisitor(visitor);
+      }
     }
 
     #endregion
