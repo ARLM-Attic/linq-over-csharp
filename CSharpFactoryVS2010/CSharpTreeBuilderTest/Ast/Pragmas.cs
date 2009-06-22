@@ -438,5 +438,26 @@ namespace CSharpTreeBuilderTest.Ast
       reg.EndRegion.RegionPragma.ShouldBeSameAs(reg);
       reg.NestedRegions.Count.ShouldEqual(0);
     }
+
+    [TestMethod]
+    public void OpenRegionFound()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"Pragmas\OpenRegion.cs");
+      InvokeParser(project).ShouldBeFalse();
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS1038");
+    }
+
+    [TestMethod]
+    public void UnexpectedEndregionFound()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"Pragmas\UnexpectedEndRegion.cs");
+      InvokeParser(project).ShouldBeFalse();
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS1028");
+    }
+
   }
 }

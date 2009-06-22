@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
@@ -48,6 +49,7 @@ namespace CSharpTreeBuilder.Ast
       FullName = fullName;
       GlobalAttributes = new AttributeDecorationNodeCollection {ParentNode = this};
       Pragmas = new PragmaNodeCollection {ParentNode = this};
+      TokenizedUnit = new TokenizedCompilationUnit();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -107,6 +109,13 @@ namespace CSharpTreeBuilder.Ast
         }
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the tokenized version of this compilation unit.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TokenizedCompilationUnit TokenizedUnit { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

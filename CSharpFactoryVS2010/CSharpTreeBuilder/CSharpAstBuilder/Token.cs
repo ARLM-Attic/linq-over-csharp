@@ -3,10 +3,11 @@
 //
 // Created: 2009.05.21, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.Ast;
+
 namespace CSharpTreeBuilder.CSharpAstBuilder
 {
-
-  // ==================================================================================
+  // ================================================================================================
   /// <summary>
   /// This class defines a Token used by the scanner and the parser.
   /// </summary>
@@ -15,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   /// fields. Because wrapping this fields into properties would affect the performance
   /// we live together to violating the convention.
   /// </remarks>
-  // ==================================================================================
+  // ================================================================================================
   public partial class Token
   {
     // --- We use these fields because CoCo generates these names into the Scanner.cs and Parser.cs.
@@ -40,7 +41,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       get { return kind; }
       internal set { kind = value; }
     }
-
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -93,11 +93,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public Token Previous { get; private set; }
 
-    //-----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the next token.
     /// </summary>
-    //-----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     public Token Next
     {
       get { return next; }
@@ -108,44 +108,90 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       }
     }
 
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the previous token.
+    /// Gets or sets the comment trailing this token.
     /// </summary>
-    //-----------------------------------------------------------------------------------
-    public Token prev
+    /// <value>The trailing comment.</value>
+    // ----------------------------------------------------------------------------------------------
+    public ICommentNode TrailingComment { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has a trailing comment.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasTrailingComment
     {
-      get { return Previous; }
+      get { return TrailingComment != null; }
     }
 
-    //-----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the string representation of the token.
     /// </summary>
-    //-----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
       return Value ?? "<<null>>";
     }
 
-    //-----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a blank token object. Used by the parser.
     /// </summary>
-    //-----------------------------------------------------------------------------------
-    public Token()
+    // ----------------------------------------------------------------------------------------------
+    internal Token()
     {
     }
 
-    //-----------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Creates a token object with the specified value. All other fields are blank.
     /// </summary>
     /// <param name="tokenValue">The text value if the token.</param>
-    //-----------------------------------------------------------------------------------
-    public Token(string tokenValue)
+    // ----------------------------------------------------------------------------------------------
+    internal Token(string tokenValue)
     {
       val = tokenValue;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is literal.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsLiteral
+    {
+      get
+      {
+        return
+          kind == CSharpParser._ident ||
+          kind == CSharpParser._intCon ||
+          kind == CSharpParser._realCon ||
+          kind == CSharpParser._charCon ||
+          kind == CSharpParser._stringCon;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is pragma.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsPragma
+    {
+      get
+      {
+        return kind > CSharpParser.maxT;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the position of thes token in the source file's tokenized stream.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int TokenizedStreamPosition { get; internal set; }
   }
 }

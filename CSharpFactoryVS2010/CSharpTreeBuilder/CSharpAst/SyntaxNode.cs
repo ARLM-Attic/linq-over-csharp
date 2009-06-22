@@ -218,6 +218,13 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets the comment related to the syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ICommentNode Comment { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>

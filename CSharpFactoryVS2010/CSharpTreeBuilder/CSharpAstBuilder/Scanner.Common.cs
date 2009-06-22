@@ -9,11 +9,11 @@ using System.Collections.Generic;
 
 namespace CSharpTreeBuilder.CSharpAstBuilder 
 {
-  // ==================================================================================
+  // ================================================================================================
   /// <summary>
   /// This class represents the scanner.
   /// </summary>
-  // ==================================================================================
+  // ================================================================================================
   public partial class Scanner
   {
     #region Constant declarations
@@ -129,8 +129,15 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       _SkipMode = false;
       _EOFFound = false;
 
-      pos = -1; line = 1; col = 0;
+      pos = -1; 
+      line = 1; 
+      col = 0;
       oldEols = 0;
+
+      // --- At this point we reached the beginning of the first line.
+      RaiseNewLineReached(line);
+
+      // --- Start scanning the stream
       NextCh();
       if (ch == 0xEF)
       { // check optional byte order mark for UTF-8
@@ -146,67 +153,125 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   		pt = tokens = new Token();  // first token is a dummy
 	  }
 
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     /// <summary>
     /// Get the next token (possibly a token already seen during peeking) 
     /// </summary>
     /// <returns>The next token.</returns>
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     public Token Scan()
     {
-      if (tokens.next == null)
-      {
-        return NextToken();
-      }
-      pt = tokens = tokens.next;
+      if (tokens.Next == null) tokens.Next = NextToken();
+      pt = tokens = tokens.Next;
       return tokens;
     }
 
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     /// <summary>
     /// Peek for the next token, ignore pragmas 
     /// </summary>
     /// <returns>The next token.</returns>
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     public Token Peek()
     {
-      if (pt.next == null)
+      if (pt.Next == null)
       {
         do
         {
-          pt = pt.next = NextToken();
+          pt = pt.Next = NextToken();
         } while (pt.kind > maxT); // skip pragmas
       }
       else
       {
         do
         {
-          pt = pt.next;
+          pt = pt.Next;
         } while (pt.kind > maxT);
       }
       return pt;
     }
 
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     /// <summary>
     /// Peek for the next token, but does not ignore pragmas 
     /// </summary>
     /// <returns>The next token.</returns>
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     public Token PeekWithPragma()
     {
-      pt = pt.next ?? (pt.next = NextToken());
+      pt = pt.Next ?? (pt.Next = NextToken());
       return pt;
     }
 
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     /// <summary>
     /// Make sure that peeking starts at the current scan position 
     /// </summary>
-    //-----------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     public void ResetPeek()
     {
        pt = tokens;
+    }
+
+    #endregion
+
+    #region Scanner events
+
+    //---------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Occurs when the scanner reaches a new line.
+    /// </summary>
+    //---------------------------------------------------------------------------------------------
+    public event EventHandler<NewLineReachedEventArgs> NewLineReached;
+
+    //---------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises the "new line reached" event.
+    /// </summary>
+    /// <param name="line">The line number reached.</param>
+    //---------------------------------------------------------------------------------------------
+    private void RaiseNewLineReached(int line)
+    {
+      if (NewLineReached != null)
+        NewLineReached.Invoke(this, new NewLineReachedEventArgs(line));
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Occurs when the scanner scannes a new token.
+    /// </summary>
+    //---------------------------------------------------------------------------------------------
+    public event EventHandler<TokenScannedEventArgs> TokenScanned;
+
+    //---------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises the "token scanned" event.
+    /// </summary>
+    /// <param name="token">The token scanned.</param>
+    //---------------------------------------------------------------------------------------------
+    private void RaiseTokenScanned(Token token)
+    {
+      if (TokenScanned != null)  
+        TokenScanned.Invoke(this, new TokenScannedEventArgs(token));
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Occurs when the scanner scannes whitespaces.
+    /// </summary>
+    //---------------------------------------------------------------------------------------------
+    public event EventHandler<WhitespaceScannedEventArgs> WhitespaceScanned;
+
+    //---------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Raises the "whitespace scanned" event .
+    /// </summary>
+    /// <param name="whitespace">The whitespace.</param>
+    //---------------------------------------------------------------------------------------------
+    private void RaiseWhitespaceScanned(string whitespace)
+    {
+      if (WhitespaceScanned != null)
+        WhitespaceScanned.Invoke(this, new WhitespaceScannedEventArgs(whitespace));
     }
 
     #endregion

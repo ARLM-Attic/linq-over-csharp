@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using System.Collections.Generic;
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
@@ -236,6 +237,13 @@ namespace CSharpTreeBuilder.Ast
     {
       TerminatingToken = token;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the comment related to the syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ICommentNode Comment { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

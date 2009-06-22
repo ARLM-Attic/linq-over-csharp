@@ -119,6 +119,13 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets the comment related to the syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    ICommentNode Comment { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Accepts a visitor object, according to the Visitor pattern.
     /// </summary>
     /// <param name="visitor">A visitor object</param>

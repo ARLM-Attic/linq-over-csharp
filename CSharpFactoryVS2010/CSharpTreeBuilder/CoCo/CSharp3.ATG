@@ -1,7 +1,4 @@
-using System.Text;
-using System.Collections;
 using CSharpTreeBuilder.Ast;
-using CSharpTreeBuilder.CSharpAstBuilder;
 
 COMPILER CS3
 
@@ -243,8 +240,8 @@ PRAGMAS
   // Comments are handled as special pragmas
   // ----------------------------------------------------------------------------------------------
   
-  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/".  //(. CommentHandler.HandleBlockComment(la); .)
-  cLineCom  = "//" { notNewLine } newLine.                                  //(. CommentHandler.HandleLineComment(la); .)
+  cBlockCom = "/*" { "/" | blockComCh | "*"{"*"} blockComCh } "*"{"*"}"/". (. HandleBlockComment(la); .)
+  cLineCom  = "//" { notNewLine } newLine.                                 (. HandleLineComment(la); .)
 
 IGNORE eol + cr + tab
 
@@ -285,7 +282,10 @@ ExternAliasDirective<NamespaceScopeNode parentNode>
   ident      
   (. identifier = t; .)
   ";"
-  (. parentNode.AddExternAlias(start, alias, identifier, t); .)
+  (. 
+     var eaNode = parentNode.AddExternAlias(start, alias, identifier, t); 
+     SetCommentOwner(eaNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -315,6 +315,7 @@ UsingDirective<NamespaceScopeNode parentNode>
      var node = (alias == null)
        ? parentNode.AddUsing(start, nsNode, t)
        : parentNode.AddUsingWithAlias(start, alias, eq, nsNode, t);
+     SetCommentOwner(node);
      Terminate(node);
   .)
 .
@@ -366,6 +367,7 @@ NamespaceMemberDeclaration<NamespaceScopeNode parentNode>
      SignRealToken();
      Token startToken = t; 
      var nsDecl = new NamespaceDeclarationNode(parentNode, t);
+     SetCommentOwner(nsDecl);
   .)
   ident
   (. nsDecl.NameTags.Add(t); .)
@@ -453,6 +455,7 @@ ClassDeclaration<out TypeDeclarationNode typeDecl>
   ident    
   (. 
      var classDecl = new ClassDeclarationNode(start, t);
+     SetCommentOwner(classDecl);
      typeDecl = classDecl;
   .)
   [ TypeParameterList<typeDecl> ] 
@@ -478,7 +481,10 @@ BaseTypeList<TypeDeclarationNode typeDecl>
   ":"
   (. typeDecl.ColonToken = t; .)                        
   ClassType<out typeNode>     
-  (. typeDecl.BaseTypes.Add(typeNode); .)
+  (. 
+     typeDecl.BaseTypes.Add(typeNode);
+     SetCommentOwner(typeNode);
+  .)
   { 
     ","  
     (. var separator = t; .)
@@ -486,6 +492,7 @@ BaseTypeList<TypeDeclarationNode typeDecl>
     (. 
        typeNode.SeparatorToken = separator;
        typeDecl.BaseTypes.Add(typeNode); 
+       SetCommentOwner(typeNode);
     .)
   }
 .
@@ -527,6 +534,7 @@ StructDeclaration<out TypeDeclarationNode typeDecl>
   ident
   (. 
      var structDecl = new StructDeclarationNode(start, t);
+     SetCommentOwner(structDecl);
      typeDecl = structDecl;
   .)
   [ TypeParameterList<typeDecl> ]
@@ -573,6 +581,7 @@ EnumDeclaration<out TypeDeclarationNode typeDecl>
   ident                          
   (. 
      var enumDecl = new EnumDeclarationNode(start, t);
+     SetCommentOwner(enumDecl);
      typeDecl = enumDecl;
   .)
   [ 
@@ -632,6 +641,7 @@ EnumMemberDeclaration<out EnumValueNode valNode>
   ident                      
   (. 
      valNode = new EnumValueNode(t);
+     SetCommentOwner(valNode);
      valNode.AttributeDecorations = attrNodes;
   .)
   [ 
@@ -660,6 +670,7 @@ DelegateDeclaration<out TypeDeclarationNode typeDecl>
   ident
   (. 
      var ddNode = new DelegateDeclarationNode(start, t);
+     SetCommentOwner(ddNode);
      typeDecl = ddNode;
      ddNode.TypeName = typeNode;
   .)
@@ -690,6 +701,7 @@ ClassMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNode
     "~" 
     (. 
        var finNode = new FinalizerDeclarationNode(t);
+       SetCommentOwner(finNode);
        memNode = finNode;
     .)
     ident   
@@ -733,6 +745,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
     MemberName<out nameNode>
     (.
        var metNode = new MethodDeclarationNode(partialToken);
+       SetCommentOwner(metNode);
        metNode.TypeName = typeNode;
        metNode.MemberName = nameNode;
        memNode = metNode;
@@ -745,6 +758,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         // --- Overloadable operator declaration
         (. 
            var opNode = new OperatorDeclarationNode(typeNode.StartToken); 
+           SetCommentOwner(opNode);
            opNode.TypeName = typeNode;
            memNode = opNode;
         .)
@@ -754,6 +768,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         IF (IsFieldDecl()) 
         (. 
            var fiNode = new FieldDeclarationNode(typeNode.StartToken); 
+           SetCommentOwner(fiNode);
            fiNode.TypeName = typeNode;
            memNode = fiNode;
         .)
@@ -768,6 +783,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         ( 
           (. 
              var propNode = new PropertyDeclarationNode(typeNode.StartToken);
+             SetCommentOwner(propNode);
              propNode.TypeName = typeNode; 
              propNode.MemberName = nameNode;
              memNode = propNode;
@@ -777,6 +793,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
           // --- Explicit indexer declaration
           (.
              var indNode = new IndexerDeclarationNode(typeNode.StartToken);
+             SetCommentOwner(indNode);
              indNode.TypeName = typeNode;
              indNode.MemberName = nameNode;
              memNode = indNode;
@@ -788,6 +805,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
           // --- Method declaration 
           (.
              var metNode = new MethodDeclarationNode(typeNode.StartToken);
+             SetCommentOwner(metNode);
              metNode.TypeName = typeNode;
              metNode.MemberName = nameNode;
              memNode = metNode;
@@ -798,6 +816,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         // --- Simple indexer declaration
         (. 
            var indNode = new IndexerDeclarationNode(typeNode.StartToken);
+           SetCommentOwner(indNode);
            indNode.TypeName = typeNode;
         .)
         IndexerDeclaration<indNode>
@@ -827,6 +846,7 @@ ConstMemberDeclaration<out MemberDeclarationNode memNode>
   "const"
   (. 
      var constNode = new ConstDeclarationNode(t);
+     SetCommentOwner(constNode);
      memNode = constNode;
      TypeOrNamespaceNode typeNode;
   .)
@@ -853,7 +873,10 @@ ConstMemberDeclaration<out MemberDeclarationNode memNode>
 SingleConstMember<out ConstTagNode tagNode>
 =
   ident
-  (. tagNode = new ConstTagNode(t); .)
+  (. 
+     tagNode = new ConstTagNode(t); 
+     SetCommentOwner(tagNode);
+  .)
   "="
   (. 
      tagNode.EqualToken = t;
@@ -880,6 +903,7 @@ EventDeclaration<out MemberDeclarationNode memNode>
     IF (IsFieldDecl()) 
     (. 
        var fiNode = new FieldDeclarationNode(eventToken); 
+       SetCommentOwner(fiNode);
        memNode = fiNode;
        fiNode.TypeName = typeNode;
     .)
@@ -888,7 +912,8 @@ EventDeclaration<out MemberDeclarationNode memNode>
     (. Terminate(fiNode); .)
   |                              
     (. 
-       var evpNode = new EventPropertyDeclarationNode(t) ;
+       var evpNode = new EventPropertyDeclarationNode(t);
+       SetCommentOwner(evpNode);
        memNode = evpNode;
     .)
     TypeName<out typeNode> 
@@ -913,6 +938,7 @@ ConstructorDeclaration<out MemberDeclarationNode memNode>
   ident
   (. 
      var cstNode = new ConstructorDeclarationNode(t);
+     SetCommentOwner(cstNode);
      memNode = cstNode;
   .)
   "(" 
@@ -929,13 +955,20 @@ ConstructorDeclaration<out MemberDeclarationNode memNode>
        ExpressionNode scopeNode = null;
     .)
     ( "base"          
-      (. scopeNode = new BaseNode(t); .)
+      (. 
+         scopeNode = new BaseNode(t); 
+         SetCommentOwner(scopeNode);
+      .)
     | "this"              
-      (. scopeNode = new ThisNode(t); .)
+      (. 
+         scopeNode = new ThisNode(t); 
+         SetCommentOwner(scopeNode);
+      .)
     ) 
     "("
     (.
        var invNode = new MethodInvocationOperatorNode(t);
+       SetCommentOwner(invNode);
        invNode.ScopeOperand = scopeNode;
     .)
     CurrentArgumentList<invNode.Arguments>
@@ -1027,6 +1060,7 @@ CastOperatorDeclaration<out MemberDeclarationNode memNode>
   )
   (. 
      var copNode = new CastOperatorDeclarationNode(t); 
+     SetCommentOwner(copNode);
      memNode = copNode;
   .)
   "operator"                        
@@ -1085,6 +1119,7 @@ InterfaceDeclaration<out TypeDeclarationNode typeDecl>
   ident            
   (. 
      var intfDecl = new InterfaceDeclarationNode(start, t);
+     SetCommentOwner(intfDecl);
      typeDecl = intfDecl;
   .)
   [ TypeParameterList<typeDecl> ]
@@ -1130,6 +1165,7 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
       ( 
         (.
            var metNode = new MethodDeclarationNode(typeNode.StartToken);
+           SetCommentOwner(metNode);
            metNode.TypeName = typeNode;
            metNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
            memNode = metNode;
@@ -1138,6 +1174,7 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
       | // --- Interface property
         (. 
            var propNode = new PropertyDeclarationNode(typeNode.StartToken);
+           SetCommentOwner(propNode);
            propNode.TypeName = typeNode;
            propNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
            memNode = propNode;
@@ -1155,6 +1192,7 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
       "this" 
       (. 
          var indNode = new IndexerDeclarationNode(typeNode.StartToken);
+         SetCommentOwner(indNode);
          indNode.TypeName = typeNode;
          indNode.ThisToken = t;
          memNode = indNode;
@@ -1193,6 +1231,7 @@ InterfaceEventDeclaration<out MemberDeclarationNode memNode>
   "event" 
   (. 
      var ieNode = new InterfaceEventDeclarationNode(t);
+     SetCommentOwner(ieNode);
      memNode = ieNode;
   .)
   (. TypeOrNamespaceNode typeNode; .)
@@ -1221,7 +1260,8 @@ LocalVariableDeclaration<out LocalVariableNode varNode>
     Type<out typeNode>
   )
   (. 
-     if (typeNode != null) varNode = new LocalVariableNode(typeNode); 
+     varNode = new LocalVariableNode(typeNode); 
+     SetCommentOwner(varNode);
      LocalVariableTagNode varTagNode;
   .)
   LocalVariableDeclarator<out varTagNode>
@@ -1243,7 +1283,10 @@ LocalVariableDeclaration<out LocalVariableNode varNode>
 LocalVariableDeclarator<out LocalVariableTagNode varDeclNode>
 = 
   ident 
-  (. varDeclNode = new LocalVariableTagNode(t); .)       
+  (. 
+     varDeclNode = new LocalVariableTagNode(t); 
+     SetCommentOwner(varDeclNode);
+  .)       
   [
     "="
     (. var start = t; .) 
@@ -1255,6 +1298,7 @@ LocalVariableDeclarator<out LocalVariableTagNode varDeclNode>
       "stackalloc" 
       (. 
          var stcInitNode = new StackAllocInitializerNode(start);
+         SetCommentOwner(stcInitNode);
          varDeclNode.Initializer = stcInitNode;
          stcInitNode.StackAllocToken = t;
       .)
@@ -1290,6 +1334,7 @@ VariableInitializer<out VariableInitializerNode initNode>
     Expression<out exprNode>  
     (. 
        var exprInitNode = new ExpressionInitializerNode(exprNode);
+       SetCommentOwner(exprInitNode);
        initNode = exprInitNode;
     .)
   | 
@@ -1305,12 +1350,16 @@ ArrayInitializer<out ArrayInitializerNode initNode>
 = 
   (. initNode = null; .)
   "{"
-  (. initNode = new ArrayInitializerNode(t); .)
+  (. 
+     initNode = new ArrayInitializerNode(t); 
+     SetCommentOwner(initNode);
+  .)
   [ 
     (. VariableInitializerNode varInitNode; .)
     VariableInitializer<out varInitNode> 
     (. 
        var initItem = new ArrayItemInitializerNode(varInitNode);
+       SetCommentOwner(initItem);
        initNode.Items.Add(initItem);
     .)
     {
@@ -1320,6 +1369,7 @@ ArrayInitializer<out ArrayInitializerNode initNode>
       VariableInitializer<out varInitNode> 
       (. 
          initItem = new ArrayItemInitializerNode(varInitNode);
+         SetCommentOwner(initItem);
          initNode.Items.Add(initItem);
     .)
     } 
@@ -1363,6 +1413,7 @@ FormalParameterTag<out FormalParameterNode parNode>
   ident                              
   (. 
      parNode = new FormalParameterNode(start);
+     SetCommentOwner(parNode);
      parNode.Modifier = modifier;
      parNode.IdentifierToken = t;
      parNode.TypeName = typeNode;
@@ -1425,6 +1476,7 @@ CurrentArgumentItem<out ArgumentNode argNode>
   (. 
      argNode = new ArgumentNode(argKind == null ? 
        (exprNode == null ? t : exprNode.StartToken) : argKind);
+     SetCommentOwner(argNode);
      argNode.KindToken = argKind;
      argNode.Expression = exprNode;
      Terminate(argNode);
@@ -1443,6 +1495,7 @@ AccessorDeclarations<PropertyDeclarationNodeBase propNode>
   ident   
   (.
      var accNode = new AccessorNode(t);
+     SetCommentOwner(accNode);
      accNode.AttributeDecorations = attrNodes;
      accNode.Modifiers = mod;
      propNode.FirstAccessor = accNode;
@@ -1463,6 +1516,7 @@ AccessorDeclarations<PropertyDeclarationNodeBase propNode>
     ident 
     (.
        accNode = new AccessorNode(t);
+       SetCommentOwner(accNode);
        accNode.AttributeDecorations = attrNodes;
        accNode.Modifiers = mod;
        propNode.SecondAccessor = accNode;
@@ -1489,6 +1543,7 @@ EventAccessorDeclarations<PropertyDeclarationNodeBase propNode>
   ident       
   (. 
      var accNode = new AccessorNode(t);
+     SetCommentOwner(accNode);
      accNode.AttributeDecorations = attrNodes;
      accNode.Modifiers = mod;
      BlockStatementNode blockNode; 
@@ -1507,6 +1562,7 @@ EventAccessorDeclarations<PropertyDeclarationNodeBase propNode>
     ident     
     (. 
        accNode = new AccessorNode(t);
+       SetCommentOwner(accNode);
        accNode.AttributeDecorations = attrNodes;
        accNode.Modifiers = mod;
     .)
@@ -1531,6 +1587,7 @@ InterfaceAccessors<PropertyDeclarationNodeBase propNode>
   ident
   (.
      var accNode = new AccessorNode(t);
+     SetCommentOwner(accNode);
      accNode.AttributeDecorations = attrNodes;
      accNode.Modifiers = mod;
      propNode.FirstAccessor = accNode;
@@ -1548,6 +1605,7 @@ InterfaceAccessors<PropertyDeclarationNodeBase propNode>
     ident
     (.
        accNode = new AccessorNode(t);
+       SetCommentOwner(accNode);
        accNode.AttributeDecorations = attrNodes;
        accNode.Modifiers = mod;
        propNode.SecondAccessor = accNode;
@@ -1632,6 +1690,7 @@ Attribute<out AttributeNode attrNode>
 = 
   (. 
      attrNode = new AttributeNode(la);
+     SetCommentOwner(attrNode);
      TypeOrNamespaceNode nsNode = null;
   .)
   TypeName<out nsNode>      
@@ -1659,7 +1718,11 @@ AttributeArguments<AttributeNode argsNode>
         (. equal = t; .)
       ]
       Expression<out exprNode>           
-      (. argsNode.Arguments.Add(new AttributeArgumentNode(identifier, equal, exprNode)); .)
+      (. 
+         var newArg = new AttributeArgumentNode(identifier, equal, exprNode);
+         SetCommentOwner(newArg);
+         argsNode.Arguments.Add(newArg); 
+      .)
       { 
         ","
         (. var separator = t; .)
@@ -1670,7 +1733,11 @@ AttributeArguments<AttributeNode argsNode>
         |                    
         ) 
         Expression<out exprNode> 
-        (. argsNode.Arguments.Add(separator, new AttributeArgumentNode(identifier, equal, exprNode)); .)
+        (. 
+           newArg = new AttributeArgumentNode(identifier, equal, exprNode);
+           SetCommentOwner(newArg);
+           argsNode.Arguments.Add(separator, newArg); 
+        .)
       }
     ]
   ")"   
@@ -1740,7 +1807,11 @@ NonArrayType<out TypeOrNamespaceNode typeNode>
   ]
   [
     "*"                         
-    (. typeNode.TypeModifiers.Add(new PointerModifierNode(t)); .)
+    (. 
+       var ptNode = new PointerModifierNode(t);
+       typeNode.TypeModifiers.Add(ptNode); 
+       SetCommentOwner(ptNode);
+    .)
   ]
   (. Terminate(typeNode); .)
 .
@@ -1772,10 +1843,17 @@ PointerOrArray<TypeOrNamespaceNode typeNode>
   { IF (IsPointerOrDims())
     ( 
       "*"
-      (. if (typeNode != null) typeNode.TypeModifiers.Add(new PointerModifierNode(t)); .)  
+      (. 
+         var ptNode = new PointerModifierNode(t);
+         typeNode.TypeModifiers.Add(ptNode); 
+         SetCommentOwner(ptNode);
+      .)  
     | 
       "["                     
-      (. var arrNode = new ArrayModifierNode(t); .)
+      (. 
+         var arrNode = new ArrayModifierNode(t); 
+         SetCommentOwner(arrNode);
+      .)
       { 
         ","                 
         (. arrNode.AddSeparator(t); .)
@@ -1855,6 +1933,7 @@ MemberName<out TypeOrNamespaceNode resultNode>
   ident
   (. 
      resultNode = new TypeOrNamespaceNode(t);
+     SetCommentOwner(resultNode);
      identifier = t; 
   .)
   [ 
@@ -1867,7 +1946,11 @@ MemberName<out TypeOrNamespaceNode resultNode>
     (. identifier = t; .)
   ]
   [ IF (la.kind == _lt && IsPartOfMemberName()) TypeArgumentList<out argList> ]
-  (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)
+  (. 
+     var tagNode = new TypeTagNode(identifier, argList);
+     SetCommentOwner(tagNode);
+     resultNode.TypeTags.Add(separator, tagNode); 
+  .)
   { 
     IF (la.kind == _dot && Peek(1).kind == _ident)
     "." 
@@ -1878,7 +1961,11 @@ MemberName<out TypeOrNamespaceNode resultNode>
     ident
     (. identifier = t; .)
     [ IF (la.kind == _lt && IsPartOfMemberName()) TypeArgumentList<out argList> ]
-    (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)                                    
+    (. 
+       tagNode = new TypeTagNode(identifier, argList);
+       SetCommentOwner(tagNode);
+       resultNode.TypeTags.Add(separator, tagNode); 
+    .)
   }
   (. Terminate(resultNode); .)
 .
@@ -1897,6 +1984,7 @@ TypeName<out TypeOrNamespaceNode resultNode>
   ident
   (. 
      resultNode = new TypeOrNamespaceNode(t);
+     SetCommentOwner(resultNode);
      identifier = t; 
   .)
   [ 
@@ -1909,7 +1997,11 @@ TypeName<out TypeOrNamespaceNode resultNode>
     (. identifier = t; .)
   ]
   [ TypeArgumentList<out argList> ]
-  (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)
+  (. 
+     var tagNode = new TypeTagNode(identifier, argList);
+     SetCommentOwner(tagNode);
+     resultNode.TypeTags.Add(separator, tagNode); 
+  .)
   {
     "."
     (.
@@ -1919,7 +2011,11 @@ TypeName<out TypeOrNamespaceNode resultNode>
     ident 
     (. identifier = t; .)
     [ TypeArgumentList<out argList> ]   
-    (. resultNode.TypeTags.Add(separator, new TypeTagNode(identifier, argList)); .)                                    
+    (. 
+       tagNode = new TypeTagNode(identifier, argList);
+       SetCommentOwner(tagNode);
+       resultNode.TypeTags.Add(separator, tagNode); 
+    .)
   }
   (. Terminate(resultNode); .)
 .
@@ -1935,7 +2031,10 @@ Statement<out StatementNode stmtNode>
     ident 
     (. identifier = t; .)
     ":" 
-    (. var label = new LabelNode(identifier, t); .)
+    (. 
+       var label = new LabelNode(identifier, t); 
+       SetCommentOwner(label);
+    .)
     Statement<out stmtNode>
     (. if (stmtNode != null) stmtNode.Labels.AddLabel(label); .)
   | ConstStatement<out stmtNode>
@@ -1944,6 +2043,7 @@ Statement<out StatementNode stmtNode>
     LocalVariableDeclaration<out varNode>
     (. 
        var varDecl = new VariableDeclarationStatementNode(varNode.StartToken);
+       SetCommentOwner(varDecl);
        stmtNode = varDecl;
        varDecl.Declaration = varNode;
     .)
@@ -1967,7 +2067,10 @@ EmbeddedStatement<out StatementNode stmtNode>
   | UnsafeBlock<out stmtNode>
   | 
     (. ExpressionNode exprNode; .)
-    (. var eNode = new ExpressionStatementNode(la); .)
+    (. 
+       var eNode = new ExpressionStatementNode(la); 
+       SetCommentOwner(eNode);
+    .)
     StatementExpression<out exprNode> 
     (. eNode.Expression = exprNode; .)
     ";"
@@ -2003,7 +2106,10 @@ Block<out BlockStatementNode blockNode>
      blockNode = null;
   .)
   "{" 
-  (. blockNode = new BlockStatementNode(t); .)
+  (. 
+     blockNode = new BlockStatementNode(t); 
+     SetCommentOwner(blockNode);
+  .)
   { 
     Statement<out stmtNode> 
     (. if (stmtNode != null) blockNode.Statements.Add(stmtNode); .)
@@ -2020,6 +2126,7 @@ SwitchStatement<out StatementNode stmtNode>
   "switch"
   (.
      var swcNode = new SwitchStatementNode(t);
+     SetCommentOwner(swcNode);
      stmtNode = swcNode; 
   .)
   "("
@@ -2052,13 +2159,17 @@ ConstStatement<out StatementNode stmtNode>
   "const"                
   (. 
      var csNode = new ConstStatementNode(t);
+     SetCommentOwner(csNode);
      stmtNode = csNode;
      TypeOrNamespaceNode typeNode;
   .)
   Type<out typeNode> 
   (. csNode.TypeName = typeNode; .)
   ident
-  (. var cmTag = new ConstTagNode(t); .)
+  (. 
+     var cmTag = new ConstTagNode(t); 
+     SetCommentOwner(cmTag);
+  .)
   "="                    
   (. cmTag.EqualToken = t; .)
   Expression<out exprNode>   
@@ -2071,7 +2182,10 @@ ConstStatement<out StatementNode stmtNode>
     ","
     (. var separator = t; .)
     ident                
-    (. var cmcTag = new ConstTagNode(t); .)
+    (. 
+       var cmcTag = new ConstTagNode(t); 
+       SetCommentOwner(cmcTag);
+    .)
     "=" 
     (. cmcTag.EqualToken = t; .)
     Expression<out exprNode> 
@@ -2091,7 +2205,10 @@ ConstStatement<out StatementNode stmtNode>
 EmptyStatement<out StatementNode stmtNode>
 =
   ";"
-  (. stmtNode = new EmptyStatementNode(t); .)
+  (. 
+     stmtNode = new EmptyStatementNode(t); 
+     SetCommentOwner(stmtNode);
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2107,7 +2224,10 @@ CheckedBlock<out StatementNode stmtNode>
        BlockStatementNode blockNode;
     .)
     Block<out blockNode>
-    (. stmtNode = new CheckedStatementNode(t, blockNode); .)
+    (. 
+       stmtNode = new CheckedStatementNode(t, blockNode); 
+       SetCommentOwner(stmtNode);
+    .)
   )
 .
 
@@ -2124,7 +2244,10 @@ UncheckedBlock<out StatementNode stmtNode>
        BlockStatementNode blockNode;
     .)
     Block<out blockNode>
-    (. stmtNode = new UncheckedStatementNode(t, blockNode); .)
+    (. 
+       stmtNode = new UncheckedStatementNode(t, blockNode); 
+       SetCommentOwner(stmtNode);
+    .)
   )
 .
 
@@ -2139,7 +2262,10 @@ UnsafeBlock<out StatementNode stmtNode>
        BlockStatementNode blockNode;
     .)
    Block<out blockNode>
-   (. stmtNode = new UnsafeStatementNode(t, blockNode); .)
+   (. 
+      stmtNode = new UnsafeStatementNode(t, blockNode); 
+      SetCommentOwner(stmtNode);
+   .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2150,6 +2276,7 @@ IfStatement<out StatementNode stmtNode>
   "if"
   (. 
      var ifNode = new IfStatementNode(t);
+     SetCommentOwner(ifNode);
      stmtNode = ifNode;
   .)
   "("
@@ -2183,6 +2310,7 @@ WhileStatement<out StatementNode stmtNode>
   "while"
   (. 
      var whNode = new WhileStatementNode(t); 
+     SetCommentOwner(whNode);
      stmtNode = whNode;
   .)
   "("
@@ -2211,6 +2339,7 @@ DoWhileStatement<out StatementNode stmtNode>
   "do"
   (. 
      var dwhNode = new DoWhileStatementNode(t); 
+     SetCommentOwner(dwhNode);
      stmtNode = dwhNode;
      StatementNode bodyNode; 
   .)
@@ -2239,6 +2368,7 @@ ForStatement<out StatementNode stmtNode>
   "for"
   (.
      var forNode = new ForStatementNode(t);
+     SetCommentOwner(forNode);
      stmtNode = forNode;
   .)
   "("
@@ -2277,6 +2407,7 @@ ForEachStatement<out StatementNode stmtNode>
   "foreach"
   (. 
      var feNode = new ForeachStatementNode(t); 
+     SetCommentOwner(feNode);
      stmtNode = feNode;
   .)
   "("
@@ -2319,7 +2450,10 @@ ForEachStatement<out StatementNode stmtNode>
 BreakStatement<out StatementNode stmtNode>
 =
   "break"
-  (. stmtNode = new BreakStatementNode(t); .)
+  (. 
+     stmtNode = new BreakStatementNode(t); 
+     SetCommentOwner(stmtNode);
+  .)
   ";"
   (. Terminate(stmtNode); .)
 .    
@@ -2330,7 +2464,10 @@ BreakStatement<out StatementNode stmtNode>
 GotoStatement<out StatementNode stmtNode>
 =
   "goto"
-  (. var gotoNode = new GotoStatementNode(t); .)
+  (. 
+     var gotoNode = new GotoStatementNode(t); 
+     SetCommentOwner(gotoNode);
+  .)
   ( 
     ident
     (. gotoNode.IdentifierToken = t; .)
@@ -2357,7 +2494,10 @@ GotoStatement<out StatementNode stmtNode>
 ContinueStatement<out StatementNode stmtNode>
 =
   "continue" 
-  (. stmtNode = new ContinueStatementNode(t); .)
+  (. 
+     stmtNode = new ContinueStatementNode(t); 
+     SetCommentOwner(stmtNode);
+  .)
   ";"
   (. Terminate(stmtNode); .)
 .    
@@ -2370,6 +2510,7 @@ TryFinallyBlock<out StatementNode stmtNode>
   "try"
   (. 
      var tryNode = new TryStatementNode(t);
+     SetCommentOwner(tryNode);
      stmtNode = tryNode;
      BlockStatementNode blockNode; 
   .)
@@ -2398,6 +2539,7 @@ LockStatement<out StatementNode stmtNode>
   "lock"
   (. 
      var lckNode = new LockStatementNode(t); 
+     SetCommentOwner(lckNode);
      stmtNode = lckNode;
   .)
   "("
@@ -2427,6 +2569,7 @@ UsingStatement<out StatementNode stmtNode>
   "using"
   (. 
      var usNode = new UsingStatementNode(t); 
+     SetCommentOwner(usNode);
      stmtNode = usNode;
   .)
   "(" 
@@ -2464,7 +2607,10 @@ ReturnStatement<out StatementNode stmtNode>
   [
     Expression<out exprNode>     
   ]
-  (. stmtNode = new ReturnStatementNode(t, exprNode); .)
+  (. 
+     stmtNode = new ReturnStatementNode(t, exprNode); 
+     SetCommentOwner(stmtNode);
+  .)
   ";"
   (. Terminate(stmtNode); .)
 .
@@ -2480,7 +2626,10 @@ ThrowStatement<out StatementNode stmtNode>
   [
     Expression<out exprNode>
   ] 
-  (. stmtNode = new ThrowStatementNode(t, exprNode); .)
+  (. 
+     stmtNode = new ThrowStatementNode(t, exprNode); 
+     SetCommentOwner(stmtNode);
+  .)
   ";"
   (. Terminate(stmtNode); .)
 .
@@ -2494,7 +2643,10 @@ YieldReturnStatement<out StatementNode stmtNode>
   "return"
   (. var start = t; .)
   Expression<out exprNode>
-  (. stmtNode = new YieldReturnStatementNode(t, exprNode); .)
+  (. 
+     stmtNode = new YieldReturnStatementNode(t, exprNode); 
+     SetCommentOwner(stmtNode);
+  .)
   ";"
   (. Terminate(stmtNode); .)
 .
@@ -2505,7 +2657,10 @@ YieldReturnStatement<out StatementNode stmtNode>
 YieldBreakStatement<out StatementNode stmtNode>
 =
   "break"
-  (. stmtNode = new YieldBreakStatementNode(t); .)
+  (. 
+     stmtNode = new YieldBreakStatementNode(t); 
+     SetCommentOwner(stmtNode);
+  .)
   ";"
   (. Terminate(stmtNode); .)
 .
@@ -2518,6 +2673,7 @@ FixedStatement<out StatementNode stmtNode>
   "fixed"
   (.
      var fixNode = new FixedStatementNode(t);
+     SetCommentOwner(fixNode);
      stmtNode = fixNode;
   .)
   "("
@@ -2528,7 +2684,10 @@ FixedStatement<out StatementNode stmtNode>
   Type<out typeNode>
   (. fixNode.TypeName = typeNode; .)
   ident
-  (. var fiNode = new FixedInitializerNode(t); .)
+  (. 
+     var fiNode = new FixedInitializerNode(t); 
+     SetCommentOwner(fiNode);
+  .)
   "="
   (. 
      fiNode.EqualToken = t; 
@@ -2544,7 +2703,10 @@ FixedStatement<out StatementNode stmtNode>
     ","
     (. var separator = t; .)
     ident
-    (. fiNode = new FixedInitializerNode(t); .)
+    (. 
+       fiNode = new FixedInitializerNode(t); 
+       SetCommentOwner(fiNode);
+    .)
     "=" 
     (. fiNode.EqualToken = t; .)
     Expression<out exprNode>
@@ -2598,6 +2760,7 @@ StatementExpression<out ExpressionNode exprNode>
 AssignmentOperator<out BinaryOperatorNode opNode> 
   (. opNode = null; .)
 =
+  (
     "="     
     (. opNode = new AssignmentOperatorNode(t); .)
   | "+="    
@@ -2628,6 +2791,8 @@ AssignmentOperator<out BinaryOperatorNode opNode>
        if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment");
        opNode = new RightShiftAssignmentOperatorNode(start, t); 
     .)
+  )
+  (. SetCommentOwner(opNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -2637,6 +2802,7 @@ SwitchSection<SwitchStatementNode swcNode>
 =
   (. 
      var ssNode = new SwitchSectionNode(la); 
+     SetCommentOwner(ssNode);
      SwitchLabelNode slNode;
   .)
   SwitchLabel<out slNode>
@@ -2661,7 +2827,10 @@ SwitchSection<SwitchStatementNode swcNode>
 // Represents a label of a switch statement.
 // ------------------------------------------------------------------------------------------------
 SwitchLabel<out SwitchLabelNode slNode>
-  (. slNode = new SwitchLabelNode(la); .)
+  (. 
+     slNode = new SwitchLabelNode(la); 
+     SetCommentOwner(slNode);
+  .)
 = 
   (
     "case" 
@@ -2719,7 +2888,8 @@ CatchClauses<TryStatementNode tryNode>
 =                                                     
   "catch"
   (. 
-     var ccNode = new CatchClauseNode(t); 
+     var ccNode = new CatchClauseNode(t);
+     SetCommentOwner(ccNode);
      BlockStatementNode blockNode;
   .)
   (                         
@@ -2765,6 +2935,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
     ident
     (.
        var fpNode = new FormalParameterNode(t);
+       SetCommentOwner(fpNode);
        fpNode.IdentifierToken = t;
        Terminate(fpNode);
        lambdaNode.FormalParameters.Add(fpNode);
@@ -2790,6 +2961,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
       ident
       (.
          parNode = new FormalParameterNode(t);
+         SetCommentOwner(parNode);
          parNode.IdentifierToken = t;
          Terminate(parNode);
          lambdaNode.FormalParameters.Add(parNode);
@@ -2800,6 +2972,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
         ident
         (.
            parNode = new FormalParameterNode(t);
+           SetCommentOwner(parNode);
            parNode.IdentifierToken = t;
            Terminate(parNode);
            lambdaNode.FormalParameters.Add(separator, parNode);
@@ -2817,7 +2990,10 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
 // ------------------------------------------------------------------------------------------------
 ExplicitLambdaParameter<out FormalParameterNode fpNode>
 =
-  (. fpNode = new FormalParameterNode(la); .)
+  (. 
+     fpNode = new FormalParameterNode(la); 
+     SetCommentOwner(fpNode);
+  .)
   [
     "ref" 
     (. fpNode.Modifier = FormalParameterModifier.Ref; .)
@@ -2859,6 +3035,7 @@ FromClause<out FromClauseNode fromNode>
   ident 
   (. 
      fromNode = new FromClauseNode(t); 
+     SetCommentOwner(fromNode);
      var typeToken = la;
   .)
   (                             
@@ -2887,7 +3064,10 @@ FromClause<out FromClauseNode fromNode>
 // ------------------------------------------------------------------------------------------------
 QueryBody<out QueryBodyNode bodyNode>
 =
-  (. bodyNode = new QueryBodyNode(la); .)
+  (. 
+     bodyNode = new QueryBodyNode(la); 
+     SetCommentOwner(bodyNode);
+  .)
   { QueryBodyClause<bodyNode> }
 .
 
@@ -2950,7 +3130,10 @@ LetClause<out LetClauseNode letNode>
   (. ExpressionNode exprNode; .)
   // --- At this point ident is "let"
   ident
-  (. letNode = new LetClauseNode(t); .)
+  (. 
+     letNode = new LetClauseNode(t); 
+     SetCommentOwner(letNode);
+  .)
   ident
   (. letNode.IdentifierToken = t; .)
   "="  
@@ -2969,7 +3152,10 @@ WhereClause<out WhereClauseNode whereNode>
 =
   (. ExpressionNode exprNode; .)
   "where"
-  (. whereNode = new WhereClauseNode(t); .)
+  (. 
+     whereNode = new WhereClauseNode(t); 
+     SetCommentOwner(whereNode);
+  .)
   Expression<out exprNode>
   (. 
      whereNode.Expression = exprNode; 
@@ -2984,7 +3170,10 @@ IntoClause<out IntoClauseNode intoNode>
 =
   // --- At this point ident is "into"
   ident
-  (. intoNode = new IntoClauseNode(t); .)
+  (. 
+     intoNode = new IntoClauseNode(t); 
+     SetCommentOwner(intoNode);
+  .)
   ident
   (. 
      intoNode.IdentifierToken = t; 
@@ -3002,6 +3191,7 @@ JoinClause<out JoinClauseNode joinNode>
   ident
   (. 
      joinNode = new JoinClauseNode(t);
+     SetCommentOwner(joinNode);
      Token typeToken = la; 
   .)
   (                     
@@ -3046,7 +3236,10 @@ OrderByClause<out OrderByClauseNode obNode>
   (. OrderingClauseNode ordNode; .)
   // --- At this point ident is "orderby"
   ident
-  (. obNode = new OrderByClauseNode(t); .)
+  (. 
+     obNode = new OrderByClauseNode(t); 
+     SetCommentOwner(obNode);
+  .)
   OrderingClause<out ordNode>
   (. obNode.Orderings.Add(ordNode); .)
   { 
@@ -3065,6 +3258,7 @@ OrderingClause<out OrderingClauseNode ordNode>
 =
   (. 
      ordNode = new OrderingClauseNode(la);
+     SetCommentOwner(ordNode);
      ExpressionNode exprNode;
   .)
   Expression<out exprNode>
@@ -3084,6 +3278,7 @@ SelectClause<out SelectClauseNode selNode>
   ident
   (. 
      selNode = new SelectClauseNode(t);
+     SetCommentOwner(selNode);
      ExpressionNode exprNode; 
   .)
   Expression<out exprNode>  
@@ -3102,7 +3297,10 @@ GroupClause<out GroupByClauseNode groupNode>
   (. ExpressionNode exprNode; .)
   // --- At this point ident is "group"
   ident
-  (. groupNode = new GroupByClauseNode(t); .)
+  (. 
+     groupNode = new GroupByClauseNode(t); 
+     SetCommentOwner(groupNode);
+  .)
   Expression<out exprNode>
   (. groupNode.GroupExpression = exprNode; .)
   "by"
@@ -3127,6 +3325,7 @@ Expression<out ExpressionNode exprNode>
     IF (IsQueryExpression())
     (.
        var qNode = new QueryExpressionNode(la);    
+       SetCommentOwner(qNode);
        FromClauseNode fromNode; 
        exprNode = qNode;
     .)
@@ -3140,6 +3339,7 @@ Expression<out ExpressionNode exprNode>
     IF (IsLambda()) 
     (.
        var lambdaNode = new LambdaExpressionNode(t);
+       SetCommentOwner(lambdaNode);
        exprNode = lambdaNode;
     .)              
     LambdaFunctionSignature<lambdaNode>
@@ -3177,7 +3377,8 @@ Expression<out ExpressionNode exprNode>
       "?"                            
       (. 
          ConditionalOperatorNode condNode = null;
-         if (exprNode != null) condNode = new ConditionalOperatorNode(exprNode);
+         condNode = new ConditionalOperatorNode(exprNode);
+         SetCommentOwner(condNode);
          exprNode = condNode;
          ExpressionNode trueNode;
       .)
@@ -3210,6 +3411,7 @@ NullCoalescingExpr<out BinaryOperatorNode exprNode>
     "??"                  
     (. 
        var opNode = new NullCoalescingOperatorNode(t);
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3234,6 +3436,7 @@ OrExpr<out BinaryOperatorNode exprNode>
     "||"                  
     (. 
        var opNode = new LogicalOrOperatorNode(t);
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3258,6 +3461,7 @@ AndExpr<out BinaryOperatorNode exprNode>
     "&&"                  
     (. 
        var opNode = new LogicalAndOperatorNode(t);
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3282,6 +3486,7 @@ BitOrExpr<out BinaryOperatorNode exprNode>
     "|"
     (. 
        var opNode = new BitwiseOrOperatorNode(t);
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3306,6 +3511,7 @@ BitXorExpr<out BinaryOperatorNode exprNode>
     "^"                   
     (. 
        var opNode = new BitwiseXorOperatorNode(t);
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3330,6 +3536,7 @@ BitAndExpr<out BinaryOperatorNode exprNode>
     "&"                   
     (. 
        var opNode = new BitwiseAndOperatorNode(t);
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3358,7 +3565,8 @@ EqlExpr<out BinaryOperatorNode exprNode>
     | "=="              
       (. opNode = new EqualOperatorNode(t); .)
     )
-    (. 
+    (.  
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3392,6 +3600,7 @@ RelExpr<out BinaryOperatorNode exprNode>
       (. opNode = new GreaterThanOrEqualOperatorNode(t); .)
     )
     (. 
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3408,11 +3617,15 @@ RelExpr<out BinaryOperatorNode exprNode>
         (. opNode = new IsOperatorNode(t); .)
       | "as"            
         (. opNode = new AsOperatorNode(t); .)
-      )                   
-      (. TypeOrNamespaceNode typeNode; .)
+      )   
+      (. 
+         SetCommentOwner(opNode);
+         TypeOrNamespaceNode typeNode; 
+      .)
       TypeInRelExpr<out typeNode>
       (. 
          opNode.RightOperand = new TypeOperatorNode(typeNode);
+         SetCommentOwner(opNode.RightOperand);
          exprNode = opNode;
          Terminate(opNode); 
       .)
@@ -3440,6 +3653,7 @@ ShiftExpr<out BinaryOperatorNode exprNode>
       (. opNode = new RightShiftOperatorNode(start, t); .)
     )                     
     (. 
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3469,6 +3683,7 @@ AddExpr<out BinaryOperatorNode exprNode>
       (. opNode = new SubtractOperatorNode(t); .)
     )                     
     (. 
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3501,6 +3716,7 @@ MulExpr<out BinaryOperatorNode exprNode>
       (. opNode = new ModuloOperatorNode(t); .)
     )                     
     (. 
+       SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
@@ -3552,6 +3768,7 @@ Unary<out ExpressionNode exprNode>
       ")"
       (. Terminate(tcNode); .)
     )
+    (. SetCommentOwner(unaryOp); .)
   )
   (. ExpressionNode unaryNode; .)
   Unary<out unaryNode>
@@ -3581,7 +3798,10 @@ Primary<out ExpressionNode exprNode>
     Literal<out innerNode>             
   | 
     "("
-    (. var pExprNode = new ParenthesisExpressionNode(t); .) 
+    (. 
+       var pExprNode = new ParenthesisExpressionNode(t); 
+       SetCommentOwner(pExprNode);
+    .) 
     Expression<out innerNode>
     (. 
        pExprNode.Expression = innerNode;
@@ -3592,9 +3812,15 @@ Primary<out ExpressionNode exprNode>
   | PrimitiveNamedLiteral<out innerNode>
   | NamedLiteral<out innerNode>
   | "this" 
-    (. innerNode = new ThisNode(t); .)
+    (. 
+       innerNode = new ThisNode(t); 
+       SetCommentOwner(innerNode);
+    .)
   | "base" 
-    (. innerNode = new BaseNode(t); .)
+    (. 
+       innerNode = new BaseNode(t); 
+       SetCommentOwner(innerNode);
+    .)
   | NewOperator<out innerNode>
   | TypeOfOperator<out innerNode>
   | CheckedOperator<out innerNode>
@@ -3609,12 +3835,14 @@ Primary<out ExpressionNode exprNode>
       "++"  
       (. 
          var incNode = new PostIncrementOperatorNode(t);
+         SetCommentOwner(incNode);
          incNode.Operand = curExprNode;
          curExprNode = incNode;
       .) 
     | "--"  
       (. 
          var decNode = new PostDecrementOperatorNode(t);
+         SetCommentOwner(decNode);
          decNode.Operand = curExprNode;
          curExprNode = decNode;
       .) 
@@ -3622,6 +3850,7 @@ Primary<out ExpressionNode exprNode>
       (. 
          SimpleNameNode snlNode;
          var ctypeNode = new CTypeMemberAccessOperatorNode(t);
+         SetCommentOwner(ctypeNode);
       .)
       SimpleNamedLiteral<out snlNode>
       (. 
@@ -3633,6 +3862,7 @@ Primary<out ExpressionNode exprNode>
       (. 
          SimpleNameNode snlNode;
          var maNode = new MemberAccessOperatorNode(t);
+         SetCommentOwner(maNode);
       .)
       SimpleNamedLiteral<out snlNode>
       (. 
@@ -3643,6 +3873,7 @@ Primary<out ExpressionNode exprNode>
     | "("   
       (. 
          var invNode = new MethodInvocationOperatorNode(t);
+         SetCommentOwner(invNode);
          invNode.ScopeOperand = curExprNode;
       .)
       CurrentArgumentList<invNode.Arguments>
@@ -3655,6 +3886,7 @@ Primary<out ExpressionNode exprNode>
       "["
       (. 
          var indNode = new ArrayIndexerInvocationOperatorNode(t);
+         SetCommentOwner(indNode);
          indNode.ScopeOperand = curExprNode;
       .)
       ArrayIndexer<indNode.Arguments> 
@@ -3671,6 +3903,7 @@ Primary<out ExpressionNode exprNode>
 Literal<out ExpressionNode valNode>
   (. valNode = null; .)
 = 
+  (
     intCon        
     (. valNode = IntegerConstantNode.Create(t); .)
   | realCon     
@@ -3685,6 +3918,8 @@ Literal<out ExpressionNode valNode>
     (. valNode = new FalseNode(t); .)
   | "null"      
     (. valNode = new NullNode(t); .)
+  )
+  (. SetCommentOwner(valNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -3711,6 +3946,7 @@ PrimitiveNamedLiteral<out ExpressionNode exprNode>
   )               
   (. 
      var pnNode = new PrimitiveNamedNode(t);
+     SetCommentOwner(pnNode);
      exprNode = pnNode;
   .)
   "." 
@@ -3731,6 +3967,7 @@ NamedLiteral<out ExpressionNode exprNode>
   ident        
   (. 
      var nlNode = new ScopedNameNode(t);
+     SetCommentOwner(nlNode);
      exprNode = nlNode;
   .)
   [ 
@@ -3756,7 +3993,10 @@ NamedLiteral<out ExpressionNode exprNode>
 SimpleNamedLiteral<out SimpleNameNode snlNode> 
 =
   ident        
-  (. snlNode = new SimpleNameNode(t); .)
+  (. 
+     snlNode = new SimpleNameNode(t); 
+     SetCommentOwner(snlNode);
+  .)
   (. TypeOrNamespaceNodeCollection argList; .)
   [ 
     IF (IsGeneric()) TypeArgumentList<out argList>
@@ -3773,6 +4013,7 @@ TypeOfOperator<out ExpressionNode exprNode>
   "typeof"                   
   (. 
      var topNode = new TypeofOperatorNode(t);
+     SetCommentOwner(topNode);
      exprNode = topNode;
   .)
   "("                        
@@ -3797,6 +4038,7 @@ SizeOfOperator<out ExpressionNode exprNode>
   "sizeof"                   
   (. 
      var sopNode = new SizeofOperatorNode(t);
+     SetCommentOwner(sopNode);
      exprNode = sopNode;
   .)
   "("                        
@@ -3821,6 +4063,7 @@ CheckedOperator<out ExpressionNode exprNode>
   "checked"                     
   (. 
      var copNode = new CheckedOperatorNode(t);
+     SetCommentOwner(copNode);
      exprNode = copNode;
   .)
   "("                           
@@ -3845,6 +4088,7 @@ UncheckedOperator<out ExpressionNode exprNode>
   "unchecked"                   
   (. 
      var uopNode = new UncheckedOperatorNode(t);
+     SetCommentOwner(uopNode);
      exprNode = uopNode;
   .)
   "("                           
@@ -3869,6 +4113,7 @@ DefaultOperator<out ExpressionNode exprNode>
   "default"                 
   (. 
      var defNode = new DefaultOperatorNode(t);
+     SetCommentOwner(defNode);
      exprNode = defNode;
   .)
   "("                       
@@ -3894,7 +4139,10 @@ NewOperator<out ExpressionNode exprNode>
   "new"
   (. var newToken = t; .)
   (
-    (. var anonNode = new NewOperatorWithAnonymousTypeNode(t); .)
+    (. 
+       var anonNode = new NewOperatorWithAnonymousTypeNode(t); 
+       SetCommentOwner(anonNode);
+    .)
     AnonymousObjectInitializer<anonNode>
     (. exprNode = anonNode; .)
   |
@@ -3902,7 +4150,10 @@ NewOperator<out ExpressionNode exprNode>
     NonArrayType<out typeNode>
     NewOperatorWithType<newToken, typeNode, out exprNode>
   |
-    (. var impArrNode = new NewOperatorWithArrayNode(t); .)
+    (. 
+       var impArrNode = new NewOperatorWithArrayNode(t); 
+       SetCommentOwner(impArrNode);
+    .)
     ImplicitArrayCreation<impArrNode>
     (. exprNode = impArrNode; .)
   )
@@ -3963,6 +4214,7 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
     (. 
        Token start = t; 
        mdNode = new MemberDeclaratorNode(t);
+       SetCommentOwner(mdNode);
        mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.Expression;
     .)
     "=" 
@@ -3977,6 +4229,7 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
     Primary<out primNode>
     (. 
        mdNode = new MemberDeclaratorNode(primNode == null ? t : primNode.StartToken);
+       SetCommentOwner(mdNode);
        mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.SimpleName;
        mdNode.Expression = primNode;
     .)
@@ -3985,6 +4238,7 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
     PredefinedType<out typeNode>
     (. 
        mdNode = new MemberDeclaratorNode(typeNode.StartToken);
+       SetCommentOwner(mdNode);
        mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.MemberAccess;
        mdNode.TypeName = typeNode;
     .)
@@ -4007,12 +4261,14 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     // --- Simple constructor call
     (. 
        var scNode = new NewOperatorWithConstructorNode(newToken); 
+       SetCommentOwner(scNode);
        scNode.TypeName = typeNode;
        exprNode = scNode;
     .)
     "("
     (.
        var invNode = new MethodInvocationOperatorNode(t);
+       SetCommentOwner(invNode);
        invNode.ScopeOperand = scNode;
     .)
     CurrentArgumentList<invNode.Arguments>
@@ -4031,6 +4287,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
   | // --- Implicit default constructor call
     (. 
        var scNode = new NewOperatorWithConstructorNode(newToken); 
+       SetCommentOwner(scNode);
        scNode.TypeName = typeNode;
        exprNode = scNode;
     .)
@@ -4044,6 +4301,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     IF (IsDims())                 
     (. 
        var newOpNode = new NewOperatorWithArrayNode(t); 
+       SetCommentOwner(newOpNode);
        newOpNode.TypeName = typeNode;
        exprNode = newOpNode;
     .)
@@ -4053,6 +4311,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
   | // --- New array creation
     (. 
        var newOpNode = new NewOperatorWithArrayNode(newToken); 
+       SetCommentOwner(newOpNode);
        newOpNode.TypeName = typeNode;
        exprNode = newOpNode;
        ExpressionNode initExprNode; 
@@ -4118,7 +4377,10 @@ ImplicitArrayCreation<NewOperatorWithArrayNode impArrNode>
 ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
 =
   "{"
-  (. oiNode = new ObjectOrCollectionInitializerNode(t); .)
+  (. 
+     oiNode = new ObjectOrCollectionInitializerNode(t); 
+     SetCommentOwner(oiNode);
+  .)
   (
     IF (IsEmptyMemberInitializer()) 
     "}"   
@@ -4167,6 +4429,7 @@ ElementInitializer<out ElementInitializerNode eiNode>
 =
   (. 
      eiNode = new ElementInitializerNode(la);
+     SetCommentOwner(eiNode);
      ExpressionNode exprNode; 
   .)
   (
@@ -4213,7 +4476,10 @@ MemberInitializerList<ObjectOrCollectionInitializerNode ocNode>
 MemberInitializer<out MemberInitializerNode miNode>
 =
   ident
-  (. miNode = new MemberInitializerNode(t); .)
+  (. 
+     miNode = new MemberInitializerNode(t); 
+     SetCommentOwner(miNode);
+  .)
   "="
   (. miNode.EqualToken = t; .)
   (
@@ -4237,12 +4503,14 @@ AnonymousDelegate<out ExpressionNode exprNode>
   "delegate"            
   (. 
      var adNode = new AnonymousDelegateNode(t);
+     SetCommentOwner(adNode);
      exprNode = adNode;
   .)
   [                     
     "("
     (. 
        var parsNode = new FormalParameterListNode(t); 
+       SetCommentOwner(parsNode);
        adNode.ParameterList = parsNode;
     .)
     [ 
@@ -4289,6 +4557,7 @@ AnonymousMethodParameter<out FormalParameterNode parNode>
   ident                         
   (. 
      parNode = new FormalParameterNode(start);
+     SetCommentOwner(parNode);
      parNode.Modifier = modifier;
      parNode.IdentifierToken = t;
      parNode.TypeName = typeNode;
@@ -4310,6 +4579,7 @@ ArrayIndexer<ArgumentNodeCollection argNodes>
      if (argNodes != null)
      {
        var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
+       SetCommentOwner(argNode);
        argNode.Expression = exprNode;
        Terminate(argNode);
        argNodes.Add(argNode);
@@ -4323,6 +4593,7 @@ ArrayIndexer<ArgumentNodeCollection argNodes>
        if (argNodes != null)
        {
          var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
+         SetCommentOwner(argNode);
          argNode.Expression = exprNode;
          Terminate(argNode);
          argNodes.Add(separator, argNode);
@@ -4353,7 +4624,10 @@ FieldMemberDeclarators<FieldDeclarationNode fiNode>
 SingleFieldMember<out FieldTagNode fiNode>
 = 
   ident                      
-  (. fiNode = new FieldTagNode(t); .)
+  (. 
+     fiNode = new FieldTagNode(t); 
+     SetCommentOwner(fiNode);
+  .)
   [ 
     "="                      
     (. 
@@ -4443,12 +4717,20 @@ TypeParameterList<ITypeParameterHolder paramNode>
   "<" 
   (. Start(paramNode.TypeParameters); .)                      
   TypeParameter<out attrNodes, out identifier>      
-  (. paramNode.TypeParameters.Add(new TypeParameterNode(identifier, attrNodes)); .)
+  (. 
+     var newParNode = new TypeParameterNode(identifier, attrNodes);
+     SetCommentOwner(newParNode);
+     paramNode.TypeParameters.Add(newParNode); 
+  .)
   { 
     "," 
     (. var separator= t; .)
     TypeParameter<out attrNodes, out identifier>      
-    (. paramNode.TypeParameters.Add(new TypeParameterNode(separator, identifier, attrNodes)); .)
+    (. 
+       newParNode = new TypeParameterNode(identifier, attrNodes);
+       SetCommentOwner(newParNode);
+       paramNode.TypeParameters.Add(separator, newParNode); 
+    .)
   } 
   ">"
   (. Terminate(paramNode.TypeParameters); .)
@@ -4477,6 +4759,7 @@ TypeArgumentList<out TypeOrNamespaceNodeCollection argList>
   "<"
   (. 
      argList = new TypeOrNamespaceNodeCollection(); 
+     SetCommentOwner(argList);
      Start(argList);
   .)
   [ 
@@ -4513,6 +4796,7 @@ TypeParameterConstraintsClause<out TypeParameterConstraintNode constrNode>
   ":"
   (. 
      constrNode = new TypeParameterConstraintNode(start, identifier, t);
+     SetCommentOwner(constrNode);
      TypeParameterConstraintTagNode tag;
   .)
   TypeParameterConstraintTag<out tag>
@@ -4532,22 +4816,25 @@ TypeParameterConstraintsClause<out TypeParameterConstraintNode constrNode>
 TypeParameterConstraintTag<out TypeParameterConstraintTagNode tag> 
   (. tag = null; .)
 =
-  "class"                    
-  (. tag = new TypeParameterConstraintTagNode(t); .)
+  (
+    "class"                    
+    (. tag = new TypeParameterConstraintTagNode(t); .)
   |
-  "struct"                   
-  (. tag = new TypeParameterConstraintTagNode(t); .)
+    "struct"                   
+    (. tag = new TypeParameterConstraintTagNode(t); .)
   |
-  "new"                      
-  (. var start = t; .)
-  "(" 
-  (. var openPar = t; .)
-  ")" 
-  (. tag = new TypeParameterConstraintTagNode(start, openPar, t); .)
+    "new"                      
+    (. var start = t; .)
+    "(" 
+    (. var openPar = t; .)
+    ")" 
+    (. tag = new TypeParameterConstraintTagNode(start, openPar, t); .)
   |
-  (. TypeOrNamespaceNode typeNode; .)
-  ClassType<out typeNode>     
-  (. tag = new TypeParameterConstraintTagNode(typeNode); .)
+    (. TypeOrNamespaceNode typeNode; .)
+    ClassType<out typeNode>     
+    (. tag = new TypeParameterConstraintTagNode(typeNode); .)
+  )
+  (. SetCommentOwner(tag); .)
 .
 
 END CS3.

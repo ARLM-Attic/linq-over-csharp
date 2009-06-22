@@ -1,36 +1,39 @@
 // ================================================================================================
-// ExpressionInitializerNode.cs
+// NewLineReachedEventArgs.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.06.20, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 
-namespace CSharpTreeBuilder.Ast
+namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an expression initializer.
+  /// This class represents the event arguments when a new line is reached by the scanner.
   /// </summary>
+  /// <remarks>
+  /// The event argument is the line number reached. When the scanner is initialized, an event is
+  /// raised with line #1.
+  /// </remarks>
   // ================================================================================================
-  public sealed class ExpressionInitializerNode : VariableInitializerNode
+  public class NewLineReachedEventArgs : EventArgs 
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="NewLineReachedEventArgs"/> class.
     /// </summary>
-    /// <param name="expression">Initializer expression.</param>
+    /// <param name="lineNumber">The line number reached.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionInitializerNode(ExpressionNode expression)
-      : base(expression.StartToken)
+    public NewLineReachedEventArgs(int lineNumber)
     {
-      Expression = expression;
-      Terminate(expression.TerminatingToken);
+      LineNumber = lineNumber;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the initializer.
+    /// Gets the line number reached.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public int LineNumber { get; private set; }
   }
 }

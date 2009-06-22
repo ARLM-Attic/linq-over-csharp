@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.22, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using System.Collections;
 using System.IO;
 using CSharpTreeBuilder.Ast;
@@ -44,12 +45,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     #endregion
 
-    #region Project Model extension fields
-
-    private ISyntaxNode _CurrentElement;
-
-    #endregion
-    
     #region Fields used by the parser
 
     // ReSharper disable InconsistentNaming
@@ -82,8 +77,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       SuppressErrors = false;
       Scanner = scanner;
       SourceFileNode = sourceFileNode;
-      // TODO: Fix this code
-      //CommentHandler = new CommentHandler(this);
     }
 
     #endregion
@@ -97,30 +90,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <value>The source file node.</value>
     // ----------------------------------------------------------------------------------------------
     public SourceFileNode SourceFileNode { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the languauge element that is currently processed.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ISyntaxNode CurrentNode
-    {
-      get { return _CurrentElement; }
-      set
-      {
-        _CurrentElement = value;
-        // TODO: Fix this code
-        //if (OrphanComment != null && OrphanComment.StartToken.pos < _CurrentElement.StartToken.pos)
-        //{
-        //  // --- The orphan comment can be added to this language element.
-        //  _CurrentElement.Comment = OrphanComment;
-        //  OrphanComment = null;
-        //}
-      }
-    }
-
-    // TODO: Fix this code
-    //public CommentInfo OrphanComment { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -190,9 +159,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     }
 
     // ReSharper disable InconsistentNaming
-    /// <summary>Tokens representing unary operators</summary>
-    private static BitArray unaryOp =
-      NewSet(_plus, _minus, _not, _tilde, _inc, _dec, _true, _false);
 
     /// <summary>Tokens representing type shortcuts</summary>
     private static readonly BitArray typeKW =
@@ -344,11 +310,20 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       var stream = File.OpenText(sourceNode.FullName).BaseStream;
       try
       {
-        // --- Create a scanner and a parser using that scanner
+        // --- Create a scanner with token processor events and a parser using that scanner
         var scanner = new Scanner(stream);
         var parser = new CSharpParser(scanner, sourceNode) {ErrorHandler = project, Project = project};
+        scanner.NewLineReached += parser.NewLineReached;
+        scanner.TokenScanned += parser.TokenScanned;
+        scanner.WhitespaceScanned += parser.WhitespaceScanned;
+        
         // --- Parse the source file
         parser.Parse();
+
+        // --- Release event handlers
+        scanner.NewLineReached -= parser.NewLineReached;
+        scanner.TokenScanned -= parser.TokenScanned;
+        scanner.WhitespaceScanned -= parser.WhitespaceScanned;
       }
       finally
       {
@@ -375,6 +350,58 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         rgNode.LeftOperand = unaryNode;
       }
       opNode.Terminate(t);
+    }
+
+    #endregion
+
+    #region Scanner event response methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Responds to the "whitespaces scanned" event of the scanner.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">
+    /// The <see cref="CSharpTreeBuilder.CSharpAstBuilder.WhitespaceScannedEventArgs"/> 
+    /// instance containing the event data.
+    /// </param>
+    // ----------------------------------------------------------------------------------------------
+    private void WhitespaceScanned(object sender, WhitespaceScannedEventArgs e)
+    {
+      SourceFileNode.TokenizedUnit.AddWhitespaceToStream(e.Whitespace);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Responds to the "token scanned" event of the scanner.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">
+    /// The <see cref="CSharpTreeBuilder.CSharpAstBuilder.TokenScannedEventArgs"/> instance 
+    /// containing the event data.
+    /// </param>
+    // ----------------------------------------------------------------------------------------------
+    private void TokenScanned(object sender, TokenScannedEventArgs e)
+    {
+      SourceFileNode.TokenizedUnit.AddTokenToStream(e.Token);
+      e.Token.TokenizedStreamPosition = SourceFileNode.TokenizedUnit.CurrentPosition;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Responds to the "new line reached" event of the scanner.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">
+    /// The <see cref="CSharpTreeBuilder.CSharpAstBuilder.NewLineReachedEventArgs"/> instance 
+    /// containing the event data.
+    /// </param>
+    // ----------------------------------------------------------------------------------------------
+    private void NewLineReached(object sender, NewLineReachedEventArgs e)
+    {
+      // --- Nothing to do in the case of first line.
+      if (e.LineNumber == 1) return;
+      SourceFileNode.TokenizedUnit.AddEndOfLineStream(e.LineNumber);
     }
 
     #endregion

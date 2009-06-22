@@ -1,36 +1,38 @@
 // ================================================================================================
-// ExpressionInitializerNode.cs
+// TokenScannedEventArgs.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.06.20, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 
-namespace CSharpTreeBuilder.Ast
+namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an expression initializer.
+  /// This class represents the parameters of an event raised when the scanner reached a new token.
   /// </summary>
+  /// <remarks>
+  /// The only parameter of this event is the token scanned.
+  /// </remarks>
   // ================================================================================================
-  public sealed class ExpressionInitializerNode : VariableInitializerNode
+  public class TokenScannedEventArgs : EventArgs 
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="TokenScannedEventArgs"/> class.
     /// </summary>
-    /// <param name="expression">Initializer expression.</param>
+    /// <param name="token">The token.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionInitializerNode(ExpressionNode expression)
-      : base(expression.StartToken)
+    public TokenScannedEventArgs(Token token)
     {
-      Expression = expression;
-      Terminate(expression.TerminatingToken);
+      Token = token;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the initializer.
+    /// Gets the token scanned
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public Token Token { get; private set; }
   }
 }

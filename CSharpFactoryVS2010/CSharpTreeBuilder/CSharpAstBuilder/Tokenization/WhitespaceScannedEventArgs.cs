@@ -1,36 +1,35 @@
 // ================================================================================================
-// ExpressionInitializerNode.cs
+// WhitespaceScannedEventArgs.cs
 //
-// Created: 2009.05.06, by Istvan Novak (DeepDiver)
+// Created: 2009.06.20, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 
-namespace CSharpTreeBuilder.Ast
+namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an expression initializer.
+  /// This class represents the arguments of an event raised when a whitespace section is scanned.
   /// </summary>
   // ================================================================================================
-  public sealed class ExpressionInitializerNode : VariableInitializerNode
+  public class WhitespaceScannedEventArgs: EventArgs
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExpressionInitializerNode"/> class.
+    /// Initializes a new instance of the <see cref="WhitespaceScannedEventArgs"/> class.
     /// </summary>
-    /// <param name="expression">Initializer expression.</param>
+    /// <param name="whitespace">The whitespace.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionInitializerNode(ExpressionNode expression)
-      : base(expression.StartToken)
+    public WhitespaceScannedEventArgs(string whitespace)
     {
-      Expression = expression;
-      Terminate(expression.TerminatingToken);
+      Whitespace = whitespace;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression of the initializer.
+    /// Gets the whitespace scanned
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public string Whitespace { get; private set; }
   }
 }

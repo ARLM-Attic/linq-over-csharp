@@ -165,10 +165,12 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="terminating">The terminating token.</param>
     /// <returns></returns>
     // ----------------------------------------------------------------------------------------------
-    public void AddExternAlias(Token start, Token alias, Token identifier,
+    public ExternAliasNode AddExternAlias(Token start, Token alias, Token identifier,
                                           Token terminating)
     {
-      ExternAliasNodes.Add(new ExternAliasNode(this, start, alias, identifier, terminating));
+      var externAlias = new ExternAliasNode(this, start, alias, identifier, terminating);
+      ExternAliasNodes.Add(externAlias);
+      return externAlias;
     }
 
     #endregion

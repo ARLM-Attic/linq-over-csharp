@@ -89,7 +89,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder {
         if (ch == '\r' && buffer.Peek() != '\n') ch = EOL;
         if (ch == EOL)
         {
-          line++; 
+          line++;
+          // --- At this point we reached a new line
+          RaiseNewLineReached(line);
           col = 0;
         }
       }
@@ -218,9 +220,18 @@ namespace CSharpTreeBuilder.CSharpAstBuilder {
     //-----------------------------------------------------------------------------------
     Token NextToken()
     {
+      var whitespace = string.Empty;
 		  while (ch == ' ' ||
       ch >= 9 && ch <= 10 || ch == 13
-		  ) NextCh();
+		  ) 
+		  {
+		    whitespace += ch;
+		    NextCh();
+		  }
+		  
+		  // --- At this point potential whitespace scanned
+		  if (!string.IsNullOrEmpty(whitespace)) RaiseWhitespaceScanned(whitespace);
+		  
 
       var apx = 0;
       // Handle skip mode
@@ -1205,9 +1216,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder {
 
   		}
 	  	t.val = new String(tval, 0, tlen);
+	  	
+	  	// --- At this point a new token is successfully scanned
+	  	RaiseTokenScanned(t);
 		  return t;
 	  }
-	
   }
 
 #pragma warning restore 1591

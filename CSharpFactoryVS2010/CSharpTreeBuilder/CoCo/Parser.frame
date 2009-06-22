@@ -28,8 +28,6 @@ This file has been modified by Novák István to customize it to the
 C# syntax as used by the LINQ over CSharp project.
 ----------------------------------------------------------------------*/
 -->begin
-using System;
-
 -->namespace
 
 // disable warnings about missing XML comments
@@ -99,11 +97,10 @@ public partial class CSharpParser
 		  Get();
 -->parseRoot
       Expect(0);
-      // TODO: Fix this code
-      //if (PragmaHandler.OpenRegionCount > 0)
-      //{
-      //  Error1038(la);
-      //}
+      if (_RegionStack.Count > 0)
+      {
+        Error1038(la);
+      }
   	}
 	
     // --------------------------------------------------------------------------------

@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CSharpAstBuilder\Buffer.cs" />
+    <Compile Include="CSharpAstBuilder\CSharpParser.Comments.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Common.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Errors.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Generated.cs" />
@@ -68,9 +69,18 @@
     <Compile Include="CSharpAstBuilder\PPExpressions\Scanner.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\ISourceSymbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\ISymbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\CSharpSourceSymbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\Symbol.cs" />
     <Compile Include="CSharpAstBuilder\Token.cs" />
     <Compile Include="CSharpAstBuilder\TokenExtensions.cs" />
     <Compile Include="CSharpAstBuilder\Token.Predefined.cs" />
+    <Compile Include="CSharpAstBuilder\Tokenization\NewLineReachedEventArgs.cs" />
+    <Compile Include="CSharpAstBuilder\Tokenization\TokenizedCompilationUnit.cs" />
+    <Compile Include="CSharpAstBuilder\Tokenization\TokenScannedEventArgs.cs" />
+    <Compile Include="CSharpAstBuilder\Tokenization\WhitespaceScannedEventArgs.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
     <Compile Include="CSharpAst\BlankSyntaxNodeVisitor.cs">
       <DependentUpon>BlankSyntaxNodeVisitor.tt</DependentUpon>
@@ -78,6 +88,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Include="CSharpAst\Comments\BlockCommentNode.cs" />
+    <Compile Include="CSharpAst\Comments\ICommentNode.cs" />
+    <Compile Include="CSharpAst\Comments\MultiCommentNode.cs" />
+    <Compile Include="CSharpAst\Comments\SingleCommentNodeBase.cs" />
+    <Compile Include="CSharpAst\Comments\LineCommentNode.cs" />
     <Compile Include="CSharpAst\Expressions\Lambda\LambdaExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\ElementInitializerNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\ElementInitializerNodeCollection.cs" />
