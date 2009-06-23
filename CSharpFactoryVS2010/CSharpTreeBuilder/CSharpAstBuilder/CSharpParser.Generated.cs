@@ -2648,15 +2648,16 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		ifNode.Condition = exprNode; 
 		Expect(113);
 		ifNode.CloseParenthesis = t;
-		StatementNode branchNode; 
+		StatementNode thenBranchNode; 
+		StatementNode elseBranchNode; 
 		
-		EmbeddedStatement(out branchNode);
-		ifNode.ThenStatement = branchNode; 
+		EmbeddedStatement(out thenBranchNode);
+		ifNode.ThenStatement = thenBranchNode; 
 		if (la.kind == 24) {
 			Get();
 			ifNode.ElseToken = t; 
-			EmbeddedStatement(out stmtNode);
-			ifNode.ThenStatement = branchNode; 
+			EmbeddedStatement(out elseBranchNode);
+			ifNode.ElseStatement = elseBranchNode; 
 		}
 		Terminate(stmtNode); 
 	}

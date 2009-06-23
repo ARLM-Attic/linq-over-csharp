@@ -77,6 +77,11 @@ namespace CSharpTreeBuilder.Ast
 
 #warning Initializer visiting is missing.
 
+      if (Body != null)
+      {
+        Body.AcceptVisitor(visitor);
+      }
+
     }
 
     #endregion

@@ -53,5 +53,37 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public BlockStatementNode FinallyBlock { get; internal set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      base.AcceptVisitor(visitor);
+
+      if (TryBlock != null)
+      {
+        TryBlock.AcceptVisitor(visitor);
+      }
+
+      foreach (var catchClause in CatchClauses)
+      {
+        catchClause.AcceptVisitor(visitor);
+      }
+
+      if (FinallyBlock != null)
+      {
+        FinallyBlock.AcceptVisitor(visitor);
+      }
+    }
+
+    #endregion
   }
 }

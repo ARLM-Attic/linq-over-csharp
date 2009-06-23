@@ -33,5 +33,23 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The labels.</value>
     // ----------------------------------------------------------------------------------------------
     public LabelNodeCollection Labels { get; private set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      foreach (var label in Labels)
+      {
+        label.AcceptVisitor(visitor);
+      }
+    }
+
+    #endregion
   }
 }

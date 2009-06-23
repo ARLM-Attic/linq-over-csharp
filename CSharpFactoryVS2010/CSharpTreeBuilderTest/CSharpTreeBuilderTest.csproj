@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -72,6 +73,7 @@
     <None Include="TestFiles\Pragmas\UnexpectedEndRegion.cs" />
     <None Include="TestFiles\Pragmas\SimpleTrueElseIf.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\Visitor\StatementVisitorTests.cs" />
     <None Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />
     <None Include="TestFiles\Visitor\EnumDeclarationNodeVisitorTest.cs" />
     <None Include="TestFiles\Visitor\InterfaceDeclarationNodeVisitorTest.cs" />

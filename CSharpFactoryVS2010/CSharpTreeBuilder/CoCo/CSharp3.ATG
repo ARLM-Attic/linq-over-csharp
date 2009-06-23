@@ -2298,15 +2298,16 @@ IfStatement<out StatementNode stmtNode>
   ")"
   (. 
      ifNode.CloseParenthesis = t;
-     StatementNode branchNode; 
+     StatementNode thenBranchNode; 
+     StatementNode elseBranchNode; 
   .)
-  EmbeddedStatement<out branchNode>
-  (. ifNode.ThenStatement = branchNode; .)
+  EmbeddedStatement<out thenBranchNode>
+  (. ifNode.ThenStatement = thenBranchNode; .)
   [ 
     "else"
     (. ifNode.ElseToken = t; .)
-    EmbeddedStatement<out stmtNode>
-    (. ifNode.ThenStatement = branchNode; .)
+    EmbeddedStatement<out elseBranchNode>
+    (. ifNode.ElseStatement = elseBranchNode; .)
   ]
   (. Terminate(stmtNode); .)
 .

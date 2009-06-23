@@ -55,5 +55,32 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ConstTagNodeCollection ConstTags { get; private set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      base.AcceptVisitor(visitor);
+
+      if (TypeName != null)
+      {
+        TypeName.AcceptVisitor(visitor);
+      }
+
+      foreach (var constTag in ConstTags)
+      {
+        constTag.AcceptVisitor(visitor);
+      }
+    }
+
+    #endregion
   }
 }

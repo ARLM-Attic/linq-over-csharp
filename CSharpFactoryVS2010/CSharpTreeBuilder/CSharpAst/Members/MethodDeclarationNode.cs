@@ -68,6 +68,11 @@ namespace CSharpTreeBuilder.Ast
       {
         FormalParameters.AcceptVisitor(visitor);
       }
+
+      if (Body != null)
+      {
+        Body.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

@@ -41,6 +41,11 @@ namespace CSharpTreeBuilder.Ast
       {
         attributeDecoration.AcceptVisitor(visitor);
       }
+
+      if (Body != null)
+      {
+        Body.AcceptVisitor(visitor);
+      }
     }
 
     #endregion
