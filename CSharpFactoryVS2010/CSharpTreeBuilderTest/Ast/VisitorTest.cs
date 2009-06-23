@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 using SoftwareApproach.TestingExtensions;
+using Rhino.Mocks;
 
 namespace CSharpTreeBuilderTest.Ast
 {
@@ -28,37 +28,42 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var compilationUnitNode = project.SyntaxTree.SourceFileNodes[0];
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(compilationUnitNode));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.ExternAliasNodes[0]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[0]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit((UsingAliasNode) compilationUnitNode.UsingNodes[1]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[1].TypeName));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.UsingNodes[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.GlobalAttributes[0]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0]));
-      //visitorMock.Setup(v => v.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0].Expression));
-      visitorMock.Setup(v => v.Visit(compilationUnitNode.NamespaceDeclarations[0]));
-      visitorMock.Setup(v => v.Visit((ClassDeclarationNode) compilationUnitNode.TypeDeclarations[0]));
-      visitorMock.Setup(v => v.Visit((StructDeclarationNode) compilationUnitNode.TypeDeclarations[1]));
-      visitorMock.Setup(v => v.Visit((InterfaceDeclarationNode) compilationUnitNode.TypeDeclarations[2]));
-      visitorMock.Setup(v => v.Visit((EnumDeclarationNode) compilationUnitNode.TypeDeclarations[3]));
-      visitorMock.Setup(v => v.Visit((DelegateDeclarationNode) compilationUnitNode.TypeDeclarations[4]));
-      visitorMock.Setup(v => v.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).TypeName));
-      visitorMock.Setup(v => v.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).FormalParameters));
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(compilationUnitNode);
+        visitorMock.Visit(compilationUnitNode.ExternAliasNodes[0]);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[0]);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[0].TypeName);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit((UsingAliasNode)compilationUnitNode.UsingNodes[1]);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[1].TypeName);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[1].TypeName.TypeTags[0]);
+        visitorMock.Visit(compilationUnitNode.GlobalAttributes[0]);
+        visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0]);
+        visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName);
+        visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0]);
+        //visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0].Expression);
+        visitorMock.Visit(compilationUnitNode.NamespaceDeclarations[0]);
+        visitorMock.Visit((ClassDeclarationNode)compilationUnitNode.TypeDeclarations[0]);
+        visitorMock.Visit((StructDeclarationNode)compilationUnitNode.TypeDeclarations[1]);
+        visitorMock.Visit((InterfaceDeclarationNode)compilationUnitNode.TypeDeclarations[2]);
+        visitorMock.Visit((EnumDeclarationNode)compilationUnitNode.TypeDeclarations[3]);
+        visitorMock.Visit((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]);
+        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).TypeName);
+        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).TypeName.TypeTags[0]);
+        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).FormalParameters);
+      }
+      mocks.ReplayAll();
 
       // Act
-      compilationUnitNode.AcceptVisitor(visitorMock.Object);
+      compilationUnitNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -75,34 +80,39 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var typeOrNamespaceNode = project.SyntaxTree.SourceFileNodes[0].UsingNodes[0].TypeName;
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode));
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[0]));                                                   // System
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[1]));                                                   // Collections
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[2]));                                                   // Generic
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3]));                                                   // IDictionary
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0]));                                        // System.Nullable<int>**[][,]
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[0]));                              // System
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1]));                              // Nullable
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1].Arguments[0]));                   // int
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1].Arguments[0].TypeTags[0]));         // int
-      visitorMock.Setup(v => v.Visit((PointerModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[0]));   // *
-      visitorMock.Setup(v => v.Visit((PointerModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[1]));   // *
-      //visitorMock.Setup(v => v.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[2]));     // []
-      //visitorMock.Setup(v => v.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[3]));     // [,]
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1]));                                        // string**[][,]
-      visitorMock.Setup(v => v.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeTags[0]));                              // string
-      visitorMock.Setup(v => v.Visit((PointerModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[0]));   // *
-      visitorMock.Setup(v => v.Visit((PointerModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[1]));   // *
-      //visitorMock.Setup(v => v.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[2]));     // []
-      //visitorMock.Setup(v => v.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[3]));     // [,]
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(typeOrNamespaceNode);
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[0]); // System
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[1]); // Collections
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[2]); // Generic
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3]); // IDictionary
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0]); // System.Nullable<int>**[][,]
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[0]); // System
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1]); // Nullable
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1].Arguments[0]); // int
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1].Arguments[0].TypeTags[0]); // int
+        visitorMock.Visit((PointerModifierNode)typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[0]); // *
+        visitorMock.Visit((PointerModifierNode)typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[1]); // *
+        //visitorMock.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[2]);     // []
+        //visitorMock.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeModifiers[3]);     // [,]
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1]); // string**[][,]
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeTags[0]); // string
+        visitorMock.Visit((PointerModifierNode)typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[0]); // *
+        visitorMock.Visit((PointerModifierNode)typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[1]); // *
+        //visitorMock.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[2]);     // []
+        //visitorMock.Visit((ArrayModifierNode) typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeModifiers[3]);     // [,]
+      }
+      mocks.ReplayAll();
 
       // Act
-      typeOrNamespaceNode.AcceptVisitor(visitorMock.Object);
+      typeOrNamespaceNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -119,238 +129,255 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var classDeclarationNode = (ClassDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(classDeclarationNode));
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(classDeclarationNode);
 
-      // Class attributes
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[2]));
+        // Class attributes
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].TypeName);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].TypeName.TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].Arguments[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].TypeName);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[0]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[1]);
+        visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[2]);
 
-      // Type params and base types
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameters[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameters[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.BaseTypes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.BaseTypes[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.BaseTypes[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.BaseTypes[1].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.TypeParameterConstraints[1].ConstraintTags[1]));
+        // Type params and base types
+        visitorMock.Visit(classDeclarationNode.TypeParameters[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameters[1]);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[0]);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[0].TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[1]);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[1].TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].TypeName);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[1]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[1].ConstraintTags[1]);
 
-      // Constant declaration
-      visitorMock.Setup(v => v.Visit((ConstDeclarationNode) classDeclarationNode.MemberDeclarations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((ConstDeclarationNode)classDeclarationNode.MemberDeclarations[0]).ConstTags[0]));
-      visitorMock.Setup(v => v.Visit(((ConstDeclarationNode)classDeclarationNode.MemberDeclarations[0]).ConstTags[1]));
+        // Constant declaration
+        var constDeclarationNode = (ConstDeclarationNode)classDeclarationNode.MemberDeclarations[0];
+        visitorMock.Visit(constDeclarationNode);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].Arguments[0]);
+        visitorMock.Visit(constDeclarationNode.TypeName);
+        visitorMock.Visit(constDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(constDeclarationNode.ConstTags[0]);
+        visitorMock.Visit(constDeclarationNode.ConstTags[1]);
 
-      // Field declaration
-      visitorMock.Setup(v => v.Visit((FieldDeclarationNode) classDeclarationNode.MemberDeclarations[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].AttributeDecorations[0].Attributes[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((FieldDeclarationNode)classDeclarationNode.MemberDeclarations[1]).FieldTags[0]));
-      visitorMock.Setup(v => v.Visit(((FieldDeclarationNode)classDeclarationNode.MemberDeclarations[1]).FieldTags[1]));
+        // Field declaration
+        var fieldDeclarationNode = (FieldDeclarationNode)classDeclarationNode.MemberDeclarations[1];
+        visitorMock.Visit(fieldDeclarationNode);
+        visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0].Arguments[0]);
+        visitorMock.Visit(fieldDeclarationNode.TypeName);
+        visitorMock.Visit(fieldDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(fieldDeclarationNode.FieldTags[0]);
+        visitorMock.Visit(fieldDeclarationNode.FieldTags[1]);
 
-      // Method declaration
-      visitorMock.Setup(v => v.Visit((MethodDeclarationNode) classDeclarationNode.MemberDeclarations[2]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeParameters[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeParameters[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeParameterConstraints[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeParameterConstraints[0].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeParameterConstraints[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[2].TypeParameterConstraints[1].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[1]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[1].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].TypeName.TypeTags[0]));
-      //visitorMock.Setup(v => v.Visit((ArrayModifierNode)((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].TypeName.TypeModifiers[0]));
+        // Method declaration
+        var methodDeclarationNode = (MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2];
+        visitorMock.Visit(methodDeclarationNode);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.TypeName);
+        visitorMock.Visit(methodDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.TypeParameters[0]);
+        visitorMock.Visit(methodDeclarationNode.TypeParameters[1]);
+        visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[0]);
+        visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
+        visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[1]);
+        visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[1]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[1].TypeName);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[1].TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2].TypeName);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2].TypeName.TypeTags[0]);
+        //visitorMock.Visit((ArrayModifierNode)methodDeclarationNode.FormalParameters.Items[2].TypeName.TypeModifiers[0]);
 #warning Attributes are missing from FormalParameterNode so these expectations are commented out at the moment
-      //visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].AttributeDecorations[0]));
-      //visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].AttributeDecorations[0].Attributes[0]));
-      //visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].AttributeDecorations[0].Attributes[0].TypeName));
-      //visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[2]).FormalParameters.Items[2].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        //visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2].AttributeDecorations[0]);
+        //visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2].AttributeDecorations[0].Attributes[0]);
+        //visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2].AttributeDecorations[0].Attributes[0].TypeName);
+        //visitorMock.Visit(methodDeclarationNode.FormalParameters.Items[2].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
-      // Method declaration (explicit interface implementation)
-      visitorMock.Setup(v => v.Visit((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[3]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[3].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[3].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[3]).FormalParameters));
+        // Method declaration (explicit interface implementation)
+        var methodDeclarationNode2 = (MethodDeclarationNode)classDeclarationNode.MemberDeclarations[3];
+        visitorMock.Visit(methodDeclarationNode2);
+        visitorMock.Visit(methodDeclarationNode2.TypeName);
+        visitorMock.Visit(methodDeclarationNode2.TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode2.FormalParameters);
 
-      // Property declaration
-      visitorMock.Setup(v => v.Visit((PropertyDeclarationNode)classDeclarationNode.MemberDeclarations[4]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)classDeclarationNode.MemberDeclarations[4]).GetAccessor));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)classDeclarationNode.MemberDeclarations[4]).SetAccessor));
+        // Property declaration
+        var propertyDeclarationNode = (PropertyDeclarationNode)classDeclarationNode.MemberDeclarations[4];
+        visitorMock.Visit(propertyDeclarationNode);
+        visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(propertyDeclarationNode.TypeName);
+        visitorMock.Visit(propertyDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(propertyDeclarationNode.GetAccessor);
+        visitorMock.Visit(propertyDeclarationNode.SetAccessor);
 
-      // Event declaration (field-like)
-#warning Field-like event declaration testing commented out, because the parser creates a FieldDeclarationNode for this
-      //visitorMock.Setup(v => v.Visit((EventPropertyDeclarationNode) classDeclarationNode.MemberDeclarations[5]));
-      visitorMock.Setup(v => v.Visit((FieldDeclarationNode)classDeclarationNode.MemberDeclarations[5]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[5].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((FieldDeclarationNode)classDeclarationNode.MemberDeclarations[5]).FieldTags[0]));
+        // Event declaration (field-like)
+        var eventDeclarationNode = (FieldDeclarationNode)classDeclarationNode.MemberDeclarations[5];
+        visitorMock.Visit(eventDeclarationNode);
+        visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(eventDeclarationNode.TypeName);
+        visitorMock.Visit(eventDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(eventDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(eventDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(eventDeclarationNode.FieldTags[0]);
 
-      // Event declaration (property-like)
-      visitorMock.Setup(v => v.Visit((EventPropertyDeclarationNode)classDeclarationNode.MemberDeclarations[6]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        // Event declaration (property-like)
+        var eventDeclarationNode2 = (EventPropertyDeclarationNode)classDeclarationNode.MemberDeclarations[6];
+        visitorMock.Visit(eventDeclarationNode2);
+        visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0]);
+        visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 #warning EventPropertyDeclarationNode TypeName visiting checking commented out because of a bug (TypeName contains the MemberName)
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].TypeName));
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0]));
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0].Arguments[0]));
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((EventPropertyDeclarationNode)classDeclarationNode.MemberDeclarations[6]).AddAccessor));
-      visitorMock.Setup(v => v.Visit(((EventPropertyDeclarationNode)classDeclarationNode.MemberDeclarations[6]).RemoveAccessor));
+        //visitorMock.Visit(eventDeclarationNode2.TypeName);
+        //visitorMock.Visit(eventDeclarationNode2.TypeName.TypeTags[0]);
+        //visitorMock.Visit(eventDeclarationNode2.TypeName.TypeTags[0].Arguments[0]);
+        //visitorMock.Visit(eventDeclarationNode2.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(eventDeclarationNode2.AddAccessor);
+        visitorMock.Visit(eventDeclarationNode2.RemoveAccessor);
 
-      // Indexer declaration
-      visitorMock.Setup(v => v.Visit((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[7].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[7].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[7].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[7].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[7].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[7].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[1]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[1].TypeName));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)classDeclarationNode.MemberDeclarations[7]).GetAccessor));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)classDeclarationNode.MemberDeclarations[7]).SetAccessor));
+        // Indexer declaration
+        var indexerDeclarationNode = (IndexerDeclarationNode)classDeclarationNode.MemberDeclarations[7];
+        visitorMock.Visit(indexerDeclarationNode);
+        visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.TypeName);
+        visitorMock.Visit(indexerDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[1]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[1].TypeName);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[1].TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.GetAccessor);
+        visitorMock.Visit(indexerDeclarationNode.SetAccessor);
 
-      // Operator declaration
-      visitorMock.Setup(v => v.Visit((OperatorDeclarationNode) classDeclarationNode.MemberDeclarations[8]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].TypeName.TypeTags[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[8].TypeName.TypeTags[0].Arguments[1].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]));
+        // Operator declaration
+        var operatorDeclarationNode = (OperatorDeclarationNode)classDeclarationNode.MemberDeclarations[8];
+        visitorMock.Visit(operatorDeclarationNode);
+        visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
 
-      // Conversion operator declaration
-      visitorMock.Setup(v => v.Visit((CastOperatorDeclarationNode) classDeclarationNode.MemberDeclarations[9]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[9].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[9].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[9].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[9].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[9].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[9].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[9]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]));
+        // Conversion operator declaration
+        var castOperatorDeclarationNode = (CastOperatorDeclarationNode)classDeclarationNode.MemberDeclarations[9];
+        visitorMock.Visit(castOperatorDeclarationNode);
+        visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.TypeName);
+        visitorMock.Visit(castOperatorDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
 
-      // Constructor declaration 
-      visitorMock.Setup(v => v.Visit((ConstructorDeclarationNode) classDeclarationNode.MemberDeclarations[10]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[10].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[10].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[10].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[10].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters.Items[1]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters.Items[1].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[10]).FormalParameters.Items[1].TypeName.TypeTags[0]));
+        // Constructor declaration 
+        var constructorDeclarationNode = (ConstructorDeclarationNode)classDeclarationNode.MemberDeclarations[10];
+        visitorMock.Visit(constructorDeclarationNode);
+        visitorMock.Visit(constructorDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(constructorDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(constructorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(constructorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[1]);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[1].TypeName);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[1].TypeName.TypeTags[0]);
 
-      // Constructor declaration with initializer
-      visitorMock.Setup(v => v.Visit((ConstructorDeclarationNode) classDeclarationNode.MemberDeclarations[11]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)classDeclarationNode.MemberDeclarations[11]).FormalParameters));
+        // Constructor declaration with initializer
+        var constructorDeclarationNode2 = (ConstructorDeclarationNode)classDeclarationNode.MemberDeclarations[11];
+        visitorMock.Visit(constructorDeclarationNode2);
+        visitorMock.Visit(constructorDeclarationNode2.FormalParameters);
 #warning Constructor-initializer visiting is not yet implemented.
-      //visitorMock.Setup(v => v.Visit(((ConstructorDeclarationNode)classDeclarationNode.MemberDeclarations[11]).Initializer));
+        //visitorMock.Visit(constructorDeclarationNode2.Initializer);
 
-      // Destructor declaration
-      visitorMock.Setup(v => v.Visit((FinalizerDeclarationNode) classDeclarationNode.MemberDeclarations[12]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[12].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[12].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[12].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[12].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        // Destructor declaration
+        var destructorDeclarationNode = (FinalizerDeclarationNode)classDeclarationNode.MemberDeclarations[12];
+        visitorMock.Visit(destructorDeclarationNode);
+        visitorMock.Visit(destructorDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(destructorDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(destructorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(destructorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
-      // Nested class declaration
-      visitorMock.Setup(v => v.Visit((ClassDeclarationNode)classDeclarationNode.NestedTypes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.NestedTypes[0].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.NestedTypes[0].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.NestedTypes[0].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.NestedTypes[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(classDeclarationNode.NestedTypes[0].AttributeDecorations[0].Attributes[0].Arguments[0]));
+        // Nested class declaration
+        var nestedClassDeclarationNode = (ClassDeclarationNode)classDeclarationNode.NestedTypes[0];
+        visitorMock.Visit(nestedClassDeclarationNode);
+        visitorMock.Visit(nestedClassDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(nestedClassDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(nestedClassDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(nestedClassDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(nestedClassDeclarationNode.AttributeDecorations[0].Attributes[0].Arguments[0]);
+      }
+      mocks.ReplayAll();
 
       // Act
-      classDeclarationNode.AcceptVisitor(visitorMock.Object);
+      classDeclarationNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -367,120 +394,134 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var structDeclarationNode = (StructDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(structDeclarationNode));
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(structDeclarationNode);
 
-      // Struct attributes
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        // Struct attributes
+        visitorMock.Visit(structDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(structDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(structDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(structDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
-      // Type params and base types
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.TypeParameters[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.TypeParameters[1]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.BaseTypes[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.BaseTypes[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.TypeParameterConstraints[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.TypeParameterConstraints[1]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]));
+        // Type params and base types
+        visitorMock.Visit(structDeclarationNode.TypeParameters[0]);
+        visitorMock.Visit(structDeclarationNode.TypeParameters[1]);
+        visitorMock.Visit(structDeclarationNode.BaseTypes[0]);
+        visitorMock.Visit(structDeclarationNode.BaseTypes[0].TypeTags[0]);
+        visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[0]);
+        visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
+        visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[1]);
+        visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
 
-      // Constant declaration
-      visitorMock.Setup(v => v.Visit((ConstDeclarationNode)structDeclarationNode.MemberDeclarations[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[0].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[0].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((ConstDeclarationNode)structDeclarationNode.MemberDeclarations[0]).ConstTags[0]));
+        // Constant declaration
+        var constDeclarationNode = (ConstDeclarationNode)structDeclarationNode.MemberDeclarations[0];
+        visitorMock.Visit(constDeclarationNode);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(constDeclarationNode.TypeName);
+        visitorMock.Visit(constDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(constDeclarationNode.ConstTags[0]);
 
-      // Field declaration
-      visitorMock.Setup(v => v.Visit((FieldDeclarationNode)structDeclarationNode.MemberDeclarations[1]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[1].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((FieldDeclarationNode)structDeclarationNode.MemberDeclarations[1]).FieldTags[0]));
+        // Field declaration
+        var fieldDeclarationNode = (FieldDeclarationNode)structDeclarationNode.MemberDeclarations[1];
+        visitorMock.Visit(fieldDeclarationNode);
+        visitorMock.Visit(fieldDeclarationNode.TypeName);
+        visitorMock.Visit(fieldDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(fieldDeclarationNode.FieldTags[0]);
 
-      // Method declaration
-      visitorMock.Setup(v => v.Visit((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[2]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[2].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[2].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[2]).FormalParameters));
+        // Method declaration
+        var methodDeclarationNode = (MethodDeclarationNode)structDeclarationNode.MemberDeclarations[2];
+        visitorMock.Visit(methodDeclarationNode);
+        visitorMock.Visit(methodDeclarationNode.TypeName);
+        visitorMock.Visit(methodDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters);
 
-      // Property declaration
-      visitorMock.Setup(v => v.Visit((PropertyDeclarationNode)structDeclarationNode.MemberDeclarations[3]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[3].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[3].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)structDeclarationNode.MemberDeclarations[3]).GetAccessor));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)structDeclarationNode.MemberDeclarations[3]).SetAccessor));
+        // Property declaration
+        var propertyDeclarationNode = (PropertyDeclarationNode)structDeclarationNode.MemberDeclarations[3];
+        visitorMock.Visit(propertyDeclarationNode);
+        visitorMock.Visit(propertyDeclarationNode.TypeName);
+        visitorMock.Visit(propertyDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(propertyDeclarationNode.GetAccessor);
+        visitorMock.Visit(propertyDeclarationNode.SetAccessor);
 
-      // Event declaration (property-like)
-      visitorMock.Setup(v => v.Visit((EventPropertyDeclarationNode)structDeclarationNode.MemberDeclarations[4]));
+        // Event declaration (property-like)
+        var eventPropertyDeclarationNode = (EventPropertyDeclarationNode)structDeclarationNode.MemberDeclarations[4];
+        visitorMock.Visit(eventPropertyDeclarationNode);
 #warning EventPropertyDeclarationNode TypeName visiting checking commented out because of a bug (TypeName contains the MemberName)
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].TypeName));
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].TypeName.TypeTags[0]));
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].TypeName.TypeTags[0].Arguments[0]));
-      //visitorMock.Setup(v => v.Visit(classDeclarationNode.MemberDeclarations[4].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((EventPropertyDeclarationNode)structDeclarationNode.MemberDeclarations[4]).AddAccessor));
-      visitorMock.Setup(v => v.Visit(((EventPropertyDeclarationNode)structDeclarationNode.MemberDeclarations[4]).RemoveAccessor));
+        //visitorMock.Visit(eventPropertyDeclarationNode.TypeName);
+        //visitorMock.Visit(eventPropertyDeclarationNode.TypeName.TypeTags[0]);
+        //visitorMock.Visit(eventPropertyDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
+        //visitorMock.Visit(eventPropertyDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(eventPropertyDeclarationNode.AddAccessor);
+        visitorMock.Visit(eventPropertyDeclarationNode.RemoveAccessor);
 
-      // Indexer declaration
-      visitorMock.Setup(v => v.Visit((IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[5].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[5].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)structDeclarationNode.MemberDeclarations[5]).GetAccessor));
+        // Indexer declaration
+        var indexerDeclarationNode = (IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5];
+        visitorMock.Visit(indexerDeclarationNode);
+        visitorMock.Visit(indexerDeclarationNode.TypeName);
+        visitorMock.Visit(indexerDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.GetAccessor);
 
-      // Operator declaration
-      visitorMock.Setup(v => v.Visit((OperatorDeclarationNode)structDeclarationNode.MemberDeclarations[6]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[6].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[6].TypeName.TypeTags[0].Arguments[1].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[6]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]));
+        // Operator declaration
+        var operatorDeclarationNode = (OperatorDeclarationNode)structDeclarationNode.MemberDeclarations[6];
+        visitorMock.Visit(operatorDeclarationNode);
+        visitorMock.Visit(operatorDeclarationNode.TypeName);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1]);
+        visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]);
+        visitorMock.Visit(operatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
 
-      // Conversion operator declaration
-      visitorMock.Setup(v => v.Visit((CastOperatorDeclarationNode)structDeclarationNode.MemberDeclarations[7]));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[7].TypeName));
-      visitorMock.Setup(v => v.Visit(structDeclarationNode.MemberDeclarations[7].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[7]).FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]));
+        // Conversion operator declaration
+        var castOperatorDeclarationNode = (CastOperatorDeclarationNode)structDeclarationNode.MemberDeclarations[7];
+        visitorMock.Visit(castOperatorDeclarationNode);
+        visitorMock.Visit(castOperatorDeclarationNode.TypeName);
+        visitorMock.Visit(castOperatorDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1]);
+        visitorMock.Visit(castOperatorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
 
-      // Constructor declaration 
-      visitorMock.Setup(v => v.Visit((ConstructorDeclarationNode)structDeclarationNode.MemberDeclarations[8]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[8]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)structDeclarationNode.MemberDeclarations[8]).FormalParameters.Items[0].TypeName.TypeTags[0]));
+        // Constructor declaration 
+        var constructorDeclarationNode = (ConstructorDeclarationNode)structDeclarationNode.MemberDeclarations[8];
+        visitorMock.Visit(constructorDeclarationNode);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
 
-      // Nested class declaration
-      visitorMock.Setup(v => v.Visit((ClassDeclarationNode)structDeclarationNode.NestedTypes[0]));
+        // Nested class declaration
+        visitorMock.Visit((ClassDeclarationNode)structDeclarationNode.NestedTypes[0]);
+      }
+      mocks.ReplayAll();
 
       // Act
-      structDeclarationNode.AcceptVisitor(visitorMock.Object);
+      structDeclarationNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -497,65 +538,74 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var interfaceDeclarationNode = (InterfaceDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode));
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(interfaceDeclarationNode);
 
-      // Interface attributes
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        // Interface attributes
+        visitorMock.Visit(interfaceDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(interfaceDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(interfaceDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(interfaceDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
-      // Type params and base types
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.TypeParameters[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.TypeParameters[1]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.BaseTypes[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.BaseTypes[0].TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.TypeParameterConstraints[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.TypeParameterConstraints[1]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]));
+        // Type params and base types
+        visitorMock.Visit(interfaceDeclarationNode.TypeParameters[0]);
+        visitorMock.Visit(interfaceDeclarationNode.TypeParameters[1]);
+        visitorMock.Visit(interfaceDeclarationNode.BaseTypes[0]);
+        visitorMock.Visit(interfaceDeclarationNode.BaseTypes[0].TypeTags[0]);
+        visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[0]);
+        visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
+        visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[1]);
+        visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
 
-      // Method declaration
-      visitorMock.Setup(v => v.Visit((MethodDeclarationNode)interfaceDeclarationNode.MemberDeclarations[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[0].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[0].TypeName));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((MethodDeclarationNode)interfaceDeclarationNode.MemberDeclarations[0]).FormalParameters));
+        // Method declaration
+        var methodDeclarationNode = (MethodDeclarationNode)interfaceDeclarationNode.MemberDeclarations[0];
+        visitorMock.Visit(methodDeclarationNode);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.TypeName);
+        visitorMock.Visit(methodDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.FormalParameters);
 
-      // Property declaration
-      visitorMock.Setup(v => v.Visit((PropertyDeclarationNode)interfaceDeclarationNode.MemberDeclarations[1]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[1].TypeName));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[1].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)interfaceDeclarationNode.MemberDeclarations[1]).GetAccessor));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)interfaceDeclarationNode.MemberDeclarations[1]).SetAccessor));
+        // Property declaration
+        var propertyDeclarationNode = (PropertyDeclarationNode)interfaceDeclarationNode.MemberDeclarations[1];
+        visitorMock.Visit(propertyDeclarationNode);
+        visitorMock.Visit(propertyDeclarationNode.TypeName);
+        visitorMock.Visit(propertyDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(propertyDeclarationNode.GetAccessor);
+        visitorMock.Visit(propertyDeclarationNode.SetAccessor);
 
-      // Event declaration
-      visitorMock.Setup(v => v.Visit((InterfaceEventDeclarationNode)interfaceDeclarationNode.MemberDeclarations[2]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[2].TypeName));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[2].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[2].TypeName.TypeTags[0].Arguments[0]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[2].TypeName.TypeTags[0].Arguments[0].TypeTags[0]));
+        // Event declaration
+        var interfaceEventDeclarationNode = (InterfaceEventDeclarationNode)interfaceDeclarationNode.MemberDeclarations[2];
+        visitorMock.Visit(interfaceEventDeclarationNode);
+        visitorMock.Visit(interfaceEventDeclarationNode.TypeName);
+        visitorMock.Visit(interfaceEventDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(interfaceEventDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(interfaceEventDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
 
-      // Indexer declaration
-      visitorMock.Setup(v => v.Visit((IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3]));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[3].TypeName));
-      visitorMock.Setup(v => v.Visit(interfaceDeclarationNode.MemberDeclarations[3].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3]).FormalParameters));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3]).FormalParameters.Items[0]));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3]).FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(((IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3]).FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(((PropertyDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3]).GetAccessor));
+        // Indexer declaration
+        var indexerDeclarationNode = (IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3];
+        visitorMock.Visit(indexerDeclarationNode);
+        visitorMock.Visit(indexerDeclarationNode.TypeName);
+        visitorMock.Visit(indexerDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.GetAccessor);
+      }
+      mocks.ReplayAll();
 
       // Act
-      interfaceDeclarationNode.AcceptVisitor(visitorMock.Object);
+      interfaceDeclarationNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -572,33 +622,38 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var enumDeclarationNode = (EnumDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode));
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(enumDeclarationNode);
 
-      // Enum attributes
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        // Enum attributes
+        visitorMock.Visit(enumDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(enumDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(enumDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(enumDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
-      // Base type
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.EnumBase));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.EnumBase.TypeTags[0]));
+        // Base type
+        visitorMock.Visit(enumDeclarationNode.EnumBase);
+        visitorMock.Visit(enumDeclarationNode.EnumBase.TypeTags[0]);
 
-      // Enum member declaration
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.Values[0]));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(enumDeclarationNode.Values[1]));
+        // Enum member declaration
+        visitorMock.Visit(enumDeclarationNode.Values[0]);
+        visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0]);
+        visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(enumDeclarationNode.Values[1]);
+      }
+      mocks.ReplayAll();
 
       // Act
-      enumDeclarationNode.AcceptVisitor(visitorMock.Object);
+      enumDeclarationNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -615,45 +670,51 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       var delegateDeclarationNode = (DelegateDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
 
-      // Set up expectations on mock
-      var visitorMock = new Mock<ISyntaxNodeVisitor>(MockBehavior.Strict);
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode));
+      // Arrange
+      var mocks = new MockRepository();
+      var visitorMock = mocks.StrictMock<ISyntaxNodeVisitor>();
+      using (mocks.Ordered())
+      {
+        visitorMock.Visit(delegateDeclarationNode);
 
-      // Delegate attributes
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.AttributeDecorations[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
+        // Delegate attributes
+        visitorMock.Visit(delegateDeclarationNode.AttributeDecorations[0]);
+        visitorMock.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0]);
+        visitorMock.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
+        visitorMock.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
-      // Return type, type parameters and constraints
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeName));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeParameters[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeParameters[1]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeParameterConstraints[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeParameterConstraints[1]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]));
+        // Return type, type parameters and constraints
+        visitorMock.Visit(delegateDeclarationNode.TypeName);
+        visitorMock.Visit(delegateDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(delegateDeclarationNode.TypeParameters[0]);
+        visitorMock.Visit(delegateDeclarationNode.TypeParameters[1]);
+        visitorMock.Visit(delegateDeclarationNode.TypeParameterConstraints[0]);
+        visitorMock.Visit(delegateDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
+        visitorMock.Visit(delegateDeclarationNode.TypeParameterConstraints[1]);
+        visitorMock.Visit(delegateDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
 
-      // Formal parameters
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0]));
+        // Formal parameters
+        var formalParameters = delegateDeclarationNode.FormalParameters;
+        visitorMock.Visit(formalParameters);
+        visitorMock.Visit(formalParameters.Items[0]);
 #warning Attributes are missing from FormalParameterNode so these expectations are commented out at the moment
-      //visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0].AttributeDecorations[0]));
-      //visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0].AttributeDecorations[0].Attributes[0]));
-      //visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0].AttributeDecorations[0].Attributes[0].TypeName));
-      //visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0].TypeName));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[0].TypeName.TypeTags[0]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[1]));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[1].TypeName));
-      visitorMock.Setup(v => v.Visit(delegateDeclarationNode.FormalParameters.Items[1].TypeName.TypeTags[0]));
+        //visitorMock.Visit(formalParameters.Items[0].AttributeDecorations[0]);
+        //visitorMock.Visit(formalParameters.Items[0].AttributeDecorations[0].Attributes[0]);
+        //visitorMock.Visit(formalParameters.Items[0].AttributeDecorations[0].Attributes[0].TypeName);
+        //visitorMock.Visit(formalParameters.Items[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(formalParameters.Items[0].TypeName);
+        visitorMock.Visit(formalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(formalParameters.Items[1]);
+        visitorMock.Visit(formalParameters.Items[1].TypeName);
+        visitorMock.Visit(formalParameters.Items[1].TypeName.TypeTags[0]);
+      }
+      mocks.ReplayAll();
 
       // Act
-      delegateDeclarationNode.AcceptVisitor(visitorMock.Object);
+      delegateDeclarationNode.AcceptVisitor(visitorMock);
 
-      // Verify that all set up expectation were met. Order is not verified, unfortunately.
-      visitorMock.VerifyAll();
+      // Assert
+      mocks.VerifyAll();
     }
   }
 }
