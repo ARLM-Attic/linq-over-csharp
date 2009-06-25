@@ -352,13 +352,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         // --- Write as a single byte with no prefix
         WriteByte((byte)number);
       }
-      else if (number >= 0x80 && number < 0x8000)
+      else if (number >= 0x80 && number < 0x4000)
       {
         // --- Write as a 16 bit unsigned value with binary prefix "1"
         WriteByte((byte) ((number & 0xff00 >> 8) | 0x80));
         WriteByte((byte)(number & 0xff));
       }
-      else if (number >= 0x8000 && number < 0x40000000)
+      else if (number >= 0x4000 && number < 0x40000000)
       {
         // --- Write as a 32 bit unsigned value with binary prefix "11"
         WriteByte((byte)((number & 0xff00000 >> 24) | 0xc0));
@@ -444,11 +444,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public byte ReadByte()
     {
-      if (CurrentPosition < 0 || CurrentPosition >= _SymbolStream.Length)
-      {
-        
-      }
-      return _SymbolStream[CurrentPosition];
+      CheckStreamPosition(CurrentPosition);
+      return _SymbolStream[CurrentPosition++];
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -460,7 +457,21 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public int ReadNumber()
     {
-      throw new NotImplementedException();
+      var startByte = ReadByte();
+      switch (startByte >> 6)
+      {
+        case 0:
+        case 1:
+          // --- Single byte
+          return startByte;
+        case 2:
+          // --- Two consecutive bytes
+          return startByte;
+        case 3:
+          // -- Four consecutive bytes
+          return startByte;
+      }
+      return startByte;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -499,10 +510,10 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       if (newSize < CurrentPosition)
       {
-        throw new InvalidOperationException("Shrinking token buffer size under its length.");
+        throw new InvalidOperationException("Shrinking symbol stream size under its length.");
       }
+      if (newSize <= _SymbolStream.Length) return;
       var newStream = new byte[newSize];
-      _SymbolStream.CopyTo(newStream, 0);
       _SymbolStream = newStream;
     }
 

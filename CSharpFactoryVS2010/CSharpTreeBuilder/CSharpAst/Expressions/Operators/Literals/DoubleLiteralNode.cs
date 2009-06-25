@@ -1,7 +1,7 @@
 // ================================================================================================
-// LiteralNode.cs
+// DoubleLiteralNode.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,20 +9,29 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Common root class of all literal nodes.
+  /// This abstract class defines a System.Double constant.
   /// </summary>
   // ================================================================================================
-  public abstract class LiteralNode : PrimaryOperatorNode
+  public class DoubleLiteralNode : RealLiteralNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LiteralNode"/> class.
+    /// Initializes a new instance of the <see cref="DoubleLiteralNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="start">The start token.</param>
+    /// <param name="value">The value of the constant.</param>
     // ----------------------------------------------------------------------------------------------
-    protected LiteralNode(Token start)
+    public DoubleLiteralNode(Token start, double value)
       : base(start)
     {
+      Value = value;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the value of the constant.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public double Value { get; internal set; }
   }
 }

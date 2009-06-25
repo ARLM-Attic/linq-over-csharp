@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class is intended to be the base class for the checked and unchecked operators.
   /// </summary>
   // ================================================================================================
-  public abstract class CheckedOperatorNodeBase : EmbeddedExpressionNode, IParentheses
+  public abstract class CheckedOperatorNodeBase : PrimaryOperatorNode, IParentheses
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -26,9 +26,15 @@ namespace CSharpTreeBuilder.Ast
     }
 
     // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the expression between parentheses.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionNode Expression { get; internal set; }
 
     #region IParentheses Members
 
+    // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the opening parenthesis token.
     /// </summary>

@@ -1,5 +1,5 @@
 // ================================================================================================
-// ArgumentNode.cs
+// SimpleNameNode.cs
 //
 // Created: 2009.04.26, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -9,64 +9,70 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an argument in the actual parameter list.
+  /// This class represents the common root class on named literals.
   /// </summary>
   // ================================================================================================
-  public class ArgumentNode : SyntaxNode<ISyntaxNode>
+  public class SimpleNameNode : PrimaryOperatorNode, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArgumentNode"/> class.
+    /// Initializes a new instance of the <see cref="SimpleNameNode"/> class.
     /// </summary>
-    /// <param name="start">The start token.</param>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArgumentNode(Token start)
+    public SimpleNameNode(Token start)
       : base(start)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the kind of parameter (in, out, ref)
+    /// Gets or sets the identifier token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token KindToken { get; internal set; }
+    public Token IdentifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance is "in" kind.
+    /// Gets the identifier name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsIn
+    public string Identifier
     {
-      get { return KindToken == null; }
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance is "out" kind.
+    /// Gets a value indicating whether this instance has identifier.
     /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public bool IsOut
+    public bool HasIdentifier
     {
-      get { return KindToken != null && KindToken.Value == "out"; }
+      get { return IdentifierToken != null; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance is "ref" kind.
+    /// Gets the node providing type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsRef
-    {
-      get { return KindToken != null && KindToken.Value == "ref"; }
-    }
+    public TypeOrNamespaceNodeCollection Arguments { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the expression between parentheses.
+    /// Gets a value indicating whether this instance has type arguments.
     /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has type arguments; otherwise, <c>false</c>.
+    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public bool HasTypeArguments
+    {
+      get { return Arguments != null; }
+    }
   }
 }

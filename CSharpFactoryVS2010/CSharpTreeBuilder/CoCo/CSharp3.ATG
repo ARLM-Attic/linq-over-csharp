@@ -2751,7 +2751,7 @@ StatementExpression<out ExpressionNode exprNode>
   Unary<out unaryNode>
   (. exprNode = unaryNode; .)
   ( 
-    (. BinaryOperatorNode asgnNode; .)
+    (. AssignmentOperatorNode asgnNode; .)
     AssignmentOperator<out asgnNode>
     (. 
        asgnNode.LeftOperand = unaryNode;
@@ -2767,42 +2767,48 @@ StatementExpression<out ExpressionNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines an assignment operator.
 // ------------------------------------------------------------------------------------------------
-AssignmentOperator<out BinaryOperatorNode opNode> 
-  (. opNode = null; .)
+AssignmentOperator<out AssignmentOperatorNode opNode> 
+  (. 
+     AssignmentOperatorType op = AssignmentOperatorType.SimpleAssignment;
+     Token start;
+     Token second = null;
+  .)
 =
+  (. start = la; .)
   (
     "="     
-    (. opNode = new AssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.SimpleAssignment; .)
   | "+="    
-    (. opNode = new PlusAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.AdditionAssignment; .)
   | "-="    
-    (. opNode = new MinusAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.SubtractionAssignment; .)
   | "*="    
-    (. opNode = new MultiplyAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.MultiplicationAssignment; .)
   | "/="    
-    (. opNode = new DivideAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.DivisionAssignment; .)
   | "%="    
-    (. opNode = new ModuloAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.ModuloAssignment; .)
   | "&="    
-    (. opNode = new AndAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.LogicalAndAssignment; .)
   | "|="    
-    (. opNode = new OrAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.LogicalOrAssignment; .)
   | "^="    
-    (. opNode = new XorAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.LogicalXorAssignment; .)
   | "<<="   
-    (. opNode = new LeftShiftAssignmentOperatorNode(t); .)
+    (. op = AssignmentOperatorType.LeftShiftAssignment; .)
   | ">"     
-    (. 
-       int pos = t.pos; 
-       var start = t;
-    .)
+    (. int pos = t.pos; .)
     ">="    
     (. 
        if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment");
-       opNode = new RightShiftAssignmentOperatorNode(start, t); 
+       op = AssignmentOperatorType.RightShiftAssignment;
+       second = t;
     .)
   )
-  (. SetCommentOwner(opNode); .)
+  (. 
+     opNode = new AssignmentOperatorNode(start, second, op);
+     SetCommentOwner(opNode); 
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -3361,7 +3367,7 @@ Expression<out ExpressionNode exprNode>
   Unary<out leftExprNode>
   (
     IF (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq))
-    (. BinaryOperatorNode asgnNode; .)
+    (. AssignmentOperatorNode asgnNode; .)
     AssignmentOperator<out asgnNode>  
     (. ExpressionNode rightExprNode; .)
     Expression<out rightExprNode>
@@ -3370,7 +3376,7 @@ Expression<out ExpressionNode exprNode>
        asgnNode.LeftOperand = leftExprNode;
        exprNode = asgnNode;
     .)
-  | (. BinaryOperatorNode ncNode; .)
+  | (. BinaryOperatorNodeBase ncNode; .)
     NullCoalescingExpr<out ncNode> 
     (. 
        if (ncNode == null)
@@ -3379,7 +3385,7 @@ Expression<out ExpressionNode exprNode>
        }
        else
        {
-         ncNode.LeftmostNonNull.LeftOperand = leftExprNode;
+         ncNode.LeftmostWithMissingLeftOperand.LeftOperand = leftExprNode;
          exprNode = ncNode;
        }
     .)
@@ -3413,20 +3419,20 @@ Expression<out ExpressionNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines a null coalescing operator.
 // ------------------------------------------------------------------------------------------------
-NullCoalescingExpr<out BinaryOperatorNode exprNode>
+NullCoalescingExpr<out BinaryOperatorNodeBase exprNode>
 =                     
   (. exprNode = null; .)
   OrExpr<out exprNode>    
   { 
     "??"                  
     (. 
-       var opNode = new NullCoalescingOperatorNode(t);
+       var opNode = new BinaryOperatorNode(t, BinaryOperatorType.NullCoalescing);
        SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     OrExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3438,20 +3444,20 @@ NullCoalescingExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines a "logical or" operator.
 // ------------------------------------------------------------------------------------------------
-OrExpr<out BinaryOperatorNode exprNode>
+OrExpr<out BinaryOperatorNodeBase exprNode>
 = 
   (. exprNode = null; .)
   AndExpr<out exprNode>    
   { 
     "||"                  
     (. 
-       var opNode = new LogicalOrOperatorNode(t);
+       var opNode = new BinaryOperatorNode(t, BinaryOperatorType.ConditionalOr);
        SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     AndExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3463,20 +3469,20 @@ OrExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines a "logical and" operator.
 // ------------------------------------------------------------------------------------------------
-AndExpr<out BinaryOperatorNode exprNode>
+AndExpr<out BinaryOperatorNodeBase exprNode>
 = 
   (. exprNode = null; .)
   BitOrExpr<out exprNode>    
   { 
     "&&"                  
     (. 
-       var opNode = new LogicalAndOperatorNode(t);
+       var opNode = new BinaryOperatorNode(t, BinaryOperatorType.ConditionalAnd);
        SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     BitOrExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3488,20 +3494,20 @@ AndExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines a "bitwise or" operator.
 // ------------------------------------------------------------------------------------------------
-BitOrExpr<out BinaryOperatorNode exprNode>
+BitOrExpr<out BinaryOperatorNodeBase exprNode>
 = 
   (. exprNode = null; .)
   BitXorExpr<out exprNode>    
   { 
     "|"
     (. 
-       var opNode = new BitwiseOrOperatorNode(t);
+       var opNode = new BinaryOperatorNode(t, BinaryOperatorType.LogicalOr);
        SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     BitXorExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3513,20 +3519,20 @@ BitOrExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines a "bitwise xor" operator.
 // ------------------------------------------------------------------------------------------------
-BitXorExpr<out BinaryOperatorNode exprNode> 
+BitXorExpr<out BinaryOperatorNodeBase exprNode> 
 = 
   (. exprNode = null; .)
   BitAndExpr<out exprNode>    
   { 
     "^"                   
     (. 
-       var opNode = new BitwiseXorOperatorNode(t);
+       var opNode = new BinaryOperatorNode(t, BinaryOperatorType.LogicalXor);
        SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     BitAndExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3538,20 +3544,20 @@ BitXorExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines a "bitwise and" operator.
 // ------------------------------------------------------------------------------------------------
-BitAndExpr<out BinaryOperatorNode exprNode> 
+BitAndExpr<out BinaryOperatorNodeBase exprNode> 
 = 
   (. exprNode = null; .)
   EqlExpr<out exprNode>    
   { 
     "&"                   
     (. 
-       var opNode = new BitwiseAndOperatorNode(t);
+       var opNode = new BinaryOperatorNode(t, BinaryOperatorType.LogicalAnd);
        SetCommentOwner(opNode);
        opNode.LeftOperand = exprNode;
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     EqlExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3563,7 +3569,7 @@ BitAndExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines an "==" or "!=" operator.
 // ------------------------------------------------------------------------------------------------
-EqlExpr<out BinaryOperatorNode exprNode>
+EqlExpr<out BinaryOperatorNodeBase exprNode>
 = 
   (. exprNode = null; .)
   RelExpr<out exprNode>       
@@ -3571,9 +3577,9 @@ EqlExpr<out BinaryOperatorNode exprNode>
   {           
     (                     
       "!="                
-      (. opNode = new EqualOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.NotEquals); .)
     | "=="              
-      (. opNode = new EqualOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.Equals); .)
     )
     (.  
        SetCommentOwner(opNode);
@@ -3581,7 +3587,7 @@ EqlExpr<out BinaryOperatorNode exprNode>
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     RelExpr<out rgNode> 
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
@@ -3593,7 +3599,7 @@ EqlExpr<out BinaryOperatorNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Defines relational and typecheck operators.
 // ------------------------------------------------------------------------------------------------
-RelExpr<out BinaryOperatorNode exprNode> 
+RelExpr<out BinaryOperatorNodeBase exprNode> 
 = 
   (. exprNode = null; .)
   ShiftExpr<out exprNode>  
@@ -3601,13 +3607,13 @@ RelExpr<out BinaryOperatorNode exprNode>
   { 
     (
       "<"                 
-      (. opNode = new LessThanOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.LessThan); .)
     | ">"               
-      (. opNode = new GreaterThanOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.GreaterThan); .)
     | "<="              
-      (. opNode = new LessThanOrEqualOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.LessThanOrEqual); .)
     | ">="              
-      (. opNode = new GreaterThanOrEqualOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.GreaterThanOrEqual); .)
     )
     (. 
        SetCommentOwner(opNode);
@@ -3615,52 +3621,57 @@ RelExpr<out BinaryOperatorNode exprNode>
        ExpressionNode unaryNode;
     .)
     Unary<out unaryNode>     
-    (. BinaryOperatorNode rgNode; .) 
+    (. BinaryOperatorNodeBase rgNode; .) 
     ShiftExpr<out rgNode>             
     (. 
        BindBinaryOperator(opNode, unaryNode, rgNode);
        exprNode = opNode;
     .)
     |
+      (. TypeTestingOperatorNode typeTestingNode = null; .)
       (
         "is"            
-        (. opNode = new IsOperatorNode(t); .)
+        (. typeTestingNode = new TypeTestingOperatorNode(t, TypeTestingOperatorType.Is); .)
       | "as"            
-        (. opNode = new AsOperatorNode(t); .)
+        (. typeTestingNode = new TypeTestingOperatorNode(t, TypeTestingOperatorType.As); .)
       )   
       (. 
-         SetCommentOwner(opNode);
+         SetCommentOwner(typeTestingNode);
          TypeOrNamespaceNode typeNode; 
       .)
       TypeInRelExpr<out typeNode>
       (. 
-         opNode.RightOperand = new TypeOperatorNode(typeNode);
-         SetCommentOwner(opNode.RightOperand);
-         exprNode = opNode;
-         Terminate(opNode); 
+         typeTestingNode.RightOperand = typeNode;
+         SetCommentOwner(typeTestingNode.RightOperand);
+         exprNode = typeTestingNode;
       .)
   }
+  (. Terminate(exprNode); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Defines shift operators.
 // ------------------------------------------------------------------------------------------------
-ShiftExpr<out BinaryOperatorNode exprNode> 
+ShiftExpr<out BinaryOperatorNodeBase exprNode> 
 = 
   (. 
      exprNode = null;
      Token start;
+     BinaryOperatorNode addExpr;
   .)
-  AddExpr<out exprNode>       
-  (. BinaryOperatorNode opNode = null; .)
+  AddExpr<out addExpr>       
+  (. 
+     exprNode = addExpr;
+     BinaryOperatorNode opNode = null; 
+  .)
   { IF (IsShift())
     (
       "<<"
-      (. opNode = new LeftShiftOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.LeftShift); .)
     | ">" 
       (. start = t; .)
       ">"           
-      (. opNode = new RightShiftOperatorNode(start, t); .)
+      (. opNode = new BinaryOperatorNode(start, t, BinaryOperatorType.RightShift); .)
     )                     
     (. 
        SetCommentOwner(opNode);
@@ -3688,9 +3699,9 @@ AddExpr<out BinaryOperatorNode exprNode>
   {
     ( 
       "+"                 
-      (. opNode = new AddOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.Addition); .)
     | "-"               
-      (. opNode = new SubtractOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.Subtraction); .)
     )                     
     (. 
        SetCommentOwner(opNode);
@@ -3719,11 +3730,11 @@ MulExpr<out BinaryOperatorNode exprNode>
   {
     (
       "*"                 
-      (. opNode = new MultiplyOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.Multiplication); .)
     | "/"               
-      (. opNode = new DivideOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.Division); .)
     | "%"               
-      (. opNode = new ModuloOperatorNode(t); .)
+      (. opNode = new BinaryOperatorNode(t, BinaryOperatorType.Modulo); .)
     )                     
     (. 
        SetCommentOwner(opNode);
@@ -3915,19 +3926,19 @@ Literal<out ExpressionNode valNode>
 = 
   (
     intCon        
-    (. valNode = IntegerConstantNode.Create(t); .)
+    (. valNode = IntegerLiteralNode.Create(t); .)
   | realCon     
-    (. valNode = RealConstantNode.Create(t); .)
+    (. valNode = RealLiteralNode.Create(t); .)
   | charCon     
-    (. valNode = new CharNode(t); .)
+    (. valNode = new CharLiteralNode(t); .)
   | stringCon   
-    (. valNode = new StringNode(t); .)
+    (. valNode = new StringLiteralNode(t); .)
   | "true"
-    (. valNode = new TrueNode(t); .)
+    (. valNode = new TrueLiteralNode(t); .)
   | "false"     
-    (. valNode = new FalseNode(t); .)
+    (. valNode = new FalseLiteralNode(t); .)
   | "null"      
-    (. valNode = new NullNode(t); .)
+    (. valNode = new NullLiteralNode(t); .)
   )
   (. SetCommentOwner(valNode); .)
 .

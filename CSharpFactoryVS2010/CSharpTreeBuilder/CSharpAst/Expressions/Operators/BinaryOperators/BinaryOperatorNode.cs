@@ -1,5 +1,5 @@
 // ================================================================================================
-// DefaultOperatorNode.cs
+// BinaryOperatorNode.cs
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -9,40 +9,56 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a base type for primary operators with an embedded type.
+  /// Common root class of all binary operator nodes.
   /// </summary>
   // ================================================================================================
-  public class DefaultOperatorNode : PrimaryOperatorNode, IParentheses
+  public class BinaryOperatorNode : BinaryOperatorNodeBase
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="PrimaryOperatorNode"/> class.
+    /// Initializes a new instance of the <see cref="BinaryOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public DefaultOperatorNode(Token start) : base(start)
+    public BinaryOperatorNode(Token start, BinaryOperatorType opType)
+      : this(start, null, opType)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the expression between parentheses.
+    /// Initializes a new instance of the <see cref="BinaryOperatorNode"/> class.
     /// </summary>
+    /// <param name="start">The start token.</param>
+    /// <param name="secondToken">The second token.</param>
+    /// <param name="opType">Type of the operator.</param>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public BinaryOperatorNode(Token start, Token secondToken, BinaryOperatorType opType) : 
+      base(start)
+    {
+      Operator = opType;
+      SecondToken = secondToken;
+      if (secondToken != null) Terminate(secondToken);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the opening parenthesis token.
+    /// Gets the type of operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis { get; internal set; }
+    public BinaryOperatorType Operator { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the closing parenthesis token.
+    /// Gets or sets the second operator token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis { get; internal set; }
+    public Token SecondToken { get; internal set; }
+
+    /// <summary>
+    /// Gets the right operand of the binary operator.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionNode RightOperand { get; internal set; }
   }
 }

@@ -320,6 +320,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         // --- Parse the source file
         parser.Parse();
 
+        // --- Sign that all tokens have been added to the symbol stream
+        sourceNode.SymbolStream.FreezeStream();
+
         // --- Release event handlers
         scanner.NewLineReached -= parser.NewLineReached;
         scanner.TokenScanned -= parser.TokenScanned;
@@ -337,8 +340,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Binds left and right operands to a binary operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private void BindBinaryOperator(BinaryOperatorNode opNode, ExpressionNode unaryNode, 
-      BinaryOperatorNode rgNode)
+    private void BindBinaryOperator(BinaryOperatorNode opNode, ExpressionNode unaryNode,
+      BinaryOperatorNodeBase rgNode)
     {
       if (rgNode == null)
       {
@@ -368,7 +371,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void WhitespaceScanned(object sender, WhitespaceScannedEventArgs e)
     {
-      SourceFileNode.TokenizedUnit.AddWhitespaceToStream(e.Whitespace);
+      SourceFileNode.SymbolStream.AddWhitespaceToStream(e.Whitespace);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -383,8 +386,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void TokenScanned(object sender, TokenScannedEventArgs e)
     {
-      SourceFileNode.TokenizedUnit.AddTokenToStream(e.Token);
-      e.Token.TokenizedStreamPosition = SourceFileNode.TokenizedUnit.CurrentPosition;
+      SourceFileNode.SymbolStream.AddTokenToStream(e.Token);
+      e.Token.TokenizedStreamPosition = SourceFileNode.SymbolStream.CurrentPosition;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -401,7 +404,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       // --- Nothing to do in the case of first line.
       if (e.LineNumber == 1) return;
-      SourceFileNode.TokenizedUnit.AddEndOfLineToStream(e.LineNumber);
+      SourceFileNode.SymbolStream.AddEndOfLineToStream(e.LineNumber);
     }
 
     #endregion

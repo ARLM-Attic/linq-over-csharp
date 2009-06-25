@@ -1,48 +1,53 @@
 // ================================================================================================
-// DefaultOperatorNode.cs
+// BinaryOperatorNodeBase.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.06.25, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
-  // ================================================================================================
   /// <summary>
-  /// This class represents a base type for primary operators with an embedded type.
+  /// 
   /// </summary>
-  // ================================================================================================
-  public class DefaultOperatorNode : PrimaryOperatorNode, IParentheses
+  public abstract class BinaryOperatorNodeBase : ExpressionNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="PrimaryOperatorNode"/> class.
+    /// Initializes a new instance of the <see cref="BinaryOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public DefaultOperatorNode(Token start) : base(start)
+    protected BinaryOperatorNodeBase(Token start)
+      : base(start)
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the expression between parentheses.
+    /// Gets the left operand of the binary operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public ExpressionNode LeftOperand { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the opening parenthesis token.
+    /// Gets the leftmost expression of this expression node with missing operand.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenParenthesis { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the closing parenthesis token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseParenthesis { get; internal set; }
+    public BinaryOperatorNodeBase LeftmostWithMissingLeftOperand
+    {
+      get
+      {
+        if (LeftOperand == null) return this;
+        var binOp = LeftOperand as BinaryOperatorNodeBase;
+        if (binOp == null)
+        {
+          throw new InvalidOperationException("Binary operator expected.");
+        }
+        return binOp.LeftmostWithMissingLeftOperand;
+      }
+    }
   }
 }

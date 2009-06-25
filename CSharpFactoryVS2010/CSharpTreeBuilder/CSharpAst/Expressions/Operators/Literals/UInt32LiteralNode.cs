@@ -1,7 +1,7 @@
 // ================================================================================================
-// LiteralNode.cs
+// UInt32LiteralNode.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,20 +9,29 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Common root class of all literal nodes.
+  /// This abstract class defines a System.UInt32 constant.
   /// </summary>
   // ================================================================================================
-  public abstract class LiteralNode : PrimaryOperatorNode
+  public class UInt32LiteralNode : IntegerLiteralNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LiteralNode"/> class.
+    /// Initializes a new instance of the <see cref="UInt32LiteralNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="start">The start token.</param>
+    /// <param name="value">The value of the constant.</param>
     // ----------------------------------------------------------------------------------------------
-    protected LiteralNode(Token start)
+    public UInt32LiteralNode(Token start, uint value)
       : base(start)
     {
+      Value = value;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the value of the constant.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public uint Value { get; internal set; }
   }
 }

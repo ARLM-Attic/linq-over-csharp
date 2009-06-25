@@ -1046,7 +1046,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		} else if (StartOf(13)) {
 			Unary(out leftExprNode);
 			if (assgnOps[la.kind] || (la.kind == _gt && Peek(1).kind == _gteq)) {
-				BinaryOperatorNode asgnNode; 
+				AssignmentOperatorNode asgnNode; 
 				AssignmentOperator(out asgnNode);
 				ExpressionNode rightExprNode; 
 				Expression(out rightExprNode);
@@ -1055,7 +1055,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				exprNode = asgnNode;
 				
 			} else if (StartOf(14)) {
-				BinaryOperatorNode ncNode; 
+				BinaryOperatorNodeBase ncNode; 
 				NullCoalescingExpr(out ncNode);
 				if (ncNode == null)
 				{
@@ -1063,7 +1063,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				}
 				else
 				{
-				  ncNode.LeftmostNonNull.LeftOperand = leftExprNode;
+				  ncNode.LeftmostWithMissingLeftOperand.LeftOperand = leftExprNode;
 				  exprNode = ncNode;
 				}
 				
@@ -2621,7 +2621,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Unary(out unaryNode);
 		exprNode = unaryNode; 
 		if (StartOf(25)) {
-			BinaryOperatorNode asgnNode; 
+			AssignmentOperatorNode asgnNode; 
 			AssignmentOperator(out asgnNode);
 			asgnNode.LeftOperand = unaryNode;
 			exprNode = asgnNode;
@@ -3176,73 +3176,78 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		} else SynErr(187);
 	}
 
-	void AssignmentOperator(out BinaryOperatorNode opNode) {
-		opNode = null; 
+	void AssignmentOperator(out AssignmentOperatorNode opNode) {
+		AssignmentOperatorType op = AssignmentOperatorType.SimpleAssignment;
+		Token start;
+		Token second = null;
+		
+		start = la; 
 		switch (la.kind) {
 		case 85: {
 			Get();
-			opNode = new AssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.SimpleAssignment; 
 			break;
 		}
 		case 109: {
 			Get();
-			opNode = new PlusAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.AdditionAssignment; 
 			break;
 		}
 		case 103: {
 			Get();
-			opNode = new MinusAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.SubtractionAssignment; 
 			break;
 		}
 		case 117: {
 			Get();
-			opNode = new MultiplyAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.MultiplicationAssignment; 
 			break;
 		}
 		case 89: {
 			Get();
-			opNode = new DivideAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.DivisionAssignment; 
 			break;
 		}
 		case 104: {
 			Get();
-			opNode = new ModuloAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.ModuloAssignment; 
 			break;
 		}
 		case 84: {
 			Get();
-			opNode = new AndAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.LogicalAndAssignment; 
 			break;
 		}
 		case 107: {
 			Get();
-			opNode = new OrAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.LogicalOrAssignment; 
 			break;
 		}
 		case 118: {
 			Get();
-			opNode = new XorAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.LogicalXorAssignment; 
 			break;
 		}
 		case 99: {
 			Get();
-			opNode = new LeftShiftAssignmentOperatorNode(t); 
+			op = AssignmentOperatorType.LeftShiftAssignment; 
 			break;
 		}
 		case 93: {
 			Get();
 			int pos = t.pos; 
-			var start = t;
-			
 			Expect(94);
 			if (pos+1 < t.pos) Error("UNDEF", la, "no whitespace allowed in right shift assignment");
-			opNode = new RightShiftAssignmentOperatorNode(start, t); 
+			op = AssignmentOperatorType.RightShiftAssignment;
+			second = t;
 			
 			break;
 		}
 		default: SynErr(188); break;
 		}
+		opNode = new AssignmentOperatorNode(start, second, op);
 		SetCommentOwner(opNode); 
+		
 	}
 
 	void SwitchLabel(out SwitchLabelNode slNode) {
@@ -3557,18 +3562,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void NullCoalescingExpr(out BinaryOperatorNode exprNode) {
+	void NullCoalescingExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		OrExpr(out exprNode);
 		while (la.kind == 126) {
 			Get();
-			var opNode = new NullCoalescingOperatorNode(t);
+			var opNode = new BinaryOperatorNode(t, BinaryOperatorType.NullCoalescing);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			OrExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3576,18 +3581,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void OrExpr(out BinaryOperatorNode exprNode) {
+	void OrExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		AndExpr(out exprNode);
 		while (la.kind == 127) {
 			Get();
-			var opNode = new LogicalOrOperatorNode(t);
+			var opNode = new BinaryOperatorNode(t, BinaryOperatorType.ConditionalOr);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			AndExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3595,18 +3600,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void AndExpr(out BinaryOperatorNode exprNode) {
+	void AndExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		BitOrExpr(out exprNode);
 		while (la.kind == 128) {
 			Get();
-			var opNode = new LogicalAndOperatorNode(t);
+			var opNode = new BinaryOperatorNode(t, BinaryOperatorType.ConditionalAnd);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			BitOrExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3614,18 +3619,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void BitOrExpr(out BinaryOperatorNode exprNode) {
+	void BitOrExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		BitXorExpr(out exprNode);
 		while (la.kind == 129) {
 			Get();
-			var opNode = new BitwiseOrOperatorNode(t);
+			var opNode = new BinaryOperatorNode(t, BinaryOperatorType.LogicalOr);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			BitXorExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3633,18 +3638,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void BitXorExpr(out BinaryOperatorNode exprNode) {
+	void BitXorExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		BitAndExpr(out exprNode);
 		while (la.kind == 130) {
 			Get();
-			var opNode = new BitwiseXorOperatorNode(t);
+			var opNode = new BinaryOperatorNode(t, BinaryOperatorType.LogicalXor);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			BitAndExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3652,18 +3657,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void BitAndExpr(out BinaryOperatorNode exprNode) {
+	void BitAndExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		EqlExpr(out exprNode);
 		while (la.kind == 83) {
 			Get();
-			var opNode = new BitwiseAndOperatorNode(t);
+			var opNode = new BinaryOperatorNode(t, BinaryOperatorType.LogicalAnd);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			EqlExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3671,24 +3676,24 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void EqlExpr(out BinaryOperatorNode exprNode) {
+	void EqlExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		RelExpr(out exprNode);
 		BinaryOperatorNode opNode = null; 
 		while (la.kind == 92 || la.kind == 105) {
 			if (la.kind == 105) {
 				Get();
-				opNode = new EqualOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.NotEquals); 
 			} else {
 				Get();
-				opNode = new EqualOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.Equals); 
 			}
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
 			
 			Unary(out unaryNode);
-			BinaryOperatorNode rgNode; 
+			BinaryOperatorNodeBase rgNode; 
 			RelExpr(out rgNode);
 			BindBinaryOperator(opNode, unaryNode, rgNode);
 			exprNode = opNode;
@@ -3696,7 +3701,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void RelExpr(out BinaryOperatorNode exprNode) {
+	void RelExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null; 
 		ShiftExpr(out exprNode);
 		BinaryOperatorNode opNode = null; 
@@ -3704,63 +3709,67 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			if (StartOf(29)) {
 				if (la.kind == 100) {
 					Get();
-					opNode = new LessThanOperatorNode(t); 
+					opNode = new BinaryOperatorNode(t, BinaryOperatorType.LessThan); 
 				} else if (la.kind == 93) {
 					Get();
-					opNode = new GreaterThanOperatorNode(t); 
+					opNode = new BinaryOperatorNode(t, BinaryOperatorType.GreaterThan); 
 				} else if (la.kind == 131) {
 					Get();
-					opNode = new LessThanOrEqualOperatorNode(t); 
+					opNode = new BinaryOperatorNode(t, BinaryOperatorType.LessThanOrEqual); 
 				} else if (la.kind == 94) {
 					Get();
-					opNode = new GreaterThanOrEqualOperatorNode(t); 
+					opNode = new BinaryOperatorNode(t, BinaryOperatorType.GreaterThanOrEqual); 
 				} else SynErr(196);
 				SetCommentOwner(opNode);
 				opNode.LeftOperand = exprNode;
 				ExpressionNode unaryNode;
 				
 				Unary(out unaryNode);
-				BinaryOperatorNode rgNode; 
+				BinaryOperatorNodeBase rgNode; 
 				ShiftExpr(out rgNode);
 				BindBinaryOperator(opNode, unaryNode, rgNode);
 				exprNode = opNode;
 				
 			} else {
+				TypeTestingOperatorNode typeTestingNode = null; 
 				if (la.kind == 42) {
 					Get();
-					opNode = new IsOperatorNode(t); 
+					typeTestingNode = new TypeTestingOperatorNode(t, TypeTestingOperatorType.Is); 
 				} else if (la.kind == 7) {
 					Get();
-					opNode = new AsOperatorNode(t); 
+					typeTestingNode = new TypeTestingOperatorNode(t, TypeTestingOperatorType.As); 
 				} else SynErr(197);
-				SetCommentOwner(opNode);
+				SetCommentOwner(typeTestingNode);
 				TypeOrNamespaceNode typeNode; 
 				
 				TypeInRelExpr(out typeNode);
-				opNode.RightOperand = new TypeOperatorNode(typeNode);
-				SetCommentOwner(opNode.RightOperand);
-				exprNode = opNode;
-				Terminate(opNode); 
+				typeTestingNode.RightOperand = typeNode;
+				SetCommentOwner(typeTestingNode.RightOperand);
+				exprNode = typeTestingNode;
 				
 			}
 		}
+		Terminate(exprNode); 
 	}
 
-	void ShiftExpr(out BinaryOperatorNode exprNode) {
+	void ShiftExpr(out BinaryOperatorNodeBase exprNode) {
 		exprNode = null;
 		Token start;
+		BinaryOperatorNode addExpr;
 		
-		AddExpr(out exprNode);
+		AddExpr(out addExpr);
+		exprNode = addExpr;
 		BinaryOperatorNode opNode = null; 
+		
 		while (IsShift()) {
 			if (la.kind == 101) {
 				Get();
-				opNode = new LeftShiftOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.LeftShift); 
 			} else if (la.kind == 93) {
 				Get();
 				start = t; 
 				Expect(93);
-				opNode = new RightShiftOperatorNode(start, t); 
+				opNode = new BinaryOperatorNode(start, t, BinaryOperatorType.RightShift); 
 			} else SynErr(198);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
@@ -3782,10 +3791,10 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		while (la.kind == 102 || la.kind == 108) {
 			if (la.kind == 108) {
 				Get();
-				opNode = new AddOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.Addition); 
 			} else {
 				Get();
-				opNode = new SubtractOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.Subtraction); 
 			}
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
@@ -3807,13 +3816,13 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		while (la.kind == 116 || la.kind == 132 || la.kind == 133) {
 			if (la.kind == 116) {
 				Get();
-				opNode = new MultiplyOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.Multiplication); 
 			} else if (la.kind == 132) {
 				Get();
-				opNode = new DivideOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.Division); 
 			} else {
 				Get();
-				opNode = new ModuloOperatorNode(t); 
+				opNode = new BinaryOperatorNode(t, BinaryOperatorType.Modulo); 
 			}
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
@@ -3982,37 +3991,37 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		switch (la.kind) {
 		case 2: {
 			Get();
-			valNode = IntegerConstantNode.Create(t); 
+			valNode = IntegerLiteralNode.Create(t); 
 			break;
 		}
 		case 3: {
 			Get();
-			valNode = RealConstantNode.Create(t); 
+			valNode = RealLiteralNode.Create(t); 
 			break;
 		}
 		case 4: {
 			Get();
-			valNode = new CharNode(t); 
+			valNode = new CharLiteralNode(t); 
 			break;
 		}
 		case 5: {
 			Get();
-			valNode = new StringNode(t); 
+			valNode = new StringLiteralNode(t); 
 			break;
 		}
 		case 70: {
 			Get();
-			valNode = new TrueNode(t); 
+			valNode = new TrueLiteralNode(t); 
 			break;
 		}
 		case 29: {
 			Get();
-			valNode = new FalseNode(t); 
+			valNode = new FalseLiteralNode(t); 
 			break;
 		}
 		case 47: {
 			Get();
-			valNode = new NullNode(t); 
+			valNode = new NullLiteralNode(t); 
 			break;
 		}
 		default: SynErr(200); break;

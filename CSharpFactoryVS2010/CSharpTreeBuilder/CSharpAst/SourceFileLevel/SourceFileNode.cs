@@ -49,7 +49,7 @@ namespace CSharpTreeBuilder.Ast
       FullName = fullName;
       GlobalAttributes = new AttributeDecorationNodeCollection {ParentNode = this};
       Pragmas = new PragmaNodeCollection {ParentNode = this};
-      TokenizedUnit = new SymbolStream();
+      SymbolStream = new SymbolStream();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the tokenized version of this compilation unit.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SymbolStream TokenizedUnit { get; private set; }
+    public SymbolStream SymbolStream { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

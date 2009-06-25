@@ -14,7 +14,7 @@ public static class CodeGenHelper
 		SortedList<string,string> typeNameList = new SortedList<string,string>();
 		List<string> ignoredTypeNames = new List<string>();
 
-		using (StreamReader streamReader = new StreamReader(@"CSharpTreeBuilder\CSharpAst\CodeGenHelper\SyntaxNode_ignore.txt"))
+		using (StreamReader streamReader = new StreamReader(@"C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\CodeGenHelper\SyntaxNode_ignore.txt"))
 		{
 			while (!streamReader.EndOfStream)
 			{
@@ -22,7 +22,7 @@ public static class CodeGenHelper
 			}
 		}
 
-		using (StreamReader streamReader = new StreamReader(@"CSharpTreeBuilder\CSharpAst\CodeGenHelper\SyntaxNode_filelist.txt"))
+		using (StreamReader streamReader = new StreamReader(@"C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\CodeGenHelper\SyntaxNode_filelist.txt"))
 		{
 			while (!streamReader.EndOfStream)
 			{

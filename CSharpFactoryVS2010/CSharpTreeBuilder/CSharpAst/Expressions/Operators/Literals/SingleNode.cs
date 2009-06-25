@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This abstract class defines a System.Single constant.
   /// </summary>
   // ================================================================================================
-  public class SingleNode : RealConstantNode
+  public class SingleNode : RealLiteralNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
