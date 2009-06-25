@@ -13,23 +13,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   // ================================================================================================
   public abstract class Symbol : ISymbol
   {
-    #region Lifecycle methods
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Symbol"/> class.
-    /// </summary>
-    /// <param name="kind">The kind.</param>
-    /// <param name="value">The value.</param>
-    // ----------------------------------------------------------------------------------------------
-    protected Symbol(int kind, string value)
-    {
-      Kind = kind;
-      Value = value;
-    }
-
-    #endregion
-
     #region ISymbol implementation
 
     // ----------------------------------------------------------------------------------------------
@@ -37,14 +20,14 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Gets the string value of a symbol.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string Value { get; private set; }
+    public abstract string Value { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the kind of a symbol.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Kind { get; private set;}
+    public abstract int Kind { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

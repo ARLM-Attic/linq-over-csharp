@@ -401,7 +401,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       // --- Nothing to do in the case of first line.
       if (e.LineNumber == 1) return;
-      SourceFileNode.TokenizedUnit.AddEndOfLineStream(e.LineNumber);
+      SourceFileNode.TokenizedUnit.AddEndOfLineToStream(e.LineNumber);
     }
 
     #endregion

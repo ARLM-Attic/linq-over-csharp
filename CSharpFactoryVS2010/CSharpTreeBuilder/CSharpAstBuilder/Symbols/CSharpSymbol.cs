@@ -10,9 +10,25 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   /// This class represents symbols specific to the C# programming language.
   /// </summary>
   // ================================================================================================
-  public partial class CSharpSymbol : Symbol
+  public class CSharpSymbol : Symbol
   {
+    #region Private fields
+
+    private readonly int _Kind;
+    private readonly string _Value;
+
+    #endregion
+
     #region Lifecycle methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CSharpSymbol"/> class.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public CSharpSymbol()
+    {
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -22,8 +38,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <param name="value">The value.</param>
     // ----------------------------------------------------------------------------------------------
     protected CSharpSymbol(int kind, string value)
-      : base(kind, value)
     {
+      _Kind = kind;
+      _Value = value;
     }
 
     #endregion
@@ -42,11 +59,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       get 
       {
-        return Kind == TokenizedCompilationUnit.LiteralWhiteSpace ||
-               Kind == TokenizedCompilationUnit.EndOfLineCode ||
+        return Kind == SymbolStream.LiteralWhiteSpace ||
+               Kind == SymbolStream.EndOfLineCode ||
                (
-                 Kind >= TokenizedCompilationUnit.FirstFrequentWhiteSpaceCode &&
-                 Kind <= TokenizedCompilationUnit.LastFrequentWhiteSpaceCode
+                 Kind >= SymbolStream.FirstFrequentWhiteSpaceCode &&
+                 Kind <= SymbolStream.LastFrequentWhiteSpaceCode
                );
       }
     }
@@ -61,7 +78,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool IsEndOfLine
     {
-      get { return Kind == TokenizedCompilationUnit.EndOfLineCode; }
+      get { return Kind == SymbolStream.EndOfLineCode; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -127,6 +144,20 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       get { return Kind >= CSharpParser._cBlockCom && Kind <= CSharpParser._cLineCom; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string value of a symbol.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string Value { get { return _Value; } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the kind of a symbol.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override int Kind { get { return _Kind; } }
 
     #endregion
 

@@ -1,5 +1,5 @@
 // ================================================================================================
-// TokenizedCompilationUnit.cs
+// SymbolStream.cs
 //
 // Created: 2009.06.19, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -10,10 +10,10 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents the tokenized form of a compilation unit (source file)
+  /// This class represents the compilation unit as a stream of symbols.
   /// </summary>
   // ================================================================================================
-  public class TokenizedCompilationUnit
+  public class SymbolStream
   {
     #region Constant values
 
@@ -65,17 +65,10 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Byte array storing the token stream.
+    /// Byte array storing the symbol stream.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private byte[] _TokenStream;
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Current position in the token stream.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private int _CurrentPosition;
+    private byte[] _SymbolStream;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -131,6 +124,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
           { "               ", 235 },
           { "                ", 236 },
         };
+
     #endregion
 
     #region Nested types
@@ -155,24 +149,25 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TokenizedCompilationUnit"/> class.
+    /// Initializes a new instance of the <see cref="SymbolStream"/> class.
     /// </summary>
     /// <param name="capacity">The initial capacity of the token stream.</param>
     // ----------------------------------------------------------------------------------------------
-    public TokenizedCompilationUnit(int capacity)
+    public SymbolStream(int capacity)
     {
-      _TokenStream = new byte[capacity];
-      _CurrentPosition = 0;
+      _SymbolStream = new byte[capacity];
+      CurrentPosition = 0;
+      Frozen = false;
       _LastSymbolPosition = -1;
       _LinePositions.Add(new LinePosition { Line = 1, Position = 0 });
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TokenizedCompilationUnit"/> class.
+    /// Initializes a new instance of the <see cref="SymbolStream"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TokenizedCompilationUnit()
+    public SymbolStream()
       : this(DefaultCapacity)
     {
     }
@@ -187,10 +182,15 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </summary>
     /// <value>The current position.</value>
     // ----------------------------------------------------------------------------------------------
-    public int CurrentPosition
-    {
-      get { return _CurrentPosition; }
-    }
+    public int CurrentPosition { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether this <see cref="SymbolStream"/> is frozen.
+    /// </summary>
+    /// <value><c>true</c> if frozen; otherwise, <c>false</c>.</value>
+    // ----------------------------------------------------------------------------------------------
+    public bool Frozen { get; private set; }
 
     #endregion
 
@@ -213,7 +213,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </summary>
     /// <param name="line">Line number.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddEndOfLineStream(int line)
+    public void AddEndOfLineToStream(int line)
     {
       AddSymbolToStream(line, EndOfLineWriter);
     }
@@ -229,9 +229,23 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       AddSymbolToStream(whitespace, WhitespaceWriter);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Freezes the stream.
+    /// </summary>
+    /// <remarks>
+    /// After the stream is frozen, only seek and read operations are allowed.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public void FreezeStream()
+    {
+      ResizeTokenStream(CurrentPosition + 1);
+      Frozen = true;
+    }
+
     #endregion
 
-    #region Helper methods
+    #region Stream writer methods
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -243,8 +257,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void AddSymbolToStream<T>(T symbol, Action<T, int> symbolWriter)
     {
+      if (Frozen)
+      {
+        throw new InvalidOperationException("Cannot write to a frozen symbol stream.");
+      }
+
       // --- Remember the starting position
-      var startPosition = _CurrentPosition;
+      var startPosition = CurrentPosition;
 
       // --- Write out the distance from the previous symbols's start position. Use zero in case
       // --- of the first token.
@@ -307,34 +326,17 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resizes the token stream to the specified new size.
-    /// </summary>
-    /// <param name="newSize">The new size.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ResizeTokenStream(int newSize)
-    {
-      if (newSize < _CurrentPosition)
-      {
-        throw new InvalidOperationException("Shrinking token buffer size under its length.");
-      }
-      var newStream = new byte[newSize];
-      _TokenStream.CopyTo(newStream, 0);
-      _TokenStream = newStream;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Writes a byte value to the token stream.
     /// </summary>
     /// <param name="value">The value.</param>
     // ----------------------------------------------------------------------------------------------
     private void WriteByte(byte value)
     {
-      if (_CurrentPosition >= _TokenStream.Length)
+      if (CurrentPosition >= _SymbolStream.Length)
       {
-        ResizeTokenStream(_TokenStream.Length + ExtentSize);
+        ResizeTokenStream(_SymbolStream.Length + ExtentSize);
       }
-      _TokenStream[_CurrentPosition++] = value;
+      _SymbolStream[CurrentPosition++] = value;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -386,6 +388,124 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       }
     }
 
+    #endregion
+
+    #region Stream reader methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sests the current position to the specified one.
+    /// </summary>
+    /// <param name="position">The position.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void Seek(int position)
+    {
+      if (!Frozen)
+      {
+        throw new InvalidOperationException("Cannot seek in an unfrozen symbol stream.");
+      }
+      CheckStreamPosition(position);
+      CurrentPosition = position;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds the line number and retrieves the related line information.
+    /// </summary>
+    /// <param name="position">The position.</param>
+    /// <returns>
+    /// Line information (line number and stream position) of the specified line.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public LinePosition FindLineNumber(int position)
+    {
+      throw new NotImplementedException();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the current position to the beginning of the line represented by the input position.
+    /// </summary>
+    /// <param name="position">Position within a line.</param>
+    /// <returns>Start line number.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public int SeekToLineStart(int position)
+    {
+      var result = FindLineNumber(position);
+      Seek(result.Position);
+      return result.Line;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Reads a byte from the current position and advances the stream with one position.
+    /// </summary>
+    /// <returns>Byte read from the stream.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public byte ReadByte()
+    {
+      if (CurrentPosition < 0 || CurrentPosition >= _SymbolStream.Length)
+      {
+        
+      }
+      return _SymbolStream[CurrentPosition];
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Reads a number from the stream. Uses the prefixes to recognize the number of bytes used to
+    /// store the number in the stream and advances the position accordingly.
+    /// </summary>
+    /// <returns>Byte read from the stream.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public int ReadNumber()
+    {
+      throw new NotImplementedException();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Reads a string from the stream and advances the position accordingly.
+    /// </summary>
+    /// <returns>Byte read from the stream.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public string ReadString()
+    {
+      throw new NotImplementedException();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Reads a literal from the stream and advances the position accordingly.
+    /// </summary>
+    /// <returns>Byte read from the stream.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public string ReadLiteral()
+    {
+      return ResolveLiteralByIndex(ReadNumber());
+    }
+
+    #endregion
+
+    #region Helper methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resizes the token stream to the specified new size.
+    /// </summary>
+    /// <param name="newSize">The new size.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void ResizeTokenStream(int newSize)
+    {
+      if (newSize < CurrentPosition)
+      {
+        throw new InvalidOperationException("Shrinking token buffer size under its length.");
+      }
+      var newStream = new byte[newSize];
+      _SymbolStream.CopyTo(newStream, 0);
+      _SymbolStream = newStream;
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the index of the literal.
@@ -405,43 +525,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       return index;
     }
 
-    public void Seek(int position)
-    {
-      throw new NotImplementedException();  
-    }
-
-    public LinePosition FindLineNumber(int position)
-    {
-      throw new NotImplementedException();
-    }
-
-    public int SeekToLineStart(int position)
-    {
-      var result = FindLineNumber(position);
-      Seek(result.Position);
-      return result.Line;
-    }
-
-    public byte ReadByte()
-    {
-      throw new NotImplementedException();
-    }
-
-    public int ReadNumber()
-    {
-      throw new NotImplementedException();
-    }
-
-    public string ReadString()
-    {
-      throw new NotImplementedException();
-    }
-
-    public string ReadLiteral()
-    {
-      return ResolveLiteralByIndex(ReadNumber());
-    }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Resolves a literal by its index.
@@ -458,6 +541,20 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         throw new InvalidOperationException("Literal index is out of the expected range.");
       }
       return _LiteralsByIndex[index];
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if the stream position is valid. Throws an exception if not.
+    /// </summary>
+    /// <param name="position">The position.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void CheckStreamPosition(int position)
+    {
+      if (position < 0 || position >= _SymbolStream.Length)
+      {
+        throw new InvalidOperationException("Seek position is out of the symbol stream.");
+      }
     }
 
     #endregion

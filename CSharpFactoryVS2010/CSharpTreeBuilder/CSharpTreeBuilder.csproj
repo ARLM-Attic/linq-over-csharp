@@ -78,7 +78,7 @@
     <Compile Include="CSharpAstBuilder\TokenExtensions.cs" />
     <Compile Include="CSharpAstBuilder\Token.Predefined.cs" />
     <Compile Include="CSharpAstBuilder\Tokenization\NewLineReachedEventArgs.cs" />
-    <Compile Include="CSharpAstBuilder\Tokenization\TokenizedCompilationUnit.cs" />
+    <Compile Include="CSharpAstBuilder\Tokenization\SymbolStream.cs" />
     <Compile Include="CSharpAstBuilder\Tokenization\TokenScannedEventArgs.cs" />
     <Compile Include="CSharpAstBuilder\Tokenization\WhitespaceScannedEventArgs.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
