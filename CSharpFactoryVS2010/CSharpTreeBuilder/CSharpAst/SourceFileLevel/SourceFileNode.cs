@@ -3,7 +3,6 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using System.Collections.Generic;
 using System.IO;
 using CSharpTreeBuilder.CSharpAstBuilder;
@@ -49,7 +48,7 @@ namespace CSharpTreeBuilder.Ast
       FullName = fullName;
       GlobalAttributes = new AttributeDecorationNodeCollection {ParentNode = this};
       Pragmas = new PragmaNodeCollection {ParentNode = this};
-      SymbolStream = new SymbolStream();
+      SymbolStream = new CSharpSymbolStream();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -77,6 +76,13 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The full name.</value>
     // ----------------------------------------------------------------------------------------------
     public string FullName { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the last scanned position.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int LastScannedPosition { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -115,7 +121,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the tokenized version of this compilation unit.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SymbolStream SymbolStream { get; private set; }
+    public CSharpSymbolStream SymbolStream { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -70,15 +70,20 @@
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbol.cs" />
-    <Compile Include="CSharpAstBuilder\Symbols\ISourceSymbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbolReference.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\IPositionedSymbol.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\ISymbol.cs" />
-    <Compile Include="CSharpAstBuilder\Symbols\CSharpSourceSymbol.cs" />
-    <Compile Include="CSharpAstBuilder\Symbols\Symbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\ISymbolReference.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\SymbolHelper.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SymbolHelper.tt</DependentUpon>
+    </Compile>
     <Compile Include="CSharpAstBuilder\Token.cs" />
     <Compile Include="CSharpAstBuilder\TokenExtensions.cs" />
     <Compile Include="CSharpAstBuilder\Token.Predefined.cs" />
     <Compile Include="CSharpAstBuilder\Tokenization\NewLineReachedEventArgs.cs" />
-    <Compile Include="CSharpAstBuilder\Tokenization\SymbolStream.cs" />
+    <Compile Include="CSharpAstBuilder\Tokenization\CSharpSymbolStream.cs" />
     <Compile Include="CSharpAstBuilder\Tokenization\TokenScannedEventArgs.cs" />
     <Compile Include="CSharpAstBuilder\Tokenization\WhitespaceScannedEventArgs.cs" />
     <Compile Include="CSharpAstBuilder\UTF8Buffer.cs" />
@@ -427,6 +432,10 @@
     <None Include="CoCo\CSharp3.ATG" />
     <None Include="CoCo\Parser.frame" />
     <None Include="CoCo\Scanner.frame" />
+    <None Include="CSharpAstBuilder\Symbols\SymbolHelper.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SymbolHelper.cs</LastGenOutput>
+    </None>
     <None Include="CSharpAst\BlankSyntaxNodeVisitor.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>BlankSyntaxNodeVisitor.cs</LastGenOutput>
@@ -444,6 +453,8 @@
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CSharpAstBuilder\SymbolTable.Exceptions.txt" />
+    <Content Include="CSharpAstBuilder\SymbolTable.Generated.txt" />
     <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_filelist.txt" />
     <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_ignore.txt" />
   </ItemGroup>

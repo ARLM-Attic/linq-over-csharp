@@ -322,6 +322,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
         // --- Sign that all tokens have been added to the symbol stream
         sourceNode.SymbolStream.FreezeStream();
+        sourceNode.LastScannedPosition = scanner.Position;
 
         // --- Release event handlers
         scanner.NewLineReached -= parser.NewLineReached;

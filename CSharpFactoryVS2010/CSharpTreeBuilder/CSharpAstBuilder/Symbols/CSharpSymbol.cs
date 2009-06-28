@@ -3,6 +3,9 @@
 //
 // Created: 2009.06.20, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
+using CSharpTreeBuilder.Ast;
+
 namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
@@ -10,25 +13,17 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   /// This class represents symbols specific to the C# programming language.
   /// </summary>
   // ================================================================================================
-  public class CSharpSymbol : Symbol
+  public struct CSharpSymbol : 
+    IPositionedSymbol, 
+    ISymbolReference,
+    IEquatable<CSharpSymbol>
   {
-    #region Private fields
-
-    private readonly int _Kind;
-    private readonly string _Value;
-
-    #endregion
-
-    #region Lifecycle methods
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="CSharpSymbol"/> class.
+    /// Represents an empty C# symbol.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public CSharpSymbol()
-    {
-    }
+    public static CSharpSymbol Empty = new CSharpSymbol(-1, null);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -37,15 +32,31 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <param name="kind">The kind.</param>
     /// <param name="value">The value.</param>
     // ----------------------------------------------------------------------------------------------
-    protected CSharpSymbol(int kind, string value)
+    public CSharpSymbol(int kind, string value) : this()
     {
-      _Kind = kind;
-      _Value = value;
+      Kind = kind;
+      Value = value;
+      Row = -1;
+      Column = -1;
     }
 
-    #endregion
-
-    #region ISymbol implementation
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CSharpSymbol"/> struct.
+    /// </summary>
+    /// <param name="kind">The kind.</param>
+    /// <param name="value">The value.</param>
+    /// <param name="row">The row.</param>
+    /// <param name="column">The column.</param>
+    // ----------------------------------------------------------------------------------------------
+    public CSharpSymbol(int kind, string value, int row, int column)
+      : this()
+    {
+      Value = value;
+      Kind = kind;
+      Row = row;
+      Column = column;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -55,15 +66,15 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// 	<c>true</c> if this instance is whitespace; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public override bool IsWhitespace
+    public bool IsWhitespace
     {
       get 
       {
-        return Kind == SymbolStream.LiteralWhiteSpace ||
-               Kind == SymbolStream.EndOfLineCode ||
+        return Kind == CSharpSymbolStream.LiteralWhiteSpace ||
+               Kind == CSharpSymbolStream.EndOfLineCode ||
                (
-                 Kind >= SymbolStream.FirstFrequentWhiteSpaceCode &&
-                 Kind <= SymbolStream.LastFrequentWhiteSpaceCode
+                 Kind >= CSharpSymbolStream.FirstFrequentWhiteSpaceCode &&
+                 Kind <= CSharpSymbolStream.LastFrequentWhiteSpaceCode
                );
       }
     }
@@ -76,9 +87,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// 	<c>true</c> if this instance is an "end of line" symbol; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public override bool IsEndOfLine
+    public bool IsEndOfLine
     {
-      get { return Kind == SymbolStream.EndOfLineCode; }
+      get { return Kind == CSharpSymbolStream.EndOfLineCode; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -89,7 +100,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// 	<c>true</c> if this instance is keyword; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public override bool HasConstantValue
+    public bool HasConstantValue
     {
       get { return Kind >= CSharpParser._abstract && Kind <= CSharpParser._larrow; }
     }
@@ -102,7 +113,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// 	<c>true</c> if this instance is identifier; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public override bool IsIdentifier
+    public bool IsIdentifier
     {
       get { return Kind == CSharpParser._ident; }
     }
@@ -116,9 +127,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// 	<c>true</c> if this instance is a literal; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public override bool IsLiteral
+    public bool IsLiteral
     {
-      get { return Kind >= CSharpParser._intCon && Kind <= CSharpParser._stringCon; }
+      get { return IsIdentifier || Kind >= CSharpParser._intCon && Kind <= CSharpParser._stringCon; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -127,7 +138,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </summary>
     /// <value><c>true</c> if this instance is pragma; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
-    public override bool IsPragma
+    public bool IsPragma
     {
       get { return Kind >= CSharpParser._ppDefine && Kind <= CSharpParser._ppEndReg; }
     }
@@ -140,7 +151,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// 	<c>true</c> if this instance is a comment; otherwise, <c>false</c>.
     /// </value>
     // ----------------------------------------------------------------------------------------------
-    public override bool IsComment
+    public bool IsComment
     {
       get { return Kind >= CSharpParser._cBlockCom && Kind <= CSharpParser._cLineCom; }
     }
@@ -150,18 +161,24 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Gets the string value of a symbol.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override string Value { get { return _Value; } }
+    public string Value { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the kind of a symbol.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override int Kind { get { return _Kind; } }
+    public int Kind { get; private set; }
 
-    #endregion
-
-    #region Factory methods
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is an empty symbol.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsEmpty
+    {
+      get { return Kind == -1 && Value == null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -263,6 +280,111 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       return new CSharpSymbol(CSharpParser._ppDefine, "#undef " + value);
     }
 
-    #endregion
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
+    /// </summary>
+    /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
+    /// <returns>
+    /// <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; 
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    /// <exception cref="T:System.NullReferenceException">
+    /// The <paramref name="obj"/> parameter is null.
+    /// </exception>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Equals(object obj)
+    {
+      if (obj is CSharpSymbol)
+      {
+        var otherSymbol = (CSharpSymbol)obj;
+        return Kind == otherSymbol.Kind && Value == otherSymbol.Value;
+      }
+      return false;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Indicates whether the current object is equal to another object of the same type.
+    /// </summary>
+    /// <returns>
+    /// true if the current object is equal to the <paramref name="other"/> parameter; 
+    /// otherwise, false.
+    /// </returns>
+    /// <param name="other">An object to compare with this object.</param>
+    // ----------------------------------------------------------------------------------------------
+    public bool Equals(CSharpSymbol other)
+    {
+      return Kind == other.Kind && Value == other.Value;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns a <see cref="System.String"/> that represents this instance.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="System.String"/> that represents this instance.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return Value;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns a hash code for this instance.
+    /// </summary>
+    /// <returns>
+    /// A hash code for this instance, suitable for use in hashing algorithms and data structures 
+    /// like a hash table. 
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public override int GetHashCode()
+    {
+      return Kind.GetHashCode() ^ Value.GetHashCode();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the row position of the symbol.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Row { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the column position of the symbol.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Column { get; private set; }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a symbol from the specified source file.
+    /// </summary>
+    /// <param name="sourceNode">The source file node.</param>
+    /// <returns>
+    /// Symbol information obtained from the specified source file.
+    /// </returns>
+    // --------------------------------------------------------------------------------------------
+    ISymbol ISymbolReference.GetSymbol(SourceFileNode sourceNode)
+    {
+      return new CSharpSymbol(Kind, Value);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a positioned symbol from the specified source file.
+    /// </summary>
+    /// <param name="sourceNode">The source file node.</param>
+    /// <returns>
+    /// Positioned symbol information obtained from the specified source file.
+    /// </returns>
+    // --------------------------------------------------------------------------------------------
+    IPositionedSymbol ISymbolReference.GetPositionedSymbol(SourceFileNode sourceNode)
+    {
+      return new CSharpSymbol(Kind, Value, Row, Column);
+    }
   }
 }

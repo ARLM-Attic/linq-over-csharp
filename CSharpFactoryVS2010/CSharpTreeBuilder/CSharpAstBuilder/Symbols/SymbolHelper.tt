@@ -1,0 +1,121 @@
+<#@ template inherits="Microsoft.VisualStudio.TextTemplating.VSHost.ModelingTextTransformation" language="C#v3.5" debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.dll" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+//
+// WARNING! This file is generated, do not modify it manually!
+//
+// Generated on: <#WriteLine(DateTime.Now.ToString());#>
+//
+// The template file is BlankSyntaxNodeVisitor.tt 
+//
+
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
+using System.Collections.Generic;
+
+namespace CSharpTreeBuilder.CSharpAstBuilder
+{
+  // ================================================================================================
+  /// <summary>
+  /// Helper class for converting between symbol kind and values.
+  /// </summary>
+  // ================================================================================================
+  public static class SymbolHelper
+  {
+    // --- Token ID --> Name resolution
+    private static readonly Dictionary<int, string> _SymbolsById =
+      new Dictionary<int, string>
+      {
+<#
+		Dictionary<string, string> exceptions = new Dictionary<string, string>();
+		using (StreamReader streamReader = new StreamReader(@"C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAstBuilder\SymbolTable.Exceptions.txt"))
+		{
+			while (!streamReader.EndOfStream)
+			{
+				string line = streamReader.ReadLine().Trim();
+				if (string.IsNullOrEmpty(line)) continue;
+				string[] parts = line.Split(' ');
+				exceptions.Add(parts[0], parts[1]);
+			}
+		}
+		
+		using (StreamReader streamReader = new StreamReader(@"C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAstBuilder\SymbolTable.Generated.txt"))
+		{
+			// --- Skip the top 4 lines, as they are headers
+			for (int i = 0; i < 4; i++)
+				streamReader.ReadLine();
+			var nonTerminalFound = false;
+			while (!streamReader.EndOfStream && !nonTerminalFound)
+			{
+				// --- Each line represents a non-terminal
+				var line = streamReader.ReadLine();
+				var tokenId = Int32.Parse(line.Substring(0, 3));
+				string tokenValue = line.Substring(4, 14).Trim();
+				if (tokenValue.StartsWith("\"")) tokenValue = tokenValue.Substring(1);
+				if (tokenValue.EndsWith("\"")) 
+					tokenValue = tokenValue.Remove(tokenValue.Length - 1);
+				string subst;
+				if (exceptions.TryGetValue(tokenValue, out subst))
+					tokenValue = subst;
+				var type = line.Substring(19, 1);
+				nonTerminalFound = type != "t";
+				if (tokenId < 6 || tokenValue == "???" || nonTerminalFound) continue;
+				WriteLine("        {{ {0}, \"{1}\" }},", tokenId, tokenValue);
+			}
+		}
+#>	
+    };  
+
+    // --- Name --> Token ID resolution
+    private static Dictionary<string, int> _SymbolsByName = new Dictionary<string, int>();
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets up the helper for token resolution
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    static SymbolHelper()
+    {
+      foreach (var pair in _SymbolsById)
+      {
+        _SymbolsByName.Add(pair.Value, pair.Key);
+      }
+    }
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the symbol id by its name.
+    /// </summary>
+    /// <param name="name">Symbol name.</param>
+    /// <returns>ID of the symbol</returns>
+    // --------------------------------------------------------------------------------------------
+    public static int GetSymbolId(string name)
+    {
+      return _SymbolsByName[name];
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the symbol by ID.
+    /// </summary>
+    /// <param name="id">Symbol ID.</param>
+    /// <returns>Name of the symbol.</returns>
+    // --------------------------------------------------------------------------------------------
+    public static string GetSymbolName(int id)
+    {
+      return _SymbolsById[id];
+    }
+  }
+}
+
+#pragma warning restore 1591
+ 
+<#+
+  // Insert any template procedures here
+  void foo(){}
+#>

@@ -1,10 +1,11 @@
 // ================================================================================================
-// SymbolStream.cs
+// CSharpSymbolStream.cs
 //
 // Created: 2009.06.19, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace CSharpTreeBuilder.CSharpAstBuilder
 {
@@ -13,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   /// This class represents the compilation unit as a stream of symbols.
   /// </summary>
   // ================================================================================================
-  public class SymbolStream
+  public class CSharpSymbolStream
   {
     #region Constant values
 
@@ -125,6 +126,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
           { "                ", 236 },
         };
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Counts the consecutive EOL marks
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private int _EolCounter;
+
     #endregion
 
     #region Nested types
@@ -149,14 +157,15 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SymbolStream"/> class.
+    /// Initializes a new instance of the <see cref="CSharpSymbolStream"/> class.
     /// </summary>
     /// <param name="capacity">The initial capacity of the token stream.</param>
     // ----------------------------------------------------------------------------------------------
-    public SymbolStream(int capacity)
+    public CSharpSymbolStream(int capacity)
     {
       _SymbolStream = new byte[capacity];
       CurrentPosition = 0;
+      _EolCounter = 0;
       Frozen = false;
       _LastSymbolPosition = -1;
       _LinePositions.Add(new LinePosition { Line = 1, Position = 0 });
@@ -164,10 +173,10 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SymbolStream"/> class.
+    /// Initializes a new instance of the <see cref="CSharpSymbolStream"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SymbolStream()
+    public CSharpSymbolStream()
       : this(DefaultCapacity)
     {
     }
@@ -186,11 +195,18 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets a value indicating whether this <see cref="SymbolStream"/> is frozen.
+    /// Gets or sets a value indicating whether this <see cref="CSharpSymbolStream"/> is frozen.
     /// </summary>
     /// <value><c>true</c> if frozen; otherwise, <c>false</c>.</value>
     // ----------------------------------------------------------------------------------------------
     public bool Frozen { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the length of the stream.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Length { get; private set; }
 
     #endregion
 
@@ -205,6 +221,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     public void AddTokenToStream(Token token)
     {
       AddSymbolToStream(token, TokenWriter);
+      _EolCounter = 0;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -216,6 +233,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     public void AddEndOfLineToStream(int line)
     {
       AddSymbolToStream(line, EndOfLineWriter);
+      _EolCounter++;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -226,7 +244,19 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public void AddWhitespaceToStream(string whitespace)
     {
+      if (_EolCounter == 0)
+      {
+        AddSymbolToStream(whitespace, WhitespaceWriter);
+        return;
+      }
+      while (whitespace.StartsWith("\r\n") && _EolCounter > 0)
+      {
+        whitespace = whitespace.Substring(2);
+        _EolCounter--;
+      }
+      if (string.IsNullOrEmpty(whitespace)) return;
       AddSymbolToStream(whitespace, WhitespaceWriter);
+      _EolCounter = 0;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -239,7 +269,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public void FreezeStream()
     {
-      ResizeTokenStream(CurrentPosition + 1);
+      Length = CurrentPosition + 1;
+      ResizeTokenStream(Length);
       Frozen = true;
     }
 
@@ -288,9 +319,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       // --- Add the token type (as a single byte) to the stream
       WriteByte((byte) token.Kind);
       // --- If token is a literal value, write out the related literal's index
-      if (token.IsLiteral) WriteNumber(GetLiteralIndex(token.Value));
-      // --- If token is a pragma, write out the pragma text
-      else if (token.IsPragma) WriteText(token.Value);
+      if (token.IsLiteral || token.IsPragma) WriteNumber(GetLiteralIndex(token.Value));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -321,7 +350,10 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       if (_WhiteSpaceByteCodes.TryGetValue(whitespace, out wsCode))
         WriteByte(wsCode);
       else
+      {
+        WriteByte(LiteralWhiteSpace);
         WriteNumber(GetLiteralIndex(whitespace));
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -372,25 +404,20 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Writes out the text to the token stream.
-    /// </summary>
-    /// <param name="text">The text.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void WriteText(string text)
-    {
-      if (text == null) throw new ArgumentNullException("text");
-      WriteNumber(text.Length);
-      foreach (var c in text)
-      {
-        WriteNumber(c);
-      }
-    }
-
     #endregion
 
     #region Stream reader methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the current position is the end of the stream.
+    /// </summary>
+    /// <value><c>true</c> if this is the end of stream; otherwise, <c>false</c>.</value>
+    // ----------------------------------------------------------------------------------------------
+    public bool Eos
+    {
+      get { return CurrentPosition >= _SymbolStream.Length - 1; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -419,7 +446,37 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     public LinePosition FindLineNumber(int position)
     {
-      throw new NotImplementedException();
+      var index = FindLinePosition(0, _LinePositions.Count - 1, position);
+      if (index < 0) index = 0;
+      return _LinePositions[index];
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds the line position in the position array between the specified indexes.
+    /// </summary>
+    /// <param name="lowerIndex">Lower index.</param>
+    /// <param name="upperIndex">Upper index.</param>
+    /// <param name="position">The position to find.</param>
+    /// <returns>Index of the line position or -1, if position not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private int FindLinePosition(int lowerIndex, int upperIndex, int position)
+    {
+      if (upperIndex - lowerIndex < 5)
+      {
+        // --- Linear search for small arrays
+        for (var i = upperIndex; i >= lowerIndex; i--)
+        {
+          if (_LinePositions[i].Position <= position) return i;
+        }
+        return -1;
+      }
+
+      // --- Binary search
+      var middleIndex = lowerIndex + (upperIndex - lowerIndex)/2;
+      return _LinePositions[middleIndex].Position <= position 
+        ? FindLinePosition(middleIndex, upperIndex, position) 
+        : FindLinePosition(lowerIndex, middleIndex - 1, position);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -438,11 +495,126 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the row and column info of the symbol at the current position.
+    /// </summary>
+    /// <param name="position">The position to search for.</param>
+    /// <param name="row">The row position.</param>
+    /// <param name="column">The column position.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void GetRowAndColumnInfo(int position, out int row, out int column)
+    {
+      var oldPos = CurrentPosition;
+      try
+      {
+        var linePos = FindLineNumber(position);
+        // --- Now we have the line number.
+        row = linePos.Line;
+
+        // --- Search the column position
+        column = 1;
+        Seek(linePos.Position);
+        while (position > CurrentPosition)
+        {
+          column += ReadSymbol().Value.Length;
+        }
+        return;
+      }
+      finally
+      {
+        CurrentPosition = oldPos;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the row and column info of the token at the specified position.
+    /// </summary>
+    /// <param name="row">The row position.</param>
+    /// <param name="column">The column position.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void GetRowAndColumnInfo(out int row, out int column)
+    {
+      GetRowAndColumnInfo(CurrentPosition, out row, out column);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Reads the symbol at the current position.
+    /// </summary>
+    /// <returns>
+    /// Null, if we are at the end of the symbol stream.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public CSharpSymbol ReadSymbol()
+    {
+      if (Eos) return CSharpSymbol.Empty;
+      // --- Skip the "back pointer"
+      ReadNumber();
+      if (Eos) return CSharpSymbol.Empty;
+      // --- Read the symbol
+      var symbol = new CSharpSymbol(ReadByte(), null);
+      var value = string.Empty;
+      if (symbol.IsWhitespace)
+      {
+        if (!symbol.IsEndOfLine)
+        {
+          // --- Handle whitespace
+          value =
+            symbol.Kind >= FirstFrequentWhiteSpaceCode && symbol.Kind <= LastFrequentWhiteSpaceCode
+              ? value.PadRight(symbol.Kind - FirstFrequentWhiteSpaceCode + 1, ' ')
+              : ReadLiteral();
+        }
+      }
+      else if (symbol.IsLiteral || symbol.IsPragma)
+      {
+        // --- Handle literals and pragmas
+        value = ReadLiteral();
+      }
+      else
+      {
+        value = SymbolHelper.GetSymbolName(symbol.Kind);
+      }
+      return new CSharpSymbol(symbol.Kind, value);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Reads the symbol from the specified position.
+    /// </summary>
+    /// <returns>
+    /// Null, if we are at the end of the symbol stream.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public CSharpSymbol ReadSymbol(int position)
+    {
+      Seek(position);
+      return ReadSymbol();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Moves back to the previous symbol.
+    /// </summary>
+    /// <returns>
+    /// True, if movement was successful; false, if we are at the beginning of the token stream.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool MoveBack()
+    {
+      if (CurrentPosition <= 0) return false;
+      var startPosition = CurrentPosition;
+      var backJump = ReadNumber();
+      Seek(startPosition - backJump);
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Reads a byte from the current position and advances the stream with one position.
     /// </summary>
     /// <returns>Byte read from the stream.</returns>
     // ----------------------------------------------------------------------------------------------
-    public byte ReadByte()
+    private byte ReadByte()
     {
       CheckStreamPosition(CurrentPosition);
       return _SymbolStream[CurrentPosition++];
@@ -455,7 +627,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </summary>
     /// <returns>Byte read from the stream.</returns>
     // ----------------------------------------------------------------------------------------------
-    public int ReadNumber()
+    private int ReadNumber()
     {
       var startByte = ReadByte();
       switch (startByte >> 6)
@@ -466,23 +638,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
           return startByte;
         case 2:
           // --- Two consecutive bytes
-          return startByte;
-        case 3:
+          return (startByte & 0x3f) << 8 + ReadByte();
+        default:
           // -- Four consecutive bytes
-          return startByte;
+          return (startByte & 0x3f) << 24 + ReadByte() << 16 + ReadByte() << 8 + ReadByte();
       }
-      return startByte;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Reads a string from the stream and advances the position accordingly.
-    /// </summary>
-    /// <returns>Byte read from the stream.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public string ReadString()
-    {
-      throw new NotImplementedException();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -566,6 +726,16 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       {
         throw new InvalidOperationException("Seek position is out of the symbol stream.");
       }
+    }
+
+    #endregion
+
+    #region Diagnostic methods
+
+    public override string ToString()
+    {
+      var sb = new StringBuilder();
+      return sb.ToString();
     }
 
     #endregion

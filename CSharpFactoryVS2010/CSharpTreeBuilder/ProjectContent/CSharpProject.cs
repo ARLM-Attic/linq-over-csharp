@@ -27,7 +27,6 @@ namespace CSharpTreeBuilder.ProjectContent
     // ----------------------------------------------------------------------------------------------
     private CSharpProject()
     {
-      Files = new SourceFileNodeCollection();
       SyntaxTree = new CSharpSyntaxTree();
       Errors = new CompilationMessageCollection();
       Warnings = new CompilationMessageCollection();
@@ -89,13 +88,6 @@ namespace CSharpTreeBuilder.ProjectContent
     /// </summary>
     // --------------------------------------------------------------------------------------------
     public ProjectProviderBase ProjectProvider { get; private set; }
-
-    // --------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the source files in the current project.
-    /// </summary>
-    // --------------------------------------------------------------------------------------------
-    public SourceFileNodeCollection Files { get; private set; }
 
     // --------------------------------------------------------------------------------------------
     /// <summary>

@@ -1,7 +1,7 @@
-//
+﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009.06.25. 18:09:38
+// Generated on: 2009.06.27. 17:35:09
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 

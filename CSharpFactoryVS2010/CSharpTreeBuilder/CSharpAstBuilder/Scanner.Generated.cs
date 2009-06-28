@@ -213,19 +213,32 @@ namespace CSharpTreeBuilder.CSharpAstBuilder {
       }
   	}
 
+
     //-----------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a character to the currently scanned token.
+    /// Scans a new token and notifies subscribers.
     /// </summary>
     //-----------------------------------------------------------------------------------
     Token NextToken()
+    {
+	  	var token = ReadNextToken();
+	  	RaiseTokenScanned(token);
+		  return token;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /// <summary>
+    /// Scans a new token.
+    /// </summary>
+    //-----------------------------------------------------------------------------------
+    Token ReadNextToken()
     {
       var whitespace = string.Empty;
 		  while (ch == ' ' ||
       ch >= 9 && ch <= 10 || ch == 13
 		  ) 
 		  {
-		    whitespace += ch;
+		    whitespace += (char)ch;
 		    NextCh();
 		  }
 		  
@@ -1216,10 +1229,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder {
 
   		}
 	  	t.val = new String(tval, 0, tlen);
-	  	
-	  	// --- At this point a new token is successfully scanned
-	  	RaiseTokenScanned(t);
-		  return t;
+	  	return t;
 	  }
   }
 

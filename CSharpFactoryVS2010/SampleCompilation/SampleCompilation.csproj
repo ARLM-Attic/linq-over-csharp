@@ -54,9 +54,9 @@
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CSharpFactory\CSharpFactory.csproj">
-      <Project>{DAC84C34-6834-4398-AE6B-24559581D0E4}</Project>
-      <Name>CSharpFactory</Name>
+    <ProjectReference Include="..\CSharpTreeBuilder\CSharpTreeBuilder.csproj">
+      <Project>{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}</Project>
+      <Name>CSharpTreeBuilder</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
