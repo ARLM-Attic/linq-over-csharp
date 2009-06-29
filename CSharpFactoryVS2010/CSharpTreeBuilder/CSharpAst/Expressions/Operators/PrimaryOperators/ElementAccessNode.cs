@@ -1,67 +1,57 @@
 // ================================================================================================
-// NameTagContinuationNode.cs
+// ArrayIndexerInvocationOperatorNode.cs
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
+using System;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a name tag as a continuation of a name tag list.
+  /// This class represents an element access node.
   /// </summary>
-  /// <remarks>
-  /// Syntax:
-  ///   NameTagContinuationNode:
-  ///     "." NameTagNode
-  /// </remarks>
   // ================================================================================================
-  public class NameTagContinuationNode : NameTagNode, IContinuationTag
+  public sealed class ElementAccessNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypeTagContinuationNode"/> class.
+    /// Initializes a new instance of the <see cref="ElementAccessNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
-    /// <param name="identifier">The identifier.</param>
+    /// <param name="expressionNode">The primary expression node</param>
     // ----------------------------------------------------------------------------------------------
-    public NameTagContinuationNode(Token start, Token identifier)
+    public ElementAccessNode(Token start, ExpressionNode expressionNode)
       : base(start)
     {
-      if (identifier == null) throw new ArgumentNullException("identifier");
-      SeparatorToken = start;
-      IdentifierToken = identifier;
+      if (expressionNode == null)
+      {
+        throw new ArgumentNullException("expressionNode");
+      }
+
+      if (!(expressionNode is PrimaryOperatorNode))
+      {
+        throw new ArgumentException("Primary expression expected");
+      }
+
+      PrimaryExpression = expressionNode as PrimaryOperatorNode;
+      
+      Expressions = new ExpressionNodeCollection { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------
-
-    #region IContinuationTag Members
-
     /// <summary>
-    /// Gets or sets the separator token.
+    /// Gets the primary expression part of the element access expression.
     /// </summary>
-    /// <value>The separator token.</value>
     // ----------------------------------------------------------------------------------------------
-    public Token SeparatorToken { get; private set; }
-
-    #endregion
+    public PrimaryOperatorNode PrimaryExpression { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the output segment representing this syntax node.
+    /// Gets or sets the expression collection.
     /// </summary>
-    /// <returns>
-    /// The OutputSegment instance describing this syntax node, or null; if the node has no output.
-    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public override OutputSegment GetOutputSegment()
-    {
-      return new OutputSegment(
-        SeparatorToken,
-        IdentifierToken
-        );
-    }
+    public ExpressionNodeCollection Expressions { get; internal set; }
   }
 }

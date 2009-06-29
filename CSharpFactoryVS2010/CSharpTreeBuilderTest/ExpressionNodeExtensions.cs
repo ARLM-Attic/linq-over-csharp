@@ -25,10 +25,10 @@ namespace CSharpTreeBuilderTest
       if (unOp != null) return unOp.Operand.LeftmostExpression();
       var binOp = exprNode as BinaryOperatorNode;
       if (binOp != null) return binOp.LeftOperand.LeftmostExpression();
-      var accOp = exprNode as MemberAccessOperatorNodeBase;
-      if (accOp != null) return accOp.ScopeOperand.LeftmostExpression();
-      var metOp = exprNode as MethodInvocationOperatorNode;
-      return metOp != null ? metOp.ScopeOperand.LeftmostExpression() : exprNode;
+      var accOp = exprNode as PrimaryMemberAccessOperatorNode;
+      if (accOp != null) return accOp.PrimaryExpression.LeftmostExpression();
+      var metOp = exprNode as InvocationOperatorNode;
+      return metOp != null ? metOp.PrimaryExpression.LeftmostExpression() : exprNode;
     }
   }
 }

@@ -110,6 +110,16 @@
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\MemberInitializerNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\MemberInitializerNodeCollection.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Initializers\ObjectOrCollectionInitializerNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseAccessNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseElementAccessNode.cs" />
+    <Compile Include="CSharpAst\Expressions\ExpressionNodeCollection.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
+    <Compile Include="CSharpAst\Members\ConstructorInitializerNode.cs" />
+    <Compile Include="CSharpAst\Members\BaseConstructorInitializerNode.cs" />
+    <Compile Include="CSharpAst\Members\ThisConstructorInitializerNode.cs" />
+    <Compile Include="CSharpAst\QualifiedAliasMemberNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\QualifiedAliasMemberAccessNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\PredefinedTypeMemberAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SizedArrayDimensionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithConstructorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\FromClauseNode.cs" />
@@ -203,6 +213,7 @@
     <Compile Include="CSharpAst\Types\TypeParameterListNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeTagNodeCollection.cs" />
+    <Compile Include="CSharpCodeModelBuilder\EntityBuilderSyntaxNodeVisitor.cs" />
     <Compile Include="CSharpCst\CompilationMessageCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
     <Compile Include="CSharpCst\CompilationModel\CompilationEntity.cs" />
@@ -248,7 +259,7 @@
     <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\BinaryOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\BinaryOperators\AssignmentOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\LiteralNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseMemberAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\BooleanLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\CharLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\DecimalLiteralNode.cs" />
@@ -258,13 +269,12 @@
     <Compile Include="CSharpAst\Expressions\Operators\Literals\Int64LiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\IntegerLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\NullLiteralNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\Literals\PrimitiveNamedNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\RealLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\ScopedNameNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SimpleNameNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\SingleNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\StringLiteralNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ThisNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ThisAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\TrueLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\TypeOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\UInt32LiteralNode.cs" />
@@ -273,23 +283,21 @@
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNodeCollection.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ArrayIndexerInvocationOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ElementAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CheckedOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CheckedOperatorNodeBase.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ConditionalOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CTypeMemberAccessOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\PointerMemberAccessOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\DefaultOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\EmbeddedTypeOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberAccessOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\PrimaryMemberAccessOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberAccessOperatorNodeBase.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberDeclaratorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberDeclaratorNodeCollection.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MethodInvocationOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithAnonymousTypeNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithArrayNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ParenthesisExpressionNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ParenthesizedExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SizeofOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\TypeofOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\UncheckedOperatorNode.cs" />
@@ -445,9 +453,9 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ISyntaxNodeVisitor.cs</LastGenOutput>
     </None>
-    <Content Include="CSharpAst\CodeGenHelper\CodeGenHelper.txt">
+    <None Include="CSharpAst\CodeGenHelper\CodeGenHelper.cs">
       <LastGenOutput>CodeGenHelper.cs</LastGenOutput>
-    </Content>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />

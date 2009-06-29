@@ -1,28 +1,30 @@
-// ================================================================================================
-// ArrayIndexerInvocationOperatorNode.cs
-//
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
-// ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an array indexer invocation operator node.
+  /// This class represents a base.member type expression
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayIndexerInvocationOperatorNode : InvocationOperatorNode
+  public class BaseMemberAccessNode : BaseAccessNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayIndexerInvocationOperatorNode"/> class.
+    /// Initializes a new instance of the <see cref="BaseMemberAccessNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayIndexerInvocationOperatorNode(Token start)
+    public BaseMemberAccessNode(Token start)
       : base(start)
     {
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the member name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SimpleNameNode MemberName { get; internal set; }
   }
 }

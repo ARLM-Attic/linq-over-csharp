@@ -360,16 +360,29 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(constructorDeclarationNode.FormalParameters.Items[1].TypeName.TypeTags[0]);
         visitorMock.Visit(constructorDeclarationNode.Body);
 
-        // Constructor declaration with initializer
+        // Constructor declaration with this initializer
         var constructorDeclarationNode2 = (ConstructorDeclarationNode)classDeclarationNode.MemberDeclarations[11];
         visitorMock.Visit(constructorDeclarationNode2);
         visitorMock.Visit(constructorDeclarationNode2.FormalParameters);
-#warning Constructor-initializer visiting is not yet implemented.
-        //visitorMock.Visit(constructorDeclarationNode2.Initializer);
+        visitorMock.Visit((ThisConstructorInitializerNode)constructorDeclarationNode2.Initializer);
+        visitorMock.Visit(constructorDeclarationNode2.Initializer.Arguments[0]);
+        visitorMock.Visit((Int32LiteralNode)constructorDeclarationNode2.Initializer.Arguments[0].Expression);
+        visitorMock.Visit(constructorDeclarationNode2.Initializer.Arguments[1]);
+        visitorMock.Visit((Int32LiteralNode)constructorDeclarationNode2.Initializer.Arguments[1].Expression);
         visitorMock.Visit(constructorDeclarationNode2.Body);
 
+        // Constructor declaration with base initializer
+        var constructorDeclarationNode3 = (ConstructorDeclarationNode)classDeclarationNode.MemberDeclarations[12];
+        visitorMock.Visit(constructorDeclarationNode3);
+        visitorMock.Visit(constructorDeclarationNode3.FormalParameters);
+        visitorMock.Visit(constructorDeclarationNode3.FormalParameters.Items[0]);
+        visitorMock.Visit(constructorDeclarationNode3.FormalParameters.Items[0].TypeName);
+        visitorMock.Visit(constructorDeclarationNode3.FormalParameters.Items[0].TypeName.TypeTags[0]);
+        visitorMock.Visit((BaseConstructorInitializerNode)constructorDeclarationNode3.Initializer);
+        visitorMock.Visit(constructorDeclarationNode3.Body);
+
         // Destructor declaration
-        var destructorDeclarationNode = (FinalizerDeclarationNode)classDeclarationNode.MemberDeclarations[12];
+        var destructorDeclarationNode = (FinalizerDeclarationNode)classDeclarationNode.MemberDeclarations[13];
         visitorMock.Visit(destructorDeclarationNode);
         visitorMock.Visit(destructorDeclarationNode.AttributeDecorations[0]);
         visitorMock.Visit(destructorDeclarationNode.AttributeDecorations[0].Attributes[0]);

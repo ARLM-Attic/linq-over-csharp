@@ -28,17 +28,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the colon token.
+    /// Gets or sets the initializer node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token Colon { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the initializer token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Initializer { get; internal set; }
+    public ConstructorInitializerNode Initializer { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -75,7 +68,10 @@ namespace CSharpTreeBuilder.Ast
         FormalParameters.AcceptVisitor(visitor);
       }
 
-#warning Initializer visiting is missing.
+      if (Initializer!=null)
+      {
+        Initializer.AcceptVisitor(visitor);
+      }
 
       if (Body != null)
       {

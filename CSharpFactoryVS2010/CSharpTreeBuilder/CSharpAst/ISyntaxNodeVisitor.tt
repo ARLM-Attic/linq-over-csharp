@@ -3,7 +3,7 @@
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
-<#@ include file="CodeGenHelper\CodeGenHelper.txt" #>
+<#@ include file="CodeGenHelper\CodeGenHelper.cs" #>
 //
 // WARNING! This file is generated, do not modify it manually!
 //

@@ -351,7 +351,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       else
       {
         opNode.RightOperand = rgNode;
-        rgNode.LeftOperand = unaryNode;
+        rgNode.LeftmostWithMissingLeftOperand.LeftOperand = unaryNode;
       }
       opNode.Terminate(t);
     }

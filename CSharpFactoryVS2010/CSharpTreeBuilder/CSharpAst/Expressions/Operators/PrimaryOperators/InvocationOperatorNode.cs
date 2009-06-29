@@ -4,34 +4,48 @@
 // Created: 2009.04.26, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
+using System;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an abstract invocation operator node.
+  /// This class represents a method invocation operator node.
   /// </summary>
   // ================================================================================================
-  public abstract class InvocationOperatorNode : PrimaryOperatorNode
+  public sealed class InvocationOperatorNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="InvocationOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
+    /// <param name="expressionNode">The primary expression node</param>
     // ----------------------------------------------------------------------------------------------
-    protected InvocationOperatorNode(Token start)
+    public InvocationOperatorNode(Token start, ExpressionNode expressionNode)
       : base(start)
     {
+      if (expressionNode == null)
+      {
+        throw new ArgumentNullException("expressionNode");
+      }
+
+      if (!(expressionNode is PrimaryOperatorNode))
+      {
+        throw new ArgumentException("Primary expression expected");
+      }
+
+      PrimaryExpression = expressionNode as PrimaryOperatorNode;
+
       Arguments = new ArgumentNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the scope operand.
+    /// Gets or sets the primary expression part.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode ScopeOperand { get; internal set; }
+    public PrimaryOperatorNode PrimaryExpression { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

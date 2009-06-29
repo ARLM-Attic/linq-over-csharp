@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents the common root class on named literals.
+  /// This class represents a simple name: identifier [type-arg-list]
   /// </summary>
   // ================================================================================================
   public class SimpleNameNode : PrimaryOperatorNode, IIdentifierSupport, ITypeArguments
@@ -23,6 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public SimpleNameNode(Token start)
       : base(start)
     {
+      IdentifierToken = start;
     }
 
     // ----------------------------------------------------------------------------------------------

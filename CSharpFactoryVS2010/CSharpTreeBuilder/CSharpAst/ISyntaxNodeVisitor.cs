@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009.06.27. 17:35:09
+// Generated on: 2009. 06. 29. 18:07:33
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -23,7 +23,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(AccessorNode node);
     void Visit(AnonymousDelegateNode node);
     void Visit(ArgumentNode node);
-    void Visit(ArrayIndexerInvocationOperatorNode node);
     void Visit(ArrayInitializerNode node);
     void Visit(ArrayItemInitializerNode node);
     void Visit(ArrayModifierNode node);
@@ -32,7 +31,10 @@ namespace CSharpTreeBuilder.Ast
     void Visit(AttributedDeclarationNode node);
     void Visit(AttributeDecorationNode node);
     void Visit(AttributeNode node);
-    void Visit(BaseNode node);
+    void Visit(BaseAccessNode node);
+    void Visit(BaseConstructorInitializerNode node);
+    void Visit(BaseElementAccessNode node);
+    void Visit(BaseMemberAccessNode node);
     void Visit(BinaryOperatorNode node);
     void Visit(BitwiseNotOperatorNode node);
     void Visit(BlockCommentNode node);
@@ -50,16 +52,17 @@ namespace CSharpTreeBuilder.Ast
     void Visit(ConditionalPragmaNode node);
     void Visit(ConstDeclarationNode node);
     void Visit(ConstructorDeclarationNode node);
+    void Visit(ConstructorInitializerNode node);
     void Visit(ConstStatementNode node);
     void Visit(ConstTagNode node);
     void Visit(ContinueStatementNode node);
-    void Visit(CTypeMemberAccessOperatorNode node);
     void Visit(DecimalLiteralNode node);
     void Visit(DefaultOperatorNode node);
     void Visit(DefinePragmaNode node);
     void Visit(DelegateDeclarationNode node);
     void Visit(DoubleLiteralNode node);
     void Visit(DoWhileStatementNode node);
+    void Visit(ElementAccessNode node);
     void Visit(ElementInitializerNode node);
     void Visit(ElseIfPragmaNode node);
     void Visit(ElsePragmaNode node);
@@ -108,13 +111,11 @@ namespace CSharpTreeBuilder.Ast
     void Visit(LocalVariableNode node);
     void Visit(LocalVariableTagNode node);
     void Visit(LockStatementNode node);
-    void Visit(MemberAccessOperatorNode node);
     void Visit(MemberDeclarationNode node);
     void Visit(MemberDeclaratorNode node);
     void Visit(MemberInitializerNode node);
     void Visit(MemberWithBodyDeclarationNode node);
     void Visit(MethodDeclarationNode node);
-    void Visit(MethodInvocationOperatorNode node);
     void Visit(ModifierNode node);
     void Visit(MultiCommentNode node);
     void Visit(NamespaceDeclarationNode node);
@@ -130,7 +131,8 @@ namespace CSharpTreeBuilder.Ast
     void Visit(OperatorNode node);
     void Visit(OrderByClauseNode node);
     void Visit(OrderingClauseNode node);
-    void Visit(ParenthesisExpressionNode node);
+    void Visit(ParenthesizedExpressionNode node);
+    void Visit(PointerMemberAccessOperatorNode node);
     void Visit(PointerModifierNode node);
     void Visit(PointerOperatorNode node);
     void Visit(PostDecrementOperatorNode node);
@@ -138,10 +140,13 @@ namespace CSharpTreeBuilder.Ast
     void Visit(PragmaNode node);
     void Visit(PragmaPragmaNode node);
     void Visit(PreDecrementOperatorNode node);
+    void Visit(PredefinedTypeMemberAccessNode node);
     void Visit(PreIncrementOperatorNode node);
+    void Visit(PrimaryMemberAccessOperatorNode node);
     void Visit(PrimaryOperatorNode node);
-    void Visit(PrimitiveNamedNode node);
     void Visit(PropertyDeclarationNode node);
+    void Visit(QualifiedAliasMemberAccessNode node);
+    void Visit(QualifiedAliasMemberNode node);
     void Visit(QueryBodyClauseNode node);
     void Visit(QueryBodyNode node);
     void Visit(QueryExpressionNode node);
@@ -163,7 +168,8 @@ namespace CSharpTreeBuilder.Ast
     void Visit(SwitchLabelNode node);
     void Visit(SwitchSectionNode node);
     void Visit(SwitchStatementNode node);
-    void Visit(ThisNode node);
+    void Visit(ThisAccessNode node);
+    void Visit(ThisConstructorInitializerNode node);
     void Visit(ThrowStatementNode node);
     void Visit(TrueLiteralNode node);
     void Visit(TryStatementNode node);

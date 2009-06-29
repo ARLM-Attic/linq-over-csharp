@@ -638,5 +638,18 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
              && pt2.val != ","
              && pt2.val != "=";
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token are: ident "::"
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsQualifiedAliasMember()
+    {
+      return la.kind == _ident && Peek(1).kind == _dblcolon;
+    }
   }
 }

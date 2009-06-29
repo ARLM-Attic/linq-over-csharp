@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type is intended to be the base class of all member access operators.
+  /// This type is intended to be the base class of all member access expressions.
   /// </summary>
   // ================================================================================================
   public abstract class MemberAccessOperatorNodeBase : PrimaryOperatorNode
@@ -24,13 +24,6 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the scope operand.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode ScopeOperand { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

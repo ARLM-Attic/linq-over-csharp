@@ -1212,29 +1212,27 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Terminate(cstNode.FormalParameters); 
 		if (la.kind == 86) {
 			Get();
-			cstNode.Colon = t; 
-			ExpressionNode scopeNode = null;
+			Token colonToken = t;
+			ConstructorInitializerNode initializerNode = null;
 			
 			if (la.kind == 8) {
 				Get();
-				scopeNode = new BaseNode(t); 
-				SetCommentOwner(scopeNode);
+				initializerNode = new BaseConstructorInitializerNode(colonToken);
+				initializerNode.BaseOrThisToken = t;
+				SetCommentOwner(initializerNode);
 				
 			} else if (la.kind == 68) {
 				Get();
-				scopeNode = new ThisNode(t); 
-				SetCommentOwner(scopeNode);
+				initializerNode = new ThisConstructorInitializerNode(colonToken); 
+				initializerNode.BaseOrThisToken = t;
+				SetCommentOwner(initializerNode);
 				
 			} else SynErr(153);
 			Expect(98);
-			var invNode = new MethodInvocationOperatorNode(t);
-			SetCommentOwner(invNode);
-			invNode.ScopeOperand = scopeNode;
-			
-			CurrentArgumentList(invNode.Arguments);
+			CurrentArgumentList(initializerNode.Arguments);
 			Expect(113);
-			Terminate(invNode);
-			cstNode.Initializer = invNode;
+			Terminate(initializerNode);
+			cstNode.Initializer = initializerNode;
 			
 		}
 		if (la.kind == 96) {
@@ -3744,6 +3742,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				
 				TypeInRelExpr(out typeNode);
 				typeTestingNode.RightOperand = typeNode;
+				typeTestingNode.LeftOperand = exprNode;
 				SetCommentOwner(typeTestingNode.RightOperand);
 				exprNode = typeTestingNode;
 				
@@ -3840,14 +3839,11 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		ExpressionNode innerNode = null;
 		exprNode = null;
 		
-		switch (la.kind) {
-		case 2: case 3: case 4: case 5: case 29: case 47: case 70: {
+		if (StartOf(30)) {
 			Literal(out innerNode);
-			break;
-		}
-		case 98: {
+		} else if (la.kind == 98) {
 			Get();
-			var pExprNode = new ParenthesisExpressionNode(t); 
+			var pExprNode = new ParenthesizedExpressionNode(t); 
 			SetCommentOwner(pExprNode);
 			
 			Expression(out innerNode);
@@ -3856,62 +3852,47 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			
 			Expect(113);
 			Terminate(pExprNode); 
-			break;
-		}
-		case 9: case 11: case 14: case 19: case 23: case 32: case 39: case 44: case 48: case 59: case 61: case 65: case 73: case 74: case 77: {
-			PrimitiveNamedLiteral(out innerNode);
-			break;
-		}
-		case 1: {
-			NamedLiteral(out innerNode);
-			break;
-		}
-		case 68: {
+		} else if (StartOf(31)) {
+			PredefinedTypeMemberAccess(out innerNode);
+		} else if (IsQualifiedAliasMember()) {
+			QualifiedAliasMemberAccess(out innerNode);
+		} else if (la.kind == 1) {
+			SimpleNameNode sn = null; 
+			SimpleName(out sn);
+			innerNode = sn; 
+		} else if (la.kind == 68) {
 			Get();
-			innerNode = new ThisNode(t); 
+			innerNode = new ThisAccessNode(t); 
 			SetCommentOwner(innerNode);
 			
-			break;
-		}
-		case 8: {
+		} else if (la.kind == 8) {
 			Get();
-			innerNode = new BaseNode(t); 
-			SetCommentOwner(innerNode);
-			
-			break;
-		}
-		case 46: {
+			if (la.kind == 90) {
+				BaseMemberAccessNode baseNode = null; 
+				BaseMemberAccess(out baseNode);
+				innerNode = baseNode; 
+			} else if (la.kind == 97) {
+				BaseElementAccessNode baseNode = null; 
+				BaseElementAccess(out baseNode);
+				innerNode = baseNode; 
+			} else SynErr(199);
+		} else if (la.kind == 46) {
 			NewOperator(out innerNode);
-			break;
-		}
-		case 72: {
+		} else if (la.kind == 72) {
 			TypeOfOperator(out innerNode);
-			break;
-		}
-		case 15: {
+		} else if (la.kind == 15) {
 			CheckedOperator(out innerNode);
-			break;
-		}
-		case 75: {
+		} else if (la.kind == 75) {
 			UncheckedOperator(out innerNode);
-			break;
-		}
-		case 20: {
+		} else if (la.kind == 20) {
 			DefaultOperator(out innerNode);
-			break;
-		}
-		case 21: {
+		} else if (la.kind == 21) {
 			AnonymousDelegate(out innerNode);
-			break;
-		}
-		case 62: {
+		} else if (la.kind == 62) {
 			SizeOfOperator(out innerNode);
-			break;
-		}
-		default: SynErr(199); break;
-		}
+		} else SynErr(200);
 		var curExprNode = innerNode; 
-		while (StartOf(30)) {
+		while (StartOf(32)) {
 			switch (la.kind) {
 			case 95: {
 				Get();
@@ -3933,35 +3914,32 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			case 134: {
 				Get();
-				SimpleNameNode snlNode;
-				var ctypeNode = new CTypeMemberAccessOperatorNode(t);
-				SetCommentOwner(ctypeNode);
+				SimpleNameNode snNode;
+				var pointerNode = new PointerMemberAccessOperatorNode(t, innerNode);
+				SetCommentOwner(pointerNode);
 				
-				SimpleNamedLiteral(out snlNode);
-				ctypeNode.ScopeOperand = curExprNode;
-				ctypeNode.MemberName = snlNode;
-				curExprNode = ctypeNode;
+				SimpleName(out snNode);
+				pointerNode.MemberName = snNode;
+				curExprNode = pointerNode;
 				
 				break;
 			}
 			case 90: {
 				Get();
-				SimpleNameNode snlNode;
-				var maNode = new MemberAccessOperatorNode(t);
+				SimpleNameNode snNode;
+				var maNode = new PrimaryMemberAccessOperatorNode(t, innerNode);
 				SetCommentOwner(maNode);
 				
-				SimpleNamedLiteral(out snlNode);
-				maNode.ScopeOperand = curExprNode;
-				maNode.MemberName = snlNode;
+				SimpleName(out snNode);
+				maNode.MemberName = snNode;
 				curExprNode = maNode;
 				
 				break;
 			}
 			case 98: {
 				Get();
-				var invNode = new MethodInvocationOperatorNode(t);
+				var invNode = new InvocationOperatorNode(t, innerNode);
 				SetCommentOwner(invNode);
-				invNode.ScopeOperand = curExprNode;
 				
 				CurrentArgumentList(invNode.Arguments);
 				Expect(113);
@@ -3972,13 +3950,14 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			case 97: {
 				Get();
-				var indNode = new ArrayIndexerInvocationOperatorNode(t);
-				SetCommentOwner(indNode);
-				indNode.ScopeOperand = curExprNode;
+				var elementAccess = new ElementAccessNode(t, innerNode);
+				SetCommentOwner(elementAccess);
 				
-				ArrayIndexer(indNode.Arguments);
+				ArrayIndexer(elementAccess.Expressions);
 				Expect(112);
-				Terminate(indNode); 
+				Terminate(elementAccess); 
+				curExprNode = elementAccess;
+				
 				break;
 			}
 			}
@@ -4024,12 +4003,12 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			valNode = new NullLiteralNode(t); 
 			break;
 		}
-		default: SynErr(200); break;
+		default: SynErr(201); break;
 		}
 		SetCommentOwner(valNode); 
 	}
 
-	void PrimitiveNamedLiteral(out ExpressionNode exprNode) {
+	void PredefinedTypeMemberAccess(out ExpressionNode exprNode) {
 		exprNode = null; 
 		switch (la.kind) {
 		case 9: {
@@ -4092,41 +4071,105 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Get();
 			break;
 		}
-		default: SynErr(201); break;
+		default: SynErr(202); break;
 		}
-		var pnNode = new PrimitiveNamedNode(t);
-		SetCommentOwner(pnNode);
-		exprNode = pnNode;
+		var typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+		var predefMemAccessNode = new PredefinedTypeMemberAccessNode(t, typeNode);
+		SetCommentOwner(predefMemAccessNode);
 		
 		Expect(90);
-		pnNode.SeparatorToken = t; 
+		SimpleNameNode nameNode = new SimpleNameNode(t);
+		predefMemAccessNode.MemberName = nameNode;
+		nameNode.SeparatorToken = t; 
+		
 		Expect(1);
-		pnNode.IdentifierToken = t;
-		Terminate(pnNode);
+		nameNode.IdentifierToken = t;
+		TypeOrNamespaceNodeCollection argList;
+		
+		if (IsGeneric()) {
+			TypeArgumentList(out argList);
+			nameNode.Arguments = argList; 
+		}
+		exprNode = predefMemAccessNode;
+		Terminate(exprNode);
 		
 	}
 
-	void NamedLiteral(out ExpressionNode exprNode) {
+	void QualifiedAliasMemberAccess(out ExpressionNode exprNode) {
 		exprNode = null; 
 		Expect(1);
-		var nlNode = new ScopedNameNode(t);
-		SetCommentOwner(nlNode);
-		exprNode = nlNode;
+		var qam = new QualifiedAliasMemberNode(t);
 		
-		if (la.kind == 91) {
-			Get();
-			nlNode.QualifierSeparatorToken = t;
-			nlNode.QualifierToken = nlNode.IdentifierToken;
+		Expect(91);
+		qam.QualifierSeparatorToken = t;
+		
+		Expect(1);
+		qam.IdentifierToken = t; 
+		Terminate(qam);
+		
+		if (la.kind == 100) {
+			TypeOrNamespaceNodeCollection argList; 
 			
-			Expect(1);
-			nlNode.IdentifierToken = t; 
+			TypeArgumentList(out argList);
+			qam.Arguments = argList; 
+			Terminate(qam);
+			
 		}
+		Expect(90);
+		Token separatorToken = t;
+		
+		Expect(1);
+		SimpleNameNode simpleNameNode = new SimpleNameNode(t);
+		simpleNameNode.SeparatorToken = separatorToken;
+		Terminate(simpleNameNode);
+		
+		    exprNode = new QualifiedAliasMemberAccessNode(t, qam, simpleNameNode); 
+		    SetCommentOwner(exprNode);
+		
+		    Terminate(exprNode); 
+		  
+	}
+
+	void SimpleName(out SimpleNameNode sn) {
+		sn = null; 
+		Expect(1);
+		sn = new SimpleNameNode(t); 
+		SetCommentOwner(sn);
 		TypeOrNamespaceNodeCollection argList; 
+		
 		if (IsGeneric()) {
 			TypeArgumentList(out argList);
-			nlNode.Arguments = argList; 
+			sn.Arguments = argList; 
 		}
-		Terminate(nlNode); 
+		Terminate(sn); 
+	}
+
+	void BaseMemberAccess(out BaseMemberAccessNode exprNode) {
+		Expect(90);
+		Token separatorToken = t;
+		exprNode = new BaseMemberAccessNode(t); 
+		SetCommentOwner(exprNode);
+		
+		Expect(1);
+		var simpleNameNode = new SimpleNameNode(t);
+		SetCommentOwner(simpleNameNode);
+		simpleNameNode.SeparatorToken = separatorToken;
+		Terminate(simpleNameNode);
+		
+		    exprNode.MemberName = simpleNameNode; 
+		    exprNode.Terminate(t); 
+		  
+	}
+
+	void BaseElementAccess(out BaseElementAccessNode exprNode) {
+		Expect(97);
+		Token separatorToken = t;
+		exprNode = new BaseElementAccessNode(t);
+		SetCommentOwner(exprNode);
+		
+		ArrayIndexer(exprNode.Expressions);
+		Expect(112);
+		exprNode.Terminate(t); 
 	}
 
 	void NewOperator(out ExpressionNode exprNode) {
@@ -4139,7 +4182,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			
 			AnonymousObjectInitializer(anonNode);
 			exprNode = anonNode; 
-		} else if (StartOf(31)) {
+		} else if (StartOf(33)) {
 			TypeOrNamespaceNode typeNode; 
 			NonArrayType(out typeNode);
 			NewOperatorWithType(newToken, typeNode, out exprNode);
@@ -4149,7 +4192,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			
 			ImplicitArrayCreation(impArrNode);
 			exprNode = impArrNode; 
-		} else SynErr(202);
+		} else SynErr(203);
 		Terminate(exprNode); 
 	}
 
@@ -4237,7 +4280,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			SetCommentOwner(parsNode);
 			adNode.ParameterList = parsNode;
 			
-			if (StartOf(32)) {
+			if (StartOf(34)) {
 				FormalParameterNode parNode; 
 				AnonymousMethodParameter(out parNode);
 				parsNode.Items.Add(parNode); 
@@ -4274,44 +4317,23 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		
 	}
 
-	void SimpleNamedLiteral(out SimpleNameNode snlNode) {
-		Expect(1);
-		snlNode = new SimpleNameNode(t); 
-		SetCommentOwner(snlNode);
-		
-		TypeOrNamespaceNodeCollection argList; 
-		if (IsGeneric()) {
-			TypeArgumentList(out argList);
-			snlNode.Arguments = argList; 
-		}
-		Terminate(snlNode); 
-	}
-
-	void ArrayIndexer(ArgumentNodeCollection argNodes) {
+	void ArrayIndexer(ExpressionNodeCollection exprList) {
 		ExpressionNode exprNode; 
 		Token separator = null;
 		
 		Expression(out exprNode);
-		if (argNodes != null)
+		if (exprList != null)
 		{
-		  var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
-		  SetCommentOwner(argNode);
-		  argNode.Expression = exprNode;
-		  Terminate(argNode);
-		  argNodes.Add(argNode);
+		  exprList.Add(exprNode);
 		}
 		
 		while (la.kind == 87) {
 			Get();
 			separator = t; 
 			Expression(out exprNode);
-			if (argNodes != null)
+			if (exprList != null)
 			{
-			  var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
-			  SetCommentOwner(argNode);
-			  argNode.Expression = exprNode;
-			  Terminate(argNode);
-			  argNodes.Add(separator, argNode);
+			  exprList.Add(separator, exprNode);
 			}
 			
 		}
@@ -4341,9 +4363,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			exprNode = scNode;
 			
 			Get();
-			var invNode = new MethodInvocationOperatorNode(t);
+			var invNode = new InvocationOperatorNode(t, scNode);
 			SetCommentOwner(invNode);
-			invNode.ScopeOperand = scNode;
 			
 			CurrentArgumentList(invNode.Arguments);
 			Expect(113);
@@ -4410,7 +4431,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Terminate(newOpNode);
 			exprNode = newOpNode;
 			
-		} else SynErr(203);
+		} else SynErr(204);
 	}
 
 	void ImplicitArrayCreation(NewOperatorWithArrayNode impArrNode) {
@@ -4467,7 +4488,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.SimpleName;
 			mdNode.Expression = primNode;
 			
-		} else if (StartOf(33)) {
+		} else if (StartOf(31)) {
 			TypeOrNamespaceNode typeNode; 
 			PredefinedType(out typeNode);
 			mdNode = new MemberDeclaratorNode(typeNode.StartToken);
@@ -4479,7 +4500,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			mdNode.DotSeparator = t; 
 			Expect(1);
 			mdNode.IdentifierToken = t; 
-		} else SynErr(204);
+		} else SynErr(205);
 		Terminate(mdNode); 
 	}
 
@@ -4507,7 +4528,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			Expect(111);
 			Terminate(oiNode); 
-		} else SynErr(205);
+		} else SynErr(206);
 	}
 
 	void MemberInitializerList(ObjectOrCollectionInitializerNode ocNode) {
@@ -4555,7 +4576,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			Expect(111);
 			Terminate(eiNode.ExpressionList); 
-		} else SynErr(206);
+		} else SynErr(207);
 		Terminate(eiNode);
 	}
 
@@ -4574,7 +4595,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			ObjectOrCollectionInitializerNode initNode; 
 			ObjectOrCollectionInitializer(out initNode);
 			miNode.Initializer = initNode; 
-		} else SynErr(207);
+		} else SynErr(208);
 		Terminate(miNode); 
 	}
 
@@ -4648,7 +4669,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			TypeOrNamespaceNode typeNode; 
 			ClassType(out typeNode);
 			tag = new TypeParameterConstraintTagNode(typeNode); 
-		} else SynErr(208);
+		} else SynErr(209);
 		SetCommentOwner(tag); 
 	}
 
@@ -4719,10 +4740,11 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x},
+		{x,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,x,T,x, x,x,x,T, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x},
 		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
-		{x,x,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,x,x, x,x,x,x, x,x,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
+		{x,T,x,x, x,x,x,x, x,T,x,T, x,x,T,x, x,x,x,T, x,x,x,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,x,x, T,x,T,x, x,x,x,x, x,T,x,T, x,T,x,x, x,T,x,x, x,x,x,x, x,T,T,x, x,T,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x}
 
 	  };
 
@@ -4937,15 +4959,16 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			case 197: s = "invalid RelExpr"; break;
 			case 198: s = "invalid ShiftExpr"; break;
 			case 199: s = "invalid Primary"; break;
-			case 200: s = "invalid Literal"; break;
-			case 201: s = "invalid PrimitiveNamedLiteral"; break;
-			case 202: s = "invalid NewOperator"; break;
-			case 203: s = "invalid NewOperatorWithType"; break;
-			case 204: s = "invalid MemberDeclarator"; break;
-			case 205: s = "invalid ObjectOrCollectionInitializer"; break;
-			case 206: s = "invalid ElementInitializer"; break;
-			case 207: s = "invalid MemberInitializer"; break;
-			case 208: s = "invalid TypeParameterConstraintTag"; break;
+			case 200: s = "invalid Primary"; break;
+			case 201: s = "invalid Literal"; break;
+			case 202: s = "invalid PredefinedTypeMemberAccess"; break;
+			case 203: s = "invalid NewOperator"; break;
+			case 204: s = "invalid NewOperatorWithType"; break;
+			case 205: s = "invalid MemberDeclarator"; break;
+			case 206: s = "invalid ObjectOrCollectionInitializer"; break;
+			case 207: s = "invalid ElementInitializer"; break;
+			case 208: s = "invalid MemberInitializer"; break;
+			case 209: s = "invalid TypeParameterConstraintTag"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

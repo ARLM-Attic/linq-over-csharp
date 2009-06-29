@@ -24,5 +24,12 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the value of the literal.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Value { get { return true; } }
   }
 }

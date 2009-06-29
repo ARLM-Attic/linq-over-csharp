@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009.06.27. 17:35:08
+// Generated on: 2009. 06. 29. 18:07:30
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -23,7 +23,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(AccessorNode node) { }
     public virtual void Visit(AnonymousDelegateNode node) { }
     public virtual void Visit(ArgumentNode node) { }
-    public virtual void Visit(ArrayIndexerInvocationOperatorNode node) { }
     public virtual void Visit(ArrayInitializerNode node) { }
     public virtual void Visit(ArrayItemInitializerNode node) { }
     public virtual void Visit(ArrayModifierNode node) { }
@@ -32,7 +31,10 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(AttributedDeclarationNode node) { }
     public virtual void Visit(AttributeDecorationNode node) { }
     public virtual void Visit(AttributeNode node) { }
-    public virtual void Visit(BaseNode node) { }
+    public virtual void Visit(BaseAccessNode node) { }
+    public virtual void Visit(BaseConstructorInitializerNode node) { }
+    public virtual void Visit(BaseElementAccessNode node) { }
+    public virtual void Visit(BaseMemberAccessNode node) { }
     public virtual void Visit(BinaryOperatorNode node) { }
     public virtual void Visit(BitwiseNotOperatorNode node) { }
     public virtual void Visit(BlockCommentNode node) { }
@@ -50,16 +52,17 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(ConditionalPragmaNode node) { }
     public virtual void Visit(ConstDeclarationNode node) { }
     public virtual void Visit(ConstructorDeclarationNode node) { }
+    public virtual void Visit(ConstructorInitializerNode node) { }
     public virtual void Visit(ConstStatementNode node) { }
     public virtual void Visit(ConstTagNode node) { }
     public virtual void Visit(ContinueStatementNode node) { }
-    public virtual void Visit(CTypeMemberAccessOperatorNode node) { }
     public virtual void Visit(DecimalLiteralNode node) { }
     public virtual void Visit(DefaultOperatorNode node) { }
     public virtual void Visit(DefinePragmaNode node) { }
     public virtual void Visit(DelegateDeclarationNode node) { }
     public virtual void Visit(DoubleLiteralNode node) { }
     public virtual void Visit(DoWhileStatementNode node) { }
+    public virtual void Visit(ElementAccessNode node) { }
     public virtual void Visit(ElementInitializerNode node) { }
     public virtual void Visit(ElseIfPragmaNode node) { }
     public virtual void Visit(ElsePragmaNode node) { }
@@ -108,13 +111,11 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(LocalVariableNode node) { }
     public virtual void Visit(LocalVariableTagNode node) { }
     public virtual void Visit(LockStatementNode node) { }
-    public virtual void Visit(MemberAccessOperatorNode node) { }
     public virtual void Visit(MemberDeclarationNode node) { }
     public virtual void Visit(MemberDeclaratorNode node) { }
     public virtual void Visit(MemberInitializerNode node) { }
     public virtual void Visit(MemberWithBodyDeclarationNode node) { }
     public virtual void Visit(MethodDeclarationNode node) { }
-    public virtual void Visit(MethodInvocationOperatorNode node) { }
     public virtual void Visit(ModifierNode node) { }
     public virtual void Visit(MultiCommentNode node) { }
     public virtual void Visit(NamespaceDeclarationNode node) { }
@@ -130,7 +131,8 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(OperatorNode node) { }
     public virtual void Visit(OrderByClauseNode node) { }
     public virtual void Visit(OrderingClauseNode node) { }
-    public virtual void Visit(ParenthesisExpressionNode node) { }
+    public virtual void Visit(ParenthesizedExpressionNode node) { }
+    public virtual void Visit(PointerMemberAccessOperatorNode node) { }
     public virtual void Visit(PointerModifierNode node) { }
     public virtual void Visit(PointerOperatorNode node) { }
     public virtual void Visit(PostDecrementOperatorNode node) { }
@@ -138,10 +140,13 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(PragmaNode node) { }
     public virtual void Visit(PragmaPragmaNode node) { }
     public virtual void Visit(PreDecrementOperatorNode node) { }
+    public virtual void Visit(PredefinedTypeMemberAccessNode node) { }
     public virtual void Visit(PreIncrementOperatorNode node) { }
+    public virtual void Visit(PrimaryMemberAccessOperatorNode node) { }
     public virtual void Visit(PrimaryOperatorNode node) { }
-    public virtual void Visit(PrimitiveNamedNode node) { }
     public virtual void Visit(PropertyDeclarationNode node) { }
+    public virtual void Visit(QualifiedAliasMemberAccessNode node) { }
+    public virtual void Visit(QualifiedAliasMemberNode node) { }
     public virtual void Visit(QueryBodyClauseNode node) { }
     public virtual void Visit(QueryBodyNode node) { }
     public virtual void Visit(QueryExpressionNode node) { }
@@ -163,7 +168,8 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(SwitchLabelNode node) { }
     public virtual void Visit(SwitchSectionNode node) { }
     public virtual void Visit(SwitchStatementNode node) { }
-    public virtual void Visit(ThisNode node) { }
+    public virtual void Visit(ThisAccessNode node) { }
+    public virtual void Visit(ThisConstructorInitializerNode node) { }
     public virtual void Visit(ThrowStatementNode node) { }
     public virtual void Visit(TrueLiteralNode node) { }
     public virtual void Visit(TryStatementNode node) { }

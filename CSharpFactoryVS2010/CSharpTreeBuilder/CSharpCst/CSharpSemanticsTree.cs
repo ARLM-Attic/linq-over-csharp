@@ -10,8 +10,7 @@ namespace CSharpTreeBuilder.Cst
   /// This class represents the semantics tree of a compilation unit.
   /// </summary>
   // ================================================================================================
-  public class CSharpSemanticsTree : 
-    ICSharpSemanticsTree
+  public class CSharpSemanticsTree : ICSharpSemanticsTree
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -21,5 +20,18 @@ namespace CSharpTreeBuilder.Cst
     public void Reset()
     {
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds entity to the graph. 
+    /// If it already exists then tries to merge the new object into the existing one.
+    /// </summary>
+    /// <param name="entity">An entity</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddEntity(CompilationEntity entity)
+    {
+      throw new System.NotImplementedException();
+    }
+
   }
 }

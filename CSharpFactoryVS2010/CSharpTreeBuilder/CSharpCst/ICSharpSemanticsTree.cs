@@ -18,5 +18,14 @@ namespace CSharpTreeBuilder.Cst
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     void Reset();
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds entity to the graph. 
+    /// If it already exists then tries to merge the new object into the existing one.
+    /// </summary>
+    /// <param name="entity">An entity</param>
+    // ----------------------------------------------------------------------------------------------
+    void AddEntity(CompilationEntity entity);
   }
 }

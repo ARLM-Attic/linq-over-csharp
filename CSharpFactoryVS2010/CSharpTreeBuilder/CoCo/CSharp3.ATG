@@ -960,31 +960,28 @@ ConstructorDeclaration<out MemberDeclarationNode memNode>
   [                                        
     ":" 
     (. 
-       cstNode.Colon = t; 
-       ExpressionNode scopeNode = null;
+       Token colonToken = t;
+       ConstructorInitializerNode initializerNode = null;
     .)
     ( "base"          
       (. 
-         scopeNode = new BaseNode(t); 
-         SetCommentOwner(scopeNode);
+         initializerNode = new BaseConstructorInitializerNode(colonToken);
+         initializerNode.BaseOrThisToken = t;
+         SetCommentOwner(initializerNode);
       .)
     | "this"              
       (. 
-         scopeNode = new ThisNode(t); 
-         SetCommentOwner(scopeNode);
+         initializerNode = new ThisConstructorInitializerNode(colonToken); 
+         initializerNode.BaseOrThisToken = t;
+         SetCommentOwner(initializerNode);
       .)
     ) 
     "("
-    (.
-       var invNode = new MethodInvocationOperatorNode(t);
-       SetCommentOwner(invNode);
-       invNode.ScopeOperand = scopeNode;
-    .)
-    CurrentArgumentList<invNode.Arguments>
+    CurrentArgumentList<initializerNode.Arguments>
     ")"
     (.
-       Terminate(invNode);
-       cstNode.Initializer = invNode;
+       Terminate(initializerNode);
+       cstNode.Initializer = initializerNode;
     .)
   ] 
   ( 
@@ -3642,6 +3639,7 @@ RelExpr<out BinaryOperatorNodeBase exprNode>
       TypeInRelExpr<out typeNode>
       (. 
          typeTestingNode.RightOperand = typeNode;
+         typeTestingNode.LeftOperand = exprNode;
          SetCommentOwner(typeTestingNode.RightOperand);
          exprNode = typeTestingNode;
       .)
@@ -3820,7 +3818,7 @@ Primary<out ExpressionNode exprNode>
   | 
     "("
     (. 
-       var pExprNode = new ParenthesisExpressionNode(t); 
+       var pExprNode = new ParenthesizedExpressionNode(t); 
        SetCommentOwner(pExprNode);
     .) 
     Expression<out innerNode>
@@ -3830,18 +3828,31 @@ Primary<out ExpressionNode exprNode>
     .)
     ")"  
     (. Terminate(pExprNode); .)
-  | PrimitiveNamedLiteral<out innerNode>
-  | NamedLiteral<out innerNode>
-  | "this" 
+  | 
+    PredefinedTypeMemberAccess<out innerNode>
+  | 
+    IF (IsQualifiedAliasMember()) QualifiedAliasMemberAccess<out innerNode>
+  | 
+    (. SimpleNameNode sn = null; .)
+    SimpleName<out sn>
+    (. innerNode = sn; .)
+  | 
+    "this" 
     (. 
-       innerNode = new ThisNode(t); 
+       innerNode = new ThisAccessNode(t); 
        SetCommentOwner(innerNode);
     .)
-  | "base" 
-    (. 
-       innerNode = new BaseNode(t); 
-       SetCommentOwner(innerNode);
-    .)
+  | 
+    "base" 
+    ( 
+      (. BaseMemberAccessNode baseNode = null; .)
+      BaseMemberAccess<out baseNode> 
+      (. innerNode = baseNode; .)
+    | 
+      (. BaseElementAccessNode baseNode = null; .)
+      BaseElementAccess<out baseNode> 
+      (. innerNode = baseNode; .)
+    )  
   | NewOperator<out innerNode>
   | TypeOfOperator<out innerNode>
   | CheckedOperator<out innerNode>
@@ -3869,33 +3880,30 @@ Primary<out ExpressionNode exprNode>
       .) 
     | "->"  
       (. 
-         SimpleNameNode snlNode;
-         var ctypeNode = new CTypeMemberAccessOperatorNode(t);
-         SetCommentOwner(ctypeNode);
+         SimpleNameNode snNode;
+         var pointerNode = new PointerMemberAccessOperatorNode(t, innerNode);
+         SetCommentOwner(pointerNode);
       .)
-      SimpleNamedLiteral<out snlNode>
+      SimpleName<out snNode>
       (. 
-         ctypeNode.ScopeOperand = curExprNode;
-         ctypeNode.MemberName = snlNode;
-         curExprNode = ctypeNode;
+         pointerNode.MemberName = snNode;
+         curExprNode = pointerNode;
       .)
     | "."   
       (. 
-         SimpleNameNode snlNode;
-         var maNode = new MemberAccessOperatorNode(t);
+         SimpleNameNode snNode;
+         var maNode = new PrimaryMemberAccessOperatorNode(t, innerNode);
          SetCommentOwner(maNode);
       .)
-      SimpleNamedLiteral<out snlNode>
+      SimpleName<out snNode>
       (. 
-         maNode.ScopeOperand = curExprNode;
-         maNode.MemberName = snlNode;
+         maNode.MemberName = snNode;
          curExprNode = maNode;
       .)
     | "("   
       (. 
-         var invNode = new MethodInvocationOperatorNode(t);
+         var invNode = new InvocationOperatorNode(t, innerNode);
          SetCommentOwner(invNode);
-         invNode.ScopeOperand = curExprNode;
       .)
       CurrentArgumentList<invNode.Arguments>
       ")"   
@@ -3906,13 +3914,15 @@ Primary<out ExpressionNode exprNode>
     |       
       "["
       (. 
-         var indNode = new ArrayIndexerInvocationOperatorNode(t);
-         SetCommentOwner(indNode);
-         indNode.ScopeOperand = curExprNode;
+         var elementAccess = new ElementAccessNode(t, innerNode);
+         SetCommentOwner(elementAccess);
       .)
-      ArrayIndexer<indNode.Arguments> 
+      ArrayIndexer<elementAccess.Expressions> 
       "]"
-      (. Terminate(indNode); .)
+      (. 
+        Terminate(elementAccess); 
+        curExprNode = elementAccess;
+      .)
   )         
   }
   (. exprNode = curExprNode; .)
@@ -3944,9 +3954,9 @@ Literal<out ExpressionNode valNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of a primitive named literal expression.
+// A predefined type member access expression.
 // ------------------------------------------------------------------------------------------------
-PrimitiveNamedLiteral<out ExpressionNode exprNode>  
+PredefinedTypeMemberAccess<out ExpressionNode exprNode>  
 =            
   (. exprNode = null; .)
   (   "bool"
@@ -3966,64 +3976,133 @@ PrimitiveNamedLiteral<out ExpressionNode exprNode>
     | "ushort"
   )               
   (. 
-     var pnNode = new PrimitiveNamedNode(t);
-     SetCommentOwner(pnNode);
-     exprNode = pnNode;
+     var typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
+     var predefMemAccessNode = new PredefinedTypeMemberAccessNode(t, typeNode);
+     SetCommentOwner(predefMemAccessNode);
   .)
   "." 
-  (. pnNode.SeparatorToken = t; .)
+  (. 
+     SimpleNameNode nameNode = new SimpleNameNode(t);
+     predefMemAccessNode.MemberName = nameNode;
+     nameNode.SeparatorToken = t; 
+  .)
   ident           
   (. 
-     pnNode.IdentifierToken = t;
-     Terminate(pnNode);
+     nameNode.IdentifierToken = t;
+     TypeOrNamespaceNodeCollection argList;
+  .)
+  [
+    IF (IsGeneric()) TypeArgumentList<out argList>
+    (. nameNode.Arguments = argList; .)
+  ]
+  (.
+     exprNode = predefMemAccessNode;
+     Terminate(exprNode);
   .)
 .
 
-// ------------------------------------------------------------------------------------------------
-// Declaration of a named literal expression.
-// ------------------------------------------------------------------------------------------------
-NamedLiteral<out ExpressionNode exprNode>  
-=              
+// ------------------------------------------------------------------------------------
+// A qualified alias member access expression.
+// ------------------------------------------------------------------------------------
+QualifiedAliasMemberAccess<out ExpressionNode exprNode>  
+= 
   (. exprNode = null; .)
   ident        
   (. 
-     var nlNode = new ScopedNameNode(t);
-     SetCommentOwner(nlNode);
-     exprNode = nlNode;
+     var qam = new QualifiedAliasMemberNode(t);
   .)
-  [ 
-    "::"       
-    (. 
-       nlNode.QualifierSeparatorToken = t;
-       nlNode.QualifierToken = nlNode.IdentifierToken;
-    .)
-    ident      
-    (. nlNode.IdentifierToken = t; .)
-  ] 
-  (. TypeOrNamespaceNodeCollection argList; .)
-  [ 
-    IF (IsGeneric()) TypeArgumentList<out argList>
-    (. nlNode.Arguments = argList; .)
-  ]
-  (. Terminate(nlNode); .)
-.
-
-// ------------------------------------------------------------------------------------------------
-// Declaration of a simple named literal expression.
-// ------------------------------------------------------------------------------------------------
-SimpleNamedLiteral<out SimpleNameNode snlNode> 
-=
+  "::"
+  (.       
+    qam.QualifierSeparatorToken = t;
+  .)
   ident        
   (. 
-     snlNode = new SimpleNameNode(t); 
-     SetCommentOwner(snlNode);
+    qam.IdentifierToken = t; 
+    Terminate(qam);
   .)
-  (. TypeOrNamespaceNodeCollection argList; .)
+  [ 
+    (. 
+      TypeOrNamespaceNodeCollection argList; 
+    .)
+    TypeArgumentList<out argList>
+    (. 
+      qam.Arguments = argList; 
+      Terminate(qam);
+    .)
+  ]
+  "."          
+  (. 
+    Token separatorToken = t;
+  .)
+  ident        
+  (. 
+    SimpleNameNode simpleNameNode = new SimpleNameNode(t);
+    simpleNameNode.SeparatorToken = separatorToken;
+    Terminate(simpleNameNode);
+
+    exprNode = new QualifiedAliasMemberAccessNode(t, qam, simpleNameNode); 
+    SetCommentOwner(exprNode);
+
+    Terminate(exprNode); 
+  .)
+.
+
+// ------------------------------------------------------------------------------------
+// A simple name expression.
+// ------------------------------------------------------------------------------------
+SimpleName<out SimpleNameNode sn>  
+= 
+  (. sn = null; .)
+  ident        
+  (. 
+    sn = new SimpleNameNode(t); 
+    SetCommentOwner(sn);
+    TypeOrNamespaceNodeCollection argList; 
+  .)
   [ 
     IF (IsGeneric()) TypeArgumentList<out argList>
-    (. snlNode.Arguments = argList; .)
+    (. sn.Arguments = argList; .)
   ]
-  (. Terminate(snlNode); .)
+  (. Terminate(sn); .)
+.
+
+// ------------------------------------------------------------------------------------
+// A base.member expression
+// ------------------------------------------------------------------------------------
+BaseMemberAccess<out BaseMemberAccessNode exprNode>  
+= 
+  "."       
+  (. 
+    Token separatorToken = t;
+    exprNode = new BaseMemberAccessNode(t); 
+    SetCommentOwner(exprNode);
+  .)
+  ident    
+  (.
+    var simpleNameNode = new SimpleNameNode(t);
+    SetCommentOwner(simpleNameNode);
+    simpleNameNode.SeparatorToken = separatorToken;
+    Terminate(simpleNameNode);
+
+    exprNode.MemberName = simpleNameNode; 
+    exprNode.Terminate(t); 
+  .)
+.
+
+// ------------------------------------------------------------------------------------
+// A base[i] expression.
+// ------------------------------------------------------------------------------------
+BaseElementAccess<out BaseElementAccessNode exprNode>
+=
+  "["                             
+  (. 
+    Token separatorToken = t;
+    exprNode = new BaseElementAccessNode(t);
+    SetCommentOwner(exprNode);
+  .)
+  ArrayIndexer<exprNode.Expressions> 
+  "]"                             
+  (. exprNode.Terminate(t); .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -4288,9 +4367,8 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     .)
     "("
     (.
-       var invNode = new MethodInvocationOperatorNode(t);
+       var invNode = new InvocationOperatorNode(t, scNode);
        SetCommentOwner(invNode);
-       invNode.ScopeOperand = scNode;
     .)
     CurrentArgumentList<invNode.Arguments>
     ")"
@@ -4587,9 +4665,9 @@ AnonymousMethodParameter<out FormalParameterNode parNode>
 .
 
 // ------------------------------------------------------------------------------------------------
-// Declaration of an array indexer operator.
+// A list of expressions.
 // ------------------------------------------------------------------------------------------------
-ArrayIndexer<ArgumentNodeCollection argNodes> 
+ArrayIndexer<ExpressionNodeCollection exprList> 
 = 
   (. 
      ExpressionNode exprNode; 
@@ -4597,13 +4675,9 @@ ArrayIndexer<ArgumentNodeCollection argNodes>
   .) 
   Expression<out exprNode>
   (. 
-     if (argNodes != null)
+     if (exprList != null)
      {
-       var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
-       SetCommentOwner(argNode);
-       argNode.Expression = exprNode;
-       Terminate(argNode);
-       argNodes.Add(argNode);
+       exprList.Add(exprNode);
      }
   .)
   { 
@@ -4611,13 +4685,9 @@ ArrayIndexer<ArgumentNodeCollection argNodes>
     (. separator = t; .)
     Expression<out exprNode>
     (. 
-       if (argNodes != null)
+       if (exprList != null)
        {
-         var argNode = new ArgumentNode(exprNode == null ? t : exprNode.StartToken);
-         SetCommentOwner(argNode);
-         argNode.Expression = exprNode;
-         Terminate(argNode);
-         argNodes.Add(separator, argNode);
+         exprList.Add(separator, exprNode);
        }
     .)
   } 

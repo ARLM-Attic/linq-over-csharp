@@ -1,7 +1,7 @@
 // ================================================================================================
-// CTypeMemberAccessOperatorNode.cs
+// ThisNode.cs
 //
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,18 +9,18 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type represents a C-type member access operator ("->").
+  /// This class defines a "this" access expression.
   /// </summary>
   // ================================================================================================
-  public class CTypeMemberAccessOperatorNode : MemberAccessOperatorNodeBase
+  public sealed class ThisAccessNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="CTypeMemberAccessOperatorNode"/> class.
+    /// Initializes a new instance of the <see cref="ThisAccessNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public CTypeMemberAccessOperatorNode(Token start)
+    public ThisAccessNode(Token start)
       : base(start)
     {
     }

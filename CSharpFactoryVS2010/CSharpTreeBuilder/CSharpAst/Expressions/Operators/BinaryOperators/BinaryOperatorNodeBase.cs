@@ -41,12 +41,13 @@ namespace CSharpTreeBuilder.Ast
       get
       {
         if (LeftOperand == null) return this;
-        var binOp = LeftOperand as BinaryOperatorNodeBase;
-        if (binOp == null)
+        
+        var childLeftOperand = LeftOperand as BinaryOperatorNodeBase;
+        if (childLeftOperand == null)
         {
           throw new InvalidOperationException("Binary operator expected.");
         }
-        return binOp.LeftmostWithMissingLeftOperand;
+        return childLeftOperand.LeftmostWithMissingLeftOperand;
       }
     }
   }

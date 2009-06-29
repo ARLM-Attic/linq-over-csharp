@@ -19,6 +19,7 @@ namespace CSharpTreeBuilder.Ast
     /// Initializes a new instance of the <see cref="BinaryOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
+    /// <param name="opType">The operator type.</param>
     // ----------------------------------------------------------------------------------------------
     public BinaryOperatorNode(Token start, BinaryOperatorType opType)
       : this(start, null, opType)

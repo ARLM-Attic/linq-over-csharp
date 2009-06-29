@@ -79,9 +79,15 @@ public class MyClass<T1, T2> : Exception, IDisposable
   {
   }
 
-  // constructor-declaration (with constructor initializer)
+  // constructor-declaration (with this constructor initializer)
   public MyClass()
     : this(0, 0)
+  {
+  }
+
+  // constructor-declaration (with base constructor initializer)
+  public MyClass(int a)
+    : base()
   {
   }
 
