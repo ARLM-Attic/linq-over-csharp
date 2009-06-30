@@ -1,5 +1,5 @@
 // ================================================================================================
-// NewOperatorWithAnonymousTypeNode.cs
+// AnonymousObjectCreationExpressionNode.cs
 //
 // Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -9,18 +9,18 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a "new" operator with anonymous type declaration.
+  /// This class represents an anonymous object creation expression.
   /// </summary>
   // ================================================================================================
-  public class NewOperatorWithAnonymousTypeNode : NewOperatorNode
+  public class AnonymousObjectCreationExpressionNode : NewOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="NewOperatorWithAnonymousTypeNode"/> class.
+    /// Initializes a new instance of the <see cref="AnonymousObjectCreationExpressionNode"/> class.
     /// </summary>
     /// <param name="start">The start.</param>
     // ----------------------------------------------------------------------------------------------
-    public NewOperatorWithAnonymousTypeNode(Token start)
+    public AnonymousObjectCreationExpressionNode(Token start)
       : base(start)
     {
       Declarators = new MemberDeclaratorNodeCollection {ParentNode = this};

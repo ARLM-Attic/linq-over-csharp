@@ -31,7 +31,9 @@ D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressio
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\TrueLiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\UInt32LiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\UInt64LiteralNode.cs
+D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\AnonymousObjectCreationExpressionNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNode.cs
+D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ArrayCreationExpressionNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\BaseAccessNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\BaseElementAccessNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\BaseMemberAccessNode.cs
@@ -43,9 +45,7 @@ D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressio
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\MemberDeclaratorNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithAnonymousTypeNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithArrayNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\NewOperatorWithConstructorNode.cs
+D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ObjectCreationExpressionNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ParenthesizedExpressionNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\PointerMemberAccessOperatorNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\PredefinedTypeMemberAccessNode.cs

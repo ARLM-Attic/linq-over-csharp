@@ -4188,7 +4188,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Expect(46);
 		var newToken = t; 
 		if (la.kind == 96) {
-			var anonNode = new NewOperatorWithAnonymousTypeNode(t); 
+			var anonNode = new AnonymousObjectCreationExpressionNode(t); 
 			SetCommentOwner(anonNode);
 			
 			AnonymousObjectInitializer(anonNode);
@@ -4198,7 +4198,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			NonArrayType(out typeNode);
 			NewOperatorWithType(newToken, typeNode, out exprNode);
 		} else if (la.kind == 97) {
-			var impArrNode = new NewOperatorWithArrayNode(t); 
+			var impArrNode = new ArrayCreationExpressionNode(t); 
 			SetCommentOwner(impArrNode);
 			
 			ImplicitArrayCreation(impArrNode);
@@ -4350,7 +4350,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 	}
 
-	void AnonymousObjectInitializer(NewOperatorWithAnonymousTypeNode anonNode) {
+	void AnonymousObjectInitializer(AnonymousObjectCreationExpressionNode anonNode) {
 		Expect(96);
 		anonNode.OpenBrace = t; 
 		MemberDeclaratorList(anonNode);
@@ -4368,84 +4368,80 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		exprNode = null; 
 		ObjectOrCollectionInitializerNode initNode; 
 		if (la.kind == 98) {
-			var scNode = new NewOperatorWithConstructorNode(newToken); 
-			SetCommentOwner(scNode);
-			scNode.TypeName = typeNode;
-			exprNode = scNode;
+			var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
+			SetCommentOwner(objectCreationNode);
+			objectCreationNode.TypeName = typeNode;
+			exprNode = objectCreationNode;
 			
 			Get();
-			var invNode = new InvocationOperatorNode(t, scNode);
-			SetCommentOwner(invNode);
-			
-			CurrentArgumentList(invNode.Arguments);
+			objectCreationNode.OpenParenthesis = t; 
+			CurrentArgumentList(objectCreationNode.Arguments);
 			Expect(113);
-			Terminate(invNode);
-			scNode.Initializer = invNode;
-			
+			objectCreationNode.CloseParenthesis = t; 
 			if (la.kind == 96) {
 				ObjectOrCollectionInitializer(out initNode);
-				scNode.ObjectInitializer = initNode; 
+				objectCreationNode.ObjectOrCollectionInitializer = initNode; 
 			}
-			Terminate(scNode); 
+			Terminate(objectCreationNode); 
 		} else if (la.kind == 96) {
-			var scNode = new NewOperatorWithConstructorNode(newToken); 
-			SetCommentOwner(scNode);
-			scNode.TypeName = typeNode;
-			exprNode = scNode;
+			var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
+			SetCommentOwner(objectCreationNode);
+			objectCreationNode.TypeName = typeNode;
+			exprNode = objectCreationNode;
 			
 			ObjectOrCollectionInitializer(out initNode);
-			scNode.ObjectInitializer = initNode; 
-			Terminate(scNode);
+			objectCreationNode.ObjectOrCollectionInitializer = initNode; 
+			Terminate(objectCreationNode);
 			
 		} else if (IsDims()) {
-			var newOpNode = new NewOperatorWithArrayNode(t); 
-			SetCommentOwner(newOpNode);
-			newOpNode.TypeName = typeNode;
-			exprNode = newOpNode;
+			var arrayCreationNode = new ArrayCreationExpressionNode(t); 
+			SetCommentOwner(arrayCreationNode);
+			arrayCreationNode.TypeName = typeNode;
+			exprNode = arrayCreationNode;
 			
-			ImplicitArrayCreation(newOpNode);
-			Terminate(newOpNode); 
+			ImplicitArrayCreation(arrayCreationNode);
+			Terminate(arrayCreationNode); 
 		} else if (la.kind == 97) {
-			var newOpNode = new NewOperatorWithArrayNode(newToken); 
-			SetCommentOwner(newOpNode);
-			newOpNode.TypeName = typeNode;
-			exprNode = newOpNode;
+			var arrayCreationNode = new ArrayCreationExpressionNode(newToken); 
+			SetCommentOwner(arrayCreationNode);
+			arrayCreationNode.TypeName = typeNode;
+			exprNode = arrayCreationNode;
 			ExpressionNode initExprNode; 
 			
 			Get();
-			newOpNode.SizedDimensions.StartToken = t; 
+			arrayCreationNode.SizedDimensions.StartToken = t; 
 			Expression(out initExprNode);
-			newOpNode.SizedDimensions.Add(initExprNode); 
+			arrayCreationNode.SizedDimensions.Add(initExprNode); 
 			while (la.kind == 87) {
 				Get();
 				var separator = t; 
 				Expression(out initExprNode);
-				newOpNode.SizedDimensions.Add(separator, initExprNode); 
+				arrayCreationNode.SizedDimensions.Add(separator, initExprNode); 
 			}
 			Expect(112);
-			Terminate(newOpNode.SizedDimensions); 
+			Terminate(arrayCreationNode.SizedDimensions); 
 			while (IsDims()) {
 				Expect(97);
-				newOpNode.OpenSquareBracket = t; 
+				arrayCreationNode.OpenSquareBracket = t; 
 				while (la.kind == 87) {
 					Get();
-					newOpNode.Commas.Add(t); 
+					arrayCreationNode.Commas.Add(t); 
 				}
 				Expect(112);
-				newOpNode.CloseSquareBracket = t; 
+				arrayCreationNode.CloseSquareBracket = t; 
 			}
 			if (la.kind == 96) {
 				ArrayInitializerNode arrInitNode; 
 				ArrayInitializer(out arrInitNode);
-				newOpNode.Initializer = arrInitNode; 
+				arrayCreationNode.Initializer = arrInitNode; 
 			}
-			Terminate(newOpNode);
-			exprNode = newOpNode;
+			Terminate(arrayCreationNode);
+			exprNode = arrayCreationNode;
 			
 		} else SynErr(198);
 	}
 
-	void ImplicitArrayCreation(NewOperatorWithArrayNode impArrNode) {
+	void ImplicitArrayCreation(ArrayCreationExpressionNode impArrNode) {
 		Expect(97);
 		impArrNode.OpenSquareBracket = t; 
 		while (la.kind == 87) {
@@ -4462,7 +4458,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Terminate(impArrNode); 
 	}
 
-	void MemberDeclaratorList(NewOperatorWithAnonymousTypeNode initNode) {
+	void MemberDeclaratorList(AnonymousObjectCreationExpressionNode initNode) {
 		MemberDeclaratorNode mdNode; 
 		MemberDeclarator(out mdNode);
 		initNode.Declarators.Add(mdNode); 

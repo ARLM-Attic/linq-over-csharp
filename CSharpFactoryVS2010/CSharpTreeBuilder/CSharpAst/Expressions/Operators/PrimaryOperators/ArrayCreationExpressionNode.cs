@@ -1,5 +1,5 @@
 // ================================================================================================
-// NewOperatorWithArrayNode.cs
+// ArrayCreationExpressionNode.cs
 //
 // Created: 2009.05.14, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -10,22 +10,51 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class is a base for "new" operator with array initializers
+  /// This class represents an array creation expression.
   /// </summary>
   // ================================================================================================
-  public sealed class NewOperatorWithArrayNode : NewOperatorNode, IArrayDimensions
+  public sealed class ArrayCreationExpressionNode : NewOperatorNode, IArrayDimensions
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="NewOperatorWithArrayNode"/> class.
+    /// Initializes a new instance of the <see cref="ArrayCreationExpressionNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public NewOperatorWithArrayNode(Token start)
+    public ArrayCreationExpressionNode(Token start)
       : base(start)
     {
       Commas = new ImmutableCollection<Token>();
       SizedDimensions = new SizedArrayDimensionNode {ParentNode = this};
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of the type.
+    /// </summary>
+    /// <value>The name of the type.</value>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        if (_TypeName != null) _TypeName.ParentNode = this;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this new operator is implicit (now explicit type used)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsImplicit
+    {
+      get { return TypeName == null; }
     }
 
     // ----------------------------------------------------------------------------------------------

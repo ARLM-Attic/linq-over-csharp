@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 30. 14:16:36
+// Generated on: 2009. 06. 30. 22:47:50
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -22,7 +22,9 @@ namespace CSharpTreeBuilder.Ast
   {
     void Visit(AccessorNode node);
     void Visit(AnonymousDelegateNode node);
+    void Visit(AnonymousObjectCreationExpressionNode node);
     void Visit(ArgumentNode node);
+    void Visit(ArrayCreationExpressionNode node);
     void Visit(ArrayInitializerNode node);
     void Visit(ArrayItemInitializerNode node);
     void Visit(ArrayModifierNode node);
@@ -122,10 +124,8 @@ namespace CSharpTreeBuilder.Ast
     void Visit(NamespaceScopeNode node);
     void Visit(NameTagNode node);
     void Visit(NewOperatorNode node);
-    void Visit(NewOperatorWithAnonymousTypeNode node);
-    void Visit(NewOperatorWithArrayNode node);
-    void Visit(NewOperatorWithConstructorNode node);
     void Visit(NullLiteralNode node);
+    void Visit(ObjectCreationExpressionNode node);
     void Visit(ObjectOrCollectionInitializerNode node);
     void Visit(OperatorDeclarationNode node);
     void Visit(OperatorNode node);

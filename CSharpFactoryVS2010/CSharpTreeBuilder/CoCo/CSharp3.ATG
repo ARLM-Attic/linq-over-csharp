@@ -4256,7 +4256,7 @@ NewOperator<out ExpressionNode exprNode>
   (. var newToken = t; .)
   (
     (. 
-       var anonNode = new NewOperatorWithAnonymousTypeNode(t); 
+       var anonNode = new AnonymousObjectCreationExpressionNode(t); 
        SetCommentOwner(anonNode);
     .)
     AnonymousObjectInitializer<anonNode>
@@ -4267,7 +4267,7 @@ NewOperator<out ExpressionNode exprNode>
     NewOperatorWithType<newToken, typeNode, out exprNode>
   |
     (. 
-       var impArrNode = new NewOperatorWithArrayNode(t); 
+       var impArrNode = new ArrayCreationExpressionNode(t); 
        SetCommentOwner(impArrNode);
     .)
     ImplicitArrayCreation<impArrNode>
@@ -4279,7 +4279,7 @@ NewOperator<out ExpressionNode exprNode>
 // ------------------------------------------------------------------------------------------------
 // Represents an anonymous object initializer
 // ------------------------------------------------------------------------------------------------
-AnonymousObjectInitializer<NewOperatorWithAnonymousTypeNode anonNode>
+AnonymousObjectInitializer<AnonymousObjectCreationExpressionNode anonNode>
 =
   "{"                                   
   (. anonNode.OpenBrace = t; .)
@@ -4301,7 +4301,7 @@ AnonymousObjectInitializer<NewOperatorWithAnonymousTypeNode anonNode>
 // ------------------------------------------------------------------------------------------------
 // Declaration of "new" operator member declaration list.
 // ------------------------------------------------------------------------------------------------
-MemberDeclaratorList<NewOperatorWithAnonymousTypeNode initNode>  
+MemberDeclaratorList<AnonymousObjectCreationExpressionNode initNode>  
 =                     
   (. MemberDeclaratorNode mdNode; .)
   MemberDeclarator<out mdNode>     
@@ -4376,91 +4376,88 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
   (
     // --- Simple constructor call
     (. 
-       var scNode = new NewOperatorWithConstructorNode(newToken); 
-       SetCommentOwner(scNode);
-       scNode.TypeName = typeNode;
-       exprNode = scNode;
+       var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
+       SetCommentOwner(objectCreationNode);
+       objectCreationNode.TypeName = typeNode;
+       exprNode = objectCreationNode;
     .)
+    
     "("
-    (.
-       var invNode = new InvocationOperatorNode(t, scNode);
-       SetCommentOwner(invNode);
-    .)
-    CurrentArgumentList<invNode.Arguments>
+    (. objectCreationNode.OpenParenthesis = t; .)
+    
+    CurrentArgumentList<objectCreationNode.Arguments>
+    
     ")"
-    (.
-       Terminate(invNode);
-       scNode.Initializer = invNode;
-    .)
-    // --- Optional initializer list
+    (. objectCreationNode.CloseParenthesis = t; .)
+    
     [         
       ObjectOrCollectionInitializer<out initNode>
-      (. scNode.ObjectInitializer = initNode; .)
+      (. objectCreationNode.ObjectOrCollectionInitializer = initNode; .)
     ]
-    (. Terminate(scNode); .)
+    (. Terminate(objectCreationNode); .)
     
   | // --- Implicit default constructor call
     (. 
-       var scNode = new NewOperatorWithConstructorNode(newToken); 
-       SetCommentOwner(scNode);
-       scNode.TypeName = typeNode;
-       exprNode = scNode;
+       var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
+       SetCommentOwner(objectCreationNode);
+       objectCreationNode.TypeName = typeNode;
+       exprNode = objectCreationNode;
     .)
     ObjectOrCollectionInitializer<out initNode>
     (. 
-       scNode.ObjectInitializer = initNode; 
-       Terminate(scNode);
+       objectCreationNode.ObjectOrCollectionInitializer = initNode; 
+       Terminate(objectCreationNode);
     .)
     
   | // --- Array initialization
     IF (IsDims())                 
     (. 
-       var newOpNode = new NewOperatorWithArrayNode(t); 
-       SetCommentOwner(newOpNode);
-       newOpNode.TypeName = typeNode;
-       exprNode = newOpNode;
+       var arrayCreationNode = new ArrayCreationExpressionNode(t); 
+       SetCommentOwner(arrayCreationNode);
+       arrayCreationNode.TypeName = typeNode;
+       exprNode = arrayCreationNode;
     .)
-    ImplicitArrayCreation<newOpNode>
-    (. Terminate(newOpNode); .)
+    ImplicitArrayCreation<arrayCreationNode>
+    (. Terminate(arrayCreationNode); .)
     
   | // --- New array creation
     (. 
-       var newOpNode = new NewOperatorWithArrayNode(newToken); 
-       SetCommentOwner(newOpNode);
-       newOpNode.TypeName = typeNode;
-       exprNode = newOpNode;
+       var arrayCreationNode = new ArrayCreationExpressionNode(newToken); 
+       SetCommentOwner(arrayCreationNode);
+       arrayCreationNode.TypeName = typeNode;
+       exprNode = arrayCreationNode;
        ExpressionNode initExprNode; 
     .)
     "["
-    (. newOpNode.SizedDimensions.StartToken = t; .)
+    (. arrayCreationNode.SizedDimensions.StartToken = t; .)
     Expression<out initExprNode>
-    (. newOpNode.SizedDimensions.Add(initExprNode); .)
+    (. arrayCreationNode.SizedDimensions.Add(initExprNode); .)
     { 
       ","
       (. var separator = t; .)
       Expression<out initExprNode>
-      (. newOpNode.SizedDimensions.Add(separator, initExprNode); .)
+      (. arrayCreationNode.SizedDimensions.Add(separator, initExprNode); .)
     } 
     "]" 
-    (. Terminate(newOpNode.SizedDimensions); .)
+    (. Terminate(arrayCreationNode.SizedDimensions); .)
     { IF (IsDims()) 
       "["
-       (. newOpNode.OpenSquareBracket = t; .)
+       (. arrayCreationNode.OpenSquareBracket = t; .)
         { 
           ","
-          (. newOpNode.Commas.Add(t); .)
+          (. arrayCreationNode.Commas.Add(t); .)
         } 
       "]" 
-      (. newOpNode.CloseSquareBracket = t; .)
+      (. arrayCreationNode.CloseSquareBracket = t; .)
     }
     [            
       (. ArrayInitializerNode arrInitNode; .)                 
       ArrayInitializer<out arrInitNode> 
-      (. newOpNode.Initializer = arrInitNode; .)
+      (. arrayCreationNode.Initializer = arrInitNode; .)
     ] 
     (.
-       Terminate(newOpNode);
-       exprNode = newOpNode;
+       Terminate(arrayCreationNode);
+       exprNode = arrayCreationNode;
     .)
   )
 .
@@ -4468,7 +4465,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
 // ------------------------------------------------------------------------------------------------
 // Declaration of an implicit array creation
 // ------------------------------------------------------------------------------------------------
-ImplicitArrayCreation<NewOperatorWithArrayNode impArrNode> 
+ImplicitArrayCreation<ArrayCreationExpressionNode impArrNode> 
 =
   "["
   (. impArrNode.OpenSquareBracket = t; .)

@@ -1,30 +1,53 @@
-// ================================================================================================
-// NewOperatorWithConstructorNode.cs
-//
-// Created: 2009.06.08, by Istvan Novak (DeepDiver)
-// ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// 
+  /// This class represents an object creation or a delegate creation expression.
+  /// Unfortunately these two cannot be distinguished by pure syntax.
   /// </summary>
+  /// <remarks>
+  /// <para>object-creation-expression:</para>
+  /// <para><code>  new type ( argument-list-opt ) object-or-collection-initilaizer-opt</code></para>
+  /// <para><code>  new type object-or-collection-initilaizer</code></para>
+  /// <para>delegate-creation-expression:</para>
+  /// <para><code>  new delegate-type ( expression )</code></para>
+  /// </remarks>
   // ================================================================================================
-  public class NewOperatorWithConstructorNode : NewOperatorNode, IParentheses
+  public class ObjectCreationExpressionNode : NewOperatorNode, IParentheses
   {
+    // --- Backing fields
+    private TypeOrNamespaceNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="NewOperatorWithConstructorNode"/> class.
+    /// Initializes a new instance of the <see cref="ObjectCreationExpressionNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public NewOperatorWithConstructorNode(Token start)
+    public ObjectCreationExpressionNode(Token start)
       : base(start)
     {
-    }
+      Arguments = new ArgumentNodeCollection() {ParentNode = this};
+    } 
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of the type.
+    /// </summary>
+    /// <value>The name of the type.</value>
+    // ----------------------------------------------------------------------------------------------
+    public TypeOrNamespaceNode TypeName
+    {
+      get { return _TypeName; }
+      internal set
+      {
+        _TypeName = value;
+        if (_TypeName != null) _TypeName.ParentNode = this;
+      }
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the opening parenthesis token.
@@ -41,6 +64,16 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether the object creation expression has constructor arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasConstructorArguments
+    {
+      get { return Arguments != null && Arguments.Count > 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the closing parenthesis token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -48,17 +81,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the method call initializer expression belonging to the constructor.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Initializer { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets the optional initializer.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ObjectOrCollectionInitializerNode ObjectInitializer { get; internal set; }
+    public ObjectOrCollectionInitializerNode ObjectOrCollectionInitializer { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -77,7 +103,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool HasObjectInitializer
     {
-      get { return ObjectInitializer == null; }
+      get { return ObjectOrCollectionInitializer != null; }
     }
   }
 }

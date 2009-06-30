@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 30. 14:16:34
+// Generated on: 2009. 06. 30. 22:47:48
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -22,7 +22,9 @@ namespace CSharpTreeBuilder.Ast
   {
     public virtual void Visit(AccessorNode node) { }
     public virtual void Visit(AnonymousDelegateNode node) { }
+    public virtual void Visit(AnonymousObjectCreationExpressionNode node) { }
     public virtual void Visit(ArgumentNode node) { }
+    public virtual void Visit(ArrayCreationExpressionNode node) { }
     public virtual void Visit(ArrayInitializerNode node) { }
     public virtual void Visit(ArrayItemInitializerNode node) { }
     public virtual void Visit(ArrayModifierNode node) { }
@@ -122,10 +124,8 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(NamespaceScopeNode node) { }
     public virtual void Visit(NameTagNode node) { }
     public virtual void Visit(NewOperatorNode node) { }
-    public virtual void Visit(NewOperatorWithAnonymousTypeNode node) { }
-    public virtual void Visit(NewOperatorWithArrayNode node) { }
-    public virtual void Visit(NewOperatorWithConstructorNode node) { }
     public virtual void Visit(NullLiteralNode node) { }
+    public virtual void Visit(ObjectCreationExpressionNode node) { }
     public virtual void Visit(ObjectOrCollectionInitializerNode node) { }
     public virtual void Visit(OperatorDeclarationNode node) { }
     public virtual void Visit(OperatorNode node) { }

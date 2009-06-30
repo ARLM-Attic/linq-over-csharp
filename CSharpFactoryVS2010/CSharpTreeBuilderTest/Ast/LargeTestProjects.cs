@@ -6,16 +6,17 @@
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilderTest;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 
 namespace CSharpParserTest
 {
   [TestClass]
   public class LargeTestProjects: ParserTestBed
   {
-    const string CSharpParserFile = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpTreeBuilder.csproj";
-    const string NUnitCoreInterfacesFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilderTest\TestFiles\LargeTestProjects\NUnit.Core.Interfaces";
-    const string NUnitCoreFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilderTest\TestFiles\LargeTestProjects\NUnit.Core";
-    const string CSLAFolder = @"C:\Work\LINQOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilderTest\TestFiles\LargeTestProjects\CSLA";
+    private readonly string CSharpParserFile = Path.Combine(WorkingFolder, @"..\..\CSharpTreeBuilder\CSharpTreeBuilder.csproj");
+    private readonly string NUnitCoreInterfacesFolder = Path.Combine(WorkingFolder, @"LargeTestProjects\NUnit.Core.Interfaces");
+    private readonly string NUnitCoreFolder = Path.Combine(WorkingFolder, @"LargeTestProjects\NUnit.Core");
+    private readonly string CSLAFolder = Path.Combine(WorkingFolder, @"LargeTestProjects\CSLA");
 
     [TestMethod]
     public void NUnitCoreInterfacesIsOk()

@@ -10,8 +10,8 @@ namespace CSharpTreeBuilder.Ast
   /// This class represens a specifier for sized array dimensions.
   /// </summary>
   // ================================================================================================
-  public class SizedArrayDimensionNode : 
-    SyntaxNodeCollection<ExpressionNode, NewOperatorWithArrayNode>
+  public class SizedArrayDimensionNode :
+    SyntaxNodeCollection<ExpressionNode, ArrayCreationExpressionNode>
   {
   }
 }
