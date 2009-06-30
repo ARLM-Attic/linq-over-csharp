@@ -14,7 +14,7 @@ namespace CSharpTreeBuilder.Cst
   /// </summary>
   /// <remarks>
   /// An instance of this class is used to point to a specific syntax node belonging to a certain
-  /// item in the entity model. The SourceFileNode property points to the file that holds the syntax
+  /// item in the entity model. The CompilationUnitNode property points to the file that holds the syntax
   /// node, while SyntaxNode declares the node within the syntax tree.
   /// This is a design decision according to the following reasons:
   /// 1) However, a syntax node obviously belongs to one and only one source file, the current 
@@ -30,12 +30,12 @@ namespace CSharpTreeBuilder.Cst
     /// <summary>
     /// Initializes a new instance of the <see cref="SyntaxNodeReference"/> class.
     /// </summary>
-    /// <param name="sourceFileNode">The source file node.</param>
+    /// <param name="compilationUnitNode">The source file node.</param>
     /// <param name="syntaxNode">The syntax node within the source file node.</param>
     // ----------------------------------------------------------------------------------------------
-    public SyntaxNodeReference(SourceFileNode sourceFileNode, ISyntaxNode syntaxNode)
+    public SyntaxNodeReference(CompilationUnitNode compilationUnitNode, ISyntaxNode syntaxNode)
     {
-      SourceFileNode = sourceFileNode;
+      CompilationUnitNode = compilationUnitNode;
       SyntaxNode = syntaxNode;
     }
 
@@ -44,7 +44,7 @@ namespace CSharpTreeBuilder.Cst
     /// Gets the source file node of this syntax node reference.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode SourceFileNode { get; private set; }
+    public CompilationUnitNode CompilationUnitNode { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

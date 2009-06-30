@@ -19,7 +19,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"StructDeclaration\StructDeclaration3.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.TypeDeclarations.Count.ShouldEqual(1);
       source.NamespaceDeclarations.Count.ShouldEqual(1);
       source.NamespaceDeclarations[0].TypeDeclarations.Count.ShouldEqual(3);
@@ -113,7 +113,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"StructDeclaration\StructDeclaration3.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.NamespaceDeclarations.Count.ShouldEqual(1);
       var nsDecl = source.NamespaceDeclarations[0];
       nsDecl.StartToken.Line.ShouldEqual(3);

@@ -35,7 +35,7 @@ namespace SampleCompilation
       foreach (var error in project.Errors)
       {
         Console.WriteLine("--- Error {0}: {1} line: {2}, column: {3}, file: {4}",
-                          error.Code, error.Description, error.Line, error.Column, error.SourceFileNode.Name);
+                          error.Code, error.Description, error.Line, error.Column, error.CompilationUnitNode.Name);
       }
 
       // --- Display warnings
@@ -43,15 +43,15 @@ namespace SampleCompilation
       foreach (var warning in project.Warnings)
       {
         Console.WriteLine("--- Warning {0}: {1} line: {2}, column: {3}, file: {4}",
-                          warning.Code, warning.Description, warning.Line, warning.Column, warning.SourceFileNode.Name);
+                          warning.Code, warning.Description, warning.Line, warning.Column, warning.CompilationUnitNode.Name);
       }
 
       // --- Display files parsed
       Console.WriteLine();
-      Console.WriteLine("{0} files have been parsed.", project.SyntaxTree.SourceFileNodes.Count);
+      Console.WriteLine("{0} files have been parsed.", project.SyntaxTree.CompilationUnitNodes.Count);
 
       // --- Display all files and length
-      foreach (var file in project.SyntaxTree.SourceFileNodes)
+      foreach (var file in project.SyntaxTree.CompilationUnitNodes)
       {
         Console.WriteLine("{0}: ({1}/{2})", file.Name, file.LastScannedPosition, file.SymbolStream.Length);
       }

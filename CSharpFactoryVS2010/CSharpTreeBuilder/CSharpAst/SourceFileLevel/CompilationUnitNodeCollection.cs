@@ -1,5 +1,5 @@
 // ================================================================================================
-// SourceFileNodeCollection.cs
+// CompilationUnitNodeCollection.cs
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -9,10 +9,10 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type defines a collection of source file nodes in the syntax tree.
+  /// This type defines a collection of compilation unit nodes.
   /// </summary>
   // ================================================================================================
-  public sealed class SourceFileNodeCollection : ImmutableIndexedCollection<SourceFileNode>
+  public sealed class CompilationUnitNodeCollection : ImmutableIndexedCollection<CompilationUnitNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -20,7 +20,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <param name="item">Item used to determine the key.</param>
     // ----------------------------------------------------------------------------------------------
-    protected override string GetKeyOfItem(SourceFileNode item)
+    protected override string GetKeyOfItem(CompilationUnitNode item)
     {
       return item.FullName;
     }

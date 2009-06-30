@@ -1,44 +1,37 @@
 // ================================================================================================
-// TypeOperatorNode.cs
+// SingleLiteralNode.cs
 //
-// Created: 2009.05.01, by Istvan Novak (DeepDiver)
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.CSharpAstBuilder;
+
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an operator holding a type definition.
+  /// This class defines a System.Single literal.
   /// </summary>
   // ================================================================================================
-  public sealed class TypeOperatorNode : LiteralNode
+  public class SingleLiteralNode : RealLiteralNode
   {
-    // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="LiteralNode"/> class.
+    /// Initializes a new instance of the <see cref="SingleLiteralNode"/> class.
     /// </summary>
-    /// <param name="typeName">Type name.</param>
+    /// <param name="start">The start token.</param>
+    /// <param name="value">The value of the constant.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOperatorNode(TypeOrNamespaceNode typeName) : base(typeName.StartToken)
+    public SingleLiteralNode(Token start, float value)
+      : base(start)
     {
-      TypeName = typeName;
+      Value = value;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the type.
+    /// Gets the value of the constant.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
-    {
-      get { return _TypeName; }
-      private set
-      {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
-      }
-    }
+    public float Value { get; internal set; }
   }
 }

@@ -44,7 +44,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Symbol information obtained from the specified source file.
     /// </returns>
     // --------------------------------------------------------------------------------------------
-    public ISymbol GetSymbol(SourceFileNode sourceNode)
+    public ISymbol GetSymbol(CompilationUnitNode sourceNode)
     {
       var symbol = sourceNode.SymbolStream.ReadSymbol(StreamPosition);
       return new CSharpSymbol(symbol.Kind, symbol.Value);
@@ -59,7 +59,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Positioned symbol information obtained from the specified source file.
     /// </returns>
     // --------------------------------------------------------------------------------------------
-    public IPositionedSymbol GetPositionedSymbol(SourceFileNode sourceNode)
+    public IPositionedSymbol GetPositionedSymbol(CompilationUnitNode sourceNode)
     {
       var symbol = sourceNode.SymbolStream.ReadSymbol(StreamPosition);
       int row;

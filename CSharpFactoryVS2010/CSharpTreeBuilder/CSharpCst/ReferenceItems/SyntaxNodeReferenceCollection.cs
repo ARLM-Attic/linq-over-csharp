@@ -44,16 +44,15 @@ namespace CSharpTreeBuilder.Cst
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Retrieves an immutable collection of syntax node references belonging to the specified source
-    /// file.
+    /// Retrieves an immutable collection of syntax node references belonging to the specified compilation unit.
     /// </summary>
-    /// <param name="sourceFile">The source file.</param>
-    /// <returns>All syntax node references belonging to the source file.</returns>
+    /// <param name="compilationUnitNode">The compilation unit.</param>
+    /// <returns>All syntax node references belonging to the compilation unit.</returns>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<SyntaxNodeReference> GetReferencesFor(SourceFileNode sourceFile)
+    public ImmutableCollection<SyntaxNodeReference> GetReferencesFor(CompilationUnitNode compilationUnitNode)
     {
       var result = new SyntaxNodeReferenceCollection(this.Where(
-                                                       node => node.SourceFileNode == sourceFile));
+                                                       node => node.CompilationUnitNode == compilationUnitNode));
       result.MakeReadOnly();
       return result;
     }

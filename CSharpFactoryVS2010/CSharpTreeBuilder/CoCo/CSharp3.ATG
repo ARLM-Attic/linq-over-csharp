@@ -253,10 +253,10 @@ PRODUCTIONS
 // ================================================================================================
 CS3
 =                                                               
-  { IF (IsExternAliasDirective()) ExternAliasDirective<SourceFileNode> }
-  { UsingDirective<SourceFileNode> }
+  { IF (IsExternAliasDirective()) ExternAliasDirective<CompilationUnitNode> }
+  { UsingDirective<CompilationUnitNode> }
   { IF (IsGlobalAttrTarget()) GlobalAttributes }
-  { NamespaceMemberDeclaration<SourceFileNode> }
+  { NamespaceMemberDeclaration<CompilationUnitNode> }
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -353,7 +353,7 @@ GlobalAttributes
   "]"                          
   (. 
      Terminate(globAttrNode);
-     SourceFileNode.GlobalAttributes.Add(globAttrNode);
+     CompilationUnitNode.GlobalAttributes.Add(globAttrNode);
   .)
 .
 

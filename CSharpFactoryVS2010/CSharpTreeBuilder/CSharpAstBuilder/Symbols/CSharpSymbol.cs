@@ -361,28 +361,28 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a symbol from the specified source file.
+    /// Gets a symbol from the specified compilation unit.
     /// </summary>
-    /// <param name="sourceNode">The source file node.</param>
+    /// <param name="compilationUnitNode">The compilation unit node.</param>
     /// <returns>
-    /// Symbol information obtained from the specified source file.
+    /// Symbol information obtained from the specified compilation unit.
     /// </returns>
     // --------------------------------------------------------------------------------------------
-    ISymbol ISymbolReference.GetSymbol(SourceFileNode sourceNode)
+    ISymbol ISymbolReference.GetSymbol(CompilationUnitNode compilationUnitNode)
     {
       return new CSharpSymbol(Kind, Value);
     }
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a positioned symbol from the specified source file.
+    /// Gets a positioned symbol from the specified compilation unit.
     /// </summary>
-    /// <param name="sourceNode">The source file node.</param>
+    /// <param name="compilationUnitNode">The compilation unit node.</param>
     /// <returns>
-    /// Positioned symbol information obtained from the specified source file.
+    /// Positioned symbol information obtained from the specified compilation unit.
     /// </returns>
     // --------------------------------------------------------------------------------------------
-    IPositionedSymbol ISymbolReference.GetPositionedSymbol(SourceFileNode sourceNode)
+    IPositionedSymbol ISymbolReference.GetPositionedSymbol(CompilationUnitNode compilationUnitNode)
     {
       return new CSharpSymbol(Kind, Value, Row, Column);
     }

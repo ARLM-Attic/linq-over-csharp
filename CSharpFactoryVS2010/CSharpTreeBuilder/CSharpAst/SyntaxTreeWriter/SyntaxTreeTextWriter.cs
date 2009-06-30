@@ -67,10 +67,10 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Writes the list of items to the output.
     /// </summary>
-    /// <param name="sourceFile">The source file.</param>
+    /// <param name="compilationUnitNode">The compilation unit.</param>
     /// <param name="items">The items to be written to the output.</param>
     // ----------------------------------------------------------------------------------------------
-    protected override void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items)
+    protected override void WriteOutput(CompilationUnitNode compilationUnitNode, OutputItemCollection items)
     {
       string expectedPrefix = ProjectProvider.WorkingFolder.Trim();
       if (!expectedPrefix.EndsWith("\\")) expectedPrefix += "\\";
@@ -78,11 +78,11 @@ namespace CSharpTreeBuilder.Ast
       string outputFolder = Path.IsPathRooted(WorkingFolder)
                               ? WorkingFolder
                               : Path.Combine(ProjectProvider.WorkingFolder, WorkingFolder);
-      string outputFile = sourceFile.FullName + ".out.cs";
-      if (sourceFile.FullName.ToLower().StartsWith(expectedPrefix))
+      string outputFile = compilationUnitNode.FullName + ".out.cs";
+      if (compilationUnitNode.FullName.ToLower().StartsWith(expectedPrefix))
       {
         outputFile = Path.Combine(outputFolder,
-                                  sourceFile.FullName.Substring(expectedPrefix.Length));
+                                  compilationUnitNode.FullName.Substring(expectedPrefix.Length));
       }
       string path = Path.GetDirectoryName(outputFile);
       if (!Directory.Exists(path)) Directory.CreateDirectory(path);

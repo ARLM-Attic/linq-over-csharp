@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines a System.Decimal constant.
+  /// This class defines a System.Decimal literal.
   /// </summary>
   // ================================================================================================
   public class DecimalLiteralNode : RealLiteralNode

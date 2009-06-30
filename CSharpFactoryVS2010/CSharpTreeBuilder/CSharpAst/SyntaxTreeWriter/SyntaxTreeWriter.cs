@@ -76,32 +76,32 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public virtual void WriteTree()
     {
-      foreach (SourceFileNode sourceFile in SyntaxTree.SourceFileNodes)
+      foreach (CompilationUnitNode compilationUnitNode in SyntaxTree.CompilationUnitNodes)
       {
-        OutputItemCollection outputForSource = CreateOutput(sourceFile);
-        WriteOutput(sourceFile, outputForSource);
+        OutputItemCollection outputForSource = CreateOutput(compilationUnitNode);
+        WriteOutput(compilationUnitNode, outputForSource);
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a list of output items according to the specified source file.
+    /// Creates a list of output items according to the specified compilation unit.
     /// </summary>
-    /// <param name="sourceFile">The source file.</param>
+    /// <param name="compilationUnitNode">The compilation unit.</param>
     /// <returns></returns>
     // ----------------------------------------------------------------------------------------------
-    protected virtual OutputItemCollection CreateOutput(SourceFileNode sourceFile)
+    protected virtual OutputItemCollection CreateOutput(CompilationUnitNode compilationUnitNode)
     {
-      return sourceFile.CreateOutput(OutputOptions);
+      return compilationUnitNode.CreateOutput(OutputOptions);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Writes the list of items to the output.
     /// </summary>
-    /// <param name="sourceFile">The source file.</param>
+    /// <param name="compilationUnitNode">The compilation unit.</param>
     /// <param name="items">The items to be written to the output.</param>
     // ----------------------------------------------------------------------------------------------
-    protected abstract void WriteOutput(SourceFileNode sourceFile, OutputItemCollection items);
+    protected abstract void WriteOutput(CompilationUnitNode compilationUnitNode, OutputItemCollection items);
   }
 }

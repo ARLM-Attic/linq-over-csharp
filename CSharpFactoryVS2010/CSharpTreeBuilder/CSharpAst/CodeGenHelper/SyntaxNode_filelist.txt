@@ -26,11 +26,9 @@ D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressio
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\IntegerLiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\NullLiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\RealLiteralNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\ScopedNameNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\SingleNode.cs
+D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\SingleLiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\StringLiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\TrueLiteralNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\TypeOperatorNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\UInt32LiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\UInt64LiteralNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNode.cs
@@ -120,10 +118,10 @@ D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Pragmas\U
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\AttributeArgumentNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\AttributeDecorationNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\AttributeNode.cs
+D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\CompilationUnitNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\ExternAliasNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\NamespaceDeclarationNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\NamespaceScopeNode.cs
-D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\SourceFileNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\UsingAliasNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\SourceFileLevel\UsingNamespaceNode.cs
 D:\work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Statements\BlockStatementNode.cs

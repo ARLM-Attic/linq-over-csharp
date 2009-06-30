@@ -70,13 +70,13 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// uint and file.
     /// </summary>
     /// <param name="scanner">The scanner used to scan tokens.</param>
-    /// <param name="sourceFileNode">File used by this parser instance.</param>
+    /// <param name="compilationUnitNode">The compilation unit used by this parser instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public CSharpParser(Scanner scanner, SourceFileNode sourceFileNode)
+    public CSharpParser(Scanner scanner, CompilationUnitNode compilationUnitNode)
     {
       SuppressErrors = false;
       Scanner = scanner;
-      SourceFileNode = sourceFileNode;
+      CompilationUnitNode = compilationUnitNode;
     }
 
     #endregion
@@ -89,7 +89,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// </summary>
     /// <value>The source file node.</value>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode SourceFileNode { get; private set; }
+    public CompilationUnitNode CompilationUnitNode { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -298,21 +298,21 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
-    /// Builds the ast for source file.
+    /// Builds the ast for a compilation unit.
     /// </summary>
-    /// <param name="sourceNode">The source file node to build the AST for.</param>
+    /// <param name="compilationUnitNode">The compilation unit node to build the AST for.</param>
     /// <param name="project">The error handler instance.</param>
     // --------------------------------------------------------------------------------------------
-    public static void BuildAstForSourceFile(SourceFileNode sourceNode, 
+    public static void BuildAstForCompilationUnit(CompilationUnitNode compilationUnitNode, 
       CSharpProject project)
     {
       // --- Open the stream
-      var stream = File.OpenText(sourceNode.FullName).BaseStream;
+      var stream = File.OpenText(compilationUnitNode.FullName).BaseStream;
       try
       {
         // --- Create a scanner with token processor events and a parser using that scanner
         var scanner = new Scanner(stream);
-        var parser = new CSharpParser(scanner, sourceNode) {ErrorHandler = project, Project = project};
+        var parser = new CSharpParser(scanner, compilationUnitNode) {ErrorHandler = project, Project = project};
         scanner.NewLineReached += parser.NewLineReached;
         scanner.TokenScanned += parser.TokenScanned;
         scanner.WhitespaceScanned += parser.WhitespaceScanned;
@@ -321,8 +321,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         parser.Parse();
 
         // --- Sign that all tokens have been added to the symbol stream
-        sourceNode.SymbolStream.FreezeStream();
-        sourceNode.LastScannedPosition = scanner.Position;
+        compilationUnitNode.SymbolStream.FreezeStream();
+        compilationUnitNode.LastScannedPosition = scanner.Position;
 
         // --- Release event handlers
         scanner.NewLineReached -= parser.NewLineReached;
@@ -372,7 +372,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void WhitespaceScanned(object sender, WhitespaceScannedEventArgs e)
     {
-      SourceFileNode.SymbolStream.AddWhitespaceToStream(e.Whitespace);
+      CompilationUnitNode.SymbolStream.AddWhitespaceToStream(e.Whitespace);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -387,8 +387,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private void TokenScanned(object sender, TokenScannedEventArgs e)
     {
-      SourceFileNode.SymbolStream.AddTokenToStream(e.Token);
-      e.Token.TokenizedStreamPosition = SourceFileNode.SymbolStream.CurrentPosition;
+      CompilationUnitNode.SymbolStream.AddTokenToStream(e.Token);
+      e.Token.TokenizedStreamPosition = CompilationUnitNode.SymbolStream.CurrentPosition;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -405,7 +405,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       // --- Nothing to do in the case of first line.
       if (e.LineNumber == 1) return;
-      SourceFileNode.SymbolStream.AddEndOfLineToStream(e.LineNumber);
+      CompilationUnitNode.SymbolStream.AddEndOfLineToStream(e.LineNumber);
     }
 
     #endregion

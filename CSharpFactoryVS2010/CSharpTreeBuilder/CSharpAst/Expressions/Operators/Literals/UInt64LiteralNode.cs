@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines a System.UInt64 constant.
+  /// This class defines a System.UInt64 literal.
   /// </summary>
   // ================================================================================================
   public class UInt64LiteralNode : IntegerLiteralNode

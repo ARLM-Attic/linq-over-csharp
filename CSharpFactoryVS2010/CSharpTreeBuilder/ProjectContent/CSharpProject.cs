@@ -169,9 +169,9 @@ namespace CSharpTreeBuilder.ProjectContent
       // --- Create a syntax tree for each source file
       foreach (var sourceFile in ProjectProvider.SourceFiles)
       {
-        SourceInProgress = new SourceFileNode(sourceFile.FullName);
-        CSharpParser.BuildAstForSourceFile(SourceInProgress, this);
-        SyntaxTree.SourceFileNodes.Add(SourceInProgress);
+        SourceInProgress = new CompilationUnitNode(sourceFile.FullName);
+        CSharpParser.BuildAstForCompilationUnit(SourceInProgress, this);
+        SyntaxTree.CompilationUnitNodes.Add(SourceInProgress);
       }
     }
 
@@ -315,7 +315,7 @@ namespace CSharpTreeBuilder.ProjectContent
     /// Gets or sets the source in progress.
     /// </summary>
     // --------------------------------------------------------------------------------------------
-    private SourceFileNode SourceInProgress { get; set; }
+    private CompilationUnitNode SourceInProgress { get; set; }
 
     // --------------------------------------------------------------------------------------------
     /// <summary>

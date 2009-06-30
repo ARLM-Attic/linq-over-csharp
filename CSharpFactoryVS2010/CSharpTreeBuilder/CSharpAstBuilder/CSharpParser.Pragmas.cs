@@ -315,7 +315,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // ----------------------------------------------------------------------------------------------
     private bool RegisterPragma(PragmaNode pragma)
     {
-      SourceFileNode.Pragmas.Add(pragma);
+      CompilationUnitNode.Pragmas.Add(pragma);
       var pragmaOk = CheckTokenIsFirstInLine(pragma.StartToken);
       if (!pragmaOk)
       {

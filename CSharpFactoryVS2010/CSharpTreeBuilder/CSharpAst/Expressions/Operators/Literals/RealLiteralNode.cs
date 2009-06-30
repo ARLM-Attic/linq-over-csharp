@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines a real value constant.
+  /// This abstract class defines a real literal.
   /// </summary>
   // ================================================================================================
   public abstract class RealLiteralNode : LiteralNode
@@ -40,7 +40,7 @@ namespace CSharpTreeBuilder.Ast
     {
       string valueSrt = t.Value.ToLower();
       if (valueSrt.EndsWith("f"))
-        return new SingleNode(t, Single.Parse(valueSrt.Substring(0, valueSrt.Length - 1),
+        return new SingleLiteralNode(t, Single.Parse(valueSrt.Substring(0, valueSrt.Length - 1),
                                               NumberStyles.Float, CultureInfo.InvariantCulture));
       if (valueSrt.EndsWith("m"))
         return new DecimalLiteralNode(t, Decimal.Parse(valueSrt.Substring(0, valueSrt.Length - 1),

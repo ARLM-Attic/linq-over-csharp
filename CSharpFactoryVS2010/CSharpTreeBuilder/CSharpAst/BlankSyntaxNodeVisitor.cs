@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 29. 18:07:30
+// Generated on: 2009. 06. 30. 9:04:57
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -48,6 +48,7 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(CheckedOperatorNode node) { }
     public virtual void Visit(CheckedStatementNode node) { }
     public virtual void Visit(ClassDeclarationNode node) { }
+    public virtual void Visit(CompilationUnitNode node) { }
     public virtual void Visit(ConditionalOperatorNode node) { }
     public virtual void Visit(ConditionalPragmaNode node) { }
     public virtual void Visit(ConstDeclarationNode node) { }
@@ -154,13 +155,11 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(ReferenceOperatorNode node) { }
     public virtual void Visit(RegionPragmaNode node) { }
     public virtual void Visit(ReturnStatementNode node) { }
-    public virtual void Visit(ScopedNameNode node) { }
     public virtual void Visit(SelectClauseNode node) { }
     public virtual void Visit(SimpleNameNode node) { }
-    public virtual void Visit(SingleNode node) { }
+    public virtual void Visit(SingleLiteralNode node) { }
     public virtual void Visit(SizedArrayDimensionNode node) { }
     public virtual void Visit(SizeofOperatorNode node) { }
-    public virtual void Visit(SourceFileNode node) { }
     public virtual void Visit(StackAllocInitializerNode node) { }
     public virtual void Visit(StatementNode node) { }
     public virtual void Visit(StringLiteralNode node) { }
@@ -177,7 +176,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(TypeDeclarationNode node) { }
     public virtual void Visit(TypeModifierNode node) { }
     public virtual void Visit(TypeofOperatorNode node) { }
-    public virtual void Visit(TypeOperatorNode node) { }
     public virtual void Visit(TypeOrMemberDeclarationNode node) { }
     public virtual void Visit(TypeOrNamespaceNode node) { }
     public virtual void Visit(TypeParameterConstraintNode node) { }

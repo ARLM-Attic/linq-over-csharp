@@ -231,16 +231,16 @@ public partial class CSharpParser
 	  
 	void CS3() {
 		while (IsExternAliasDirective()) {
-			ExternAliasDirective(SourceFileNode);
+			ExternAliasDirective(CompilationUnitNode);
 		}
 		while (la.kind == 78) {
-			UsingDirective(SourceFileNode);
+			UsingDirective(CompilationUnitNode);
 		}
 		while (IsGlobalAttrTarget()) {
 			GlobalAttributes();
 		}
 		while (StartOf(1)) {
-			NamespaceMemberDeclaration(SourceFileNode);
+			NamespaceMemberDeclaration(CompilationUnitNode);
 		}
 	}
 
@@ -315,7 +315,7 @@ public partial class CSharpParser
 		}
 		Expect(112);
 		Terminate(globAttrNode);
-		SourceFileNode.GlobalAttributes.Add(globAttrNode);
+		CompilationUnitNode.GlobalAttributes.Add(globAttrNode);
 		
 	}
 

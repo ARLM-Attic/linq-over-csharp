@@ -18,7 +18,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
       Assert.IsTrue(InvokeParser(project));
-      var file = project.SyntaxTree.SourceFileNodes[0];
+      var file = project.SyntaxTree.CompilationUnitNodes[0];
 
       // --- Check global attributes in the file
       Assert.AreEqual(file.GlobalAttributes.Count, 5);
@@ -41,7 +41,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
       Assert.IsTrue(InvokeParser(project));
-      var file = project.SyntaxTree.SourceFileNodes[0];
+      var file = project.SyntaxTree.CompilationUnitNodes[0];
 
       // --- Check global attributes in the file
       Assert.AreEqual(file.GlobalAttributes.Count, 5);
@@ -146,7 +146,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
       Assert.IsTrue(InvokeParser(project));
-      var file = project.SyntaxTree.SourceFileNodes[0];
+      var file = project.SyntaxTree.CompilationUnitNodes[0];
       foreach (var attrNode in file.GlobalAttributes)
       {
         Assert.AreEqual(attrNode.ParentNode, file);

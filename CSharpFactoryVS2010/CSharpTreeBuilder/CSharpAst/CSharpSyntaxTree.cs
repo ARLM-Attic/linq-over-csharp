@@ -20,7 +20,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public CSharpSyntaxTree()
     {
-      SourceFileNodes = new SourceFileNodeCollection();
+      CompilationUnitNodes = new CompilationUnitNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The source file nodes.</value>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNodeCollection SourceFileNodes { get; private set; }
+    public CompilationUnitNodeCollection CompilationUnitNodes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -38,7 +38,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public void Reset()
     {
-      SourceFileNodes.Clear();
+      CompilationUnitNodes.Clear();
     }
   }
 }

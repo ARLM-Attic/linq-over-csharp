@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 29. 18:07:33
+// Generated on: 2009. 06. 30. 9:05:00
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -48,6 +48,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(CheckedOperatorNode node);
     void Visit(CheckedStatementNode node);
     void Visit(ClassDeclarationNode node);
+    void Visit(CompilationUnitNode node);
     void Visit(ConditionalOperatorNode node);
     void Visit(ConditionalPragmaNode node);
     void Visit(ConstDeclarationNode node);
@@ -154,13 +155,11 @@ namespace CSharpTreeBuilder.Ast
     void Visit(ReferenceOperatorNode node);
     void Visit(RegionPragmaNode node);
     void Visit(ReturnStatementNode node);
-    void Visit(ScopedNameNode node);
     void Visit(SelectClauseNode node);
     void Visit(SimpleNameNode node);
-    void Visit(SingleNode node);
+    void Visit(SingleLiteralNode node);
     void Visit(SizedArrayDimensionNode node);
     void Visit(SizeofOperatorNode node);
-    void Visit(SourceFileNode node);
     void Visit(StackAllocInitializerNode node);
     void Visit(StatementNode node);
     void Visit(StringLiteralNode node);
@@ -177,7 +176,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(TypeDeclarationNode node);
     void Visit(TypeModifierNode node);
     void Visit(TypeofOperatorNode node);
-    void Visit(TypeOperatorNode node);
     void Visit(TypeOrMemberDeclarationNode node);
     void Visit(TypeOrNamespaceNode node);
     void Visit(TypeParameterConstraintNode node);

@@ -20,14 +20,14 @@ namespace CSharpTreeBuilder.Cst
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationMessageNode"/> class.
     /// </summary>
-    /// <param name="sourceFileNode">The source file node.</param>
+    /// <param name="compilationUnitNode">The source file node.</param>
     /// <param name="code">The message code.</param>
     /// <param name="token">The message token.</param>
     /// <param name="description">The textual description.</param>
     // ----------------------------------------------------------------------------------------------
-    public CompilationMessageNode(SourceFileNode sourceFileNode, string code, Token token,
+    public CompilationMessageNode(CompilationUnitNode compilationUnitNode, string code, Token token,
       string description)
-      : base(sourceFileNode)
+      : base(compilationUnitNode)
     {
       Code = code;
       MessageToken = token;
@@ -107,7 +107,7 @@ namespace CSharpTreeBuilder.Cst
     // ----------------------------------------------------------------------------------------------
     public string SourceFileName
     {
-      get { return RedirectedSourceFile ?? SourceFileNode.Name; }
+      get { return RedirectedSourceFile ?? CompilationUnitNode.Name; }
     }
 
     // ----------------------------------------------------------------------------------------------

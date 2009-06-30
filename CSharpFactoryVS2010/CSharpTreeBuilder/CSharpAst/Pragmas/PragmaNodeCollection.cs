@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents a collection of pragma nodes.
   /// </summary>
   // ================================================================================================
-  public class PragmaNodeCollection : SyntaxNodeCollection<PragmaNode, SourceFileNode>
+  public class PragmaNodeCollection : SyntaxNodeCollection<PragmaNode, CompilationUnitNode>
   {
   }
 }

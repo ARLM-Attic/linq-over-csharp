@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines an integer constant.
+  /// This abstract class defines an integer literal.
   /// </summary>
   // ================================================================================================
   public abstract class IntegerLiteralNode : LiteralNode

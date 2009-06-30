@@ -10,8 +10,8 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   /// <summary>
   ///     This abstract class is the common base class for all syntax nodes belonging to a
-  ///     syntax tree of a source file. The root object object of the syntax tree is
-  ///     represented by a <see cref="SourceFileNode"/> instance.
+  ///     syntax tree of a compilation unit. The root object object of the syntax tree is
+  ///     represented by a <see cref="CompilationUnitNode"/> instance.
   /// </summary>
   /// <remarks>
   /// 	<para>

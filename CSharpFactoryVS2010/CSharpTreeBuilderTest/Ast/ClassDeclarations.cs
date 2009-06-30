@@ -19,7 +19,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration1.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.TypeDeclarations.Count.ShouldEqual(3);
       var classDecl = source.TypeDeclarations[0] as ClassDeclarationNode;
       classDecl.ShouldNotBeNull();
@@ -73,7 +73,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration1.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.TypeDeclarations.Count.ShouldEqual(3);
       var classDecl = source.TypeDeclarations[0] as ClassDeclarationNode;
       classDecl.StartToken.Value.ShouldEqual("class");
@@ -125,7 +125,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.ShouldNotBeNull();
       source.UsingNodes.Count.ShouldEqual(2);
       source.NamespaceDeclarations.Count.ShouldEqual(1);

@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines a System.Char literal.
+  /// This class defines a System.String literal.
   /// </summary>
   // ================================================================================================
   public class StringLiteralNode : LiteralNode

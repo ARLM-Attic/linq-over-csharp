@@ -18,7 +18,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
       Assert.IsTrue(InvokeParser(project));
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(source.TypeDeclarations.Count, 1);
       var typeDecl = source.TypeDeclarations[0] as EnumDeclarationNode;
       Assert.IsNotNull(typeDecl);
@@ -45,7 +45,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
       Assert.IsTrue(InvokeParser(project));
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       var enumDecl = source.TypeDeclarations[0] as EnumDeclarationNode;
       Assert.IsNotNull(enumDecl);
       Assert.AreEqual(enumDecl.StartToken.Value, "enum");
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration2.cs");
       Assert.IsTrue(InvokeParser(project));
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(source.TypeDeclarations.Count, 2);
       var typeDecl = source.TypeDeclarations[0] as StructDeclarationNode;
       Assert.IsNotNull(typeDecl);

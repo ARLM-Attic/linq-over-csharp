@@ -24,7 +24,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Symbol information obtained from the specified source file.
     /// </returns>
     // --------------------------------------------------------------------------------------------
-    ISymbol GetSymbol(SourceFileNode sourceNode);
+    ISymbol GetSymbol(CompilationUnitNode sourceNode);
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
@@ -35,6 +35,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Positioned symbol information obtained from the specified source file.
     /// </returns>
     // --------------------------------------------------------------------------------------------
-    IPositionedSymbol GetPositionedSymbol(SourceFileNode sourceNode);
+    IPositionedSymbol GetPositionedSymbol(CompilationUnitNode sourceNode);
   }
 }

@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines a System.Double constant.
+  /// This class defines a System.Double literal.
   /// </summary>
   // ================================================================================================
   public class DoubleLiteralNode : RealLiteralNode

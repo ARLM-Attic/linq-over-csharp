@@ -1,5 +1,5 @@
 // ================================================================================================
-// SourceFileNode.cs
+// CompilationUnitNode.cs
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type defines a source file node in the syntax tree.
+  /// This type defines a compilation unit node in the syntax tree.
   /// </summary>
   /// <remarks>
   /// 	<para>Syntax:</para>
@@ -34,15 +34,15 @@ namespace CSharpTreeBuilder.Ast
   /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
-  public sealed class SourceFileNode : NamespaceScopeNode
+  public sealed class CompilationUnitNode : NamespaceScopeNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SourceFileNode"/> class.
+    /// Initializes a new instance of the <see cref="CompilationUnitNode"/> class.
     /// </summary>
     /// <param name="fullName">The full name of the source file.</param>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode(string fullName) : base(null, null)
+    public CompilationUnitNode(string fullName) : base(null, null)
     {
       Name = Path.GetFileName(fullName);
       FullName = fullName;
@@ -53,10 +53,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SourceFileNode"/> class without a filename.
+    /// Initializes a new instance of the <see cref="CompilationUnitNode"/> class without a filename.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode()
+    public CompilationUnitNode()
       : this(null)
     {
     }
@@ -191,7 +191,7 @@ namespace CSharpTreeBuilder.Ast
         node.AcceptVisitor(visitor);
       }
 
-      // Visit extern alias nodes
+      // Visit attribute nodes
       foreach (var node in GlobalAttributes)
       {
         node.AcceptVisitor(visitor);

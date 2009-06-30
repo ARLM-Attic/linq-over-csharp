@@ -270,13 +270,11 @@
     <Compile Include="CSharpAst\Expressions\Operators\Literals\IntegerLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\NullLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\RealLiteralNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\Literals\ScopedNameNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SimpleNameNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\Literals\SingleNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\Literals\SingleLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\StringLiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ThisAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\TrueLiteralNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\Literals\TypeOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\UInt32LiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\Literals\UInt64LiteralNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\OperatorNode.cs" />
@@ -345,8 +343,8 @@
     <Compile Include="CSharpAst\SourceFileLevel\NamespaceDeclarationNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\NamespaceDeclarationNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\NamespaceScopeNode.cs" />
-    <Compile Include="CSharpAst\SourceFileLevel\SourceFileNode.cs" />
-    <Compile Include="CSharpAst\SourceFileLevel\SourceFileNodeCollection.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\CompilationUnitNode.cs" />
+    <Compile Include="CSharpAst\SourceFileLevel\CompilationUnitNodeCollection.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\UsingNamespaceNode.cs" />
     <Compile Include="CSharpAst\SourceFileLevel\UsingAliasNode.cs" />
     <Compile Include="CSharpAst\Statements\BlockStatementNode.cs" />

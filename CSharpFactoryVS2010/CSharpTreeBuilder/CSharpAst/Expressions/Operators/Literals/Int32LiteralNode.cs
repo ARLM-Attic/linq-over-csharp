@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class defines a System.Int32 constant.
+  /// This class defines a System.Int32 literal.
   /// </summary>
   // ================================================================================================
   public class Int32LiteralNode : IntegerLiteralNode

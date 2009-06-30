@@ -18,18 +18,18 @@ namespace CSharpTreeBuilder.Cst
     /// <summary>
     /// Initializes a new instance of the <see cref="SemanticsNode"/> class.
     /// </summary>
-    /// <param name="sourceFileNode">The source file node.</param>
+    /// <param name="compilationUnitNode">The compilation unit node.</param>
     // ----------------------------------------------------------------------------------------------
-    protected SemanticsNode(SourceFileNode sourceFileNode)
+    protected SemanticsNode(CompilationUnitNode compilationUnitNode)
     {
-      SourceFileNode = sourceFileNode;
+      CompilationUnitNode = compilationUnitNode;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the source file node belonging to this semantics node.
+    /// Gets the compilation unit node belonging to this semantics node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SourceFileNode SourceFileNode { get; private set; }
+    public CompilationUnitNode CompilationUnitNode { get; private set; }
   }
 }

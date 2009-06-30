@@ -67,7 +67,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif1.cs");
       InvokeParser(project).ShouldBeTrue();
-      var cd = project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+      var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
       md.ShouldNotBeNull();
@@ -82,7 +82,7 @@ namespace CSharpTreeBuilderTest.Ast
       var parser = new CSharpProject(WorkingFolder);
       parser.AddFile(@"Pragmas\IfEndif5.cs");
       InvokeParser(parser).ShouldBeTrue();
-      var cd = parser.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+      var cd = parser.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
       md.ShouldNotBeNull();
@@ -96,7 +96,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif6.cs");
       InvokeParser(project).ShouldBeTrue();
-      var cd = project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+      var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
       md.ShouldNotBeNull();
@@ -111,7 +111,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif7.cs");
       InvokeParser(project).ShouldBeTrue();
-      var cd = project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+      var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
       md.ShouldNotBeNull();
@@ -127,7 +127,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif7.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.Pragmas.Count.ShouldEqual(13);
       var ifPragma = source.Pragmas[0] as IfPragmaNode;
       ifPragma.ShouldNotBeNull();
@@ -297,7 +297,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndifInVerbatimString.cs");
       InvokeParser(project).ShouldBeTrue();
-      var cd = project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+      var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
       md.ShouldNotBeNull();
@@ -358,7 +358,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\RegionOk.cs");
       InvokeParser(project).ShouldBeTrue();
-      var source = project.SyntaxTree.SourceFileNodes[0];
+      var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.Regions.Count().ShouldEqual(3);
 
       var reg = source.Regions.Skip(0).Take(1).First();

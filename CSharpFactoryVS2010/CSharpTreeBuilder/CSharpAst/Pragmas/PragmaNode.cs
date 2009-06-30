@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.Ast
   /// parts of pragma definitions.
   /// </remarks>
   // ================================================================================================
-  public abstract class PragmaNode : SyntaxNode<SourceFileNode>
+  public abstract class PragmaNode : SyntaxNode<CompilationUnitNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

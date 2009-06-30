@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The source file nodes.</value>
     // ----------------------------------------------------------------------------------------------
-    SourceFileNodeCollection SourceFileNodes { get; }
+    CompilationUnitNodeCollection CompilationUnitNodes { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

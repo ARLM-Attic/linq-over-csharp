@@ -23,7 +23,7 @@ namespace CSharpTreeBuilderTest
       project.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(project));
 
-      var sn = project.SyntaxTree.SourceFileNodes[0];
+      var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
       Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
@@ -91,7 +91,7 @@ namespace CSharpTreeBuilderTest
       project.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(project));
 
-      var sn = project.SyntaxTree.SourceFileNodes[0];
+      var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
       Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
@@ -195,7 +195,7 @@ namespace CSharpTreeBuilderTest
       Assert.IsTrue(InvokeParser(project));
 
       // --- Check syntax tree
-      var sn = project.SyntaxTree.SourceFileNodes[0];
+      var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.NamespaceDeclarations.Count, 3);
       var nsDecl = sn.NamespaceDeclarations[0];
       Assert.AreEqual(nsDecl.NameTags.FullName, "CSharpParserTest.TestFiles");
@@ -240,7 +240,7 @@ namespace CSharpTreeBuilderTest
       project.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(project));
 
-      var sn = project.SyntaxTree.SourceFileNodes[0];
+      var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.NamespaceDeclarations.Count, 3);
       var nsDecl = sn.NamespaceDeclarations[0];
       Assert.AreEqual(nsDecl.StartToken.Value, "namespace");
@@ -297,7 +297,7 @@ namespace CSharpTreeBuilderTest
       project.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(project));
 
-      var sn = project.SyntaxTree.SourceFileNodes[0];
+      var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
       foreach (var usingNode in sn.UsingNodes)
       {
@@ -355,7 +355,7 @@ namespace CSharpTreeBuilderTest
       project.AddAssemblyReference("System.Xml");
       Assert.IsTrue(InvokeParser(project));
 
-      var sn = project.SyntaxTree.SourceFileNodes[0];
+      var sn = project.SyntaxTree.CompilationUnitNodes[0];
       foreach (var nsNode in sn.NamespaceDeclarations)
       {
         Assert.AreEqual(nsNode.ParentNode, sn);

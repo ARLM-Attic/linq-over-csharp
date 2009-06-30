@@ -26,7 +26,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\CompilationUnitNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var compilationUnitNode = project.SyntaxTree.SourceFileNodes[0];
+      var compilationUnitNode = project.SyntaxTree.CompilationUnitNodes[0];
 
       // Arrange
       var mocks = new MockRepository();
@@ -78,7 +78,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\TypeOrNamespaceNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var typeOrNamespaceNode = project.SyntaxTree.SourceFileNodes[0].UsingNodes[0].TypeName;
+      var typeOrNamespaceNode = project.SyntaxTree.CompilationUnitNodes[0].UsingNodes[0].TypeName;
 
       // Arrange
       var mocks = new MockRepository();
@@ -127,7 +127,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\ClassDeclarationNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var classDeclarationNode = (ClassDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
+      var classDeclarationNode = (ClassDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
       var mocks = new MockRepository();
@@ -420,7 +420,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\StructDeclarationNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var structDeclarationNode = (StructDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
+      var structDeclarationNode = (StructDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
       var mocks = new MockRepository();
@@ -578,7 +578,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\InterfaceDeclarationNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var interfaceDeclarationNode = (InterfaceDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
+      var interfaceDeclarationNode = (InterfaceDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
       var mocks = new MockRepository();
@@ -662,7 +662,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\EnumDeclarationNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var enumDeclarationNode = (EnumDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
+      var enumDeclarationNode = (EnumDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
       var mocks = new MockRepository();
@@ -710,7 +710,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Visitor\DelegateDeclarationNodeVisitorTest.cs");
       InvokeParser(project).ShouldBeTrue();
-      var delegateDeclarationNode = (DelegateDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0];
+      var delegateDeclarationNode = (DelegateDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
       var mocks = new MockRepository();
@@ -773,9 +773,9 @@ namespace CSharpTreeBuilderTest.Ast
       InvokeParser(project).ShouldBeTrue();
       
       // method1 includes all kinds of statements except yield-s
-      var method1Body = ((MethodDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0].MemberDeclarations[0]).Body;
+      var method1Body = ((MethodDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0]).Body;
       // method2 includes yield statements
-      var method2Body = ((MethodDeclarationNode)project.SyntaxTree.SourceFileNodes[0].TypeDeclarations[0].MemberDeclarations[1]).Body;
+      var method2Body = ((MethodDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[1]).Body;
 
       // Arrange
       var mocks = new MockRepository();
