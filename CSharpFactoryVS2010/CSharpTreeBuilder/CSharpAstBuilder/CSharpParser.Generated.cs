@@ -2419,19 +2419,24 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		SetCommentOwner(argList);
 		Start(argList);
 		
+		   TypeOrNamespaceNode typeNode = null;
+		
 		if (StartOf(11)) {
-			TypeOrNamespaceNode typeNode; 
 			Type(out typeNode);
-			argList.Add(typeNode); 
 		}
+		if (typeNode==null) { typeNode = TypeOrNamespaceNode.CreateEmptyTypeNode(null); }
+		argList.Add(typeNode); 
+		
 		while (la.kind == 87) {
 			Get();
-			var separator = t; 
+			typeNode = null;
+			
 			if (StartOf(11)) {
-				TypeOrNamespaceNode typeNode; 
 				Type(out typeNode);
-				argList.Add(separator, typeNode); 
 			}
+			if (typeNode==null) { typeNode = TypeOrNamespaceNode.CreateEmptyTypeNode(t); }
+			argList.Add(typeNode); 
+			
 		}
 		Expect(93);
 		Terminate(argList); 
@@ -3106,22 +3111,22 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			switch (la.kind) {
 			case 108: {
 				Get();
-				unaryOp = new UnaryPlusOperatorNode(t); 
+				unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.Identity); 
 				break;
 			}
 			case 102: {
 				Get();
-				unaryOp = new UnaryMinusOperatorNode(t);
+				unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.Negation);
 				break;
 			}
 			case 106: {
 				Get();
-				unaryOp = new UnaryNotOperatorNode(t); 
+				unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.LogicalNegation); 
 				break;
 			}
 			case 115: {
 				Get();
-				unaryOp = new BitwiseNotOperatorNode(t); 
+				unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.BitwiseNegation); 
 				break;
 			}
 			case 95: {
@@ -3136,12 +3141,12 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			case 116: {
 				Get();
-				unaryOp = new PointerOperatorNode(t); 
+				unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.PointerIndirection); 
 				break;
 			}
 			case 83: {
 				Get();
-				unaryOp = new ReferenceOperatorNode(t); 
+				unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.AddressOf); 
 				break;
 			}
 			case 98: {
@@ -4252,16 +4257,16 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 
 	void DefaultOperator(out ExpressionNode exprNode) {
 		Expect(20);
-		var defNode = new DefaultOperatorNode(t);
+		var defNode = new DefaultValueOperatorNode(t);
 		SetCommentOwner(defNode);
 		exprNode = defNode;
 		
 		Expect(98);
 		defNode.OpenParenthesis = t;
-		ExpressionNode primNode;
+		TypeOrNamespaceNode typeNode;
 		
-		Primary(out primNode);
-		defNode.Expression = primNode; 
+		Type(out typeNode);
+		defNode.TypeName = typeNode; 
 		Expect(113);
 		defNode.CloseParenthesis = t;
 		Terminate(defNode);

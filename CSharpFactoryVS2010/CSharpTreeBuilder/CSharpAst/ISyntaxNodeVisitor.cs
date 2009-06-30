@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 30. 9:05:00
+// Generated on: 2009. 06. 30. 14:16:36
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -36,7 +36,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(BaseElementAccessNode node);
     void Visit(BaseMemberAccessNode node);
     void Visit(BinaryOperatorNode node);
-    void Visit(BitwiseNotOperatorNode node);
     void Visit(BlockCommentNode node);
     void Visit(BlockStatementNode node);
     void Visit(BlockWrappingStatementNode node);
@@ -58,7 +57,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(ConstTagNode node);
     void Visit(ContinueStatementNode node);
     void Visit(DecimalLiteralNode node);
-    void Visit(DefaultOperatorNode node);
+    void Visit(DefaultValueOperatorNode node);
     void Visit(DefinePragmaNode node);
     void Visit(DelegateDeclarationNode node);
     void Visit(DoubleLiteralNode node);
@@ -135,7 +134,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(ParenthesizedExpressionNode node);
     void Visit(PointerMemberAccessOperatorNode node);
     void Visit(PointerModifierNode node);
-    void Visit(PointerOperatorNode node);
     void Visit(PostDecrementOperatorNode node);
     void Visit(PostIncrementOperatorNode node);
     void Visit(PragmaNode node);
@@ -152,7 +150,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(QueryBodyNode node);
     void Visit(QueryExpressionNode node);
     void Visit(RealLiteralNode node);
-    void Visit(ReferenceOperatorNode node);
     void Visit(RegionPragmaNode node);
     void Visit(ReturnStatementNode node);
     void Visit(SelectClauseNode node);
@@ -188,10 +185,8 @@ namespace CSharpTreeBuilder.Ast
     void Visit(TypeWithMembersDeclarationNode node);
     void Visit(UInt32LiteralNode node);
     void Visit(UInt64LiteralNode node);
-    void Visit(UnaryMinusOperatorNode node);
-    void Visit(UnaryNotOperatorNode node);
+    void Visit(UnaryOperatorExpressionNode node);
     void Visit(UnaryOperatorNode node);
-    void Visit(UnaryPlusOperatorNode node);
     void Visit(UncheckedOperatorNode node);
     void Visit(UncheckedStatementNode node);
     void Visit(UndefPragmaNode node);

@@ -111,6 +111,16 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this is an empty type name. (used in unbound generic types)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsEmpty
+    {
+      get { return TypeTags == null || TypeTags.Count == 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the type tags.
     /// </summary>
     /// <value>The type tags.</value>
@@ -181,10 +191,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Create type of namespace node from the specified token used for a simple type.
+    /// Create type or namespace node from the specified token used for a simple type.
     /// </summary>
     /// <param name="t">The token for the simple type.</param>
-    /// <returns></returns>
+    /// <returns>A new TypeOrNamespaceNode</returns>
     // ----------------------------------------------------------------------------------------------
     public static TypeOrNamespaceNode CreateTypeNode(Token t)
     {
@@ -192,6 +202,18 @@ namespace CSharpTreeBuilder.Ast
       result.TypeTags.Add(new TypeTagNode(t, null));
       result.Terminate(t);
       return result;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a special TypeOrNamespaceNode that represents a missing type name. Used for unbound types.
+    /// </summary>
+    /// <param name="separatorToken">Optional separator token.</param>
+    /// <returns>A new TypeOrNamespaceNode with null identifier token.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static TypeOrNamespaceNode CreateEmptyTypeNode(Token separatorToken)
+    {
+      return new TypeOrNamespaceNode(separatorToken, null);
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -164,6 +164,26 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this is an unbound generic type (has empty type arguments).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsUnbound
+    {
+      get { return HasTypeArguments && Arguments[0].IsEmpty; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating the number of generic dimensions.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int GenericDimensions
+    {
+      get { return Arguments.Count; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>

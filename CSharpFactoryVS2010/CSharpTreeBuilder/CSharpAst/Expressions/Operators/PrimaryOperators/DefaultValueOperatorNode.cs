@@ -1,7 +1,7 @@
 // ================================================================================================
-// ReferenceOperatorNode.cs
+// DefaultValueOperatorNode.cs
 //
-// Created: 2009.04.15, by Istvan Novak (DeepDiver)
+// Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
 
@@ -9,20 +9,21 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a reference operator.
+  /// This class represents a default value expression.
   /// </summary>
   // ================================================================================================
-  public sealed class ReferenceOperatorNode : UnaryOperatorNode
+  public class DefaultValueOperatorNode : EmbeddedTypeOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReferenceOperatorNode"/> class.
+    /// Initializes a new instance of the <see cref="DefaultValueOperatorNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ReferenceOperatorNode(Token start)
+    public DefaultValueOperatorNode(Token start)
       : base(start)
     {
     }
+
   }
 }

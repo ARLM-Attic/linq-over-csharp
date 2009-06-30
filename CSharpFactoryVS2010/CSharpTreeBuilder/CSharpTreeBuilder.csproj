@@ -114,6 +114,8 @@
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseElementAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\ExpressionNodeCollection.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorExpressionNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorType.cs" />
     <Compile Include="CSharpAst\Members\ConstructorInitializerNode.cs" />
     <Compile Include="CSharpAst\Members\BaseConstructorInitializerNode.cs" />
     <Compile Include="CSharpAst\Members\ThisConstructorInitializerNode.cs" />
@@ -286,7 +288,7 @@
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\CheckedOperatorNodeBase.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ConditionalOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\PointerMemberAccessOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\DefaultOperatorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\DefaultValueOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\EmbeddedTypeOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\PrimaryMemberAccessOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberAccessOperatorNodeBase.cs" />
@@ -299,18 +301,12 @@
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SizeofOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\TypeofOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\UncheckedOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\BitwiseNotOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PointerOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PostDecrementOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PostIncrementOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PreDecrementOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\PreIncrementOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\ReferenceOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\TypecastOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryMinusOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryNotOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorNode.cs" />
-    <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryPlusOperatorNode.cs" />
     <Compile Include="CSharpAst\ICSharpSyntaxTree.cs" />
     <Compile Include="CSharpAst\Members\AccessorNode.cs" />
     <Compile Include="CSharpAst\Members\AnonymousDelegateNode.cs" />

@@ -4,12 +4,13 @@
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
+using System;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Common root class of all unary operator nodes.
+  /// This class represents the abstract base class of expressions with one operand.
   /// </summary>
   // ================================================================================================
   public abstract class UnaryOperatorNode : OperatorNode
@@ -30,7 +31,7 @@ namespace CSharpTreeBuilder.Ast
     /// Initializes a new instance of the <see cref="UnaryOperatorNode"/> class.
     /// </summary>
     /// <param name="start">The start token.</param>
-    /// <param name="operand">The operand of the unary operator.</param>
+    /// <param name="operand">The operand of the unary expression.</param>
     // ----------------------------------------------------------------------------------------------
     protected UnaryOperatorNode(Token start, ExpressionNode operand)
       : base(start)
@@ -40,7 +41,7 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the operand of the unary operator.
+    /// Gets the operand of the unary expression.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ExpressionNode Operand { get; internal set; }

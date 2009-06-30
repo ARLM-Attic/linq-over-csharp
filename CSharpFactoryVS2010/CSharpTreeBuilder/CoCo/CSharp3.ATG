@@ -3761,21 +3761,21 @@ Unary<out ExpressionNode exprNode>
     IF (unaryHead[la.kind] || IsTypeCast())
     ( 
       "+"     
-      (. unaryOp = new UnaryPlusOperatorNode(t); .)
+      (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.Identity); .)
     | "-"   
-      (. unaryOp = new UnaryMinusOperatorNode(t);.)
+      (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.Negation);.)
     | "!"   
-      (. unaryOp = new UnaryNotOperatorNode(t); .)
+      (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.LogicalNegation); .)
     | "~"   
-      (. unaryOp = new BitwiseNotOperatorNode(t); .)
+      (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.BitwiseNegation); .)
     | "++"  
       (. unaryOp = new PreIncrementOperatorNode(t); .)
     | "--"  
       (. unaryOp = new PreDecrementOperatorNode(t); .)
     | "*"   
-      (. unaryOp = new PointerOperatorNode(t); .)
+      (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.PointerIndirection); .)
     | "&"   
-      (. unaryOp = new ReferenceOperatorNode(t); .)
+      (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperatorType.AddressOf); .)
     | "("   
       (. 
          TypeOrNamespaceNode typeNode; 
@@ -4210,24 +4210,25 @@ UncheckedOperator<out ExpressionNode exprNode>
 // ------------------------------------------------------------------------------------------------
 DefaultOperator<out ExpressionNode exprNode>
 = 
-  "default"                 
+  "default"     
   (. 
-     var defNode = new DefaultOperatorNode(t);
+     var defNode = new DefaultValueOperatorNode(t);
      SetCommentOwner(defNode);
      exprNode = defNode;
   .)
-  "("                       
-    (. 
-       defNode.OpenParenthesis = t;
-       ExpressionNode primNode;
-    .)
-    Primary<out primNode>  
-    (. defNode.Expression = primNode; .)
-  ")"                       
+  "("                        
+  (. 
+     defNode.OpenParenthesis = t;
+     TypeOrNamespaceNode typeNode;
+  .)
+  Type<out typeNode>  
+  (. defNode.TypeName = typeNode; .)
+  ")"                        
   (. 
      defNode.CloseParenthesis = t;
      Terminate(defNode);
   .)
+
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -4852,20 +4853,28 @@ TypeArgumentList<out TypeOrNamespaceNodeCollection argList>
      argList = new TypeOrNamespaceNodeCollection(); 
      SetCommentOwner(argList);
      Start(argList);
+  
+     TypeOrNamespaceNode typeNode = null;
   .)
   [ 
-    (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
-    (. argList.Add(typeNode); .)          
   ]                              
+  (. 
+    if (typeNode==null) { typeNode = TypeOrNamespaceNode.CreateEmptyTypeNode(null); }
+    argList.Add(typeNode); 
+  .)          
   { 
     ","
-    (. var separator = t; .)
+    (. 
+      typeNode = null;
+    .)
     [ 
-      (. TypeOrNamespaceNode typeNode; .)
       Type<out typeNode>           
-      (. argList.Add(separator, typeNode); .)          
     ]
+  (. 
+    if (typeNode==null) { typeNode = TypeOrNamespaceNode.CreateEmptyTypeNode(t); }
+    argList.Add(typeNode); 
+  .)          
   } 
   ">"
   (. Terminate(argList); .)

@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 30. 9:04:57
+// Generated on: 2009. 06. 30. 14:16:34
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -36,7 +36,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(BaseElementAccessNode node) { }
     public virtual void Visit(BaseMemberAccessNode node) { }
     public virtual void Visit(BinaryOperatorNode node) { }
-    public virtual void Visit(BitwiseNotOperatorNode node) { }
     public virtual void Visit(BlockCommentNode node) { }
     public virtual void Visit(BlockStatementNode node) { }
     public virtual void Visit(BlockWrappingStatementNode node) { }
@@ -58,7 +57,7 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(ConstTagNode node) { }
     public virtual void Visit(ContinueStatementNode node) { }
     public virtual void Visit(DecimalLiteralNode node) { }
-    public virtual void Visit(DefaultOperatorNode node) { }
+    public virtual void Visit(DefaultValueOperatorNode node) { }
     public virtual void Visit(DefinePragmaNode node) { }
     public virtual void Visit(DelegateDeclarationNode node) { }
     public virtual void Visit(DoubleLiteralNode node) { }
@@ -135,7 +134,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(ParenthesizedExpressionNode node) { }
     public virtual void Visit(PointerMemberAccessOperatorNode node) { }
     public virtual void Visit(PointerModifierNode node) { }
-    public virtual void Visit(PointerOperatorNode node) { }
     public virtual void Visit(PostDecrementOperatorNode node) { }
     public virtual void Visit(PostIncrementOperatorNode node) { }
     public virtual void Visit(PragmaNode node) { }
@@ -152,7 +150,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(QueryBodyNode node) { }
     public virtual void Visit(QueryExpressionNode node) { }
     public virtual void Visit(RealLiteralNode node) { }
-    public virtual void Visit(ReferenceOperatorNode node) { }
     public virtual void Visit(RegionPragmaNode node) { }
     public virtual void Visit(ReturnStatementNode node) { }
     public virtual void Visit(SelectClauseNode node) { }
@@ -188,10 +185,8 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(TypeWithMembersDeclarationNode node) { }
     public virtual void Visit(UInt32LiteralNode node) { }
     public virtual void Visit(UInt64LiteralNode node) { }
-    public virtual void Visit(UnaryMinusOperatorNode node) { }
-    public virtual void Visit(UnaryNotOperatorNode node) { }
+    public virtual void Visit(UnaryOperatorExpressionNode node) { }
     public virtual void Visit(UnaryOperatorNode node) { }
-    public virtual void Visit(UnaryPlusOperatorNode node) { }
     public virtual void Visit(UncheckedOperatorNode node) { }
     public virtual void Visit(UncheckedStatementNode node) { }
     public virtual void Visit(UndefPragmaNode node) { }

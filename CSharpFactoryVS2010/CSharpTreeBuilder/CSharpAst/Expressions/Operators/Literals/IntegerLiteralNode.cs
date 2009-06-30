@@ -43,38 +43,56 @@ namespace CSharpTreeBuilder.Ast
       {
         valueStr = valueStr.Substring(2);
         if (valueStr.EndsWith("ul") || valueStr.EndsWith("lu"))
-          return new UInt64LiteralNode(t, UInt64.Parse(valueStr, NumberStyles.HexNumber));
-        if (valueStr.EndsWith("u"))
-          return new UInt32LiteralNode(t, UInt32.Parse(valueStr, NumberStyles.HexNumber));
-        if (valueStr.EndsWith("l"))
-          return new Int64LiteralNode(t, Int64.Parse(valueStr, NumberStyles.HexNumber));
         {
-          try
-          {
-            return new Int32LiteralNode(t, Int32.Parse(valueStr, NumberStyles.HexNumber));
-          }
-          catch (OverflowException)
-          {
-            return new UInt32LiteralNode(t, UInt32.Parse(valueStr, NumberStyles.HexNumber));
-          }
+          valueStr = valueStr.Remove(valueStr.Length - 2);
+          return new UInt64LiteralNode(t, UInt64.Parse(valueStr, NumberStyles.HexNumber));
         }
-      }
-      if (valueStr.EndsWith("ul") || valueStr.EndsWith("lu"))
-        return new UInt64LiteralNode(t, UInt64.Parse(valueStr));
-      if (valueStr.EndsWith("u"))
-        return new UInt32LiteralNode(t, UInt32.Parse(valueStr));
-      if (valueStr.EndsWith("l"))
-        return new Int64LiteralNode(t, Int64.Parse(valueStr));
-      {
+        if (valueStr.EndsWith("u"))
+        {
+          valueStr = valueStr.Remove(valueStr.Length - 1);
+          return new UInt32LiteralNode(t, UInt32.Parse(valueStr, NumberStyles.HexNumber));
+        }
+        if (valueStr.EndsWith("l"))
+        {
+          valueStr = valueStr.Remove(valueStr.Length - 1);
+          return new Int64LiteralNode(t, Int64.Parse(valueStr, NumberStyles.HexNumber));
+        }
+
         try
         {
-          return new Int32LiteralNode(t, Int32.Parse(valueStr));
+          return new Int32LiteralNode(t, Int32.Parse(valueStr, NumberStyles.HexNumber));
         }
         catch (OverflowException)
         {
-          return new UInt32LiteralNode(t, UInt32.Parse(valueStr));
+          return new UInt32LiteralNode(t, UInt32.Parse(valueStr, NumberStyles.HexNumber));
         }
       }
+
+      if (valueStr.EndsWith("ul") || valueStr.EndsWith("lu"))
+      {
+        valueStr = valueStr.Remove(valueStr.Length - 2);
+        return new UInt64LiteralNode(t, UInt64.Parse(valueStr));
+      }
+      if (valueStr.EndsWith("u"))
+      {
+        valueStr = valueStr.Remove(valueStr.Length - 1);
+        return new UInt32LiteralNode(t, UInt32.Parse(valueStr));
+      }
+      if (valueStr.EndsWith("l"))
+      {
+        valueStr = valueStr.Remove(valueStr.Length - 1);
+        return new Int64LiteralNode(t, Int64.Parse(valueStr));
+      }
+      
+      try
+      {
+        return new Int32LiteralNode(t, Int32.Parse(valueStr));
+      }
+      catch (OverflowException)
+      {
+        return new UInt32LiteralNode(t, UInt32.Parse(valueStr));
+      }
+      
     }
   }
 }
