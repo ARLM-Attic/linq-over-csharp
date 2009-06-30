@@ -422,16 +422,15 @@ TypeDeclaration<TypeDeclarationNode declaringType, out TypeDeclarationNode typeD
      typeDecl = null; 
      Token partialToken = null;
   .)
-  (                                                             
-    [ 
-      "partial"                                      
+  (   
+    [
+      IF (la.kind == _ident && la.val == "partial")
+      ident
       (. partialToken = t; .)
     ]
-    ( 
-      ClassDeclaration<out typeDecl> |                                                           
-      StructDeclaration<out typeDecl> |                                                           
-      InterfaceDeclaration<out typeDecl>                                                           
-    )                                                          
+      ClassDeclaration<out typeDecl> 
+    | StructDeclaration<out typeDecl> 
+    | InterfaceDeclaration<out typeDecl>                                                           
     | EnumDeclaration<out typeDecl> 
     | DelegateDeclaration<out typeDecl>
   )
@@ -460,7 +459,7 @@ ClassDeclaration<out TypeDeclarationNode typeDecl>
   .)
   [ TypeParameterList<typeDecl> ] 
   [ BaseTypeList<typeDecl> ]
-  {                                                  
+  {    
     (. TypeParameterConstraintNode constrNode; .)
     TypeParameterConstraintsClause<out constrNode>   
     (. typeDecl.TypeParameterConstraints.Add(constrNode); .)
@@ -743,9 +742,10 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
   | 
     // --- Partial method declaration
     IF (IsPartialMethod())
-    "partial"
+    // --- At this point ident is "partial"
+    ident
     (. 
-       var partialToken = t;
+       var partialToken = t; 
        TypeOrNamespaceNode typeNode; 
     .)
     Type<out typeNode>
@@ -2064,6 +2064,9 @@ Statement<out StatementNode stmtNode>
 EmbeddedStatement<out StatementNode stmtNode>
   (. stmtNode = null; .)
 =   
+    IF (la.kind == _ident && la.val == "yield")
+    ident ( YieldReturnStatement<out stmtNode> | YieldBreakStatement<out stmtNode> )
+  |
     (. BlockStatementNode blockNode; .)
     Block<out blockNode> 
     (. stmtNode = blockNode; .)
@@ -2098,7 +2101,6 @@ EmbeddedStatement<out StatementNode stmtNode>
   | TryFinallyBlock<out stmtNode>
   | LockStatement<out stmtNode>
   | UsingStatement<out stmtNode>
-  | "yield" ( YieldReturnStatement<out stmtNode> | YieldBreakStatement<out stmtNode> )
   | FixedStatement<out stmtNode>
 .
 
@@ -2223,7 +2225,6 @@ EmptyStatement<out StatementNode stmtNode>
 CheckedBlock<out StatementNode stmtNode>
 =
   (
-    IF (la.kind == _checked && Peek(1).kind == _lbrace) 
     "checked"
     (. 
        var start = t; 
@@ -2243,7 +2244,6 @@ CheckedBlock<out StatementNode stmtNode>
 UncheckedBlock<out StatementNode stmtNode>
 =
   (
-    IF (la.kind == _unchecked && Peek(1).kind == _lbrace) 
     "unchecked"
     (. 
        var start = t; 
@@ -2646,12 +2646,15 @@ ThrowStatement<out StatementNode stmtNode>
 // ------------------------------------------------------------------------------------------------
 YieldReturnStatement<out StatementNode stmtNode>
 =
-  (. ExpressionNode exprNode; .)
+  (. 
+     var start = t;
+     ExpressionNode exprNode; 
+  .)
   "return"
-  (. var start = t; .)
+  (. var returnToken = t; .)
   Expression<out exprNode>
   (. 
-     stmtNode = new YieldReturnStatementNode(t, exprNode); 
+     stmtNode = new YieldReturnStatementNode(t, returnToken, exprNode); 
      SetCommentOwner(stmtNode);
   .)
   ";"
@@ -2663,9 +2666,11 @@ YieldReturnStatement<out StatementNode stmtNode>
 // ------------------------------------------------------------------------------------------------
 YieldBreakStatement<out StatementNode stmtNode>
 =
+  (. var start = t; .)
   "break"
+  (. var breakToken = t; .)
   (. 
-     stmtNode = new YieldBreakStatementNode(t); 
+     stmtNode = new YieldBreakStatementNode(t, breakToken); 
      SetCommentOwner(stmtNode);
   .)
   ";"
@@ -3125,6 +3130,7 @@ QueryBodyClause<QueryBodyNode bodyNode>
     GroupClause<out groupNode>
     (. bodyNode.BodyClauses.Add(groupNode); .)
   |
+    IF (la.kind == _ident && la.val == "where")
     (. WhereClauseNode whereNode; .)
     WhereClause<out whereNode>
     (. bodyNode.BodyClauses.Add(whereNode); .)
@@ -3164,7 +3170,8 @@ LetClause<out LetClauseNode letNode>
 WhereClause<out WhereClauseNode whereNode>
 =
   (. ExpressionNode exprNode; .)
-  "where"
+  // --- At this point ident is "where"
+  ident
   (. 
      whereNode = new WhereClauseNode(t); 
      SetCommentOwner(whereNode);
@@ -3276,10 +3283,12 @@ OrderingClause<out OrderingClauseNode ordNode>
   .)
   Expression<out exprNode>
   (. ordNode.Expression = exprNode; .)
-  [                             
-    ( "ascending" | "descending" )
-    (. ordNode.Direction = t; .)
-  ]               
+  (
+      IF (la.kind == _ident && (la.val == "ascending" || la.val == "descending"))
+      ident
+      (. ordNode.Direction = t; .)
+    |
+  )
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -3316,8 +3325,14 @@ GroupClause<out GroupByClauseNode groupNode>
   .)
   Expression<out exprNode>
   (. groupNode.GroupExpression = exprNode; .)
-  "by"
-  (. groupNode.ByToken = t; .)
+  // --- At this point ident must be "by"
+  (. .)
+  ident
+  (. 
+     if (t.kind != _ident || t.val != "by") 
+       Error("SYNERR", t, "'by' token is expected", null);
+     groupNode.ByToken = t; 
+  .)
   Expression<out exprNode>
   (. 
      groupNode.ByExpression = exprNode; 
@@ -4888,9 +4903,14 @@ TypeParameterConstraintsClause<out TypeParameterConstraintNode constrNode>
   (. 
      Token start;
      Token identifier;
-  .)      
-  "where"
-  (. start = t; .)
+     constrNode = null;
+  .)   
+  // --- At this point ident is "where"  
+  ident
+  (. 
+     if (t.val != "where") Error("SYNERR", t, "'where' token is expected", null);
+     start = t; 
+  .)
   ident                        
   (. identifier = t; .)
   ":"

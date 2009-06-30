@@ -19,11 +19,20 @@ namespace CSharpTreeBuilder.Ast
     /// Initializes a new instance of the <see cref="YieldBreakStatementNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
+    /// <param name="breakToken">The "break" token.</param>
     // ----------------------------------------------------------------------------------------------
-    public YieldBreakStatementNode(Token start)
+    public YieldBreakStatementNode(Token start, Token breakToken)
       : base(start)
     {
+      BreakToken = breakToken;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the "break" token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token BreakToken { get; private set; }
 
     #region Visitor methods
 

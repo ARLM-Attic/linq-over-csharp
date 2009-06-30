@@ -1,0 +1,415 @@
+Symbol Table:
+------------
+
+ ID name          typ  hasAt graph  del    line tokenKind
+  0 EOF            t    false                 0 fixedToken
+  1 ident          t    false                34 classLitToken
+  2 intCon         t    false                51 classToken
+  3 realCon        t    false                59 classToken
+  4 charCon        t    false                74 classToken
+  5 stringCon      t    false                85 classToken
+  6 abstract       t    false                99 litToken
+  7 as             t    false               100 litToken
+  8 base           t    false               101 litToken
+  9 bool           t    false               102 litToken
+ 10 break          t    false               103 litToken
+ 11 byte           t    false               104 litToken
+ 12 case           t    false               105 litToken
+ 13 catch          t    false               106 litToken
+ 14 char           t    false               107 litToken
+ 15 checked        t    false               108 litToken
+ 16 class          t    false               109 litToken
+ 17 const          t    false               110 litToken
+ 18 continue       t    false               111 litToken
+ 19 decimal        t    false               112 litToken
+ 20 default        t    false               113 litToken
+ 21 delegate       t    false               114 litToken
+ 22 do             t    false               115 litToken
+ 23 double         t    false               116 litToken
+ 24 else           t    false               117 litToken
+ 25 enum           t    false               118 litToken
+ 26 event          t    false               119 litToken
+ 27 explicit       t    false               120 litToken
+ 28 extern         t    false               121 litToken
+ 29 false          t    false               122 litToken
+ 30 finally        t    false               123 litToken
+ 31 fixed          t    false               124 litToken
+ 32 float          t    false               125 litToken
+ 33 for            t    false               126 litToken
+ 34 foreach        t    false               127 litToken
+ 35 goto           t    false               128 litToken
+ 36 if             t    false               129 litToken
+ 37 implicit       t    false               130 litToken
+ 38 in             t    false               131 litToken
+ 39 int            t    false               132 litToken
+ 40 interface      t    false               133 litToken
+ 41 internal       t    false               134 litToken
+ 42 is             t    false               135 litToken
+ 43 lock           t    false               136 litToken
+ 44 long           t    false               137 litToken
+ 45 namespace      t    false               138 litToken
+ 46 new            t    false               139 litToken
+ 47 null           t    false               140 litToken
+ 48 object         t    false               141 litToken
+ 49 operator       t    false               142 litToken
+ 50 out            t    false               143 litToken
+ 51 override       t    false               144 litToken
+ 52 params         t    false               145 litToken
+ 53 private        t    false               146 litToken
+ 54 protected      t    false               147 litToken
+ 55 public         t    false               148 litToken
+ 56 readonly       t    false               149 litToken
+ 57 ref            t    false               150 litToken
+ 58 return         t    false               151 litToken
+ 59 sbyte          t    false               152 litToken
+ 60 sealed         t    false               153 litToken
+ 61 short          t    false               154 litToken
+ 62 sizeof         t    false               155 litToken
+ 63 stackalloc     t    false               156 litToken
+ 64 static         t    false               157 litToken
+ 65 string         t    false               158 litToken
+ 66 struct         t    false               159 litToken
+ 67 switch         t    false               160 litToken
+ 68 this           t    false               161 litToken
+ 69 throw          t    false               162 litToken
+ 70 true           t    false               163 litToken
+ 71 try            t    false               164 litToken
+ 72 typeof         t    false               165 litToken
+ 73 uint           t    false               166 litToken
+ 74 ulong          t    false               167 litToken
+ 75 unchecked      t    false               168 litToken
+ 76 unsafe         t    false               169 litToken
+ 77 ushort         t    false               170 litToken
+ 78 usingKW        t    false               171 litToken
+ 79 virtual        t    false               172 litToken
+ 80 void           t    false               173 litToken
+ 81 volatile       t    false               174 litToken
+ 82 while          t    false               175 litToken
+ 83 and            t    false               181 fixedToken
+ 84 andassgn       t    false               182 fixedToken
+ 85 assgn          t    false               183 fixedToken
+ 86 colon          t    false               184 fixedToken
+ 87 comma          t    false               185 fixedToken
+ 88 dec            t    false               186 fixedToken
+ 89 divassgn       t    false               187 fixedToken
+ 90 dot            t    false               188 fixedToken
+ 91 dblcolon       t    false               189 fixedToken
+ 92 eq             t    false               190 fixedToken
+ 93 gt             t    false               191 fixedToken
+ 94 gteq           t    false               192 fixedToken
+ 95 inc            t    false               193 fixedToken
+ 96 lbrace         t    false               194 fixedToken
+ 97 lbrack         t    false               195 fixedToken
+ 98 lpar           t    false               196 fixedToken
+ 99 lshassgn       t    false               197 fixedToken
+100 lt             t    false               198 fixedToken
+101 ltlt           t    false               199 fixedToken
+102 minus          t    false               200 fixedToken
+103 minusassgn     t    false               201 fixedToken
+104 modassgn       t    false               202 fixedToken
+105 neq            t    false               203 fixedToken
+106 not            t    false               204 fixedToken
+107 orassgn        t    false               205 fixedToken
+108 plus           t    false               206 fixedToken
+109 plusassgn      t    false               207 fixedToken
+110 question       t    false               208 fixedToken
+111 rbrace         t    false               209 fixedToken
+112 rbrack         t    false               210 fixedToken
+113 rpar           t    false               211 fixedToken
+114 scolon         t    false               212 fixedToken
+115 tilde          t    false               213 fixedToken
+116 times          t    false               214 fixedToken
+117 timesassgn     t    false               215 fixedToken
+118 xorassgn       t    false               216 fixedToken
+119 larrow         t    false               217 fixedToken
+120 "??"           t    false              3439 fixedToken
+121 "||"           t    false              3464 fixedToken
+122 "&&"           t    false              3489 fixedToken
+123 "|"            t    false              3514 fixedToken
+124 "^"            t    false              3539 fixedToken
+125 "<="           t    false              3625 fixedToken
+126 "/"            t    false              3747 fixedToken
+127 "%"            t    false              3749 fixedToken
+128 "->"           t    false              3896 fixedToken
+129 ???            t    false                 0 fixedToken
+130 ppDefine       pr   false               226 classToken
+131 ppUndef        pr   false               227 classToken
+132 ppIf           pr   false               228 classToken
+133 ppElif         pr   false               229 classToken
+134 ppElse         pr   false               230 classToken
+135 ppEndif        pr   false               231 classToken
+136 ppLine         pr   false               232 classToken
+137 ppError        pr   false               233 classToken
+138 ppWarning      pr   false               234 classToken
+139 ppPragma       pr   false               235 classToken
+140 ppRegion       pr   false               236 classToken
+141 ppEndReg       pr   false               237 classToken
+142 cBlockCom      pr   false               243 classToken
+143 cLineCom       pr   false               244 classToken
+  0 CS3            nt   false     3 true    254 fixedToken
+  1 ExternAliasD   nt   true     11 false   265 fixedToken
+  2 UsingDirecti   nt   true     19 false   294 fixedToken
+  3 GlobalAttrib   nt   false    30 false   328 fixedToken
+  4 NamespaceMem   nt   true     81 false   363 fixedToken
+  5 TypeName       nt   true   1050 false  1982 fixedToken
+  6 Attribute      nt   true    866 false  1695 fixedToken
+  7 AttributeDec   nt   true    711 true   1664 fixedToken
+  8 ModifierList   nt   true    928 true   1756 fixedToken
+  9 TypeDeclarat   nt   true     83 false   419 fixedToken
+ 10 ClassDeclara   nt   true     99 false   450 fixedToken
+ 11 StructDeclar   nt   true    138 false   529 fixedToken
+ 12 InterfaceDec   nt   true    449 false  1121 fixedToken
+ 13 EnumDeclarat   nt   true    167 false   584 fixedToken
+ 14 DelegateDecl   nt   true    213 false   669 fixedToken
+ 15 TypeParamete   nt   true   2464 false  4818 fixedToken
+ 16 BaseTypeList   nt   true    116 false   477 fixedToken
+ 17 TypeParamete   nt   true   2494 false  4901 fixedToken
+ 18 ClassBody      nt   true    126 false   502 fixedToken
+ 19 ClassType      nt   true   1026 false  1919 fixedToken
+ 20 ClassMemberD   nt   true    249 false   702 fixedToken
+ 21 StructBody     nt   true    155 false   557 fixedToken
+ 22 StructMember   nt   true    251 false   733 fixedToken
+ 23 IntegralType   nt   true   1003 false  1900 fixedToken
+ 24 EnumBody       nt   true    184 false   611 fixedToken
+ 25 EnumMemberDe   nt   true    203 false   641 fixedToken
+ 26 Expression     nt   true   1725 false  3346 fixedToken
+ 27 Type           nt   true    929 false  1782 fixedToken
+ 28 FormalParame   nt   true    599 false  1434 fixedToken
+ 29 Block          nt   true   1146 false  2110 fixedToken
+ 30 ConstMemberD   nt   true    303 false   852 fixedToken
+ 31 EventDeclara   nt   true    323 false   904 fixedToken
+ 32 ConstructorD   nt   true    342 false   944 fixedToken
+ 33 MemberName     nt   true   1028 false  1931 fixedToken
+ 34 MethodDeclar   nt   true    391 false  1034 fixedToken
+ 35 OperatorDecl   nt   true    433 false  1098 fixedToken
+ 36 FieldMemberD   nt   true   2379 false  4715 fixedToken
+ 37 PropertyDecl   nt   true    372 false  1000 fixedToken
+ 38 IndexerDecla   nt   true    377 false  1015 fixedToken
+ 39 CastOperator   nt   true    412 false  1060 fixedToken
+ 40 SingleConstM   nt   true    317 false   882 fixedToken
+ 41 EventAccesso   nt   true    651 false  1543 fixedToken
+ 42 CurrentArgum   nt   true    614 true   1453 fixedToken
+ 43 AccessorDecl   nt   true    624 false  1495 fixedToken
+ 44 Overloadable   nt   true   2462 false  4753 fixedToken
+ 45 InterfaceMem   nt   true    470 false  1155 fixedToken
+ 46 InterfaceAcc   nt   true    668 false  1587 fixedToken
+ 47 InterfaceEve   nt   true    506 false  1235 fixedToken
+ 48 LocalVariabl   nt   true    515 false  1255 fixedToken
+ 49 LocalVariabl   nt   true    531 false  1289 fixedToken
+ 50 VariableInit   nt   true    558 false  1334 fixedToken
+ 51 ArrayInitial   nt   true    560 false  1355 fixedToken
+ 52 FormalParame   nt   true    578 false  1394 fixedToken
+ 53 CurrentArgum   nt   true    615 false  1471 fixedToken
+ 54 Attributes     nt   true    685 false  1630 fixedToken
+ 55 Keyword        nt   false   714 false  1676 fixedToken
+ 56 AttributeArg   nt   true    872 false  1711 fixedToken
+ 57 PrimitiveTyp   nt   true    999 false  1888 fixedToken
+ 58 PointerOrArr   nt   true    980 true   1847 fixedToken
+ 59 NonArrayType   nt   true    942 false  1802 fixedToken
+ 60 TypeInRelExp   nt   true    954 false  1828 fixedToken
+ 61 PredefinedTy   nt   true    987 false  1876 fixedToken
+ 62 TypeArgument   nt   true   2480 false  4860 fixedToken
+ 63 Statement      nt   true   1079 false  2032 fixedToken
+ 64 ConstStateme   nt   true   1168 false  2164 fixedToken
+ 65 EmbeddedStat   nt   true   1099 false  2064 fixedToken
+ 66 YieldReturnS   nt   true   1365 false  2647 fixedToken
+ 67 YieldBreakSt   nt   true   1372 false  2667 fixedToken
+ 68 EmptyStateme   nt   true   1189 false  2213 fixedToken
+ 69 CheckedBlock   nt   true   1191 false  2225 fixedToken
+ 70 UncheckedBlo   nt   true   1195 false  2244 fixedToken
+ 71 UnsafeBlock    nt   true   1199 false  2263 fixedToken
+ 72 StatementExp   nt   true   1403 false  2746 fixedToken
+ 73 IfStatement    nt   true   1203 false  2280 fixedToken
+ 74 SwitchStatem   nt   true   1154 false  2132 fixedToken
+ 75 WhileStateme   nt   true   1219 false  2315 fixedToken
+ 76 DoWhileState   nt   true   1228 false  2344 fixedToken
+ 77 ForStatement   nt   true   1242 false  2373 fixedToken
+ 78 ForEachState   nt   true   1261 false  2412 fixedToken
+ 79 BreakStateme   nt   true   1282 false  2457 fixedToken
+ 80 ContinueStat   nt   true   1302 false  2501 fixedToken
+ 81 GotoStatemen   nt   true   1286 false  2471 fixedToken
+ 82 ReturnStatem   nt   true   1349 false  2609 fixedToken
+ 83 ThrowStateme   nt   true   1357 false  2628 fixedToken
+ 84 TryFinallyBl   nt   true   1306 false  2515 fixedToken
+ 85 LockStatemen   nt   true   1322 false  2544 fixedToken
+ 86 UsingStateme   nt   true   1332 false  2574 fixedToken
+ 87 FixedStateme   nt   true   1378 false  2683 fixedToken
+ 88 SwitchSectio   nt   true   1451 false  2819 fixedToken
+ 89 ForInitializ   nt   true   1487 false  2868 fixedToken
+ 90 ForIterator    nt   true   1489 false  2889 fixedToken
+ 91 CatchClauses   nt   true   1497 false  2905 fixedToken
+ 92 Unary          nt   true   1937 false  3769 fixedToken
+ 93 AssignmentOp   nt   true   1414 false  2772 fixedToken
+ 94 SwitchLabel    nt   true   1471 false  2847 fixedToken
+ 95 LambdaFuncti   nt   true   1543 false  2949 fixedToken
+ 96 ExplicitLamb   nt   true   1545 false  3009 fixedToken
+ 97 LambdaFuncti   nt   true   1564 false  3034 fixedToken
+ 98 FromClause     nt   true   1566 false  3050 fixedToken
+ 99 QueryBody      nt   true   1581 true   3083 fixedToken
+100 QueryBodyCla   nt   true   1592 false  3095 fixedToken
+101 LetClause      nt   true   1627 false  3147 fixedToken
+102 JoinClause     nt   true   1645 false  3207 fixedToken
+103 OrderByClaus   nt   true   1679 false  3254 fixedToken
+104 IntoClause     nt   true   1641 false  3189 fixedToken
+105 SelectClause   nt   true   1699 false  3297 fixedToken
+106 GroupClause    nt   true   1703 false  3316 fixedToken
+107 WhereClause    nt   true   1636 false  3170 fixedToken
+108 OrderingClau   nt   true   1690 false  3277 fixedToken
+109 NullCoalesci   nt   true   1750 true   3434 fixedToken
+110 OrExpr         nt   true   1759 true   3459 fixedToken
+111 AndExpr        nt   true   1768 true   3484 fixedToken
+112 BitOrExpr      nt   true   1777 true   3509 fixedToken
+113 BitXorExpr     nt   true   1786 true   3534 fixedToken
+114 BitAndExpr     nt   true   1795 true   3559 fixedToken
+115 EqlExpr        nt   true   1804 true   3584 fixedToken
+116 RelExpr        nt   true   1819 true   3614 fixedToken
+117 ShiftExpr      nt   true   1853 true   3668 fixedToken
+118 AddExpr        nt   true   1871 true   3707 fixedToken
+119 MulExpr        nt   true   1886 true   3737 fixedToken
+120 Primary        nt   true   1939 false  3825 fixedToken
+121 Literal        nt   true   2020 false  3949 fixedToken
+122 PredefinedTy   nt   true   2038 false  3974 fixedToken
+123 QualifiedAli   nt   true   2079 false  4022 fixedToken
+124 SimpleName     nt   true   2094 false  4068 fixedToken
+125 BaseMemberAc   nt   true   2102 false  4087 fixedToken
+126 BaseElementA   nt   true   2106 false  4110 fixedToken
+127 NewOperator    nt   true   2151 false  4252 fixedToken
+128 TypeOfOperat   nt   true   2111 false  4126 fixedToken
+129 CheckedOpera   nt   true   2127 false  4176 fixedToken
+130 UncheckedOpe   nt   true   2135 false  4201 fixedToken
+131 DefaultOpera   nt   true   2143 false  4226 fixedToken
+132 AnonymousDel   nt   true   2338 false  4616 fixedToken
+133 SizeOfOperat   nt   true   2119 false  4151 fixedToken
+134 ArrayIndexer   nt   true   2371 false  4686 fixedToken
+135 AnonymousObj   nt   true   2167 false  4282 fixedToken
+136 NewOperatorW   nt   true   2207 false  4372 fixedToken
+137 ImplicitArra   nt   true   2255 false  4471 fixedToken
+138 MemberDeclar   nt   true   2176 false  4304 fixedToken
+139 MemberDeclar   nt   true   2185 false  4321 fixedToken
+140 ObjectOrColl   nt   true   2267 false  4492 fixedToken
+141 MemberInitia   nt   true   2315 false  4574 fixedToken
+142 ElementIniti   nt   true   2288 false  4526 fixedToken
+143 ElementIniti   nt   true   2297 false  4543 fixedToken
+144 MemberInitia   nt   true   2324 false  4591 fixedToken
+145 AnonymousMet   nt   true   2357 false  4653 fixedToken
+146 SingleFieldM   nt   true   2387 false  4731 fixedToken
+147 TypeParamete   nt   true   2476 false  4849 fixedToken
+148 TypeParamete   nt   true   2513 false  4936 fixedToken
+
+Literal Tokens:
+--------------
+_lbrace = "{".
+_times = "*".
+_modassgn = "%=".
+_continue = "continue".
+_minus = "-".
+_as = "as".
+_timesassgn = "*=".
+_xorassgn = "^=".
+_interface = "interface".
+_rbrack = "]".
+_lbrack = "[".
+_uint = "uint".
+_out = "out".
+_static = "static".
+_minusassgn = "-=".
+_usingKW = "using".
+_ulong = "ulong".
+_namespace = "namespace".
+_unchecked = "unchecked".
+_override = "override".
+_null = "null".
+_string = "string".
+_private = "private".
+_while = "while".
+_divassgn = "/=".
+_colon = ":".
+_dot = ".".
+_eq = "==".
+_explicit = "explicit".
+_const = "const".
+_dblcolon = "::".
+_internal = "internal".
+_long = "long".
+_enum = "enum".
+_fixed = "fixed".
+_plusassgn = "+=".
+_scolon = ";".
+_assgn = "=".
+_bool = "bool".
+_orassgn = "|=".
+_params = "params".
+_for = "for".
+_lshassgn = "<<=".
+_inc = "++".
+_neq = "!=".
+_gt = ">".
+_ushort = "ushort".
+_is = "is".
+_break = "break".
+_decimal = "decimal".
+_goto = "goto".
+_in = "in".
+_class = "class".
+_plus = "+".
+_throw = "throw".
+_if = "if".
+_switch = "switch".
+_sizeof = "sizeof".
+_abstract = "abstract".
+_typeof = "typeof".
+_delegate = "delegate".
+_sbyte = "sbyte".
+_gteq = ">=".
+_double = "double".
+_larrow = "=>".
+_struct = "struct".
+_volatile = "volatile".
+_event = "event".
+_extern = "extern".
+_new = "new".
+_question = "?".
+_andassgn = "&=".
+_char = "char".
+_lock = "lock".
+_dec = "--".
+_float = "float".
+_object = "object".
+_not = "!".
+_protected = "protected".
+_catch = "catch".
+_virtual = "virtual".
+_lpar = "(".
+_base = "base".
+_unsafe = "unsafe".
+_true = "true".
+_case = "case".
+_do = "do".
+_finally = "finally".
+_rbrace = "}".
+_public = "public".
+_foreach = "foreach".
+_try = "try".
+_and = "&".
+_return = "return".
+_tilde = "~".
+_short = "short".
+_sealed = "sealed".
+_ref = "ref".
+_void = "void".
+_lt = "<".
+_operator = "operator".
+_else = "else".
+_this = "this".
+_readonly = "readonly".
+_comma = ",".
+_ltlt = "<<".
+_implicit = "implicit".
+_byte = "byte".
+_int = "int".
+_stackalloc = "stackalloc".
+_rpar = ")".
+_default = "default".
+_checked = "checked".
+_false = "false".
+

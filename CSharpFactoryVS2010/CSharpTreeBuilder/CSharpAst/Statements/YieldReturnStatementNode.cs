@@ -19,13 +19,22 @@ namespace CSharpTreeBuilder.Ast
     /// Initializes a new instance of the <see cref="YieldReturnStatementNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
+    /// <param name="returnToken">The "return" token.</param>
     /// <param name="expression">The expression belonging to the statement.</param>
     // ----------------------------------------------------------------------------------------------
-    public YieldReturnStatementNode(Token start, ExpressionNode expression)
+    public YieldReturnStatementNode(Token start, Token returnToken, ExpressionNode expression)
       : base(start)
     {
+      ReturnToken = returnToken;
       Expression = expression;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the "return" token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token ReturnToken { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

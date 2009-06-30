@@ -651,5 +651,18 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     {
       return la.kind == _ident && Peek(1).kind == _dblcolon;
     }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
+    /// Lookahead method to check if the next token is the "where" identifier.
+    /// </summary>
+    /// <returns>
+    /// True, if lookahed resulted with the expected result; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------
+    bool IsWhere()
+    {
+      return la.kind == _ident && la.val == "where";
+    }
   }
 }

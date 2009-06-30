@@ -54,7 +54,7 @@
     <Compile Include="CSharpAstBuilder\CSharpParser.Comments.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Common.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Errors.cs" />
-    <Compile Include="CSharpAstBuilder\CSharpParser.Generated.cs" />
+    <Compile Include="CSharpAstBuilder\Generated\CSharpParser.Generated.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Pragmas.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Resolvers.cs" />
     <Compile Include="CSharpAstBuilder\ErrorCodes.Designer.cs">
@@ -68,7 +68,7 @@
     <Compile Include="CSharpAstBuilder\PPExpressions\PPExpression.cs" />
     <Compile Include="CSharpAstBuilder\PPExpressions\Scanner.cs" />
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
-    <Compile Include="CSharpAstBuilder\Scanner.Generated.cs" />
+    <Compile Include="CSharpAstBuilder\Generated\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbol.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbolReference.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\IPositionedSymbol.cs" />
@@ -456,7 +456,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CSharpAstBuilder\SymbolTable.Exceptions.txt" />
-    <Content Include="CSharpAstBuilder\SymbolTable.Generated.txt" />
+    <Content Include="CSharpAstBuilder\Generated\SymbolTable.Generated.txt" />
     <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_filelist.txt" />
     <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_ignore.txt" />
   </ItemGroup>
