@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   /// This class represents symbols specific to the C# programming language.
   /// </summary>
   // ================================================================================================
-  public struct CSharpSymbol : 
+  public partial struct CSharpSymbol : 
     IPositionedSymbol, 
     ISymbolReference,
     IEquatable<CSharpSymbol>
@@ -29,13 +29,29 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <summary>
     /// Initializes a new instance of the <see cref="CSharpSymbol"/> class.
     /// </summary>
-    /// <param name="kind">The kind.</param>
-    /// <param name="value">The value.</param>
+    /// <param name="kind">The kind of symbol.</param>
+    /// <param name="value">The symbol value.</param>
     // ----------------------------------------------------------------------------------------------
-    public CSharpSymbol(int kind, string value) : this()
+    public CSharpSymbol(int kind, string value)
+      : this()
     {
       Kind = kind;
       Value = value;
+      Row = -1;
+      Column = -1;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CSharpSymbol"/> struct.
+    /// </summary>
+    /// <param name="kind">The kind of symbol.</param>
+    // ----------------------------------------------------------------------------------------------
+    public CSharpSymbol(int kind)
+      : this()
+    {
+      Kind = kind;
+      Value = SymbolHelper.GetSymbolName(kind);
       Row = -1;
       Column = -1;
     }

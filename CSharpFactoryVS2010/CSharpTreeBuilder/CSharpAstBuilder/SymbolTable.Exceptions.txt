@@ -1,38 +1,47 @@
-﻿usingKW using
-and &
-andassgn &=
-assgn =
+﻿usingKW using Using
+and & And
+andassgn &= AndAssignment
+assgn = Assigment
 colon :
 comma ,
-dec --
-divassgn /=
+dec -- Decrement
+divassgn /= DivisionAssignment
 dot .
-dblcolon ::
-eq ==
-gt >
-gteq >=
-inc ++
-lbrace {
-lbrack [
-lpar (
-lshassgn <<=
-lt <
-ltlt <<
-minus -
-minusassgn -=
-modassgn %=
-neq !=
-not !
-orassgn |=
-plus +
-plusassgn +=
-question ?
-rbrace }
-rbrack ]
-rpar )
-scolon ;
+dblcolon :: DoubleColon
+eq == Equal
+gt > GreaterThan
+gteq >= GreaterThanOrEqual
+inc ++ Increment
+lbrace { LeftBrace
+lbrack [ LeftBracket
+lpar ( LeftParenthesis
+lshassgn <<= LeftShiftAssignment
+lt < LessThan
+ltlt << LeftShift
+minus - 
+minusassgn -= SubtractAssignment
+modassgn %= ModuloAssignment
+neq != NotEqual
+not ! 
+orassgn |= OrAssignment
+plus + Add
+plusassgn += AdditionAssignment
+question ? QuestionMark
+rbrace } RightBrace
+rbrack ] RightBracket
+rpar ) RightParenthesis
+scolon ; Semicolon
 tilde ~
 times *
-timesassgn *=
-xorassgn ^=
-larrow =>
+timesassgn *= MultiplicationAssignment
+xorassgn ^= XorAssignment
+larrow => Lambda
+?? ?? NullCoalescing
+|| || ConditionalOr
+&& && ConditionalAnd
+| | Or
+^ ^ Xor
+<= <= LessThanOrEqual
+/ / Division
+% % Modulo
+-> -> CMemberAccess

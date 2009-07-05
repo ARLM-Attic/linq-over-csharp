@@ -3,7 +3,6 @@
 //
 // Created: 2009.05.22, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using System.Collections;
 using System.IO;
 using CSharpTreeBuilder.Ast;
@@ -406,6 +405,57 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       // --- Nothing to do in the case of first line.
       if (e.LineNumber == 1) return;
       CompilationUnitNode.SymbolStream.AddEndOfLineToStream(e.LineNumber);
+    }
+
+    #endregion
+
+    #region SyntaxNode factory methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new syntax node having the specified type with the given token as start token.
+    /// </summary>
+    /// <typeparam name="TNode">The type of the syntax node to create.</typeparam>
+    /// <param name="start">The start token.</param>
+    /// <returns></returns>
+    // ----------------------------------------------------------------------------------------------
+    private TNode New<TNode>(Token start)
+      where TNode: ISyntaxNode, new()
+    {
+      return New<TNode>(start, null);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new syntax node having the specified type with the given token as start token.
+    /// </summary>
+    /// <typeparam name="TNode">The type of the syntax node to create.</typeparam>
+    /// <param name="start">The start token.</param>
+    /// <returns></returns>
+    // ----------------------------------------------------------------------------------------------
+    private TNode New<TNode>(Token start, ISyntaxNode parentNode)
+      where TNode : ISyntaxNode, new()
+    {
+      var node = new TNode();
+      node.Parent = parentNode;
+      node.SetOwner(CompilationUnitNode);
+      node.SetStartSymbol(start);
+      SetCommentOwner(node);
+      return node;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a symbol from the specified token.
+    /// </summary>
+    /// <param name="token">The token to translate to a symbol.</param>
+    /// <returns>Symbol for the specified token.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private ISymbolReference Symbol(Token token)
+    {
+      return token.BoundToStream
+        ? new CSharpSymbolReference(token.TokenizedStreamPosition) as ISymbolReference
+        : new CSharpSymbol(token.Kind, token.Value);
     }
 
     #endregion

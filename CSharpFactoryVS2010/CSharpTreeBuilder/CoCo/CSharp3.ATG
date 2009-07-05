@@ -263,28 +263,23 @@ CS3
 // "extern alias" directive that is used in conjunction with a file or with a namespace
 // ------------------------------------------------------------------------------------------------
 ExternAliasDirective<NamespaceScopeNode parentNode>
-(.
-   Token start;
-   Token alias;
-   Token identifier;
-.)
 =
   "extern"   
   (. 
      SignRealToken(); 
-     start = t;
+     var eaNode = New<ExternAliasNode>(t);
   .)
   ident
   (. 
      if (t.val != "alias") Error1003(t, "alias"); 
-     alias = t;
+     eaNode.AliasToken = t;
   .)
   ident      
-  (. identifier = t; .)
+  (. eaNode.IdentifierToken = t; .)
   ";"
   (. 
-     var eaNode = parentNode.AddExternAlias(start, alias, identifier, t); 
-     SetCommentOwner(eaNode);
+     Terminate(eaNode); 
+     parentNode.ExternAliasNodes.Add(eaNode);
   .)
 .
 
@@ -423,14 +418,18 @@ TypeDeclaration<TypeDeclarationNode declaringType, out TypeDeclarationNode typeD
      Token partialToken = null;
   .)
   (   
-    [
-      IF (la.kind == _ident && la.val == "partial")
-      ident
-      (. partialToken = t; .)
-    ]
-      ClassDeclaration<out typeDecl> 
-    | StructDeclaration<out typeDecl> 
-    | InterfaceDeclaration<out typeDecl>                                                           
+    (
+      [
+        IF (la.kind == _ident && la.val == "partial")
+        ident
+        (. partialToken = t; .)
+      ]
+      ( 
+        ClassDeclaration<out typeDecl> 
+      | StructDeclaration<out typeDecl> 
+      | InterfaceDeclaration<out typeDecl>
+      )
+    )
     | EnumDeclaration<out typeDecl> 
     | DelegateDeclaration<out typeDecl>
   )

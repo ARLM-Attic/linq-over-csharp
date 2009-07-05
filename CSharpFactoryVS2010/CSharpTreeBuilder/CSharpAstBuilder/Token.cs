@@ -31,6 +31,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     internal Token next;
     // ReSharper restore InconsistentNaming
 
+    private int _TokenizedStreamPosition = -1;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Kind of token.
@@ -192,6 +194,20 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Gets or sets the position of thes token in the source file's tokenized stream.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int TokenizedStreamPosition { get; internal set; }
+    public int TokenizedStreamPosition
+    {
+      get { return _TokenizedStreamPosition; }
+      internal set { _TokenizedStreamPosition = value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this token is bound to a stream.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool BoundToStream
+    {
+      get { return _TokenizedStreamPosition >= 0; }
+    }
   }
 }

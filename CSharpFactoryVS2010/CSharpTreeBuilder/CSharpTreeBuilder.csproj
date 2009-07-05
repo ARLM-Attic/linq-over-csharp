@@ -70,6 +70,11 @@
     <Compile Include="CSharpAstBuilder\Scanner.Common.cs" />
     <Compile Include="CSharpAstBuilder\Generated\Scanner.Generated.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbol.cs" />
+    <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbol.Predefined.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CSharpSymbol.Predefined.tt</DependentUpon>
+    </Compile>
     <Compile Include="CSharpAstBuilder\Symbols\CSharpSymbolReference.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\IPositionedSymbol.cs" />
     <Compile Include="CSharpAstBuilder\Symbols\ISymbol.cs" />
@@ -434,6 +439,10 @@
     <None Include="CoCo\CSharp3.ATG" />
     <None Include="CoCo\Parser.frame" />
     <None Include="CoCo\Scanner.frame" />
+    <None Include="CSharpAstBuilder\Symbols\CSharpSymbol.Predefined.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>CSharpSymbol.Predefined.cs</LastGenOutput>
+    </None>
     <None Include="CSharpAstBuilder\Symbols\SymbolHelper.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>SymbolHelper.cs</LastGenOutput>

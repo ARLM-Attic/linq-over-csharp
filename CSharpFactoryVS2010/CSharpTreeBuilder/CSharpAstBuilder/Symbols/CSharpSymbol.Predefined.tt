@@ -17,23 +17,15 @@
 // disable warnings about missing XML comments
 #pragma warning disable 1591 
 
-using System.Collections.Generic;
-
 namespace CSharpTreeBuilder.CSharpAstBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// Helper class for converting between symbol kind and values.
+  /// Static CSharpSymbol definitions
   /// </summary>
   // ================================================================================================
-  public static class SymbolHelper
+  public partial struct CSharpSymbol
   {
-    // ReSharper disable InconsistentNaming
-    // --- Token ID --> Name resolution
-    private static readonly Dictionary<int, string> _SymbolsById =
-    // ReSharper restore InconsistentNaming
-      new Dictionary<int, string>
-      {
 <#
 		Dictionary<string, string> exceptions = new Dictionary<string, string>();
 		using (StreamReader streamReader = new StreamReader(@"C:\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAstBuilder\SymbolTable.Exceptions.txt"))
@@ -43,7 +35,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 				string line = streamReader.ReadLine().Trim();
 				if (string.IsNullOrEmpty(line)) continue;
 				string[] parts = line.Split(' ');
-				exceptions.Add(parts[0], parts[1]);
+				if (parts.Length > 2) exceptions.Add(parts[0], parts[2]);
 			}
 		}
 		
@@ -69,54 +61,14 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 				var type = line.Substring(19, 1);
 				nonTerminalFound = type != "t";
 				if (tokenId < 6 || tokenValue == "???" || nonTerminalFound) continue;
+				tokenValue = tokenValue.Substring(0, 1).ToUpper() + tokenValue.Substring(1);
 				if (!isFirst) WriteLine("");
-				Write("        {{ {0}, \"{1}\" }},", tokenId, tokenValue);
+				Write("    public static CSharpSymbol {0} = new CSharpSymbol({1});", 
+				tokenValue, tokenId);
 				isFirst = false;
 			}
 		}
 #>	
-    };  
-
-    // ReSharper disable InconsistentNaming
-    // --- Name --> Token ID resolution
-    private static readonly Dictionary<string, int> _SymbolsByName = new Dictionary<string, int>();
-    // ReSharper restore InconsistentNaming
-
-    // --------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets up the helper for token resolution
-    /// </summary>
-    // --------------------------------------------------------------------------------------------
-    static SymbolHelper()
-    {
-      foreach (var pair in _SymbolsById)
-      {
-        _SymbolsByName.Add(pair.Value, pair.Key);
-      }
-    }
-    // --------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the symbol id by its name.
-    /// </summary>
-    /// <param name="name">Symbol name.</param>
-    /// <returns>ID of the symbol</returns>
-    // --------------------------------------------------------------------------------------------
-    public static int GetSymbolId(string name)
-    {
-      return _SymbolsByName[name];
-    }
-
-    // --------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the symbol by ID.
-    /// </summary>
-    /// <param name="id">Symbol ID.</param>
-    /// <returns>Name of the symbol.</returns>
-    // --------------------------------------------------------------------------------------------
-    public static string GetSymbolName(int id)
-    {
-      return _SymbolsById[id];
-    }
   }
 }
 

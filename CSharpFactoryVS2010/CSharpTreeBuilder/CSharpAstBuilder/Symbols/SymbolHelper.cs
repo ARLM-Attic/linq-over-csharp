@@ -1,7 +1,7 @@
 //
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009.06.27. 17:35:09
+// Generated on: 2009.07.05. 18:43:14
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -20,8 +20,10 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
   // ================================================================================================
   public static class SymbolHelper
   {
+    // ReSharper disable InconsistentNaming
     // --- Token ID --> Name resolution
     private static readonly Dictionary<int, string> _SymbolsById =
+    // ReSharper restore InconsistentNaming
       new Dictionary<int, string>
       {
         { 6, "abstract" },
@@ -138,26 +140,21 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         { 117, "*=" },
         { 118, "^=" },
         { 119, "=>" },
-        { 120, "partial" },
-        { 121, "yield" },
-        { 122, "where" },
-        { 123, "ascending" },
-        { 124, "descending" },
-        { 125, "by" },
-        { 126, "??" },
-        { 127, "||" },
-        { 128, "&&" },
-        { 129, "|" },
-        { 130, "^" },
-        { 131, "<=" },
-        { 132, "/" },
-        { 133, "%" },
-        { 134, "->" },
-	
+        { 120, "??" },
+        { 121, "||" },
+        { 122, "&&" },
+        { 123, "|" },
+        { 124, "^" },
+        { 125, "<=" },
+        { 126, "/" },
+        { 127, "%" },
+        { 128, "->" },	
     };  
 
+    // ReSharper disable InconsistentNaming
     // --- Name --> Token ID resolution
-    private static Dictionary<string, int> _SymbolsByName = new Dictionary<string, int>();
+    private static readonly Dictionary<string, int> _SymbolsByName = new Dictionary<string, int>();
+    // ReSharper restore InconsistentNaming
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
@@ -198,4 +195,3 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 }
 
 #pragma warning restore 1591
- 

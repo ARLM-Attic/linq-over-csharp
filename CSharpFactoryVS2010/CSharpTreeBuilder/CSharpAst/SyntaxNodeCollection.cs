@@ -41,6 +41,30 @@ namespace CSharpTreeBuilder.Ast
     where TNode: class, ISyntaxNode
     where TParent: class, ISyntaxNode
   {
+    // --- Backing fields
+    private CompilationUnitNode _Owner;
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the compilation unit node owning this syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public CompilationUnitNode Owner
+    {
+      get { return _Owner; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the owner compilation unit of this syntax node.
+    /// </summary>
+    /// <param name="owner">The owner.</param>
+    // ----------------------------------------------------------------------------------------------
+    void ISyntaxNode.SetOwner(CompilationUnitNode owner)
+    {
+      _Owner = owner;
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the parent node of this syntax node.
@@ -165,6 +189,35 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the start symbol of this syntax node
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ISymbolReference StartSymbol { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the start symbol according to the specified token.
+    /// </summary>
+    /// <param name="token">The token.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void SetStartSymbol(Token token)
+    {
+      if (token == null) throw new ArgumentNullException("token");
+      StartToken = token;
+      StartSymbol = token.BoundToStream
+        ? new CSharpSymbolReference(token.TokenizedStreamPosition) as ISymbolReference
+        : new CSharpSymbol(token.Kind, token.Value);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the terminating symbol of this syntax node
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ISymbolReference TerminatingSymbol { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>
@@ -235,7 +288,9 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public void Terminate(Token token)
     {
+      if (token == null) throw new ArgumentNullException("token");
       TerminatingToken = token;
+      TerminatingSymbol = new CSharpSymbolReference(token.TokenizedStreamPosition);
     }
 
     // ----------------------------------------------------------------------------------------------

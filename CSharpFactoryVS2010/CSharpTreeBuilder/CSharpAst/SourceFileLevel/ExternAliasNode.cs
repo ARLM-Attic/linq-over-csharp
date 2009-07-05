@@ -34,6 +34,15 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Initializes a new instance of the <see cref="ExternAliasNode"/> class.
     /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExternAliasNode()
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ExternAliasNode"/> class.
+    /// </summary>
     /// <param name="parent">The parent namespace scope node.</param>
     /// <param name="start">The start token.</param>
     /// <param name="alias">The alias token.</param>
@@ -54,14 +63,14 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the alias token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token AliasToken { get; private set; }
+    public Token AliasToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the identifier token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token IdentifierToken { get; private set; }
+    public Token IdentifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
