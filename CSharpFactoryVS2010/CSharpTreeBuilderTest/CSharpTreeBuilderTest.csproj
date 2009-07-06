@@ -301,6 +301,8 @@
     <None Include="TestFiles\LargeTestProjects\SampleQueries\LinqSamples.cs" />
     <None Include="TestFiles\LargeTestProjects\SampleQueries\ObjectDumper.cs" />
     <None Include="TestFiles\LargeTestProjects\SampleQueries\SampleHarness.cs" />
+    <None Include="TestFiles\ObjectOrArrayCreationExpressions\DelegateCreationExpression.cs" />
+    <Compile Include="TestFiles\ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\Visitor\StatementVisitorTests.cs" />
     <None Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />

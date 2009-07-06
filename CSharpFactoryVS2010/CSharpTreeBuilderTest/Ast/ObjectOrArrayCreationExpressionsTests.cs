@@ -126,5 +126,54 @@ namespace CSharpTreeBuilderTest
       ((Int32LiteralNode)exp2.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[0]).Value.ShouldEqual(5);
       ((StringLiteralNode)exp2.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[1]).Value.ShouldEqual("b");
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the expressions:
+    /// <code>
+    ///     var myDelegate = new MyDelegate(MyTarget);
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void DelegateCreationExpression()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ObjectOrArrayCreationExpressions\DelegateCreationExpression.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
+
+      var init1 = ((VariableDeclarationStatementNode) method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp1 = init1.Expression as ObjectCreationExpressionNode;
+      exp1.TypeName.TypeTags[0].Identifier.ShouldEqual("MyDelegate");
+      exp1.HasConstructorArguments.ShouldBeTrue();
+      ((SimpleNameNode)exp1.Arguments[0].Expression).Identifier.ShouldEqual("MyTarget");
+      exp1.HasObjectInitializer.ShouldBeFalse();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the expressions:
+    /// <code>
+    ///     var a = new { x, AnonymousObjectCreationExpression.xs, A = 2 };
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void AnonymousObjectCreationExpression()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
+
+      var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp1 = init1.Expression as AnonymousObjectCreationExpressionNode;
+      exp1.Declarators.Count.ShouldEqual(3);
+      // todo: check member declarators
+    }
+
   }
 }
