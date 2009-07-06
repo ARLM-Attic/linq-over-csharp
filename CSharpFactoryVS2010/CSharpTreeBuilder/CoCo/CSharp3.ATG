@@ -1869,6 +1869,7 @@ PointerOrArray<TypeOrNamespaceNode typeNode>
   }
 .
 
+/*
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------------------
@@ -1880,6 +1881,7 @@ PredefinedType<out TypeOrNamespaceNode typeNode>
     ( "object" | "string" )                                    
     (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
 .
+*/
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
@@ -4319,50 +4321,33 @@ MemberDeclaratorList<AnonymousObjectCreationExpressionNode initNode>
 // ------------------------------------------------------------------------------------------------
 MemberDeclarator<out MemberDeclaratorNode mdNode> 
 =
-  (. 
-     ExpressionNode exprNode;
-     mdNode = null;
+  (.
+    mdNode = null; 
+    ExpressionNode exprNode = null; 
+    Token identToken = null;
+    Token equalToken = null;
   .)
-  (
-    IF (IsMemberInitializer())
-    ident                         
-    (. 
-       Token start = t; 
-       mdNode = new MemberDeclaratorNode(t);
-       SetCommentOwner(mdNode);
-       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.Expression;
-    .)
+  [ 
+    IF (IsAssignment()) 
+    ident
+    (. identToken = t; .)
     "=" 
-    (. mdNode.EqualToken = t; .)
-    Expression<out exprNode>
-    (. mdNode.Expression = exprNode; .)
-  | 
-    (. 
-       Token start = la; 
-       ExpressionNode primNode;
-    .)
-    Primary<out primNode>
-    (. 
-       mdNode = new MemberDeclaratorNode(primNode == null ? t : primNode.StartToken);
-       SetCommentOwner(mdNode);
-       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.SimpleName;
-       mdNode.Expression = primNode;
-    .)
-  |
-    (. TypeOrNamespaceNode typeNode; .)
-    PredefinedType<out typeNode>
-    (. 
-       mdNode = new MemberDeclaratorNode(typeNode.StartToken);
-       SetCommentOwner(mdNode);
-       mdNode.Kind = MemberDeclaratorNode.DeclaratorKind.MemberAccess;
-       mdNode.TypeName = typeNode;
-    .)
-    "."
-    (. mdNode.DotSeparator = t; .)
-    ident                         
-    (. mdNode.IdentifierToken = t; .)
-  )
-  (. Terminate(mdNode); .)
+    (. equalToken = t; .)
+  ] 
+  Expression<out exprNode>
+
+  /* The spec (May 2006) allows only:                    *
+   *   - simple-name                                     *
+   *   - member-access                                   *
+   *   - identifier = expression                         *
+   * The CreateMemberDeclarator method will handle this. */
+
+  (.
+    mdNode = CreateMemberDeclarator(identToken, equalToken, exprNode);
+    SetCommentOwner(mdNode);
+    Terminate(mdNode); 
+  .)
+
 .
 
 // ------------------------------------------------------------------------------------------------

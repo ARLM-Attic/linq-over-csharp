@@ -118,6 +118,9 @@
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\BaseElementAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\ExpressionNodeCollection.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\MemberAccessMemberDeclaratorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\SimpleNameMemberDeclaratorNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\IdentifierMemberDeclaratorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\ObjectCreationExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\InvocationOperatorNode.cs" />
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorExpressionNode.cs" />

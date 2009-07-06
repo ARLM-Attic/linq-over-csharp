@@ -1381,6 +1381,19 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0746: Invalid anonymous type member declarator.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    /// <param name="typeName">Parameter name</param>
+    // --------------------------------------------------------------------------------
+    public void Error0746(Token token, string typeName)
+    {
+      Error("CS0746", token,
+        string.Format("Invalid anonymous type member declarator. Expected SimpleName or MemberAccess but found '{0}'.", typeName));
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS1003: Syntax error, '{0}' expected.
     /// </summary>
     /// <param name="token">Error point</param>

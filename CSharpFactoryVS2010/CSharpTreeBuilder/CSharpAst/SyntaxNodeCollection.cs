@@ -250,10 +250,13 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void Add(TNode item)
     {
-      base.Add(item);
-      if (item.Parent == null) item.Parent = (this as ISyntaxNode).Parent;
-      if (Count == 1 && StartToken == null) StartToken = item.StartToken;
-      TerminatingToken = item.TerminatingToken;
+      if (item != null)
+      {
+        base.Add(item);
+        if (item.Parent == null) item.Parent = (this as ISyntaxNode).Parent;
+        if (Count == 1 && StartToken == null) StartToken = item.StartToken;
+        TerminatingToken = item.TerminatingToken;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

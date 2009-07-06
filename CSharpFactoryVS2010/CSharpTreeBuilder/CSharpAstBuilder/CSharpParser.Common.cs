@@ -355,6 +355,45 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       opNode.Terminate(t);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a MemberDeclaratorNode from the given parameters, or signs an error if it's not possible.
+    /// </summary>
+    /// <param name="identToken">Optional indentifier token. Can be null.</param>
+    /// <param name="equalToken">Optional equal sign (=) token. Can be null.</param>
+    /// <param name="expressionNode">An expression. Cannot be null.</param>
+    /// <returns>A newly constructed MemberDeclaratorNode.</returns>
+    /// <remarks>
+    /// <para>According to the spec a MemberDeclarator node can be one of the following:</para>
+    /// <para> - identifier = Expression</para>
+    /// <para> - SimpleName</para>
+    /// <para> - MemberAccess</para>
+    /// <para>It would be hard to handle it with the grammar (LL conflicts), so the grammar accepts a more 
+    /// general Expression, and this factory method checks if the Expression is one of the allowed types.</para>
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    private MemberDeclaratorNode CreateMemberDeclarator(Token identToken, Token equalToken, ExpressionNode expressionNode)
+    {
+      if (identToken != null && equalToken != null)
+      {
+        return new IdentifierMemberDeclaratorNode(identToken, equalToken, expressionNode);
+      }
+
+      if (expressionNode is SimpleNameNode)
+      {
+        return new SimpleNameMemberDeclaratorNode(expressionNode as SimpleNameNode);
+      }
+
+      if (expressionNode is MemberAccessOperatorNodeBase)
+      {
+        return new MemberAccessMemberDeclaratorNode(expressionNode as MemberAccessOperatorNodeBase);
+      }
+
+      Error0746( expressionNode.StartToken, expressionNode.GetType().FullName);
+
+      return null;
+    }
+
     #endregion
 
     #region Scanner event response methods

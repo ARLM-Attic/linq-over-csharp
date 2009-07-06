@@ -156,7 +156,7 @@ namespace CSharpTreeBuilderTest
     /// <summary>
     /// Tests the parsing of the expressions:
     /// <code>
-    ///     var a = new { x, AnonymousObjectCreationExpression.xs, A = 2 };
+    ///   var a = new { x, AnonymousObjectCreationExpression.xs1, global::AnonymousObjectCreationExpression.xs2, A = 1 };
     /// </code>
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -171,9 +171,42 @@ namespace CSharpTreeBuilderTest
 
       var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp1 = init1.Expression as AnonymousObjectCreationExpressionNode;
-      exp1.Declarators.Count.ShouldEqual(3);
-      // todo: check member declarators
+      exp1.Declarators.Count.ShouldEqual(4);
+
+      var memberDeclarator1 = exp1.Declarators[0] as SimpleNameMemberDeclaratorNode;
+      memberDeclarator1.SimpleName.Identifier.ShouldEqual("x");
+
+      var memberDeclarator2 = exp1.Declarators[1] as MemberAccessMemberDeclaratorNode;
+      var memberAccess2 = memberDeclarator2.MemberAccess as PrimaryMemberAccessOperatorNode;
+      ((SimpleNameNode) memberAccess2.PrimaryExpression).Identifier.ShouldEqual("AnonymousObjectCreationExpression");
+      memberAccess2.MemberName.Identifier.ShouldEqual("xs1");
+
+      var memberDeclarator3 = exp1.Declarators[2] as MemberAccessMemberDeclaratorNode;
+      var memberAccess3 = memberDeclarator3.MemberAccess as QualifiedAliasMemberAccessNode;
+      memberAccess3.QualifiedAliasMember.Qualifier.ShouldEqual("global");
+      memberAccess3.QualifiedAliasMember.Identifier.ShouldEqual("AnonymousObjectCreationExpression");
+      memberAccess3.MemberName.Identifier.ShouldEqual("xs2");
+
+      var memberDeclarator4 = exp1.Declarators[3] as IdentifierMemberDeclaratorNode;
+      memberDeclarator4.Identifier.ShouldEqual("A");
+      ((Int32LiteralNode)memberDeclarator4.Expression).Value.ShouldEqual(1);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the erroneous expressions:
+    /// <code>
+    ///   var a = new { 1 };
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void AnonymousObjectCreationExpression_Error()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression_Error.cs");
+      InvokeParser(project).ShouldBeFalse();
+      project.Errors[0].Code.ShouldEqual("CS0746");
+    }
   }
 }
