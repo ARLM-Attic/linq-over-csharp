@@ -2981,6 +2981,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
       (.
          parNode = new FormalParameterNode(t);
          SetCommentOwner(parNode);
+         parNode.TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
          parNode.IdentifierToken = t;
          Terminate(parNode);
          lambdaNode.FormalParameters.Add(parNode);
@@ -2992,6 +2993,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
         (.
            parNode = new FormalParameterNode(t);
            SetCommentOwner(parNode);
+           parNode.TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
            parNode.IdentifierToken = t;
            Terminate(parNode);
            lambdaNode.FormalParameters.Add(separator, parNode);
@@ -4672,7 +4674,7 @@ AnonymousDelegate<out ExpressionNode exprNode>
 = 
   "delegate"            
   (. 
-     var adNode = new AnonymousDelegateNode(t);
+     var adNode = new AnonymousMethodNode(t);
      SetCommentOwner(adNode);
      exprNode = adNode;
   .)
@@ -4699,7 +4701,10 @@ AnonymousDelegate<out ExpressionNode exprNode>
   ] 
   (. BlockStatementNode blockNode; .)
   Block<out blockNode>           
-  (. Terminate(exprNode); .)
+  (. 
+    adNode.Body = blockNode;
+    Terminate(exprNode); 
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------

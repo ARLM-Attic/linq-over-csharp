@@ -3283,6 +3283,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				Get();
 				parNode = new FormalParameterNode(t);
 				SetCommentOwner(parNode);
+				parNode.TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
 				parNode.IdentifierToken = t;
 				Terminate(parNode);
 				lambdaNode.FormalParameters.Add(parNode);
@@ -3293,6 +3294,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 					Expect(1);
 					parNode = new FormalParameterNode(t);
 					SetCommentOwner(parNode);
+					parNode.TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
 					parNode.IdentifierToken = t;
 					Terminate(parNode);
 					lambdaNode.FormalParameters.Add(separator, parNode);
@@ -4263,7 +4265,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 
 	void AnonymousDelegate(out ExpressionNode exprNode) {
 		Expect(21);
-		var adNode = new AnonymousDelegateNode(t);
+		var adNode = new AnonymousMethodNode(t);
 		SetCommentOwner(adNode);
 		exprNode = adNode;
 		
@@ -4289,7 +4291,9 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		}
 		BlockStatementNode blockNode; 
 		Block(out blockNode);
+		adNode.Body = blockNode;
 		Terminate(exprNode); 
+		
 	}
 
 	void SizeOfOperator(out ExpressionNode exprNode) {

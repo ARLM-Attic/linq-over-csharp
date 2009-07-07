@@ -31,17 +31,26 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((Int32LiteralNode)init1.Expression).Value.ShouldEqual(1);
-
-      var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((Int64LiteralNode)init2.Expression).Value.ShouldEqual(2);
-
-      var init3 = ((VariableDeclarationStatementNode)method.Body.Statements[2]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((UInt32LiteralNode)init3.Expression).Value.ShouldEqual<uint>(3);
-
-      var init4 = ((VariableDeclarationStatementNode)method.Body.Statements[3]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((UInt64LiteralNode)init4.Expression).Value.ShouldEqual<ulong>(4);
+      {
+        var decl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((Int32LiteralNode)init.Expression).Value.ShouldEqual(1);
+      }
+      {
+        var decl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((Int64LiteralNode)init.Expression).Value.ShouldEqual(2);
+      }
+      {
+        var decl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((UInt32LiteralNode)init.Expression).Value.ShouldEqual<uint>(3);
+      }
+      {
+        var decl = method.Body.Statements[3] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((UInt64LiteralNode)init.Expression).Value.ShouldEqual<ulong>(4);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -61,14 +70,21 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((SingleLiteralNode)init1.Expression).Value.ShouldEqual(1);
-
-      var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((DoubleLiteralNode)init2.Expression).Value.ShouldEqual(2);
-
-      var init3 = ((VariableDeclarationStatementNode)method.Body.Statements[2]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((DecimalLiteralNode)init3.Expression).Value.ShouldEqual(3);
+      {
+        var decl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((SingleLiteralNode)init.Expression).Value.ShouldEqual(1);
+      }
+      {
+        var decl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((DoubleLiteralNode)init.Expression).Value.ShouldEqual(2);
+      }
+      {
+        var decl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        ((DecimalLiteralNode)init.Expression).Value.ShouldEqual(3);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -86,8 +102,9 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((CharLiteralNode)init1.Expression).Value.ShouldEqual('a');
+      var decl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+      var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      ((CharLiteralNode)init.Expression).Value.ShouldEqual('a');
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -105,8 +122,9 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      ((StringLiteralNode)init1.Expression).Value.ShouldEqual("a");
+      var decl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+      var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      ((StringLiteralNode)init.Expression).Value.ShouldEqual("a");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -148,17 +166,22 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var op1 = ((ExpressionStatementNode)method.Body.Statements[0]).Expression as PreIncrementOperatorNode;
-      op1.ShouldNotBeNull();
-
-      var op2 = ((ExpressionStatementNode)method.Body.Statements[1]).Expression as PreDecrementOperatorNode;
-      op2.ShouldNotBeNull();
-
-      var op3 = ((ExpressionStatementNode)method.Body.Statements[2]).Expression as PostIncrementOperatorNode;
-      op3.ShouldNotBeNull();
-
-      var op4 = ((ExpressionStatementNode)method.Body.Statements[3]).Expression as PostDecrementOperatorNode;
-      op4.ShouldNotBeNull();
+      {
+        var op = ((ExpressionStatementNode) method.Body.Statements[0]).Expression as PreIncrementOperatorNode;
+        op.ShouldNotBeNull();
+      }
+      {
+        var op = ((ExpressionStatementNode) method.Body.Statements[1]).Expression as PreDecrementOperatorNode;
+        op.ShouldNotBeNull();
+      }
+      {
+        var op = ((ExpressionStatementNode) method.Body.Statements[2]).Expression as PostIncrementOperatorNode;
+        op.ShouldNotBeNull();
+      }
+      {
+        var op = ((ExpressionStatementNode) method.Body.Statements[3]).Expression as PostDecrementOperatorNode;
+        op.ShouldNotBeNull();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -346,10 +369,10 @@ namespace CSharpTreeBuilderTest
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
-      var binary1 = initializer.Expression as BinaryOperatorNode;
-      binary1.Operator.ShouldEqual(BinaryOperatorType.NullCoalescing);
-      ((StringLiteralNode) (binary1.LeftOperand)).Value.ShouldEqual("a");
-      ((StringLiteralNode) (binary1.RightOperand)).Value.ShouldEqual("b");
+      var binary = initializer.Expression as BinaryOperatorNode;
+      binary.Operator.ShouldEqual(BinaryOperatorType.NullCoalescing);
+      ((StringLiteralNode) (binary.LeftOperand)).Value.ShouldEqual("a");
+      ((StringLiteralNode) (binary.RightOperand)).Value.ShouldEqual("b");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -737,48 +760,61 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var typeName1 = ((TypeofOperatorNode) init1.Expression).TypeName;
-      typeName1.TypeTags[0].Identifier.ShouldEqual("int");
-      typeName1.TypeTags[0].IsUnbound.ShouldBeFalse();
-      typeName1.TypeTags[0].GenericDimensions.ShouldEqual(0);
-
-      var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var typeName2 = ((TypeofOperatorNode) init2.Expression).TypeName;
-      typeName2.TypeTags[0].Identifier.ShouldEqual("Generic");
-      typeName2.TypeTags[0].IsUnbound.ShouldBeTrue();
-      typeName2.TypeTags[0].GenericDimensions.ShouldEqual(2);
-
-      var init3 = ((VariableDeclarationStatementNode)method.Body.Statements[2]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var typeName3 = ((TypeofOperatorNode)init3.Expression).TypeName;
-      typeName3.TypeTags[0].Identifier.ShouldEqual("Generic");
-      typeName3.TypeTags[0].IsUnbound.ShouldBeFalse();
-      typeName3.TypeTags[0].GenericDimensions.ShouldEqual(2);
-      typeName3.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("int");
-      typeName3.TypeTags[0].Arguments[1].TypeTags[0].Identifier.ShouldEqual("int");
-
-      var init4 = ((VariableDeclarationStatementNode)method.Body.Statements[3]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var typeName4 = ((TypeofOperatorNode)init4.Expression).TypeName;
-      typeName4.Qualifier.ShouldEqual("myAlias");
-      typeName4.TypeTags[0].Identifier.ShouldEqual("IList");
-      typeName4.TypeTags[0].IsUnbound.ShouldBeTrue();
-      typeName4.TypeTags[0].GenericDimensions.ShouldEqual(1);
-
-      var init5 = ((VariableDeclarationStatementNode)method.Body.Statements[4]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var typeName5 = ((TypeofOperatorNode)init5.Expression).TypeName;
-      typeName5.Qualifier.ShouldBeNull();
-      typeName5.TypeTags[0].Identifier.ShouldEqual("Generic");
-      typeName5.TypeTags[0].IsUnbound.ShouldBeTrue();
-      typeName5.TypeTags[0].GenericDimensions.ShouldEqual(2);
-      typeName5.TypeTags[1].Identifier.ShouldEqual("EmbeddedGeneric");
-      typeName5.TypeTags[1].IsUnbound.ShouldBeTrue();
-      typeName5.TypeTags[1].GenericDimensions.ShouldEqual(1);
-
-      var init6 = ((VariableDeclarationStatementNode)method.Body.Statements[5]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var typeName6 = ((TypeofOperatorNode)init6.Expression).TypeName;
-      typeName6.TypeTags[0].Identifier.ShouldEqual("void");
-      typeName6.TypeTags[0].IsUnbound.ShouldBeFalse();
-      typeName6.TypeTags[0].GenericDimensions.ShouldEqual(0);
+      {
+        var decl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var typeName = ((TypeofOperatorNode)init.Expression).TypeName;
+        typeName.TypeTags[0].Identifier.ShouldEqual("int");
+        typeName.TypeTags[0].IsUnbound.ShouldBeFalse();
+        typeName.TypeTags[0].GenericDimensions.ShouldEqual(0);
+      }
+      {
+        var decl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var typeName = ((TypeofOperatorNode)init.Expression).TypeName;
+        typeName.TypeTags[0].Identifier.ShouldEqual("Generic");
+        typeName.TypeTags[0].IsUnbound.ShouldBeTrue();
+        typeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+      }
+      {
+        var decl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var typeName = ((TypeofOperatorNode)init.Expression).TypeName;
+        typeName.TypeTags[0].Identifier.ShouldEqual("Generic");
+        typeName.TypeTags[0].IsUnbound.ShouldBeFalse();
+        typeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+        typeName.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("int");
+        typeName.TypeTags[0].Arguments[1].TypeTags[0].Identifier.ShouldEqual("int");
+      }
+      {
+        var decl = method.Body.Statements[3] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var typeName = ((TypeofOperatorNode)init.Expression).TypeName;
+        typeName.Qualifier.ShouldEqual("myAlias");
+        typeName.TypeTags[0].Identifier.ShouldEqual("IList");
+        typeName.TypeTags[0].IsUnbound.ShouldBeTrue();
+        typeName.TypeTags[0].GenericDimensions.ShouldEqual(1);
+      }
+      {
+        var decl = method.Body.Statements[4] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var typeName = ((TypeofOperatorNode)init.Expression).TypeName;
+        typeName.Qualifier.ShouldBeNull();
+        typeName.TypeTags[0].Identifier.ShouldEqual("Generic");
+        typeName.TypeTags[0].IsUnbound.ShouldBeTrue();
+        typeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+        typeName.TypeTags[1].Identifier.ShouldEqual("EmbeddedGeneric");
+        typeName.TypeTags[1].IsUnbound.ShouldBeTrue();
+        typeName.TypeTags[1].GenericDimensions.ShouldEqual(1);
+      }
+      {
+        var decl = method.Body.Statements[5] as VariableDeclarationStatementNode;
+        var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var typeName = ((TypeofOperatorNode)init.Expression).TypeName;
+        typeName.TypeTags[0].Identifier.ShouldEqual("void");
+        typeName.TypeTags[0].IsUnbound.ShouldBeFalse();
+        typeName.TypeTags[0].GenericDimensions.ShouldEqual(0);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -887,41 +923,48 @@ namespace CSharpTreeBuilderTest
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
-      var var1 = method.Body.Statements[0] as VariableDeclarationStatementNode;
-      var init1 = var1.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var op1 = init1.Expression as UnaryOperatorExpressionNode;
-      op1.Operator.ShouldEqual(UnaryOperatorType.Identity);
-      ((Int32LiteralNode) op1.Operand).Value.ShouldEqual(1);
-
-      var var2 = method.Body.Statements[1] as VariableDeclarationStatementNode;
-      var init2 = var2.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var op2 = init2.Expression as UnaryOperatorExpressionNode;
-      op2.Operator.ShouldEqual(UnaryOperatorType.Negation);
-      ((Int32LiteralNode)op2.Operand).Value.ShouldEqual(2);
-
-      var var3 = method.Body.Statements[2] as VariableDeclarationStatementNode;
-      var init3 = var3.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var op3 = init3.Expression as UnaryOperatorExpressionNode;
-      op3.Operator.ShouldEqual(UnaryOperatorType.LogicalNegation);
-      ((BooleanLiteralNode)op3.Operand).Value.ShouldEqual(true);
-
-      var var4 = method.Body.Statements[3] as VariableDeclarationStatementNode;
-      var init4 = var4.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var op4 = init4.Expression as UnaryOperatorExpressionNode;
-      op4.Operator.ShouldEqual(UnaryOperatorType.BitwiseNegation);
-      ((Int32LiteralNode)op4.Operand).Value.ShouldEqual(0);
-
-      var var5 = method.Body.Statements[4] as VariableDeclarationStatementNode;
-      var init5 = var5.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var op5 = init5.Expression as UnaryOperatorExpressionNode;
-      op5.Operator.ShouldEqual(UnaryOperatorType.AddressOf);
-      ((SimpleNameNode)op5.Operand).Identifier.ShouldEqual("i1");
-
-      var var6 = method.Body.Statements[5] as VariableDeclarationStatementNode;
-      var init6 = var6.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      var op6 = init6.Expression as UnaryOperatorExpressionNode;
-      op6.Operator.ShouldEqual(UnaryOperatorType.PointerIndirection);
-      ((SimpleNameNode)op6.Operand).Identifier.ShouldEqual("i5");
+      {
+        var var = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var init = var.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var op = init.Expression as UnaryOperatorExpressionNode;
+        op.Operator.ShouldEqual(UnaryOperatorType.Identity);
+        ((Int32LiteralNode)op.Operand).Value.ShouldEqual(1);
+      }
+      {
+        var var = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var init = var.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var op = init.Expression as UnaryOperatorExpressionNode;
+        op.Operator.ShouldEqual(UnaryOperatorType.Negation);
+        ((Int32LiteralNode)op.Operand).Value.ShouldEqual(2);
+      }
+      {
+        var var = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var init = var.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var op = init.Expression as UnaryOperatorExpressionNode;
+        op.Operator.ShouldEqual(UnaryOperatorType.LogicalNegation);
+        ((BooleanLiteralNode)op.Operand).Value.ShouldEqual(true);
+      }
+      {
+        var var = method.Body.Statements[3] as VariableDeclarationStatementNode;
+        var init = var.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var op = init.Expression as UnaryOperatorExpressionNode;
+        op.Operator.ShouldEqual(UnaryOperatorType.BitwiseNegation);
+        ((Int32LiteralNode)op.Operand).Value.ShouldEqual(0);
+      }
+      {
+        var var = method.Body.Statements[4] as VariableDeclarationStatementNode;
+        var init = var.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var op = init.Expression as UnaryOperatorExpressionNode;
+        op.Operator.ShouldEqual(UnaryOperatorType.AddressOf);
+        ((SimpleNameNode)op.Operand).Identifier.ShouldEqual("i1");
+      }
+      {
+        var var = method.Body.Statements[5] as VariableDeclarationStatementNode;
+        var init = var.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var op = init.Expression as UnaryOperatorExpressionNode;
+        op.Operator.ShouldEqual(UnaryOperatorType.PointerIndirection);
+        ((SimpleNameNode) op.Operand).Identifier.ShouldEqual("i5");
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -967,6 +1010,135 @@ namespace CSharpTreeBuilderTest
       ((BooleanLiteralNode) conditional.Condition).Value.ShouldEqual(true);
       ((Int32LiteralNode) conditional.TrueExpression).Value.ShouldEqual(0);
       ((Int32LiteralNode) conditional.FalseExpression).Value.ShouldEqual(1);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the expression:
+    /// <code>
+    ///   // Lamba expression with block body, no parameters
+    ///   Dvoid d1 = () =&gt; { };
+    ///   // Lambda expression with expression body, no parameters
+    ///   Expression&lt;Func&lt;int&gt;&gt; d2 = () =&gt; 1;
+    ///   // Lambda expression with block body, explicit-anonymous-function-signature
+    ///   Dint d3 = (int i, ref int j, out int k) =&gt; { k = 1; return i; };
+    ///   // Lambda expression with expression body, implicit-anonymous-function-signature
+    ///   Expression&lt;Func&lt;int, int, int&gt;&gt; d4 = (i, j) =&gt; i + j;
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void LambdaExpressions()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"Expressions\LambdaExpressions.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
+      {
+        var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var lambda = initializer.Expression as LambdaExpressionNode;
+        lambda.FormalParameters.Count.ShouldEqual(0);
+        lambda.IsSimpleExpression.ShouldBeFalse();
+        lambda.Expression.ShouldBeNull();
+        lambda.Block.Statements.Count.ShouldEqual(0);
+      }
+      {
+        var varDecl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var lambda = initializer.Expression as LambdaExpressionNode;
+        lambda.FormalParameters.Count.ShouldEqual(0);
+        lambda.IsSimpleExpression.ShouldBeTrue();
+        ((Int32LiteralNode)lambda.Expression).Value.ShouldEqual(1);
+        lambda.Block.ShouldBeNull();
+      }
+      {
+        var varDecl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var lambda = initializer.Expression as LambdaExpressionNode;
+        lambda.FormalParameters.Count.ShouldEqual(3);
+        lambda.FormalParameters[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        lambda.FormalParameters[0].Identifier.ShouldEqual("i");
+        lambda.FormalParameters[0].Modifier.ShouldEqual(FormalParameterModifier.In);
+        lambda.FormalParameters[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        lambda.FormalParameters[1].Identifier.ShouldEqual("j");
+        lambda.FormalParameters[1].Modifier.ShouldEqual(FormalParameterModifier.Ref);
+        lambda.FormalParameters[2].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        lambda.FormalParameters[2].Identifier.ShouldEqual("k");
+        lambda.FormalParameters[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
+        lambda.IsSimpleExpression.ShouldBeFalse();
+        lambda.Expression.ShouldBeNull();
+        lambda.Block.Statements.Count.ShouldEqual(2);
+      }
+      {
+        var varDecl = method.Body.Statements[3] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var lambda = initializer.Expression as LambdaExpressionNode;
+        lambda.FormalParameters.Count.ShouldEqual(2);
+        lambda.FormalParameters[0].TypeName.IsEmpty.ShouldBeTrue();
+        lambda.FormalParameters[0].Identifier.ShouldEqual("i");
+        lambda.FormalParameters[1].TypeName.IsEmpty.ShouldBeTrue();
+        lambda.FormalParameters[1].Identifier.ShouldEqual("j");
+        lambda.IsSimpleExpression.ShouldBeTrue();
+        ((BinaryOperatorNode) lambda.Expression).Operator.ShouldEqual(BinaryOperatorType.Addition);
+        ((SimpleNameNode)((BinaryOperatorNode)lambda.Expression).LeftOperand).Identifier.ShouldEqual("i");
+        ((SimpleNameNode)((BinaryOperatorNode)lambda.Expression).RightOperand).Identifier.ShouldEqual("j");
+        lambda.Block.ShouldBeNull();
+      }
+    }
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the expression:
+    /// <code>
+    ///   // Anonymous method without signature
+    ///   Dvoid d1 = delegate { };
+    ///   // Anonymous method with empty signature
+    ///   Dvoid d2 = delegate() { };
+    ///   // Anonymous method with signature
+    ///   Dint d3 = delegate(int i, ref int j, out int k) { k = 1; return i; };
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void AnonymousMethodExpressions()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"Expressions\AnonymousMethodExpressions.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
+
+      {
+        var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var anonym = initializer.Expression as AnonymousMethodNode;
+        anonym.ParameterList.Items.Count.ShouldEqual(0);
+        anonym.Body.Statements.Count.ShouldEqual(0);
+      }
+      {
+        var varDecl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var anonym = initializer.Expression as AnonymousMethodNode;
+        anonym.ParameterList.Items.Count.ShouldEqual(0);
+        anonym.Body.Statements.Count.ShouldEqual(0);
+      }
+      {
+        var varDecl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var anonym = initializer.Expression as AnonymousMethodNode;
+        anonym.ParameterList.Items.Count.ShouldEqual(3);
+        anonym.ParameterList.Items[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.ParameterList.Items[0].Identifier.ShouldEqual("i");
+        anonym.ParameterList.Items[0].Modifier.ShouldEqual(FormalParameterModifier.In);
+        anonym.ParameterList.Items[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.ParameterList.Items[1].Identifier.ShouldEqual("j");
+        anonym.ParameterList.Items[1].Modifier.ShouldEqual(FormalParameterModifier.Ref);
+        anonym.ParameterList.Items[2].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.ParameterList.Items[2].Identifier.ShouldEqual("k");
+        anonym.ParameterList.Items[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
+        anonym.Body.Statements.Count.ShouldEqual(2);
+      }
     }
   }
 }

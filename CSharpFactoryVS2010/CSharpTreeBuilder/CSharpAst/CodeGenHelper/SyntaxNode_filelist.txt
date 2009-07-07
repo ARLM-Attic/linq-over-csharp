@@ -33,6 +33,7 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expres
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\TrueLiteralNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\UInt32LiteralNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\Literals\UInt64LiteralNode.cs
+D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\AnonymousMethodNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\AnonymousObjectCreationExpressionNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ArgumentNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Operators\PrimaryOperators\ArrayCreationExpressionNode.cs
@@ -81,7 +82,6 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expres
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\SelectClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\WhereClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\AccessorNode.cs
-D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\AnonymousDelegateNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\BaseConstructorInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\CastOperatorDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\ConstDeclarationNode.cs

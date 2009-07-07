@@ -1,5 +1,5 @@
 // ================================================================================================
-// AnonymousDelegateNode.cs
+// AnonymousMethodNode.cs
 //
 // Created: 2009.05.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -9,20 +9,21 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an anonymous delegate.
+  /// This class represents an anonymous method expression.
   /// </summary>
   // ================================================================================================
-  public class AnonymousDelegateNode : PrimaryOperatorNode
+  public class AnonymousMethodNode : PrimaryOperatorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="AnonymousDelegateNode"/> class.
+    /// Initializes a new instance of the <see cref="AnonymousMethodNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public AnonymousDelegateNode(Token start)
+    public AnonymousMethodNode(Token start)
       : base(start)
     {
+      ParameterList = new FormalParameterListNode(null);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -32,5 +33,12 @@ namespace CSharpTreeBuilder.Ast
     /// <value>The parameter list.</value>
     // ----------------------------------------------------------------------------------------------
     public FormalParameterListNode ParameterList { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the body of the anonymous method.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public BlockStatementNode Body { get; internal set; }
   }
 }

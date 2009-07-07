@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 07. 12:09:29
+// Generated on: 2009. 07. 07. 14:31:46
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.Ast
   public interface ISyntaxNodeVisitor
   {
     void Visit(AccessorNode node);
-    void Visit(AnonymousDelegateNode node);
+    void Visit(AnonymousMethodNode node);
     void Visit(AnonymousObjectCreationExpressionNode node);
     void Visit(ArgumentNode node);
     void Visit(ArrayCreationExpressionNode node);

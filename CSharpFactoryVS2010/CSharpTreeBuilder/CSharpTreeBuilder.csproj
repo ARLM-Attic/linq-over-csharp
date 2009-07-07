@@ -317,7 +317,7 @@
     <Compile Include="CSharpAst\Expressions\Operators\UnaryOperators\UnaryOperatorNode.cs" />
     <Compile Include="CSharpAst\ICSharpSyntaxTree.cs" />
     <Compile Include="CSharpAst\Members\AccessorNode.cs" />
-    <Compile Include="CSharpAst\Members\AnonymousDelegateNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Operators\PrimaryOperators\AnonymousMethodNode.cs" />
     <Compile Include="CSharpAst\Members\ConstDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\ConstructorDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\ConstTagNode.cs" />
