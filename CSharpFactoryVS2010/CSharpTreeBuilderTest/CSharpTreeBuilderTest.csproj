@@ -304,6 +304,7 @@
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\DelegateCreationExpression.cs" />
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression.cs" />
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression_Error.cs" />
+    <None Include="TestFiles\ObjectOrArrayCreationExpressions\ArrayCreationExpression.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\Visitor\StatementVisitorTests.cs" />
     <None Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />

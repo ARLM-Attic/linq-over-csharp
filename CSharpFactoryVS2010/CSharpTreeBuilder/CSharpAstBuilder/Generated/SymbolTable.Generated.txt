@@ -151,149 +151,150 @@ Symbol Table:
   2 UsingDirecti   nt   true     19 false   289 fixedToken
   3 GlobalAttrib   nt   false    30 false   323 fixedToken
   4 NamespaceMem   nt   true     81 false   358 fixedToken
-  5 TypeName       nt   true   1043 false  1983 fixedToken
-  6 Attribute      nt   true    867 false  1694 fixedToken
-  7 AttributeDec   nt   true    712 true   1663 fixedToken
-  8 ModifierList   nt   true    929 true   1755 fixedToken
+  5 TypeName       nt   true   1042 false  1983 fixedToken
+  6 Attribute      nt   true    866 false  1694 fixedToken
+  7 AttributeDec   nt   true    711 true   1663 fixedToken
+  8 ModifierList   nt   true    928 true   1755 fixedToken
   9 TypeDeclarat   nt   true     83 false   414 fixedToken
- 10 ClassDeclara   nt   true    100 false   449 fixedToken
- 11 StructDeclar   nt   true    139 false   528 fixedToken
- 12 InterfaceDec   nt   true    450 false  1120 fixedToken
- 13 EnumDeclarat   nt   true    168 false   583 fixedToken
- 14 DelegateDecl   nt   true    214 false   668 fixedToken
- 15 TypeParamete   nt   true   2444 false  4799 fixedToken
- 16 BaseTypeList   nt   true    117 false   476 fixedToken
- 17 TypeParamete   nt   true   2474 false  4882 fixedToken
- 18 ClassBody      nt   true    127 false   501 fixedToken
- 19 ClassType      nt   true   1019 false  1920 fixedToken
- 20 ClassMemberD   nt   true    250 false   701 fixedToken
- 21 StructBody     nt   true    156 false   556 fixedToken
- 22 StructMember   nt   true    252 false   732 fixedToken
- 23 IntegralType   nt   true    996 false  1901 fixedToken
- 24 EnumBody       nt   true    185 false   610 fixedToken
- 25 EnumMemberDe   nt   true    204 false   640 fixedToken
- 26 Expression     nt   true   1718 false  3347 fixedToken
- 27 Type           nt   true    930 false  1781 fixedToken
- 28 FormalParame   nt   true    600 false  1433 fixedToken
- 29 Block          nt   true   1139 false  2111 fixedToken
- 30 ConstMemberD   nt   true    304 false   851 fixedToken
- 31 EventDeclara   nt   true    324 false   903 fixedToken
- 32 ConstructorD   nt   true    343 false   943 fixedToken
- 33 MemberName     nt   true   1021 false  1932 fixedToken
- 34 MethodDeclar   nt   true    392 false  1033 fixedToken
- 35 OperatorDecl   nt   true    434 false  1097 fixedToken
- 36 FieldMemberD   nt   true   2359 false  4696 fixedToken
- 37 PropertyDecl   nt   true    373 false   999 fixedToken
- 38 IndexerDecla   nt   true    378 false  1014 fixedToken
- 39 CastOperator   nt   true    413 false  1059 fixedToken
- 40 SingleConstM   nt   true    318 false   881 fixedToken
- 41 EventAccesso   nt   true    652 false  1542 fixedToken
- 42 CurrentArgum   nt   true    615 true   1452 fixedToken
- 43 AccessorDecl   nt   true    625 false  1494 fixedToken
- 44 Overloadable   nt   true   2442 false  4734 fixedToken
- 45 InterfaceMem   nt   true    471 false  1154 fixedToken
- 46 InterfaceAcc   nt   true    669 false  1586 fixedToken
- 47 InterfaceEve   nt   true    507 false  1234 fixedToken
- 48 LocalVariabl   nt   true    516 false  1254 fixedToken
- 49 LocalVariabl   nt   true    532 false  1288 fixedToken
- 50 VariableInit   nt   true    559 false  1333 fixedToken
- 51 ArrayInitial   nt   true    561 false  1354 fixedToken
- 52 FormalParame   nt   true    579 false  1393 fixedToken
- 53 CurrentArgum   nt   true    616 false  1470 fixedToken
- 54 Attributes     nt   true    686 false  1629 fixedToken
- 55 Keyword        nt   false   715 false  1675 fixedToken
- 56 AttributeArg   nt   true    873 false  1710 fixedToken
- 57 PrimitiveTyp   nt   true    992 false  1889 fixedToken
- 58 PointerOrArr   nt   true    981 true   1846 fixedToken
- 59 NonArrayType   nt   true    943 false  1801 fixedToken
- 60 TypeInRelExp   nt   true    955 false  1827 fixedToken
- 61 TypeArgument   nt   true   2460 false  4841 fixedToken
- 62 Statement      nt   true   1072 false  2033 fixedToken
- 63 ConstStateme   nt   true   1161 false  2165 fixedToken
- 64 EmbeddedStat   nt   true   1092 false  2065 fixedToken
- 65 YieldReturnS   nt   true   1358 false  2648 fixedToken
- 66 YieldBreakSt   nt   true   1365 false  2668 fixedToken
- 67 EmptyStateme   nt   true   1182 false  2214 fixedToken
- 68 CheckedBlock   nt   true   1184 false  2226 fixedToken
- 69 UncheckedBlo   nt   true   1188 false  2245 fixedToken
- 70 UnsafeBlock    nt   true   1192 false  2264 fixedToken
- 71 StatementExp   nt   true   1396 false  2747 fixedToken
- 72 IfStatement    nt   true   1196 false  2281 fixedToken
- 73 SwitchStatem   nt   true   1147 false  2133 fixedToken
- 74 WhileStateme   nt   true   1212 false  2316 fixedToken
- 75 DoWhileState   nt   true   1221 false  2345 fixedToken
- 76 ForStatement   nt   true   1235 false  2374 fixedToken
- 77 ForEachState   nt   true   1254 false  2413 fixedToken
- 78 BreakStateme   nt   true   1275 false  2458 fixedToken
- 79 ContinueStat   nt   true   1295 false  2502 fixedToken
- 80 GotoStatemen   nt   true   1279 false  2472 fixedToken
- 81 ReturnStatem   nt   true   1342 false  2610 fixedToken
- 82 ThrowStateme   nt   true   1350 false  2629 fixedToken
- 83 TryFinallyBl   nt   true   1299 false  2516 fixedToken
- 84 LockStatemen   nt   true   1315 false  2545 fixedToken
- 85 UsingStateme   nt   true   1325 false  2575 fixedToken
- 86 FixedStateme   nt   true   1371 false  2684 fixedToken
- 87 SwitchSectio   nt   true   1444 false  2820 fixedToken
- 88 ForInitializ   nt   true   1480 false  2869 fixedToken
- 89 ForIterator    nt   true   1482 false  2890 fixedToken
- 90 CatchClauses   nt   true   1490 false  2906 fixedToken
- 91 Unary          nt   true   1930 false  3770 fixedToken
- 92 AssignmentOp   nt   true   1407 false  2773 fixedToken
- 93 SwitchLabel    nt   true   1464 false  2848 fixedToken
- 94 LambdaFuncti   nt   true   1536 false  2950 fixedToken
- 95 ExplicitLamb   nt   true   1538 false  3010 fixedToken
- 96 LambdaFuncti   nt   true   1557 false  3035 fixedToken
- 97 FromClause     nt   true   1559 false  3051 fixedToken
- 98 QueryBody      nt   true   1574 true   3084 fixedToken
- 99 QueryBodyCla   nt   true   1585 false  3096 fixedToken
-100 LetClause      nt   true   1620 false  3148 fixedToken
-101 JoinClause     nt   true   1638 false  3208 fixedToken
-102 OrderByClaus   nt   true   1672 false  3255 fixedToken
-103 IntoClause     nt   true   1634 false  3190 fixedToken
-104 SelectClause   nt   true   1692 false  3298 fixedToken
-105 GroupClause    nt   true   1696 false  3317 fixedToken
-106 WhereClause    nt   true   1629 false  3171 fixedToken
-107 OrderingClau   nt   true   1683 false  3278 fixedToken
-108 NullCoalesci   nt   true   1743 true   3435 fixedToken
-109 OrExpr         nt   true   1752 true   3460 fixedToken
-110 AndExpr        nt   true   1761 true   3485 fixedToken
-111 BitOrExpr      nt   true   1770 true   3510 fixedToken
-112 BitXorExpr     nt   true   1779 true   3535 fixedToken
-113 BitAndExpr     nt   true   1788 true   3560 fixedToken
-114 EqlExpr        nt   true   1797 true   3585 fixedToken
-115 RelExpr        nt   true   1812 true   3615 fixedToken
-116 ShiftExpr      nt   true   1846 true   3669 fixedToken
-117 AddExpr        nt   true   1864 true   3708 fixedToken
-118 MulExpr        nt   true   1879 true   3738 fixedToken
-119 Primary        nt   true   1932 false  3826 fixedToken
-120 Literal        nt   true   2013 false  3950 fixedToken
-121 PredefinedTy   nt   true   2031 false  3975 fixedToken
-122 QualifiedAli   nt   true   2072 false  4023 fixedToken
-123 SimpleName     nt   true   2087 false  4069 fixedToken
-124 BaseMemberAc   nt   true   2095 false  4088 fixedToken
-125 BaseElementA   nt   true   2099 false  4111 fixedToken
-126 NewOperator    nt   true   2144 false  4253 fixedToken
-127 TypeOfOperat   nt   true   2104 false  4127 fixedToken
-128 CheckedOpera   nt   true   2120 false  4177 fixedToken
-129 UncheckedOpe   nt   true   2128 false  4202 fixedToken
-130 DefaultOpera   nt   true   2136 false  4227 fixedToken
-131 AnonymousDel   nt   true   2318 false  4597 fixedToken
-132 SizeOfOperat   nt   true   2112 false  4152 fixedToken
-133 ArrayIndexer   nt   true   2351 false  4667 fixedToken
-134 AnonymousObj   nt   true   2160 false  4283 fixedToken
-135 NewOperatorW   nt   true   2187 false  4356 fixedToken
-136 ImplicitArra   nt   true   2235 false  4452 fixedToken
-137 MemberDeclar   nt   true   2169 false  4305 fixedToken
-138 MemberDeclar   nt   true   2178 false  4322 fixedToken
-139 ObjectOrColl   nt   true   2247 false  4473 fixedToken
-140 MemberInitia   nt   true   2295 false  4555 fixedToken
-141 ElementIniti   nt   true   2268 false  4507 fixedToken
-142 ElementIniti   nt   true   2277 false  4524 fixedToken
-143 MemberInitia   nt   true   2304 false  4572 fixedToken
-144 AnonymousMet   nt   true   2337 false  4634 fixedToken
-145 SingleFieldM   nt   true   2367 false  4712 fixedToken
-146 TypeParamete   nt   true   2456 false  4830 fixedToken
-147 TypeParamete   nt   true   2493 false  4917 fixedToken
+ 10 ClassDeclara   nt   true     99 false   449 fixedToken
+ 11 StructDeclar   nt   true    138 false   528 fixedToken
+ 12 InterfaceDec   nt   true    449 false  1120 fixedToken
+ 13 EnumDeclarat   nt   true    167 false   583 fixedToken
+ 14 DelegateDecl   nt   true    213 false   668 fixedToken
+ 15 TypeParamete   nt   true   2452 false  4873 fixedToken
+ 16 BaseTypeList   nt   true    116 false   476 fixedToken
+ 17 TypeParamete   nt   true   2482 false  4956 fixedToken
+ 18 ClassBody      nt   true    126 false   501 fixedToken
+ 19 ClassType      nt   true   1018 false  1920 fixedToken
+ 20 ClassMemberD   nt   true    249 false   701 fixedToken
+ 21 StructBody     nt   true    155 false   556 fixedToken
+ 22 StructMember   nt   true    251 false   732 fixedToken
+ 23 IntegralType   nt   true    995 false  1901 fixedToken
+ 24 EnumBody       nt   true    184 false   610 fixedToken
+ 25 EnumMemberDe   nt   true    203 false   640 fixedToken
+ 26 Expression     nt   true   1715 false  3347 fixedToken
+ 27 Type           nt   true    929 false  1781 fixedToken
+ 28 FormalParame   nt   true    599 false  1433 fixedToken
+ 29 Block          nt   true   1138 false  2111 fixedToken
+ 30 ConstMemberD   nt   true    303 false   851 fixedToken
+ 31 EventDeclara   nt   true    323 false   903 fixedToken
+ 32 ConstructorD   nt   true    342 false   943 fixedToken
+ 33 MemberName     nt   true   1020 false  1932 fixedToken
+ 34 MethodDeclar   nt   true    391 false  1033 fixedToken
+ 35 OperatorDecl   nt   true    433 false  1097 fixedToken
+ 36 FieldMemberD   nt   true   2367 false  4770 fixedToken
+ 37 PropertyDecl   nt   true    372 false   999 fixedToken
+ 38 IndexerDecla   nt   true    377 false  1014 fixedToken
+ 39 CastOperator   nt   true    412 false  1059 fixedToken
+ 40 SingleConstM   nt   true    317 false   881 fixedToken
+ 41 EventAccesso   nt   true    651 false  1542 fixedToken
+ 42 CurrentArgum   nt   true    614 true   1452 fixedToken
+ 43 AccessorDecl   nt   true    624 false  1494 fixedToken
+ 44 Overloadable   nt   true   2450 false  4808 fixedToken
+ 45 InterfaceMem   nt   true    470 false  1154 fixedToken
+ 46 InterfaceAcc   nt   true    668 false  1586 fixedToken
+ 47 InterfaceEve   nt   true    506 false  1234 fixedToken
+ 48 LocalVariabl   nt   true    515 false  1254 fixedToken
+ 49 LocalVariabl   nt   true    531 false  1288 fixedToken
+ 50 VariableInit   nt   true    558 false  1333 fixedToken
+ 51 ArrayInitial   nt   true    560 false  1354 fixedToken
+ 52 FormalParame   nt   true    578 false  1393 fixedToken
+ 53 CurrentArgum   nt   true    615 false  1470 fixedToken
+ 54 Attributes     nt   true    685 false  1629 fixedToken
+ 55 Keyword        nt   false   714 false  1675 fixedToken
+ 56 AttributeArg   nt   true    872 false  1710 fixedToken
+ 57 PrimitiveTyp   nt   true    991 false  1889 fixedToken
+ 58 PointerOrArr   nt   true    980 true   1846 fixedToken
+ 59 NonArrayType   nt   true    942 false  1803 fixedToken
+ 60 TypeInRelExp   nt   true    954 false  1827 fixedToken
+ 61 TypeArgument   nt   true   2468 false  4915 fixedToken
+ 62 Statement      nt   true   1071 false  2033 fixedToken
+ 63 ConstStateme   nt   true   1160 false  2165 fixedToken
+ 64 EmbeddedStat   nt   true   1091 false  2065 fixedToken
+ 65 YieldReturnS   nt   true   1357 false  2648 fixedToken
+ 66 YieldBreakSt   nt   true   1364 false  2668 fixedToken
+ 67 EmptyStateme   nt   true   1181 false  2214 fixedToken
+ 68 CheckedBlock   nt   true   1183 false  2226 fixedToken
+ 69 UncheckedBlo   nt   true   1187 false  2245 fixedToken
+ 70 UnsafeBlock    nt   true   1191 false  2264 fixedToken
+ 71 StatementExp   nt   true   1395 false  2747 fixedToken
+ 72 IfStatement    nt   true   1195 false  2281 fixedToken
+ 73 SwitchStatem   nt   true   1146 false  2133 fixedToken
+ 74 WhileStateme   nt   true   1211 false  2316 fixedToken
+ 75 DoWhileState   nt   true   1220 false  2345 fixedToken
+ 76 ForStatement   nt   true   1234 false  2374 fixedToken
+ 77 ForEachState   nt   true   1253 false  2413 fixedToken
+ 78 BreakStateme   nt   true   1274 false  2458 fixedToken
+ 79 ContinueStat   nt   true   1294 false  2502 fixedToken
+ 80 GotoStatemen   nt   true   1278 false  2472 fixedToken
+ 81 ReturnStatem   nt   true   1341 false  2610 fixedToken
+ 82 ThrowStateme   nt   true   1349 false  2629 fixedToken
+ 83 TryFinallyBl   nt   true   1298 false  2516 fixedToken
+ 84 LockStatemen   nt   true   1314 false  2545 fixedToken
+ 85 UsingStateme   nt   true   1324 false  2575 fixedToken
+ 86 FixedStateme   nt   true   1370 false  2684 fixedToken
+ 87 SwitchSectio   nt   true   1443 false  2820 fixedToken
+ 88 ForInitializ   nt   true   1479 false  2869 fixedToken
+ 89 ForIterator    nt   true   1481 false  2890 fixedToken
+ 90 CatchClauses   nt   true   1489 false  2906 fixedToken
+ 91 Unary          nt   true   1927 false  3770 fixedToken
+ 92 AssignmentOp   nt   true   1406 false  2773 fixedToken
+ 93 SwitchLabel    nt   true   1463 false  2848 fixedToken
+ 94 LambdaFuncti   nt   true   1533 false  2950 fixedToken
+ 95 ExplicitLamb   nt   true   1535 false  3010 fixedToken
+ 96 LambdaFuncti   nt   true   1554 false  3035 fixedToken
+ 97 FromClause     nt   true   1556 false  3051 fixedToken
+ 98 QueryBody      nt   true   1571 true   3084 fixedToken
+ 99 QueryBodyCla   nt   true   1582 false  3096 fixedToken
+100 LetClause      nt   true   1617 false  3148 fixedToken
+101 JoinClause     nt   true   1635 false  3208 fixedToken
+102 OrderByClaus   nt   true   1669 false  3255 fixedToken
+103 IntoClause     nt   true   1631 false  3190 fixedToken
+104 SelectClause   nt   true   1689 false  3298 fixedToken
+105 GroupClause    nt   true   1693 false  3317 fixedToken
+106 WhereClause    nt   true   1626 false  3171 fixedToken
+107 OrderingClau   nt   true   1680 false  3278 fixedToken
+108 NullCoalesci   nt   true   1740 true   3435 fixedToken
+109 OrExpr         nt   true   1749 true   3460 fixedToken
+110 AndExpr        nt   true   1758 true   3485 fixedToken
+111 BitOrExpr      nt   true   1767 true   3510 fixedToken
+112 BitXorExpr     nt   true   1776 true   3535 fixedToken
+113 BitAndExpr     nt   true   1785 true   3560 fixedToken
+114 EqlExpr        nt   true   1794 true   3585 fixedToken
+115 RelExpr        nt   true   1809 true   3615 fixedToken
+116 ShiftExpr      nt   true   1843 true   3669 fixedToken
+117 AddExpr        nt   true   1861 true   3708 fixedToken
+118 MulExpr        nt   true   1876 true   3738 fixedToken
+119 Primary        nt   true   1929 false  3826 fixedToken
+120 Literal        nt   true   2010 false  3950 fixedToken
+121 PredefinedTy   nt   true   2028 false  3975 fixedToken
+122 QualifiedAli   nt   true   2069 false  4023 fixedToken
+123 SimpleName     nt   true   2084 false  4069 fixedToken
+124 BaseMemberAc   nt   true   2092 false  4088 fixedToken
+125 BaseElementA   nt   true   2096 false  4111 fixedToken
+126 NewOperator    nt   true   2141 false  4253 fixedToken
+127 TypeOfOperat   nt   true   2101 false  4127 fixedToken
+128 CheckedOpera   nt   true   2117 false  4177 fixedToken
+129 UncheckedOpe   nt   true   2125 false  4202 fixedToken
+130 DefaultOpera   nt   true   2133 false  4227 fixedToken
+131 AnonymousDel   nt   true   2326 false  4671 fixedToken
+132 SizeOfOperat   nt   true   2109 false  4152 fixedToken
+133 ArrayIndexer   nt   true   2359 false  4741 fixedToken
+134 AnonymousObj   nt   true   2157 false  4295 fixedToken
+135 NewOperatorW   nt   true   2198 false  4366 fixedToken
+136 ImplicitArra   nt   true   2249 false  4519 fixedToken
+137 MemberDeclar   nt   true   2166 false  4316 fixedToken
+138 MemberDeclar   nt   true   2175 false  4333 fixedToken
+139 ObjectOrColl   nt   true   2258 false  4547 fixedToken
+140 RankSpecifie   nt   true   2234 false  4481 fixedToken
+141 MemberInitia   nt   true   2304 false  4629 fixedToken
+142 ElementIniti   nt   true   2278 false  4581 fixedToken
+143 ElementIniti   nt   true   2287 false  4598 fixedToken
+144 MemberInitia   nt   true   2313 false  4646 fixedToken
+145 AnonymousMet   nt   true   2345 false  4708 fixedToken
+146 SingleFieldM   nt   true   2375 false  4786 fixedToken
+147 TypeParamete   nt   true   2464 false  4904 fixedToken
+148 TypeParamete   nt   true   2501 false  4991 fixedToken
 
 Literal Tokens:
 --------------

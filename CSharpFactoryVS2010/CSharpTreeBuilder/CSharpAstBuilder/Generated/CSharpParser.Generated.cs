@@ -504,8 +504,8 @@ public partial class CSharpParser
 		Token partialToken = null;
 		
 		if (StartOf(4)) {
-			if (la.kind == _ident && la.val == "partial") {
-				Expect(1);
+			if (la.kind == 1) {
+				Get();
 				partialToken = t; 
 			}
 			if (la.kind == 16) {
@@ -2339,21 +2339,21 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		while (IsPointerOrDims()) {
 			if (la.kind == 116) {
 				Get();
-				var ptNode = new PointerModifierNode(t);
-				typeNode.TypeModifiers.Add(ptNode); 
-				SetCommentOwner(ptNode);
-				
+				typeNode.PointerTokens.Add(t); 
 			} else if (la.kind == 97) {
 				Get();
-				var arrNode = new ArrayModifierNode(t); 
-				SetCommentOwner(arrNode);
+				var rankSpecifier = new RankSpecifierNode(t);
+				typeNode.RankSpecifiers.Add(rankSpecifier);
+				SetCommentOwner(rankSpecifier);
 				
 				while (la.kind == 87) {
 					Get();
-					arrNode.AddSeparator(t); 
+					rankSpecifier.Commas.Add(t); 
 				}
 				Expect(112);
-				Terminate(arrNode); 
+				rankSpecifier.CloseSquareBracket = t;
+				Terminate(rankSpecifier); 
+				
 			} else SynErr(166);
 		}
 	}
@@ -2369,11 +2369,9 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Get();
 			typeNode.NullableToken = t; 
 		}
-		if (la.kind == 116) {
+		while (la.kind == 116) {
 			Get();
-			var ptNode = new PointerModifierNode(t);
-			typeNode.TypeModifiers.Add(ptNode); 
-			SetCommentOwner(ptNode);
+			typeNode.PointerTokens.Add(t); 
 			
 		}
 		Terminate(typeNode); 
@@ -3259,8 +3257,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	}
 
 	void LambdaFunctionSignature(LambdaExpressionNode lambdaNode) {
-		if (la.kind == _ident) {
-			Expect(1);
+		if (la.kind == 1) {
+			Get();
 			var fpNode = new FormalParameterNode(t);
 			SetCommentOwner(fpNode);
 			fpNode.IdentifierToken = t;
@@ -3281,8 +3279,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 					ExplicitLambdaParameter(out parNode);
 					lambdaNode.FormalParameters.Add(separator, parNode); 
 				}
-			} else if (la.kind != _rpar) {
-				Expect(1);
+			} else if (la.kind == 1) {
+				Get();
 				parNode = new FormalParameterNode(t);
 				SetCommentOwner(parNode);
 				parNode.IdentifierToken = t;
@@ -4337,10 +4335,12 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	void AnonymousObjectInitializer(AnonymousObjectCreationExpressionNode anonNode) {
 		Expect(96);
 		anonNode.OpenBrace = t; 
-		MemberDeclaratorList(anonNode);
-		if (la.kind == 87) {
-			Get();
-			anonNode.OrphanComma = t; 
+		if (StartOf(13)) {
+			MemberDeclaratorList(anonNode);
+			if (la.kind == 87) {
+				Get();
+				anonNode.OrphanComma = t; 
+			}
 		}
 		Expect(111);
 		anonNode.CloseBrace = t; 
@@ -4350,7 +4350,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 
 	void NewOperatorWithType(Token newToken, TypeOrNamespaceNode typeNode, out ExpressionNode exprNode) {
 		exprNode = null; 
-		ObjectOrCollectionInitializerNode initNode; 
 		if (la.kind == 98) {
 			var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
 			SetCommentOwner(objectCreationNode);
@@ -4363,6 +4362,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Expect(113);
 			objectCreationNode.CloseParenthesis = t; 
 			if (la.kind == 96) {
+				ObjectOrCollectionInitializerNode initNode; 
 				ObjectOrCollectionInitializer(out initNode);
 				objectCreationNode.ObjectOrCollectionInitializer = initNode; 
 			}
@@ -4372,6 +4372,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			SetCommentOwner(objectCreationNode);
 			objectCreationNode.TypeName = typeNode;
 			exprNode = objectCreationNode;
+			ObjectOrCollectionInitializerNode initNode; 
 			
 			ObjectOrCollectionInitializer(out initNode);
 			objectCreationNode.ObjectOrCollectionInitializer = initNode; 
@@ -4383,8 +4384,12 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			arrayCreationNode.TypeName = typeNode;
 			exprNode = arrayCreationNode;
 			
-			ImplicitArrayCreation(arrayCreationNode);
+			RankSpecifiers(arrayCreationNode);
+			ArrayInitializerNode arrInitNode; 
+			ArrayInitializer(out arrInitNode);
+			arrayCreationNode.Initializer = arrInitNode;
 			Terminate(arrayCreationNode); 
+			
 		} else if (la.kind == 97) {
 			var arrayCreationNode = new ArrayCreationExpressionNode(newToken); 
 			SetCommentOwner(arrayCreationNode);
@@ -4393,26 +4398,34 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			ExpressionNode initExprNode; 
 			
 			Get();
-			arrayCreationNode.SizedDimensions.StartToken = t; 
+			arrayCreationNode.ArraySizeSpecifier.OpenSquareBracket = t; 
 			Expression(out initExprNode);
-			arrayCreationNode.SizedDimensions.Add(initExprNode); 
+			arrayCreationNode.ArraySizeSpecifier.Expressions.Add(initExprNode); 
 			while (la.kind == 87) {
 				Get();
+				arrayCreationNode.ArraySizeSpecifier.Commas.Add(t);
 				var separator = t; 
+				
 				Expression(out initExprNode);
-				arrayCreationNode.SizedDimensions.Add(separator, initExprNode); 
+				arrayCreationNode.ArraySizeSpecifier.Expressions.Add(separator, initExprNode); 
 			}
 			Expect(112);
-			Terminate(arrayCreationNode.SizedDimensions); 
+			arrayCreationNode.ArraySizeSpecifier.CloseSquareBracket = t;
+			Terminate(arrayCreationNode.ArraySizeSpecifier); 
+			
 			while (IsDims()) {
 				Expect(97);
-				arrayCreationNode.OpenSquareBracket = t; 
+				var rankSpecifier = new RankSpecifierNode(t);
+				arrayCreationNode.RankSpecifiers.Add(rankSpecifier);
+				
 				while (la.kind == 87) {
 					Get();
-					arrayCreationNode.Commas.Add(t); 
+					rankSpecifier.Commas.Add(t); 
 				}
 				Expect(112);
-				arrayCreationNode.CloseSquareBracket = t; 
+				rankSpecifier.CloseSquareBracket = t;
+				Terminate(rankSpecifier);
+				
 			}
 			if (la.kind == 96) {
 				ArrayInitializerNode arrInitNode; 
@@ -4427,30 +4440,33 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 
 	void ImplicitArrayCreation(ArrayCreationExpressionNode impArrNode) {
 		Expect(97);
-		impArrNode.OpenSquareBracket = t; 
+		var rankSpecifier = new RankSpecifierNode(t);
+		impArrNode.RankSpecifiers.Add(rankSpecifier);
+		
 		while (la.kind == 87) {
 			Get();
-			impArrNode.Commas.Add(t); 
+			rankSpecifier.Commas.Add(t); 
 		}
 		Expect(112);
-		impArrNode.CloseSquareBracket = t; 
-		if (la.kind == 96) {
-			ArrayInitializerNode initNode; 
-			ArrayInitializer(out initNode);
-			impArrNode.Initializer = initNode; 
-		}
+		rankSpecifier.CloseSquareBracket = t;
+		Terminate(rankSpecifier);
+		ArrayInitializerNode initNode; 
+		
+		ArrayInitializer(out initNode);
+		impArrNode.Initializer = initNode;
 		Terminate(impArrNode); 
+		
 	}
 
-	void MemberDeclaratorList(AnonymousObjectCreationExpressionNode initNode) {
+	void MemberDeclaratorList(AnonymousObjectCreationExpressionNode anonNode) {
 		MemberDeclaratorNode mdNode; 
 		MemberDeclarator(out mdNode);
-		initNode.Declarators.Add(mdNode); 
+		anonNode.Declarators.Add(mdNode); 
 		while (NotFinalComma()) {
 			Expect(87);
 			var separator = t; 
 			MemberDeclarator(out mdNode);
-			initNode.Declarators.Add(separator, mdNode); 
+			anonNode.Declarators.Add(separator, mdNode); 
 		}
 	}
 
@@ -4478,8 +4494,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		oiNode = new ObjectOrCollectionInitializerNode(t); 
 		SetCommentOwner(oiNode);
 		
-		if (IsEmptyMemberInitializer()) {
-			Expect(111);
+		if (la.kind == 111) {
+			Get();
 			Terminate(oiNode); 
 		} else if (IsMemberInitializer()) {
 			MemberInitializerList(oiNode);
@@ -4498,6 +4514,35 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Expect(111);
 			Terminate(oiNode); 
 		} else SynErr(199);
+	}
+
+	void RankSpecifiers(ArrayCreationExpressionNode arrayCreationNode) {
+		Expect(97);
+		var rankSpecifier = new RankSpecifierNode(t);
+		arrayCreationNode.RankSpecifiers.Add(rankSpecifier);
+		
+		while (la.kind == 87) {
+			Get();
+			rankSpecifier.Commas.Add(t); 
+		}
+		Expect(112);
+		rankSpecifier.CloseSquareBracket = t;
+		Terminate(rankSpecifier);
+		
+		while (la.kind == 97) {
+			Get();
+			rankSpecifier = new RankSpecifierNode(t);
+			arrayCreationNode.RankSpecifiers.Add(rankSpecifier);
+			
+			while (la.kind == 87) {
+				Get();
+				rankSpecifier.Commas.Add(t); 
+			}
+			Expect(112);
+			rankSpecifier.CloseSquareBracket = t;
+			Terminate(rankSpecifier);
+			
+		}
 	}
 
 	void MemberInitializerList(ObjectOrCollectionInitializerNode ocNode) {
@@ -4529,7 +4574,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		SetCommentOwner(eiNode);
 		ExpressionNode exprNode; 
 		
-		if (IsValueInitializer()) {
+		if (StartOf(13)) {
 			Expression(out exprNode);
 			eiNode.Expression = exprNode; 
 		} else if (la.kind == 96) {
@@ -4556,7 +4601,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		
 		Expect(85);
 		miNode.EqualToken = t; 
-		if (IsValueInitializer()) {
+		if (StartOf(13)) {
 			ExpressionNode exprNode; 
 			Expression(out exprNode);
 			miNode.Expression = exprNode; 

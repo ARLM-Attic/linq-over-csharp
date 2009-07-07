@@ -1,39 +1,42 @@
-// ================================================================================================
-// IArrayDimensions.cs
-//
-// Created: 2009.05.14, by Istvan Novak (DeepDiver)
-// ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
+using CSharpTreeBuilder.Collections;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Defines the properties of array dimension declarations.
+  /// This class represents an array specifier node: [ expression , ... ]
   /// </summary>
   // ================================================================================================
-  public interface IArrayDimensions
+  public class ArraySizeSpecifierNode : RankSpecifierNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the opening square bracket.
+    /// Initializes a new instance of the <see cref="ArraySizeSpecifierNode"/> class.
     /// </summary>
+    /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    Token OpenSquareBracket { get; }
+    public ArraySizeSpecifierNode(Token start)
+      : base(start)
+    {
+      Expressions = new ExpressionNodeCollection();
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of comma tokens.
+    /// Initializes a new instance of the <see cref="ArraySizeSpecifierNode"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    ImmutableCollection<Token> Commas { get; }
+    public ArraySizeSpecifierNode()
+      : this(null)
+    {
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the closing square bracket.
+    /// Gets a collection of expressions that specify the array sizes.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    Token CloseSquareBracket { get; }
-  }
+    public ExpressionNodeCollection Expressions { get; private set; }
+   }
 }

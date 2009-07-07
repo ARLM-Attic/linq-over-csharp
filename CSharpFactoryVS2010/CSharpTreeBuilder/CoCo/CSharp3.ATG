@@ -420,7 +420,7 @@ TypeDeclaration<TypeDeclarationNode declaringType, out TypeDeclarationNode typeD
   (   
     (
       [
-        IF (la.kind == _ident && la.val == "partial")
+        //IF (la.kind == _ident && la.val == "partial")
         ident
         (. partialToken = t; .)
       ]
@@ -1782,10 +1782,12 @@ Type<out TypeOrNamespaceNode typeNode>
 =                                                    
   (. typeNode = null; .)      
   ( 
-     PrimitiveType<out typeNode>
-  |  ClassType<out typeNode>                                               
-  |  "void"                                           
-     (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+    PrimitiveType<out typeNode>
+  |  
+    ClassType<out typeNode>                                               
+  |  
+    "void"                                           
+    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
   )
   [ 
     "?"                                              
@@ -1810,14 +1812,12 @@ NonArrayType<out TypeOrNamespaceNode typeNode>
     "?"
     (. typeNode.NullableToken = t; .)                                              
   ]
-  [
+  {
     "*"                         
     (. 
-       var ptNode = new PointerModifierNode(t);
-       typeNode.TypeModifiers.Add(ptNode); 
-       SetCommentOwner(ptNode);
+       typeNode.PointerTokens.Add(t); 
     .)
-  ]
+  }
   (. Terminate(typeNode); .)
 .
 
@@ -1848,23 +1848,23 @@ PointerOrArray<TypeOrNamespaceNode typeNode>
   { IF (IsPointerOrDims())
     ( 
       "*"
-      (. 
-         var ptNode = new PointerModifierNode(t);
-         typeNode.TypeModifiers.Add(ptNode); 
-         SetCommentOwner(ptNode);
-      .)  
+      (. typeNode.PointerTokens.Add(t); .)  
     | 
       "["                     
       (. 
-         var arrNode = new ArrayModifierNode(t); 
-         SetCommentOwner(arrNode);
+         var rankSpecifier = new RankSpecifierNode(t);
+         typeNode.RankSpecifiers.Add(rankSpecifier);
+         SetCommentOwner(rankSpecifier);
       .)
       { 
         ","                 
-        (. arrNode.AddSeparator(t); .)
+        (. rankSpecifier.Commas.Add(t); .)
       } 
       "]"                     
-      (. Terminate(arrNode); .)
+      (. 
+        rankSpecifier.CloseSquareBracket = t;
+        Terminate(rankSpecifier); 
+      .)
     )
   }
 .
@@ -2950,7 +2950,7 @@ CatchClauses<TryStatementNode tryNode>
 LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
 =
   (
-    IF (la.kind == _ident)
+    //IF (la.kind == _ident)
     ident
     (.
        var fpNode = new FormalParameterNode(t);
@@ -2976,7 +2976,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
         (. lambdaNode.FormalParameters.Add(separator, parNode); .)
       }
     |
-      IF (la.kind != _rpar)
+      //IF (la.kind != _rpar)
       ident
       (.
          parNode = new FormalParameterNode(t);
@@ -4255,18 +4255,30 @@ NewOperator<out ExpressionNode exprNode>
   (. exprNode = null; .)
   "new"
   (. var newToken = t; .)
+
   (
+    // new anonymous-object-initializer ==== new { member-declarator-list-opt } 
+
     (. 
        var anonNode = new AnonymousObjectCreationExpressionNode(t); 
        SetCommentOwner(anonNode);
     .)
     AnonymousObjectInitializer<anonNode>
     (. exprNode = anonNode; .)
-  |
+  | 
+    // alternatives:
+    //   new type ( argument-list-opt ) object-or-collection-initializer-opt
+    //   new delegate-type ( expression ) <-- this one cannot be distinguised from the previous based solely on syntax
+    //   new type object-or-collection-initializer
+    //   new non-array-type [ expression-list ] rank-specifiers-opt array-initializer-opt
+    //   new array-type array-initializer
+
     (. TypeOrNamespaceNode typeNode; .)
     NonArrayType<out typeNode>
     NewOperatorWithType<newToken, typeNode, out exprNode>
   |
+    // new rank-specifier array-initializer ==== new [ dim-separators-opt ] array-initializer
+
     (. 
        var impArrNode = new ArrayCreationExpressionNode(t); 
        SetCommentOwner(impArrNode);
@@ -4284,14 +4296,13 @@ AnonymousObjectInitializer<AnonymousObjectCreationExpressionNode anonNode>
 =
   "{"                                   
   (. anonNode.OpenBrace = t; .)
-  (
-    IF (!IsEmptyMemberInitializer()) 
+  [
     MemberDeclaratorList<anonNode> 
     [ 
       "," 
       (. anonNode.OrphanComma = t; .)
     ]
-  )
+  ]
   "}"
   (. 
      anonNode.CloseBrace = t; 
@@ -4302,17 +4313,17 @@ AnonymousObjectInitializer<AnonymousObjectCreationExpressionNode anonNode>
 // ------------------------------------------------------------------------------------------------
 // Declaration of "new" operator member declaration list.
 // ------------------------------------------------------------------------------------------------
-MemberDeclaratorList<AnonymousObjectCreationExpressionNode initNode>  
+MemberDeclaratorList<AnonymousObjectCreationExpressionNode anonNode>  
 =                     
   (. MemberDeclaratorNode mdNode; .)
   MemberDeclarator<out mdNode>     
-  (. initNode.Declarators.Add(mdNode); .)
+  (. anonNode.Declarators.Add(mdNode); .)
   {
     IF (NotFinalComma()) 
     ","
     (. var separator = t; .)
     MemberDeclarator<out mdNode>   
-    (. initNode.Declarators.Add(separator, mdNode); .)
+    (. anonNode.Declarators.Add(separator, mdNode); .)
   } 
 .
 
@@ -4347,7 +4358,6 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
     SetCommentOwner(mdNode);
     Terminate(mdNode); 
   .)
-
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -4356,9 +4366,8 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
 NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out ExpressionNode exprNode>
   (. exprNode = null; .)
 =
-  (. ObjectOrCollectionInitializerNode initNode; .)                 
   (
-    // --- Simple constructor call
+    // new type (here we stand) ( argument-list-opt ) object-or-collection-initializer-opt
     (. 
        var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
        SetCommentOwner(objectCreationNode);
@@ -4369,31 +4378,33 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     "("
     (. objectCreationNode.OpenParenthesis = t; .)
     
-    CurrentArgumentList<objectCreationNode.Arguments>
+    CurrentArgumentList<objectCreationNode.Arguments>   // this rule accepts empty arg-list as well
     
     ")"
     (. objectCreationNode.CloseParenthesis = t; .)
     
     [         
+      (. ObjectOrCollectionInitializerNode initNode; .)                 
       ObjectOrCollectionInitializer<out initNode>
       (. objectCreationNode.ObjectOrCollectionInitializer = initNode; .)
     ]
     (. Terminate(objectCreationNode); .)
-    
-  | // --- Implicit default constructor call
+  | 
+    // new type (here we stand) object-or-collection-initializer ==== new type (here we stand) { ...
     (. 
        var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
        SetCommentOwner(objectCreationNode);
        objectCreationNode.TypeName = typeNode;
        exprNode = objectCreationNode;
-    .)
+       ObjectOrCollectionInitializerNode initNode; 
+     .)
     ObjectOrCollectionInitializer<out initNode>
     (. 
        objectCreationNode.ObjectOrCollectionInitializer = initNode; 
        Terminate(objectCreationNode);
     .)
-    
-  | // --- Array initialization
+  | 
+    // new array-type array-initializer ==== new non-array-type (here we stand) rank-specifiers array-initializer
     IF (IsDims())                 
     (. 
        var arrayCreationNode = new ArrayCreationExpressionNode(t); 
@@ -4401,10 +4412,15 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
        arrayCreationNode.TypeName = typeNode;
        exprNode = arrayCreationNode;
     .)
-    ImplicitArrayCreation<arrayCreationNode>
-    (. Terminate(arrayCreationNode); .)
-    
-  | // --- New array creation
+    RankSpecifiers<arrayCreationNode>
+    (. ArrayInitializerNode arrInitNode; .)                     
+    ArrayInitializer<out arrInitNode> 
+    (. 
+      arrayCreationNode.Initializer = arrInitNode;
+      Terminate(arrayCreationNode); 
+    .)
+  | 
+    // new non-array-type (here we stand) [ expression-list ] rank-specifiers-opt array-initializer-opt
     (. 
        var arrayCreationNode = new ArrayCreationExpressionNode(newToken); 
        SetCommentOwner(arrayCreationNode);
@@ -4413,26 +4429,39 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
        ExpressionNode initExprNode; 
     .)
     "["
-    (. arrayCreationNode.SizedDimensions.StartToken = t; .)
+    (. arrayCreationNode.ArraySizeSpecifier.OpenSquareBracket = t; .)
     Expression<out initExprNode>
-    (. arrayCreationNode.SizedDimensions.Add(initExprNode); .)
+    (. arrayCreationNode.ArraySizeSpecifier.Expressions.Add(initExprNode); .)
     { 
       ","
-      (. var separator = t; .)
+      (. 
+        arrayCreationNode.ArraySizeSpecifier.Commas.Add(t);
+        var separator = t; 
+      .)
       Expression<out initExprNode>
-      (. arrayCreationNode.SizedDimensions.Add(separator, initExprNode); .)
+      (. arrayCreationNode.ArraySizeSpecifier.Expressions.Add(separator, initExprNode); .)
     } 
     "]" 
-    (. Terminate(arrayCreationNode.SizedDimensions); .)
+    (. 
+      arrayCreationNode.ArraySizeSpecifier.CloseSquareBracket = t;
+      Terminate(arrayCreationNode.ArraySizeSpecifier); 
+    .)
+    
     { IF (IsDims()) 
       "["
-       (. arrayCreationNode.OpenSquareBracket = t; .)
+      (.
+        var rankSpecifier = new RankSpecifierNode(t);
+        arrayCreationNode.RankSpecifiers.Add(rankSpecifier);
+      .)
         { 
-          ","
-          (. arrayCreationNode.Commas.Add(t); .)
+          ","                           
+          (. rankSpecifier.Commas.Add(t); .)
         } 
       "]" 
-      (. arrayCreationNode.CloseSquareBracket = t; .)
+      (.
+        rankSpecifier.CloseSquareBracket = t;
+        Terminate(rankSpecifier);
+      .)
     }
     [            
       (. ArrayInitializerNode arrInitNode; .)                 
@@ -4447,24 +4476,69 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
 .
 
 // ------------------------------------------------------------------------------------------------
+// Rank specifiers
+// ------------------------------------------------------------------------------------------------
+RankSpecifiers<ArrayCreationExpressionNode arrayCreationNode>
+=
+  "["
+  (.
+    var rankSpecifier = new RankSpecifierNode(t);
+    arrayCreationNode.RankSpecifiers.Add(rankSpecifier);
+  .)
+    { 
+      ","
+      (. rankSpecifier.Commas.Add(t); .)
+    } 
+  "]"
+  (.
+    rankSpecifier.CloseSquareBracket = t;
+    Terminate(rankSpecifier);
+  .)
+  
+  {
+    "["
+    (.
+      rankSpecifier = new RankSpecifierNode(t);
+      arrayCreationNode.RankSpecifiers.Add(rankSpecifier);
+    .)
+      { 
+        ","                           
+        (. rankSpecifier.Commas.Add(t); .)
+      } 
+    "]" 
+    (.
+      rankSpecifier.CloseSquareBracket = t;
+      Terminate(rankSpecifier);
+    .)
+  }
+.
+
+// ------------------------------------------------------------------------------------------------
 // Declaration of an implicit array creation
 // ------------------------------------------------------------------------------------------------
 ImplicitArrayCreation<ArrayCreationExpressionNode impArrNode> 
 =
+  // --- new (here we stand) rank-specifier array-initializer
   "["
-  (. impArrNode.OpenSquareBracket = t; .)
+  (.
+    var rankSpecifier = new RankSpecifierNode(t);
+    impArrNode.RankSpecifiers.Add(rankSpecifier);
+  .)
     { 
       ","                           
-      (. impArrNode.Commas.Add(t); .)
+      (. rankSpecifier.Commas.Add(t); .)
     } 
   "]" 
-  (. impArrNode.CloseSquareBracket = t; .)
-  [        
-    (. ArrayInitializerNode initNode; .)                     
-    ArrayInitializer<out initNode> 
-    (. impArrNode.Initializer = initNode; .)
-  ]
-  (. Terminate(impArrNode); .)
+  (. 
+    rankSpecifier.CloseSquareBracket = t;
+    Terminate(rankSpecifier);
+    ArrayInitializerNode initNode; 
+  .)                     
+  ArrayInitializer<out initNode> 
+  (. 
+    impArrNode.Initializer = initNode;
+    Terminate(impArrNode); 
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -4478,7 +4552,7 @@ ObjectOrCollectionInitializer<out ObjectOrCollectionInitializerNode oiNode>
      SetCommentOwner(oiNode);
   .)
   (
-    IF (IsEmptyMemberInitializer()) 
+    //IF (IsEmptyMemberInitializer()) 
     "}"   
     (. Terminate(oiNode); .)
   |
@@ -4529,7 +4603,7 @@ ElementInitializer<out ElementInitializerNode eiNode>
      ExpressionNode exprNode; 
   .)
   (
-    IF (IsValueInitializer())
+    //IF (IsValueInitializer())
     Expression<out exprNode>
     (. eiNode.Expression = exprNode; .)
   | 
@@ -4579,7 +4653,7 @@ MemberInitializer<out MemberInitializerNode miNode>
   "="
   (. miNode.EqualToken = t; .)
   (
-    IF (IsValueInitializer())
+    //IF (IsValueInitializer())
     (. ExpressionNode exprNode; .)
     Expression<out exprNode>
     (. miNode.Expression = exprNode; .)

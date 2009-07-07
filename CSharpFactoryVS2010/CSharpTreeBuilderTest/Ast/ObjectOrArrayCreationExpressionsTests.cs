@@ -156,7 +156,8 @@ namespace CSharpTreeBuilderTest
     /// <summary>
     /// Tests the parsing of the expressions:
     /// <code>
-    ///   var a = new { x, AnonymousObjectCreationExpression.xs1, global::AnonymousObjectCreationExpression.xs2, A = 1 };
+    ///    var a1 = new { x, AnonymousObjectCreationExpression.xs1, global::AnonymousObjectCreationExpression.xs2, A = 1 };
+    ///    var a2 = new { };
     /// </code>
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -190,6 +191,11 @@ namespace CSharpTreeBuilderTest
       var memberDeclarator4 = exp1.Declarators[3] as IdentifierMemberDeclaratorNode;
       memberDeclarator4.Identifier.ShouldEqual("A");
       ((Int32LiteralNode)memberDeclarator4.Expression).Value.ShouldEqual(1);
+
+      var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp2 = init2.Expression as AnonymousObjectCreationExpressionNode;
+      exp2.Declarators.Count.ShouldEqual(0);
+
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -207,6 +213,87 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression_Error.cs");
       InvokeParser(project).ShouldBeFalse();
       project.Errors[0].Code.ShouldEqual("CS0746");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the expressions:
+    /// <code>
+    ///   var a1 = new int[1, 2][][,] { { null, null } };
+    ///   var a2 = new int**[5, 6];
+    ///   var a3 = new[,] { { 7, 8 }, { 9, 10 } };
+    ///   var a4 = new int[][,] { null, null };
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ArrayCreationExpression()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ObjectOrArrayCreationExpressions\ArrayCreationExpression.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
+
+      var init1 = ((VariableDeclarationStatementNode) method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp1 = init1.Expression as ArrayCreationExpressionNode;
+      exp1.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp1.TypeName.IsArray.ShouldBeFalse(); // note that the type is NOT an array type!
+      exp1.TypeName.IsPointer.ShouldBeFalse();
+      exp1.HasSpecifiedArraySizes.ShouldBeTrue();
+      exp1.ArraySizeSpecifier.Rank.ShouldEqual(2);
+      ((Int32LiteralNode)exp1.ArraySizeSpecifier.Expressions[0]).Value.ShouldEqual(1);
+      ((Int32LiteralNode) exp1.ArraySizeSpecifier.Expressions[1]).Value.ShouldEqual(2);
+      exp1.HasRankSpecifiers.ShouldBeTrue();
+      exp1.RankSpecifiers[0].Rank.ShouldEqual(1);
+      exp1.RankSpecifiers[1].Rank.ShouldEqual(2);
+      exp1.HasInitializer.ShouldBeTrue();
+      var init1_1 = exp1.Initializer.Items[0].Initializer as ArrayInitializerNode;
+      (((ExpressionInitializerNode)init1_1.Items[0].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
+      (((ExpressionInitializerNode)init1_1.Items[1].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
+
+      var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp2 = init2.Expression as ArrayCreationExpressionNode;
+      exp2.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp2.TypeName.IsPointer.ShouldBeTrue();
+      exp2.TypeName.PointerSpecifierCount.ShouldEqual(2);
+      exp2.HasSpecifiedArraySizes.ShouldBeTrue();
+      exp2.ArraySizeSpecifier.Rank.ShouldEqual(2);
+      ((Int32LiteralNode)exp2.ArraySizeSpecifier.Expressions[0]).Value.ShouldEqual(5);
+      ((Int32LiteralNode)exp2.ArraySizeSpecifier.Expressions[1]).Value.ShouldEqual(6);
+      exp2.HasInitializer.ShouldBeFalse();
+
+      var init3 = ((VariableDeclarationStatementNode)method.Body.Statements[2]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp3 = init3.Expression as ArrayCreationExpressionNode;
+      exp3.TypeName.IsEmpty.ShouldBeTrue();
+      exp3.HasSpecifiedArraySizes.ShouldBeFalse();
+      exp3.HasRankSpecifiers.ShouldBeTrue();
+      exp3.RankSpecifiers.Count.ShouldEqual(1);
+      exp3.RankSpecifiers[0].Rank.ShouldEqual(2);
+      exp3.HasInitializer.ShouldBeTrue();
+      exp3.Initializer.Items.Count.ShouldEqual(2);
+      ((ArrayInitializerNode) exp3.Initializer.Items[0].Initializer).Items.Count.ShouldEqual(2);
+      var init3_1 = ((ArrayInitializerNode) exp3.Initializer.Items[0].Initializer).Items[0].Initializer as ExpressionInitializerNode;
+      ((Int32LiteralNode)init3_1.Expression).Value.ShouldEqual(7);
+      var init3_2 = ((ArrayInitializerNode)exp3.Initializer.Items[0].Initializer).Items[1].Initializer as ExpressionInitializerNode;
+      ((Int32LiteralNode)init3_2.Expression).Value.ShouldEqual(8);
+      var init3_3 = ((ArrayInitializerNode)exp3.Initializer.Items[1].Initializer).Items[0].Initializer as ExpressionInitializerNode;
+      ((Int32LiteralNode)init3_3.Expression).Value.ShouldEqual(9);
+      var init3_4 = ((ArrayInitializerNode)exp3.Initializer.Items[1].Initializer).Items[1].Initializer as ExpressionInitializerNode;
+      ((Int32LiteralNode)init3_4.Expression).Value.ShouldEqual(10);
+
+      var init4 = ((VariableDeclarationStatementNode)method.Body.Statements[3]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+      var exp4 = init4.Expression as ArrayCreationExpressionNode;
+      exp4.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp4.HasSpecifiedArraySizes.ShouldBeFalse();
+      exp4.HasRankSpecifiers.ShouldBeTrue();
+      exp4.RankSpecifiers[0].Rank.ShouldEqual(1);
+      exp4.RankSpecifiers[1].Rank.ShouldEqual(2);
+      exp4.HasInitializer.ShouldBeTrue();
+      var init4_1 = exp1.Initializer.Items[0].Initializer as ArrayInitializerNode;
+      (((ExpressionInitializerNode)init4_1.Items[0].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
+      (((ExpressionInitializerNode)init4_1.Items[1].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
+
     }
   }
 }

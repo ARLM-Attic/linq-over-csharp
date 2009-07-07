@@ -4,6 +4,7 @@
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using CSharpTreeBuilder.CSharpAstBuilder;
+using CSharpTreeBuilder.Collections;
 
 namespace CSharpTreeBuilder.Ast
 {
@@ -40,8 +41,9 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public TypeOrNamespaceNode(Token identifier) : base(identifier)
     {
-      TypeTags = new TypeTagNodeCollection { ParentNode = this };
-      TypeModifiers = new TypeModifierNodeCollection { ParentNode = this};
+      TypeTags = new TypeTagNodeCollection {ParentNode = this};
+      RankSpecifiers = new RankSpecifierNodeCollection {ParentNode = this};
+      PointerTokens = new ImmutableCollection<Token>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -184,10 +186,47 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type modifiers.
+    /// Gets the array rank specifiers.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeModifierNodeCollection TypeModifiers { get; private set; }
+    public RankSpecifierNodeCollection RankSpecifiers { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type has array rank specifiers.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsArray 
+    {
+      get { return RankSpecifiers.Count > 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the pointer tokens.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<Token> PointerTokens { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type has pointer specifiers.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsPointer
+    {
+      get { return PointerTokens.Count > 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of pointer specifiers.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int PointerSpecifierCount
+    {
+      get { return PointerTokens.Count; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -251,12 +290,10 @@ namespace CSharpTreeBuilder.Ast
         tag.AcceptVisitor(visitor);
       }
 
-      foreach (var modifier in TypeModifiers)
+      foreach (var rankSpecifier in RankSpecifiers)
       {
-        modifier.AcceptVisitor(visitor);
+        rankSpecifier.AcceptVisitor(visitor);
       }
-
-#warning Seems like ArrayModifierNodes are missing!
     }
 
     #endregion

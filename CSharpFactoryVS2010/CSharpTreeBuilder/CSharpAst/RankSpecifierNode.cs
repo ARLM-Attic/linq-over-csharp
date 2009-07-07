@@ -1,71 +1,67 @@
-// ================================================================================================
-// ArrayModifierNode.cs
-//
-// Created: 2009.05.11, by Istvan Novak (DeepDiver)
-// ================================================================================================
-using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
+using CSharpTreeBuilder.Collections;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This type represents a pointer modifier.
+  /// This class represents a rank specifier node: [ , ]
   /// </summary>
-  /// <remarks>
-  /// 	<para>Syntax:</para>
-  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>"<strong>[</strong>" { "<strong>,</strong>" } "<strong>]</strong>"</para>
-  /// 	</blockquote>
-  /// 	<para>Representation:</para>
-  /// 	<para>
-  ///         "<strong>[</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
-  ///         { "<strong>,</strong>" }: <see cref="Separators"/>, each comma is an item
-  ///         in the collection<br/>
-  ///         "<strong>]</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
-  /// 	</para>
-  /// </remarks>
   // ================================================================================================
-  public sealed class ArrayModifierNode : TypeModifierNode
+  public class RankSpecifierNode : SyntaxNode<ISyntaxNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayModifierNode"/> class.
+    /// Initializes a new instance of the <see cref="RankSpecifierNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayModifierNode(Token start)
+    public RankSpecifierNode(Token start)
       : base(start)
     {
-      Separators = new ImmutableCollection<Token>();
+      Commas = new ImmutableCollection<Token>();
+      OpenSquareBracket = start;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of separators.
+    /// Initializes a new instance of the <see cref="RankSpecifierNode"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<Token> Separators { get; private set; }
+    public RankSpecifierNode()
+      : this(null)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the opening square bracket.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token OpenSquareBracket { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of comma tokens.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ImmutableCollection<Token> Commas { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the closing square bracket.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token CloseSquareBracket { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the rank of the array.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Rank
-    {
-      get { return Separators.Count + 1; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a new separator token.
-    /// </summary>
-    /// <param name="t">The token to add.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddSeparator(Token t)
-    {
-      Separators.Add(t);
+    public int Rank 
+    { 
+      get { return Commas.Count + 1; } 
     }
 
     #region Visitor methods

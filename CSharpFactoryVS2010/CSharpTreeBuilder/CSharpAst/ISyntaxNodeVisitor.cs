@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 06. 30. 22:47:50
+// Generated on: 2009. 07. 07. 12:09:29
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -27,7 +27,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(ArrayCreationExpressionNode node);
     void Visit(ArrayInitializerNode node);
     void Visit(ArrayItemInitializerNode node);
-    void Visit(ArrayModifierNode node);
+    void Visit(ArraySizeSpecifierNode node);
     void Visit(AssignmentOperatorNode node);
     void Visit(AttributeArgumentNode node);
     void Visit(AttributedDeclarationNode node);
@@ -93,6 +93,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(GotoStatementNode node);
     void Visit(GroupByClauseNode node);
     void Visit(ICommentNode node);
+    void Visit(IdentifierMemberDeclaratorNode node);
     void Visit(IfPragmaNode node);
     void Visit(IfStatementNode node);
     void Visit(IndexerDeclarationNode node);
@@ -113,6 +114,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(LocalVariableNode node);
     void Visit(LocalVariableTagNode node);
     void Visit(LockStatementNode node);
+    void Visit(MemberAccessMemberDeclaratorNode node);
     void Visit(MemberDeclarationNode node);
     void Visit(MemberDeclaratorNode node);
     void Visit(MemberInitializerNode node);
@@ -133,7 +135,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(OrderingClauseNode node);
     void Visit(ParenthesizedExpressionNode node);
     void Visit(PointerMemberAccessOperatorNode node);
-    void Visit(PointerModifierNode node);
     void Visit(PostDecrementOperatorNode node);
     void Visit(PostIncrementOperatorNode node);
     void Visit(PragmaNode node);
@@ -149,13 +150,14 @@ namespace CSharpTreeBuilder.Ast
     void Visit(QueryBodyClauseNode node);
     void Visit(QueryBodyNode node);
     void Visit(QueryExpressionNode node);
+    void Visit(RankSpecifierNode node);
     void Visit(RealLiteralNode node);
     void Visit(RegionPragmaNode node);
     void Visit(ReturnStatementNode node);
     void Visit(SelectClauseNode node);
+    void Visit(SimpleNameMemberDeclaratorNode node);
     void Visit(SimpleNameNode node);
     void Visit(SingleLiteralNode node);
-    void Visit(SizedArrayDimensionNode node);
     void Visit(SizeofOperatorNode node);
     void Visit(StackAllocInitializerNode node);
     void Visit(StatementNode node);
@@ -171,7 +173,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(TryStatementNode node);
     void Visit(TypecastOperatorNode node);
     void Visit(TypeDeclarationNode node);
-    void Visit(TypeModifierNode node);
     void Visit(TypeofOperatorNode node);
     void Visit(TypeOrMemberDeclarationNode node);
     void Visit(TypeOrNamespaceNode node);

@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents an array creation expression.
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayCreationExpressionNode : NewOperatorNode, IArrayDimensions
+  public sealed class ArrayCreationExpressionNode : NewOperatorNode
   {
     // --- Backing fields
     private TypeOrNamespaceNode _TypeName;
@@ -27,8 +27,9 @@ namespace CSharpTreeBuilder.Ast
     public ArrayCreationExpressionNode(Token start)
       : base(start)
     {
-      Commas = new ImmutableCollection<Token>();
-      SizedDimensions = new SizedArrayDimensionNode {ParentNode = this};
+      _TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
+      ArraySizeSpecifier = new ArraySizeSpecifierNode();
+      RankSpecifiers = new RankSpecifierNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -59,19 +60,36 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the sized dimensions.
+    /// Gets the array size specifier.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SizedArrayDimensionNode SizedDimensions { get; private set; }
+    public ArraySizeSpecifierNode ArraySizeSpecifier { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance has sized dimensions.
+    /// Gets a value indicating whether this instance has specified array sizes.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool HasSizedDimensions
+    public bool HasSpecifiedArraySizes
     {
-      get { return SizedDimensions.Count > 0; }
+      get { return ArraySizeSpecifier.Expressions.Count > 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the rank specifier collection.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public RankSpecifierNodeCollection RankSpecifiers { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has any rank specifiers.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasRankSpecifiers
+    {
+      get { return RankSpecifiers.Count > 0; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -84,23 +102,12 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the opening square bracket.
+    /// Gets a value indicating whether this instance has an initializer.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token OpenSquareBracket { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the collection of comma tokens.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<Token> Commas { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the closing square bracket.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token CloseSquareBracket { get; internal set; }
+    public bool HasInitializer
+    {
+      get { return Initializer != null; }
+    }
   }
 }
