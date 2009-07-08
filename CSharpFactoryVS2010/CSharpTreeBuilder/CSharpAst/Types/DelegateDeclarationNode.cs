@@ -28,6 +28,7 @@ namespace CSharpTreeBuilder.Ast
       : base(start, name)
     {
       IdentifierToken = name;
+      FormalParameters = new FormalParameterNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -50,7 +51,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the formal parameters.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
+    public FormalParameterNodeCollection FormalParameters { get; internal set; }
 
     #region Visitor methods
 
@@ -84,9 +85,9 @@ namespace CSharpTreeBuilder.Ast
         typeParameterConstraint.AcceptVisitor(visitor);
       }
 
-      if(FormalParameters!=null)
+      foreach (var formalParameter in FormalParameters)
       {
-        FormalParameters.AcceptVisitor(visitor);
+        formalParameter.AcceptVisitor(visitor);
       }
     }
 

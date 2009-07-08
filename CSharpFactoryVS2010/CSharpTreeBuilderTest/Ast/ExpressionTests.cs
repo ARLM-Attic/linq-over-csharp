@@ -1144,30 +1144,30 @@ namespace CSharpTreeBuilderTest
         var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var anonym = initializer.Expression as AnonymousMethodExpressionNode;
-        anonym.ParameterList.Items.Count.ShouldEqual(0);
+        anonym.FormalParameters.Count.ShouldEqual(0);
         anonym.Body.Statements.Count.ShouldEqual(0);
       }
       {
         var varDecl = method.Body.Statements[1] as VariableDeclarationStatementNode;
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var anonym = initializer.Expression as AnonymousMethodExpressionNode;
-        anonym.ParameterList.Items.Count.ShouldEqual(0);
+        anonym.FormalParameters.Count.ShouldEqual(0);
         anonym.Body.Statements.Count.ShouldEqual(0);
       }
       {
         var varDecl = method.Body.Statements[2] as VariableDeclarationStatementNode;
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var anonym = initializer.Expression as AnonymousMethodExpressionNode;
-        anonym.ParameterList.Items.Count.ShouldEqual(3);
-        anonym.ParameterList.Items[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
-        anonym.ParameterList.Items[0].Identifier.ShouldEqual("i");
-        anonym.ParameterList.Items[0].Modifier.ShouldEqual(FormalParameterModifier.In);
-        anonym.ParameterList.Items[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
-        anonym.ParameterList.Items[1].Identifier.ShouldEqual("j");
-        anonym.ParameterList.Items[1].Modifier.ShouldEqual(FormalParameterModifier.Ref);
-        anonym.ParameterList.Items[2].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
-        anonym.ParameterList.Items[2].Identifier.ShouldEqual("k");
-        anonym.ParameterList.Items[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
+        anonym.FormalParameters.Count.ShouldEqual(3);
+        anonym.FormalParameters[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.FormalParameters[0].Identifier.ShouldEqual("i");
+        anonym.FormalParameters[0].Modifier.ShouldEqual(FormalParameterModifier.In);
+        anonym.FormalParameters[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.FormalParameters[1].Identifier.ShouldEqual("j");
+        anonym.FormalParameters[1].Modifier.ShouldEqual(FormalParameterModifier.Ref);
+        anonym.FormalParameters[2].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.FormalParameters[2].Identifier.ShouldEqual("k");
+        anonym.FormalParameters[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
         anonym.Body.Statements.Count.ShouldEqual(2);
       }
     }

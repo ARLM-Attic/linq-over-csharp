@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public AnonymousMethodExpressionNode(Token start)
       : base(start)
     {
-      ParameterList = new FormalParameterListNode(null);
+      FormalParameters = new FormalParameterNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The parameter list.</value>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode ParameterList { get; internal set; }
+    public FormalParameterNodeCollection FormalParameters { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

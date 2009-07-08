@@ -659,7 +659,6 @@ public partial class CSharpParser
 			TypeParameterList(typeDecl);
 		}
 		Expect(98);
-		ddNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(ddNode.FormalParameters);
 		}
@@ -794,7 +793,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Expect(1);
 			finNode.IdentifierToken = t; 
 			Expect(98);
-			finNode.FormalParameters = new FormalParameterListNode(t); 
 			Expect(113);
 			Terminate(finNode.FormalParameters); 
 			if (la.kind == 96) {
@@ -1110,16 +1108,16 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Terminate(typeNode); 
 	}
 
-	void FormalParameterList(FormalParameterListNode parsNode) {
+	void FormalParameterList(FormalParameterNodeCollection parsNode) {
 		FormalParameterNode node; 
 		FormalParameterTag(out node);
-		if (parsNode != null && node != null) parsNode.Items.Add(node); 
+		if (parsNode != null && node != null) parsNode.Add(node); 
 		while (la.kind == 87) {
 			Get();
 			var separator = t; 
 			FormalParameterTag(out node);
 			if (parsNode != null && node != null) 
-			 parsNode.Items.Add(separator, node); 
+			 parsNode.Add(separator, node); 
 			
 		}
 	}
@@ -1204,7 +1202,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		memNode = cstNode;
 		
 		Expect(98);
-		cstNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(cstNode.FormalParameters);
 		}
@@ -1295,7 +1292,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			TypeParameterList(metNode);
 		}
 		Expect(98);
-		metNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(metNode.FormalParameters);
 		}
@@ -1322,7 +1318,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		opNode.OperatorToken = t; 
 		OverloadableOp(opNode);
 		Expect(98);
-		opNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(opNode.FormalParameters);
 		}
@@ -1364,7 +1359,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Expect(68);
 		indNode.ThisToken = t; 
 		Expect(97);
-		indNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(indNode.FormalParameters);
 		}
@@ -1395,7 +1389,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Type(out typeNode);
 		copNode.TypeName = typeNode; 
 		Expect(98);
-		copNode.FormalParameters = new FormalParameterListNode(t); 
 		if (StartOf(7)) {
 			FormalParameterList(copNode.FormalParameters);
 		}
@@ -1687,7 +1680,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				memNode = indNode;
 				
 				Expect(97);
-				indNode.FormalParameters = new FormalParameterListNode(t); 
 				if (StartOf(7)) {
 					FormalParameterList(indNode.FormalParameters);
 				}
@@ -4297,23 +4289,18 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		
 		if (la.kind == 98) {
 			Get();
-			var parsNode = new FormalParameterListNode(t); 
-			SetCommentOwner(parsNode);
-			adNode.ParameterList = parsNode;
-			
 			if (StartOf(34)) {
 				FormalParameterNode parNode; 
 				AnonymousMethodParameter(out parNode);
-				parsNode.Items.Add(parNode); 
+				adNode.FormalParameters.Add(parNode); 
 				while (la.kind == 87) {
 					Get();
 					var separator = t; 
 					AnonymousMethodParameter(out parNode);
-					parsNode.Items.Add(separator, parNode); 
+					adNode.FormalParameters.Add(separator, parNode); 
 				}
 			}
 			Expect(113);
-			Terminate(parsNode); 
 		}
 		BlockStatementNode blockNode; 
 		Block(out blockNode);

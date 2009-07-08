@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class represents an array initializer.
   /// </summary>
   // ================================================================================================
-  public class ArrayInitializerNode : VariableInitializerNode
+  public sealed class ArrayInitializerNode : VariableInitializerNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

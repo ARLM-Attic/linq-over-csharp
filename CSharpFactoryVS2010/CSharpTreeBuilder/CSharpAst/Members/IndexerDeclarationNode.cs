@@ -23,6 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public IndexerDeclarationNode(Token start)
       : base(start)
     {
+      FormalParameters = new FormalParameterNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -44,7 +45,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the node representing formal parameters.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public FormalParameterListNode FormalParameters { get; internal set; }
+    public FormalParameterNodeCollection FormalParameters { get; internal set; }
 
     #region Visitor methods
 
@@ -68,9 +69,9 @@ namespace CSharpTreeBuilder.Ast
         TypeName.AcceptVisitor(visitor);
       }
 
-      if (FormalParameters!=null)
+      foreach (var formalParameter in FormalParameters)
       {
-        FormalParameters.AcceptVisitor(visitor);
+        formalParameter.AcceptVisitor(visitor);
       }
 
       if (GetAccessor!=null)

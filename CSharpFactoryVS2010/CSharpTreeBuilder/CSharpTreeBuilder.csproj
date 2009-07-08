@@ -103,10 +103,10 @@
     <Compile Include="CSharpAst\Comments\MultiCommentNode.cs" />
     <Compile Include="CSharpAst\Comments\SingleCommentNodeBase.cs" />
     <Compile Include="CSharpAst\Comments\LineCommentNode.cs" />
-    <Compile Include="CSharpAst\ArraySizeSpecifierNode.cs" />
+    <Compile Include="CSharpAst\Types\ArraySizeSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\JoinIntoClauseNode.cs" />
-    <Compile Include="CSharpAst\RankSpecifierNodeCollection.cs" />
-    <Compile Include="CSharpAst\RankSpecifierNode.cs" />
+    <Compile Include="CSharpAst\Types\RankSpecifierNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\RankSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Lambda\LambdaExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Binary\AssignmentOperator.cs" />
     <Compile Include="CSharpAst\Expressions\Binary\BinaryExpressionNodeBase.cs" />
@@ -131,7 +131,7 @@
     <Compile Include="CSharpAst\Members\ConstructorInitializerNode.cs" />
     <Compile Include="CSharpAst\Members\BaseConstructorInitializerNode.cs" />
     <Compile Include="CSharpAst\Members\ThisConstructorInitializerNode.cs" />
-    <Compile Include="CSharpAst\QualifiedAliasMemberNode.cs" />
+    <Compile Include="CSharpAst\Types\QualifiedAliasMemberNode.cs" />
     <Compile Include="CSharpAst\Expressions\Primary\QualifiedAliasMemberAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Primary\PredefinedTypeMemberAccessNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\FromClauseNode.cs" />
@@ -326,7 +326,6 @@
     <Compile Include="CSharpAst\Members\FieldTagNode.cs" />
     <Compile Include="CSharpAst\Members\FieldTagNodeCollection.cs" />
     <Compile Include="CSharpAst\Members\FinalizerDeclarationNode.cs" />
-    <Compile Include="CSharpAst\Members\FormalParameterListNode.cs" />
     <Compile Include="CSharpAst\Members\FormalParameterModifier.cs" />
     <Compile Include="CSharpAst\Members\FormalParameterNode.cs" />
     <Compile Include="CSharpAst\Members\FormalParameterNodeCollection.cs" />

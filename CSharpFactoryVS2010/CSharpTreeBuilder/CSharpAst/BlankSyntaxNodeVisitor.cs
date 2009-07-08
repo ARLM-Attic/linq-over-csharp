@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 08. 13:41:01
+// Generated on: 2009. 07. 08. 14:57:53
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -86,7 +86,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(FixedInitializerNode node) { }
     public virtual void Visit(FixedStatementNode node) { }
     public virtual void Visit(ForeachStatementNode node) { }
-    public virtual void Visit(FormalParameterListNode node) { }
     public virtual void Visit(FormalParameterNode node) { }
     public virtual void Visit(ForStatementNode node) { }
     public virtual void Visit(FromClauseNode node) { }

@@ -682,7 +682,6 @@ DelegateDeclaration<out TypeDeclarationNode typeDecl>
   .)
   [ TypeParameterList<typeDecl> ]
   "(" 
-  (. ddNode.FormalParameters = new FormalParameterListNode(t); .)
   [ FormalParameterList<ddNode.FormalParameters> ] 
   ")"
   (. Terminate(ddNode.FormalParameters); .)
@@ -713,7 +712,6 @@ ClassMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNode
     ident   
     (. finNode.IdentifierToken = t; .)
     "(" 
-    (. finNode.FormalParameters = new FormalParameterListNode(t); .)
     ")" 
     (. Terminate(finNode.FormalParameters); .)
     ( 
@@ -950,7 +948,6 @@ ConstructorDeclaration<out MemberDeclarationNode memNode>
      memNode = cstNode;
   .)
   "(" 
-  (. cstNode.FormalParameters = new FormalParameterListNode(t); .)
   [                                    
     FormalParameterList<cstNode.FormalParameters>
   ] 
@@ -1016,7 +1013,6 @@ IndexerDeclaration<IndexerDeclarationNode indNode>
   "this"
   (. indNode.ThisToken = t; .)
   "[" 
-  (. indNode.FormalParameters = new FormalParameterListNode(t); .)
   [ FormalParameterList<indNode.FormalParameters> ] 
   "]" 
   (. Terminate(indNode.FormalParameters); .)
@@ -1034,7 +1030,6 @@ MethodDeclaration<MethodDeclarationNode metNode>
 =                                                    
   [ TypeParameterList<metNode> ]
   "(" 
-  (. metNode.FormalParameters = new FormalParameterListNode(t); .)
   [ FormalParameterList<metNode.FormalParameters> ] 
   ")"
   (. Terminate(metNode.FormalParameters); .)
@@ -1076,7 +1071,6 @@ CastOperatorDeclaration<out MemberDeclarationNode memNode>
   Type<out typeNode>
   (. copNode.TypeName = typeNode; .)
   "("   
-  (. copNode.FormalParameters = new FormalParameterListNode(t); .)
   [ FormalParameterList<copNode.FormalParameters> ]   
   ")"
   (. Terminate(copNode.FormalParameters); .)
@@ -1100,7 +1094,6 @@ OperatorDeclaration<OperatorDeclarationNode opNode>
   (. opNode.OperatorToken = t; .)
   OverloadableOp<opNode>
   "("
-  (. opNode.FormalParameters = new FormalParameterListNode(t); .)
   [ FormalParameterList<opNode.FormalParameters> ]
   ")"
   (. Terminate(opNode.FormalParameters); .)
@@ -1203,7 +1196,6 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
          memNode = indNode;
       .)
       "[" 
-      (. indNode.FormalParameters = new FormalParameterListNode(t); .)
       [ FormalParameterList<indNode.FormalParameters> ] 
       "]" 
       (. Terminate(indNode.FormalParameters); .)
@@ -1430,18 +1422,18 @@ FormalParameterTag<out FormalParameterNode parNode>
 // Declaration of a formal parameter list
 //   parsNode List holding the formal parameter declarations.
 // ------------------------------------------------------------------------------------------------
-FormalParameterList<FormalParameterListNode parsNode>  
+FormalParameterList<FormalParameterNodeCollection parsNode>  
   (. FormalParameterNode node; .)                                                
 =                                    
   FormalParameterTag<out node>
-  (. if (parsNode != null && node != null) parsNode.Items.Add(node); .)
+  (. if (parsNode != null && node != null) parsNode.Add(node); .)
   {
     ","
     (. var separator = t; .)
     FormalParameterTag<out node>
     (. 
        if (parsNode != null && node != null) 
-         parsNode.Items.Add(separator, node); 
+         parsNode.Add(separator, node); 
     .)
   }
 .
@@ -4744,24 +4736,18 @@ AnonymousDelegate<out ExpressionNode exprNode>
   .)
   [                     
     "("
-    (. 
-       var parsNode = new FormalParameterListNode(t); 
-       SetCommentOwner(parsNode);
-       adNode.ParameterList = parsNode;
-    .)
     [ 
       (. FormalParameterNode parNode; .)
       AnonymousMethodParameter<out parNode>
-      (. parsNode.Items.Add(parNode); .)
+      (. adNode.FormalParameters.Add(parNode); .)
       { 
         "," 
         (. var separator = t; .)
         AnonymousMethodParameter<out parNode>   
-        (. parsNode.Items.Add(separator, parNode); .)
+        (. adNode.FormalParameters.Add(separator, parNode); .)
       } 
     ] 
     ")" 
-    (. Terminate(parsNode); .)
   ] 
   (. BlockStatementNode blockNode; .)
   Block<out blockNode>           
