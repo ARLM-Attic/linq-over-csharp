@@ -40,6 +40,7 @@ namespace CSharpTreeBuilder.Ast
     public FromClauseNode(Token start)
       : base(start)
     {
+      _TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
     }
 
     // ----------------------------------------------------------------------------------------------

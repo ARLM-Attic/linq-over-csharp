@@ -64,7 +64,7 @@
     <Compile Include="Ast\Pragmas.cs" />
     <Compile Include="Ast\QueryExpressions.cs" />
     <Compile Include="Ast\RegressionTests.cs" />
-    <Compile Include="Ast\SimpleExpressionTests.cs" />
+    <Compile Include="Ast\ExpressionTests.cs" />
     <Compile Include="Ast\StructDeclarations.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\VisitorTest.cs" />
@@ -305,8 +305,9 @@
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression.cs" />
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression_Error.cs" />
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\ArrayCreationExpression.cs" />
-    <Compile Include="TestFiles\Expressions\AnonymousMethodExpressions.cs" />
-    <Compile Include="TestFiles\Expressions\LambdaExpressions.cs" />
+    <None Include="TestFiles\Expressions\AnonymousMethodExpressions.cs" />
+    <None Include="TestFiles\Expressions\LambdaExpressions.cs" />
+    <None Include="TestFiles\Expressions\QueryExpressions.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\Visitor\StatementVisitorTests.cs" />
     <None Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />

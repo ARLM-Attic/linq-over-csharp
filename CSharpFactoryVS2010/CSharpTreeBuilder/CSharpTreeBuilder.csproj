@@ -104,6 +104,7 @@
     <Compile Include="CSharpAst\Comments\SingleCommentNodeBase.cs" />
     <Compile Include="CSharpAst\Comments\LineCommentNode.cs" />
     <Compile Include="CSharpAst\ArraySizeSpecifierNode.cs" />
+    <Compile Include="CSharpAst\Expressions\Query\JoinIntoClauseNode.cs" />
     <Compile Include="CSharpAst\RankSpecifierNodeCollection.cs" />
     <Compile Include="CSharpAst\RankSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Lambda\LambdaExpressionNode.cs" />

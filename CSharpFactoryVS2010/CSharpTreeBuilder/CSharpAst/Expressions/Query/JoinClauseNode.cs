@@ -12,11 +12,12 @@ namespace CSharpTreeBuilder.Ast
   /// <remarks>
   /// 	<para>Syntax:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>'<strong>join</strong>' [ <em>TypeOrNamespaceNode</em> ]
+  /// 		<para>
+  ///         '<strong>join</strong>' [ <em>TypeOrNamespaceNode</em> ]
   ///         <em>identifier</em> "<strong>in</strong>" <em>ExpressionNode</em>
   ///         '<strong>on</strong>' <em>ExpressionNode</em> '<strong>equals</strong>'
-  ///         <em>ExpressionNode</em> [ '<strong>into</strong>' <em>intoidentifier</em>
-  ///         ]</para>
+  ///         <em>ExpressionNode</em> 
+  ///     </para>
   /// 	</blockquote>
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
@@ -30,8 +31,6 @@ namespace CSharpTreeBuilder.Ast
   /// 			<em>ExpressionNode</em>: <see cref="OnExpression"/><br/>
   ///             '<strong>equals</strong>': <see cref="EqualsToken"/><br/>
   /// 			<em>ExpressionNode</em>: <see cref="EqualsExpression"/><br/>
-  ///             '<strong>into</strong>': <see cref="IntoToken"/><br/>
-  /// 			<em>intoidentifier</em>: <see cref="IntoIdentifierToken"/>
   /// 		</para>
   /// 	</blockquote>
   /// </remarks>
@@ -50,6 +49,7 @@ namespace CSharpTreeBuilder.Ast
     public JoinClauseNode(Token start)
       : base(start)
     {
+      _TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -141,19 +141,5 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ExpressionNode EqualsExpression { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the "into" token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token IntoToken { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the "into" identifier token.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public Token IntoIdentifierToken { get; internal set; }
   }
 }

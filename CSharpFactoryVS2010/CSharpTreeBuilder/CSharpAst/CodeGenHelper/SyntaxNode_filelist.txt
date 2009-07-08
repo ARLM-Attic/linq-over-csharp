@@ -73,6 +73,7 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expres
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\GroupByClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\IntoClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\JoinClauseNode.cs
+D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\JoinIntoClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\LetClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\OrderByClauseNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Query\OrderingClauseNode.cs

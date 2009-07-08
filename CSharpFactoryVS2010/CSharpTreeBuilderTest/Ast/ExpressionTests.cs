@@ -1087,6 +1087,7 @@ namespace CSharpTreeBuilderTest
         lambda.Block.ShouldBeNull();
       }
     }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Tests the parsing of the expression:
@@ -1138,6 +1139,148 @@ namespace CSharpTreeBuilderTest
         anonym.ParameterList.Items[2].Identifier.ShouldEqual("k");
         anonym.ParameterList.Items[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
         anonym.Body.Statements.Count.ShouldEqual(2);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the expression:
+    /// <code>
+    ///    // simplest query with select: from-clause select-clause
+    ///    var a1 = from i in array
+    ///             select i;
+    ///    
+    ///    // simplest query with group: from-clause group-clause
+    ///    var a2 = from int i in array
+    ///             group i by i;
+    ///    
+    ///    // query with all possible clauses 
+    ///    var a3 = from i in array
+    ///             from int j in array
+    ///             let k = j
+    ///             where true
+    ///             join l in array on i equals l
+    ///             join int p in array on i equals p
+    ///             join n in array on i equals n into o
+    ///             join int q in array on i equals q into r
+    ///             orderby k ascending , j descending
+    ///             select i
+    ///             into m
+    ///               select m;
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void QueryExpressions()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"Expressions\QueryExpressions.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
+
+      {
+        var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var query = initializer.Expression as QueryExpressionNode;
+        query.FromClause.TypeName.IsEmpty.ShouldBeTrue();
+        query.FromClause.Identifier.ShouldEqual("i1");
+        ((SimpleNameNode)query.FromClause.Expression).Identifier.ShouldEqual("array");
+        query.QueryBody.BodyClauses.Count.ShouldEqual(0);
+        ((SimpleNameNode)query.QueryBody.SelectClause.Expression).Identifier.ShouldEqual("i1");
+        query.QueryBody.GroupClause.ShouldBeNull();
+        query.QueryBody.IntoClause.ShouldBeNull();
+      }
+      {
+        var varDecl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var query = initializer.Expression as QueryExpressionNode;
+        query.FromClause.TypeName.IsEmpty.ShouldBeFalse();
+        query.FromClause.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        query.FromClause.Identifier.ShouldEqual("i2");
+        ((SimpleNameNode)query.FromClause.Expression).Identifier.ShouldEqual("array");
+        query.QueryBody.BodyClauses.Count.ShouldEqual(0);
+        query.QueryBody.SelectClause.ShouldBeNull();
+        ((SimpleNameNode)query.QueryBody.GroupClause.GroupExpression).Identifier.ShouldEqual("i2");
+        var unaryNode = query.QueryBody.GroupClause.ByExpression as UnaryOperatorExpressionNode;
+        unaryNode.Operator.ShouldEqual(UnaryOperatorType.Negation);
+        ((SimpleNameNode)unaryNode.Operand).Identifier.ShouldEqual("i2");
+        query.QueryBody.IntoClause.ShouldBeNull();
+      }
+      {
+        var varDecl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var query = initializer.Expression as QueryExpressionNode;
+        
+        query.FromClause.TypeName.IsEmpty.ShouldBeTrue();
+        query.FromClause.Identifier.ShouldEqual("i");
+        ((SimpleNameNode)query.FromClause.Expression).Identifier.ShouldEqual("array");
+
+        query.QueryBody.BodyClauses.Count.ShouldEqual(8);
+        
+        var fromClause = query.QueryBody.BodyClauses[0] as FromClauseNode;
+        fromClause.TypeName.IsEmpty.ShouldBeFalse();
+        fromClause.TypeName.TypeTags[0].Identifier.ShouldEqual("int"); 
+        fromClause.Identifier.ShouldEqual("j");
+        ((SimpleNameNode) fromClause.Expression).Identifier.ShouldEqual("array");
+
+        var letClause = query.QueryBody.BodyClauses[1] as LetClauseNode;
+        letClause.Identifier.ShouldEqual("k");
+        ((SimpleNameNode) letClause.Expression).Identifier.ShouldEqual("j");
+
+        var whereClause = query.QueryBody.BodyClauses[2] as WhereClauseNode;
+        ((TrueLiteralNode)whereClause.Expression).Value.ShouldEqual(true);
+
+        var joinClause = query.QueryBody.BodyClauses[3] as JoinClauseNode;
+        joinClause.TypeName.IsEmpty.ShouldBeTrue();
+        joinClause.Identifier.ShouldEqual("l");
+        ((SimpleNameNode) joinClause.InExpression).Identifier.ShouldEqual("array");
+        ((SimpleNameNode)joinClause.OnExpression).Identifier.ShouldEqual("i");
+        ((SimpleNameNode)joinClause.EqualsExpression).Identifier.ShouldEqual("l");
+
+        var joinClauseWithTypeName = query.QueryBody.BodyClauses[4] as JoinClauseNode;
+        joinClauseWithTypeName.TypeName.IsEmpty.ShouldBeFalse();
+        joinClauseWithTypeName.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        joinClauseWithTypeName.Identifier.ShouldEqual("p");
+        ((SimpleNameNode)joinClauseWithTypeName.InExpression).Identifier.ShouldEqual("array");
+        ((SimpleNameNode)joinClauseWithTypeName.OnExpression).Identifier.ShouldEqual("i");
+        ((SimpleNameNode)joinClauseWithTypeName.EqualsExpression).Identifier.ShouldEqual("p");
+
+        var joinIntoClause = query.QueryBody.BodyClauses[5] as JoinIntoClauseNode;
+        joinIntoClause.TypeName.IsEmpty.ShouldBeTrue();
+        joinIntoClause.Identifier.ShouldEqual("n");
+        ((SimpleNameNode)joinIntoClause.InExpression).Identifier.ShouldEqual("array");
+        ((SimpleNameNode)joinIntoClause.OnExpression).Identifier.ShouldEqual("i");
+        ((SimpleNameNode)joinIntoClause.EqualsExpression).Identifier.ShouldEqual("n");
+        joinIntoClause.IntoIdentifier.ShouldEqual("o");
+
+        var joinIntoClauseWithTypeName = query.QueryBody.BodyClauses[6] as JoinIntoClauseNode;
+        joinIntoClauseWithTypeName.TypeName.IsEmpty.ShouldBeFalse();
+        joinIntoClauseWithTypeName.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        joinIntoClauseWithTypeName.Identifier.ShouldEqual("q");
+        ((SimpleNameNode)joinIntoClauseWithTypeName.InExpression).Identifier.ShouldEqual("array");
+        ((SimpleNameNode)joinIntoClauseWithTypeName.OnExpression).Identifier.ShouldEqual("i");
+        ((SimpleNameNode)joinIntoClauseWithTypeName.EqualsExpression).Identifier.ShouldEqual("q");
+        joinIntoClauseWithTypeName.IntoIdentifier.ShouldEqual("r");
+
+        var orderbyClause = query.QueryBody.BodyClauses[7] as OrderByClauseNode;
+        orderbyClause.Orderings.Count.ShouldEqual(2);
+        ((SimpleNameNode) orderbyClause.Orderings[0].Expression).Identifier.ShouldEqual("k");
+        orderbyClause.Orderings[0].IsAscending.ShouldBeTrue();
+        ((SimpleNameNode)orderbyClause.Orderings[1].Expression).Identifier.ShouldEqual("j");
+        orderbyClause.Orderings[1].IsAscending.ShouldBeFalse();
+
+        ((SimpleNameNode)query.QueryBody.SelectClause.Expression).Identifier.ShouldEqual("i");
+
+        query.QueryBody.GroupClause.ShouldBeNull();
+
+        query.QueryBody.IntoClause.Identifier.ShouldEqual("m");
+
+        var embeddedQuery = query.QueryBody.IntoClause.QueryBody;
+        embeddedQuery.BodyClauses.Count.ShouldEqual(0);
+        ((SimpleNameNode) embeddedQuery.SelectClause.Expression).Identifier.ShouldEqual("m");
+        embeddedQuery.GroupClause.ShouldBeNull();
+        embeddedQuery.IntoClause.ShouldBeNull();
       }
     }
   }

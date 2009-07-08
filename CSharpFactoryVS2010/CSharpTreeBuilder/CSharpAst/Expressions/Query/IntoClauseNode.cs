@@ -56,5 +56,13 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return IdentifierToken != null; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the query body.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public QueryBodyNode QueryBody { get; internal set; }
+
   }
 }

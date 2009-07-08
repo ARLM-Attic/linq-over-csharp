@@ -3,17 +3,26 @@
 //
 // Created: 2009.06.02, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// 
+  /// Represents the body of a query expression.
+  /// <code>
+  /// query-body:
+  ///   query-body-clauses-opt select-or-group-clause query-continuation-opt
+  /// </code>
   /// </summary>
   // ================================================================================================
   public class QueryBodyNode : SyntaxNode<QueryExpressionNode>
   {
+    // Backing fields for properties.
+    private SelectClauseNode _SelectClause;
+    private GroupByClauseNode _GroupClause;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="QueryBodyNode"/> class.
@@ -32,5 +41,50 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public QueryBodyClauseNodeCollection BodyClauses { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the select clause node. Only one of select or group clause can be set.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SelectClauseNode SelectClause
+    {
+      get { return _SelectClause; }
+
+      internal set
+      {
+        if (GroupClause != null)
+        {
+          throw new InvalidOperationException("Select clause cannot be set, because group clause is already set.");
+        }
+        _SelectClause = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the group clause node. Only one of select or group clause can be set.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public GroupByClauseNode GroupClause
+    {
+      get { return _GroupClause; }
+
+      internal set
+      {
+        if (SelectClause != null)
+        {
+          throw new InvalidOperationException("Group clause cannot be set, because select clause is already set.");
+        }
+        _GroupClause = value;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the optional query continuation (aka into clause) node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IntoClauseNode IntoClause { get; internal set; }
   }
 }

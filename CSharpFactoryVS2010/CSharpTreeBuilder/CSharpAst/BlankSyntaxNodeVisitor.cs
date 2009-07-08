@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 07. 14:31:44
+// Generated on: 2009. 07. 08. 9:48:29
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -106,6 +106,7 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(InvocationOperatorNode node) { }
     public virtual void Visit(ISyntaxNode node) { }
     public virtual void Visit(JoinClauseNode node) { }
+    public virtual void Visit(JoinIntoClauseNode node) { }
     public virtual void Visit(LabelNode node) { }
     public virtual void Visit(LambdaExpressionNode node) { }
     public virtual void Visit(LetClauseNode node) { }

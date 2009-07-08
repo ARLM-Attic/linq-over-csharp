@@ -1032,6 +1032,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			QueryBodyNode bodyNode;
 			
 			QueryBody(out bodyNode);
+			qNode.QueryBody = bodyNode;
+			
 		} else if (IsLambda()) {
 			var lambdaNode = new LambdaExpressionNode(t);
 			SetCommentOwner(lambdaNode);
@@ -3343,6 +3345,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 
 	void FromClause(out FromClauseNode fromNode) {
 		Expect(1);
+		if (t.val!="from") Error("SYNERR", t, "Expected 'from' but found '{0}'.", t.val);
 		fromNode = new FromClauseNode(t); 
 		SetCommentOwner(fromNode);
 		var typeToken = la;
@@ -3351,8 +3354,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			TypeOrNamespaceNode typeNode; 
 			Type(out typeNode);
 			fromNode.TypeName = typeNode; 
-		} else if (la.kind == 1) {
-		} else SynErr(186);
+		}
 		Expect(1);
 		fromNode.IdentifierToken = t; 
 		Expect(38);
@@ -3369,135 +3371,55 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		bodyNode = new QueryBodyNode(la); 
 		SetCommentOwner(bodyNode);
 		
-		while (la.kind == 1) {
-			QueryBodyClause(bodyNode);
+		while (la.kind == _ident && (la.val == "from" || la.val == "let" || la.val == "where" || la.val == "join" || la.val == "orderby")) {
+			QueryBodyClauseNode bodyClauseNode = null; 
+			QueryBodyClause(out bodyClauseNode);
+			bodyNode.BodyClauses.Add(bodyClauseNode); 
+		}
+		if (la.kind == _ident && la.val == "select") {
+			SelectClauseNode selectNode; 
+			SelectClause(out selectNode);
+			bodyNode.SelectClause = selectNode; 
+		} else if (la.kind == 1) {
+			GroupByClauseNode groupNode; 
+			GroupClause(out groupNode);
+			bodyNode.GroupClause = groupNode; 
+		} else SynErr(186);
+		if (la.kind == _ident && la.val == "into") {
+			IntoClauseNode intoNode; 
+			IntoClause(out intoNode);
+			bodyNode.IntoClause = intoNode; 
 		}
 	}
 
-	void QueryBodyClause(QueryBodyNode bodyNode) {
+	void QueryBodyClause(out QueryBodyClauseNode bodyClauseNode) {
+		bodyClauseNode=null; 
 		if (la.kind == _ident && la.val == "from") {
 			FromClauseNode fromNode; 
 			FromClause(out fromNode);
-			bodyNode.BodyClauses.Add(fromNode); 
+			bodyClauseNode = fromNode; 
 		} else if (la.kind == _ident && la.val == "let") {
 			LetClauseNode letNode; 
 			LetClause(out letNode);
-			bodyNode.BodyClauses.Add(letNode); 
-		} else if (la.kind == _ident && la.val == "join") {
-			JoinClauseNode joinNode; 
-			JoinClause(out joinNode);
-			bodyNode.BodyClauses.Add(joinNode); 
-		} else if (la.kind == _ident && la.val == "orderby") {
-			OrderByClauseNode orderNode; 
-			OrderByClause(out orderNode);
-			bodyNode.BodyClauses.Add(orderNode); 
-		} else if (la.kind == _ident && la.val == "into") {
-			IntoClauseNode intoNode; 
-			IntoClause(out intoNode);
-			bodyNode.BodyClauses.Add(intoNode); 
-		} else if (la.kind == _ident && la.val == "select") {
-			SelectClauseNode selectNode; 
-			SelectClause(out selectNode);
-			bodyNode.BodyClauses.Add(selectNode); 
-		} else if (la.kind == _ident && la.val == "group") {
-			GroupByClauseNode groupNode; 
-			GroupClause(out groupNode);
-			bodyNode.BodyClauses.Add(groupNode); 
+			bodyClauseNode = letNode; 
 		} else if (la.kind == _ident && la.val == "where") {
 			WhereClauseNode whereNode; 
 			WhereClause(out whereNode);
-			bodyNode.BodyClauses.Add(whereNode); 
+			bodyClauseNode = whereNode; 
+		} else if (la.kind == _ident && la.val == "join") {
+			JoinClauseNode joinNode; 
+			JoinClause(out joinNode);
+			bodyClauseNode = joinNode; 
 		} else if (la.kind == 1) {
-			Get();
-			Error("SYNERR", t, "invalid identifier in query expression", null); 
+			OrderByClauseNode orderNode; 
+			OrderByClause(out orderNode);
+			bodyClauseNode = orderNode; 
 		} else SynErr(187);
-	}
-
-	void LetClause(out LetClauseNode letNode) {
-		ExpressionNode exprNode; 
-		Expect(1);
-		letNode = new LetClauseNode(t); 
-		SetCommentOwner(letNode);
-		
-		Expect(1);
-		letNode.IdentifierToken = t; 
-		Expect(85);
-		letNode.EqualToken = t; 
-		Expression(out exprNode);
-		letNode.Expression = exprNode; 
-		Terminate(letNode);
-		
-	}
-
-	void JoinClause(out JoinClauseNode joinNode) {
-		ExpressionNode exprNode; 
-		Expect(1);
-		joinNode = new JoinClauseNode(t);
-		SetCommentOwner(joinNode);
-		Token typeToken = la; 
-		
-		if (IsType(ref typeToken) && typeToken.val != "in") {
-			TypeOrNamespaceNode typeNode; 
-			Type(out typeNode);
-			joinNode.TypeName = typeNode; 
-		} else if (la.kind == 1) {
-		} else SynErr(188);
-		Expect(1);
-		joinNode.IdentifierToken = t; 
-		Expect(38);
-		joinNode.InToken = t; 
-		Expression(out exprNode);
-		joinNode.InExpression = exprNode; 
-		Expect(1);
-		joinNode.OnToken = t; 
-		Expression(out exprNode);
-		joinNode.OnExpression = exprNode; 
-		Expect(1);
-		joinNode.EqualsToken = t; 
-		Expression(out exprNode);
-		joinNode.EqualsExpression = exprNode; 
-		if (la.kind == 1) {
-			if (la.kind == _ident && la.val == "into") {
-				Expect(1);
-				joinNode.IntoToken = t; 
-				Expect(1);
-				joinNode.IntoIdentifierToken = t; 
-			} else {
-			}
-		}
-		Terminate(joinNode); 
-	}
-
-	void OrderByClause(out OrderByClauseNode obNode) {
-		OrderingClauseNode ordNode; 
-		Expect(1);
-		obNode = new OrderByClauseNode(t); 
-		SetCommentOwner(obNode);
-		
-		OrderingClause(out ordNode);
-		obNode.Orderings.Add(ordNode); 
-		while (la.kind == 87) {
-			Get();
-			var separator = t; 
-			OrderingClause(out ordNode);
-			obNode.Orderings.Add(separator, ordNode); 
-		}
-		Terminate(obNode); 
-	}
-
-	void IntoClause(out IntoClauseNode intoNode) {
-		Expect(1);
-		intoNode = new IntoClauseNode(t); 
-		SetCommentOwner(intoNode);
-		
-		Expect(1);
-		intoNode.IdentifierToken = t; 
-		Terminate(intoNode);
-		
 	}
 
 	void SelectClause(out SelectClauseNode selNode) {
 		Expect(1);
+		if (t.val!="select") Error("SYNERR", t, "Expected 'select' but found '{0}'.", t.val);
 		selNode = new SelectClauseNode(t);
 		SetCommentOwner(selNode);
 		ExpressionNode exprNode; 
@@ -3512,15 +3434,14 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		groupNode = null; 
 		ExpressionNode exprNode; 
 		Expect(1);
+		if (t.val!="group") Error("SYNERR", t, "Expected 'group' but found '{0}'.", t.val);
 		groupNode = new GroupByClauseNode(t); 
 		SetCommentOwner(groupNode);
 		
 		Expression(out exprNode);
 		groupNode.GroupExpression = exprNode; 
-		
 		Expect(1);
-		if (t.kind != _ident || t.val != "by") 
-		 Error("SYNERR", t, "'by' token is expected", null);
+		if (t.val!="by") Error("SYNERR", t, "Expected 'by' but found '{0}'.", t.val);
 		groupNode.ByToken = t; 
 		
 		Expression(out exprNode);
@@ -3529,9 +3450,43 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		
 	}
 
+	void IntoClause(out IntoClauseNode intoNode) {
+		Expect(1);
+		if (t.val!="into") Error("SYNERR", t, "Expected 'into' but found '{0}'.", t.val);
+		intoNode = new IntoClauseNode(t); 
+		SetCommentOwner(intoNode);
+		
+		Expect(1);
+		intoNode.IdentifierToken = t; 
+		Terminate(intoNode);
+		QueryBodyNode bodyNode;
+		
+		QueryBody(out bodyNode);
+		intoNode.QueryBody = bodyNode;
+		
+	}
+
+	void LetClause(out LetClauseNode letNode) {
+		ExpressionNode exprNode; 
+		Expect(1);
+		if (t.val!="let") Error("SYNERR", t, "Expected 'let' but found '{0}'.", t.val);
+		letNode = new LetClauseNode(t); 
+		SetCommentOwner(letNode);
+		
+		Expect(1);
+		letNode.IdentifierToken = t; 
+		Expect(85);
+		letNode.EqualToken = t; 
+		Expression(out exprNode);
+		letNode.Expression = exprNode; 
+		Terminate(letNode);
+		
+	}
+
 	void WhereClause(out WhereClauseNode whereNode) {
 		ExpressionNode exprNode; 
 		Expect(1);
+		if (t.val!="where") Error("SYNERR", t, "Expected 'where' but found '{0}'.", t.val);
 		whereNode = new WhereClauseNode(t); 
 		SetCommentOwner(whereNode);
 		
@@ -3539,6 +3494,79 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		whereNode.Expression = exprNode; 
 		Terminate(whereNode);
 		
+	}
+
+	void JoinClause(out JoinClauseNode joinNode) {
+		ExpressionNode exprNode; 
+		Expect(1);
+		if (t.val!="join") Error("SYNERR", t, "Expected 'join' but found '{0}'.", t.val);
+		joinNode = new JoinClauseNode(t);
+		SetCommentOwner(joinNode);
+		Token typeToken = la; 
+		
+		if (IsType(ref typeToken) && typeToken.val != "in") {
+			TypeOrNamespaceNode typeNode; 
+			Type(out typeNode);
+			joinNode.TypeName = typeNode; 
+		}
+		Expect(1);
+		joinNode.IdentifierToken = t; 
+		Expect(38);
+		joinNode.InToken = t; 
+		Expression(out exprNode);
+		joinNode.InExpression = exprNode; 
+		Expect(1);
+		if (t.val!="on") Error("SYNERR", t, "Expected 'on' but found '{0}'.", t.val);
+		joinNode.OnToken = t; 
+		
+		Expression(out exprNode);
+		joinNode.OnExpression = exprNode; 
+		Expect(1);
+		if (t.val!="equals") Error("SYNERR", t, "Expected 'equals' but found '{0}'.", t.val);
+		joinNode.EqualsToken = t; 
+		
+		Expression(out exprNode);
+		joinNode.EqualsExpression = exprNode; 
+		if (la.kind == _ident && la.val == "into") {
+			var joinIntoNode = new JoinIntoClauseNode(joinNode.StartToken);
+			joinIntoNode.Comment = joinNode.Comment;
+			joinIntoNode.TypeName = joinNode.TypeName;
+			joinIntoNode.IdentifierToken = joinNode.IdentifierToken;
+			joinIntoNode.InToken = joinNode.InToken;
+			joinIntoNode.InExpression = joinNode.InExpression;
+			joinIntoNode.OnToken = joinNode.OnToken;
+			joinIntoNode.OnExpression = joinNode.OnExpression;
+			joinIntoNode.EqualsToken = joinNode.EqualsToken;
+			joinIntoNode.EqualsExpression = joinNode.EqualsExpression;
+			
+			Expect(1);
+			if (t.val!="into") Error("SYNERR", t, "Expected 'into' but found '{0}'.", t.val);
+			joinIntoNode.IntoToken = t; 
+			
+			Expect(1);
+			joinIntoNode.IntoIdentifierToken = t; 
+			joinNode = joinIntoNode;
+			
+		}
+		Terminate(joinNode); 
+	}
+
+	void OrderByClause(out OrderByClauseNode obNode) {
+		OrderingClauseNode ordNode; 
+		Expect(1);
+		if (t.val!="orderby") Error("SYNERR", t, "Expected 'orderby' but found '{0}'.", t.val);
+		obNode = new OrderByClauseNode(t); 
+		SetCommentOwner(obNode);
+		
+		OrderingClause(out ordNode);
+		obNode.Orderings.Add(ordNode); 
+		while (la.kind == 87) {
+			Get();
+			var separator = t; 
+			OrderingClause(out ordNode);
+			obNode.Orderings.Add(separator, ordNode); 
+		}
+		Terminate(obNode); 
 	}
 
 	void OrderingClause(out OrderingClauseNode ordNode) {
@@ -3551,8 +3579,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		if (la.kind == _ident && (la.val == "ascending" || la.val == "descending")) {
 			Expect(1);
 			ordNode.Direction = t; 
-		} else if (StartOf(28)) {
-		} else SynErr(189);
+		}
 	}
 
 	void NullCoalescingExpr(out BinaryOperatorNodeBase exprNode) {
@@ -3698,8 +3725,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		exprNode = null; 
 		ShiftExpr(out exprNode);
 		BinaryOperatorNode opNode = null; 
-		while (StartOf(29)) {
-			if (StartOf(30)) {
+		while (StartOf(28)) {
+			if (StartOf(29)) {
 				if (la.kind == 100) {
 					Get();
 					opNode = new BinaryOperatorNode(t, BinaryOperatorType.LessThan); 
@@ -3712,7 +3739,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				} else if (la.kind == 94) {
 					Get();
 					opNode = new BinaryOperatorNode(t, BinaryOperatorType.GreaterThanOrEqual); 
-				} else SynErr(190);
+				} else SynErr(188);
 				SetCommentOwner(opNode);
 				opNode.LeftOperand = exprNode;
 				ExpressionNode unaryNode;
@@ -3731,7 +3758,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				} else if (la.kind == 7) {
 					Get();
 					typeTestingNode = new TypeTestingOperatorNode(t, TypeTestingOperatorType.As); 
-				} else SynErr(191);
+				} else SynErr(189);
 				SetCommentOwner(typeTestingNode);
 				TypeOrNamespaceNode typeNode; 
 				
@@ -3764,7 +3791,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				start = t; 
 				Expect(93);
 				opNode = new BinaryOperatorNode(start, t, BinaryOperatorType.RightShift); 
-			} else SynErr(192);
+			} else SynErr(190);
 			SetCommentOwner(opNode);
 			opNode.LeftOperand = exprNode;
 			ExpressionNode unaryNode;
@@ -3834,7 +3861,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		ExpressionNode innerNode = null;
 		exprNode = null;
 		
-		if (StartOf(31)) {
+		if (StartOf(30)) {
 			Literal(out innerNode);
 		} else if (la.kind == 98) {
 			Get();
@@ -3847,7 +3874,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			
 			Expect(113);
 			Terminate(pExprNode); 
-		} else if (StartOf(32)) {
+		} else if (StartOf(31)) {
 			PredefinedTypeMemberAccess(out innerNode);
 		} else if (IsQualifiedAliasMember()) {
 			QualifiedAliasMemberAccess(out innerNode);
@@ -3870,7 +3897,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				BaseElementAccessNode baseNode = null; 
 				BaseElementAccess(out baseNode);
 				innerNode = baseNode; 
-			} else SynErr(193);
+			} else SynErr(191);
 		} else if (la.kind == 46) {
 			NewOperator(out innerNode);
 		} else if (la.kind == 72) {
@@ -3885,9 +3912,9 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			AnonymousDelegate(out innerNode);
 		} else if (la.kind == 62) {
 			SizeOfOperator(out innerNode);
-		} else SynErr(194);
+		} else SynErr(192);
 		var curExprNode = innerNode; 
-		while (StartOf(33)) {
+		while (StartOf(32)) {
 			switch (la.kind) {
 			case 95: {
 				Get();
@@ -3998,7 +4025,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			valNode = new NullLiteralNode(t); 
 			break;
 		}
-		default: SynErr(195); break;
+		default: SynErr(193); break;
 		}
 		SetCommentOwner(valNode); 
 	}
@@ -4066,7 +4093,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Get();
 			break;
 		}
-		default: SynErr(196); break;
+		default: SynErr(194); break;
 		}
 		var typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
 		var predefMemAccessNode = new PredefinedTypeMemberAccessNode(t, typeNode);
@@ -4177,7 +4204,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			
 			AnonymousObjectInitializer(anonNode);
 			exprNode = anonNode; 
-		} else if (StartOf(34)) {
+		} else if (StartOf(33)) {
 			TypeOrNamespaceNode typeNode; 
 			NonArrayType(out typeNode);
 			NewOperatorWithType(newToken, typeNode, out exprNode);
@@ -4187,7 +4214,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			
 			ImplicitArrayCreation(impArrNode);
 			exprNode = impArrNode; 
-		} else SynErr(197);
+		} else SynErr(195);
 		Terminate(exprNode); 
 	}
 
@@ -4275,7 +4302,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			SetCommentOwner(parsNode);
 			adNode.ParameterList = parsNode;
 			
-			if (StartOf(35)) {
+			if (StartOf(34)) {
 				FormalParameterNode parNode; 
 				AnonymousMethodParameter(out parNode);
 				parsNode.Items.Add(parNode); 
@@ -4439,7 +4466,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Terminate(arrayCreationNode);
 			exprNode = arrayCreationNode;
 			
-		} else SynErr(198);
+		} else SynErr(196);
 	}
 
 	void ImplicitArrayCreation(ArrayCreationExpressionNode impArrNode) {
@@ -4517,7 +4544,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			Expect(111);
 			Terminate(oiNode); 
-		} else SynErr(199);
+		} else SynErr(197);
 	}
 
 	void RankSpecifiers(ArrayCreationExpressionNode arrayCreationNode) {
@@ -4594,7 +4621,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			Expect(111);
 			Terminate(eiNode.ExpressionList); 
-		} else SynErr(200);
+		} else SynErr(198);
 		Terminate(eiNode);
 	}
 
@@ -4613,7 +4640,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			ObjectOrCollectionInitializerNode initNode; 
 			ObjectOrCollectionInitializer(out initNode);
 			miNode.Initializer = initNode; 
-		} else SynErr(201);
+		} else SynErr(199);
 		Terminate(miNode); 
 	}
 
@@ -4687,7 +4714,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			TypeOrNamespaceNode typeNode; 
 			ClassType(out typeNode);
 			tag = new TypeParameterConstraintTagNode(typeNode); 
-		} else SynErr(202);
+		} else SynErr(200);
 		SetCommentOwner(tag); 
 	}
 
@@ -4756,7 +4783,6 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,x,x, x,T,x,x, x,T,x,x, x,x,x,T, x,x,x,T, T,x,x,T, x,T,x,x, x,x,x,x, x,T,T,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, T,x,x,T, x,x,x,x, T,x,x,x, x,x,x,T, x,x,T,x, x,x,T,x, x,x,T,x, T,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,T,T,T, T,T,x,x, T,T,x,T, x,x,T,T, x,x,x,T, T,T,x,T, x,x,x,x, x,T,x,x, T,x,x,x, x,x,x,T, x,x,x,x, T,x,T,T, T,x,x,x, x,x,x,x, x,x,x,T, x,T,T,x, x,T,x,x, T,x,T,x, T,T,T,T, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
-		{x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
 		{x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x},
 		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x},
 		{x,x,T,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x},
@@ -4964,23 +4990,21 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			case 183: s = "invalid LambdaFunctionSignature"; break;
 			case 184: s = "invalid LambdaFunctionSignature"; break;
 			case 185: s = "invalid LambdaFunctionBody"; break;
-			case 186: s = "invalid FromClause"; break;
+			case 186: s = "invalid QueryBody"; break;
 			case 187: s = "invalid QueryBodyClause"; break;
-			case 188: s = "invalid JoinClause"; break;
-			case 189: s = "invalid OrderingClause"; break;
-			case 190: s = "invalid RelExpr"; break;
-			case 191: s = "invalid RelExpr"; break;
-			case 192: s = "invalid ShiftExpr"; break;
-			case 193: s = "invalid Primary"; break;
-			case 194: s = "invalid Primary"; break;
-			case 195: s = "invalid Literal"; break;
-			case 196: s = "invalid PredefinedTypeMemberAccess"; break;
-			case 197: s = "invalid NewOperator"; break;
-			case 198: s = "invalid NewOperatorWithType"; break;
-			case 199: s = "invalid ObjectOrCollectionInitializer"; break;
-			case 200: s = "invalid ElementInitializer"; break;
-			case 201: s = "invalid MemberInitializer"; break;
-			case 202: s = "invalid TypeParameterConstraintTag"; break;
+			case 188: s = "invalid RelExpr"; break;
+			case 189: s = "invalid RelExpr"; break;
+			case 190: s = "invalid ShiftExpr"; break;
+			case 191: s = "invalid Primary"; break;
+			case 192: s = "invalid Primary"; break;
+			case 193: s = "invalid Literal"; break;
+			case 194: s = "invalid PredefinedTypeMemberAccess"; break;
+			case 195: s = "invalid NewOperator"; break;
+			case 196: s = "invalid NewOperatorWithType"; break;
+			case 197: s = "invalid ObjectOrCollectionInitializer"; break;
+			case 198: s = "invalid ElementInitializer"; break;
+			case 199: s = "invalid MemberInitializer"; break;
+			case 200: s = "invalid TypeParameterConstraintTag"; break;
 
   			  default: s = "error " + n; break;
 	  	  }

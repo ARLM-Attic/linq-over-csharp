@@ -3055,17 +3055,17 @@ FromClause<out FromClauseNode fromNode>
   // --- At this point ident is "from"
   ident 
   (. 
+     if (t.val!="from") Error("SYNERR", t, "Expected 'from' but found '{0}'.", t.val);
      fromNode = new FromClauseNode(t); 
      SetCommentOwner(fromNode);
      var typeToken = la;
   .)
-  (                             
+  [                            
     IF (IsType(ref typeToken) && typeToken.val != "in")
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
     (. fromNode.TypeName = typeNode; .)
-  |
-  )                             
+  ]                             
   ident
   (. fromNode.IdentifierToken = t; .)
   "in"
@@ -3089,58 +3089,73 @@ QueryBody<out QueryBodyNode bodyNode>
      bodyNode = new QueryBodyNode(la); 
      SetCommentOwner(bodyNode);
   .)
-  { QueryBodyClause<bodyNode> }
+  { 
+    IF (la.kind == _ident && (la.val == "from" || la.val == "let" || la.val == "where" || la.val == "join" || la.val == "orderby"))
+    (. QueryBodyClauseNode bodyClauseNode = null; .)
+    QueryBodyClause<out bodyClauseNode> 
+    (. bodyNode.BodyClauses.Add(bodyClauseNode); .)
+  }
+
+  (
+    IF (la.kind == _ident && la.val == "select")
+    (. SelectClauseNode selectNode; .)
+    SelectClause<out selectNode>
+    (. bodyNode.SelectClause = selectNode; .)
+  | 
+    //IF (la.kind == _ident && la.val == "group")
+    (. GroupByClauseNode groupNode; .)
+    GroupClause<out groupNode>
+    (. bodyNode.GroupClause = groupNode; .)
+  )
+
+  [
+    IF (la.kind == _ident && la.val == "into")
+    (. IntoClauseNode intoNode; .)
+    IntoClause<out intoNode>
+    (. bodyNode.IntoClause = intoNode; .)
+  ]
 .
 
 // ------------------------------------------------------------------------------------------------
 // Gets a query body clause
 // ------------------------------------------------------------------------------------------------
-QueryBodyClause<QueryBodyNode bodyNode>
+QueryBodyClause<out QueryBodyClauseNode bodyClauseNode>
 =
+  (. bodyClauseNode=null; .)
   (
     IF (la.kind == _ident && la.val == "from")
     (. FromClauseNode fromNode; .)
     FromClause<out fromNode>
-    (. bodyNode.BodyClauses.Add(fromNode); .)
+    (. bodyClauseNode = fromNode; .)
   | 
     IF (la.kind == _ident && la.val == "let")
     (. LetClauseNode letNode; .)
     LetClause<out letNode>
-    (. bodyNode.BodyClauses.Add(letNode); .)
+    (. bodyClauseNode = letNode; .)
   | 
-    IF (la.kind == _ident && la.val == "join")
-    (. JoinClauseNode joinNode; .)
-    JoinClause<out joinNode>
-    (. bodyNode.BodyClauses.Add(joinNode); .)
-  | 
-    IF (la.kind == _ident && la.val == "orderby")
-    (. OrderByClauseNode orderNode; .)
-    OrderByClause<out orderNode>
-    (. bodyNode.BodyClauses.Add(orderNode); .)
-  | 
-    IF (la.kind == _ident && la.val == "into")
-    (. IntoClauseNode intoNode; .)
-    IntoClause<out intoNode>
-    (. bodyNode.BodyClauses.Add(intoNode); .)
-  | 
-    IF (la.kind == _ident && la.val == "select")
-    (. SelectClauseNode selectNode; .)
-    SelectClause<out selectNode>
-    (. bodyNode.BodyClauses.Add(selectNode); .)
-  | 
-    IF (la.kind == _ident && la.val == "group")
-    (. GroupByClauseNode groupNode; .)
-    GroupClause<out groupNode>
-    (. bodyNode.BodyClauses.Add(groupNode); .)
-  |
     IF (la.kind == _ident && la.val == "where")
     (. WhereClauseNode whereNode; .)
     WhereClause<out whereNode>
-    (. bodyNode.BodyClauses.Add(whereNode); .)
+    (. bodyClauseNode = whereNode; .)
   |
+    IF (la.kind == _ident && la.val == "join")
+    (. JoinClauseNode joinNode; .)
+    JoinClause<out joinNode>
+    (. bodyClauseNode = joinNode; .)
+  | 
+    //IF (la.kind == _ident && la.val == "orderby")
+    (. OrderByClauseNode orderNode; .)
+    OrderByClause<out orderNode>
+    (. bodyClauseNode = orderNode; .)
+    
+/* I think the following voodoo magic is not necessary any more, but I leave it here in a comment block just in case.
+  |
+    // WARNING: omitting the following ident could cause an infinite loop in parsing
     ident
     // --- At this point we have faced an identifier that would cause an infinite parsing loop
     (. Error("SYNERR", t, "invalid identifier in query expression", null); .)
+*/
+    
   )
 .
 
@@ -3153,6 +3168,7 @@ LetClause<out LetClauseNode letNode>
   // --- At this point ident is "let"
   ident
   (. 
+     if (t.val!="let") Error("SYNERR", t, "Expected 'let' but found '{0}'.", t.val);
      letNode = new LetClauseNode(t); 
      SetCommentOwner(letNode);
   .)
@@ -3176,6 +3192,7 @@ WhereClause<out WhereClauseNode whereNode>
   // --- At this point ident is "where"
   ident
   (. 
+     if (t.val!="where") Error("SYNERR", t, "Expected 'where' but found '{0}'.", t.val);
      whereNode = new WhereClauseNode(t); 
      SetCommentOwner(whereNode);
   .)
@@ -3194,6 +3211,7 @@ IntoClause<out IntoClauseNode intoNode>
   // --- At this point ident is "into"
   ident
   (. 
+     if (t.val!="into") Error("SYNERR", t, "Expected 'into' but found '{0}'.", t.val);
      intoNode = new IntoClauseNode(t); 
      SetCommentOwner(intoNode);
   .)
@@ -3201,11 +3219,16 @@ IntoClause<out IntoClauseNode intoNode>
   (. 
      intoNode.IdentifierToken = t; 
      Terminate(intoNode);
+     QueryBodyNode bodyNode;
+  .)
+  QueryBody<out bodyNode>
+  (.
+    intoNode.QueryBody = bodyNode;
   .)
 .
 
 // ------------------------------------------------------------------------------------------------
-// Gets a "join" clause
+// Gets a "join" or "join-into" clause
 // ------------------------------------------------------------------------------------------------
 JoinClause<out JoinClauseNode joinNode>
 =
@@ -3213,41 +3236,70 @@ JoinClause<out JoinClauseNode joinNode>
   // --- At this point ident is "join"
   ident
   (. 
+     if (t.val!="join") Error("SYNERR", t, "Expected 'join' but found '{0}'.", t.val);
      joinNode = new JoinClauseNode(t);
      SetCommentOwner(joinNode);
      Token typeToken = la; 
   .)
-  (                     
+
+  [                    
     IF (IsType(ref typeToken) && typeToken.val != "in")
     (. TypeOrNamespaceNode typeNode; .)
     Type<out typeNode>
     (. joinNode.TypeName = typeNode; .)
-  |
-  )
+  ]
+
   ident
   (. joinNode.IdentifierToken = t; .)
   "in" 
   (. joinNode.InToken = t; .)
   Expression<out exprNode>
   (. joinNode.InExpression = exprNode; .)
-  // CHECKTHIS: In the syntax tree you should check that this token is "on".
+
   ident
-  (. joinNode.OnToken = t; .)
+  (. 
+     if (t.val!="on") Error("SYNERR", t, "Expected 'on' but found '{0}'.", t.val);
+     joinNode.OnToken = t; 
+  .)
   Expression<out exprNode>
   (. joinNode.OnExpression = exprNode; .)
-  // CHECKTHIS: In the syntax tree you should check that this token is "equals".
+  
   ident
-  (. joinNode.EqualsToken = t; .)
+  (. 
+    if (t.val!="equals") Error("SYNERR", t, "Expected 'equals' but found '{0}'.", t.val);
+    joinNode.EqualsToken = t; 
+  .)
+  
   Expression<out exprNode>
   (. joinNode.EqualsExpression = exprNode; .)
+  
   [ 
     IF (la.kind == _ident && la.val == "into")
+    (. 
+      // create a JoinIntoClauseNode based on the JoinClauseNode that was built so far
+      var joinIntoNode = new JoinIntoClauseNode(joinNode.StartToken);
+      joinIntoNode.Comment = joinNode.Comment;
+      joinIntoNode.TypeName = joinNode.TypeName;
+      joinIntoNode.IdentifierToken = joinNode.IdentifierToken;
+      joinIntoNode.InToken = joinNode.InToken;
+      joinIntoNode.InExpression = joinNode.InExpression;
+      joinIntoNode.OnToken = joinNode.OnToken;
+      joinIntoNode.OnExpression = joinNode.OnExpression;
+      joinIntoNode.EqualsToken = joinNode.EqualsToken;
+      joinIntoNode.EqualsExpression = joinNode.EqualsExpression;
+    .)  
     ident
-    (. joinNode.IntoToken = t; .)
+    (. 
+      if (t.val!="into") Error("SYNERR", t, "Expected 'into' but found '{0}'.", t.val);
+      joinIntoNode.IntoToken = t; 
+    .)
     ident
-    (. joinNode.IntoIdentifierToken = t; .)
-    |
+    (. 
+      joinIntoNode.IntoIdentifierToken = t; 
+      joinNode = joinIntoNode;
+    .)
   ]
+  
   (. Terminate(joinNode); .)
 .
 
@@ -3260,6 +3312,7 @@ OrderByClause<out OrderByClauseNode obNode>
   // --- At this point ident is "orderby"
   ident
   (. 
+     if (t.val!="orderby") Error("SYNERR", t, "Expected 'orderby' but found '{0}'.", t.val);
      obNode = new OrderByClauseNode(t); 
      SetCommentOwner(obNode);
   .)
@@ -3286,12 +3339,11 @@ OrderingClause<out OrderingClauseNode ordNode>
   .)
   Expression<out exprNode>
   (. ordNode.Expression = exprNode; .)
-  (
-      IF (la.kind == _ident && (la.val == "ascending" || la.val == "descending"))
-      ident
-      (. ordNode.Direction = t; .)
-    |
-  )
+  [
+    IF (la.kind == _ident && (la.val == "ascending" || la.val == "descending"))
+    ident
+    (. ordNode.Direction = t; .)
+  ]
 .
 
 // ------------------------------------------------------------------------------------------------
@@ -3302,6 +3354,7 @@ SelectClause<out SelectClauseNode selNode>
   // --- At this point ident is "select"
   ident
   (. 
+     if (t.val!="select") Error("SYNERR", t, "Expected 'select' but found '{0}'.", t.val);
      selNode = new SelectClauseNode(t);
      SetCommentOwner(selNode);
      ExpressionNode exprNode; 
@@ -3323,17 +3376,16 @@ GroupClause<out GroupByClauseNode groupNode>
   // --- At this point ident is "group"
   ident
   (. 
+     if (t.val!="group") Error("SYNERR", t, "Expected 'group' but found '{0}'.", t.val);
      groupNode = new GroupByClauseNode(t); 
      SetCommentOwner(groupNode);
   .)
   Expression<out exprNode>
   (. groupNode.GroupExpression = exprNode; .)
   // --- At this point ident must be "by"
-  (. .)
   ident
   (. 
-     if (t.kind != _ident || t.val != "by") 
-       Error("SYNERR", t, "'by' token is expected", null);
+     if (t.val!="by") Error("SYNERR", t, "Expected 'by' but found '{0}'.", t.val);
      groupNode.ByToken = t; 
   .)
   Expression<out exprNode>
@@ -3366,6 +3418,9 @@ Expression<out ExpressionNode exprNode>
        QueryBodyNode bodyNode;
     .)
     QueryBody<out bodyNode>
+    (.
+      qNode.QueryBody = bodyNode;
+    .)
   |
     IF (IsLambda()) 
     (.
