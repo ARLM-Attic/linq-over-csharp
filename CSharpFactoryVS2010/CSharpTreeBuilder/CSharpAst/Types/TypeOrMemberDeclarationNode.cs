@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected TypeOrMemberDeclarationNode(Token start) : base(start)
     {
-      TypeParameters = new TypeParameterListNode { ParentNode = this };
+      TypeParameters = new TypeParameterNodeCollection { ParentNode = this };
       TypeParameterConstraints = new TypeParameterConstraintNodeCollection { ParentNode = this };
     }
 
@@ -111,7 +111,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of type parameters.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterListNode TypeParameters { get; private set; }
+    public TypeParameterNodeCollection TypeParameters { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

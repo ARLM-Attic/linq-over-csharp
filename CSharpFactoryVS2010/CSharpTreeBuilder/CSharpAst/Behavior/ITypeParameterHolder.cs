@@ -28,7 +28,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The type parameters.</value>
     // ----------------------------------------------------------------------------------------------
-    TypeParameterListNode TypeParameters { get; }
+    TypeParameterNodeCollection TypeParameters { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

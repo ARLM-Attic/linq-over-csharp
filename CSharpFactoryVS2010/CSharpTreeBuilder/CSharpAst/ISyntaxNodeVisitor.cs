@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 08. 15:30:17
+// Generated on: 2009. 07. 08. 15:47:24
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -175,7 +175,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(TypeOrNamespaceNode node);
     void Visit(TypeParameterConstraintNode node);
     void Visit(TypeParameterConstraintTagNode node);
-    void Visit(TypeParameterListNode node);
     void Visit(TypeParameterNode node);
     void Visit(TypeTagNode node);
     void Visit(TypeTestingExpressionNode node);

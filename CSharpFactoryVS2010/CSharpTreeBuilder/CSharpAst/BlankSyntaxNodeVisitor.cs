@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 08. 15:30:12
+// Generated on: 2009. 07. 08. 15:47:22
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -175,7 +175,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(TypeOrNamespaceNode node) { }
     public virtual void Visit(TypeParameterConstraintNode node) { }
     public virtual void Visit(TypeParameterConstraintTagNode node) { }
-    public virtual void Visit(TypeParameterListNode node) { }
     public virtual void Visit(TypeParameterNode node) { }
     public virtual void Visit(TypeTagNode node) { }
     public virtual void Visit(TypeTestingExpressionNode node) { }

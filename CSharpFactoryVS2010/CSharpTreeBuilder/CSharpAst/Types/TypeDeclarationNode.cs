@@ -79,7 +79,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the nested declarations.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ImmutableCollection<TypeOrMemberDeclarationNode> NestedDeclarations { get; private set; }
+    public TypeOrMemberNodeCollection NestedDeclarations { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
