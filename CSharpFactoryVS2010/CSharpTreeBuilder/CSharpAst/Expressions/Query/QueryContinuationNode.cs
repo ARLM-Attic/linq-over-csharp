@@ -1,90 +1,72 @@
 // ================================================================================================
-// QueryBodyNode.cs
+// QueryContinuationNode.cs
 //
-// Created: 2009.06.02, by Istvan Novak (DeepDiver)
+// Created: 2009.06.05, by Istvan Novak (DeepDiver)
 // ================================================================================================
-using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Represents the body of a query expression.
+  /// This class represents a query continuation node.
   /// <code>
-  /// query-body:
-  ///   query-body-clauses-opt select-or-group-clause query-continuation-opt
+  /// query-continuation:
+  ///   into identifier query-body
   /// </code>
   /// </summary>
   // ================================================================================================
-  public class QueryBodyNode : SyntaxNode<QueryExpressionNode>
+  public class QueryContinuationNode : QueryBodyClauseNode, IIdentifierSupport
   {
-    // Backing fields for properties.
-    private SelectClauseNode _SelectClause;
-    private GroupClauseNode _GroupClause;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="QueryBodyNode"/> class.
+    /// Initializes a new instance of the <see cref="QueryContinuationNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public QueryBodyNode(Token start)
+    public QueryContinuationNode(Token start)
       : base(start)
     {
-      BodyClauses = new QueryBodyClauseNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the query body clauses.
+    /// Gets or sets the identifier token.
     /// </summary>
+    /// <value>The identifier token.</value>
     // ----------------------------------------------------------------------------------------------
-    public QueryBodyClauseNodeCollection BodyClauses { get; private set; }
+    public Token IdentifierToken { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the select clause node. Only one of select or group clause can be set.
+    /// Gets the identifier name.
     /// </summary>
+    /// <value>The identifier name.</value>
     // ----------------------------------------------------------------------------------------------
-    public SelectClauseNode SelectClause
+    public string Identifier
     {
-      get { return _SelectClause; }
-
-      internal set
-      {
-        if (GroupClause != null)
-        {
-          throw new InvalidOperationException("Select clause cannot be set, because group clause is already set.");
-        }
-        _SelectClause = value;
-      }
+      get { return IdentifierToken.Value; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the group clause node. Only one of select or group clause can be set.
+    /// Gets a value indicating whether this instance has identifier.
     /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
     // ----------------------------------------------------------------------------------------------
-    public GroupClauseNode GroupClause
+    public bool HasIdentifier
     {
-      get { return _GroupClause; }
-
-      internal set
-      {
-        if (SelectClause != null)
-        {
-          throw new InvalidOperationException("Group clause cannot be set, because select clause is already set.");
-        }
-        _GroupClause = value;
-      }
+      get { return IdentifierToken != null; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the optional query continuation (aka into clause) node.
+    /// Gets or sets the query body.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public QueryContinuationNode QueryContinuation { get; internal set; }
+    public QueryBodyNode QueryBody { get; internal set; }
+
   }
 }

@@ -340,8 +340,8 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// Binds left and right operands to a binary operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    private void BindBinaryOperator(BinaryOperatorNode opNode, ExpressionNode unaryNode,
-      BinaryOperatorNodeBase rgNode)
+    private void BindBinaryOperator(BinaryExpressionNode opNode, ExpressionNode unaryNode,
+      BinaryExpressionNodeBase rgNode)
     {
       if (rgNode == null)
       {
@@ -350,7 +350,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
       else
       {
         opNode.RightOperand = rgNode;
-        rgNode.LeftmostWithMissingLeftOperand.LeftOperand = unaryNode;
+        rgNode.LeftmostExpressionWithMissingLeftOperand.LeftOperand = unaryNode;
       }
       opNode.Terminate(t);
     }
@@ -384,9 +384,9 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         return new SimpleNameMemberDeclaratorNode(expressionNode as SimpleNameNode);
       }
 
-      if (expressionNode is MemberAccessOperatorNodeBase)
+      if (expressionNode is MemberAccessNode)
       {
-        return new MemberAccessMemberDeclaratorNode(expressionNode as MemberAccessOperatorNodeBase);
+        return new MemberAccessMemberDeclaratorNode(expressionNode as MemberAccessNode);
       }
 
       Error0746( expressionNode.StartToken, expressionNode.GetType().FullName);

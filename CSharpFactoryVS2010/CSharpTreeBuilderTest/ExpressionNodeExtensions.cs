@@ -21,13 +21,13 @@ namespace CSharpTreeBuilderTest
     // --------------------------------------------------------------------------------
     public static ExpressionNode LeftmostExpression(this ExpressionNode exprNode)
     {
-      var unOp = exprNode as UnaryOperatorNode;
+      var unOp = exprNode as UnaryExpressionNodeBase;
       if (unOp != null) return unOp.Operand.LeftmostExpression();
-      var binOp = exprNode as BinaryOperatorNode;
+      var binOp = exprNode as BinaryExpressionNode;
       if (binOp != null) return binOp.LeftOperand.LeftmostExpression();
-      var accOp = exprNode as PrimaryMemberAccessOperatorNode;
+      var accOp = exprNode as PrimaryExpressionMemberAccessNode;
       if (accOp != null) return accOp.PrimaryExpression.LeftmostExpression();
-      var metOp = exprNode as InvocationOperatorNode;
+      var metOp = exprNode as InvocationExpressionNode;
       return metOp != null ? metOp.PrimaryExpression.LeftmostExpression() : exprNode;
     }
   }

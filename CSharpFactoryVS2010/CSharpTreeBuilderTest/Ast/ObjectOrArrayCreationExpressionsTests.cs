@@ -106,11 +106,11 @@ namespace CSharpTreeBuilderTest
       exp1.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("int");
       exp1.HasConstructorArguments.ShouldBeFalse();
       exp1.HasObjectInitializer.ShouldBeTrue();
-      var elementInit1 = exp1.ObjectOrCollectionInitializer.ElementInitializers[0].Expression as Int32LiteralNode;
+      var elementInit1 = exp1.ObjectOrCollectionInitializer.ElementInitializers[0].NonAssignmentExpression as Int32LiteralNode;
       elementInit1.Value.ShouldEqual(1);
-      var elementInit2 = exp1.ObjectOrCollectionInitializer.ElementInitializers[1].Expression as BinaryOperatorNode;
+      var elementInit2 = exp1.ObjectOrCollectionInitializer.ElementInitializers[1].NonAssignmentExpression as BinaryExpressionNode;
       ((Int32LiteralNode) elementInit2.LeftOperand).Value.ShouldEqual(2);
-      elementInit2.Operator.ShouldEqual(BinaryOperatorType.Multiplication);
+      elementInit2.Operator.ShouldEqual(BinaryOperator.Multiplication);
       ((Int32LiteralNode) elementInit2.RightOperand).Value.ShouldEqual(3);
 
       var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
@@ -127,6 +127,23 @@ namespace CSharpTreeBuilderTest
       ((StringLiteralNode)exp2.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[1]).Value.ShouldEqual("b");
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the parsing of the erroneous expression:
+    /// <code>
+    ///    var a1 = new List<int>() {1, Capacity = 2};
+    /// </code>
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CollectionInitializer_Error()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ObjectOrArrayCreationExpressions\CollectionInitializer_Error.cs");
+      InvokeParser(project).ShouldBeFalse();
+      project.Errors[0].Code.ShouldEqual("CS0747");
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Tests the parsing of the expressions:
@@ -178,7 +195,7 @@ namespace CSharpTreeBuilderTest
       memberDeclarator1.SimpleName.Identifier.ShouldEqual("x");
 
       var memberDeclarator2 = exp1.Declarators[1] as MemberAccessMemberDeclaratorNode;
-      var memberAccess2 = memberDeclarator2.MemberAccess as PrimaryMemberAccessOperatorNode;
+      var memberAccess2 = memberDeclarator2.MemberAccess as PrimaryExpressionMemberAccessNode;
       ((SimpleNameNode) memberAccess2.PrimaryExpression).Identifier.ShouldEqual("AnonymousObjectCreationExpression");
       memberAccess2.MemberName.Identifier.ShouldEqual("xs1");
 
@@ -221,7 +238,7 @@ namespace CSharpTreeBuilderTest
     /// <code>
     ///   var a1 = new int[1, 2][][,] { { null, null } };
     ///   var a2 = new int**[5, 6];
-    ///   var a3 = new[,] { { 7, 8 }, { 9, 10 } };
+    ///   var a3 = new[,] { { a = 7, 8 }, { 9, 10 } };
     ///   var a4 = new int[][,] { null, null };
     /// </code>
     /// </summary>
@@ -274,7 +291,10 @@ namespace CSharpTreeBuilderTest
       exp3.Initializer.Items.Count.ShouldEqual(2);
       ((ArrayInitializerNode) exp3.Initializer.Items[0].Initializer).Items.Count.ShouldEqual(2);
       var init3_1 = ((ArrayInitializerNode) exp3.Initializer.Items[0].Initializer).Items[0].Initializer as ExpressionInitializerNode;
-      ((Int32LiteralNode)init3_1.Expression).Value.ShouldEqual(7);
+      var assignment = init3_1.Expression as AssignmentExpressionNode;
+      ((SimpleNameNode) assignment.LeftOperand).Identifier.ShouldEqual("a");
+      assignment.Operator.ShouldEqual(AssignmentOperator.SimpleAssignment);
+      ((Int32LiteralNode)assignment.RightOperand).Value.ShouldEqual(7);
       var init3_2 = ((ArrayInitializerNode)exp3.Initializer.Items[0].Initializer).Items[1].Initializer as ExpressionInitializerNode;
       ((Int32LiteralNode)init3_2.Expression).Value.ShouldEqual(8);
       var init3_3 = ((ArrayInitializerNode)exp3.Initializer.Items[1].Initializer).Items[0].Initializer as ExpressionInitializerNode;

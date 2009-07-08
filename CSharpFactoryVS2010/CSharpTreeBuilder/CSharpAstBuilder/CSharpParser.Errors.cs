@@ -1394,6 +1394,17 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
 
     // --------------------------------------------------------------------------------
     /// <summary>
+    /// Error CS0747: Invalid initializer member declarator.
+    /// </summary>
+    /// <param name="token">Error point</param>
+    // --------------------------------------------------------------------------------
+    public void Error0747(Token token)
+    {
+      Error("CS0747", token, "Invalid initializer member declarator.");
+    }
+
+    // --------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS1003: Syntax error, '{0}' expected.
     /// </summary>
     /// <param name="token">Error point</param>

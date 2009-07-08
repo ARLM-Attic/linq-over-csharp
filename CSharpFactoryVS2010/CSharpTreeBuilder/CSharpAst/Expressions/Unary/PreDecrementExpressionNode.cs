@@ -1,0 +1,28 @@
+// ================================================================================================
+// PreDecrementExpressionNode.cs
+//
+// Created: 2009.04.15, by Istvan Novak (DeepDiver)
+// ================================================================================================
+using CSharpTreeBuilder.CSharpAstBuilder;
+
+namespace CSharpTreeBuilder.Ast
+{
+  // ================================================================================================
+  /// <summary>
+  /// This class represents a predecrement (--) operator.
+  /// </summary>
+  // ================================================================================================
+  public sealed class PreDecrementExpressionNode : UnaryExpressionNodeBase
+  {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PreDecrementExpressionNode"/> class.
+    /// </summary>
+    /// <param name="start">Token providing information about the element.</param>
+    // ----------------------------------------------------------------------------------------------
+    public PreDecrementExpressionNode(Token start)
+      : base(start)
+    {
+    }
+  }
+}

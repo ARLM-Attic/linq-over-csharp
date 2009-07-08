@@ -308,6 +308,7 @@
     <None Include="TestFiles\Expressions\AnonymousMethodExpressions.cs" />
     <None Include="TestFiles\Expressions\LambdaExpressions.cs" />
     <None Include="TestFiles\Expressions\QueryExpressions.cs" />
+    <None Include="TestFiles\ObjectOrArrayCreationExpressions\CollectionInitializer_Error.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\Visitor\StatementVisitorTests.cs" />
     <None Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />
