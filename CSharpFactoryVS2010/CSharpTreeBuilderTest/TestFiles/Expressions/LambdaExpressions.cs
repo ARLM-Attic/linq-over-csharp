@@ -16,6 +16,9 @@ class LambdaExpressions
 
     // Lambda expression with expression body, implicit-anonymous-function-signature
     Expression<Func<int,int,int>> d4 = (i,j) =>  i+j;
+
+    // Lambda expression are right-associative
+    Expression<Func<Func<int>>> d5 = () => () => 2;
   }
 
   private delegate void Dvoid();

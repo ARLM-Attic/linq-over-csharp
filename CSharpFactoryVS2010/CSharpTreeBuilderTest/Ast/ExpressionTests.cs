@@ -993,6 +993,9 @@ namespace CSharpTreeBuilderTest
     /// <summary>
     /// Tests the parsing of the expression:
     ///    var i1 = true ? 0 : 1;
+    ///
+    ///    // right-associativity test
+    ///    var i2 = true ? 2 : false ? 3 : 4;
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
@@ -1003,13 +1006,25 @@ namespace CSharpTreeBuilderTest
       InvokeParser(project).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
-      var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
-      var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-      
-      var conditional = initializer.Expression as ConditionalExpressionNode;
-      ((BooleanLiteralNode) conditional.Condition).Value.ShouldEqual(true);
-      ((Int32LiteralNode) conditional.TrueExpression).Value.ShouldEqual(0);
-      ((Int32LiteralNode) conditional.FalseExpression).Value.ShouldEqual(1);
+
+      {
+        var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var conditional = initializer.Expression as ConditionalExpressionNode;
+        ((BooleanLiteralNode)conditional.Condition).Value.ShouldEqual(true);
+        ((Int32LiteralNode)conditional.TrueExpression).Value.ShouldEqual(0);
+        ((Int32LiteralNode)conditional.FalseExpression).Value.ShouldEqual(1);
+      }
+      {
+        var varDecl = method.Body.Statements[1] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var conditional = initializer.Expression as ConditionalExpressionNode;
+        ((BooleanLiteralNode) conditional.Condition).Value.ShouldEqual(true);
+        ((Int32LiteralNode) conditional.TrueExpression).Value.ShouldEqual(2);
+        var embeddedConditional = conditional.FalseExpression as ConditionalExpressionNode;
+        ((Int32LiteralNode) embeddedConditional.TrueExpression).Value.ShouldEqual(3);
+        ((Int32LiteralNode) embeddedConditional.FalseExpression).Value.ShouldEqual(4);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -1018,12 +1033,18 @@ namespace CSharpTreeBuilderTest
     /// <code>
     ///   // Lamba expression with block body, no parameters
     ///   Dvoid d1 = () =&gt; { };
+    ///
     ///   // Lambda expression with expression body, no parameters
     ///   Expression&lt;Func&lt;int&gt;&gt; d2 = () =&gt; 1;
+    ///
     ///   // Lambda expression with block body, explicit-anonymous-function-signature
     ///   Dint d3 = (int i, ref int j, out int k) =&gt; { k = 1; return i; };
+    ///
     ///   // Lambda expression with expression body, implicit-anonymous-function-signature
     ///   Expression&lt;Func&lt;int, int, int&gt;&gt; d4 = (i, j) =&gt; i + j;
+    ///
+    ///   // Lambda expression are right-associative
+    ///   Expression&lt;Func&lt;Func&lt;int&gt;&gt;&gt; d5 = () =&gt; () =&gt; 2;
     /// </code>
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -1081,10 +1102,19 @@ namespace CSharpTreeBuilderTest
         lambda.FormalParameters[1].TypeName.IsEmpty.ShouldBeTrue();
         lambda.FormalParameters[1].Identifier.ShouldEqual("j");
         lambda.IsSimpleExpression.ShouldBeTrue();
-        ((BinaryExpressionNode) lambda.Expression).Operator.ShouldEqual(BinaryOperator.Addition);
+        ((BinaryExpressionNode)lambda.Expression).Operator.ShouldEqual(BinaryOperator.Addition);
         ((SimpleNameNode)((BinaryExpressionNode)lambda.Expression).LeftOperand).Identifier.ShouldEqual("i");
         ((SimpleNameNode)((BinaryExpressionNode)lambda.Expression).RightOperand).Identifier.ShouldEqual("j");
         lambda.Block.ShouldBeNull();
+      }
+      {
+        var varDecl = method.Body.Statements[4] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var lambda = initializer.Expression as LambdaExpressionNode;
+        lambda.FormalParameters.Count.ShouldEqual(0);
+        var embeddedLambda = lambda.Expression as LambdaExpressionNode;
+        embeddedLambda.FormalParameters.Count.ShouldEqual(0);
+        ((Int32LiteralNode) embeddedLambda.Expression).Value.ShouldEqual(2);
       }
     }
 
