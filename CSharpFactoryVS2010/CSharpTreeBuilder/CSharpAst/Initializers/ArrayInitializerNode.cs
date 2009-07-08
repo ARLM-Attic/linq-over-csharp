@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public ArrayInitializerNode(Token start)
       : base(start)
     {
-      Items = new ArrayItemInitializerNodeCollection();
+      VariableInitializers = new VariableInitializerNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -31,6 +31,13 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the items of this initializer.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ArrayItemInitializerNodeCollection Items { get; private set; }
+    public VariableInitializerNodeCollection VariableInitializers { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the orphan comma token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token OrphanComma { get; internal set; }
   }
 }

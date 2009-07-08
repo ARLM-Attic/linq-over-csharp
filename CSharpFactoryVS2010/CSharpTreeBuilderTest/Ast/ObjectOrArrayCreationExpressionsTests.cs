@@ -265,9 +265,9 @@ namespace CSharpTreeBuilderTest
       exp1.RankSpecifiers[0].Rank.ShouldEqual(1);
       exp1.RankSpecifiers[1].Rank.ShouldEqual(2);
       exp1.HasInitializer.ShouldBeTrue();
-      var init1_1 = exp1.Initializer.Items[0].Initializer as ArrayInitializerNode;
-      (((ExpressionInitializerNode)init1_1.Items[0].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
-      (((ExpressionInitializerNode)init1_1.Items[1].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
+      var init1_1 = exp1.Initializer.VariableInitializers[0] as ArrayInitializerNode;
+      (((ExpressionInitializerNode)init1_1.VariableInitializers[0]).Expression as NullLiteralNode).ShouldNotBeNull();
+      (((ExpressionInitializerNode)init1_1.VariableInitializers[1]).Expression as NullLiteralNode).ShouldNotBeNull();
 
       var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp2 = init2.Expression as ArrayCreationExpressionNode;
@@ -288,18 +288,18 @@ namespace CSharpTreeBuilderTest
       exp3.RankSpecifiers.Count.ShouldEqual(1);
       exp3.RankSpecifiers[0].Rank.ShouldEqual(2);
       exp3.HasInitializer.ShouldBeTrue();
-      exp3.Initializer.Items.Count.ShouldEqual(2);
-      ((ArrayInitializerNode) exp3.Initializer.Items[0].Initializer).Items.Count.ShouldEqual(2);
-      var init3_1 = ((ArrayInitializerNode) exp3.Initializer.Items[0].Initializer).Items[0].Initializer as ExpressionInitializerNode;
+      exp3.Initializer.VariableInitializers.Count.ShouldEqual(2);
+      ((ArrayInitializerNode) exp3.Initializer.VariableInitializers[0]).VariableInitializers.Count.ShouldEqual(2);
+      var init3_1 = ((ArrayInitializerNode) exp3.Initializer.VariableInitializers[0]).VariableInitializers[0] as ExpressionInitializerNode;
       var assignment = init3_1.Expression as AssignmentExpressionNode;
       ((SimpleNameNode) assignment.LeftOperand).Identifier.ShouldEqual("a");
       assignment.Operator.ShouldEqual(AssignmentOperator.SimpleAssignment);
       ((Int32LiteralNode)assignment.RightOperand).Value.ShouldEqual(7);
-      var init3_2 = ((ArrayInitializerNode)exp3.Initializer.Items[0].Initializer).Items[1].Initializer as ExpressionInitializerNode;
+      var init3_2 = ((ArrayInitializerNode)exp3.Initializer.VariableInitializers[0]).VariableInitializers[1] as ExpressionInitializerNode;
       ((Int32LiteralNode)init3_2.Expression).Value.ShouldEqual(8);
-      var init3_3 = ((ArrayInitializerNode)exp3.Initializer.Items[1].Initializer).Items[0].Initializer as ExpressionInitializerNode;
+      var init3_3 = ((ArrayInitializerNode)exp3.Initializer.VariableInitializers[1]).VariableInitializers[0] as ExpressionInitializerNode;
       ((Int32LiteralNode)init3_3.Expression).Value.ShouldEqual(9);
-      var init3_4 = ((ArrayInitializerNode)exp3.Initializer.Items[1].Initializer).Items[1].Initializer as ExpressionInitializerNode;
+      var init3_4 = ((ArrayInitializerNode)exp3.Initializer.VariableInitializers[1]).VariableInitializers[1] as ExpressionInitializerNode;
       ((Int32LiteralNode)init3_4.Expression).Value.ShouldEqual(10);
 
       var init4 = ((VariableDeclarationStatementNode)method.Body.Statements[3]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
@@ -310,9 +310,9 @@ namespace CSharpTreeBuilderTest
       exp4.RankSpecifiers[0].Rank.ShouldEqual(1);
       exp4.RankSpecifiers[1].Rank.ShouldEqual(2);
       exp4.HasInitializer.ShouldBeTrue();
-      var init4_1 = exp1.Initializer.Items[0].Initializer as ArrayInitializerNode;
-      (((ExpressionInitializerNode)init4_1.Items[0].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
-      (((ExpressionInitializerNode)init4_1.Items[1].Initializer).Expression as NullLiteralNode).ShouldNotBeNull();
+      var init4_1 = exp1.Initializer.VariableInitializers[0] as ArrayInitializerNode;
+      (((ExpressionInitializerNode)init4_1.VariableInitializers[0]).Expression as NullLiteralNode).ShouldNotBeNull();
+      (((ExpressionInitializerNode)init4_1.VariableInitializers[1]).Expression as NullLiteralNode).ShouldNotBeNull();
 
     }
   }

@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 08. 14:57:53
+// Generated on: 2009. 07. 08. 15:30:12
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -26,7 +26,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(ArgumentNode node) { }
     public virtual void Visit(ArrayCreationExpressionNode node) { }
     public virtual void Visit(ArrayInitializerNode node) { }
-    public virtual void Visit(ArrayItemInitializerNode node) { }
     public virtual void Visit(ArraySizeSpecifierNode node) { }
     public virtual void Visit(AssignmentExpressionNode node) { }
     public virtual void Visit(AttributeArgumentNode node) { }

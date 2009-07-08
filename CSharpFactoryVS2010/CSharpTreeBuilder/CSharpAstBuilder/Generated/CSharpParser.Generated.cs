@@ -1844,22 +1844,19 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		if (StartOf(20)) {
 			VariableInitializerNode varInitNode; 
 			VariableInitializer(out varInitNode);
-			var initItem = new ArrayItemInitializerNode(varInitNode);
-			SetCommentOwner(initItem);
-			initNode.Items.Add(initItem);
+			initNode.VariableInitializers.Add(varInitNode);
 			
 			while (NotFinalComma()) {
 				Expect(87);
-				initItem.Separator = t; 
+				var separator = t; 
 				VariableInitializer(out varInitNode);
-				initItem = new ArrayItemInitializerNode(varInitNode);
-				SetCommentOwner(initItem);
-				initNode.Items.Add(initItem);
+				varInitNode.SeparatorToken = t; 
+				initNode.VariableInitializers.Add(varInitNode);
 				
 			}
 			if (la.kind == 87) {
 				Get();
-				initItem.Separator = t; 
+				initNode.OrphanComma = t; 
 			}
 		}
 		Expect(111);

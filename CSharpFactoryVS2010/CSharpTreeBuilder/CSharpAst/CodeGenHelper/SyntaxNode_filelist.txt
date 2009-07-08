@@ -70,7 +70,6 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expres
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Unary\PreIncrementExpressionNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Unary\UnaryOperatorExpressionNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ArrayInitializerNode.cs
-D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ArrayItemInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ElementInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ExpressionInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\IdentifierMemberDeclaratorNode.cs

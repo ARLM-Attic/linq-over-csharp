@@ -103,6 +103,7 @@
     <Compile Include="CSharpAst\Comments\MultiCommentNode.cs" />
     <Compile Include="CSharpAst\Comments\SingleCommentNodeBase.cs" />
     <Compile Include="CSharpAst\Comments\LineCommentNode.cs" />
+    <Compile Include="CSharpAst\Initializers\VariableInitializerNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\ArraySizeSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\JoinIntoClauseNode.cs" />
     <Compile Include="CSharpAst\Types\RankSpecifierNodeCollection.cs" />
@@ -398,8 +399,6 @@
     <Compile Include="CSharpAst\Types\TypeWithBodyDeclarationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeWithMembersDeclarationNode.cs" />
     <Compile Include="CSharpAst\Initializers\ArrayInitializerNode.cs" />
-    <Compile Include="CSharpAst\Initializers\ArrayItemInitializerNode.cs" />
-    <Compile Include="CSharpAst\Initializers\ArrayItemInitializerNodeCollection.cs" />
     <Compile Include="CSharpAst\Initializers\ExpressionInitializerNode.cs" />
     <Compile Include="CSharpAst\Variables\LocalVariableNode.cs" />
     <Compile Include="CSharpAst\Variables\LocalVariableTagNode.cs" />
