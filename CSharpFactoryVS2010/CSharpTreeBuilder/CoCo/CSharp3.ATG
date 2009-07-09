@@ -705,7 +705,7 @@ ClassMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNode
   | 
     "~" 
     (. 
-       var finNode = new FinalizerDeclarationNode(t);
+       var finNode = new DestructorDeclarationNode(t);
        SetCommentOwner(finNode);
        memNode = finNode;
     .)
@@ -921,9 +921,11 @@ EventDeclaration<out MemberDeclarationNode memNode>
        var evpNode = new EventPropertyDeclarationNode(t);
        SetCommentOwner(evpNode);
        memNode = evpNode;
+       evpNode.TypeName = typeNode;
+       TypeOrNamespaceNode memberName = null;
     .)
-    TypeName<out typeNode> 
-    (. evpNode.TypeName = typeNode; .)
+    TypeName<out memberName> 
+    (. evpNode.MemberName = memberName; .)
     "{"
     (. evpNode.OpenBrace = t; .)
     EventAccessorDeclarations<evpNode>
@@ -1408,6 +1410,7 @@ FormalParameterTag<out FormalParameterNode parNode>
   (. 
      parNode = new FormalParameterNode(start);
      SetCommentOwner(parNode);
+     parNode.AttributeDecorations = attrNodes;
      parNode.Modifier = modifier;
      parNode.IdentifierToken = t;
      parNode.TypeName = typeNode;
@@ -2316,6 +2319,7 @@ WhileStatement<out StatementNode stmtNode>
      ExpressionNode exprNode; 
   .)
   Expression<out exprNode>  
+  (. whNode.Condition = exprNode; .)
   ")" 
   (. 
      whNode.CloseParenthesis = t;
@@ -2377,7 +2381,8 @@ ForStatement<out StatementNode stmtNode>
   (. forNode.InitSeparator = t; .)
   [
     (. ExpressionNode exprNode; .)
-    Expression<out exprNode>    
+    Expression<out exprNode>
+    (. forNode.Condition = exprNode; .)
   ] 
   ";" 
   (. forNode.ConditionSeparator = t; .)
@@ -2428,7 +2433,7 @@ ForEachStatement<out StatementNode stmtNode>
      ExpressionNode exprNode;
   .)
   Expression<out exprNode>
-  (. feNode.Collection = exprNode; .)
+  (. feNode.CollectionExpression = exprNode; .)
   ")"
   (.
      feNode.CloseParenthesis = t; 
@@ -3871,122 +3876,120 @@ Unary<out ExpressionNode exprNode>
 Primary<out ExpressionNode exprNode>
 =
   (. 
-     ExpressionNode innerNode = null;
      exprNode = null;
   .)
   ( 
-    Literal<out innerNode>             
+    Literal<out exprNode>             
   | 
     "("
     (. 
        var pExprNode = new ParenthesizedExpressionNode(t); 
        SetCommentOwner(pExprNode);
     .) 
-    Expression<out innerNode>
+    Expression<out exprNode>
     (. 
-       pExprNode.Expression = innerNode;
-       innerNode = pExprNode;
+       pExprNode.Expression = exprNode;
+       exprNode = pExprNode;
     .)
     ")"  
     (. Terminate(pExprNode); .)
   | 
-    PredefinedTypeMemberAccess<out innerNode>
+    PredefinedTypeMemberAccess<out exprNode>
   | 
-    IF (IsQualifiedAliasMember()) QualifiedAliasMemberAccess<out innerNode>
+    IF (IsQualifiedAliasMember()) QualifiedAliasMemberAccess<out exprNode>
   | 
     (. SimpleNameNode sn = null; .)
     SimpleName<out sn>
-    (. innerNode = sn; .)
+    (. exprNode = sn; .)
   | 
     "this" 
     (. 
-       innerNode = new ThisAccessNode(t); 
-       SetCommentOwner(innerNode);
+       exprNode = new ThisAccessNode(t); 
+       SetCommentOwner(exprNode);
     .)
   | 
     "base" 
     ( 
       (. BaseMemberAccessNode baseNode = null; .)
       BaseMemberAccess<out baseNode> 
-      (. innerNode = baseNode; .)
+      (. exprNode = baseNode; .)
     | 
       (. BaseElementAccessNode baseNode = null; .)
       BaseElementAccess<out baseNode> 
-      (. innerNode = baseNode; .)
+      (. exprNode = baseNode; .)
     )  
-  | NewOperator<out innerNode>
-  | TypeOfOperator<out innerNode>
-  | CheckedOperator<out innerNode>
-  | UncheckedOperator<out innerNode>
-  | DefaultOperator<out innerNode>
-  | AnonymousDelegate<out innerNode>
-  | SizeOfOperator<out innerNode>
+  | NewOperator<out exprNode>
+  | TypeOfOperator<out exprNode>
+  | CheckedOperator<out exprNode>
+  | UncheckedOperator<out exprNode>
+  | DefaultOperator<out exprNode>
+  | AnonymousDelegate<out exprNode>
+  | SizeOfOperator<out exprNode>
   )
-  (. var curExprNode = innerNode; .)
+
   { 
-  (
+    (
       "++"  
       (. 
          var incNode = new PostIncrementExpressionNode(t);
          SetCommentOwner(incNode);
-         incNode.Operand = curExprNode;
-         curExprNode = incNode;
+         incNode.Operand = exprNode;
+         exprNode = incNode;
       .) 
     | "--"  
       (. 
          var decNode = new PostDecrementExpressionNode(t);
          SetCommentOwner(decNode);
-         decNode.Operand = curExprNode;
-         curExprNode = decNode;
+         decNode.Operand = exprNode;
+         exprNode = decNode;
       .) 
     | "->"  
       (. 
          SimpleNameNode snNode;
-         var pointerNode = new PointerMemberAccessNode(t, innerNode);
+         var pointerNode = new PointerMemberAccessNode(t, exprNode);
          SetCommentOwner(pointerNode);
       .)
       SimpleName<out snNode>
       (. 
          pointerNode.MemberName = snNode;
-         curExprNode = pointerNode;
+         exprNode = pointerNode;
       .)
     | "."   
       (. 
          SimpleNameNode snNode;
-         var maNode = new PrimaryExpressionMemberAccessNode(t, innerNode);
+         var maNode = new PrimaryExpressionMemberAccessNode(t, exprNode);
          SetCommentOwner(maNode);
       .)
       SimpleName<out snNode>
       (. 
          maNode.MemberName = snNode;
-         curExprNode = maNode;
+         exprNode = maNode;
       .)
     | "("   
       (. 
-         var invNode = new InvocationExpressionNode(t, innerNode);
+         var invNode = new InvocationExpressionNode(t, exprNode);
          SetCommentOwner(invNode);
       .)
       CurrentArgumentList<invNode.Arguments>
       ")"   
       (. 
          Terminate(invNode);
-         curExprNode = invNode;
+         exprNode = invNode;
       .)
     |       
       "["
       (. 
-         var elementAccess = new ElementAccessNode(t, innerNode);
+         var elementAccess = new ElementAccessNode(t, exprNode);
          SetCommentOwner(elementAccess);
       .)
       ArrayIndexer<elementAccess.Expressions> 
       "]"
       (. 
         Terminate(elementAccess); 
-        curExprNode = elementAccess;
+        exprNode = elementAccess;
       .)
-  )         
+    )         
   }
-  (. exprNode = curExprNode; .)
 .
 
 // ------------------------------------------------------------------------------------

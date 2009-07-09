@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 08. 15:47:24
+// Generated on: 2009. 07. 09. 17:58:37
 //
 // The template file is ISyntaxNodeVisitor.tt which uses SyntaxNode_filelist.txt as input.
 // You can modify SyntaxNode_filelist.txt manually, 
@@ -35,6 +35,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(BaseAccessNode node);
     void Visit(BaseConstructorInitializerNode node);
     void Visit(BaseElementAccessNode node);
+    void Visit(BaseMemberAccessMemberDeclaratorNode node);
     void Visit(BaseMemberAccessNode node);
     void Visit(BinaryExpressionNode node);
     void Visit(BlockCommentNode node);
@@ -62,6 +63,7 @@ namespace CSharpTreeBuilder.Ast
     void Visit(DefaultValueExpressionNode node);
     void Visit(DefinePragmaNode node);
     void Visit(DelegateDeclarationNode node);
+    void Visit(DestructorDeclarationNode node);
     void Visit(DoubleLiteralNode node);
     void Visit(DoWhileStatementNode node);
     void Visit(ElementAccessNode node);
@@ -81,7 +83,6 @@ namespace CSharpTreeBuilder.Ast
     void Visit(FalseLiteralNode node);
     void Visit(FieldDeclarationNode node);
     void Visit(FieldTagNode node);
-    void Visit(FinalizerDeclarationNode node);
     void Visit(FixedInitializerNode node);
     void Visit(FixedStatementNode node);
     void Visit(ForeachStatementNode node);

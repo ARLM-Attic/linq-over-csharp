@@ -97,6 +97,11 @@ namespace CSharpTreeBuilder.Ast
       visitor.Visit(this);
 
       base.AcceptVisitor(visitor);
+
+      if (Expression!=null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

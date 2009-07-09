@@ -82,7 +82,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-#warning Expression is not yet visited.
+      if (Expression!=null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

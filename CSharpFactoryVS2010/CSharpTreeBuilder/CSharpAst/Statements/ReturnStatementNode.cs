@@ -48,7 +48,10 @@ namespace CSharpTreeBuilder.Ast
 
       base.AcceptVisitor(visitor);
 
-#warning Expression visiting is not implemented yet!
+      if (Expression!=null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

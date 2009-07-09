@@ -6,27 +6,27 @@ class MyClass
 {
   int MyMethod()
   {
-    // method body is a block statement
+  // method body is a block statement
 
     // empty-statement
-    label1:
+  label1:
     ;
 
     // local-variable-declaration
-    label2:
+  label2:
     int a1, a2 = 0;
     var v1 = 0;
 
     // local-constant-declaration
-    label3:
+  label3:
     const int c1 = 0, c2 = 0;
 
     // expression-statement
-    label4:
+  label4:
     v1++;
 
     // if-statement
-    label5:
+  label5:
     if (true)
     {
     }
@@ -35,49 +35,51 @@ class MyClass
     }
 
     // switch-statement
-    label6:
+  label6:
     switch (v1)
     {
       case 0:
       case 1:
-        // break-statement
-        break;
+        goto case 2;
+      case 2:
+        goto default;
       default:
+        // break-statement
         break;
     }
 
     // while-statement
-    label7:
+  label7:
     while (false)
     {
     }
 
     // do-statement
-    label8:
+  label8:
     do
     {
     } while (false);
 
     // for-statement (with local-variable-declaration)
-    label9:
+  label9:
     for (int i = 0; false; i++)
       // continue-statement
       continue;
 
     // for-statement (with statement-expression-list)
-    label10:
+  label10:
     for (v1++, v1++; false; v1++, v1++)
     {
     }
 
     // foreach-statement
-    label11:
-    foreach (int i in new int[] {0})
+  label11:
+    foreach (int i in array)
     {
     }
 
     // try-statement
-    label12:
+  label12:
     try
     {
     }
@@ -92,52 +94,60 @@ class MyClass
     }
 
     // checked-statement
-    label13:
+  label13:
     checked
     {
     }
 
     // unchecked-statement
-    label14:
+  label14:
     unchecked
     {
     }
 
     // lock-statement
-    label15:
+  label15:
     lock (this)
     {
     }
 
-    // using-statement
-    label16:
+    // using-statement (with local-variable-declaration)
+  label16:
     using (Stream s = null)
     {
     }
 
+    // using-statement (with expression)
+  label16_2:
+    using (null)
+    {
+    }
+
     // return-statement
-    labl17:
+  labl17:
     return 0;
 
     // goto-statement
-    label18:
+  label18:
     goto label1;
 
     // throw-statement
-    label19:
+  label19:
     throw new Exception();
 
     // unsafe-statement
-    label20:
+  label20:
     unsafe
     {
       string s = "a";
 
       // fixed-statement
-      label21:
+    label21:
       fixed (char* p1 = s, p2 = s)
       {
       }
+
+      char* p = stackalloc char[256];
     }
   }
 
@@ -151,5 +161,7 @@ class MyClass
   label_2:
     yield break;
   }
+
+  private int[] array = new int[10];
 }
 

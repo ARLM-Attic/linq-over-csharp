@@ -4,20 +4,20 @@ using System.Runtime.InteropServices;
 
 [Serializable, CLSCompliant(false)]
 [DebuggerDisplay("a", Name = "a", Type = "a")]
-public class MyClass<T1, T2> : Exception, IDisposable
+public class MyClass<[MyGenericAttribute]T1, T2> : Exception, IDisposable
   where T1 : Exception
   where T2 : class, new()
 {
   // constant-declaration
-  [DebuggerDisplay("a")] 
+  [Obsolete] 
   private const int c1 = 0, c2 = 0;
 
   // field-declaration
-  [DebuggerDisplay("a")]
+  [Obsolete]
   private int f1, f2 = 0;
 
   // method-declaration
-  [DebuggerStepThrough()]
+  [Obsolete]
   public void GenericMethod<T3, T4>
   (
     ref T3 t3,
@@ -36,7 +36,7 @@ public class MyClass<T1, T2> : Exception, IDisposable
   }
 
   // property-declaration
-  [DebuggerHidden()]
+  [Obsolete]
   public int A { get; set; }
 
   // event-declaration
@@ -52,7 +52,7 @@ public class MyClass<T1, T2> : Exception, IDisposable
   }
 
   // indexer-declaration
-  [DebuggerHidden()]
+  [Obsolete]
   public int this[int a, int b]
   {
     get { return 0; }
@@ -60,21 +60,21 @@ public class MyClass<T1, T2> : Exception, IDisposable
   }
 
   // operator-declaration
-  [DebuggerStepThrough()]
+  [Obsolete]
   public static MyClass<T1, T2> operator ++(MyClass<T1, T2> m)
   {
     return null;
   }
 
   // operator-declaration (conversion operator)
-  [DebuggerStepThrough()]
+  [Obsolete]
   public static implicit operator string(MyClass<T1, T2> m)
   {
     return null;
   }
 
   // constructor-declaration
-  [DebuggerStepThrough()]
+  [Obsolete]
   public MyClass(int a, int b)
   {
   }
@@ -92,13 +92,18 @@ public class MyClass<T1, T2> : Exception, IDisposable
   }
 
   // destructor-declaration
-  [DebuggerNonUserCode()]
+  [Obsolete]
   ~MyClass()
   {
   }
 
-  [DebuggerDisplay("a")]
+  [Obsolete]
   public class SubType
   { 
   }
+}
+
+[AttributeUsage(AttributeTargets.GenericParameter)]
+public class MyGenericAttribute:Attribute
+{
 }

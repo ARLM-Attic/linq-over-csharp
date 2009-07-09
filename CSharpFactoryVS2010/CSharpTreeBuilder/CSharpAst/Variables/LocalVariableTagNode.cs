@@ -97,7 +97,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-#warning Initializer visiting not yet implemented!
+      if (Initializer!=null)
+      {
+        Initializer.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

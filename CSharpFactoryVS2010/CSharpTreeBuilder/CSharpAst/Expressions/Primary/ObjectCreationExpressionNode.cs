@@ -105,5 +105,35 @@ namespace CSharpTreeBuilder.Ast
     {
       get { return ObjectOrCollectionInitializer != null; }
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      if (TypeName != null)
+      {
+        TypeName.AcceptVisitor(visitor);
+      }
+
+      foreach (var argument in Arguments)
+      {
+        argument.AcceptVisitor(visitor);
+      }
+
+      if (ObjectOrCollectionInitializer != null)
+      {
+        ObjectOrCollectionInitializer.AcceptVisitor(visitor);
+      }
+    }
+
+    #endregion
   }
 }

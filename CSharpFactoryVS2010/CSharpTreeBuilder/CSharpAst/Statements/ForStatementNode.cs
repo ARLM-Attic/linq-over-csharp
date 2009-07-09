@@ -109,7 +109,20 @@ namespace CSharpTreeBuilder.Ast
         Initializer.AcceptVisitor(visitor);
       }
 
-#warning Expressions not yet visited.
+      foreach (var initializer in Initializers)
+      {
+        initializer.AcceptVisitor(visitor);
+      }
+
+      if (Condition!=null)
+      {
+        Condition.AcceptVisitor(visitor);
+      }
+
+      foreach (var iterator in Iterators)
+      {
+        iterator.AcceptVisitor(visitor);
+      }
 
       if (Statement != null)
       {

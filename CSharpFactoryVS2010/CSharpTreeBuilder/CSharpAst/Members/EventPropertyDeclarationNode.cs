@@ -62,7 +62,10 @@ namespace CSharpTreeBuilder.Ast
         attributeDecoration.AcceptVisitor(visitor);
       }
 
-#warning Visiting of TypeName missing, because of a bug (TypeName contains the member's name).
+      if (TypeName!=null)
+      {
+        TypeName.AcceptVisitor(visitor);
+      }
 
       if (AddAccessor!=null)
       {

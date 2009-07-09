@@ -786,7 +786,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			StructMemberDeclaration(attrNodes, mod, typeDecl, out memNode);
 		} else if (la.kind == 115) {
 			Get();
-			var finNode = new FinalizerDeclarationNode(t);
+			var finNode = new DestructorDeclarationNode(t);
 			SetCommentOwner(finNode);
 			memNode = finNode;
 			
@@ -1181,9 +1181,11 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			var evpNode = new EventPropertyDeclarationNode(t);
 			SetCommentOwner(evpNode);
 			memNode = evpNode;
+			evpNode.TypeName = typeNode;
+			TypeOrNamespaceNode memberName = null;
 			
-			TypeName(out typeNode);
-			evpNode.TypeName = typeNode; 
+			TypeName(out memberName);
+			evpNode.MemberName = memberName; 
 			Expect(96);
 			evpNode.OpenBrace = t; 
 			EventAccessorDeclarations(evpNode);
@@ -1892,6 +1894,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Expect(1);
 		parNode = new FormalParameterNode(start);
 		SetCommentOwner(parNode);
+		parNode.AttributeDecorations = attrNodes;
 		parNode.Modifier = modifier;
 		parNode.IdentifierToken = t;
 		parNode.TypeName = typeNode;
@@ -2699,6 +2702,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		ExpressionNode exprNode; 
 		
 		Expression(out exprNode);
+		whNode.Condition = exprNode; 
 		Expect(113);
 		whNode.CloseParenthesis = t;
 		StatementNode bodyNode; 
@@ -2748,6 +2752,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		if (StartOf(13)) {
 			ExpressionNode exprNode; 
 			Expression(out exprNode);
+			forNode.Condition = exprNode; 
 		}
 		Expect(114);
 		forNode.ConditionSeparator = t; 
@@ -2788,7 +2793,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		ExpressionNode exprNode;
 		
 		Expression(out exprNode);
-		feNode.Collection = exprNode; 
+		feNode.CollectionExpression = exprNode; 
 		Expect(113);
 		feNode.CloseParenthesis = t; 
 		StatementNode bodyNode; 
@@ -3846,70 +3851,68 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 	}
 
 	void Primary(out ExpressionNode exprNode) {
-		ExpressionNode innerNode = null;
 		exprNode = null;
 		
 		if (StartOf(30)) {
-			Literal(out innerNode);
+			Literal(out exprNode);
 		} else if (la.kind == 98) {
 			Get();
 			var pExprNode = new ParenthesizedExpressionNode(t); 
 			SetCommentOwner(pExprNode);
 			
-			Expression(out innerNode);
-			pExprNode.Expression = innerNode;
-			innerNode = pExprNode;
+			Expression(out exprNode);
+			pExprNode.Expression = exprNode;
+			exprNode = pExprNode;
 			
 			Expect(113);
 			Terminate(pExprNode); 
 		} else if (StartOf(31)) {
-			PredefinedTypeMemberAccess(out innerNode);
+			PredefinedTypeMemberAccess(out exprNode);
 		} else if (IsQualifiedAliasMember()) {
-			QualifiedAliasMemberAccess(out innerNode);
+			QualifiedAliasMemberAccess(out exprNode);
 		} else if (la.kind == 1) {
 			SimpleNameNode sn = null; 
 			SimpleName(out sn);
-			innerNode = sn; 
+			exprNode = sn; 
 		} else if (la.kind == 68) {
 			Get();
-			innerNode = new ThisAccessNode(t); 
-			SetCommentOwner(innerNode);
+			exprNode = new ThisAccessNode(t); 
+			SetCommentOwner(exprNode);
 			
 		} else if (la.kind == 8) {
 			Get();
 			if (la.kind == 90) {
 				BaseMemberAccessNode baseNode = null; 
 				BaseMemberAccess(out baseNode);
-				innerNode = baseNode; 
+				exprNode = baseNode; 
 			} else if (la.kind == 97) {
 				BaseElementAccessNode baseNode = null; 
 				BaseElementAccess(out baseNode);
-				innerNode = baseNode; 
+				exprNode = baseNode; 
 			} else SynErr(191);
 		} else if (la.kind == 46) {
-			NewOperator(out innerNode);
+			NewOperator(out exprNode);
 		} else if (la.kind == 72) {
-			TypeOfOperator(out innerNode);
+			TypeOfOperator(out exprNode);
 		} else if (la.kind == 15) {
-			CheckedOperator(out innerNode);
+			CheckedOperator(out exprNode);
 		} else if (la.kind == 75) {
-			UncheckedOperator(out innerNode);
+			UncheckedOperator(out exprNode);
 		} else if (la.kind == 20) {
-			DefaultOperator(out innerNode);
+			DefaultOperator(out exprNode);
 		} else if (la.kind == 21) {
-			AnonymousDelegate(out innerNode);
+			AnonymousDelegate(out exprNode);
 		} else if (la.kind == 62) {
-			SizeOfOperator(out innerNode);
+			SizeOfOperator(out exprNode);
 		} else SynErr(192);
-		var curExprNode = innerNode; 
 		while (StartOf(32)) {
 			switch (la.kind) {
 			case 95: {
 				Get();
 				var incNode = new PostIncrementExpressionNode(t);
 				SetCommentOwner(incNode);
-				incNode.Operand = curExprNode;
-				curExprNode = incNode;
+				incNode.Operand = exprNode;
+				exprNode = incNode;
 				
 				break;
 			}
@@ -3917,62 +3920,61 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 				Get();
 				var decNode = new PostDecrementExpressionNode(t);
 				SetCommentOwner(decNode);
-				decNode.Operand = curExprNode;
-				curExprNode = decNode;
+				decNode.Operand = exprNode;
+				exprNode = decNode;
 				
 				break;
 			}
 			case 128: {
 				Get();
 				SimpleNameNode snNode;
-				var pointerNode = new PointerMemberAccessNode(t, innerNode);
+				var pointerNode = new PointerMemberAccessNode(t, exprNode);
 				SetCommentOwner(pointerNode);
 				
 				SimpleName(out snNode);
 				pointerNode.MemberName = snNode;
-				curExprNode = pointerNode;
+				exprNode = pointerNode;
 				
 				break;
 			}
 			case 90: {
 				Get();
 				SimpleNameNode snNode;
-				var maNode = new PrimaryExpressionMemberAccessNode(t, innerNode);
+				var maNode = new PrimaryExpressionMemberAccessNode(t, exprNode);
 				SetCommentOwner(maNode);
 				
 				SimpleName(out snNode);
 				maNode.MemberName = snNode;
-				curExprNode = maNode;
+				exprNode = maNode;
 				
 				break;
 			}
 			case 98: {
 				Get();
-				var invNode = new InvocationExpressionNode(t, innerNode);
+				var invNode = new InvocationExpressionNode(t, exprNode);
 				SetCommentOwner(invNode);
 				
 				CurrentArgumentList(invNode.Arguments);
 				Expect(113);
 				Terminate(invNode);
-				curExprNode = invNode;
+				exprNode = invNode;
 				
 				break;
 			}
 			case 97: {
 				Get();
-				var elementAccess = new ElementAccessNode(t, innerNode);
+				var elementAccess = new ElementAccessNode(t, exprNode);
 				SetCommentOwner(elementAccess);
 				
 				ArrayIndexer(elementAccess.Expressions);
 				Expect(112);
 				Terminate(elementAccess); 
-				curExprNode = elementAccess;
+				exprNode = elementAccess;
 				
 				break;
 			}
 			}
 		}
-		exprNode = curExprNode; 
 	}
 
 	void Literal(out ExpressionNode valNode) {

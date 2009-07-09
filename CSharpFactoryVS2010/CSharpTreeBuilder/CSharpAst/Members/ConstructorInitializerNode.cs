@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class is the abstract base class of constructor initializers :base(args) and :this(args). 
   /// </summary>
   // ================================================================================================
-  public abstract class ConstructorInitializerNode : SyntaxNode<ConstDeclarationNode>
+  public abstract class ConstructorInitializerNode : SyntaxNode<ConstructorDeclarationNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

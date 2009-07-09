@@ -180,27 +180,27 @@ namespace CSharpTreeBuilder.Ast
       visitor.Visit(this);
 
       // Visit extern alias nodes
-      foreach (var node in ExternAliasNodes)
+      foreach (var externAliasNode in ExternAliasNodes)
       {
-        node.AcceptVisitor(visitor);
+        externAliasNode.AcceptVisitor(visitor);
       }
 
       // Visit using nodes
-      foreach (var node in UsingNodes)
+      foreach (var usingNode in UsingNodes)
       {
-        node.AcceptVisitor(visitor);
+        usingNode.AcceptVisitor(visitor);
       }
 
       // Visit attribute nodes
-      foreach (var node in GlobalAttributes)
+      foreach (var globalAttribute in GlobalAttributes)
       {
-        node.AcceptVisitor(visitor);
+        globalAttribute.AcceptVisitor(visitor);
       }
 
       // Visit in-scope declaration nodes (namespaces and types)
-      foreach (var node in InScopeDeclarations)
+      foreach (var inScopeDeclaration in InScopeDeclarations)
       {
-        node.AcceptVisitor(visitor);
+        inScopeDeclaration.AcceptVisitor(visitor);
       }
     }
 

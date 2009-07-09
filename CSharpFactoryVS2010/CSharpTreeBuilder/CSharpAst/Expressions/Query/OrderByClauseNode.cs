@@ -32,5 +32,25 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public OrderingClauseNodeCollection Orderings { get; private set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      foreach (var ordering in Orderings)
+      {
+        ordering.AcceptVisitor(visitor);
+      }
+    }
+
+    #endregion
   }
 }

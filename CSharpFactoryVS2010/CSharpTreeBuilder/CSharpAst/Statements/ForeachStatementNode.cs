@@ -94,7 +94,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the Collection expression of this statement.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Collection { get; internal set; }
+    public ExpressionNode CollectionExpression { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -129,7 +129,10 @@ namespace CSharpTreeBuilder.Ast
         TypeName.AcceptVisitor(visitor);
       }
 
-#warning Expressions not yet visited.
+      if (CollectionExpression!=null)
+      {
+        CollectionExpression.AcceptVisitor(visitor);
+      }
 
       if (Statement != null)
       {

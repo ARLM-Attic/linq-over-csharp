@@ -81,7 +81,10 @@ namespace CSharpTreeBuilder.Ast
 
       base.AcceptVisitor(visitor);
 
-#warning Expression is not yet visited!
+      if (Condition!=null)
+      {
+        Condition.AcceptVisitor(visitor);
+      }
 
       if (ThenStatement!=null)
       {

@@ -52,7 +52,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-#warning Should also visit Expression node.
+      if (Expression!=null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

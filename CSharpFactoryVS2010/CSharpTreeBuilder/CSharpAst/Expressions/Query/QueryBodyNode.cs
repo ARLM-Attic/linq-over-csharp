@@ -86,5 +86,40 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public QueryContinuationNode QueryContinuation { get; internal set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      foreach (var bodyClause in BodyClauses)
+      {
+        bodyClause.AcceptVisitor(visitor);
+      }
+
+      if (SelectClause != null)
+      {
+        SelectClause.AcceptVisitor(visitor);
+      }
+
+      if (GroupClause != null)
+      {
+        GroupClause.AcceptVisitor(visitor);
+      }
+
+      if (QueryContinuation != null)
+      {
+        QueryContinuation.AcceptVisitor(visitor);
+      }
+    }
+
+    #endregion
   }
 }

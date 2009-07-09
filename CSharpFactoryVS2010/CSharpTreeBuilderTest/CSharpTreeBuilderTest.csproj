@@ -310,7 +310,8 @@
     <None Include="TestFiles\Expressions\QueryExpressions.cs" />
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\CollectionInitializer_Error.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
-    <None Include="TestFiles\Visitor\StatementVisitorTests.cs" />
+    <None Include="TestFiles\Visitor\ExpressionVisitorTest.cs" />
+    <None Include="TestFiles\Visitor\StatementVisitorTest.cs" />
     <None Include="TestFiles\Visitor\DelegateDeclarationNodeVisitorTest.cs" />
     <None Include="TestFiles\Visitor\EnumDeclarationNodeVisitorTest.cs" />
     <None Include="TestFiles\Visitor\InterfaceDeclarationNodeVisitorTest.cs" />

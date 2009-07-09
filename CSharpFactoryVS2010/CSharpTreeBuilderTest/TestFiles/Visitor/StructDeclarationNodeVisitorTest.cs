@@ -49,7 +49,7 @@ public struct MyStruct<T1, T2> : IDisposable
     return null;
   }
 
-  // constructor-declaration (with constructor initializer)
+  // constructor-declaration
   public MyStruct(int a)
   {
     f1 = 0;

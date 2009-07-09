@@ -79,6 +79,11 @@ namespace CSharpTreeBuilder.Ast
         Initializer.AcceptVisitor(visitor);
       }
 
+      if (Expression != null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
+
       if (Statement != null)
       {
         Statement.AcceptVisitor(visitor);

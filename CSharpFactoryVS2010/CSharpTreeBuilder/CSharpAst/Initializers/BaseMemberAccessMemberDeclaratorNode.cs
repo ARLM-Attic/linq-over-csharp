@@ -1,38 +1,38 @@
-// ================================================================================================
-// ThrowStatementNode.cs
-//
-// Created: 2009.06.05, by Istvan Novak (DeepDiver)
-// ================================================================================================
-using CSharpTreeBuilder.CSharpAstBuilder;
+using System;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// 
+  /// This class represents a base-member-access member declarator node.
   /// </summary>
   // ================================================================================================
-  public class ThrowStatementNode : StatementNode
+  public class BaseMemberAccessMemberDeclaratorNode : MemberDeclaratorNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ThrowStatementNode"/> class.
+    /// Initializes a new instance of the <see cref="BaseMemberAccessMemberDeclaratorNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
-    /// <param name="expression">The expression belonging to the statement.</param>
+    /// <param name="baseMemberAccessNode">A base member access node.</param>
     // ----------------------------------------------------------------------------------------------
-    public ThrowStatementNode(Token start, ExpressionNode expression)
-      : base(start)
+    public BaseMemberAccessMemberDeclaratorNode(BaseMemberAccessNode baseMemberAccessNode)
+      : base(baseMemberAccessNode.StartToken)
     {
-      Expression = expression;
+      if (baseMemberAccessNode == null)
+      {
+        throw new ArgumentNullException("baseMemberAccessNode");
+      }
+
+      BaseMemberAccess = baseMemberAccessNode;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the expression.
+    /// Gets or sets the BaseMemberAccess expression.
     /// </summary>
+    /// <value>The base member access expression.</value>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; private set; }
+    public BaseMemberAccessNode BaseMemberAccess { get; private set; }
 
     #region Visitor methods
 
@@ -46,11 +46,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      base.AcceptVisitor(visitor);
-
-      if (Expression!=null)
+      if (BaseMemberAccess!=null)
       {
-        Expression.AcceptVisitor(visitor);
+        BaseMemberAccess.AcceptVisitor(visitor);
       }
     }
 

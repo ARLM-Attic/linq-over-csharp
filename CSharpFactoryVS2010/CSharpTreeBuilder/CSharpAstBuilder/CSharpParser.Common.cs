@@ -389,6 +389,11 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
         return new MemberAccessMemberDeclaratorNode(expressionNode as MemberAccessNode);
       }
 
+      if (expressionNode is BaseMemberAccessNode)
+      {
+        return new BaseMemberAccessMemberDeclaratorNode(expressionNode as BaseMemberAccessNode);
+      }
+
       Error0746( expressionNode.StartToken, expressionNode.GetType().FullName);
 
       return null;

@@ -25,5 +25,21 @@ namespace CSharpTreeBuilder.Ast
     {
     }
 
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

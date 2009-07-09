@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 08. 15:47:22
+// Generated on: 2009. 07. 09. 17:58:34
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -35,6 +35,7 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(BaseAccessNode node) { }
     public virtual void Visit(BaseConstructorInitializerNode node) { }
     public virtual void Visit(BaseElementAccessNode node) { }
+    public virtual void Visit(BaseMemberAccessMemberDeclaratorNode node) { }
     public virtual void Visit(BaseMemberAccessNode node) { }
     public virtual void Visit(BinaryExpressionNode node) { }
     public virtual void Visit(BlockCommentNode node) { }
@@ -62,6 +63,7 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(DefaultValueExpressionNode node) { }
     public virtual void Visit(DefinePragmaNode node) { }
     public virtual void Visit(DelegateDeclarationNode node) { }
+    public virtual void Visit(DestructorDeclarationNode node) { }
     public virtual void Visit(DoubleLiteralNode node) { }
     public virtual void Visit(DoWhileStatementNode node) { }
     public virtual void Visit(ElementAccessNode node) { }
@@ -81,7 +83,6 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(FalseLiteralNode node) { }
     public virtual void Visit(FieldDeclarationNode node) { }
     public virtual void Visit(FieldTagNode node) { }
-    public virtual void Visit(FinalizerDeclarationNode node) { }
     public virtual void Visit(FixedInitializerNode node) { }
     public virtual void Visit(FixedStatementNode node) { }
     public virtual void Visit(ForeachStatementNode node) { }

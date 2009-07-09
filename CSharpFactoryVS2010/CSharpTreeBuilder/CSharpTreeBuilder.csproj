@@ -103,6 +103,7 @@
     <Compile Include="CSharpAst\Comments\MultiCommentNode.cs" />
     <Compile Include="CSharpAst\Comments\SingleCommentNodeBase.cs" />
     <Compile Include="CSharpAst\Comments\LineCommentNode.cs" />
+    <Compile Include="CSharpAst\Initializers\BaseMemberAccessMemberDeclaratorNode.cs" />
     <Compile Include="CSharpAst\Initializers\VariableInitializerNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\ArraySizeSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\JoinIntoClauseNode.cs" />
@@ -325,7 +326,7 @@
     <Compile Include="CSharpAst\Members\FieldDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\FieldTagNode.cs" />
     <Compile Include="CSharpAst\Members\FieldTagNodeCollection.cs" />
-    <Compile Include="CSharpAst\Members\FinalizerDeclarationNode.cs" />
+    <Compile Include="CSharpAst\Members\DestructorDeclarationNode.cs" />
     <Compile Include="CSharpAst\Members\FormalParameterModifier.cs" />
     <Compile Include="CSharpAst\Members\FormalParameterNode.cs" />
     <Compile Include="CSharpAst\Members\FormalParameterNodeCollection.cs" />

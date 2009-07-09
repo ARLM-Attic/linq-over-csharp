@@ -102,9 +102,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      #warning Expression visiting missing. Continue after expression object model refactoring.
-
-      //if (Expression != null) { Expression.AcceptVisitor(visitor); }
+      if (Expression != null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

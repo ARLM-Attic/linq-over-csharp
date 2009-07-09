@@ -70,6 +70,7 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expres
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Unary\PreIncrementExpressionNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Expressions\Unary\UnaryOperatorExpressionNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ArrayInitializerNode.cs
+D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\BaseMemberAccessMemberDeclaratorNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ElementInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\ExpressionInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Initializers\IdentifierMemberDeclaratorNode.cs
@@ -87,11 +88,11 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Member
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\ConstructorDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\ConstructorInitializerNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\ConstTagNode.cs
+D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\DestructorDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\EnumValueNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\EventPropertyDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\FieldDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\FieldTagNode.cs
-D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\FinalizerDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\FormalParameterNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\IndexerDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Members\InterfaceEventDeclarationNode.cs

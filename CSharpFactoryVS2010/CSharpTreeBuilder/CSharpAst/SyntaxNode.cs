@@ -323,7 +323,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public virtual void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      visitor.Visit(this);
+      throw new ApplicationException(string.Format("SyntaxNode.AcceptVisitor called on type: {0}",GetType()));
     }
   }
 }

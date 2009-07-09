@@ -176,7 +176,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName!=null) { TypeName.AcceptVisitor(visitor); }
+      if (TypeName!=null)
+      {
+        TypeName.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

@@ -1,5 +1,5 @@
 // ================================================================================================
-// FinalizerDeclarationNode.cs
+// DestructorDeclarationNode.cs
 //
 // Created: 2009.04.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
@@ -12,15 +12,15 @@ namespace CSharpTreeBuilder.Ast
   /// This class declares a finalizer member.
   /// </summary>
   // ================================================================================================
-  public class FinalizerDeclarationNode : MethodDeclarationNode
+  public class DestructorDeclarationNode : MethodDeclarationNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="FinalizerDeclarationNode"/> class.
+    /// Initializes a new instance of the <see cref="DestructorDeclarationNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public FinalizerDeclarationNode(Token start)
+    public DestructorDeclarationNode(Token start)
       : base(start)
     {
     }

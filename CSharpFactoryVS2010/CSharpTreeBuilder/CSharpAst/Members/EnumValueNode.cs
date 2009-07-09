@@ -109,7 +109,10 @@ namespace CSharpTreeBuilder.Ast
         attributeDecoration.AcceptVisitor(visitor);
       }
 
-#warning Visiting of Expression field is missing.
+      if (Expression!=null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion
