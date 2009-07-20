@@ -3,7 +3,9 @@
 //
 // Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Collections.Generic;
 using CSharpTreeBuilder.CSharpAstBuilder;
+using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilder.Ast
 {
@@ -160,6 +162,13 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     ICommentNode Comment { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of semantic entities created from this syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    List<SemanticEntity> SemanticEntities { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

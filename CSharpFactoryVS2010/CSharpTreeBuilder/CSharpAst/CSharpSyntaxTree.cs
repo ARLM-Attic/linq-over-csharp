@@ -40,5 +40,19 @@ namespace CSharpTreeBuilder.Ast
     {
       CompilationUnitNodes.Clear();
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Visits all compilation units with a visitor.
+    /// </summary>
+    /// <param name="visitor">A syntax node visitor object.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AcceptVisitor(ISyntaxNodeVisitor visitor)
+    {
+      foreach (var compilationUnitNode in CompilationUnitNodes)
+      {
+        compilationUnitNode.AcceptVisitor(visitor);
+      }
+    }
   }
 }

@@ -109,6 +109,24 @@ namespace CSharpTreeBuilder.Ast
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
       visitor.Visit(this);
+
+      // Visit extern alias nodes
+      foreach (var externAliasNode in ExternAliasNodes)
+      {
+        externAliasNode.AcceptVisitor(visitor);
+      }
+
+      // Visit using nodes
+      foreach (var usingNode in UsingNodes)
+      {
+        usingNode.AcceptVisitor(visitor);
+      }
+
+      // Visit in-scope declaration nodes (namespaces and types)
+      foreach (var inScopeDeclaration in InScopeDeclarations)
+      {
+        inScopeDeclaration.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

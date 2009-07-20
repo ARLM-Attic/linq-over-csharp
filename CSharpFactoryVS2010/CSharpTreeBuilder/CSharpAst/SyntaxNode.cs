@@ -4,7 +4,9 @@
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
 using System;
+using System.Collections.Generic;
 using CSharpTreeBuilder.CSharpAstBuilder;
+using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilder.Ast
 {
@@ -40,8 +42,8 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     protected SyntaxNode()
+      : this(null)
     {
-      Validate();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -52,6 +54,8 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected SyntaxNode(Token start)
     {
+      SemanticEntities = new List<SemanticEntity>();
+
       StartToken = start;
       TerminatingToken = start;
       Validate();
@@ -317,6 +321,15 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the collection of semantic entities created from this syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public List<SemanticEntity> SemanticEntities { get; private set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Accepts a visitor object, according to the Visitor pattern.
     /// </summary>
     /// <param name="visitor">A visitor object</param>
@@ -325,5 +338,7 @@ namespace CSharpTreeBuilder.Ast
     {
       throw new ApplicationException(string.Format("SyntaxNode.AcceptVisitor called on type: {0}",GetType()));
     }
+
+    #endregion
   }
 }

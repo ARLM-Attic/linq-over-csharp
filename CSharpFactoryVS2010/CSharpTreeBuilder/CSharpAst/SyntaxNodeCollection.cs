@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using CSharpTreeBuilder.Collections;
 using CSharpTreeBuilder.CSharpAstBuilder;
+using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilder.Ast
 {
@@ -302,6 +303,16 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public ICommentNode Comment { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of semantic entities created from this syntax node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public List<SemanticEntity> SemanticEntities
+    {
+      get { throw new InvalidOperationException("SyntaxNodeCollection.SemanticEntities should not be called."); }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
