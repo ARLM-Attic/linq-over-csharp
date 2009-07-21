@@ -1,3 +1,4 @@
+using System.Text;
 using CSharpTreeBuilder.CSharpAstBuilder;
 using CSharpTreeBuilder.Collections;
 
@@ -62,6 +63,26 @@ namespace CSharpTreeBuilder.Ast
     public int Rank 
     { 
       get { return Commas.Count + 1; } 
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this language element.
+    /// </summary>
+    /// <returns>Full name of the language element.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var result = new StringBuilder();
+
+      if (StartToken!=null)
+      {
+        result.Append('[');
+        result.Append(',', Commas.Count);
+        result.Append(']');
+      }
+
+      return result.Length == 0 ? GetType().ToString() : result.ToString();
     }
 
     #region Visitor methods

@@ -20,7 +20,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>A dictionary of root namespace entities. The key is the name of the root namespace.</summary>
     private Dictionary<string, RootNamespaceEntity> _RootNamespaces;
 
-    /// <summary>A dictionary of namespace-or-type entities. The key is: 'root-namespace-name::FQN' .</summary>
+    /// <summary>A dictionary of namespace-or-type entities. 
+    /// The key is the fully qualified name (including 'root-namespace-name::' too.</summary>
     private Dictionary<string, NamespaceOrTypeEntity> _NamespaceOrTypeEntities;
 
     // ----------------------------------------------------------------------------------------------
@@ -49,21 +50,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets an array of semantic entities in the graph, for unit testing purposes only.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SemanticEntity[] SemanticEntitiesForUnitTest
-    {
-      get
-      {
-        var semanticEntityArray = new SemanticEntity[_SemanticEntities.Count];
-        _SemanticEntities.CopyTo(semanticEntityArray);
-        return semanticEntityArray;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets an iterate-only collection of root namespace entities. The key is the namespace name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -85,9 +71,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Adds an entity to the semantic graph.
-    /// If the entity is a root namespace entity then it is added to the RootNamespaces collection as well.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
+    /// <remarks>
+    /// Root namespace entities are also added to the _RootNamespaces collection.
+    /// Namespace and type entities are also added to the _NamespaceOrTypeEntities collection
+    /// (except TypeParameters which are not visible outside of the defining type).
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public void AddEntity(SemanticEntity entity)
     {
@@ -107,11 +97,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         _RootNamespaces.Add(rootNamespaceEntity.Name, rootNamespaceEntity);
       }
 
-      // If it's a namespace or type then also add it to NamespaceOrTypeEntities dictionary
-      if (entity is NamespaceOrTypeEntity)
+      // If it's a namespace or type (but not a type parameter) then also add it to NamespaceOrTypeEntities dictionary
+      if (entity is NamespaceOrTypeEntity && !(entity is TypeParameterEntity))
       {
         var namespaceOrTypeEntity = entity as NamespaceOrTypeEntity;
-        _NamespaceOrTypeEntities.Add(namespaceOrTypeEntity.FqnWithRoot, namespaceOrTypeEntity);
+        _NamespaceOrTypeEntities.Add(namespaceOrTypeEntity.FullyQualifiedName, namespaceOrTypeEntity);
       }
     }
 
@@ -119,30 +109,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Gets an entity by its fully qualified name under a given root namespace.
     /// </summary>
-    /// <param name="rootNamespaceName">The name of a root namespace.</param>
-    /// <param name="fullyQualifiedName">A fully qualified name.</param>
-    /// <returns>A namespace or type entity with the given fully qualified name, or null if not found.</returns>
-    /// <remarks>Only namespaces and types have a FQN.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeEntity GetEntityByFullyQualifiedName(string rootNamespaceName, string fullyQualifiedName)
-    {
-      string key = string.Format("{0}::{1}", rootNamespaceName, fullyQualifiedName);
-      return _NamespaceOrTypeEntities.ContainsKey(key)
-               ? _NamespaceOrTypeEntities[key]
-               : null;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets an entity by its fully qualified name, in the "global" root namespace. 
-    /// </summary>
     /// <param name="fullyQualifiedName">A fully qualified name.</param>
     /// <returns>A namespace or type entity with the given fully qualified name, or null if not found.</returns>
     /// <remarks>Only namespaces and types have a FQN.</remarks>
     // ----------------------------------------------------------------------------------------------
     public NamespaceOrTypeEntity GetEntityByFullyQualifiedName(string fullyQualifiedName)
     {
-      return GetEntityByFullyQualifiedName(GLOBAL_NAMESPACE_NAME, fullyQualifiedName);
+      return _NamespaceOrTypeEntities.ContainsKey(fullyQualifiedName)
+               ? _NamespaceOrTypeEntities[fullyQualifiedName]
+               : null;
     }
 
     #region Visitor methods

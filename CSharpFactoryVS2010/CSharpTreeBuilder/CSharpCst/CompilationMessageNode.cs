@@ -3,6 +3,7 @@
 //
 // Created: 2009.04.05, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Linq;
 using System.Collections.Generic;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpAstBuilder;
@@ -126,10 +127,21 @@ namespace CSharpTreeBuilder.Cst
     /// Redirects the source file.
     /// </summary>
     /// <param name="fileName">Name of the file.</param>
-    internal void RedirectSourceFile(string fileName)
     // ----------------------------------------------------------------------------------------------
+    internal void RedirectSourceFile(string fileName)
     {
       RedirectedSourceFile = fileName;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this message.
+    /// </summary>
+    /// <returns>The string representation of this message.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public string Message
+    {
+      get { return string.Format(Description, Parameters.ToArray()); }
     }
   }
 }

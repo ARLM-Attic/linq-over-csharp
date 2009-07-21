@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.CSharpSemanticGraph;
@@ -36,7 +37,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     public void Definite()
     {
       var declarationSpace = new DeclarationSpace();
-      declarationSpace.DefineName("A", new RootNamespaceEntity("aRoot"));
+      declarationSpace.Define(new RootNamespaceEntity("A"));
 
       declarationSpace.NameCount.ShouldEqual(1);
       declarationSpace.IsNameDefined("A").ShouldBeTrue();
@@ -44,7 +45,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       nameTableEntry.ShouldNotBeNull();
       nameTableEntry.State.ShouldEqual(NameTableEntryState.Definite);
       nameTableEntry.Name.ShouldEqual("A");
-      ((RootNamespaceEntity) nameTableEntry.Entity).FqnWithRoot.ShouldEqual("aRoot");
+      ((RootNamespaceEntity) nameTableEntry.Entity).FullyQualifiedName.ShouldEqual("A");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -56,8 +57,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     public void Ambigous()
     {
       var declarationSpace = new DeclarationSpace();
-      declarationSpace.DefineName("A", new RootNamespaceEntity("aRoot1"));
-      declarationSpace.DefineName("A", new RootNamespaceEntity("aRoot2"));
+      var entity1 = new RootNamespaceEntity("A");
+      var entity2 = new RootNamespaceEntity("A");
+      declarationSpace.Define(entity1);
+      declarationSpace.Define(entity2);
 
       declarationSpace.NameCount.ShouldEqual(1);
       declarationSpace.IsNameDefined("A").ShouldBeTrue();
@@ -66,13 +69,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       nameTableEntry.State.ShouldEqual(NameTableEntryState.Ambigous);
       nameTableEntry.Name.ShouldEqual("A");
 
-      int i = 0;
-      foreach (var entity in nameTableEntry.Entities)
-      {
-        if (i == 0) ((RootNamespaceEntity) entity).FqnWithRoot.ShouldEqual("aRoot1");
-        if (i == 1) ((RootNamespaceEntity) entity).FqnWithRoot.ShouldEqual("aRoot2");
-        i++;
-      }
+      var entities = nameTableEntry.Entities.ToArray();
+      entities[0].ShouldEqual(entity1);
+      entities[1].ShouldEqual(entity2);
 
       try
       {

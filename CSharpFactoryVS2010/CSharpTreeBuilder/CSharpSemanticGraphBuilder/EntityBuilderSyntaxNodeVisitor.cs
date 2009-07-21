@@ -1,6 +1,7 @@
 ﻿using System;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraph;
+using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
@@ -14,15 +15,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>The semantic graph that will hold the built entities.</summary>
     private SemanticGraph _SemanticGraph;
 
+    /// <summary>The project used for reporting compilation messages.</summary>
+    private CSharpProject _Project;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="EntityBuilderSyntaxNodeVisitor"/> class.
     /// </summary>
     /// <param name="semanticGraph">The semantic graph that will receive the built entities.</param>
+    /// <param name="project">The project used for reporting compilation messages.</param>
     // ----------------------------------------------------------------------------------------------
-    public EntityBuilderSyntaxNodeVisitor(SemanticGraph semanticGraph)
+    public EntityBuilderSyntaxNodeVisitor(SemanticGraph semanticGraph, CSharpProject project)
     {
       _SemanticGraph = semanticGraph;
+      _Project = project;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -46,7 +52,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         // Determine FQN that is the key for finding the entity in the semantic graph.
         string fullyQualifiedName = parentNamespaceEntity is RootNamespaceEntity
-                                     ? nameTag.Identifier
+                                     ? parentNamespaceEntity.FullyQualifiedName + "::"+ nameTag.Identifier
                                      : parentNamespaceEntity.FullyQualifiedName + "." + nameTag.Identifier;
 
         // Find out whether the namespace entity already exists in the graph.
@@ -132,9 +138,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           entity.BaseTypes.Add(new NamespaceOrTypeEntityReference(baseType));
         }
+        if (entity is GenericCapableTypeEntity)
+        {
+          foreach (var typeParameter in node.TypeParameters)
+          {
+            ((GenericCapableTypeEntity)entity).AddTypeParameter(new TypeParameterEntity(typeParameter.Identifier));
+          }
+        }
 
-        parentNamespaceOrTypeEntity.AddChildType(entity);
-        _SemanticGraph.AddEntity(entity);
+        // Add the entity to its parent
+        if (parentNamespaceOrTypeEntity is IHasChildTypes)
+        {
+          ((IHasChildTypes)parentNamespaceOrTypeEntity).AddChildType(entity);
+          _SemanticGraph.AddEntity(entity);
+        }
+        else
+        {
+          throw new ApplicationException(String.Format("Type '{0}' cannot not declare child type '{1}'.",
+            parentNamespaceOrTypeEntity.Name, entity.Name));
+        }
       }
 
       // Set a bidirectional link between AST and SG node

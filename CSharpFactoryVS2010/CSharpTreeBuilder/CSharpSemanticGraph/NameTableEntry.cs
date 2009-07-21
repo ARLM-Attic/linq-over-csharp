@@ -5,25 +5,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
-  /// This class associates a name with one or more semantic entities.
+  /// This class associates a name with one or more named semantic entities.
   /// </summary>
   // ================================================================================================
   public sealed class NameTableEntry
   {
-    /// <summary>The list of entities associated with the name.</summary>
-    private List<SemanticEntity> _Entities;
+    /// <summary>The list of named entities associated with the name.</summary>
+    private List<INamedEntity> _Entities;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NameTableEntry"/> class.
     /// </summary>
     /// <param name="name">The name of the entry.</param>
-    /// <param name="entity">The entity associated woth the name.</param>
+    /// <param name="entity">The entity associated with the name.</param>
     // ----------------------------------------------------------------------------------------------
-    public NameTableEntry(string name, SemanticEntity entity)
+    public NameTableEntry(string name, INamedEntity entity)
     {
       Name = name;
-      _Entities = new List<SemanticEntity>() {entity};
+      _Entities = new List<INamedEntity>() { entity };
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the entity associated with the name. If it is not definite then throws an error.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity Entity
+    public INamedEntity Entity
     {
       get
       {
@@ -55,7 +55,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of the entities associated woth the name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<SemanticEntity> Entities
+    public IEnumerable<INamedEntity> Entities
     {
       get
       {
@@ -69,7 +69,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="entity">The entity to be associated with the name.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddEntity(SemanticEntity entity)
+    public void AddEntity(INamedEntity entity)
     {
       _Entities.Add(entity);
     }

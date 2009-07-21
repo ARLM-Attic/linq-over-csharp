@@ -4,10 +4,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a reference to a type entity.
+  /// This class represents a reference to a namespace or type entity.
   /// </summary>
+  /// <remarks>Type-specific features are in TypeEntityReference class.</remarks>
   // ================================================================================================
-  public sealed class NamespaceOrTypeEntityReference
+  public class NamespaceOrTypeEntityReference
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -36,8 +37,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the resolved entity.
+    /// Gets the resolved namespace or type entity.
     /// </summary>
+    /// <remarks>
+    /// In case of a constructed type, ResolvedEntity property contains the underlying type.
+    /// For the whole constructed type see the TypeReference.TypeEntity property.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public NamespaceOrTypeEntity ResolvedEntity { get; private set; }
 

@@ -7,11 +7,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a namespace node in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public class NamespaceEntity : NamespaceOrTypeEntity
+  public class NamespaceEntity : NamespaceOrTypeEntity, IHasChildTypes
   {
-    /// <summary>Backing field for ChildNamespaces property.</summary>
-    protected List<NamespaceEntity> _ChildNamespaces;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceEntity"/> class.
@@ -19,7 +16,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public NamespaceEntity()
     {
-      _ChildNamespaces = new List<NamespaceEntity>();
+      ChildNamespaces = new List<NamespaceEntity>();
+      ChildTypes = new List<TypeEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -41,20 +39,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of child namespaces.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<NamespaceEntity> ChildNamespaces
-    {
-      get { return _ChildNamespaces; }
-    }
+    public List<NamespaceEntity> ChildNamespaces { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a list of child namespaces, for unit testing only.
+    /// Gets an iterate-only collection of child namespaces.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<NamespaceEntity> ChildNamespacesForUnitTests
-    {
-      get { return _ChildNamespaces; }
-    }
+    public List<TypeEntity> ChildTypes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -65,9 +57,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddChildNamespace(NamespaceEntity namespaceEntity)
     {
-      _ChildNamespaces.Add(namespaceEntity);
+      ChildNamespaces.Add(namespaceEntity);
       namespaceEntity.Parent = this;
-      DeclarationSpace.DefineName(namespaceEntity.Name,namespaceEntity);
+      DeclarationSpace.Define(namespaceEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child type. 
+    /// Also sets the child's parent property, and defines child's name in the declaration space.
+    /// </summary>
+    /// <param name="typeEntity">The child type entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddChildType(TypeEntity typeEntity)
+    {
+      ChildTypes.Add(typeEntity);
+      typeEntity.Parent = this;
+      DeclarationSpace.Define(typeEntity);
     }
 
     #region Visitor methods
@@ -80,12 +86,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      foreach (var childNamespace in _ChildNamespaces)
+      visitor.Visit(this);
+
+      foreach (var childNamespace in ChildNamespaces)
       {
         childNamespace.AcceptVisitor(visitor);
       }
 
-      base.AcceptVisitor(visitor);
+      foreach (var childTypes in ChildTypes)
+      {
+        childTypes.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

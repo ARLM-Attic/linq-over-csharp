@@ -25,20 +25,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Defines a name in the declaration space.
+    /// Defines a name+entity pair in the declaration space.
     /// </summary>
-    /// <param name="name">A name.</param>
-    /// <param name="entity">An entity associated with the name.</param>
+    /// <param name="namedEntity">An entity that has a name.</param>
     // ----------------------------------------------------------------------------------------------
-    public void DefineName(string name, SemanticEntity entity)
+    public void Define(INamedEntity namedEntity)
     {
+      var name = namedEntity.DistinctiveName;
+
       if (_NameTable.ContainsKey(name))
       {
-        _NameTable[name].AddEntity(entity);
+        _NameTable[name].AddEntity(namedEntity);
       }
       else
       {
-        _NameTable.Add(name, new NameTableEntry(name, entity));
+        _NameTable.Add(name, new NameTableEntry(name, namedEntity));
       }
     }
 

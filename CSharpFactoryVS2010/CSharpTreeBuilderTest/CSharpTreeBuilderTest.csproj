@@ -318,9 +318,12 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildNamespaceEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildClassEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildEnumEntities.cs" />
+    <Compile Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildGenericClassEntities.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
-    <Compile Include="TestFiles\SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs" />
-    <Compile Include="TestFiles\TypeResolution\TypesDeclaredInCode.cs" />
+    <None Include="TestFiles\SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs" />
+    <None Include="TestFiles\TypeResolution\CS0246_TypeOrNamespaceNameCouldNotBeFound.cs" />
+    <None Include="TestFiles\TypeResolution\CS0118_NamespaceIsUsedLikeAType.cs" />
+    <Compile Include="TestFiles\TypeResolution\LocallyDeclaredBaseTypes.cs" />
     <None Include="TestFiles\SyntaxNodeVisitor\ExpressionVisitorTest.cs" />
     <None Include="TestFiles\SyntaxNodeVisitor\StatementVisitorTest.cs" />
     <None Include="TestFiles\SyntaxNodeVisitor\DelegateDeclarationNodeVisitorTest.cs" />

@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.11, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Text;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -197,6 +198,41 @@ namespace CSharpTreeBuilder.Ast
         IdentifierToken,
         Arguments
         );
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this language element.
+    /// </summary>
+    /// <returns>Full name of the language element.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var result = new StringBuilder();
+
+      if (Identifier!= null)
+      {
+        result.Append(Identifier);
+      }
+
+      if (Arguments.Count>0)
+      {
+        result.Append('<');
+      }
+
+      bool firstItem = true;
+      foreach (var argument in Arguments)
+      {
+        if (firstItem) { firstItem = false; } else { result.Append(','); }
+        result.Append(argument.ToString());
+      }
+
+      if (Arguments.Count > 0)
+      {
+        result.Append('>');
+      }
+
+      return result.Length == 0 ? GetType().ToString() : result.ToString();
     }
 
     #region Visitor methods

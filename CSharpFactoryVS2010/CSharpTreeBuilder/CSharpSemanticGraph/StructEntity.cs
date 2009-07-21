@@ -1,13 +1,11 @@
-﻿using CSharpTreeBuilder.Ast;
-
-namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a struct entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public class StructEntity : ValueTypeEntity
+  public sealed class StructEntity : ClassOrStructEntity
   {
   }
 }

@@ -3,6 +3,7 @@
 //
 // Created: 2009.03.13, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Text;
 using CSharpTreeBuilder.CSharpAstBuilder;
 using CSharpTreeBuilder.Collections;
 
@@ -271,6 +272,45 @@ namespace CSharpTreeBuilder.Ast
         QualifierToken,
         TypeTags
         );
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this language element.
+    /// </summary>
+    /// <returns>Full name of the language element.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var result = new StringBuilder();
+
+      if (Qualifier != null) 
+      {
+        result.Append(Qualifier);
+        result.Append("::");
+      }
+
+      foreach (var typeTag in TypeTags)
+      {
+        result.Append(typeTag.ToString());
+      }
+
+      if (NullableToken!=null)
+      {
+        result.Append('?');
+      }
+
+      foreach (var pointerToken in PointerTokens)
+      {
+        result.Append('*');
+      }
+
+      foreach (var rankSpecifier in RankSpecifiers)
+      {
+        result.Append(rankSpecifier.ToString());
+      }
+
+      return result.Length == 0 ? GetType().ToString() : result.ToString();
     }
 
     #region Visitor methods

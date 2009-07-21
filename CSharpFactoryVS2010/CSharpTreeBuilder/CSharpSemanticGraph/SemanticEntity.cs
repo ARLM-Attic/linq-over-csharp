@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the parent of this entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity Parent { get; protected set;}
+    public SemanticEntity Parent { get; set;}
  
     // ----------------------------------------------------------------------------------------------
     /// <summary>
