@@ -35,7 +35,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve base type references
       foreach (var typeEntityReference in entity.BaseTypes)
       {
-        Resolve(entity, typeEntityReference);
+        Resolve<TypeEntity>((NamespaceOrTypeEntity)entity.Parent, typeEntityReference);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a FieldEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(FieldEntity entity)
+    {
+      if (entity.Type != null)
+      {
+        Resolve<TypeEntity>((NamespaceOrTypeEntity)entity.Parent, entity.Type);
       }
     }
 
@@ -43,15 +57,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>
     /// Resolves a namespace or type entity reference.
     /// </summary>
-    /// <typeparam name="TNamespaceOrTypeEntity">The type of entity to be found. 
+    /// <typeparam name="TNamespaceOrTypeEntity">The type of entity expected to be found. 
     /// Must be a subclass of NamespaceOrTypeEntity.</typeparam>
-    /// <param name="entity">The namespace or type entity which is the context of the resolution.</param>
+    /// <param name="contextEntity">The namespace or type entity which is the starting context of the resolution.</param>
     /// <param name="reference">A namespace or type entity reference to be resolved.</param>
     // ----------------------------------------------------------------------------------------------
-    private void Resolve<TNamespaceOrTypeEntity>(TNamespaceOrTypeEntity entity, NamespaceOrTypeEntityReference reference)
+    private void Resolve<TNamespaceOrTypeEntity>(NamespaceOrTypeEntity contextEntity, NamespaceOrTypeEntityReference reference)
       where TNamespaceOrTypeEntity : NamespaceOrTypeEntity
     {
-      var lookupStartingEntity = entity.Parent as NamespaceOrTypeEntity;
+      var lookupStartingEntity = contextEntity;
 
       // Looping till reference is resolved or we run out of the semantic graph
       while (reference.ResolutionState == ResolutionState.NotYetResolved && lookupStartingEntity != null)
@@ -64,7 +78,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // and continuing in its embedded declaration spaces
         while (matchedTypeTags < reference.SyntaxNode.TypeTags.Count && currentDeclarationSpace != null)
         {
-          var nameTableEntry = currentDeclarationSpace[reference.SyntaxNode.TypeTags[matchedTypeTags].Identifier];
+          var typeTagToMatch = reference.SyntaxNode.TypeTags[matchedTypeTags];
+          var nameToLookFor = typeTagToMatch.Identifier
+                              + (typeTagToMatch.HasTypeArguments
+                                   ? "`" + typeTagToMatch.Arguments.Count
+                                   : "");
+          var nameTableEntry = currentDeclarationSpace[nameToLookFor];
 
           // If the name is found then continue matching the remaining typetags
           if (nameTableEntry != null
@@ -89,6 +108,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // Then check if the found entity is of the expected type
           if (foundEntity is TNamespaceOrTypeEntity)
           {
+            // If the type has generic arguments, then create a new type entity
+            if (reference.SyntaxNode.TypeTags[matchedTypeTags-1].HasTypeArguments
+              && foundEntity is ClassOrStructEntity)
+            {
+              foundEntity = new ConstructedGenericTypeEntity((ClassOrStructEntity)foundEntity);
+              foreach (var argument in reference.SyntaxNode.TypeTags[matchedTypeTags-1].Arguments)
+              {
+                var typeArg = new TypeEntityReference(argument);
+                ((ConstructedGenericTypeEntity)foundEntity).AddTypeArgument(typeArg);
+                Resolve<TypeEntity>(contextEntity,typeArg);
+              }
+            }
             reference.Resolve(foundEntity);
           }
           else

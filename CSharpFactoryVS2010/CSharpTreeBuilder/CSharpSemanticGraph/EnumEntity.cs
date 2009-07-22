@@ -5,7 +5,7 @@
   /// This class represents an enum entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class EnumEntity : TypeEntity
+  public sealed class EnumEntity : TypeEntity, IValueType
   {
   }
 }

@@ -5,7 +5,7 @@
   /// This class represents an array type entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayTypeEntity: TypeEmbeddingTypeEntity
+  public sealed class ArrayTypeEntity: ConstructedTypeEntity, IReferenceType
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

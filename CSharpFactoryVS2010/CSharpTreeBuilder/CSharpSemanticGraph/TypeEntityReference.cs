@@ -44,7 +44,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
           foreach (var pointerToken in SyntaxNode.PointerTokens)
           {
-            typeEntity = new PointerTypeEntity(typeEntity);
+            typeEntity = new PointerToTypeEntity(typeEntity);
           }
 
           foreach (var rankSpecifier in SyntaxNode.RankSpecifiers)

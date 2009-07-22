@@ -27,9 +27,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for TypeParameters property to disallow direct adding or removing.</summary>
     private List<TypeParameterEntity> _TypeParameters;
 
-    /// <summary>Backing field for TypeArguments property to disallow direct adding or removing.</summary>
-    private List<TypeEntityReference> _TypeArguments;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="GenericCapableTypeEntity"/> class.
@@ -38,7 +35,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected GenericCapableTypeEntity()
     {
       _TypeParameters = new List<TypeParameterEntity>();
-      _TypeArguments = new List<TypeEntityReference>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -50,17 +46,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public IEnumerable<TypeParameterEntity> TypeParameters
     {
       get { return _TypeParameters; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of type arguments of this type. 
-    /// Empty list for non-generic types and open generic types.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TypeEntityReference> TypeArguments
-    {
-      get { return _TypeArguments; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -92,17 +77,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is a constructed generic type. 
-    /// </summary>
-    /// <remarks>It's a constructed generic type if it has any type arguments.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsConstructed
-    {
-      get { return _TypeArguments.Count > 0; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Adds a type parameter to this type.
     /// </summary>
     /// <param name="typeParameterEntity">The type parameter entity.</param>
@@ -110,18 +84,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
       _TypeParameters.Add(typeParameterEntity);
+      typeParameterEntity.Parent = this;
       DeclarationSpace.Define(typeParameterEntity);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a type argument the this type.
-    /// </summary>
-    /// <param name="typeArgument">A type argument, which is a TypeEntityReference.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddTypeArgument(TypeEntityReference typeArgument)
-    {
-      _TypeArguments.Add(typeArgument);
     }
   }
 }

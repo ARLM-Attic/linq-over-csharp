@@ -28,5 +28,24 @@ namespace CSharpTreeBuilder.Ast
       Add(result);
       return result;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds out if this collection contains a certian modifier type.
+    /// </summary>
+    /// <param name="modifierType">The modifier type to be found.</param>
+    /// <returns>True if this collection contains the given modifier type, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool Contains(ModifierType modifierType)
+    {
+      foreach (var modifierNode in this)
+      {
+        if (modifierNode.Value == modifierType) 
+        {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 }

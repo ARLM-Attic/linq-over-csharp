@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.ProjectContent;
@@ -137,6 +138,57 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors[0].Code.ShouldEqual("CS0246");
     }
 
-    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolving a type to type parameter.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void TypeParameter()
+    {
+      // Set up SyntaxTree and SemanticGraph
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\TypeParameter.cs");
+      InvokeParser(project).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(semanticGraph, project));
+      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project));
+
+      var fieldEntity = semanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
+      fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      ((TypeParameterEntity) fieldEntity.Type.TypeEntity).FullyQualifiedName.ShouldEqual("global::A`1.T1");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolving a constructed generic type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ConstructedGenericType()
+    {
+      // Set up SyntaxTree and SemanticGraph
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\ConstructedGenericType.cs");
+      InvokeParser(project).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(semanticGraph, project));
+      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project));
+
+      var fieldEntity = semanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
+      fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      var typeEntity = fieldEntity.Type.TypeEntity as ConstructedGenericTypeEntity;
+      typeEntity.ShouldNotBeNull();
+      ((ClassEntity)typeEntity.EmbeddedType).FullyQualifiedName.ShouldEqual("global::A2`2");
+      ((ClassEntity)typeEntity.EmbeddedType).IsGeneric.ShouldBeTrue();
+      var typeParams = ((ClassEntity)typeEntity.EmbeddedType).TypeParameters.ToArray();
+      typeParams[0].FullyQualifiedName.ShouldEqual("global::A2`2.T1");
+      typeParams[1].FullyQualifiedName.ShouldEqual("global::A2`2.T2");
+      var typeArgs = typeEntity.TypeArguments.ToArray();
+      typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      typeArgs[0].TypeEntity.ShouldEqual(semanticGraph.GlobalNamespace.ChildTypes[2]);
+      typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      typeArgs[1].TypeEntity.ShouldEqual(semanticGraph.GlobalNamespace.ChildTypes[3]);
+    }
   }
 }

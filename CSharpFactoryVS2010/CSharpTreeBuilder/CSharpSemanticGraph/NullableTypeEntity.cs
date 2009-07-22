@@ -1,11 +1,13 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using System;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a nullable type entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class NullableTypeEntity : TypeEmbeddingTypeEntity
+  public sealed class NullableTypeEntity : ConstructedTypeEntity, IValueType
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -16,6 +18,12 @@
     public NullableTypeEntity(TypeEntity embeddedType)
       : base(embeddedType)
     {
+      if ((embeddedType is NullableTypeEntity) || !(embeddedType is IValueType))
+      {
+        throw new ArgumentException(
+          string.Format("Non-nullable value type expected, but received {0}", embeddedType.GetType()),
+          "embeddedType");
+      }
     }
   }
 }

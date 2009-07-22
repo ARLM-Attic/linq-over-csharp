@@ -9,6 +9,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class TypeEntity : NamespaceOrTypeEntity
   {
+    /// <summary>Backing field for Members property.</summary>
+    private List<MemberEntity> _Members;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeEntity"/> class.
@@ -17,6 +20,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected TypeEntity()
     {
       BaseTypes = new List<NamespaceOrTypeEntityReference>();
+      _Members = new List<MemberEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -25,6 +29,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public List<NamespaceOrTypeEntityReference> BaseTypes { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of members.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<MemberEntity> Members { get { return _Members; } }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a member. 
+    /// Also sets the member's parent property, and defines member's name in the declaration space.
+    /// </summary>
+    /// <param name="memberEntity">The member entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddMember(MemberEntity memberEntity)
+    {
+      _Members.Add(memberEntity);
+      memberEntity.Parent = this;
+      DeclarationSpace.Define(memberEntity);
+    }
 
     #region Visitor methods
 
@@ -37,6 +62,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       visitor.Visit(this);
+
+      foreach (var member in Members)
+      {
+        member.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

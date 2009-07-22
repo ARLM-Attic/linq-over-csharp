@@ -39,9 +39,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         sgVisitorMock.Visit(semanticGraph.GlobalNamespace);
         sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0]);
         sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0]);
-        sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0]);
-        sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildTypes[0]);
-        sgVisitorMock.Visit(((ClassEntity)semanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0]);
+        sgVisitorMock.Visit((TypeEntity)semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0]);
+        sgVisitorMock.Visit((TypeEntity)semanticGraph.GlobalNamespace.ChildTypes[0]);
+        sgVisitorMock.Visit((TypeEntity)((ClassEntity)semanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0]);
       }
       mocks.ReplayAll();
 

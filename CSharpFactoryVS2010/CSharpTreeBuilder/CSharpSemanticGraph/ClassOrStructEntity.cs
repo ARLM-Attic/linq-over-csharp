@@ -50,7 +50,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
 
       foreach (var childTypes in ChildTypes)
       {

@@ -66,9 +66,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           _SemanticGraph.AddEntity(namespaceEntity);
         }
 
-        // Set a bidirectional link between AST and SG node
-        namespaceEntity.SyntaxNodes.Add(node);
-        node.SemanticEntities.Add(namespaceEntity);
+        AssociateSyntaxNodeWithSemanticEntity(node, namespaceEntity);
 
         // The next parent is the current entity
         parentNamespaceEntity = namespaceEntity;
@@ -84,6 +82,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(ClassDeclarationNode node)
     {
       CreateTypeEntityFromTypeDeclaration<ClassDeclarationNode,ClassEntity>(node);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a struct entity from a struct declaration.
+    /// </summary>
+    /// <param name="node">A struct declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(StructDeclarationNode node)
+    {
+      CreateTypeEntityFromTypeDeclaration<StructDeclarationNode, StructEntity>(node);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -142,7 +151,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           foreach (var typeParameter in node.TypeParameters)
           {
-            ((GenericCapableTypeEntity)entity).AddTypeParameter(new TypeParameterEntity(typeParameter.Identifier));
+            var typeParameterEntity = new TypeParameterEntity(typeParameter.Identifier);
+            ((GenericCapableTypeEntity)entity).AddTypeParameter(typeParameterEntity);
+            _SemanticGraph.AddEntity(typeParameterEntity);
           }
         }
 
@@ -159,34 +170,103 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
 
-      // Set a bidirectional link between AST and SG node
-      entity.SyntaxNodes.Add(node);
-      node.SemanticEntities.Add(entity);
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the entity associated with the parent of a syntax node. 
-    /// This will be the parent of the entity created from this syntax node.
+    /// Gets the entity that will be the parent of a new entity created from a syntax node.
     /// </summary>
     /// <param name="node">A syntax node.</param>
     /// <returns>The parent of the entity to be created from the given syntax node.</returns>
+    /// <remarks>
+    /// Walks the syntax tree up from the given node, looking for a syntax node 
+    /// that already has an associated semantic entity.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
     private SemanticEntity GetParentEntity(ISyntaxNode node)
     {
-      // If the syntax node is at the compilation unit level, then the entity will be created under the "global" namespace.
-      if (node.Parent is CompilationUnitNode) { return _SemanticGraph.GlobalNamespace; }
+      // Going up in the syntax tree, looking for a node that has a semantic entity
+      while (node.Parent.SemanticEntities.Count==0 && !(node.Parent is CompilationUnitNode))
+      {
+        node = node.Parent;
+      }
 
-      // If the parent of this syntax node has only 1 entity associated with it, then it will be the parent entity.
+      // If we reached the compilation unit level, then the entity will be created under the "global" namespace.
+      if (node.Parent is CompilationUnitNode)
+      {
+        return _SemanticGraph.GlobalNamespace;
+      }
+
+      // If the found node has only 1 semantic entity associated, then this will be the parent entity.
       var parentEntityCount = node.Parent.SemanticEntities.Count;
-      if (parentEntityCount == 1) { return node.Parent.SemanticEntities[0]; }
+      if (parentEntityCount == 1)
+      {
+        return node.Parent.SemanticEntities[0];
+      }
 
-      // If the parent of this syntax node is a NamespaceDeclarationNode, then it can have several entities associated with it
-      // (eg. namespace A.B.C where A, B, C are all NamespaceEntity objects), then the parent entity is the last in the list.
-      if (node.Parent is NamespaceDeclarationNode) { return node.Parent.SemanticEntities[parentEntityCount - 1]; }
+      // If the found node is a NamespaceDeclarationNode, then it can have several entities associated with it
+      // (eg. namespace A.B.C where A, B, C are all distinct semantic entities), 
+      // then the parent entity is the last in the list.
+      if (node.Parent is NamespaceDeclarationNode)
+      {
+        return node.Parent.SemanticEntities[parentEntityCount - 1];
+      }
       
       // All other cases are error.
       throw new ApplicationException("Cannot determine parent entity.");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a field entity from a field declaration.
+    /// </summary>
+    /// <param name="node">A field declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(FieldDeclarationNode node)
+    {
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      var parentTypeEntity = parentEntity as TypeEntity;
+      if (parentTypeEntity == null)
+      {
+        throw new ApplicationException(String.Format("Parent expected to be TypeEntity but was {0}", parentEntity.GetType()));
+      }
+
+      // Looping through every tag in the field declaration
+      foreach (var fieldTag in node.FieldTags)
+      {
+        // Check if this name is already in use in this declaration space
+        if (parentTypeEntity.DeclarationSpace.IsNameDefined(fieldTag.Identifier))
+        {
+          ((ICompilationErrorHandler) _Project).Error( "CS0102", node.StartToken, 
+            "The type '{0}' already contains a definition for '{1}'.",
+            parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
+          
+          // Continue with the next field tag.
+          continue;
+        }
+
+        // Create a semantic entity, add to its parent, and add to the graph.
+        var fieldEntity = new FieldEntity(fieldTag.Identifier, true, new TypeEntityReference(node.TypeName), node.IsStatic);
+        parentTypeEntity.AddMember(fieldEntity);
+        _SemanticGraph.AddEntity(fieldEntity);
+
+        AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Establishis a bi-directional link between an AST (abstract syntax tree) node and an SG (semantic graph) node.
+    /// </summary>
+    /// <param name="syntaxNode">A syntax tree node.</param>
+    /// <param name="semanticEntity">A semantic entity node.</param>
+    // ----------------------------------------------------------------------------------------------
+    private static void AssociateSyntaxNodeWithSemanticEntity(ISyntaxNode syntaxNode, SemanticEntity semanticEntity)
+    {
+      semanticEntity.SyntaxNodes.Add(syntaxNode);
+      syntaxNode.SemanticEntities.Add(semanticEntity);
     }
   }
 }

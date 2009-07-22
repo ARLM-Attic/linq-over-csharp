@@ -4,6 +4,7 @@ using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using CSharpTreeBuilder.Ast;
 
 namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 {
@@ -310,7 +311,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.SyntaxTree.AcceptVisitor(visitor);
 
       var semanticEntities = semanticGraph.SemanticEntities.ToArray();
-      semanticEntities.Length.ShouldEqual(4);
+      semanticEntities.Length.ShouldEqual(7);
 
       // global root namespace
       {
@@ -324,29 +325,163 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         ((NamespaceEntity)namespaceEntity.DeclarationSpace["A"].Entity).FullyQualifiedName.ShouldEqual("global::A");
         ((ClassEntity)namespaceEntity.DeclarationSpace["A`2"].Entity).FullyQualifiedName.ShouldEqual("global::A`2");
       }
+      // type param T1
+      {
+        var typeParamEntity = semanticEntities[2] as TypeParameterEntity;
+        typeParamEntity.FullyQualifiedName.ShouldEqual("global::A`2.T1");
+        ((ClassEntity) typeParamEntity.Parent).FullyQualifiedName.ShouldEqual("global::A`2");
+      }
+      // type param T2
+      {
+        var typeParamEntity = semanticEntities[3] as TypeParameterEntity;
+        typeParamEntity.FullyQualifiedName.ShouldEqual("global::A`2.T2");
+        ((ClassEntity)typeParamEntity.Parent).FullyQualifiedName.ShouldEqual("global::A`2");
+      }
       // class A<T1, T2>
       {
-        var classEntity = semanticEntities[2] as ClassEntity;
+        var classEntity = semanticEntities[4] as ClassEntity;
         classEntity.FullyQualifiedName.ShouldEqual("global::A`2");
 
         classEntity.ChildTypes.Count.ShouldEqual(1);
         classEntity.ChildTypes[0].FullyQualifiedName.ShouldEqual("global::A`2.B`1");
 
         classEntity.DeclarationSpace.NameCount.ShouldEqual(3);
-        ((TypeParameterEntity)classEntity.DeclarationSpace["T1"].Entity).FullyQualifiedName.ShouldEqual("T1");
-        ((TypeParameterEntity)classEntity.DeclarationSpace["T2"].Entity).FullyQualifiedName.ShouldEqual("T2");
+        ((TypeParameterEntity)classEntity.DeclarationSpace["T1"].Entity).FullyQualifiedName.ShouldEqual("global::A`2.T1");
+        ((TypeParameterEntity)classEntity.DeclarationSpace["T2"].Entity).FullyQualifiedName.ShouldEqual("global::A`2.T2");
         ((ClassEntity)classEntity.DeclarationSpace["B`1"].Entity).FullyQualifiedName.ShouldEqual("global::A`2.B`1");
+      }
+      // type param T3
+      {
+        var typeParamEntity = semanticEntities[5] as TypeParameterEntity;
+        typeParamEntity.FullyQualifiedName.ShouldEqual("global::A`2.B`1.T3");
+        ((ClassEntity)typeParamEntity.Parent).FullyQualifiedName.ShouldEqual("global::A`2.B`1");
       }
       // class B<T3>
       {
-        var classEntity = semanticEntities[3] as ClassEntity;
+        var classEntity = semanticEntities[6] as ClassEntity;
         classEntity.FullyQualifiedName.ShouldEqual("global::A`2.B`1");
 
         classEntity.ChildTypes.Count.ShouldEqual(0);
 
         classEntity.DeclarationSpace.NameCount.ShouldEqual(1);
-        ((TypeParameterEntity)classEntity.DeclarationSpace["T3"].Entity).FullyQualifiedName.ShouldEqual("T3");
+        ((TypeParameterEntity)classEntity.DeclarationSpace["T3"].Entity).FullyQualifiedName.ShouldEqual("global::A`2.B`1.T3");
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of field member entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildFieldEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildFieldEntities.cs");
+      InvokeParser(project).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      var semanticEntities = semanticGraph.SemanticEntities.ToArray();
+      semanticEntities.Length.ShouldEqual(7);
+
+      // class A
+      {
+        var classEntity = semanticEntities[1] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("global::A");
+
+        var memberArray = classEntity.Members.ToArray();
+        memberArray.Length.ShouldEqual(3);
+        memberArray[0].Name.ShouldEqual("a1");
+        memberArray[1].Name.ShouldEqual("a2");
+        memberArray[2].Name.ShouldEqual("a3");
+
+        classEntity.DeclarationSpace.NameCount.ShouldEqual(3);
+        ((FieldEntity)classEntity.DeclarationSpace["a1"].Entity).Name.ShouldEqual("a1");
+        ((FieldEntity)classEntity.DeclarationSpace["a2"].Entity).Name.ShouldEqual("a2");
+        ((FieldEntity)classEntity.DeclarationSpace["a3"].Entity).Name.ShouldEqual("a3");
+      }
+
+      // A a1, a2;
+      {
+        var fieldEntity = semanticEntities[2] as FieldEntity;
+        fieldEntity.Name.ShouldEqual("a1");
+        fieldEntity.DistinctiveName.ShouldEqual("a1");
+        fieldEntity.IsExplicitlyDefined.ShouldBeTrue();
+        fieldEntity.IsStatic.ShouldBeFalse();
+        ((ClassEntity) fieldEntity.Parent).FullyQualifiedName.ShouldEqual("global::A");
+        fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
+        ((FieldTagNode) fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a1");
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+      }
+      // A a1, a2;
+      {
+        var fieldEntity = semanticEntities[3] as FieldEntity;
+        fieldEntity.Name.ShouldEqual("a2");
+        fieldEntity.DistinctiveName.ShouldEqual("a2");
+        fieldEntity.IsExplicitlyDefined.ShouldBeTrue();
+        fieldEntity.IsStatic.ShouldBeFalse();
+        ((ClassEntity)fieldEntity.Parent).FullyQualifiedName.ShouldEqual("global::A");
+        fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
+        ((FieldTagNode)fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a2");
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+      }
+      // static A a3;
+      {
+        var fieldEntity = semanticEntities[4] as FieldEntity;
+        fieldEntity.Name.ShouldEqual("a3");
+        fieldEntity.DistinctiveName.ShouldEqual("a3");
+        fieldEntity.IsExplicitlyDefined.ShouldBeTrue();
+        fieldEntity.IsStatic.ShouldBeTrue();
+        ((ClassEntity)fieldEntity.Parent).FullyQualifiedName.ShouldEqual("global::A");
+        fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
+        ((FieldTagNode)fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a3");
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+      }
+      // struct S
+      {
+        var structEntity = semanticEntities[5] as StructEntity;
+        structEntity.FullyQualifiedName.ShouldEqual("global::S");
+
+        var memberArray = structEntity.Members.ToArray();
+        memberArray.Length.ShouldEqual(1);
+        memberArray[0].Name.ShouldEqual("a4");
+
+        structEntity.DeclarationSpace.NameCount.ShouldEqual(1);
+        ((FieldEntity)structEntity.DeclarationSpace["a4"].Entity).Name.ShouldEqual("a4");
+      }
+      // A a4;
+      {
+        var fieldEntity = semanticEntities[6] as FieldEntity;
+        fieldEntity.Name.ShouldEqual("a4");
+        fieldEntity.DistinctiveName.ShouldEqual("a4");
+        fieldEntity.IsExplicitlyDefined.ShouldBeTrue();
+        fieldEntity.IsStatic.ShouldBeFalse();
+        ((StructEntity)fieldEntity.Parent).FullyQualifiedName.ShouldEqual("global::S");
+        fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
+        ((FieldTagNode)fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a4");
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0102: The type 'A' already contains a definition for 'a1'
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0102_TypeAlreadyContainsADefinition()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0102_TypeAlreadyContainsADefinition.cs");
+      InvokeParser(project).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0102");
     }
   }
 }

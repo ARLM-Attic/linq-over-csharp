@@ -46,6 +46,16 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public FieldTagNodeCollection FieldTags { get; private set; }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this field is declared with the static modifier
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsStatic
+    {
+      get { return (Modifiers != null && Modifiers.Contains(ModifierType.Static)); }
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------
