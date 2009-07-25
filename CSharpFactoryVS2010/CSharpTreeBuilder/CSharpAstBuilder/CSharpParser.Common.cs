@@ -495,7 +495,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     /// <param name="token">The token to translate to a symbol.</param>
     /// <returns>Symbol for the specified token.</returns>
     // ----------------------------------------------------------------------------------------------
-    private ISymbolReference Symbol(Token token)
+    private static ISymbolReference Symbol(Token token)
     {
       return token.BoundToStream
         ? new CSharpSymbolReference(token.TokenizedStreamPosition) as ISymbolReference

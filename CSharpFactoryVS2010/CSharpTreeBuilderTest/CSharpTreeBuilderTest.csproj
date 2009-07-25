@@ -321,6 +321,7 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildGenericClassEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildFieldEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0102_TypeAlreadyContainsADefinition.cs" />
+    <None Include="TestFiles\Expressions\ConditionalExpression1.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\ConstructedGenericType.cs" />
     <None Include="TestFiles\TypeResolution\TypeParameter.cs" />

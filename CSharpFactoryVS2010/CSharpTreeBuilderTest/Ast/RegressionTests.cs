@@ -3,13 +3,15 @@
 //
 // Created: 2009.06.04, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoftwareApproach.TestingExtensions;
 
 namespace CSharpTreeBuilderTest
 {
   [TestClass]
-  public class RegressionTests: ParserTestBed
+  public class RegressionTests : ParserTestBed
   {
     // --- There is a "feature" in CoCo that compiled the following CoCo non-terminal faulty_
     // Unary<out ExpressionNode exprNode>   
@@ -43,6 +45,14 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Regression\ExpressionBug1.cs");
       Assert.IsTrue(InvokeParser(project));
+    }
+
+    [TestMethod]
+    public void ConditionalExpressionBug1()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"Expressions\ConditionalExpression1.cs");
+      InvokeParser(project).ShouldBeTrue();
     }
   }
 }

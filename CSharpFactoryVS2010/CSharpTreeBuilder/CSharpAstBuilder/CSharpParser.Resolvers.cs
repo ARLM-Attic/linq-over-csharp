@@ -451,7 +451,7 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
     // --------------------------------------------------------------------------------
     bool IsNullableTypeMark()
     {
-      int peek = Peek(1).kind;
+      var peek = Peek(1).kind;
       return Lookahead.kind == _question &&
              (
                peek == _and ||
@@ -465,7 +465,6 @@ namespace CSharpTreeBuilder.CSharpAstBuilder
                peek == _gt ||
                peek == _gteq ||
                peek == _lbrack ||
-               peek == _lpar ||
                peek == _lshassgn ||
                peek == _lt ||
                peek == _ltlt ||
