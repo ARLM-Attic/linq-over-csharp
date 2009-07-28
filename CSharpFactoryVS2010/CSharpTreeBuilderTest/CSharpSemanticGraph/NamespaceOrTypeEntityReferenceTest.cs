@@ -42,7 +42,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var typeOrNamespaceNode = new TypeOrNamespaceNode();
       typeOrNamespaceNode.AddTypeTag(new TypeTagNode("a"));
       var namespaceOrTypeEntityReference = new NamespaceOrTypeEntityReference(typeOrNamespaceNode);
-      namespaceOrTypeEntityReference.Resolve(new ClassEntity() { Name = "A" });
+      namespaceOrTypeEntityReference.SetResolved(new ClassEntity() { Name = "A" });
 
       namespaceOrTypeEntityReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       namespaceOrTypeEntityReference.SyntaxNode.TypeTags[0].Identifier.ShouldEqual("a");
@@ -60,7 +60,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var typeOrNamespaceNode = new TypeOrNamespaceNode();
       typeOrNamespaceNode.AddTypeTag(new TypeTagNode("a"));
       var namespaceOrTypeEntityReference = new NamespaceOrTypeEntityReference(typeOrNamespaceNode);
-      namespaceOrTypeEntityReference.Unresolvable();
+      namespaceOrTypeEntityReference.SetUnresolvable();
 
       namespaceOrTypeEntityReference.ResolutionState.ShouldEqual(ResolutionState.Unresolvable);
       namespaceOrTypeEntityReference.SyntaxNode.TypeTags[0].Identifier.ShouldEqual("a");

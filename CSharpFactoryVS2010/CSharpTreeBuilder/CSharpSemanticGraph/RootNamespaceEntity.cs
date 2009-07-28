@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using System.Collections.Generic;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>

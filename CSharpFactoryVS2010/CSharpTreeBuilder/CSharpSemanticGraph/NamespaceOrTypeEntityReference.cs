@@ -52,7 +52,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="resolvedEntity">The result of the resolution.</param>
     // ----------------------------------------------------------------------------------------------
-    public void Resolve(NamespaceOrTypeEntity resolvedEntity)
+    public virtual void SetResolved(NamespaceOrTypeEntity resolvedEntity)
     {
       ResolvedEntity = resolvedEntity;
       ResolutionState = ResolutionState.Resolved;
@@ -63,7 +63,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Sets the reference to unresolvable state.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public void Unresolvable()
+    public void SetUnresolvable()
     {
       ResolvedEntity = null;
       ResolutionState = ResolutionState.Unresolvable;

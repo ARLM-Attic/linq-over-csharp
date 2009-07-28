@@ -242,12 +242,15 @@
     <Compile Include="CSharpCst\ReferenceItems\SyntaxNodeReferenceCollection.cs" />
     <Compile Include="CSharpCst\SemanticsNode.cs" />
     <Compile Include="CSharpCst\CSharpSemanticsTree.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactory.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraph\BuiltInTypeEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\BuiltInType.cs" />
     <Compile Include="CSharpSemanticGraph\ClassEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayTypeEntity.cs" />
-    <Compile Include="CSharpSemanticGraph\ClassOrStructEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\ChildTypeCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstructedGenericTypeEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IAliasType.cs" />
     <Compile Include="CSharpSemanticGraph\PointerToUnknownTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IPointerType.cs" />
     <Compile Include="CSharpSemanticGraph\IReferenceType.cs" />

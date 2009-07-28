@@ -69,6 +69,7 @@
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitorTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactoryTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraph\DeclarationSpaceTest.cs" />
@@ -322,7 +323,16 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildFieldEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0102_TypeAlreadyContainsADefinition.cs" />
     <None Include="TestFiles\Expressions\ConditionalExpression1.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndNamespaceSameName.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndStructSameName.cs" />
+    <None Include="TestFiles\MetadataImporterSemanticEntityFactory\ImportToExistingNamespace.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeResolution\ArrayType.cs" />
+    <None Include="TestFiles\TypeResolution\PointerToUnknown.cs" />
+    <None Include="TestFiles\TypeResolution\NullableType.cs" />
+    <None Include="TestFiles\TypeResolution\PointerToType.cs" />
+    <None Include="TestFiles\TypeResolution\ChainedGenericType.cs" />
+    <None Include="TestFiles\TypeResolution\NestedGenericType.cs" />
     <None Include="TestFiles\TypeResolution\ConstructedGenericType.cs" />
     <None Include="TestFiles\TypeResolution\TypeParameter.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs" />

@@ -1,4 +1,5 @@
-﻿using CSharpTreeBuilder.CSharpSemanticGraph;
+﻿using System;
+using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
@@ -65,6 +66,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     private void Resolve<TNamespaceOrTypeEntity>(NamespaceOrTypeEntity contextEntity, NamespaceOrTypeEntityReference reference)
       where TNamespaceOrTypeEntity : NamespaceOrTypeEntity
     {
+      // If resolving to a typename, then first try to resolve as built-in type, then bail out if succeeded
+      if (typeof(TNamespaceOrTypeEntity) == typeof(TypeEntity) && reference is TypeEntityReference 
+        && TryResolveAsBuiltInType((TypeEntityReference)reference))
+      {
+        return;
+      }
+
+      // If it's not a builtin type name then proceed by trying to resolve to declared or constructed types.
       var lookupStartingEntity = contextEntity;
 
       // Looping till reference is resolved or we run out of the semantic graph
@@ -73,27 +82,45 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var currentDeclarationSpace = lookupStartingEntity.DeclarationSpace;
         int matchedTypeTags = 0;
         NamespaceOrTypeEntity foundEntity = null;
+        NamespaceOrTypeEntity parentEntityForConstructedTypes = lookupStartingEntity;
 
         // Try to find a match of all parts of the TypeTags list, starting in lookupStartingEntity's declaration space,
-        // and continuing in its embedded declaration spaces
+        // and continuing in its children's declaration spaces.
         while (matchedTypeTags < reference.SyntaxNode.TypeTags.Count && currentDeclarationSpace != null)
         {
           var typeTagToMatch = reference.SyntaxNode.TypeTags[matchedTypeTags];
           var nameToLookFor = typeTagToMatch.Identifier
-                              + (typeTagToMatch.HasTypeArguments
-                                   ? "`" + typeTagToMatch.Arguments.Count
-                                   : "");
+                              + (typeTagToMatch.HasTypeArguments ? "`" + typeTagToMatch.Arguments.Count : "");
           var nameTableEntry = currentDeclarationSpace[nameToLookFor];
 
-          // If the name is found then continue matching the remaining typetags
+          // If the name is found 
           if (nameTableEntry != null
               && nameTableEntry.State == NameTableEntryState.Definite
               && nameTableEntry.Entity is NamespaceOrTypeEntity)
           {
-            // Continue the matching at the next typetag and the next nested declaration space
             foundEntity = nameTableEntry.Entity as NamespaceOrTypeEntity;
+
+            // If this is a constructed generic type (it has type arguments), then create an entity for it.
+            if (typeTagToMatch.HasTypeArguments)
+            {
+              foundEntity = new ConstructedGenericTypeEntity((GenericCapableTypeEntity)foundEntity, parentEntityForConstructedTypes);
+              
+              // And also resolve the generic's type arguments.
+              foreach (var argument in typeTagToMatch.Arguments)
+              {
+                var typeArg = new TypeEntityReference(argument);
+                ((ConstructedGenericTypeEntity)foundEntity).AddTypeArgument(typeArg);
+                Resolve<TypeEntity>(contextEntity, typeArg);
+              }
+           
+              // Note: Possible memory usage optimization: store the constructed types in SemanticGraph's
+              // _NamespaceOrTypeEntities collection, avoid creating multiple instances of the same constructed type.
+            }
+
+            // Continue the matching at the next typetag and the next declaration space.
             matchedTypeTags++;
             currentDeclarationSpace = foundEntity.DeclarationSpace;
+            parentEntityForConstructedTypes = foundEntity;
           }
           else
           {
@@ -108,19 +135,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // Then check if the found entity is of the expected type
           if (foundEntity is TNamespaceOrTypeEntity)
           {
-            // If the type has generic arguments, then create a new type entity
-            if (reference.SyntaxNode.TypeTags[matchedTypeTags-1].HasTypeArguments
-              && foundEntity is ClassOrStructEntity)
-            {
-              foundEntity = new ConstructedGenericTypeEntity((ClassOrStructEntity)foundEntity);
-              foreach (var argument in reference.SyntaxNode.TypeTags[matchedTypeTags-1].Arguments)
-              {
-                var typeArg = new TypeEntityReference(argument);
-                ((ConstructedGenericTypeEntity)foundEntity).AddTypeArgument(typeArg);
-                Resolve<TypeEntity>(contextEntity,typeArg);
-              }
-            }
-            reference.Resolve(foundEntity);
+            reference.SetResolved(foundEntity);
           }
           else
           {
@@ -128,7 +143,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               "'{0}' is a '{1}' but is used like a '{2}'.",
               reference.SyntaxNode.ToString(), foundEntity.GetType(), typeof (TNamespaceOrTypeEntity));
 
-            reference.Unresolvable();
+            reference.SetUnresolvable();
           }
         }
         else
@@ -145,8 +160,48 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           "The type or namespace name '{0}' could not be found (are you missing a using directive or an assembly reference?)",
           reference.SyntaxNode.ToString());
 
-        reference.Unresolvable();
+        reference.SetUnresolvable();
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tries to resolves a type reference to a built-in type.
+    /// </summary>
+    /// <param name="reference">The type reference to be resolved. Will be set to Resolved state is successful.</param>
+    /// <returns>True if succeeded, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool TryResolveAsBuiltInType(TypeEntityReference reference)
+    {
+      // If the name is not a on-part-long name, then not a builtin type
+      if (reference.SyntaxNode.TypeTags.Count != 1)
+      {
+        return false;
+      }
+
+      TypeEntity typeEntity = null;
+
+      switch (reference.SyntaxNode.TypeTags[0].Identifier)
+      {
+        case "void":
+          if (reference.SyntaxNode.PointerTokens.Count>0)
+          {
+            typeEntity = new PointerToUnknownTypeEntity();
+          }
+          else
+          {
+            // TODO: error: void used as type name
+          }
+          break;
+        default:
+          break;
+      }
+
+      if (typeEntity != null)
+      {
+        reference.SetResolved(typeEntity);
+      }
+      return typeEntity != null;
     }
   }
 }

@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a nullable type entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class NullableTypeEntity : ConstructedTypeEntity, IValueType
+  public sealed class NullableTypeEntity : ConstructedTypeEntity, IValueType, IAliasType
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -23,6 +23,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new ArgumentException(
           string.Format("Non-nullable value type expected, but received {0}", embeddedType.GetType()),
           "embeddedType");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the alias type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity Alias
+    {
+      get
+      {
+        throw new NotImplementedException();
       }
     }
   }

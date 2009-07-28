@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -18,16 +19,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="ConstructedGenericTypeEntity"/> class.
     /// </summary>
     /// <param name="embeddedType">An open generic type.</param>
+    /// <param name="parent">The parent entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstructedGenericTypeEntity(TypeEntity embeddedType)
+    public ConstructedGenericTypeEntity(GenericCapableTypeEntity embeddedType, NamespaceOrTypeEntity parent)
       : base(embeddedType)
     {
-      if (!(embeddedType is GenericCapableTypeEntity))
-      {
-        throw new ArgumentException(
-          string.Format("GenericCapableTypeEntity expected, but received {0}", embeddedType.GetType()), 
-          "embeddedType");
-      }
+      Parent = parent;
+
+      BaseTypes = embeddedType.BaseTypes;
+      _Members = (List<MemberEntity>)embeddedType.Members;
 
       _TypeArguments = new List<TypeEntityReference>();
     }
@@ -53,5 +53,39 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       _TypeArguments.Add(typeArgument);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
+    /// The distinctive name for a constructed generic type is:
+    /// EmbeddedType.DistinctiveName&lt;TypeArg1.TypeEntity.DistinctiveName,...&gt;
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string DistinctiveName
+    {
+      get
+      {
+        var distinctiveName = new StringBuilder(EmbeddedType.DistinctiveName);
+
+        distinctiveName.Append('<');
+        bool firstTypeArg = true;
+        foreach (var typeArgument in TypeArguments)
+        {
+          if (firstTypeArg) { firstTypeArg = false; }
+          else
+          {
+            distinctiveName.Append(',');
+          }
+
+          distinctiveName.Append(typeArgument.ResolutionState == ResolutionState.Resolved
+                                   ? typeArgument.TypeEntity.FullyQualifiedName
+                                   : "?");
+        }
+        distinctiveName.Append('>');
+
+        return distinctiveName.ToString();
+      }
+    }
+
   }
 }

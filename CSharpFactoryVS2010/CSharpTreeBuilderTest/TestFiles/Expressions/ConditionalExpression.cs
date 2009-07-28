@@ -6,5 +6,8 @@ public class ConditionalExpression
 
     // right-associativity test
     var i2 = true ? 2 : false ? 3 : 4;
+
+    // this was buggy (generated a syntax error)
+    var i5 = 5 is int ? (int)6 : 7;
   }
 }

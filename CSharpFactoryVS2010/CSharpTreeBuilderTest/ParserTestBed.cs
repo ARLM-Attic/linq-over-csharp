@@ -75,7 +75,17 @@ namespace CSharpTreeBuilderTest
     {
       get { return WorkingFolder + @"\Temp"; }
     }
-    
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the folder and filename for test assemlby.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string TestAssemblyPathAndFilename
+    {
+      get { return WorkingFolder + @"\..\..\MetadataImportTestSubject\bin\debug\MetadataImportTestSubject.dll"; }
+    }
+
     // --------------------------------------------------------------------------------------------
     /// <summary>
     /// Invokes the parser for the specified C# source file.

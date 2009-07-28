@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using System.Text;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -18,6 +20,23 @@
       : base(elementType)
     {
       Rank = rank;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string DistinctiveName
+    {
+      get
+      {
+        var stringBuilder = new StringBuilder(EmbeddedType.DistinctiveName);
+        stringBuilder.Append('[');
+        stringBuilder.Append(',',Rank-1);
+        stringBuilder.Append(']');
+        return stringBuilder.ToString();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

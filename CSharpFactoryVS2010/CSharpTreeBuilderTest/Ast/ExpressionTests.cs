@@ -1025,6 +1025,19 @@ namespace CSharpTreeBuilderTest
         ((Int32LiteralNode) embeddedConditional.TrueExpression).Value.ShouldEqual(3);
         ((Int32LiteralNode) embeddedConditional.FalseExpression).Value.ShouldEqual(4);
       }
+      {
+        var varDecl = method.Body.Statements[2] as VariableDeclarationStatementNode;
+        var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
+        var conditional = initializer.Expression as ConditionalExpressionNode;
+        var isExpression = (conditional.Condition) as TypeTestingExpressionNode;
+        ((Int32LiteralNode)isExpression.LeftOperand).Value.ShouldEqual(5);
+        isExpression.Operator.ShouldEqual(TypeTestingOperator.Is);
+        isExpression.RightOperand.TypeTags[0].Identifier.ShouldEqual("int");
+        var castExp = conditional.TrueExpression as CastExpressionNode;
+        castExp.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        ((Int32LiteralNode)castExp.Operand).Value.ShouldEqual(6);
+        ((Int32LiteralNode)conditional.FalseExpression).Value.ShouldEqual(7);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

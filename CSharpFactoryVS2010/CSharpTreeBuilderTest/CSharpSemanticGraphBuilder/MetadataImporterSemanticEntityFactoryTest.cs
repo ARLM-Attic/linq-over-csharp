@@ -1,0 +1,227 @@
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoftwareApproach.TestingExtensions;
+using CSharpTreeBuilder.ProjectContent;
+using CSharpTreeBuilder.CSharpSemanticGraph;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using System.IO;
+
+namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
+{
+  // ================================================================================================
+  /// <summary>
+  /// Tests the class that creates semantic entities from assembly metadata.
+  /// </summary>
+  // ================================================================================================
+  [TestClass]
+  public class MetadataImporterSemanticEntityFactoryTest : ParserTestBed
+  {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the metadata import to an empty semantic graph.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ImportToEmptySemanticGraph()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      var semanticGraph = new SemanticGraph();
+      var factory = new MetadataImporterSemanticEntityFactory(project);
+      factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
+
+      CheckTestAssemblyImportResult(semanticGraph);
+
+      // check namespace A
+      semanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeFalse();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks if MetadataImportTestSubject.dll content exists in the semantic graph.
+    /// </summary>
+    /// <param name="semanticGraph">Semantic graph to check.</param>
+    // ----------------------------------------------------------------------------------------------
+    private static void CheckTestAssemblyImportResult(SemanticGraph semanticGraph)
+    {
+      // class Class0
+      {
+        var entity = semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+        entity.Name.ShouldEqual("Class0");
+        entity.DistinctiveName.ShouldEqual("Class0");
+        entity.FullyQualifiedName.ShouldEqual("Class0");
+        entity.Parent.ShouldEqual(semanticGraph.GlobalNamespace);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeFalse();
+      }
+      // namespace A
+      {
+        var entity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
+        entity.Name.ShouldEqual("A");
+        entity.DistinctiveName.ShouldEqual("A");
+        entity.FullyQualifiedName.ShouldEqual("A");
+      }
+      // namespace B
+      {
+        var entity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0];
+        entity.Name.ShouldEqual("B");
+        entity.DistinctiveName.ShouldEqual("B");
+        entity.FullyQualifiedName.ShouldEqual("A.B");
+        entity.IsExplicit.ShouldBeFalse();
+      }
+
+      var namespaceAB = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0];
+
+      // class Class1
+      {
+        var entity = namespaceAB.ChildTypes[0] as ClassEntity;
+        entity.Name.ShouldEqual("Class1");
+        entity.DistinctiveName.ShouldEqual("Class1");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Class1");
+        entity.Parent.ShouldEqual(namespaceAB);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeFalse();
+      }
+      // class Class1.SubClass1
+      {
+        var entity = ((ClassEntity) namespaceAB.ChildTypes[0]).ChildTypes[0] as ClassEntity;
+        entity.Name.ShouldEqual("SubClass1");
+        entity.DistinctiveName.ShouldEqual("SubClass1");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Class1.SubClass1");
+        entity.Parent.ShouldEqual(namespaceAB.ChildTypes[0]);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeFalse();
+      }
+      // enum Enum1
+      {
+        var entity = namespaceAB.ChildTypes[1] as EnumEntity;
+        entity.Name.ShouldEqual("Enum1");
+        entity.DistinctiveName.ShouldEqual("Enum1");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Enum1");
+        entity.Parent.ShouldEqual(namespaceAB);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+      }
+      // struct Struct1
+      {
+        var entity = namespaceAB.ChildTypes[2] as StructEntity;
+        entity.Name.ShouldEqual("Struct1");
+        entity.DistinctiveName.ShouldEqual("Struct1");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Struct1");
+        entity.Parent.ShouldEqual(namespaceAB);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeFalse();
+      }
+      // interface IInterface1
+      {
+        var entity = namespaceAB.ChildTypes[3] as InterfaceEntity;
+        entity.Name.ShouldEqual("IInterface1");
+        entity.DistinctiveName.ShouldEqual("IInterface1");
+        entity.FullyQualifiedName.ShouldEqual("A.B.IInterface1");
+        entity.Parent.ShouldEqual(namespaceAB);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeFalse();
+      }
+      // delegate void Delegate1();
+      {
+        var entity = namespaceAB.ChildTypes[4] as DelegateEntity;
+        entity.Name.ShouldEqual("Delegate1");
+        entity.DistinctiveName.ShouldEqual("Delegate1");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Delegate1");
+        entity.Parent.ShouldEqual(namespaceAB);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeFalse();
+      }
+      // class Generic1<T1,T2>
+      {
+        var entity = namespaceAB.ChildTypes[5] as ClassEntity;
+        entity.Name.ShouldEqual("Generic1");
+        entity.DistinctiveName.ShouldEqual("Generic1`2");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Generic1`2");
+        entity.Parent.ShouldEqual(namespaceAB);
+        entity.SyntaxNodes.Count.ShouldEqual(0);
+        entity.IsGeneric.ShouldBeTrue();
+        var typeParamArray = entity.TypeParameters.ToArray();
+        typeParamArray[0].FullyQualifiedName.ShouldEqual("A.B.Generic1`2.T1");
+        typeParamArray[1].FullyQualifiedName.ShouldEqual("A.B.Generic1`2.T2");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the metadata import to an existing namespace
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ImportToExistingNamespace()
+    {
+      // Set up SyntaxTree and SemanticGraph
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MetadataImporterSemanticEntityFactory\ImportToExistingNamespace.cs");
+      InvokeParser(project).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(semanticGraph, project));
+      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project));
+
+      var factory = new MetadataImporterSemanticEntityFactory(project);
+      factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
+
+      CheckTestAssemblyImportResult(semanticGraph);
+
+      // check namespace A
+      semanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeTrue();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests error: CS0006_MetadataFileNotFound
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0006_MetadataFileNotFound()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      var semanticGraph = new SemanticGraph();
+      var factory = new MetadataImporterSemanticEntityFactory(project);
+      factory.CreateEntitiesFromAssembly(@"c:\nosuchfile.dll", "global", semanticGraph);
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0006");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests error: CS0009_IncorrectFormat
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0009_IncorrectFormat()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      var semanticGraph = new SemanticGraph();
+      var factory = new MetadataImporterSemanticEntityFactory(project);
+      factory.CreateEntitiesFromAssembly(Path.Combine(Environment.SystemDirectory, @"ntdll.dll"), "global", semanticGraph);
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0009");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Imports mscorlib.dll
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ImportMscorlib()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      var semanticGraph = new SemanticGraph();
+      var factory = new MetadataImporterSemanticEntityFactory(project);
+      factory.CreateEntitiesFromAssembly(Assembly.GetAssembly(typeof(int)).Location, "global", semanticGraph);
+
+      project.Warnings.Count.ShouldEqual(0);
+      project.Errors.Count.ShouldEqual(0);
+    }
+
+  }
+}

@@ -22,7 +22,7 @@
     /// Gets the declaration space of the entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public DeclarationSpace DeclarationSpace { get; private set; }
+    public virtual DeclarationSpace DeclarationSpace { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -44,17 +44,24 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the fully qualified name of the namespace or type.
+    /// Gets the fully qualified name of the namespace or type, 
+    /// that uniquely identifies the namespace or type amongst all others.
     /// </summary>
+    /// <remarks>
+    /// The fully qualified name of N is the complete hierarchical path of identifiers that lead to N,
+    /// starting from the global namespace.
+    /// However, in our implementation the root namespace name is also part of the fully qualified name,
+    /// to allow storing all namespace and type names in a single collection regardless of the root namespace.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public string FullyQualifiedName 
+    public virtual string FullyQualifiedName 
     { 
       get
       {
         if (Parent is NamespaceOrTypeEntity)
         {
           return Parent is RootNamespaceEntity
-            ? string.Format("{0}::{1}", ((RootNamespaceEntity)Parent).DistinctiveName, DistinctiveName)
+            ? DistinctiveName
             : string.Format("{0}.{1}", ((NamespaceOrTypeEntity)Parent).FullyQualifiedName, DistinctiveName);
         }
         return DistinctiveName;

@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using System.Text;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -16,6 +18,19 @@
     public PointerToTypeEntity(TypeEntity embeddedType)
       : base(embeddedType)
     {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string DistinctiveName
+    {
+      get
+      {
+        return EmbeddedType.DistinctiveName + "*";
+      }
     }
   }
 }

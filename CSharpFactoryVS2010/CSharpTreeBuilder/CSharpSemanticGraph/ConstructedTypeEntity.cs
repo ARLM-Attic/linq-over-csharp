@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -23,6 +24,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       EmbeddedType = embeddedType;
+      Parent = embeddedType.Parent; 
+      Name = embeddedType.Name;
+
+      // Type tulajdonságok
+      // BaseTypes = embeddedType.BaseTypes;
+      // - array: System.Array
+      // - nullable: System.Nullable<T> base type-jai
+      // - pointer: nincs base type
+      // _Members = (List<MemberEntity>)embeddedType.Members;
+      // - array: örökli a System.Array-t
+      // - nullable: System.Nullable<T> memberei
+      // - pointer: nincs membere
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -31,5 +44,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity EmbeddedType { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the declaration space of the entity. 
+    /// For a constructed type, the declaration space is the embedded type's declaration space.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override DeclarationSpace DeclarationSpace
+    {
+      get
+      {
+        return EmbeddedType.DeclarationSpace;
+      }
+    }
   }
 }

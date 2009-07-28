@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public abstract class TypeEntity : NamespaceOrTypeEntity
   {
     /// <summary>Backing field for Members property.</summary>
-    private List<MemberEntity> _Members;
+    protected List<MemberEntity> _Members;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -28,7 +28,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<NamespaceOrTypeEntityReference> BaseTypes { get; private set; }
+    public List<NamespaceOrTypeEntityReference> BaseTypes { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

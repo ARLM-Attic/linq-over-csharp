@@ -11,5 +11,15 @@
   // ================================================================================================
   public sealed class PointerToUnknownTypeEntity : TypeEntity, IPointerType
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PointerToUnknownTypeEntity"/> class.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public PointerToUnknownTypeEntity()
+    {
+      DeclarationSpace = null;
+      Name = "void*";
+    }
   }
 }

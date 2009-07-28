@@ -5,7 +5,7 @@
   /// This class represents a struct entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class StructEntity : ClassOrStructEntity, IValueType
+  public sealed class StructEntity : ChildTypeCapableTypeEntity, IValueType
   {
   }
 }

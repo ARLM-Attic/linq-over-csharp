@@ -50,20 +50,39 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Looping through every tag in the namespace name
       foreach (var nameTag in node.NameTags)
       {
-        // Determine FQN that is the key for finding the entity in the semantic graph.
-        string fullyQualifiedName = parentNamespaceEntity is RootNamespaceEntity
-                                     ? parentNamespaceEntity.FullyQualifiedName + "::"+ nameTag.Identifier
-                                     : parentNamespaceEntity.FullyQualifiedName + "." + nameTag.Identifier;
+        NamespaceEntity namespaceEntity;
 
-        // Find out whether the namespace entity already exists in the graph.
-        var namespaceEntity = _SemanticGraph.GetEntityByFullyQualifiedName(fullyQualifiedName) as NamespaceEntity;
+        var nameTableEntry = parentNamespaceEntity.DeclarationSpace[nameTag.Identifier];
+        
+        // If the name is found then we have to examine some sub-cases
+        if (nameTableEntry != null)
+        {
+          // Let's check whether the name's meaning is definit
+          switch (nameTableEntry.State)
+          {
+            case NameTableEntryState.Definite:
+              // If the name is definite, but it's not a namespace, then signal error and get out.
+              if (!(nameTableEntry.Entity is NamespaceEntity))
+              {
+                ((ICompilationErrorHandler)_Project).Error("CS0101", node.StartToken,
+                                                            "The namespace '{0}' already contains a definition for '{1}'.",
+                                                            parentNamespaceEntity.FullyQualifiedName, nameTag.Identifier);
+                return;
+              }
 
-        // If no namespace entity found then create it and add it to the graph
-        if (namespaceEntity == null)
+              // If the name is definite, and is a namespace, then this is the one we were looking for.
+              namespaceEntity = nameTableEntry.Entity as NamespaceEntity;
+              break;
+
+            // If the name is found, but is not definite, then no semantic entity can be created, so let's get out.
+            default:
+              return;
+          }
+        }
+        else // If the name was not found then we have to create it.
         {
           namespaceEntity = new NamespaceEntity() {Name = nameTag.Identifier};
           parentNamespaceEntity.AddChildNamespace(namespaceEntity);
-          _SemanticGraph.AddEntity(namespaceEntity);
         }
 
         AssociateSyntaxNodeWithSemanticEntity(node, namespaceEntity);
@@ -111,7 +130,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Creates a type entity from a type declaration syntax node.
     /// </summary>
     /// <typeparam name="TSyntaxNodeType">The type of the syntax node.</typeparam>
-    /// <typeparam name="TSemanticEntityType">The type of the semantic entity.</typeparam>
+    /// <typeparam name="TSemanticEntityType">The type of the semantic entity to be created.</typeparam>
     /// <param name="node">A syntax node.</param>
     // ----------------------------------------------------------------------------------------------
     private void CreateTypeEntityFromTypeDeclaration<TSyntaxNodeType, TSemanticEntityType>(TSyntaxNodeType node) 
@@ -126,51 +145,67 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException(String.Format("Parent expected to be NamespaceOrTypeEntity but was {0}", parentEntity.GetType()));
       }
 
-      // Determine FQN that is the key for finding the entity in the semantic graph.
-      string fullyQualifiedName = parentNamespaceOrTypeEntity is RootNamespaceEntity
-                                   ? node.Name
-                                   : parentNamespaceOrTypeEntity.FullyQualifiedName + "." + node.Name;
+      TypeEntity typeEntity;
 
-      // Find out whether the entity already exists in the graph.
-      var entity = _SemanticGraph.GetEntityByFullyQualifiedName(fullyQualifiedName) as TypeEntity;
+      var nameTableEntry = parentNamespaceOrTypeEntity.DeclarationSpace[node.Name
+                              + (node.HasTypeParameters ? "`" + node.TypeParameters.Count : "")];
 
-      // If it already exists, that's an error (unless partial)
-      if (entity != null)
+      // If the name is found then we have to examine some sub-cases
+      if (nameTableEntry != null)
       {
-        // TODO: signal error or deal with partials
+        // Let's check whether the name's meaning is definit
+        switch (nameTableEntry.State)
+        {
+          case NameTableEntryState.Definite:
+            // If the name is definite, but it's not a type, then signal error and get out.
+            if (!(nameTableEntry.Entity is TSemanticEntityType))
+            {
+              ((ICompilationErrorHandler)_Project).Error("CS0101", node.StartToken,
+                                                          "The namespace '{0}' already contains a definition for '{1}'.",
+                                                          parentNamespaceOrTypeEntity.FullyQualifiedName, node.Name);
+              return;
+            }
+
+            // If the name is definite, and is the desired type, then this is the one we were looking for.
+            typeEntity = nameTableEntry.Entity as TSemanticEntityType;
+            // TODO: if partial allowed then deal with it, otherwise signal error
+            break;
+
+          // If the name is found, but is not definite, then no semantic entity can be created, so let's get out.
+          default:
+            return;
+        }
       }
-      else
+      else // If the name was not found then we have to create it.
       {
         // Build the new entity
-        entity = new TSemanticEntityType() {Name = node.Name};
+        typeEntity = new TSemanticEntityType() { Name = node.Name };
         foreach (var baseType in node.BaseTypes)
         {
-          entity.BaseTypes.Add(new NamespaceOrTypeEntityReference(baseType));
+          typeEntity.BaseTypes.Add(new NamespaceOrTypeEntityReference(baseType));
         }
-        if (entity is GenericCapableTypeEntity)
+        if (typeEntity is GenericCapableTypeEntity)
         {
           foreach (var typeParameter in node.TypeParameters)
           {
             var typeParameterEntity = new TypeParameterEntity(typeParameter.Identifier);
-            ((GenericCapableTypeEntity)entity).AddTypeParameter(typeParameterEntity);
-            _SemanticGraph.AddEntity(typeParameterEntity);
+            ((GenericCapableTypeEntity)typeEntity).AddTypeParameter(typeParameterEntity);
           }
         }
 
-        // Add the entity to its parent
+        // Add the entity to its parent (but only if the parent can have child types)
         if (parentNamespaceOrTypeEntity is IHasChildTypes)
         {
-          ((IHasChildTypes)parentNamespaceOrTypeEntity).AddChildType(entity);
-          _SemanticGraph.AddEntity(entity);
+          ((IHasChildTypes)parentNamespaceOrTypeEntity).AddChildType(typeEntity);
         }
         else
         {
-          throw new ApplicationException(String.Format("Type '{0}' cannot not declare child type '{1}'.",
-            parentNamespaceOrTypeEntity.Name, entity.Name));
+          throw new ApplicationException(String.Format("Type '{0}' cannot declare child type '{1}'.",
+                                                       parentNamespaceOrTypeEntity.Name, typeEntity.Name));
         }
       }
 
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+      AssociateSyntaxNodeWithSemanticEntity(node, typeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -239,9 +274,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Check if this name is already in use in this declaration space
         if (parentTypeEntity.DeclarationSpace.IsNameDefined(fieldTag.Identifier))
         {
-          ((ICompilationErrorHandler) _Project).Error( "CS0102", node.StartToken, 
-            "The type '{0}' already contains a definition for '{1}'.",
-            parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
+          ((ICompilationErrorHandler) _Project).Error("CS0102", node.StartToken,
+                                                      "The type '{0}' already contains a definition for '{1}'.",
+                                                      parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
           
           // Continue with the next field tag.
           continue;
@@ -250,7 +285,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Create a semantic entity, add to its parent, and add to the graph.
         var fieldEntity = new FieldEntity(fieldTag.Identifier, true, new TypeEntityReference(node.TypeName), node.IsStatic);
         parentTypeEntity.AddMember(fieldEntity);
-        _SemanticGraph.AddEntity(fieldEntity);
 
         AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
       }

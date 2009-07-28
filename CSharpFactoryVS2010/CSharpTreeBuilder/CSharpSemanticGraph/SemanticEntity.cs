@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the list of syntax nodes that generated this semantic entity. Can be empty.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<ISyntaxNode> SyntaxNodes { get; private set; }
+    public List<ISyntaxNode> SyntaxNodes { get; protected set; }
 
     #region Visitor methods
 

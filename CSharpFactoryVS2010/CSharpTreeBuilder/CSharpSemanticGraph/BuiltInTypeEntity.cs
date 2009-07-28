@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using System;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -10,7 +12,37 @@
   /// long, ulong, char, float, double, bool, decimal, bool, string, object.
   /// </remarks>
   // ================================================================================================
-  public sealed class BuiltInTypeEntity : TypeEntity
+  public sealed class BuiltInTypeEntity : TypeEntity, IAliasType
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BuiltInTypeEntity"/> class.
+    /// </summary>
+    /// <param name="builtInType">A built in type.</param>
+    // ----------------------------------------------------------------------------------------------
+    public BuiltInTypeEntity(BuiltInType builtInType)
+    {
+      BuiltInType = builtInType;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the built in type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public BuiltInType BuiltInType { get; private set; }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the alias type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity Alias
+    {
+      get
+      {
+        throw new NotImplementedException();
+      }
+    }
   }
 }

@@ -5,7 +5,7 @@
   /// This class represents a class entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class ClassEntity : ClassOrStructEntity, IReferenceType
+  public sealed class ClassEntity : ChildTypeCapableTypeEntity, IReferenceType
   {
   }
 }
