@@ -13,10 +13,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="PointerToTypeEntity"/> class.
     /// </summary>
-    /// <param name="embeddedType">The referent type.</param>
+    /// <param name="underlyingType">The referent type.</param>
     // ----------------------------------------------------------------------------------------------
-    public PointerToTypeEntity(TypeEntity embeddedType)
-      : base(embeddedType)
+    public PointerToTypeEntity(TypeEntity underlyingType)
+      : base(underlyingType)
     {
     }
 
@@ -39,7 +39,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return EmbeddedType.DistinctiveName + "*";
+        return UnderlyingType.DistinctiveName + "*";
       }
     }
   }

@@ -15,24 +15,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstructedTypeEntity"/> class.
     /// </summary>
+    /// <param name="underlyingType">A type that this constructed type builds upon.</param>
     // ----------------------------------------------------------------------------------------------
-    protected ConstructedTypeEntity(TypeEntity embeddedType)
+    protected ConstructedTypeEntity(TypeEntity underlyingType)
     {
-      if (embeddedType == null )
+      if (underlyingType == null )
       {
-        throw new ArgumentNullException("embeddedType");
+        throw new ArgumentNullException("underlyingType");
       }
 
-      EmbeddedType = embeddedType;
-      Parent = embeddedType.Parent; 
-      Name = embeddedType.Name;
+      UnderlyingType = underlyingType;
+      Parent = underlyingType.Parent; 
+      Name = underlyingType.Name;
 
       // Type tulajdonságok
-      // BaseTypes = embeddedType.BaseTypes;
+      // BaseTypes = underlyingType.BaseTypes;
       // - array: System.Array
       // - nullable: System.Nullable<T> base type-jai
       // - pointer: nincs base type
-      // _Members = (List<MemberEntity>)embeddedType.Members;
+      // _Members = (List<MemberEntity>)underlyingType.Members;
       // - array: örökli a System.Array-t
       // - nullable: System.Nullable<T> memberei
       // - pointer: nincs membere
@@ -40,22 +41,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the embedded type that this type build upon.
+    /// Gets the underlying type that this type build upon.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity EmbeddedType { get; private set; }
+    public TypeEntity UnderlyingType { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the declaration space of the entity. 
-    /// For a constructed type, the declaration space is the embedded type's declaration space.
+    /// For a constructed type, the declaration space is the underlying type's declaration space.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public override DeclarationSpace DeclarationSpace
     {
       get
       {
-        return EmbeddedType.DeclarationSpace;
+        return UnderlyingType.DeclarationSpace;
       }
     }
   }

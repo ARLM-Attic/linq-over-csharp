@@ -17,16 +17,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstructedGenericTypeEntity"/> class.
     /// </summary>
-    /// <param name="embeddedType">An open generic type.</param>
+    /// <param name="underlyingType">An open generic type.</param>
     /// <param name="parent">The parent entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstructedGenericTypeEntity(GenericCapableTypeEntity embeddedType, NamespaceOrTypeEntity parent)
-      : base(embeddedType)
+    public ConstructedGenericTypeEntity(GenericCapableTypeEntity underlyingType, NamespaceOrTypeEntity parent)
+      : base(underlyingType)
     {
       Parent = parent;
 
-      _BaseTypes = (List<SemanticEntityReference<TypeEntity>>)embeddedType.BaseTypes;
-      _Members = (List<MemberEntity>)embeddedType.Members;
+      _BaseTypes = (List<SemanticEntityReference<TypeEntity>>)underlyingType.BaseTypes;
+      _Members = (List<MemberEntity>)underlyingType.Members;
 
       _TypeArguments = new List<SemanticEntityReference<TypeEntity>>();
     }
@@ -67,14 +67,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
     /// The distinctive name for a constructed generic type is:
-    /// EmbeddedType.DistinctiveName&lt;TypeArg1.TypeEntity.DistinctiveName,...&gt;
+    /// UnderlyingType.DistinctiveName&lt;TypeArg1.TypeEntity.DistinctiveName,...&gt;
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public override string DistinctiveName
     {
       get
       {
-        var distinctiveName = new StringBuilder(EmbeddedType.DistinctiveName);
+        var distinctiveName = new StringBuilder(UnderlyingType.DistinctiveName);
 
         distinctiveName.Append('<');
         bool firstTypeArg = true;

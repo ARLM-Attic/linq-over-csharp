@@ -141,7 +141,10 @@ namespace CSharpTreeBuilder.Cst
     // ----------------------------------------------------------------------------------------------
     public string Message
     {
-      get { return string.Format(Description, Parameters.ToArray()); }
+      get 
+      {
+        return Parameters == null ? Description : string.Format(Description, Parameters.ToArray());
+      }
     }
   }
 }

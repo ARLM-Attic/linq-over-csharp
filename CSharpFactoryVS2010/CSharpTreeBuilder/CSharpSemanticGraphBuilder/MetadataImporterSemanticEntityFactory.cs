@@ -97,6 +97,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // The context entity is our current position in the semantic graph.
       NamespaceOrTypeEntity contextEntity = semanticGraph.GetRootNamespaceByName(alias);
+      
+      // If no root namespace exists with the given alias, then create it.
+      if (contextEntity==null)
+      {
+        var rootNamespaceEntity = new RootNamespaceEntity(alias);
+        semanticGraph.AddRootNamespace(rootNamespaceEntity);
+        contextEntity = rootNamespaceEntity;
+      }
 
       // If the type has a namespace name, then create the corresponding namespace entity hierarchy.
       if (type.Namespace != null)

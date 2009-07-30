@@ -145,14 +145,14 @@ namespace CSharpTreeBuilderTest
       foreach (var error in project.Errors)
       {
         Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", error.Line, error.Column,
-          error.Code, error.Description, error.CompilationUnitNode.Name);
+          error.Code, error.Message, error.CompilationUnitNode.Name);
       }
       Console.WriteLine();
       Console.WriteLine("{0} warnings detected", project.Warnings.Count);
       foreach (var warning in project.Warnings)
       {
         Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", warning.Line, warning.Column,
-          warning.Code, warning.Description, warning.CompilationUnitNode.Name);
+          warning.Code, warning.Message, warning.CompilationUnitNode.Name);
       }
       Console.WriteLine();
 

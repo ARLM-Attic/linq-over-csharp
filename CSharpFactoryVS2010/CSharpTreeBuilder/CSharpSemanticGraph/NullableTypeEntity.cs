@@ -14,16 +14,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="NullableTypeEntity"/> class.
     /// </summary>
-    /// <param name="embeddedType">The underlying type.</param>
+    /// <param name="underlyingType">The underlying type.</param>
     // ----------------------------------------------------------------------------------------------
-    public NullableTypeEntity(TypeEntity embeddedType)
-      : base(embeddedType)
+    public NullableTypeEntity(TypeEntity underlyingType)
+      : base(underlyingType)
     {
-      if ((embeddedType is NullableTypeEntity) || !(embeddedType.IsValueType))
+      if ((underlyingType is NullableTypeEntity) || !(underlyingType.IsValueType))
       {
         throw new ArgumentException(
-          string.Format("Non-nullable value type expected, but received {0}", embeddedType.GetType()),
-          "embeddedType");
+          string.Format("Non-nullable value type expected, but received {0}", underlyingType.GetType()),
+          "underlyingType");
       }
 
       AliasToType = new ReflectedTypeBasedTypeEntityReference(typeof(System.Nullable<>));

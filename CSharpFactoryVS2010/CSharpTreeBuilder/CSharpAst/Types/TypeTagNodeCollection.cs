@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System.Text;
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
@@ -25,5 +26,33 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class TypeTagNodeCollection : SyntaxNodeCollection<TypeTagNode, TypeOrNamespaceNode>
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns the string representation of the object.
+    /// </summary>
+    /// <returns>The string representation of the object.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var stringBuilder = new StringBuilder();
+      
+      bool firstTag = true;
+      
+      foreach (var typeTagNode in this)
+      {
+        if (firstTag)
+        {
+          firstTag = false;
+        }
+        else
+        {
+          stringBuilder.Append('.');
+        }
+      
+        stringBuilder.Append(typeTagNode.ToString());
+      }
+
+      return stringBuilder.ToString();
+    }
   }
 }

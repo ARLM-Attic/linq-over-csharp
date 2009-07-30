@@ -209,8 +209,9 @@ namespace CSharpTreeBuilder.ProjectContent
       // Create entities from ASTs
       SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this, SemanticGraph));
 
-      // Resolve type references
-      SemanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(this, SemanticGraph));
+      // Resolve type references in 2 pass (1. type declarations, 2. type bodies)
+      SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(this, SemanticGraph));
+      SemanticGraph.AcceptVisitor(new TypeBodyResolverSemanticGraphVisitor(this, SemanticGraph));
 
       // TODO: continue
     }

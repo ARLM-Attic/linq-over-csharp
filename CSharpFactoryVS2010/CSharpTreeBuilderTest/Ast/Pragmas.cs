@@ -19,7 +19,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\DefineUndefineOK.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolA").ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolB").ShouldBeFalse();
     }
@@ -30,7 +30,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\DefineUndefineOK.cs");
       project.AddConditionalCompilationSymbol("SymbolC");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolA").ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolB").ShouldBeFalse();
       project.ConditionalSymbols.Contains("SymbolC").ShouldBeTrue();
@@ -42,7 +42,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\DefineUndefineOK.cs");
       project.AddConditionalCompilationSymbols(new[] { "SymbolA", "SymbolB", "SymbolC" });
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolA").ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolB").ShouldBeFalse();
       project.ConditionalSymbols.Contains("SymbolC").ShouldBeTrue();
@@ -54,7 +54,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\DefineUndefineWithCS1032.cs");
       project.AddConditionalCompilationSymbols(new[] { "SymbolA", "SymbolB", "SymbolC" });
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
       project.ConditionalSymbols.Contains("SymbolA").ShouldBeTrue();
       project.ConditionalSymbols.Contains("SymbolB").ShouldBeFalse();
       project.ConditionalSymbols.Contains("SymbolC").ShouldBeTrue();
@@ -66,7 +66,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif1.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
@@ -81,7 +81,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var parser = new CSharpProject(WorkingFolder);
       parser.AddFile(@"Pragmas\IfEndif5.cs");
-      InvokeParser(parser).ShouldBeTrue();
+      InvokeParser(parser, true, false).ShouldBeTrue();
       var cd = parser.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
@@ -95,7 +95,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif6.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
@@ -110,7 +110,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif7.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
@@ -126,7 +126,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndif7.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.Pragmas.Count.ShouldEqual(13);
       var ifPragma = source.Pragmas[0] as IfPragmaNode;
@@ -296,7 +296,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\IfEndifInVerbatimString.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var cd = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
       cd.ShouldNotBeNull();
       var md = cd.MemberDeclarations[0] as MethodDeclarationNode;
@@ -310,7 +310,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\PragmaAfterNonWhiteSpace.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
       Assert.AreEqual(project.Errors.Count, 12);
       foreach (var error in project.Errors)
       {
@@ -323,7 +323,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\ErrorAndWarningByPragma.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
       project.Errors.Count.ShouldEqual(2);
       project.Warnings.Count.ShouldEqual(2);
       project.Errors[0].Description.ShouldEqual("#error: 1. Error");
@@ -337,7 +337,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\LinePragma.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
       project.Errors.Count.ShouldEqual(4);
       project.Warnings.Count.ShouldEqual(3);
       project.Warnings[0].Line.ShouldBeGreaterThan(1000);
@@ -357,7 +357,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\RegionOk.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.Regions.Count().ShouldEqual(3);
 
@@ -444,7 +444,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\OpenRegion.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
       project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS1038");
     }
@@ -454,7 +454,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Pragmas\UnexpectedEndRegion.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
       project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS1028");
     }

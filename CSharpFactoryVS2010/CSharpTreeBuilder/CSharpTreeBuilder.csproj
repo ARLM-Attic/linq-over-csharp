@@ -227,6 +227,8 @@
     <Compile Include="CSharpAst\Types\TypeTagNodeCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageCollection.cs" />
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\TypeBodyResolverSemanticGraphVisitor.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\TypeResolverSemanticGraphVisitorBase.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitor.cs" />
     <Compile Include="CSharpCst\CompilationModel\CompilationEntity.cs" />
     <Compile Include="CSharpCst\CompilationModel\CompilationModel.cs" />
@@ -243,7 +245,7 @@
     <Compile Include="CSharpCst\SemanticsNode.cs" />
     <Compile Include="CSharpCst\CSharpSemanticsTree.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactory.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\TypeResolverSemanticGraphVisitor.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\TypeDeclarationResolverSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraph\BuiltInTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\BuiltInType.cs" />
     <Compile Include="CSharpSemanticGraph\ClassEntity.cs" />

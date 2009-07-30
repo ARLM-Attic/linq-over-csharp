@@ -1,6 +1,7 @@
 ﻿class A1
 {
-  A2<A3, A4> a;
+  A2<A3, A4> a1;
+  A2<A3, A4>[] a2;
 }
 
 class A2<T1,T2>

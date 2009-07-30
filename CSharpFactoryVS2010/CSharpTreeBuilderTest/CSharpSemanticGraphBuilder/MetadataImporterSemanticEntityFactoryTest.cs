@@ -31,7 +31,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
 
-      CheckTestAssemblyImportResult(semanticGraph);
+      CheckTestAssemblyImportResult(semanticGraph.GlobalNamespace);
 
       // check namespace A
       semanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeFalse();
@@ -41,37 +41,39 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// <summary>
     /// Checks if MetadataImportTestSubject.dll content exists in the semantic graph.
     /// </summary>
-    /// <param name="semanticGraph">Semantic graph to check.</param>
+    /// <param name="rootNamespace">The root namespace that contains the entities to be checked.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void CheckTestAssemblyImportResult(SemanticGraph semanticGraph)
+    private static void CheckTestAssemblyImportResult(RootNamespaceEntity rootNamespace)
     {
+      rootNamespace.ShouldNotBeNull();
+
       // class Class0
       {
-        var entity = semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+        var entity = rootNamespace.ChildTypes[0] as ClassEntity;
         entity.Name.ShouldEqual("Class0");
         entity.DistinctiveName.ShouldEqual("Class0");
         entity.FullyQualifiedName.ShouldEqual("Class0");
-        entity.Parent.ShouldEqual(semanticGraph.GlobalNamespace);
+        entity.Parent.ShouldEqual(rootNamespace);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
       }
       // namespace A
       {
-        var entity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
+        var entity = rootNamespace.ChildNamespaces[0];
         entity.Name.ShouldEqual("A");
         entity.DistinctiveName.ShouldEqual("A");
         entity.FullyQualifiedName.ShouldEqual("A");
       }
       // namespace B
       {
-        var entity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0];
+        var entity = rootNamespace.ChildNamespaces[0].ChildNamespaces[0];
         entity.Name.ShouldEqual("B");
         entity.DistinctiveName.ShouldEqual("B");
         entity.FullyQualifiedName.ShouldEqual("A.B");
         entity.IsExplicit.ShouldBeFalse();
       }
 
-      var namespaceAB = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0];
+      var namespaceAB = rootNamespace.ChildNamespaces[0].ChildNamespaces[0];
 
       // class Class1
       {
@@ -163,14 +165,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       
       // First the entity builder and resolver
       project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, semanticGraph));
-      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project, semanticGraph));
+      semanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, semanticGraph));
 
       // Then the importer
       var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
 
       // Check resulting semantic graph
-      CheckTestAssemblyImportResult(semanticGraph);
+      CheckTestAssemblyImportResult(semanticGraph.GlobalNamespace);
 
       // check namespace A
       semanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeTrue();
@@ -196,10 +198,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       
       // Then the entity builder and resolver
       project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, semanticGraph));
-      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project, semanticGraph));
+      semanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, semanticGraph));
 
       // Check resulting semantic graph
-      CheckTestAssemblyImportResult(semanticGraph);
+      CheckTestAssemblyImportResult(semanticGraph.GlobalNamespace);
 
       // check namespace A
       semanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeTrue();
@@ -251,11 +253,29 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var semanticGraph = new SemanticGraph();
       var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(Assembly.GetAssembly(typeof(int)).Location, "global", semanticGraph);
-      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project, semanticGraph));
+      semanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, semanticGraph));
 
       project.Warnings.Count.ShouldEqual(0);
       project.Errors.Count.ShouldEqual(0);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the metadata import with an alias
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ImportWithAlias()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      var semanticGraph = new SemanticGraph();
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
+      factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "MyAlias", semanticGraph);
+
+      CheckTestAssemblyImportResult(semanticGraph.GetRootNamespaceByName("MyAlias"));
+
+      semanticGraph.GlobalNamespace.ChildNamespaces.Count.ShouldEqual(0);
+      semanticGraph.GlobalNamespace.ChildTypes.Count.ShouldEqual(0);
+    }
   }
 }

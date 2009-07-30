@@ -41,7 +41,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        var stringBuilder = new StringBuilder(EmbeddedType.DistinctiveName);
+        var stringBuilder = new StringBuilder(UnderlyingType.DistinctiveName);
         stringBuilder.Append('[');
         stringBuilder.Append(',',Rank-1);
         stringBuilder.Append(']');
