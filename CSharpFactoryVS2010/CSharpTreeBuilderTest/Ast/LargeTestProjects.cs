@@ -22,7 +22,7 @@ namespace CSharpParserTest
     public void NUnitCoreInterfacesIsOk()
     {
       var project = new CSharpProject(NUnitCoreInterfacesFolder, true);
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
     [TestMethod]
@@ -30,7 +30,7 @@ namespace CSharpParserTest
     {
       var project = new CSharpProject(NUnitCoreFolder, true);
       project.AddAssemblyReference("NUnit.Core.Interfaces");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
     [TestMethod]
@@ -48,7 +48,7 @@ namespace CSharpParserTest
       project.AddAssemblyReference("System.Web.Services");
       project.AddAssemblyReference("System.Windows.Forms");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
     [TestMethod]
@@ -56,7 +56,7 @@ namespace CSharpParserTest
     {
       var content = new CSharp9ProjectContentProvider(CSharpParserFile);
       var project = new CSharpProject(content);
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
   }
 }

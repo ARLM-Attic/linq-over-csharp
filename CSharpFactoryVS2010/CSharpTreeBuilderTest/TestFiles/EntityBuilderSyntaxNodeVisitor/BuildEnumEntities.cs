@@ -1,10 +1,6 @@
-﻿enum A
+﻿namespace A
 {
-}
-
-namespace B
-{
-  enum C
+  enum B : int
   {
   }
 }

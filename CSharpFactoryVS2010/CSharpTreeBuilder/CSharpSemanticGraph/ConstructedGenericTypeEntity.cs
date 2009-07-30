@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -12,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class ConstructedGenericTypeEntity : ConstructedTypeEntity
   {
     /// <summary>Backing field for TypeArguments property to disallow direct adding or removing.</summary>
-    private List<TypeEntityReference> _TypeArguments;
+    private List<SemanticEntityReference<TypeEntity>> _TypeArguments;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -26,10 +25,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       Parent = parent;
 
-      BaseTypes = embeddedType.BaseTypes;
+      _BaseTypes = (List<SemanticEntityReference<TypeEntity>>)embeddedType.BaseTypes;
       _Members = (List<MemberEntity>)embeddedType.Members;
 
-      _TypeArguments = new List<TypeEntityReference>();
+      _TypeArguments = new List<SemanticEntityReference<TypeEntity>>();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a reference type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsReferenceType
+    {
+      get { return true; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -38,7 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Empty list for non-generic types and open generic types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TypeEntityReference> TypeArguments
+    public IEnumerable<SemanticEntityReference<TypeEntity>> TypeArguments
     {
       get { return _TypeArguments; }
     }
@@ -49,7 +58,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="typeArgument">A type argument, which is a TypeEntityReference.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddTypeArgument(TypeEntityReference typeArgument)
+    public void AddTypeArgument(SemanticEntityReference<TypeEntity> typeArgument)
     {
       _TypeArguments.Add(typeArgument);
     }
@@ -78,7 +87,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           }
 
           distinctiveName.Append(typeArgument.ResolutionState == ResolutionState.Resolved
-                                   ? typeArgument.TypeEntity.FullyQualifiedName
+                                   ? typeArgument.TargetEntity.FullyQualifiedName
                                    : "?");
         }
         distinctiveName.Append('>');

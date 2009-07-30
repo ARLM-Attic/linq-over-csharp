@@ -21,7 +21,7 @@ namespace CSharpTreeBuilderTest
       project.AddAssemblyReference("System.Core");
       project.AddAssemblyReference("System.Windows.Forms");
       project.AddAssemblyReference("System.Xml.Linq");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
   }
 }

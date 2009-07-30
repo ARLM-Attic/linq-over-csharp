@@ -12,8 +12,6 @@
 
     public virtual void Visit(NamespaceEntity entity) { }
     public virtual void Visit(TypeEntity entity) { }
-    public virtual void Visit(ClassEntity entity) { }
-    public virtual void Visit(StructEntity entity) { }
     public virtual void Visit(FieldEntity entity) { }
 
     #pragma warning restore 1591

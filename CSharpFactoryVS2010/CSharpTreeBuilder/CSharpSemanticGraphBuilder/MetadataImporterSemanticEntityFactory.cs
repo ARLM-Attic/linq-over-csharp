@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Collections.Generic;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -13,18 +12,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   // ================================================================================================
   public class MetadataImporterSemanticEntityFactory
   {
-    /// <summary>The project used for reporting compilation messages.</summary>
-    private CSharpProject _Project;
+    /// <summary>Error handler object used for reporting compilation messages.</summary>
+    private ICompilationErrorHandler _ErrorHandler;
+
+    /// <summary>A map to resolve metadata objects to semantic entities.</summary>
+    private IMetadataToEntityMap _MetadataToEntityMap;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MetadataImporterSemanticEntityFactory"/> class.
     /// </summary>
-    /// <param name="project">The project used for reporting compilation messages.</param>
+    /// <param name="errorHandler">Error handler object used for reporting compilation messages.</param>
+    /// <param name="metadataToEntityMap">A cache that maps metadata objects to semantic entities.</param>
     // ----------------------------------------------------------------------------------------------
-    public MetadataImporterSemanticEntityFactory(CSharpProject project)
+    public MetadataImporterSemanticEntityFactory(ICompilationErrorHandler errorHandler, IMetadataToEntityMap metadataToEntityMap)
     {
-      _Project = project;
+      _ErrorHandler = errorHandler;
+      _MetadataToEntityMap = metadataToEntityMap;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -50,12 +54,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       catch (System.IO.FileNotFoundException)
       {
-        ((ICompilationErrorHandler) _Project).Error("CS0006", null, "Metadata file '{0}' could not be found.", filename);
+        _ErrorHandler.Error("CS0006", null, "Metadata file '{0}' could not be found.", filename);
         return;
       }
       catch (System.BadImageFormatException)
       {
-        ((ICompilationErrorHandler) _Project).Error("CS0009", null, 
+        _ErrorHandler.Error("CS0009", null, 
           "Metadata file '{0}' could not be opened. -- An attempt was made to load a program with an incorrect format.", filename);
         return;
       }
@@ -164,9 +168,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // If the namespace name is found, but is not definite then we stop creating new entities.
           if (nameTableEntry.State != NameTableEntryState.Definite)
           {
-            ((ICompilationErrorHandler) _Project).Warning("TBD", null,
-                                                          "Ambigous name '{0}' found in declaration space '{1}'.",
-                                                          namespaceTag, contextEntity.FullyQualifiedName);
+            _ErrorHandler.Warning("TBD", null, "Ambigous name '{0}' found in declaration space '{1}'.",
+                                  namespaceTag, contextEntity.FullyQualifiedName);
             return null;
           }
 
@@ -193,7 +196,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="contextEntity">The context where the new type will be created.</param>
     /// <param name="type">A reflected type.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void CreateTypeEntityFromReflectedType(NamespaceOrTypeEntity contextEntity, Type type)
+    private void CreateTypeEntityFromReflectedType(NamespaceOrTypeEntity contextEntity, Type type)
     {
       // Find out whether this name already exists in this declaration space.
       var nameTableEntry = contextEntity.DeclarationSpace[type.Name 
@@ -252,6 +255,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException(string.Format("Type '{0}' not handled by CreatSemanticEntityFromType", type));
       }
 
+      // Populate base type and base interfaces
+      if (type.BaseType != null)
+      {
+        typeEntity.AddBaseType(new ReflectedTypeBasedTypeEntityReference(type.BaseType));
+      }
+      foreach (var interfaceItem in type.GetInterfaces())
+      {
+        typeEntity.AddBaseType(new ReflectedTypeBasedTypeEntityReference(interfaceItem));
+      }
+
       // If it's a generic type, then add type parameters
       if (typeEntity is GenericCapableTypeEntity && type.IsGenericTypeDefinition)
       {
@@ -270,6 +283,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       if (typeEntity != null)
       {
         parentContextEntity.AddChildType(typeEntity);
+        _MetadataToEntityMap.AddMapping(type, typeEntity);
       }
     }
 

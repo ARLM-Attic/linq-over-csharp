@@ -18,6 +18,6 @@
     /// Gets the type of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    TypeEntityReference Type { get; }
+    SemanticEntityReference<TypeEntity> Type { get; }
   }
 }

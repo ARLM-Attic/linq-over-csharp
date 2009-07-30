@@ -25,7 +25,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\CompilationUnitNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var compilationUnitNode = project.SyntaxTree.CompilationUnitNodes[0];
 
       // Arrange
@@ -78,7 +78,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\TypeOrNamespaceNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var typeOrNamespaceNode = project.SyntaxTree.CompilationUnitNodes[0].UsingNodes[0].TypeName;
 
       // Arrange
@@ -123,7 +123,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\ClassDeclarationNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var classDeclarationNode = (ClassDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
@@ -446,7 +446,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\StructDeclarationNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var structDeclarationNode = (StructDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
@@ -625,7 +625,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\InterfaceDeclarationNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var interfaceDeclarationNode = (InterfaceDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
@@ -707,7 +707,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\EnumDeclarationNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var enumDeclarationNode = (EnumDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
@@ -756,7 +756,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\DelegateDeclarationNodeVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var delegateDeclarationNode = (DelegateDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0];
 
       // Arrange
@@ -814,7 +814,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\StatementVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       
       // method1 includes all kinds of statements except yield-s
       var method1Body = ((MethodDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0]).Body;
@@ -1142,7 +1142,7 @@ namespace CSharpTreeBuilderTest.Ast
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\ExpressionVisitorTest.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       // The first method includes a collection initializer with all kinds of expressions
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;

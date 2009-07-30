@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a pointer to a type.
   /// </summary>
   // ================================================================================================
-  public sealed class PointerToTypeEntity : ConstructedTypeEntity, IPointerType
+  public sealed class PointerToTypeEntity : ConstructedTypeEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -18,6 +18,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public PointerToTypeEntity(TypeEntity embeddedType)
       : base(embeddedType)
     {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a pointer type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsPointerType
+    {
+      get { return true; }
     }
 
     // ----------------------------------------------------------------------------------------------

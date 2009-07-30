@@ -71,6 +71,19 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the collection of base types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeOrNamespaceNodeCollection BaseTypes
+    {
+      get
+      {
+        return new TypeOrNamespaceNodeCollection() {EnumBase};
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the collection of enumeration values.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

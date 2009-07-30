@@ -6,6 +6,7 @@
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SoftwareApproach.TestingExtensions;
 
 namespace CSharpTreeBuilderTest
 {
@@ -111,6 +112,17 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(enumDecl.Values.Count, 2);
       Assert.AreEqual(enumDecl.Values[0].Identifier, "EnumVal1");
       Assert.AreEqual(enumDecl.Values[1].Identifier, "Enumval2");
+    }
+
+    [TestMethod]
+    public void EnumDeclarationWithBaseType()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EnumDeclaration\EnumDeclarationWithBaseType.cs");
+      Assert.IsTrue(InvokeParser(project));
+
+      var enumDecl = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
+      enumDecl.EnumBase.TypeTags[0].Identifier.ShouldEqual("int");
     }
   }
 }

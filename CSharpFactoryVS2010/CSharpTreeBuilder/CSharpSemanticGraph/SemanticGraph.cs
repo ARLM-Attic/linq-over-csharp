@@ -9,13 +9,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// (a project is a group of source files compiled together and a group of referenced assemblies).
   /// </summary>
   // ================================================================================================
-  public sealed class SemanticGraph
+  public sealed class SemanticGraph : IMetadataToEntityMap
   {
     /// <summary>The name of the global namespace.</summary>
     private const string GLOBAL_NAMESPACE_NAME = "global";
 
     /// <summary>A dictionary of root namespace entities. The key is the name of the root namespace.</summary>
     private Dictionary<string, RootNamespaceEntity> _RootNamespaces;
+
+    /// <summary>A cache that maps metadata objects to semantic entities.</summary>
+    private Dictionary<System.Reflection.MemberInfo, SemanticEntity> _MetadataToEntityMap;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -25,6 +28,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public SemanticGraph()
     {
       _RootNamespaces = new Dictionary<string, RootNamespaceEntity>();
+      _MetadataToEntityMap = new Dictionary<System.Reflection.MemberInfo, SemanticEntity>();
 
       AddRootNamespace(new RootNamespaceEntity(GLOBAL_NAMESPACE_NAME));
     }
@@ -76,6 +80,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _RootNamespaces.Add(rootNamespaceEntity.Name, rootNamespaceEntity);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a metadata+entity pair to the mapping cache.
+    /// </summary>
+    /// <param name="metadata">A metadata object.</param>
+    /// <param name="semanticEntity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddMapping(System.Reflection.MemberInfo metadata, SemanticEntity semanticEntity)
+    {
+      if (!_MetadataToEntityMap.ContainsKey(metadata))
+      {
+        _MetadataToEntityMap.Add(metadata, semanticEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Indexer operator that returns the semantic entity that is mapped to the supplied metadata object.
+    /// </summary>
+    /// <param name="metadata">A metadata object.</param>
+    /// <returns>The semantic entity mapped to the metadata object. Null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntity this[System.Reflection.MemberInfo metadata]
+    {
+      get
+      {
+        return _MetadataToEntityMap.ContainsKey(metadata) ? _MetadataToEntityMap[metadata] : null;
+      }
+    }
+    
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

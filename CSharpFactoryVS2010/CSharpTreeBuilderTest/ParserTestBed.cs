@@ -114,7 +114,32 @@ namespace CSharpTreeBuilderTest
     // --------------------------------------------------------------------------------------------
     public bool InvokeParser(CSharpProject project)
     {
-      project.Build();
+      return InvokeParser(project, true, true);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Invokes the parser for the specified C# project.
+    /// </summary>
+    /// <param name="project">The project to invoke the parser on.</param>
+    /// <param name="buildSyntaxTree">True to invoke BuildSyntaxTree on project.</param>
+    /// <param name="buildSemanticTree">True to invoke BuildSemanticTree on project.</param>
+    /// <returns>
+    /// True, if parsing is successful; otherwise, false.
+    /// </returns>
+    // --------------------------------------------------------------------------------------------
+    public bool InvokeParser(CSharpProject project, bool buildSyntaxTree, bool buildSemanticTree)
+    {
+      if (buildSyntaxTree)
+      {
+        project.BuildSyntaxTree();
+      }
+
+      if (buildSemanticTree)
+      {
+        project.BuildSemanticTree();
+      }
+
       var errors = project.Errors.Count;
       Console.WriteLine("{0} errors detected", errors);
       foreach (var error in project.Errors)
@@ -130,6 +155,7 @@ namespace CSharpTreeBuilderTest
           warning.Code, warning.Description, warning.CompilationUnitNode.Name);
       }
       Console.WriteLine();
+
       return errors == 0;
     }
 

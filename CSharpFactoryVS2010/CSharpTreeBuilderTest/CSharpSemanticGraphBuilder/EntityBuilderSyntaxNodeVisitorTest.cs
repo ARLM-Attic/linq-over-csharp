@@ -26,9 +26,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildNamespaceEntities.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -154,9 +154,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildClassEntities.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -185,6 +185,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         classEntity.DeclarationSpace.NameCount.ShouldEqual(1);
         ((ClassEntity)classEntity.DeclarationSpace["B"].Entity).FullyQualifiedName.ShouldEqual("A.B");
+
+        classEntity.IsGeneric.ShouldBeFalse();
+        classEntity.IsPointerType.ShouldBeFalse();
+        classEntity.IsReferenceType.ShouldBeTrue();
+        classEntity.IsValueType.ShouldBeFalse();
       }
       // class B
       {
@@ -226,8 +231,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.ChildTypes.Count.ShouldEqual(0);
         classEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
-        classEntity.BaseTypes.Count.ShouldEqual(1);
-        classEntity.BaseTypes[0].SyntaxNode.TypeTags[0].Identifier.ShouldEqual("A");
+        classEntity.BaseTypes.Count().ShouldEqual(1);
+        ((TypeOrNamespaceNodeBasedTypeEntityReference)classEntity.BaseTypes.ToArray()[0]).SyntaxNode.TypeTags[0].Identifier.ShouldEqual("A");
       }
     }
 
@@ -241,52 +246,198 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildEnumEntities.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
       {
         var namespaceEntity = semanticGraph.GlobalNamespace;
         namespaceEntity.FullyQualifiedName.ShouldEqual("global");
-
-        namespaceEntity.ChildTypes.Count.ShouldEqual(1);
-        ((EnumEntity)namespaceEntity.ChildTypes[0]).FullyQualifiedName.ShouldEqual("A");
-
-        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(2);
-        ((EnumEntity)namespaceEntity.DeclarationSpace["A"].Entity).FullyQualifiedName.ShouldEqual("A");
-        ((NamespaceEntity)namespaceEntity.DeclarationSpace["B"].Entity).FullyQualifiedName.ShouldEqual("B");
+        namespaceEntity.ChildNamespaces.Count.ShouldEqual(1);
+        namespaceEntity.ChildNamespaces[0].FullyQualifiedName.ShouldEqual("A");
       }
       // enum A
       {
-        var enumEntity = semanticGraph.GlobalNamespace.ChildTypes[0] as EnumEntity;
-        enumEntity.FullyQualifiedName.ShouldEqual("A");
-        enumEntity.Name.ShouldEqual("A");
-        ((RootNamespaceEntity)enumEntity.Parent).FullyQualifiedName.ShouldEqual("global");
-        enumEntity.SyntaxNodes.Count.ShouldEqual(1);
-        enumEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0]);
-
-        enumEntity.DeclarationSpace.NameCount.ShouldEqual(0);
-      }
-      // namespace B
-      {
-        var namespaceEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
-        namespaceEntity.FullyQualifiedName.ShouldEqual("B");
-
-        namespaceEntity.ChildTypes.Count.ShouldEqual(1);
-        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(1);
-      }
-      // enum C
-      {
         var enumEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as EnumEntity;
-        enumEntity.Name.ShouldEqual("C");
-        enumEntity.FullyQualifiedName.ShouldEqual("B.C");
-        ((NamespaceEntity)enumEntity.Parent).FullyQualifiedName.ShouldEqual("B");
+        enumEntity.Name.ShouldEqual("B");
+        enumEntity.DistinctiveName.ShouldEqual("B");
+        enumEntity.FullyQualifiedName.ShouldEqual("A.B");
+        ((NamespaceEntity)enumEntity.Parent).FullyQualifiedName.ShouldEqual("A");
         enumEntity.SyntaxNodes.Count.ShouldEqual(1);
         enumEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]);
 
+        enumEntity.IsPointerType.ShouldBeFalse();
+        enumEntity.IsReferenceType.ShouldBeFalse();
+        enumEntity.IsValueType.ShouldBeTrue();
+
         enumEntity.DeclarationSpace.NameCount.ShouldEqual(0);
+
+        var baseTypes = enumEntity.BaseTypes.ToArray();
+        baseTypes.Length.ShouldEqual(1);
+        baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+          project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of struct entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildStructEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildStructEntities.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // global root namespace
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace;
+        namespaceEntity.FullyQualifiedName.ShouldEqual("global");
+      }
+      // namespace A
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
+        namespaceEntity.FullyQualifiedName.ShouldEqual("A");
+        namespaceEntity.ChildTypes.Count.ShouldEqual(1);
+        namespaceEntity.ChildTypes[0].FullyQualifiedName.ShouldEqual("A.B");
+        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(1);
+        ((StructEntity)namespaceEntity.DeclarationSpace["B"].Entity).FullyQualifiedName.ShouldEqual("A.B");
+      }
+      // struct B
+      {
+        var structEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as StructEntity;
+        structEntity.Name.ShouldEqual("B");
+        structEntity.DistinctiveName.ShouldEqual("B");
+        structEntity.FullyQualifiedName.ShouldEqual("A.B");
+        ((NamespaceEntity)structEntity.Parent).FullyQualifiedName.ShouldEqual("A");
+        structEntity.SyntaxNodes.Count.ShouldEqual(1);
+        structEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]);
+
+        structEntity.IsGeneric.ShouldBeFalse();
+        structEntity.IsPointerType.ShouldBeFalse();
+        structEntity.IsReferenceType.ShouldBeFalse();
+        structEntity.IsValueType.ShouldBeTrue();
+
+        structEntity.DeclarationSpace.NameCount.ShouldEqual(0);
+
+        var baseTypes = structEntity.BaseTypes.ToArray();
+        baseTypes.Length.ShouldEqual(1);
+        baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+          project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of interface entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildInterfaceEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildInterfaceEntities.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // global root namespace
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace;
+        namespaceEntity.FullyQualifiedName.ShouldEqual("global");
+      }
+      // namespace A
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
+        namespaceEntity.FullyQualifiedName.ShouldEqual("A");
+        namespaceEntity.ChildTypes.Count.ShouldEqual(1);
+        namespaceEntity.ChildTypes[0].FullyQualifiedName.ShouldEqual("A.B");
+        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(1);
+        ((InterfaceEntity)namespaceEntity.DeclarationSpace["B"].Entity).FullyQualifiedName.ShouldEqual("A.B");
+      }
+      // interface B
+      {
+        var interfaceEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as InterfaceEntity;
+        interfaceEntity.Name.ShouldEqual("B");
+        interfaceEntity.DistinctiveName.ShouldEqual("B");
+        interfaceEntity.FullyQualifiedName.ShouldEqual("A.B");
+        ((NamespaceEntity)interfaceEntity.Parent).FullyQualifiedName.ShouldEqual("A");
+        interfaceEntity.SyntaxNodes.Count.ShouldEqual(1);
+        interfaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]);
+
+        interfaceEntity.IsGeneric.ShouldBeFalse();
+        interfaceEntity.IsPointerType.ShouldBeFalse();
+        interfaceEntity.IsReferenceType.ShouldBeTrue();
+        interfaceEntity.IsValueType.ShouldBeFalse();
+
+        interfaceEntity.DeclarationSpace.NameCount.ShouldEqual(0);
+
+        var baseTypes = interfaceEntity.BaseTypes.ToArray();
+        baseTypes.Length.ShouldEqual(1);
+        baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((TypeOrNamespaceNodeBasedTypeEntityReference) baseTypes[0]).SyntaxNode.ShouldEqual(
+          project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of delegate entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildDelegateEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildDelegateEntities.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // global root namespace
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace;
+        namespaceEntity.FullyQualifiedName.ShouldEqual("global");
+        namespaceEntity.ChildNamespaces.Count.ShouldEqual(1);
+        namespaceEntity.ChildNamespaces[0].FullyQualifiedName.ShouldEqual("A");
+        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(1);
+        ((NamespaceEntity)namespaceEntity.DeclarationSpace["A"].Entity).FullyQualifiedName.ShouldEqual("A");
+      }
+      // namespace A
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
+        namespaceEntity.FullyQualifiedName.ShouldEqual("A");
+        namespaceEntity.ChildTypes.Count.ShouldEqual(1);
+        namespaceEntity.ChildTypes[0].FullyQualifiedName.ShouldEqual("A.B");
+        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(1);
+        ((DelegateEntity)namespaceEntity.DeclarationSpace["B"].Entity).FullyQualifiedName.ShouldEqual("A.B");
+      }
+      // delegate B
+      {
+        var delegateEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as DelegateEntity;
+        delegateEntity.Name.ShouldEqual("B");
+        delegateEntity.DistinctiveName.ShouldEqual("B");
+        delegateEntity.FullyQualifiedName.ShouldEqual("A.B");
+        ((NamespaceEntity) delegateEntity.Parent).FullyQualifiedName.ShouldEqual("A");
+        delegateEntity.SyntaxNodes.Count.ShouldEqual(1);
+        delegateEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]);
+
+        delegateEntity.DeclarationSpace.NameCount.ShouldEqual(0);
+
+        delegateEntity.IsPointerType.ShouldBeFalse();
+        delegateEntity.IsReferenceType.ShouldBeTrue();
+        delegateEntity.IsValueType.ShouldBeFalse();
       }
     }
 
@@ -300,9 +451,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildGenericClassEntities.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -317,9 +468,20 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // type param T1
       {
-        var typeParamEntity = (semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity).TypeParameters.ToArray()[0];
-        typeParamEntity.FullyQualifiedName.ShouldEqual("A`2.T1");
-        ((ClassEntity) typeParamEntity.Parent).FullyQualifiedName.ShouldEqual("A`2");
+        var typeParam = (semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity).TypeParameters.ToArray()[0];
+        typeParam.Name.ShouldEqual("T1");
+        typeParam.DistinctiveName.ShouldEqual("T1");
+        typeParam.FullyQualifiedName.ShouldEqual("A`2.T1");
+        typeParam.IsPointerType.ShouldBeFalse();
+        typeParam.IsReferenceType.ShouldBeFalse();
+        typeParam.IsValueType.ShouldBeFalse();
+        typeParam.BaseTypes.Count().ShouldEqual(0);
+        typeParam.DeclarationSpace.NameCount.ShouldEqual(0);
+        typeParam.Members.Count().ShouldEqual(0);
+        typeParam.Parent.ShouldEqual(semanticGraph.GlobalNamespace.ChildTypes[0]);
+        typeParam.SyntaxNodes.Count.ShouldEqual(1);
+        typeParam.SyntaxNodes[0].ShouldEqual(
+          project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].TypeParameters[0]);
       }
       // type param T2
       {
@@ -369,9 +531,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildFieldEntities.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -400,7 +562,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.IsStatic.ShouldBeFalse();
         ((ClassEntity) fieldEntity.Parent).FullyQualifiedName.ShouldEqual("A");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
-        ((FieldTagNode) fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a1");
+        ((FieldTagNode) fieldEntity.SyntaxNodes[0]).ShouldEqual(
+          ((FieldDeclarationNode) project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0]).FieldTags[0]);
         fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
       }
       // A a1, a2;
@@ -463,9 +626,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndNamespaceSameName.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -482,9 +645,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndStructSameName.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -501,9 +664,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0102_TypeAlreadyContainsADefinition.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(semanticGraph, project);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, semanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);

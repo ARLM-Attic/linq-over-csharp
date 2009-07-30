@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents an array type entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayTypeEntity: ConstructedTypeEntity, IReferenceType
+  public sealed class ArrayTypeEntity: ConstructedTypeEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -20,6 +20,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(elementType)
     {
       Rank = rank;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a reference type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsReferenceType
+    {
+      get { return true; }
     }
 
     // ----------------------------------------------------------------------------------------------

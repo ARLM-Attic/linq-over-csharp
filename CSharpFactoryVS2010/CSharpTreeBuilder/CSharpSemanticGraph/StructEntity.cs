@@ -5,7 +5,16 @@
   /// This class represents a struct entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class StructEntity : ChildTypeCapableTypeEntity, IValueType
+  public sealed class StructEntity : ChildTypeCapableTypeEntity
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a value type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsValueType
+    {
+      get { return true; }
+    }
   }
 }

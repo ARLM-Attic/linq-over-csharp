@@ -15,20 +15,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>The semantic graph that will hold the built entities.</summary>
     private SemanticGraph _SemanticGraph;
 
-    /// <summary>The project used for reporting compilation messages.</summary>
-    private CSharpProject _Project;
+    /// <summary>Error handler object used for reporting compilation messages.</summary>
+    private ICompilationErrorHandler _ErrorHandler;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="EntityBuilderSyntaxNodeVisitor"/> class.
     /// </summary>
     /// <param name="semanticGraph">The semantic graph that will receive the built entities.</param>
-    /// <param name="project">The project used for reporting compilation messages.</param>
+    /// <param name="errorHandler">Error handler object used for reporting compilation messages.</param>
     // ----------------------------------------------------------------------------------------------
-    public EntityBuilderSyntaxNodeVisitor(SemanticGraph semanticGraph, CSharpProject project)
+    public EntityBuilderSyntaxNodeVisitor(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
     {
       _SemanticGraph = semanticGraph;
-      _Project = project;
+      _ErrorHandler = errorHandler;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -64,9 +64,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               // If the name is definite, but it's not a namespace, then signal error and get out.
               if (!(nameTableEntry.Entity is NamespaceEntity))
               {
-                ((ICompilationErrorHandler)_Project).Error("CS0101", node.StartToken,
-                                                            "The namespace '{0}' already contains a definition for '{1}'.",
-                                                            parentNamespaceEntity.FullyQualifiedName, nameTag.Identifier);
+                _ErrorHandler.Error("CS0101", node.StartToken,
+                                    "The namespace '{0}' already contains a definition for '{1}'.",
+                                    parentNamespaceEntity.FullyQualifiedName, nameTag.Identifier);
                 return;
               }
 
@@ -116,6 +116,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Creates an interface entity from an interface declaration.
+    /// </summary>
+    /// <param name="node">An interface declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(InterfaceDeclarationNode node)
+    {
+      CreateTypeEntityFromTypeDeclaration<InterfaceDeclarationNode, InterfaceEntity>(node);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Creates an enum entity from an enum declaration.
     /// </summary>
     /// <param name="node">An enum declaration syntax node.</param>
@@ -123,6 +134,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(EnumDeclarationNode node)
     {
       CreateTypeEntityFromTypeDeclaration<EnumDeclarationNode, EnumEntity>(node);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a delegate entity from a delegate declaration.
+    /// </summary>
+    /// <param name="node">A delegate declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(DelegateDeclarationNode node)
+    {
+      CreateTypeEntityFromTypeDeclaration<DelegateDeclarationNode, DelegateEntity>(node);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -160,9 +182,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             // If the name is definite, but it's not a type, then signal error and get out.
             if (!(nameTableEntry.Entity is TSemanticEntityType))
             {
-              ((ICompilationErrorHandler)_Project).Error("CS0101", node.StartToken,
-                                                          "The namespace '{0}' already contains a definition for '{1}'.",
-                                                          parentNamespaceOrTypeEntity.FullyQualifiedName, node.Name);
+              _ErrorHandler.Error("CS0101", node.StartToken,
+                                  "The namespace '{0}' already contains a definition for '{1}'.",
+                                  parentNamespaceOrTypeEntity.FullyQualifiedName, node.Name);
               return;
             }
 
@@ -182,7 +204,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         typeEntity = new TSemanticEntityType() { Name = node.Name };
         foreach (var baseType in node.BaseTypes)
         {
-          typeEntity.BaseTypes.Add(new NamespaceOrTypeEntityReference(baseType));
+          typeEntity.AddBaseType(new TypeOrNamespaceNodeBasedTypeEntityReference(baseType));
         }
         if (typeEntity is GenericCapableTypeEntity)
         {
@@ -190,6 +212,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           {
             var typeParameterEntity = new TypeParameterEntity(typeParameter.Identifier);
             ((GenericCapableTypeEntity)typeEntity).AddTypeParameter(typeParameterEntity);
+            AssociateSyntaxNodeWithSemanticEntity(typeParameter, typeParameterEntity);
           }
         }
 
@@ -274,16 +297,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Check if this name is already in use in this declaration space
         if (parentTypeEntity.DeclarationSpace.IsNameDefined(fieldTag.Identifier))
         {
-          ((ICompilationErrorHandler) _Project).Error("CS0102", node.StartToken,
-                                                      "The type '{0}' already contains a definition for '{1}'.",
-                                                      parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
+          _ErrorHandler.Error("CS0102", node.StartToken, "The type '{0}' already contains a definition for '{1}'.",
+                              parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
           
           // Continue with the next field tag.
           continue;
         }
 
         // Create a semantic entity, add to its parent, and add to the graph.
-        var fieldEntity = new FieldEntity(fieldTag.Identifier, true, new TypeEntityReference(node.TypeName), node.IsStatic);
+        var fieldEntity = new FieldEntity(fieldTag.Identifier, true,
+                                          new TypeOrNamespaceNodeBasedTypeEntityReference(node.TypeName),
+                                          node.IsStatic);
         parentTypeEntity.AddMember(fieldEntity);
 
         AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);

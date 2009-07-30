@@ -16,7 +16,7 @@
     /// <param name="type">The type of the field (a type entity reference).</param>
     /// <param name="isStatic">True, if the field is static, false otherwise.</param>
     // ----------------------------------------------------------------------------------------------
-    public FieldEntity(string name, bool isExplicitlyDefined, TypeEntityReference type, bool isStatic)
+    public FieldEntity(string name, bool isExplicitlyDefined, SemanticEntityReference<TypeEntity> type, bool isStatic)
       : base(name, isExplicitlyDefined)
     {
       Type = type;
@@ -28,7 +28,7 @@
     /// Gets the type of the field.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntityReference Type { get; private set; }
+    public SemanticEntityReference<TypeEntity> Type { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -74,7 +74,6 @@
     <Compile Include="CSharpSemanticGraph\SemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraph\DeclarationSpaceTest.cs" />
     <Compile Include="CSharpSemanticGraph\EnumEntityTest.cs" />
-    <Compile Include="CSharpSemanticGraph\NamespaceOrTypeEntityReferenceTest.cs" />
     <Compile Include="ParserExtensions.cs" />
     <Compile Include="ParserTestBed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -326,7 +325,12 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndNamespaceSameName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndStructSameName.cs" />
     <None Include="TestFiles\MetadataImporterSemanticEntityFactory\ImportToExistingNamespace.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildStructEntities.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildInterfaceEntities.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildDelegateEntities.cs" />
+    <Compile Include="TestFiles\EnumDeclaration\EnumDeclarationWithBaseType.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeResolution\BuiltInTypes.cs" />
     <None Include="TestFiles\TypeResolution\ArrayType.cs" />
     <None Include="TestFiles\TypeResolution\PointerToUnknown.cs" />
     <None Include="TestFiles\TypeResolution\NullableType.cs" />

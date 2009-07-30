@@ -6,7 +6,12 @@
 using System;
 using System.Collections.Generic;
 using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpSemanticGraph;
+
+// TODO: remove reference to CSharpTreeBuilder.Cst
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.Cst;
+// TODO: remove reference to CSharpTreeBuilder.CSharpAstBuilder
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.ProjectContent
@@ -30,8 +35,9 @@ namespace CSharpTreeBuilder.ProjectContent
       SyntaxTree = new CSharpSyntaxTree();
       Errors = new CompilationMessageCollection();
       Warnings = new CompilationMessageCollection();
-      SemanticsTree = new CSharpSemanticsTree();
+      SemanticGraph = new SemanticGraph();
       ConditionalSymbols = new List<string>();
+      ReferencedAssemblyFilenames = new List<string>();
 
       // --- Set up the default error handling parameters
       ErrorMessageFormat = "-- line {0} col {1}: {2}";
@@ -112,10 +118,10 @@ namespace CSharpTreeBuilder.ProjectContent
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the semantics tree representing this project.
+    /// Gets the semantic graph representing this project.
     /// </summary>
     // --------------------------------------------------------------------------------------------
-    public CSharpSemanticsTree SemanticsTree { get; private set; }
+    public SemanticGraph SemanticGraph { get; private set; }
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
@@ -123,6 +129,13 @@ namespace CSharpTreeBuilder.ProjectContent
     /// </summary>
     // --------------------------------------------------------------------------------------------
     public List<string> ConditionalSymbols { get; private set; }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of referenced assembly filenames.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    public List<string> ReferencedAssemblyFilenames { get; private set; }
 
     #endregion
 
@@ -162,7 +175,6 @@ namespace CSharpTreeBuilder.ProjectContent
       SyntaxTree.Reset();
       ConditionalSymbols.Clear();
       foreach (var item in ProjectProvider.ConditionalSymbols) ConditionalSymbols.Add(item);
-      SemanticsTree.Reset();
       Errors.Clear();
       Warnings.Clear();
 
@@ -182,10 +194,25 @@ namespace CSharpTreeBuilder.ProjectContent
     // --------------------------------------------------------------------------------------------
     public void BuildSemanticTree()
     {
-      // --- Init the semantics tree, but leave existing messages
-      SemanticsTree.Reset();
+      // Create a factory that imports metadata from assemblies to the semantic graph
+      var factory = new MetadataImporterSemanticEntityFactory(this, SemanticGraph);
 
-      // TODO: Implement semantics tree creation
+      // Load mscorlib entities into the semantic graph
+      factory.CreateEntitiesFromAssembly(typeof(int).Assembly.Location, "global", SemanticGraph);
+
+      // Load other referenced assemblies into the semantic graph
+      foreach (string filename in ReferencedAssemblyFilenames)
+      {
+        factory.CreateEntitiesFromAssembly(filename, "global", SemanticGraph);
+      }
+
+      // Create entities from ASTs
+      SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this, SemanticGraph));
+
+      // Resolve type references
+      SemanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(this, SemanticGraph));
+
+      // TODO: continue
     }
 
     // --------------------------------------------------------------------------------------------

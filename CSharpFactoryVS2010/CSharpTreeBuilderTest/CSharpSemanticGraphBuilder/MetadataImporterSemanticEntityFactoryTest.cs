@@ -28,7 +28,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       var semanticGraph = new SemanticGraph();
-      var factory = new MetadataImporterSemanticEntityFactory(project);
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
 
       CheckTestAssemblyImportResult(semanticGraph);
@@ -149,7 +149,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the metadata import to an existing namespace
+    /// EntityBuilder already created a namespace that metadata importer also wants to create.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
@@ -158,14 +158,47 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // Set up SyntaxTree and SemanticGraph
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"MetadataImporterSemanticEntityFactory\ImportToExistingNamespace.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var semanticGraph = new SemanticGraph();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(semanticGraph, project));
-      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project));
+      
+      // First the entity builder and resolver
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, semanticGraph));
+      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project, semanticGraph));
 
-      var factory = new MetadataImporterSemanticEntityFactory(project);
+      // Then the importer
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
 
+      // Check resulting semantic graph
+      CheckTestAssemblyImportResult(semanticGraph);
+
+      // check namespace A
+      semanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeTrue();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Metadata importer already created a namespace that entity builder also wants to create.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildingAnExistingNamespace()
+    {
+      // Set up SyntaxTree and SemanticGraph
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MetadataImporterSemanticEntityFactory\ImportToExistingNamespace.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var semanticGraph = new SemanticGraph();
+      
+      // First the import
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
+      factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global", semanticGraph);
+      
+      // Then the entity builder and resolver
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, semanticGraph));
+      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project, semanticGraph));
+
+      // Check resulting semantic graph
       CheckTestAssemblyImportResult(semanticGraph);
 
       // check namespace A
@@ -182,7 +215,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       var semanticGraph = new SemanticGraph();
-      var factory = new MetadataImporterSemanticEntityFactory(project);
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(@"c:\nosuchfile.dll", "global", semanticGraph);
 
       project.Errors.Count.ShouldEqual(1);
@@ -199,7 +232,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       var semanticGraph = new SemanticGraph();
-      var factory = new MetadataImporterSemanticEntityFactory(project);
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(Path.Combine(Environment.SystemDirectory, @"ntdll.dll"), "global", semanticGraph);
 
       project.Errors.Count.ShouldEqual(1);
@@ -216,8 +249,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       var semanticGraph = new SemanticGraph();
-      var factory = new MetadataImporterSemanticEntityFactory(project);
+      var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.CreateEntitiesFromAssembly(Assembly.GetAssembly(typeof(int)).Location, "global", semanticGraph);
+      semanticGraph.AcceptVisitor(new TypeResolverSemanticGraphVisitor(project, semanticGraph));
 
       project.Warnings.Count.ShouldEqual(0);
       project.Errors.Count.ShouldEqual(0);

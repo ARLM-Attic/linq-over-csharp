@@ -9,6 +9,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class TypeEntity : NamespaceOrTypeEntity
   {
+    /// <summary>Backing field for BaseTypes property.</summary>
+    protected List<SemanticEntityReference<TypeEntity>> _BaseTypes;
+
     /// <summary>Backing field for Members property.</summary>
     protected List<MemberEntity> _Members;
 
@@ -19,23 +22,70 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected TypeEntity()
     {
-      BaseTypes = new List<NamespaceOrTypeEntityReference>();
+      _BaseTypes = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of base types.
+    /// Gets a value indicating whether this type is a reference type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<NamespaceOrTypeEntityReference> BaseTypes { get; protected set; }
+    public virtual bool IsReferenceType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a value type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsValueType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a pointer type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsPointerType 
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of base types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypes
+    {
+      get { return _BaseTypes; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets an iterate-only collection of members.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<MemberEntity> Members { get { return _Members; } }
+    public virtual IEnumerable<MemberEntity> Members
+    {
+      get { return _Members; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a base type.
+    /// </summary>
+    /// <param name="typeEntityReference">A type entity reference.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddBaseType(SemanticEntityReference<TypeEntity> typeEntityReference)
+    {
+      _BaseTypes.Add(typeEntityReference);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

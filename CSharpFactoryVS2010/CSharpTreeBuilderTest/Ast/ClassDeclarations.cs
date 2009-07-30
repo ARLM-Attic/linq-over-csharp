@@ -18,7 +18,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration1.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.TypeDeclarations.Count.ShouldEqual(3);
       var classDecl = source.TypeDeclarations[0] as ClassDeclarationNode;
@@ -72,7 +72,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration1.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.TypeDeclarations.Count.ShouldEqual(3);
       var classDecl = source.TypeDeclarations[0] as ClassDeclarationNode;
@@ -124,7 +124,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.ShouldNotBeNull();
       source.UsingNodes.Count.ShouldEqual(2);
@@ -269,12 +269,12 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var treeWriter = new SyntaxTreeTextWriter(project.SyntaxTree, project.ProjectProvider) { WorkingFolder = TempOutputFolder };
       treeWriter.WriteTree();
       project = new CSharpProject(TempOutputFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration8.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
   }
 }

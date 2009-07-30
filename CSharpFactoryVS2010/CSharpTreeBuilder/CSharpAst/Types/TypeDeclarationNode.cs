@@ -72,7 +72,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeCollection BaseTypes { get; private set; }
+    public virtual TypeOrNamespaceNodeCollection BaseTypes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -9,7 +9,7 @@
   /// but 'void' is not a type. (Though 'void*' is a type).
   /// </remarks>
   // ================================================================================================
-  public sealed class PointerToUnknownTypeEntity : TypeEntity, IPointerType
+  public sealed class PointerToUnknownTypeEntity : TypeEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -18,8 +18,31 @@
     // ----------------------------------------------------------------------------------------------
     public PointerToUnknownTypeEntity()
     {
-      DeclarationSpace = null;
       Name = "void*";
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a pointer type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsPointerType
+    {
+      get { return true; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the declaration space of the entity. 
+    /// For a void* it is null.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override DeclarationSpace DeclarationSpace
+    {
+      get
+      {
+        return null;
+      }
     }
   }
 }

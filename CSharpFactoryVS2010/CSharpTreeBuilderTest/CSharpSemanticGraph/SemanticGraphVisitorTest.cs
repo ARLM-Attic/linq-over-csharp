@@ -26,10 +26,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       // Create semantic graph
       var semanticGraph = new SemanticGraph();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(semanticGraph,project));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, semanticGraph));
 
       // Arrange
       var mocks = new MockRepository();

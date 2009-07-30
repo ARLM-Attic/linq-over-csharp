@@ -18,7 +18,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"StructDeclaration\StructDeclaration3.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.TypeDeclarations.Count.ShouldEqual(1);
       source.NamespaceDeclarations.Count.ShouldEqual(1);
@@ -112,7 +112,7 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"StructDeclaration\StructDeclaration3.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       source.NamespaceDeclarations.Count.ShouldEqual(1);
       var nsDecl = source.NamespaceDeclarations[0];
@@ -206,12 +206,12 @@ namespace CSharpTreeBuilderTest.Ast
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"StructDeclaration\StructDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var treeWriter = new SyntaxTreeTextWriter(project.SyntaxTree, project.ProjectProvider) { WorkingFolder = TempOutputFolder };
       treeWriter.WriteTree();
       project = new CSharpProject(TempOutputFolder);
       project.AddFile(@"StructDeclaration\StructDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
   }

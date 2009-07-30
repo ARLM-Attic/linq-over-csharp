@@ -5,8 +5,11 @@
   /// This is the abstract base class of namespace and type entities.
   /// </summary>
   // ================================================================================================
-  public abstract class NamespaceOrTypeEntity : SemanticEntity, INamedEntity
+  public abstract class NamespaceOrTypeEntity : SemanticEntity, INamedEntity, IDefinesDeclarationSpace
   {
+    /// <summary>Backing field for DeclarationSpace property.</summary>
+    private readonly DeclarationSpace _DeclarationSpace;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceOrTypeEntity"/> class.
@@ -14,7 +17,7 @@
     // ----------------------------------------------------------------------------------------------
     protected NamespaceOrTypeEntity()
     {
-      DeclarationSpace = new DeclarationSpace();
+      _DeclarationSpace = new DeclarationSpace();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -22,7 +25,10 @@
     /// Gets the declaration space of the entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual DeclarationSpace DeclarationSpace { get; protected set; }
+    public virtual DeclarationSpace DeclarationSpace
+    {
+      get { return _DeclarationSpace; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
