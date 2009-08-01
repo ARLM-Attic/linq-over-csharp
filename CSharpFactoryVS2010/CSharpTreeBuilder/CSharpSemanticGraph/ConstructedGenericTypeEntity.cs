@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -11,24 +12,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class ConstructedGenericTypeEntity : ConstructedTypeEntity
   {
     /// <summary>Backing field for TypeArguments property to disallow direct adding or removing.</summary>
-    private List<SemanticEntityReference<TypeEntity>> _TypeArguments;
+    private List<SemanticEntityReference<TypeEntity>> _OwnTypeArguments;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstructedGenericTypeEntity"/> class.
     /// </summary>
     /// <param name="underlyingType">An open generic type.</param>
-    /// <param name="parent">The parent entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstructedGenericTypeEntity(GenericCapableTypeEntity underlyingType, NamespaceOrTypeEntity parent)
+    public ConstructedGenericTypeEntity(GenericCapableTypeEntity underlyingType)
       : base(underlyingType)
     {
-      Parent = parent;
-
       _BaseTypes = (List<SemanticEntityReference<TypeEntity>>)underlyingType.BaseTypes;
       _Members = (List<MemberEntity>)underlyingType.Members;
 
-      _TypeArguments = new List<SemanticEntityReference<TypeEntity>>();
+      _OwnTypeArguments = new List<SemanticEntityReference<TypeEntity>>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -43,13 +41,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of type arguments of this type. 
-    /// Empty list for non-generic types and open generic types.
+    /// Gets the list of the own type arguments of this type (no parents' arguments included).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<SemanticEntityReference<TypeEntity>> TypeArguments
+    public IEnumerable<SemanticEntityReference<TypeEntity>> OwnTypeArguments
     {
-      get { return _TypeArguments; }
+      get
+      {
+        return _OwnTypeArguments;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the list of all type arguments of this type 
+    /// (including the parent constructed generic types' arguments). 
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<SemanticEntityReference<TypeEntity>> AllTypeArguments
+    {
+      get
+      {
+        return Parent is ConstructedGenericTypeEntity
+                 ? (Parent as ConstructedGenericTypeEntity).AllTypeArguments.Concat(_OwnTypeArguments)
+                 : _OwnTypeArguments;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -60,7 +76,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeArgument(SemanticEntityReference<TypeEntity> typeArgument)
     {
-      _TypeArguments.Add(typeArgument);
+      _OwnTypeArguments.Add(typeArgument);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -76,11 +92,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         var distinctiveName = new StringBuilder(UnderlyingType.DistinctiveName);
 
-        distinctiveName.Append('<');
+        distinctiveName.Append('[');
         bool firstTypeArg = true;
-        foreach (var typeArgument in TypeArguments)
+        foreach (var typeArgument in AllTypeArguments)
         {
-          if (firstTypeArg) { firstTypeArg = false; }
+          if (firstTypeArg)
+          {
+            firstTypeArg = false;
+          }
           else
           {
             distinctiveName.Append(',');
@@ -90,7 +109,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
                                    ? typeArgument.TargetEntity.FullyQualifiedName
                                    : "?");
         }
-        distinctiveName.Append('>');
+        distinctiveName.Append(']');
 
         return distinctiveName.ToString();
       }

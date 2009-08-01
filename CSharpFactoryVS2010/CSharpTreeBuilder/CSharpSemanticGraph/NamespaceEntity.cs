@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -60,6 +61,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       ChildNamespaces.Add(namespaceEntity);
       namespaceEntity.Parent = this;
       DeclarationSpace.Define(namespaceEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child namespace by name. 
+    /// </summary>
+    /// <param name="name">An identifier.</param>
+    /// <returns>A child namespace entity, if one found by name. Null if none or more was found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceEntity GetChildNamespaceByName(string name)
+    {
+      var resultSet = from childNamespace in ChildNamespaces 
+                      where childNamespace.Name == name 
+                      select childNamespace;
+      if (resultSet.Count()==1)
+      {
+        return resultSet.First();
+      }
+      return null;
     }
 
     // ----------------------------------------------------------------------------------------------

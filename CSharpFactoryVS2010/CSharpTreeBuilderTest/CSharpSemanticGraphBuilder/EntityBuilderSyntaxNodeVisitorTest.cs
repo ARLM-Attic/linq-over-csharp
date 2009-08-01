@@ -190,6 +190,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.IsPointerType.ShouldBeFalse();
         classEntity.IsReferenceType.ShouldBeTrue();
         classEntity.IsValueType.ShouldBeFalse();
+
+        // base class is not yet resolved, so it's null
+        classEntity.BaseClassEntity.ShouldBeNull();
+
+        // TODO: basetypes, members
       }
       // class B
       {
@@ -459,65 +464,100 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // global root namespace
       {
         var namespaceEntity = semanticGraph.GlobalNamespace as NamespaceEntity;
-        namespaceEntity.ChildTypes.Count.ShouldEqual(1);
-        namespaceEntity.ChildTypes[0].FullyQualifiedName.ShouldEqual("A`2");
-
+        namespaceEntity.ChildNamespaces.Count.ShouldEqual(1);
+        namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(1);
+        ((NamespaceEntity)namespaceEntity.DeclarationSpace["N"].Entity).FullyQualifiedName.ShouldEqual("N");
+      }
+      // namespace N
+      {
+        var namespaceEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0];
         namespaceEntity.DeclarationSpace.NameCount.ShouldEqual(2);
-        ((NamespaceEntity)namespaceEntity.DeclarationSpace["A"].Entity).FullyQualifiedName.ShouldEqual("A");
-        ((ClassEntity)namespaceEntity.DeclarationSpace["A`2"].Entity).FullyQualifiedName.ShouldEqual("A`2");
-      }
-      // type param T1
-      {
-        var typeParam = (semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity).TypeParameters.ToArray()[0];
-        typeParam.Name.ShouldEqual("T1");
-        typeParam.DistinctiveName.ShouldEqual("T1");
-        typeParam.FullyQualifiedName.ShouldEqual("A`2.T1");
-        typeParam.IsPointerType.ShouldBeFalse();
-        typeParam.IsReferenceType.ShouldBeFalse();
-        typeParam.IsValueType.ShouldBeFalse();
-        typeParam.BaseTypes.Count().ShouldEqual(0);
-        typeParam.DeclarationSpace.NameCount.ShouldEqual(0);
-        typeParam.Members.Count().ShouldEqual(0);
-        typeParam.Parent.ShouldEqual(semanticGraph.GlobalNamespace.ChildTypes[0]);
-        typeParam.SyntaxNodes.Count.ShouldEqual(1);
-        typeParam.SyntaxNodes[0].ShouldEqual(
-          project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].TypeParameters[0]);
-      }
-      // type param T2
-      {
-        var typeParamEntity = (semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity).TypeParameters.ToArray()[1];
-        typeParamEntity.FullyQualifiedName.ShouldEqual("A`2.T2");
-        ((ClassEntity)typeParamEntity.Parent).FullyQualifiedName.ShouldEqual("A`2");
+        ((NamespaceEntity)namespaceEntity.DeclarationSpace["A"].Entity).FullyQualifiedName.ShouldEqual("N.A");
+        ((ClassEntity)namespaceEntity.DeclarationSpace["A`2"].Entity).FullyQualifiedName.ShouldEqual("N.A`2");
       }
       // class A<T1, T2>
       {
-        var classEntity = semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
-        classEntity.FullyQualifiedName.ShouldEqual("A`2");
+        var classEntity = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
+        classEntity.Name.ShouldEqual("A");
+        classEntity.DistinctiveName.ShouldEqual("A`2");
+        classEntity.FullyQualifiedName.ShouldEqual("N.A`2");
 
-        classEntity.ChildTypes.Count.ShouldEqual(1);
-        classEntity.ChildTypes[0].FullyQualifiedName.ShouldEqual("A`2.B`1");
+        classEntity.ChildTypes.Count.ShouldEqual(3);
+        classEntity.DeclarationSpace.NameCount.ShouldEqual(5);
+        ((TypeParameterEntity) classEntity.DeclarationSpace["T1"].Entity).FullyQualifiedName.ShouldEqual("N.A`2.T1");
+        ((TypeParameterEntity) classEntity.DeclarationSpace["T2"].Entity).FullyQualifiedName.ShouldEqual("N.A`2.T2");
+        ((ClassEntity) classEntity.DeclarationSpace["B1"].Entity).FullyQualifiedName.ShouldEqual("N.A`2.B1");
+        ((ClassEntity) classEntity.DeclarationSpace["B2`1"].Entity).FullyQualifiedName.ShouldEqual("N.A`2.B2`1");
+        ((ClassEntity) classEntity.DeclarationSpace["B3`1"].Entity).FullyQualifiedName.ShouldEqual("N.A`2.B3`1");
 
-        classEntity.DeclarationSpace.NameCount.ShouldEqual(3);
-        ((TypeParameterEntity)classEntity.DeclarationSpace["T1"].Entity).FullyQualifiedName.ShouldEqual("A`2.T1");
-        ((TypeParameterEntity)classEntity.DeclarationSpace["T2"].Entity).FullyQualifiedName.ShouldEqual("A`2.T2");
-        ((ClassEntity)classEntity.DeclarationSpace["B`1"].Entity).FullyQualifiedName.ShouldEqual("A`2.B`1");
+        classEntity.IsGeneric.ShouldBeTrue();
+        classEntity.OwnTypeParameters.ToArray().Count().ShouldEqual(2);
+        var typeParams = classEntity.AllTypeParameters.ToArray();
+        typeParams.Length.ShouldEqual(2);
+
+        // type param T1
+        {
+          var typeParam = typeParams[0];
+          typeParam.Name.ShouldEqual("T1");
+          typeParam.DistinctiveName.ShouldEqual("T1");
+          typeParam.FullyQualifiedName.ShouldEqual("N.A`2.T1");
+          typeParam.IsPointerType.ShouldBeFalse();
+          typeParam.IsReferenceType.ShouldBeFalse();
+          typeParam.IsValueType.ShouldBeFalse();
+          typeParam.BaseTypes.Count().ShouldEqual(0);
+          typeParam.DeclarationSpace.NameCount.ShouldEqual(0);
+          typeParam.Members.Count().ShouldEqual(0);
+          typeParam.Parent.ShouldEqual(classEntity);
+          typeParam.SyntaxNodes.Count.ShouldEqual(1);
+          typeParam.SyntaxNodes[0].ShouldEqual(
+            project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].TypeParameters[0]);
+        }
+        // type param T2
+        {
+          var typeParam = typeParams[1];
+          typeParam.FullyQualifiedName.ShouldEqual("N.A`2.T2");
+          typeParam.Parent.ShouldEqual(classEntity);
+        }
       }
-      // type param T3
+
+      var parentClass = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
+      int child = 0;
+      // class B1
       {
-        var typeParamEntity =
-          ((semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity).ChildTypes[0] as ClassEntity).TypeParameters.ToArray()[0];
-        typeParamEntity.FullyQualifiedName.ShouldEqual("A`2.B`1.T3");
-        ((ClassEntity)typeParamEntity.Parent).FullyQualifiedName.ShouldEqual("A`2.B`1");
+        var classEntity = parentClass.ChildTypes[child++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("N.A`2.B1");
+        var ownTypeParams = classEntity.OwnTypeParameters.ToArray();
+        ownTypeParams.Length.ShouldEqual(0);
+        var typeParams = classEntity.AllTypeParameters.ToArray();
+        typeParams.Length.ShouldEqual(2);
+        typeParams[0].FullyQualifiedName.ShouldEqual("N.A`2.T1");
+        typeParams[1].FullyQualifiedName.ShouldEqual("N.A`2.T2");
       }
-      // class B<T3>
+      // class B2<T1>
       {
-        var classEntity = (semanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity).ChildTypes[0] as ClassEntity;
-        classEntity.FullyQualifiedName.ShouldEqual("A`2.B`1");
-
-        classEntity.ChildTypes.Count.ShouldEqual(0);
-
-        classEntity.DeclarationSpace.NameCount.ShouldEqual(1);
-        ((TypeParameterEntity)classEntity.DeclarationSpace["T3"].Entity).FullyQualifiedName.ShouldEqual("A`2.B`1.T3");
+        var classEntity = parentClass.ChildTypes[child++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("N.A`2.B2`1");
+        var ownTypeParams = classEntity.OwnTypeParameters.ToArray();
+        ownTypeParams.Length.ShouldEqual(1);
+        ownTypeParams[0].FullyQualifiedName.ShouldEqual("N.A`2.B2`1.T1");
+        var typeParams = classEntity.AllTypeParameters.ToArray();
+        typeParams.Length.ShouldEqual(3);
+        typeParams[0].FullyQualifiedName.ShouldEqual("N.A`2.T1");
+        typeParams[1].FullyQualifiedName.ShouldEqual("N.A`2.T2");
+        typeParams[2].FullyQualifiedName.ShouldEqual("N.A`2.B2`1.T1");
+      }
+      // class B3<T3>
+      {
+        var classEntity = parentClass.ChildTypes[child++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("N.A`2.B3`1");
+        var ownTypeParams = classEntity.OwnTypeParameters.ToArray();
+        ownTypeParams.Length.ShouldEqual(1);
+        ownTypeParams[0].FullyQualifiedName.ShouldEqual("N.A`2.B3`1.T3");
+        var typeParams = classEntity.AllTypeParameters.ToArray();
+        typeParams.Length.ShouldEqual(3);
+        typeParams[0].FullyQualifiedName.ShouldEqual("N.A`2.T1");
+        typeParams[1].FullyQualifiedName.ShouldEqual("N.A`2.T2");
+        typeParams[2].FullyQualifiedName.ShouldEqual("N.A`2.B3`1.T3");
       }
     }
 

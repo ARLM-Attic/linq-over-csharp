@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -24,8 +25,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class GenericCapableTypeEntity : TypeEntity
   {
-    /// <summary>Backing field for TypeParameters property to disallow direct adding or removing.</summary>
-    private List<TypeParameterEntity> _TypeParameters;
+    /// <summary>Backing field for OwnTypeParameters property to disallow direct adding or removing.</summary>
+    private List<TypeParameterEntity> _OwnTypeParameters;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -34,18 +35,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected GenericCapableTypeEntity()
     {
-      _TypeParameters = new List<TypeParameterEntity>();
+      _OwnTypeParameters = new List<TypeParameterEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets an iterate-only collection of type parameters of this type. 
+    /// Gets an iterate-only collection of the own type parameters of this type. 
     /// Empty list for non-generic types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TypeParameterEntity> TypeParameters
+    public IEnumerable<TypeParameterEntity> OwnTypeParameters
     {
-      get { return _TypeParameters; }
+      get { return _OwnTypeParameters; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of all type parameters of this type (parent's + own).
+    /// Empty list for non-generic types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TypeParameterEntity> AllTypeParameters
+    {
+      get
+      {
+        return Parent is GenericCapableTypeEntity
+                 ? (Parent as GenericCapableTypeEntity).AllTypeParameters.Concat(_OwnTypeParameters)
+                 : _OwnTypeParameters;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -58,9 +75,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return _TypeParameters.Count == 0
+        return _OwnTypeParameters.Count == 0
                  ? Name
-                 : string.Format("{0}`{1}", Name, _TypeParameters.Count);
+                 : string.Format("{0}`{1}", Name, _OwnTypeParameters.Count);
       }
     }
 
@@ -72,7 +89,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public bool IsGeneric
     {
-      get { return _TypeParameters.Count > 0; }
+      get { return AllTypeParameters.Count() > 0; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -83,7 +100,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      _TypeParameters.Add(typeParameterEntity);
+      _OwnTypeParameters.Add(typeParameterEntity);
       typeParameterEntity.Parent = this;
       DeclarationSpace.Define(typeParameterEntity);
     }

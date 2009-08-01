@@ -143,7 +143,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeTrue();
-        var typeParamArray = entity.TypeParameters.ToArray();
+        var typeParamArray = entity.OwnTypeParameters.ToArray();
         typeParamArray[0].FullyQualifiedName.ShouldEqual("A.B.Generic1`2.T1");
         typeParamArray[1].FullyQualifiedName.ShouldEqual("A.B.Generic1`2.T2");
       }

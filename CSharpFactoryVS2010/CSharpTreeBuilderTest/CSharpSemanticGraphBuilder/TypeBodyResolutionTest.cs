@@ -45,58 +45,101 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"TypeBodyResolution\ConstructedGenericType.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      // A2<A3, A4> a1;
+      var fields = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("N").ChildTypes[0].Members.ToArray();
+      int i = 0;
+
+      // A<int, long>.B1 b1;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
+        var fieldEntity = fields[i++] as FieldEntity;
         fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.Type.TargetEntity as ConstructedGenericTypeEntity;
-        typeEntity.ShouldNotBeNull();
-        typeEntity.Name.ShouldEqual("A2");
-        typeEntity.DistinctiveName.ShouldEqual("A2`2<A3,A4>");
-        typeEntity.FullyQualifiedName.ShouldEqual("A2`2<A3,A4>");
+        typeEntity.Name.ShouldEqual("B1");
+        typeEntity.DistinctiveName.ShouldEqual("B1[N.A1,N.A2]");
+        typeEntity.FullyQualifiedName.ShouldEqual("N.A`2.B1[N.A1,N.A2]");
         typeEntity.BaseTypes.ShouldEqual(typeEntity.UnderlyingType.BaseTypes);
         typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
         typeEntity.SyntaxNodes.Count.ShouldEqual(0);
-        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace);
+        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("N").ChildTypes[0]);
         typeEntity.DeclarationSpace.ShouldEqual(typeEntity.UnderlyingType.DeclarationSpace);
         typeEntity.IsPointerType.ShouldBeFalse();
         typeEntity.IsReferenceType.ShouldBeTrue();
         typeEntity.IsValueType.ShouldBeFalse();
 
-        var typeArgs = typeEntity.TypeArguments.ToArray();
+        var typeArgs = typeEntity.AllTypeArguments.ToArray();
         typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[0].TargetEntity.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[2]);
+        typeArgs[0].TargetEntity.FullyQualifiedName.ShouldEqual("N.A1");
         typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[1].TargetEntity.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[3]);
+        typeArgs[1].TargetEntity.FullyQualifiedName.ShouldEqual("N.A2");
 
-        ((ClassEntity) typeEntity.UnderlyingType).FullyQualifiedName.ShouldEqual("A2`2");
-        ((ClassEntity) typeEntity.UnderlyingType).IsGeneric.ShouldBeTrue();
-        var typeParams = ((ClassEntity) typeEntity.UnderlyingType).TypeParameters.ToArray();
-        typeParams[0].FullyQualifiedName.ShouldEqual("A2`2.T1");
-        typeParams[1].FullyQualifiedName.ShouldEqual("A2`2.T2");
+        typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("N.A`2.B1");
       }
-      // A2<A3, A4>[] a2;
+      // A<A1, A2>.B2<A3> b2;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[1] as FieldEntity;
+        var fieldEntity = fields[i++] as FieldEntity;
         fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var arrayEntity = fieldEntity.Type.TargetEntity as ArrayTypeEntity;
-        var typeEntity = arrayEntity.UnderlyingType as ConstructedGenericTypeEntity;
-        typeEntity.FullyQualifiedName.ShouldEqual("A2`2<A3,A4>");
-        typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2`2");
+        var typeEntity = fieldEntity.Type.TargetEntity as ConstructedGenericTypeEntity;
+        typeEntity.Name.ShouldEqual("B2");
+        typeEntity.DistinctiveName.ShouldEqual("B2`1[N.A1,N.A2,N.A3]");
+        typeEntity.FullyQualifiedName.ShouldEqual("N.A`2.B2`1[N.A1,N.A2,N.A3]");
+        typeEntity.BaseTypes.ShouldEqual(typeEntity.UnderlyingType.BaseTypes);
+        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
+        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
+        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("N").ChildTypes[0]);
+        typeEntity.DeclarationSpace.ShouldEqual(typeEntity.UnderlyingType.DeclarationSpace);
+        typeEntity.IsPointerType.ShouldBeFalse();
+        typeEntity.IsReferenceType.ShouldBeTrue();
+        typeEntity.IsValueType.ShouldBeFalse();
+
+        var typeArgs = typeEntity.AllTypeArguments.ToArray();
+        typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        typeArgs[0].TargetEntity.FullyQualifiedName.ShouldEqual("N.A1");
+        typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        typeArgs[1].TargetEntity.FullyQualifiedName.ShouldEqual("N.A2");
+        typeArgs[2].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        typeArgs[2].TargetEntity.FullyQualifiedName.ShouldEqual("N.A3");
+
+        typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("N.A`2.B2`1");
+      }
+      //  A<A1, A2>.B3<A4> b3;
+      {
+        var fieldEntity = fields[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var typeEntity = fieldEntity.Type.TargetEntity as ConstructedGenericTypeEntity;
+        typeEntity.Name.ShouldEqual("B3");
+        typeEntity.DistinctiveName.ShouldEqual("B3`1[N.A1,N.A2,N.A4]");
+        typeEntity.FullyQualifiedName.ShouldEqual("N.A`2.B3`1[N.A1,N.A2,N.A4]");
+        typeEntity.BaseTypes.ShouldEqual(typeEntity.UnderlyingType.BaseTypes);
+        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
+        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
+        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("N").ChildTypes[0]);
+        typeEntity.DeclarationSpace.ShouldEqual(typeEntity.UnderlyingType.DeclarationSpace);
+        typeEntity.IsPointerType.ShouldBeFalse();
+        typeEntity.IsReferenceType.ShouldBeTrue();
+        typeEntity.IsValueType.ShouldBeFalse();
+
+        var typeArgs = typeEntity.AllTypeArguments.ToArray();
+        typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        typeArgs[0].TargetEntity.FullyQualifiedName.ShouldEqual("N.A1");
+        typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        typeArgs[1].TargetEntity.FullyQualifiedName.ShouldEqual("N.A2");
+        typeArgs[2].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        typeArgs[2].TargetEntity.FullyQualifiedName.ShouldEqual("N.A4");
+
+        typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("N.A`2.B3`1");
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resolving a nested generic type (a type argument is also a generic type).
+    /// Resolving a generic type, where the type argument is also a generic type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void NestedGenericType()
+    public void GenericTypeArgument()
     {
       // Set up SyntaxTree and SemanticGraph
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"TypeBodyResolution\NestedGenericType.cs");
+      project.AddFile(@"TypeBodyResolution\GenericTypeArgument.cs");
       InvokeParser(project).ShouldBeTrue();
 
       var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
@@ -104,73 +147,20 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var typeEntity = fieldEntity.Type.TargetEntity as ConstructedGenericTypeEntity;
       typeEntity.ShouldNotBeNull();
       typeEntity.Name.ShouldEqual("A3");
-      typeEntity.DistinctiveName.ShouldEqual("A3`1<A2.A3`1<A4>>");
-      typeEntity.FullyQualifiedName.ShouldEqual("A2.A3`1<A2.A3`1<A4>>");
+      typeEntity.DistinctiveName.ShouldEqual("A3`1[A2.A3`1[A4]]");
+      typeEntity.FullyQualifiedName.ShouldEqual("A2.A3`1[A2.A3`1[A4]]");
       typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2.A3`1");
 
-      var typeArgs = typeEntity.TypeArguments.ToArray();
+      var typeArgs = typeEntity.AllTypeArguments.ToArray();
       typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
       var typeArgTypeEntity = typeArgs[0].TargetEntity as ConstructedGenericTypeEntity;
-      typeArgTypeEntity.FullyQualifiedName.ShouldEqual("A2.A3`1<A4>");
+      typeArgTypeEntity.FullyQualifiedName.ShouldEqual("A2.A3`1[A4]");
       typeArgTypeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2.A3`1");
 
-      var typeArgs2 = typeArgTypeEntity.TypeArguments.ToArray();
+      var typeArgs2 = typeArgTypeEntity.AllTypeArguments.ToArray();
       typeArgs2[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
       var typeArgTypeEntity2 = typeArgs2[0].TargetEntity as ClassEntity;
       typeArgTypeEntity2.FullyQualifiedName.ShouldEqual("A4");
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolving a chained generic type (the child of a generic is also a generic).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void ChainedGenericType()
-    {
-      // Set up SyntaxTree and SemanticGraph
-      var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"TypeBodyResolution\ChainedGenericType.cs");
-      InvokeParser(project).ShouldBeTrue();
-
-      int i = 0;
-
-      // A2<A3>.A4<A5> a;
-      {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
-        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var typeEntity = fieldEntity.Type.TargetEntity as ConstructedGenericTypeEntity;
-        typeEntity.ShouldNotBeNull();
-        typeEntity.Name.ShouldEqual("A4");
-        typeEntity.DistinctiveName.ShouldEqual("A4`1<A5>");
-        typeEntity.FullyQualifiedName.ShouldEqual("A2`1<A3>.A4`1<A5>");
-        typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2`1.A4`1");
-
-        var parentEntity = typeEntity.Parent as ConstructedGenericTypeEntity;
-        parentEntity.ShouldNotBeNull();
-        parentEntity.Name.ShouldEqual("A2");
-        parentEntity.DistinctiveName.ShouldEqual("A2`1<A3>");
-        parentEntity.FullyQualifiedName.ShouldEqual("A2`1<A3>");
-        parentEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2`1");
-      }
-      // A2<A3>.A6 b;
-      {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
-        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var typeEntity = fieldEntity.Type.TargetEntity as ClassEntity;
-        typeEntity.ShouldNotBeNull();
-        typeEntity.Name.ShouldEqual("A6");
-        typeEntity.DistinctiveName.ShouldEqual("A6");
-#warning BUG!
-        //typeEntity.FullyQualifiedName.ShouldEqual("A2`1<A3>.A6");
-
-        //var parentEntity = typeEntity.Parent as ConstructedGenericTypeEntity;
-        //parentEntity.ShouldNotBeNull();
-        //parentEntity.Name.ShouldEqual("A2");
-        //parentEntity.DistinctiveName.ShouldEqual("A2`1<A3>");
-        //parentEntity.FullyQualifiedName.ShouldEqual("A2`1<A3>");
-        //parentEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2`1");
-      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -886,7 +876,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var field = classA.Members.ToArray()[i++] as FieldEntity;
         field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("C.E`1<int>");
+        field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("C.E`1[int]");
         ((ConstructedGenericTypeEntity) field.Type.TargetEntity).UnderlyingType.FullyQualifiedName.ShouldEqual("C.E`1");
       }
       // F.G x3;
@@ -899,14 +889,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var field = classA.Members.ToArray()[i++] as FieldEntity;
         field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-#warning BUG!
-        //field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("D.F`1<int>.G");
+        field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("D.F`1.G[int]");
       }
       // F<int>.G<int> x5;
       {
         var field = classA.Members.ToArray()[i++] as FieldEntity;
         field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("D.F`1<int>.G`1<int>");
+        field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("D.F`1.G`1[int,int]");
         ((ConstructedGenericTypeEntity)field.Type.TargetEntity).UnderlyingType.FullyQualifiedName.ShouldEqual("D.F`1.G`1");
       }
 

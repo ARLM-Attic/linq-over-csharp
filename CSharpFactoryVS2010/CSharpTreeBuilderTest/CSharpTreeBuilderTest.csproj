@@ -337,8 +337,7 @@
     <None Include="TestFiles\TypeBodyResolution\PointerToUnknown.cs" />
     <None Include="TestFiles\TypeBodyResolution\NullableType.cs" />
     <None Include="TestFiles\TypeBodyResolution\PointerToType.cs" />
-    <None Include="TestFiles\TypeBodyResolution\ChainedGenericType.cs" />
-    <None Include="TestFiles\TypeBodyResolution\NestedGenericType.cs" />
+    <None Include="TestFiles\TypeBodyResolution\GenericTypeArgument.cs" />
     <None Include="TestFiles\TypeBodyResolution\ConstructedGenericType.cs" />
     <None Include="TestFiles\TypeBodyResolution\TypeParameter.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs" />

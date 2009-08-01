@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraph;
@@ -218,6 +219,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // The first TypeTag must be found in contextEntity's declaration space, the next one in its child, and so on.
       var typeTagContextEntity = contextEntity;
 
+      // All type arguments will be collected from every typetag, 
+      // because constructed generic types need their parents' type arguments as well.
+      var allTypeArguments = new TypeOrNamespaceNodeCollection();
+
       // Match all parts (typeTags) of the name (eg. A.B.C<D> = 3 TypeTags) 
       for (int i = 0; i < typeTags.Count; i++)
       {
@@ -230,24 +235,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           return null;
         }
 
-        // If according to the syntax it's a generic, but the found entity is not, then it's an error
-        if (typeTags[i].HasTypeArguments && !(entity is GenericCapableTypeEntity))
+        // We have to collect all type arguments, because constructed generic types need their parents's type arguments as well.
+        if (typeTags[i].HasTypeArguments)
         {
-          throw new ApplicationException(string.Format("Expected to find GenericCapableTypeEntity, but found '{0}'.",
-                                                       entity.GetType()));
-        }
-
-        // If according to the syntax it's a generic, and the found entity is also a generic,
-        // then create a constructed generic type entity, because that will be the context of the next TypeTag's lookup.
-        if (typeTags[i].HasTypeArguments && (entity is GenericCapableTypeEntity))
-        {
-          entity = CreateConstructedGenericType(entity as GenericCapableTypeEntity,
-                                                     typeTagContextEntity,
-                                                     typeTags[i].Arguments);
-          if (entity == null)
+          foreach (var argument in typeTags[i].Arguments)
           {
-            throw new ApplicationException("CreateConstructedGenericType returned null.");
-          }
+            allTypeArguments.Add(argument);
+          } 
         }
 
         // If not all typeTags were matched then we should continue with the next one, 
@@ -262,6 +256,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // The resolution context of the next tag will be the current entity
         typeTagContextEntity = entity as NamespaceOrTypeEntity;
+      }
+
+      // If there are type arguments, but the found entity is not a generic template, then it's an error.
+      if (allTypeArguments.Count > 0 && !(entity is GenericCapableTypeEntity))
+      {
+        throw new ApplicationException(string.Format("Expected to find GenericCapableTypeEntity, but found '{0}'.",
+                                                     entity == null ? "(null)" : entity.GetType().ToString()));
+      }
+
+      // If there are type arguments then we have to create a constructed generic type.
+      if (allTypeArguments.Count > 0 && entity is GenericCapableTypeEntity)
+      {
+        entity = CreateConstructedGenericType(entity as GenericCapableTypeEntity, allTypeArguments);
+        if (entity == null)
+        {
+          throw new ApplicationException("CreateConstructedGenericType returned null.");
+        }
       }
 
       return entity;
@@ -452,17 +463,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Also resolves the arguments.
     /// </summary>
     /// <param name="genericEntity">The generic 'template' entity.</param>
-    /// <param name="parentEntity">The parent of the to-be-created constructed generic entity. 
-    /// It's not simply the parent of genericEntity, because it can be a construced generic entity.</param>
     /// <param name="typeArguments">The type argument AST nodes.</param>
     /// <returns>The constructed generic entity, with all arguments resolved as well.</returns>
     // ----------------------------------------------------------------------------------------------
     private ConstructedGenericTypeEntity CreateConstructedGenericType(GenericCapableTypeEntity genericEntity,
-                                                                      NamespaceOrTypeEntity parentEntity,
                                                                       TypeOrNamespaceNodeCollection typeArguments)
     {
       // Create the constructed generic type
-      var constructedGenericType = new ConstructedGenericTypeEntity(genericEntity, parentEntity);
+      var constructedGenericType = new ConstructedGenericTypeEntity(genericEntity);
 
       // Also resolve the generic's type arguments.
       foreach (var argument in typeArguments)
