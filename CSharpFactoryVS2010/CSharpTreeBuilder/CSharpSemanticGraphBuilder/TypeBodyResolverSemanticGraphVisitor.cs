@@ -15,10 +15,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Initializes a new instance of the <see cref="TypeBodyResolverSemanticGraphVisitor"/> class.
     /// </summary>
     /// <param name="errorHandler">Error handler object for error and warning reporting.</param>
-    /// <param name="metadataToEntityMap">A cache object for mapping reflected types to semantic entities.</param>
+    /// <param name="semanticGraph">The semantic graph that this visitor is working on.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeBodyResolverSemanticGraphVisitor(ICompilationErrorHandler errorHandler, IMetadataToEntityMap metadataToEntityMap)
-      :base(errorHandler,metadataToEntityMap)
+    public TypeBodyResolverSemanticGraphVisitor(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
+      :base(errorHandler,semanticGraph)
     {
     }
 

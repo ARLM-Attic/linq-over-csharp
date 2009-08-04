@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -12,21 +14,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class ConstructedGenericTypeEntity : ConstructedTypeEntity
   {
     /// <summary>Backing field for TypeArguments property to disallow direct adding or removing.</summary>
-    private List<SemanticEntityReference<TypeEntity>> _OwnTypeArguments;
+    private List<TypeEntity> _TypeArguments;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstructedGenericTypeEntity"/> class.
     /// </summary>
     /// <param name="underlyingType">An open generic type.</param>
+    /// <param name="typeArguments">The list of type arguments.</param>
     // ----------------------------------------------------------------------------------------------
-    public ConstructedGenericTypeEntity(GenericCapableTypeEntity underlyingType)
+    public ConstructedGenericTypeEntity(GenericCapableTypeEntity underlyingType, List<TypeEntity> typeArguments)
       : base(underlyingType)
     {
-      _BaseTypes = (List<SemanticEntityReference<TypeEntity>>)underlyingType.BaseTypes;
-      _Members = (List<MemberEntity>)underlyingType.Members;
+      if (typeArguments.Count != underlyingType.AllTypeParameters.Count)
+      {
+        throw new ArgumentException(
+          string.Format("Expected '{0}' type arguments for generic type definition '{1}', but received '{2}'.",
+                        underlyingType.AllTypeParameters.Count, underlyingType.FullyQualifiedName, typeArguments.Count),
+          "typeArguments");
+      }
+      _TypeArguments = typeArguments;
 
-      _OwnTypeArguments = new List<SemanticEntityReference<TypeEntity>>();
+      _BaseTypes = (List<SemanticEntityReference<TypeEntity>>) underlyingType.BaseTypes;
+      _Members = (List<MemberEntity>) underlyingType.Members;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -36,47 +46,70 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override bool IsReferenceType
     {
-      get { return true; }
+      get { return UnderlyingType.IsReferenceType; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of the own type arguments of this type (no parents' arguments included).
+    /// Gets a value indicating whether this type is a value type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<SemanticEntityReference<TypeEntity>> OwnTypeArguments
+    public override bool IsValueType
+    {
+      get { return UnderlyingType.IsValueType; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a class type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsClassType
+    {
+      get { return UnderlyingType.IsClassType; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a struct type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsStructType
+    {
+      get { return UnderlyingType.IsStructType; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is an interface type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsInterfaceType
+    {
+      get { return UnderlyingType.IsInterfaceType; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a delegate type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsDelegateType
+    {
+      get { return UnderlyingType.IsDelegateType; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a read-only list of the type arguments of this type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ReadOnlyCollection<TypeEntity> TypeArguments
     {
       get
       {
-        return _OwnTypeArguments;
+        return _TypeArguments.AsReadOnly();
       }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of all type arguments of this type 
-    /// (including the parent constructed generic types' arguments). 
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<SemanticEntityReference<TypeEntity>> AllTypeArguments
-    {
-      get
-      {
-        return Parent is ConstructedGenericTypeEntity
-                 ? (Parent as ConstructedGenericTypeEntity).AllTypeArguments.Concat(_OwnTypeArguments)
-                 : _OwnTypeArguments;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a type argument the this type.
-    /// </summary>
-    /// <param name="typeArgument">A type argument, which is a TypeEntityReference.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddTypeArgument(SemanticEntityReference<TypeEntity> typeArgument)
-    {
-      _OwnTypeArguments.Add(typeArgument);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -94,7 +127,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
         distinctiveName.Append('[');
         bool firstTypeArg = true;
-        foreach (var typeArgument in AllTypeArguments)
+        foreach (var typeArgument in TypeArguments)
         {
           if (firstTypeArg)
           {
@@ -104,10 +137,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           {
             distinctiveName.Append(',');
           }
-
-          distinctiveName.Append(typeArgument.ResolutionState == ResolutionState.Resolved
-                                   ? typeArgument.TargetEntity.FullyQualifiedName
-                                   : "?");
+          distinctiveName.Append(typeArgument.FullyQualifiedName);
         }
         distinctiveName.Append(']');
 

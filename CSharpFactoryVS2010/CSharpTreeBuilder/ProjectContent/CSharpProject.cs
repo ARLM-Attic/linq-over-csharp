@@ -198,12 +198,12 @@ namespace CSharpTreeBuilder.ProjectContent
       var factory = new MetadataImporterSemanticEntityFactory(this, SemanticGraph);
 
       // Load mscorlib entities into the semantic graph
-      factory.CreateEntitiesFromAssembly(typeof(int).Assembly.Location, "global", SemanticGraph);
+      factory.CreateEntitiesFromAssembly(typeof(int).Assembly.Location, "global");
 
       // Load other referenced assemblies into the semantic graph
       foreach (string filename in ReferencedAssemblyFilenames)
       {
-        factory.CreateEntitiesFromAssembly(filename, "global", SemanticGraph);
+        factory.CreateEntitiesFromAssembly(filename, "global");
       }
 
       // Create entities from ASTs

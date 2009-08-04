@@ -154,8 +154,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <typeparam name="TSyntaxNodeType">The type of the syntax node.</typeparam>
     /// <typeparam name="TSemanticEntityType">The type of the semantic entity to be created.</typeparam>
     /// <param name="node">A syntax node.</param>
+    /// <returns>The created type entity, or null if an error occured.</returns>
     // ----------------------------------------------------------------------------------------------
-    private void CreateTypeEntityFromTypeDeclaration<TSyntaxNodeType, TSemanticEntityType>(TSyntaxNodeType node) 
+    private TSemanticEntityType CreateTypeEntityFromTypeDeclaration<TSyntaxNodeType, TSemanticEntityType>(TSyntaxNodeType node) 
       where TSyntaxNodeType: TypeDeclarationNode
       where TSemanticEntityType: TypeEntity, new()
     {
@@ -167,7 +168,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException(String.Format("Parent expected to be NamespaceOrTypeEntity but was {0}", parentEntity.GetType()));
       }
 
-      TypeEntity typeEntity;
+      TSemanticEntityType typeEntity;
 
       var nameTableEntry = parentNamespaceOrTypeEntity.DeclarationSpace[node.Name
                               + (node.HasTypeParameters ? "`" + node.TypeParameters.Count : "")];
@@ -185,7 +186,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               _ErrorHandler.Error("CS0101", node.StartToken,
                                   "The namespace '{0}' already contains a definition for '{1}'.",
                                   parentNamespaceOrTypeEntity.FullyQualifiedName, node.Name);
-              return;
+              return null;
             }
 
             // If the name is definite, and is the desired type, then this is the one we were looking for.
@@ -195,7 +196,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
           // If the name is found, but is not definite, then no semantic entity can be created, so let's get out.
           default:
-            return;
+            _ErrorHandler.Warning("TBD", node.StartToken,
+                                "The name '{1}' is ambigous in the context of '{0}'. No entity created.",
+                                parentNamespaceOrTypeEntity.FullyQualifiedName, node.Name);
+            return null;
         }
       }
       else // If the name was not found then we have to create it.
@@ -208,10 +212,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
         if (typeEntity is GenericCapableTypeEntity)
         {
+          var genericTypeEntity = typeEntity as GenericCapableTypeEntity;
+
+          // First add the (inherited) type parameters from the parent type
+          if (parentEntity is GenericCapableTypeEntity)
+          {
+            foreach (var typeParameterEntity in ((GenericCapableTypeEntity)parentEntity).AllTypeParameters)
+            {
+              genericTypeEntity.AddTypeParameter(typeParameterEntity);
+            }
+          }
+
+          // Then add the "own" type parameters
           foreach (var typeParameter in node.TypeParameters)
           {
             var typeParameterEntity = new TypeParameterEntity(typeParameter.Identifier);
-            ((GenericCapableTypeEntity)typeEntity).AddTypeParameter(typeParameterEntity);
+            genericTypeEntity.AddTypeParameter(typeParameterEntity);
             AssociateSyntaxNodeWithSemanticEntity(typeParameter, typeParameterEntity);
           }
         }
@@ -229,6 +245,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       AssociateSyntaxNodeWithSemanticEntity(node, typeEntity);
+
+      return typeEntity as TSemanticEntityType;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -323,7 +341,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private static void AssociateSyntaxNodeWithSemanticEntity(ISyntaxNode syntaxNode, SemanticEntity semanticEntity)
     {
-      semanticEntity.SyntaxNodes.Add(syntaxNode);
+      semanticEntity.AddSyntaxNode(syntaxNode);
       syntaxNode.SemanticEntities.Add(semanticEntity);
     }
   }

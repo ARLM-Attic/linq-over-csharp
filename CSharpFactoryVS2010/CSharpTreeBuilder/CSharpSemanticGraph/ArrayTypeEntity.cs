@@ -34,6 +34,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this type is an array type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsArrayType
+    {
+      get { return true; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

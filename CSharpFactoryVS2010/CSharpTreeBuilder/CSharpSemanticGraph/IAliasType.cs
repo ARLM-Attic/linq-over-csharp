@@ -2,7 +2,7 @@
 {
   // ================================================================================================
   /// <summary>
-  /// This interface is implemented by types that are alias of other types.
+  /// This interface is implemented by types that are aliases of other types.
   /// Eg. 'int' is alias of 'System.Int32', 'T?' is alias of System.Nullable&lt;T&gt;
   /// </summary>
   // ================================================================================================
@@ -10,9 +10,9 @@
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the alias type.
+    /// Gets the reference of the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntityReference<TypeEntity> AliasToType { get; }
+    SemanticEntityReference<TypeEntity> AliasedType { get; }
   }
 }

@@ -25,75 +25,75 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       BuiltInType = builtInType;
 
-      System.Type aliasType = null;
+      System.Type aliasedType = null;
 
       switch (builtInType)
       {
         case BuiltInType.Bool:
           Name = "bool";
-          aliasType = typeof (bool);
+          aliasedType = typeof (bool);
           break;
         case BuiltInType.Byte:
           Name = "byte";
-          aliasType = typeof(byte);
+          aliasedType = typeof(byte);
           break;
         case BuiltInType.Char:
           Name = "char";
-          aliasType = typeof(char);
+          aliasedType = typeof(char);
           break;
         case BuiltInType.Decimal:
           Name = "decimal";
-          aliasType = typeof(decimal);
+          aliasedType = typeof(decimal);
           break;
         case BuiltInType.Double:
           Name = "double";
-          aliasType = typeof(double);
+          aliasedType = typeof(double);
           break;
         case BuiltInType.Float:
           Name = "float";
-          aliasType = typeof(float);
+          aliasedType = typeof(float);
           break;
         case BuiltInType.Int:
           Name = "int";
-          aliasType = typeof(int);
+          aliasedType = typeof(int);
           break;
         case BuiltInType.Long:
           Name = "long";
-          aliasType = typeof(long);
+          aliasedType = typeof(long);
           break;
         case BuiltInType.Object:
           Name = "object";
-          aliasType = typeof(object);
+          aliasedType = typeof(object);
           break;
         case BuiltInType.Sbyte:
           Name = "sbyte";
-          aliasType = typeof(sbyte);
+          aliasedType = typeof(sbyte);
           break;
         case BuiltInType.Short:
           Name = "short";
-          aliasType = typeof(short);
+          aliasedType = typeof(short);
           break;
         case BuiltInType.String:
           Name = "string";
-          aliasType = typeof(string);
+          aliasedType = typeof(string);
           break;
         case BuiltInType.Uint:
           Name = "uint";
-          aliasType = typeof(uint);
+          aliasedType = typeof(uint);
           break;
         case BuiltInType.Ulong:
           Name = "ulong";
-          aliasType = typeof(ulong);
+          aliasedType = typeof(ulong);
           break;
         case BuiltInType.Ushort:
           Name = "ushort";
-          aliasType = typeof(ushort);
+          aliasedType = typeof(ushort);
           break;
         default:
           throw new ApplicationException(string.Format("Unexpected BuiltInType: '{0}'", builtInType));
       }
 
-      AliasToType = new ReflectedTypeBasedTypeEntityReference(aliasType);
+      AliasedType = new ReflectedTypeBasedTypeEntityReference(aliasedType);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -105,10 +105,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the alias type.
+    /// Gets the reference of the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> AliasToType { get; private set; }
+    public SemanticEntityReference<TypeEntity> AliasedType { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -209,8 +209,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (AliasToType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasToType.TargetEntity.DeclarationSpace
+        return (AliasedType.ResolutionState == ResolutionState.Resolved)
+                 ? AliasedType.TargetEntity.DeclarationSpace
                  : base.DeclarationSpace;
       }
     }
@@ -227,8 +227,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (AliasToType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasToType.TargetEntity.BaseTypes
+        return (AliasedType.ResolutionState == ResolutionState.Resolved)
+                 ? AliasedType.TargetEntity.BaseTypes
                  : base.BaseTypes;
       }
     }
@@ -245,8 +245,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (AliasToType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasToType.TargetEntity.Members
+        return (AliasedType.ResolutionState == ResolutionState.Resolved)
+                 ? AliasedType.TargetEntity.Members
                  : base.Members;
       }
     }

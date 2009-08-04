@@ -192,7 +192,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.IsValueType.ShouldBeFalse();
 
         // base class is not yet resolved, so it's null
-        classEntity.BaseClassEntity.ShouldBeNull();
+        classEntity.BaseTypeEntity.ShouldBeNull();
 
         // TODO: basetypes, members
       }

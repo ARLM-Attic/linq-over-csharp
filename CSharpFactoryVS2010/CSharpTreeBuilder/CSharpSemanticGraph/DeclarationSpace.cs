@@ -45,6 +45,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Redefines a name, ie. deletes the old definition and creates a new one.
+    /// </summary>
+    /// <param name="namedEntity">An entity that has a name.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void Redefine(INamedEntity namedEntity)
+    {
+      var name = namedEntity.DistinctiveName;
+
+      if (_NameTable.ContainsKey(name))
+      {
+        _NameTable.Remove(name);
+      }
+
+      Define(namedEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a NameTableEntry by name.
     /// </summary>
     /// <param name="name">A name.</param>

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using CSharpTreeBuilder.Ast;
-using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -11,6 +12,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class SemanticEntity
   {
+    /// <summary>Backing field for SyntaxNodes property.</summary>
+    private List<ISyntaxNode> _SyntaxNodes;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SemanticEntity"/> class.
@@ -18,7 +22,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected SemanticEntity()
     {
-      SyntaxNodes = new List<ISyntaxNode>();
+      _SyntaxNodes = new List<ISyntaxNode>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -27,13 +31,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public SemanticEntity Parent { get; set;}
- 
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the list of syntax nodes that generated this semantic entity. Can be empty.
+    /// Gets or sets the reflected metadata (eg. type) that this entity was created from.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<ISyntaxNode> SyntaxNodes { get; protected set; }
+    public System.Reflection.MemberInfo ReflectedMetadata { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a read-only list of syntax nodes that generated this semantic entity. Can be empty.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ReadOnlyCollection<ISyntaxNode> SyntaxNodes
+    {
+      get { return _SyntaxNodes.AsReadOnly(); }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a syntax node to the SyntaxNodes collection.
+    /// </summary>
+    /// <param name="syntaxNode">A syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddSyntaxNode(ISyntaxNode syntaxNode)
+    {
+      _SyntaxNodes.Add(syntaxNode);
+    }
 
     #region Visitor methods
 

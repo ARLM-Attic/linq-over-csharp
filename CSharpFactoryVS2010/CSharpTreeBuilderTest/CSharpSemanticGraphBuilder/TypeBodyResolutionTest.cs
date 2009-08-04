@@ -34,15 +34,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resolving a constructed generic type.
+    /// Resolving a constructed generic class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void ConstructedGenericType()
+    public void ConstructedGenericClass()
     {
       // Set up SyntaxTree and SemanticGraph
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"TypeBodyResolution\ConstructedGenericType.cs");
+      project.AddFile(@"TypeBodyResolution\ConstructedGenericClass.cs");
       InvokeParser(project).ShouldBeTrue();
 
       var fields = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("N").ChildTypes[0].Members.ToArray();
@@ -65,11 +65,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.IsReferenceType.ShouldBeTrue();
         typeEntity.IsValueType.ShouldBeFalse();
 
-        var typeArgs = typeEntity.AllTypeArguments.ToArray();
-        typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[0].TargetEntity.FullyQualifiedName.ShouldEqual("N.A1");
-        typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[1].TargetEntity.FullyQualifiedName.ShouldEqual("N.A2");
+        typeEntity.TypeArguments[0].FullyQualifiedName.ShouldEqual("N.A1");
+        typeEntity.TypeArguments[1].FullyQualifiedName.ShouldEqual("N.A2");
 
         typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("N.A`2.B1");
       }
@@ -90,13 +87,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.IsReferenceType.ShouldBeTrue();
         typeEntity.IsValueType.ShouldBeFalse();
 
-        var typeArgs = typeEntity.AllTypeArguments.ToArray();
-        typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[0].TargetEntity.FullyQualifiedName.ShouldEqual("N.A1");
-        typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[1].TargetEntity.FullyQualifiedName.ShouldEqual("N.A2");
-        typeArgs[2].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[2].TargetEntity.FullyQualifiedName.ShouldEqual("N.A3");
+        typeEntity.TypeArguments[0].FullyQualifiedName.ShouldEqual("N.A1");
+        typeEntity.TypeArguments[1].FullyQualifiedName.ShouldEqual("N.A2");
+        typeEntity.TypeArguments[2].FullyQualifiedName.ShouldEqual("N.A3");
 
         typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("N.A`2.B2`1");
       }
@@ -117,15 +110,48 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.IsReferenceType.ShouldBeTrue();
         typeEntity.IsValueType.ShouldBeFalse();
 
-        var typeArgs = typeEntity.AllTypeArguments.ToArray();
-        typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[0].TargetEntity.FullyQualifiedName.ShouldEqual("N.A1");
-        typeArgs[1].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[1].TargetEntity.FullyQualifiedName.ShouldEqual("N.A2");
-        typeArgs[2].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        typeArgs[2].TargetEntity.FullyQualifiedName.ShouldEqual("N.A4");
+        typeEntity.TypeArguments[0].FullyQualifiedName.ShouldEqual("N.A1");
+        typeEntity.TypeArguments[1].FullyQualifiedName.ShouldEqual("N.A2");
+        typeEntity.TypeArguments[2].FullyQualifiedName.ShouldEqual("N.A4");
 
         typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("N.A`2.B3`1");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolving a constructed generic struct.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ConstructedGenericStruct()
+    {
+      // Set up SyntaxTree and SemanticGraph
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\ConstructedGenericStruct.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var fields = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray();
+      int i = 0;
+
+      // B<int> a;
+      {
+        var fieldEntity = fields[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var typeEntity = fieldEntity.Type.TargetEntity as ConstructedGenericTypeEntity;
+        typeEntity.Name.ShouldEqual("B");
+        typeEntity.DistinctiveName.ShouldEqual("B`1[int]");
+        typeEntity.FullyQualifiedName.ShouldEqual("B`1[int]");
+        typeEntity.BaseTypes.ShouldEqual(typeEntity.UnderlyingType.BaseTypes);
+        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
+        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
+        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace);
+        typeEntity.DeclarationSpace.ShouldEqual(typeEntity.UnderlyingType.DeclarationSpace);
+        typeEntity.IsPointerType.ShouldBeFalse();
+        typeEntity.IsReferenceType.ShouldBeFalse();
+        typeEntity.IsValueType.ShouldBeTrue();
+        typeEntity.TypeArguments[0].FullyQualifiedName.ShouldEqual("int");
+        typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("B`1");
       }
     }
 
@@ -151,15 +177,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       typeEntity.FullyQualifiedName.ShouldEqual("A2.A3`1[A2.A3`1[A4]]");
       typeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2.A3`1");
 
-      var typeArgs = typeEntity.AllTypeArguments.ToArray();
-      typeArgs[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      var typeArgTypeEntity = typeArgs[0].TargetEntity as ConstructedGenericTypeEntity;
+      var typeArgTypeEntity = typeEntity.TypeArguments[0] as ConstructedGenericTypeEntity;
       typeArgTypeEntity.FullyQualifiedName.ShouldEqual("A2.A3`1[A4]");
       typeArgTypeEntity.UnderlyingType.FullyQualifiedName.ShouldEqual("A2.A3`1");
 
-      var typeArgs2 = typeArgTypeEntity.AllTypeArguments.ToArray();
-      typeArgs2[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      var typeArgTypeEntity2 = typeArgs2[0].TargetEntity as ClassEntity;
+      var typeArgTypeEntity2 = typeArgTypeEntity.TypeArguments[0] as ClassEntity;
       typeArgTypeEntity2.FullyQualifiedName.ShouldEqual("A4");
     }
 
@@ -180,7 +202,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
         fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array1 = fieldEntity.Type.TargetEntity as ArrayTypeEntity;
-        // TODO: check that the base type is System.Array
+        array1.BaseTypes.ToArray()[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        array1.BaseTypes.ToArray()[0].TargetEntity.FullyQualifiedName.ShouldEqual("System.Array");
         array1.Members.Count().ShouldEqual(0);
         array1.DeclarationSpace.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[1].DeclarationSpace);
         array1.DistinctiveName.ShouldEqual("A2[][,]");
@@ -194,8 +217,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         array1.IsValueType.ShouldBeFalse();
 
         var array2 = array1.UnderlyingType as ArrayTypeEntity;
-        // TODO: check that the base type is System.Array
-        array1.Members.Count().ShouldEqual(0);
         array2.DeclarationSpace.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[1].DeclarationSpace);
         array2.DistinctiveName.ShouldEqual("A2[]");
         array2.FullyQualifiedName.ShouldEqual("A2[]");
@@ -340,13 +361,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var embedded = nullable.UnderlyingType as StructEntity;
         embedded.FullyQualifiedName.ShouldEqual("A2");
 
-        nullable.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = nullable.AliasToType.TargetEntity as StructEntity;
+        nullable.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = nullable.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Nullable`1");
 
-        nullable.BaseTypes.ShouldEqual(nullable.AliasToType.TargetEntity.BaseTypes);
-        nullable.Members.ShouldEqual(nullable.AliasToType.TargetEntity.Members);
-        nullable.DeclarationSpace.ShouldEqual(nullable.AliasToType.TargetEntity.DeclarationSpace);
+        nullable.BaseTypes.ShouldEqual(nullable.AliasedType.TargetEntity.BaseTypes);
+        nullable.Members.ShouldEqual(nullable.AliasedType.TargetEntity.Members);
+        nullable.DeclarationSpace.ShouldEqual(nullable.AliasedType.TargetEntity.DeclarationSpace);
       }
       // A2?[] a2;
       {
@@ -363,8 +384,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var embedded = nullable.UnderlyingType as StructEntity;
         embedded.FullyQualifiedName.ShouldEqual("A2");
 
-        nullable.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = nullable.AliasToType.TargetEntity as StructEntity;
+        nullable.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = nullable.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Nullable`1");
       }
     }
@@ -405,13 +426,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.SByte");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // byte a2;
       {
@@ -434,13 +455,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Byte");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // short a3;
       {
@@ -463,13 +484,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Int16");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // ushort a4;
       {
@@ -492,13 +513,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.UInt16");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // int a5;
       {
@@ -521,13 +542,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Int32");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // uint a6;
       {
@@ -550,13 +571,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.UInt32");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // long a7;
       {
@@ -579,13 +600,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Int64");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // ulong a8;
       {
@@ -608,13 +629,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.UInt64");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // char a9;
       {
@@ -637,13 +658,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Char");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // float a10;
       {
@@ -666,13 +687,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Single");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // double a11;
       {
@@ -695,13 +716,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Double");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // bool a12;
       {
@@ -724,13 +745,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Boolean");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // decimal a13;
       {
@@ -753,13 +774,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeTrue();
         builtin.IsValueType.ShouldBeTrue();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Decimal");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // object a14;
       {
@@ -782,13 +803,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeFalse();
         builtin.IsValueType.ShouldBeFalse();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as ClassEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as ClassEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Object");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
       // string a15;
       {
@@ -811,13 +832,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         builtin.IsSimpleType.ShouldBeFalse();
         builtin.IsValueType.ShouldBeFalse();
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as ClassEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as ClassEntity;
         alias.FullyQualifiedName.ShouldEqual("System.String");
 
-        builtin.BaseTypes.ShouldEqual(builtin.AliasToType.TargetEntity.BaseTypes);
-        builtin.Members.ShouldEqual(builtin.AliasToType.TargetEntity.Members);
-        builtin.DeclarationSpace.ShouldEqual(builtin.AliasToType.TargetEntity.DeclarationSpace);
+        builtin.BaseTypes.ShouldEqual(builtin.AliasedType.TargetEntity.BaseTypes);
+        builtin.Members.ShouldEqual(builtin.AliasedType.TargetEntity.Members);
+        builtin.DeclarationSpace.ShouldEqual(builtin.AliasedType.TargetEntity.DeclarationSpace);
       }
 
       // int? a16;
@@ -829,8 +850,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var builtin = nullable.UnderlyingType as BuiltInTypeEntity;
         builtin.BuiltInType.ShouldEqual(BuiltInType.Int);
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Int32");
       }
 
@@ -844,8 +865,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var builtin = pointer.UnderlyingType as BuiltInTypeEntity;
         builtin.BuiltInType.ShouldEqual(BuiltInType.Int);
 
-        builtin.AliasToType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var alias = builtin.AliasToType.TargetEntity as StructEntity;
+        builtin.AliasedType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var alias = builtin.AliasedType.TargetEntity as StructEntity;
         alias.FullyQualifiedName.ShouldEqual("System.Int32");
       }
     }

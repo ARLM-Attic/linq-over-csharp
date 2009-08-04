@@ -331,6 +331,11 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildDelegateEntities.cs" />
     <None Include="TestFiles\EnumDeclaration\EnumDeclarationWithBaseType.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeBodyResolution\ConstructedGenericStruct.cs" />
+    <None Include="TestFiles\TypeDeclarationResolution\ImplicitBaseTypes.cs" />
+    <None Include="TestFiles\TypeDeclarationResolution\BuiltInBaseTypes.cs" />
+    <None Include="TestFiles\TypeDeclarationResolution\ReflectedBaseTypes.cs" />
+    <None Include="TestFiles\TypeDeclarationResolution\GenericBaseTypes.cs" />
     <None Include="TestFiles\TypeBodyResolution\DeclaredInBaseClass.cs" />
     <None Include="TestFiles\TypeBodyResolution\BuiltInTypes.cs" />
     <None Include="TestFiles\TypeBodyResolution\ArrayType.cs" />
@@ -338,12 +343,12 @@
     <None Include="TestFiles\TypeBodyResolution\NullableType.cs" />
     <None Include="TestFiles\TypeBodyResolution\PointerToType.cs" />
     <None Include="TestFiles\TypeBodyResolution\GenericTypeArgument.cs" />
-    <None Include="TestFiles\TypeBodyResolution\ConstructedGenericType.cs" />
+    <None Include="TestFiles\TypeBodyResolution\ConstructedGenericClass.cs" />
     <None Include="TestFiles\TypeBodyResolution\TypeParameter.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs" />
     <None Include="TestFiles\TypeDeclarationResolution\CS0246_TypeOrNamespaceNameCouldNotBeFound.cs" />
     <None Include="TestFiles\TypeDeclarationResolution\CS0118_NamespaceIsUsedLikeAType.cs" />
-    <None Include="TestFiles\TypeDeclarationResolution\LocallyDeclaredBaseTypes.cs" />
+    <None Include="TestFiles\TypeDeclarationResolution\NonGenericBaseTypes.cs" />
     <None Include="TestFiles\SyntaxNodeVisitor\ExpressionVisitorTest.cs" />
     <None Include="TestFiles\SyntaxNodeVisitor\StatementVisitorTest.cs" />
     <None Include="TestFiles\SyntaxNodeVisitor\DelegateDeclarationNodeVisitorTest.cs" />

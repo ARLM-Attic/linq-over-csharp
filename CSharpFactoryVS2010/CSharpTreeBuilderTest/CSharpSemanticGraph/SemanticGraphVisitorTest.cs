@@ -45,8 +45,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       }
       mocks.ReplayAll();
 
-      // Act
-      semanticGraph.AcceptVisitor(sgVisitorMock);
+      // We only travers the global namespace, not the whole semantic graph, because that would include the built-in types too
+      semanticGraph.GlobalNamespace.AcceptVisitor(sgVisitorMock);
 
       // Assert
       mocks.VerifyAll();

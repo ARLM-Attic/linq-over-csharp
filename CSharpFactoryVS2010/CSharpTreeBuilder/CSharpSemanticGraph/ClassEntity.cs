@@ -19,29 +19,12 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the base class entity of this class.
+    /// Gets a value indicating whether this type is a class type.
     /// </summary>
-    /// <remarks>
-    /// It returns an entity, not a reference, so it can be successful only if the base type references are already resolved.
-    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public ClassEntity BaseClassEntity
+    public override bool IsClassType
     {
-      get
-      {
-        ClassEntity baseClassEntity = null;
-
-        foreach (var baseType in BaseTypes)
-        {
-          if (baseType.ResolutionState==ResolutionState.Resolved && baseType.TargetEntity is ClassEntity)
-          {
-            baseClassEntity = baseType.TargetEntity as ClassEntity;
-            break;
-          }
-        }
-
-        return baseClassEntity;
-      }
+      get { return true; }
     }
   }
 }

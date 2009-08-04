@@ -253,7 +253,6 @@
     <Compile Include="CSharpSemanticGraph\ChildTypeCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstructedGenericTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ReflectedTypeBasedTypeEntityReference.cs" />
-    <Compile Include="CSharpSemanticGraph\IMetadataToEntityMap.cs" />
     <Compile Include="CSharpSemanticGraph\SyntaxNodeBasedSemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\IDefinesDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraph\MetadataBasedSemanticEntityReference.cs" />

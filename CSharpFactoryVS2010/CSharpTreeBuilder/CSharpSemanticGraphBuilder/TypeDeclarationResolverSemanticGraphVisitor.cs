@@ -16,10 +16,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Initializes a new instance of the <see cref="TypeDeclarationResolverSemanticGraphVisitor"/> class.
     /// </summary>
     /// <param name="errorHandler">Error handler object for error and warning reporting.</param>
-    /// <param name="metadataToEntityMap">A cache object for mapping reflected types to semantic entities.</param>
+    /// <param name="semanticGraph">The semantic graph that this visitor is working on.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeDeclarationResolverSemanticGraphVisitor(ICompilationErrorHandler errorHandler, IMetadataToEntityMap metadataToEntityMap)
-      :base(errorHandler,metadataToEntityMap)
+    public TypeDeclarationResolverSemanticGraphVisitor(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
+      :base(errorHandler,semanticGraph)
     {
     }
 
@@ -34,7 +34,47 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve base type references
       foreach (var typeEntityReference in entity.BaseTypes)
       {
-        ResolveTypeEntityReference(typeEntityReference, entity.Parent);
+        ResolveTypeEntityReference(typeEntityReference, entity);
+      }
+
+      // Resolve aliased type, if exists
+      if (entity is IAliasType)
+      {
+        var aliasedEntityRef = (entity as IAliasType).AliasedType;
+        if (aliasedEntityRef!=null)
+        {
+          ResolveTypeEntityReference(aliasedEntityRef, entity);
+        }
+      }
+
+      // Assign implicit base class, if necessary
+      if (!entity.IsInterfaceType && entity.ReflectedMetadata != typeof(object) && entity.BaseTypeEntity == null)
+      {
+        System.Type baseType = null;
+
+        if (entity is EnumEntity)
+        {
+          baseType = typeof (System.Enum);
+        }
+        else if (entity is StructEntity)
+        {
+          baseType = typeof (System.ValueType);
+        }
+        else if (entity is DelegateEntity)
+        {
+          baseType = typeof (System.MulticastDelegate);
+        }
+        else if (entity is ClassEntity)
+        {
+          baseType = typeof (System.Object);
+        }
+
+        if (baseType != null)
+        {
+          var reference = new ReflectedTypeBasedTypeEntityReference(baseType);
+          ResolveTypeEntityReference(reference, entity);
+          entity.AddBaseType(reference);
+        }
       }
     }
   }

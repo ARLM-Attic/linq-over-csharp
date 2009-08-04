@@ -16,5 +16,15 @@
     {
       get { return true; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a delegate type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsDelegateType
+    {
+      get { return true; }
+    }
   }
 }

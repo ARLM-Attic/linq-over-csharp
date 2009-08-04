@@ -40,6 +40,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       DeclarationSpace.Define(typeEntity);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type by name. 
+    /// </summary>
+    /// <param name="distinctiveName">A distinctive name.</param>
+    /// <returns>The type with the given name, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity GetChildTypeByDistinctiveName(string distinctiveName)
+    {
+      if (DeclarationSpace.IsNameDefined(distinctiveName))
+      {
+        var nameTableEntry = DeclarationSpace[distinctiveName];
+        if (nameTableEntry.State == NameTableEntryState.Definite && nameTableEntry.Entity is TypeEntity)
+        {
+          return nameTableEntry.Entity as TypeEntity;
+        }
+      }
+      return null;
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

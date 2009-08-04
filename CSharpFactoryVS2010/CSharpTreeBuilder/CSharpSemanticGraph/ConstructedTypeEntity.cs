@@ -27,16 +27,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       UnderlyingType = underlyingType;
       Parent = underlyingType.Parent; 
       Name = underlyingType.Name;
-
-      // Type tulajdonságok
-      // BaseTypes = underlyingType.BaseTypes;
-      // - array: System.Array
-      // - nullable: System.Nullable<T> base type-jai
-      // - pointer: nincs base type
-      // _Members = (List<MemberEntity>)underlyingType.Members;
-      // - array: örökli a System.Array-t
-      // - nullable: System.Nullable<T> memberei
-      // - pointer: nincs membere
     }
 
     // ----------------------------------------------------------------------------------------------

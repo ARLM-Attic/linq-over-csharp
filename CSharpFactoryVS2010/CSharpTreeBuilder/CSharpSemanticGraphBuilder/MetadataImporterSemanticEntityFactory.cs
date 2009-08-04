@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
@@ -15,20 +16,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>Error handler object used for reporting compilation messages.</summary>
     private ICompilationErrorHandler _ErrorHandler;
 
-    /// <summary>A map to resolve metadata objects to semantic entities.</summary>
-    private IMetadataToEntityMap _MetadataToEntityMap;
+    /// <summary>The semantic graph that this factory is working on.</summary>
+    private SemanticGraph _SemanticGraph;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MetadataImporterSemanticEntityFactory"/> class.
     /// </summary>
     /// <param name="errorHandler">Error handler object used for reporting compilation messages.</param>
-    /// <param name="metadataToEntityMap">A cache that maps metadata objects to semantic entities.</param>
+    /// <param name="semanticGraph">The semantic graph that this factory is working on.</param>
     // ----------------------------------------------------------------------------------------------
-    public MetadataImporterSemanticEntityFactory(ICompilationErrorHandler errorHandler, IMetadataToEntityMap metadataToEntityMap)
+    public MetadataImporterSemanticEntityFactory(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
     {
       _ErrorHandler = errorHandler;
-      _MetadataToEntityMap = metadataToEntityMap;
+      _SemanticGraph = semanticGraph;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -38,13 +39,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="filename">The name of the assembly file.</param>
     /// <param name="alias">A valid C# identifier that will represent a root namespace 
     /// that will contain all namespaces in the assembly. If null, then "global" is assumed.</param>
-    /// <param name="semanticGraph">The new entities will be added to this semantic graph.</param>
     // ----------------------------------------------------------------------------------------------
-    public void CreateEntitiesFromAssembly(string filename, string alias, SemanticGraph semanticGraph)
+    public void CreateEntitiesFromAssembly(string filename, string alias)
     {
       if (filename == null) { throw new ArgumentNullException("filename"); }
-      if (semanticGraph == null) { throw new ArgumentNullException("semanticGraph"); }
-      if (alias == null) { alias = semanticGraph.GlobalNamespace.Name; }
+      if (alias == null) { alias = _SemanticGraph.GlobalNamespace.Name; }
 
       Assembly assembly;
 
@@ -66,7 +65,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       foreach (var type in assembly.GetExportedTypes())
       {
-        CreateEntitiesFromReflectedType(type, alias, semanticGraph);
+        CreateEntitiesFromReflectedType(type, alias);
       }
 
       return;
@@ -78,9 +77,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="type">The type to be added to the semantic graph.</param>
     /// <param name="alias">A valid C# identifier that will represent a root namespace that will contain the type.</param>
-    /// <param name="semanticGraph">The created entities will be added to this graph.</param>
     // ----------------------------------------------------------------------------------------------
-    private void CreateEntitiesFromReflectedType(Type type, string alias, SemanticGraph semanticGraph)
+    private void CreateEntitiesFromReflectedType(Type type, string alias)
     {
       if (type == null)
       {
@@ -90,19 +88,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         throw new ArgumentNullException("alias");
       }
-      if (semanticGraph == null)
-      {
-        throw new ArgumentNullException("semanticGraph");
-      }
 
       // The context entity is our current position in the semantic graph.
-      NamespaceOrTypeEntity contextEntity = semanticGraph.GetRootNamespaceByName(alias);
+      NamespaceOrTypeEntity contextEntity = _SemanticGraph.GetRootNamespaceByName(alias);
       
       // If no root namespace exists with the given alias, then create it.
       if (contextEntity==null)
       {
         var rootNamespaceEntity = new RootNamespaceEntity(alias);
-        semanticGraph.AddRootNamespace(rootNamespaceEntity);
+        _SemanticGraph.AddRootNamespace(rootNamespaceEntity);
         contextEntity = rootNamespaceEntity;
       }
 
@@ -207,19 +201,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     private void CreateTypeEntityFromReflectedType(NamespaceOrTypeEntity contextEntity, Type type)
     {
       // Find out whether this name already exists in this declaration space.
-      var nameTableEntry = contextEntity.DeclarationSpace[type.Name 
-                            + (type.ContainsGenericParameters ? "`" + type.GetGenericArguments().Length : "")];
+      var nameTableEntry = contextEntity.DeclarationSpace[type.Name
+                                                          +
+                                                          (type.ContainsGenericParameters
+                                                             ? "`" + type.GetGenericArguments().Length
+                                                             : "")];
 
       // If the name already exists, that's an error
-      if (nameTableEntry!=null)
+      if (nameTableEntry != null)
       {
-        throw new ApplicationException(string.Format("Name '{0}' is already defined in declaration space '{1}'.", type.Name,
+        throw new ApplicationException(string.Format("Name '{0}' is already defined in declaration space '{1}'.",
+                                                     type.Name,
                                                      contextEntity.FullyQualifiedName));
       }
 
       if (!(contextEntity is IHasChildTypes))
       {
-        throw new ApplicationException(string.Format("Expected IHasChildTypes entity but received '{0}'.", contextEntity.GetType()));
+        throw new ApplicationException(string.Format("Expected IHasChildTypes entity but received '{0}'.",
+                                                     contextEntity.GetType()));
       }
 
       var parentContextEntity = contextEntity as IHasChildTypes;
@@ -238,30 +237,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (type.IsClass && type.BaseType != null && type.BaseType.FullName == "System.MulticastDelegate")
       {
-        typeEntity = new DelegateEntity() { Name = typeName };
-      }
-      else if (type.IsClass || type.FullName == "System.Enum")
-      // type.FullName == "System.Enum" is a hack needed because reflection thinks that System.Enum is 
-      // not a class, and not an enum, and not a value type, and not an interface. So what is it? We assume a class.
-      {
-        typeEntity = new ClassEntity() {Name = typeName};
-      }
-      else if (type.IsEnum)
-      {
-        typeEntity = new EnumEntity() { Name = typeName };
-      }
-      else if (type.IsValueType)
-      {
-        typeEntity = new StructEntity() { Name = typeName };
-      }
-      else if (type.IsInterface)
-      {
-        typeEntity = new InterfaceEntity() { Name = typeName };
+        typeEntity = new DelegateEntity() {Name = typeName};
       }
       else
-      {
-        throw new ApplicationException(string.Format("Type '{0}' not handled by CreatSemanticEntityFromType", type));
-      }
+        // type.FullName == "System.Enum" is a hack needed because reflection thinks that System.Enum is 
+        // not a class, and not an enum, and not a value type, and not an interface. So what is it? We assume a class.
+        if (type.IsClass || type.FullName == "System.Enum")
+        {
+          typeEntity = new ClassEntity() {Name = typeName};
+        }
+        else if (type.IsEnum)
+        {
+          typeEntity = new EnumEntity() {Name = typeName};
+        }
+        else if (type.IsValueType)
+        {
+          typeEntity = new StructEntity() {Name = typeName};
+        }
+        else if (type.IsInterface)
+        {
+          typeEntity = new InterfaceEntity() {Name = typeName};
+        }
+        else
+        {
+          throw new ApplicationException(string.Format("Type '{0}' not handled by CreatSemanticEntityFromType", type));
+        }
 
       // Populate base type and base interfaces
       if (type.BaseType != null)
@@ -277,51 +277,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       if (typeEntity is GenericCapableTypeEntity && type.IsGenericTypeDefinition)
       {
         var genericEntity = typeEntity as GenericCapableTypeEntity;
-        foreach (var typeParamter in type.GetGenericArguments())
+        foreach (var typeParameter in type.GetGenericArguments())
         {
-          // For nested types, reflection return the parent types' type parameters as well, so we have to filter them out
-          if (!ArgumentBelongsToParentType(typeParamter.Name, type))
-          {
-            var typeParameterEntity = new TypeParameterEntity(typeParamter.Name);
-            genericEntity.AddTypeParameter(typeParameterEntity);
-          }
+          var typeParameterEntity = new TypeParameterEntity(typeParameter.Name);
+          genericEntity.AddTypeParameter(typeParameterEntity);
+          MapEntityToReflectedMetadata(typeParameterEntity, typeParameter);
         }
       }
 
       if (typeEntity != null)
       {
         parentContextEntity.AddChildType(typeEntity);
-        _MetadataToEntityMap.AddMapping(type, typeEntity);
+        MapEntityToReflectedMetadata(typeEntity, type);
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Returns a value indicating whether the given type parameter name belongs to one of the parent types.
+    /// Maps a semantic entity to a reflected metadata object.
     /// </summary>
-    /// <param name="typeParameterName">A type parameter name.</param>
-    /// <param name="type">The type whose parents will be searched for the type parameter.</param>
-    /// <returns>True, if the type parameter name belongs to a parent type, not directly to the supplied type entity.</returns>
+    /// <param name="entity">A semantic entity.</param>
+    /// <param name="metadata">A reflected metadata object.</param>
     // ----------------------------------------------------------------------------------------------
-    private static bool ArgumentBelongsToParentType(string typeParameterName, Type type)
+    private void MapEntityToReflectedMetadata(SemanticEntity entity, MemberInfo metadata)
     {
-      if (type.DeclaringType == null)
-      {
-        return false;
-      }
-
-      if (type.DeclaringType.IsGenericTypeDefinition)
-      {
-        foreach (var typeParameter in type.DeclaringType.GetGenericArguments())
-        {
-          if (typeParameter.Name == typeParameterName)
-          {
-            return true;
-          }
-        }
-      }
-
-      return ArgumentBelongsToParentType(typeParameterName, type.DeclaringType);
+      entity.ReflectedMetadata = metadata;
+      _SemanticGraph.AddMetadataToEntityMapping(metadata, entity);
     }
   }
 }

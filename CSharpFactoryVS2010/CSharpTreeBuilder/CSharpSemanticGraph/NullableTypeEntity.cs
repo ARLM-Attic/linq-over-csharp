@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           "underlyingType");
       }
 
-      AliasToType = new ReflectedTypeBasedTypeEntityReference(typeof(System.Nullable<>));
+      AliasedType = new ReflectedTypeBasedTypeEntityReference(typeof(System.Nullable<>));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -35,6 +35,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public override bool IsValueType
+    {
+      get { return true; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a struct type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsStructType
     {
       get { return true; }
     }
@@ -54,10 +64,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the alias type.
+    /// Gets the reference of the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> AliasToType { get; private set; }
+    public SemanticEntityReference<TypeEntity> AliasedType { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -71,8 +81,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (AliasToType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasToType.TargetEntity.DeclarationSpace
+        return (AliasedType.ResolutionState == ResolutionState.Resolved)
+                 ? AliasedType.TargetEntity.DeclarationSpace
                  : base.DeclarationSpace;
       }
     }
@@ -89,8 +99,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (AliasToType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasToType.TargetEntity.BaseTypes
+        return (AliasedType.ResolutionState == ResolutionState.Resolved)
+                 ? AliasedType.TargetEntity.BaseTypes
                  : base.BaseTypes;
       }
     }
@@ -107,8 +117,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (AliasToType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasToType.TargetEntity.Members
+        return (AliasedType.ResolutionState == ResolutionState.Resolved)
+                 ? AliasedType.TargetEntity.Members
                  : base.Members;
       }
     }

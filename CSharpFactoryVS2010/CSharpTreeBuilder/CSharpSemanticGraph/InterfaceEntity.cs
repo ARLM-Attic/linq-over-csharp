@@ -16,5 +16,15 @@
     {
       get { return true; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is an interface type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsInterfaceType
+    {
+      get { return true; }
+    }
   }
 }

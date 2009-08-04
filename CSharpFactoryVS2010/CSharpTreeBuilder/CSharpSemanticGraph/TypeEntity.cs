@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -58,6 +59,76 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this type is a class type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsClassType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is an interface type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsInterfaceType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a struct type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsStructType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is an enum type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsEnumType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a delegate type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsDelegateType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is an array type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsArrayType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is an alias of another type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsAlias
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets an iterate-only collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -99,6 +170,48 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _Members.Add(memberEntity);
       memberEntity.Parent = this;
       DeclarationSpace.Define(memberEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type entity of this type.
+    /// </summary>
+    /// <remarks>
+    /// It returns an entity, not a reference, so it can be successful only if the base type references are already resolved.
+    /// If more than 1 base type reference is resolved to class entity, then null is returned (ambigous).
+    /// Always null for interfaces, pointer types, type parameters.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity BaseTypeEntity
+    {
+      get
+      {
+        var baseEntities = (from baseType in BaseTypes
+                            where
+                              baseType.ResolutionState == ResolutionState.Resolved &&
+                              baseType.TargetEntity.IsClassType
+                            select baseType.TargetEntity).ToArray();
+
+        return baseEntities.Length == 1 ? baseEntities[0] : null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the collection of base interface entities of this type.
+    /// </summary>
+    /// <remarks>
+    /// It returns the resolved entities, not the references, so it can be successful only if the base type references are already resolved.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<InterfaceEntity> BaseInterfaceEntities
+    {
+      get
+      {
+        return from baseType in BaseTypes
+               where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
+               select baseType.TargetEntity as InterfaceEntity;
+      }
     }
 
     #region Visitor methods

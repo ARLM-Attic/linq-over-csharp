@@ -16,5 +16,15 @@
     {
       get { return true; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a struct type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsStructType
+    {
+      get { return true; }
+    }
   }
 }
