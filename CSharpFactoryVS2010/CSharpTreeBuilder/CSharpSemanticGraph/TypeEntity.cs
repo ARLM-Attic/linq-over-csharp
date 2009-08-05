@@ -164,7 +164,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Always null for interfaces, pointer types, type parameters.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity BaseType
+    public virtual TypeEntity BaseType
     {
       get
       {

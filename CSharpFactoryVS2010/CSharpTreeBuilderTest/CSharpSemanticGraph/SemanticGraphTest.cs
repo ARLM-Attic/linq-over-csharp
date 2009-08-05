@@ -77,6 +77,20 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Tests the SystemArray property.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void SystemArray()
+    {
+      var semanticGraph = new SemanticGraph();
+      // mscorlib is not yet imported, so this is null 
+      semanticGraph.SystemArray.ShouldBeNull();
+    }
+
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Tests the PointerToUnknownType property.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

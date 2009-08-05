@@ -249,11 +249,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Warnings.Count.ShouldEqual(0);
       project.Errors.Count.ShouldEqual(0);
 
-      // mscorlib is already imported, so this is not null 
-      project.SemanticGraph.NullableGenericTypeDefinition.ShouldNotBeNull();
-      project.SemanticGraph.NullableGenericTypeDefinition.ShouldEqual(
-        project.SemanticGraph.GetEntityByMetadataObject(typeof (System.Nullable<>)));
-
       // Builtin type aliases must be resolved
       project.SemanticGraph.BuiltInTypes.All(
         builtInType => builtInType.AliasedTypeReference.ResolutionState == ResolutionState.Resolved).ShouldBeTrue();

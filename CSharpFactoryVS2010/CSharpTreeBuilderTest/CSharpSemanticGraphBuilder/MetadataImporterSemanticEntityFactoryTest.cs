@@ -263,6 +263,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters.Count.ShouldEqual(1);
       project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters[0].FullyQualifiedName.ShouldEqual("System.Nullable`1.T");
 
+      // check System.Array
+      // It's not a reference to be resolved, but a lookup in metadata map, so it is already populated
+      project.SemanticGraph.SystemArray.FullyQualifiedName.ShouldEqual("System.Array");
+
       // check BuiltIn types
       // The alias is a reference, and it is not yet resolved
       project.SemanticGraph.GetBuiltInTypeByName("int").AliasedTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);

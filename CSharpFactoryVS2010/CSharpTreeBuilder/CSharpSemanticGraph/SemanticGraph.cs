@@ -133,6 +133,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the System.Array type.
+    /// </summary>
+    /// <remarks>If mscorlib is not yet imported, then returns null.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public ClassEntity SystemArray
+    {
+      get
+      {
+        return GetEntityByMetadataObject(typeof(System.Array)) as ClassEntity;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Adds a metadataObject+semanticEntity pair to the mapping cache.
     /// </summary>
     /// <param name="metadataObject">A metadata object.</param>

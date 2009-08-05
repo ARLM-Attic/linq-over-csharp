@@ -521,13 +521,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the constructed type not exists yet then create it.
       if (arrayType == null)
       {
-        arrayType = new ArrayTypeEntity(underlyingTypeEntity, rank);
-
-        // Create a re
-        var baseTypeRef = new ReflectedTypeBasedTypeEntityReference(typeof(System.Array));
-        ResolveTypeEntityReference(baseTypeRef, null);
-        arrayType.AddBaseTypeReference(baseTypeRef);
-
+        arrayType = new ArrayTypeEntity(underlyingTypeEntity, rank, _SemanticGraph.SystemArray);
         underlyingTypeEntity.AddArrayType(arrayType);
       }
 

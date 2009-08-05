@@ -212,7 +212,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
         fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array1 = fieldEntity.Type.TargetEntity as ArrayTypeEntity;
-        array1.BaseTypeReferences.ToArray()[0].ResolutionState.ShouldEqual(ResolutionState.Resolved);
         array1.BaseType.FullyQualifiedName.ShouldEqual("System.Array");
         array1.Members.Count().ShouldEqual(0);
         array1.DeclarationSpace.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[1].DeclarationSpace);
