@@ -192,7 +192,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.IsValueType.ShouldBeFalse();
 
         // base class is not yet resolved, so it's null
-        classEntity.BaseTypeEntity.ShouldBeNull();
+        classEntity.BaseType.ShouldBeNull();
 
         // TODO: basetypes, members
       }
@@ -236,8 +236,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.ChildTypes.Count.ShouldEqual(0);
         classEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
-        classEntity.BaseTypes.Count().ShouldEqual(1);
-        ((TypeOrNamespaceNodeBasedTypeEntityReference)classEntity.BaseTypes.ToArray()[0]).SyntaxNode.TypeTags[0].Identifier.ShouldEqual("A");
+        classEntity.BaseTypeReferences.Count().ShouldEqual(1);
+        ((TypeOrNamespaceNodeBasedTypeEntityReference)classEntity.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeTags[0].Identifier.ShouldEqual("A");
       }
     }
 
@@ -279,7 +279,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         enumEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
-        var baseTypes = enumEntity.BaseTypes.ToArray();
+        var baseTypes = enumEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
         ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
@@ -333,7 +333,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         structEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
-        var baseTypes = structEntity.BaseTypes.ToArray();
+        var baseTypes = structEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
         ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
@@ -387,7 +387,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         interfaceEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
-        var baseTypes = interfaceEntity.BaseTypes.ToArray();
+        var baseTypes = interfaceEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
         ((TypeOrNamespaceNodeBasedTypeEntityReference) baseTypes[0]).SyntaxNode.ShouldEqual(
@@ -504,7 +504,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           typeParam.IsPointerType.ShouldBeFalse();
           typeParam.IsReferenceType.ShouldBeFalse();
           typeParam.IsValueType.ShouldBeFalse();
-          typeParam.BaseTypes.Count().ShouldEqual(0);
+          typeParam.BaseTypeReferences.Count().ShouldEqual(0);
           typeParam.DeclarationSpace.NameCount.ShouldEqual(0);
           typeParam.Members.Count().ShouldEqual(0);
           typeParam.Parent.ShouldEqual(classEntity);

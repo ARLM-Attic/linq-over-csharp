@@ -58,7 +58,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     {
       var declarationSpace = new DeclarationSpace();
       var entity1 = new RootNamespaceEntity("A");
-      var entity2 = new RootNamespaceEntity("A");
+      var entity2 = new ClassEntity() {Name = "A"};
       declarationSpace.Define(entity1);
       declarationSpace.Define(entity2);
 
@@ -70,8 +70,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       nameTableEntry.Name.ShouldEqual("A");
 
       var entities = nameTableEntry.Entities.ToArray();
-      entities[0].ShouldEqual(entity1);
-      entities[1].ShouldEqual(entity2);
+      entities[0].ShouldEqual(entity1 as RootNamespaceEntity);
+      entities[1].ShouldEqual(entity2 as ClassEntity);
 
       try
       {
@@ -81,6 +81,30 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       {
         e.Message.Contains("not definite").ShouldBeTrue();
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the redefinition of a name
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Redefine()
+    {
+      var declarationSpace = new DeclarationSpace();
+      var entity1 = new RootNamespaceEntity("A");
+      declarationSpace.Define(entity1);
+
+      var entity2 = new ClassEntity() { Name = "A" };
+      declarationSpace.Redefine(entity2);
+
+      declarationSpace.NameCount.ShouldEqual(1);
+      declarationSpace.IsNameDefined("A").ShouldBeTrue();
+      var nameTableEntry = declarationSpace["A"];
+      nameTableEntry.ShouldNotBeNull();
+      nameTableEntry.State.ShouldEqual(NameTableEntryState.Definite);
+      nameTableEntry.Name.ShouldEqual("A");
+      ((ClassEntity)nameTableEntry.Entity).FullyQualifiedName.ShouldEqual("A");
     }
   }
 }

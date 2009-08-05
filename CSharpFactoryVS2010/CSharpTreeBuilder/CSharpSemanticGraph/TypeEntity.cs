@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -10,11 +12,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class TypeEntity : NamespaceOrTypeEntity
   {
-    /// <summary>Backing field for BaseTypes property.</summary>
-    protected List<SemanticEntityReference<TypeEntity>> _BaseTypes;
+    /// <summary>Backing field for BaseTypeReferences property.</summary>
+    protected List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences;
 
     /// <summary>Backing field for Members property.</summary>
     protected List<MemberEntity> _Members;
+
+    /// <summary>Stores array types created from this type. The key is the rank of the array.</summary>
+    protected Dictionary<int,ArrayTypeEntity> _ArrayTypes;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -23,8 +28,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected TypeEntity()
     {
-      _BaseTypes = new List<SemanticEntityReference<TypeEntity>>();
+      _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
+      _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -132,19 +138,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypes
+    public virtual IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypeReferences
     {
-      get { return _BaseTypes; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets an iterate-only collection of members.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual IEnumerable<MemberEntity> Members
-    {
-      get { return _Members; }
+      get { return _BaseTypeReferences; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -153,9 +149,61 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="typeEntityReference">A type entity reference.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddBaseType(SemanticEntityReference<TypeEntity> typeEntityReference)
+    public void AddBaseTypeReference(SemanticEntityReference<TypeEntity> typeEntityReference)
     {
-      _BaseTypes.Add(typeEntityReference);
+      _BaseTypeReferences.Add(typeEntityReference);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type entity of this type.
+    /// </summary>
+    /// <remarks>
+    /// It returns an entity, not a reference, so it can be successful only if the base type references are already resolved.
+    /// If more than 1 base type reference is resolved to class entity, then null is returned (ambigous).
+    /// Always null for interfaces, pointer types, type parameters.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity BaseType
+    {
+      get
+      {
+        var baseTypes = (from baseType in BaseTypeReferences
+                            where
+                              baseType.ResolutionState == ResolutionState.Resolved &&
+                              baseType.TargetEntity.IsClassType
+                            select baseType.TargetEntity).ToArray();
+
+        return baseTypes.Length == 1 ? baseTypes[0] : null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a read-only collection of base interface entities of this type.
+    /// </summary>
+    /// <remarks>
+    /// It returns the resolved entities, not the references, so it can be successful only if the base type references are already resolved.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public ReadOnlyCollection<InterfaceEntity> BaseInterfaces
+    {
+      get
+      {
+        return (from baseType in BaseTypeReferences
+               where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
+               select baseType.TargetEntity as InterfaceEntity).ToList().AsReadOnly();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of member references.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual IEnumerable<MemberEntity> Members
+    {
+      get { return _Members; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -174,44 +222,55 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the base type entity of this type.
+    /// Gets or sets the nullable type constructed from this type.
     /// </summary>
-    /// <remarks>
-    /// It returns an entity, not a reference, so it can be successful only if the base type references are already resolved.
-    /// If more than 1 base type reference is resolved to class entity, then null is returned (ambigous).
-    /// Always null for interfaces, pointer types, type parameters.
-    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity BaseTypeEntity
-    {
-      get
-      {
-        var baseEntities = (from baseType in BaseTypes
-                            where
-                              baseType.ResolutionState == ResolutionState.Resolved &&
-                              baseType.TargetEntity.IsClassType
-                            select baseType.TargetEntity).ToArray();
+    public NullableTypeEntity NullableType { get; set; }
 
-        return baseEntities.Length == 1 ? baseEntities[0] : null;
-      }
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the pointer type constructed from this type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public PointerToTypeEntity PointerType { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an array type created from this type with the given rank.
+    /// </summary>
+    /// <param name="rank">The rank of the array to be retreived.</param>
+    /// <returns>
+    /// An array type created from this type with the given rank. Null if no such array was created so far.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public ArrayTypeEntity GetArrayTypeByRank(int rank)
+    {
+      return _ArrayTypes.ContainsKey(rank) ? _ArrayTypes[rank] : null;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the collection of base interface entities of this type.
+    /// Adds an array type to the array type collection of this type.
     /// </summary>
-    /// <remarks>
-    /// It returns the resolved entities, not the references, so it can be successful only if the base type references are already resolved.
-    /// </remarks>
+    /// <param name="arrayType">An array type with the this type as underlying type.</param>
+    /// <remarks>Throws an error if the array has a different underlying type or 
+    /// an array with the same rank already exists in the array collection.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<InterfaceEntity> BaseInterfaceEntities
+    public void AddArrayType(ArrayTypeEntity arrayType)
     {
-      get
+      if (arrayType.UnderlyingType != this)
       {
-        return from baseType in BaseTypes
-               where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
-               select baseType.TargetEntity as InterfaceEntity;
+        throw new ArgumentException(
+          string.Format("Only arrays with underlying type '{0}' are accepted, but received underlying type '{1}'.",
+                        this.FullyQualifiedName, arrayType.UnderlyingType.FullyQualifiedName), "arrayType");
       }
+
+      if (_ArrayTypes.ContainsKey(arrayType.Rank))
+      {
+        throw new ApplicationException(string.Format("ArrayType with rank '{0}' was already added.", arrayType.Rank));
+      }
+
+      _ArrayTypes.Add(arrayType.Rank, arrayType);
     }
 
     #region Visitor methods

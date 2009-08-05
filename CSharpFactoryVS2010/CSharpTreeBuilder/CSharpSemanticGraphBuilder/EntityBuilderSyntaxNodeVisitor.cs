@@ -208,7 +208,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         typeEntity = new TSemanticEntityType() { Name = node.Name };
         foreach (var baseType in node.BaseTypes)
         {
-          typeEntity.AddBaseType(new TypeOrNamespaceNodeBasedTypeEntityReference(baseType));
+          typeEntity.AddBaseTypeReference(new TypeOrNamespaceNodeBasedTypeEntityReference(baseType));
         }
         if (typeEntity is GenericCapableTypeEntity)
         {

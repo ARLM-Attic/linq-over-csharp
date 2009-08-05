@@ -25,6 +25,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Resolves type references in a BuiltInTypeEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(BuiltInTypeEntity entity)
+    {
+      ResolveTypeEntityReference(entity.AliasedTypeReference, null);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Resolves type references in a TypeEntity node.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
@@ -32,23 +43,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(TypeEntity entity)
     {
       // Resolve base type references
-      foreach (var typeEntityReference in entity.BaseTypes)
+      foreach (var typeEntityReference in entity.BaseTypeReferences)
       {
         ResolveTypeEntityReference(typeEntityReference, entity);
       }
 
-      // Resolve aliased type, if exists
-      if (entity is IAliasType)
-      {
-        var aliasedEntityRef = (entity as IAliasType).AliasedType;
-        if (aliasedEntityRef!=null)
-        {
-          ResolveTypeEntityReference(aliasedEntityRef, entity);
-        }
-      }
-
       // Assign implicit base class, if necessary
-      if (!entity.IsInterfaceType && entity.ReflectedMetadata != typeof(object) && entity.BaseTypeEntity == null)
+      if (!entity.IsInterfaceType && entity.ReflectedMetadata != typeof(object) && entity.BaseType == null)
       {
         System.Type baseType = null;
 
@@ -73,7 +74,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           var reference = new ReflectedTypeBasedTypeEntityReference(baseType);
           ResolveTypeEntityReference(reference, entity);
-          entity.AddBaseType(reference);
+          entity.AddBaseTypeReference(reference);
         }
       }
     }

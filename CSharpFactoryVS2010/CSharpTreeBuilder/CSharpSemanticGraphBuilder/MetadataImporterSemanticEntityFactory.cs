@@ -266,11 +266,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Populate base type and base interfaces
       if (type.BaseType != null)
       {
-        typeEntity.AddBaseType(new ReflectedTypeBasedTypeEntityReference(type.BaseType));
+        typeEntity.AddBaseTypeReference(new ReflectedTypeBasedTypeEntityReference(type.BaseType));
       }
       foreach (var interfaceItem in type.GetInterfaces())
       {
-        typeEntity.AddBaseType(new ReflectedTypeBasedTypeEntityReference(interfaceItem));
+        typeEntity.AddBaseTypeReference(new ReflectedTypeBasedTypeEntityReference(interfaceItem));
       }
 
       // If it's a generic type, then add type parameters

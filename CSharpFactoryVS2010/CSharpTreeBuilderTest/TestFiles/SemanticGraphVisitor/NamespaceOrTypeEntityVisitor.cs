@@ -4,7 +4,9 @@
   { }
 
   class Class1
-  { }
+  {
+    int a;
+  }
 }
 
 class Class2

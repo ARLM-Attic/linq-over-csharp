@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rhino.Mocks;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.ProjectContent;
@@ -39,7 +40,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         sgVisitorMock.Visit(semanticGraph.GlobalNamespace);
         sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0]);
         sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0]);
-        sgVisitorMock.Visit((TypeEntity)semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0]);
+        var class1 = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
+        sgVisitorMock.Visit(class1);
+        sgVisitorMock.Visit(class1.Members.ToArray()[0] as FieldEntity);
         sgVisitorMock.Visit((TypeEntity)semanticGraph.GlobalNamespace.ChildTypes[0]);
         sgVisitorMock.Visit((TypeEntity)((ClassEntity)semanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0]);
       }

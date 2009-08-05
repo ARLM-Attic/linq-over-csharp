@@ -10,9 +10,9 @@
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference of the aliased type.
+    /// Gets the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntityReference<TypeEntity> AliasedType { get; }
+    TypeEntity AliasedType { get; }
   }
 }

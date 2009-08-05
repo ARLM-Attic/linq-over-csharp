@@ -72,9 +72,9 @@
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactoryTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeBodyResolutionTest.cs" />
+    <Compile Include="CSharpSemanticGraph\SemanticGraphTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraph\DeclarationSpaceTest.cs" />
-    <Compile Include="CSharpSemanticGraph\EnumEntityTest.cs" />
     <Compile Include="ParserExtensions.cs" />
     <Compile Include="ParserTestBed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

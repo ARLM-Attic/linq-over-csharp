@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -15,8 +16,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="NullableTypeEntity"/> class.
     /// </summary>
     /// <param name="underlyingType">The underlying type.</param>
+    /// <param name="aliasedType">The aliased type</param>
     // ----------------------------------------------------------------------------------------------
-    public NullableTypeEntity(TypeEntity underlyingType)
+    public NullableTypeEntity(TypeEntity underlyingType, TypeEntity aliasedType)
       : base(underlyingType)
     {
       if ((underlyingType is NullableTypeEntity) || !(underlyingType.IsValueType))
@@ -26,7 +28,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           "underlyingType");
       }
 
-      AliasedType = new ReflectedTypeBasedTypeEntityReference(typeof(System.Nullable<>));
+      if (aliasedType==null)
+      {
+        throw new ArgumentNullException("aliasedType");
+      }
+
+      AliasedType = aliasedType;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -64,27 +71,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference of the aliased type.
+    /// Gets the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> AliasedType { get; private set; }
+    public TypeEntity AliasedType { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the declaration space of the entity. 
     /// </summary>
     /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's declaration space.
+    /// Returns the aliased type's declaration space.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public override DeclarationSpace DeclarationSpace
     {
-      get
-      {
-        return (AliasedType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasedType.TargetEntity.DeclarationSpace
-                 : base.DeclarationSpace;
-      }
+      get { return AliasedType.DeclarationSpace; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -92,17 +94,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of base types.
     /// </summary>
     /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's base types.
+    /// Returns the aliased type's base type references.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public override IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypes
+    public override IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypeReferences
     {
-      get
-      {
-        return (AliasedType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasedType.TargetEntity.BaseTypes
-                 : base.BaseTypes;
-      }
+      get { return AliasedType.BaseTypeReferences; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -110,16 +107,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of members.
     /// </summary>
     /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's members.
+    /// Returns the aliased type's members.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public override IEnumerable<MemberEntity> Members
     {
       get
       {
-        return (AliasedType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasedType.TargetEntity.Members
-                 : base.Members;
+        return AliasedType.Members;
       }
     }
 

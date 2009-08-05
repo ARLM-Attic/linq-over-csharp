@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -93,7 +94,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           throw new ApplicationException(string.Format("Unexpected BuiltInType: '{0}'", builtInType));
       }
 
-      AliasedType = new ReflectedTypeBasedTypeEntityReference(aliasedType);
+      AliasedTypeReference = new ReflectedTypeBasedTypeEntityReference(aliasedType);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -108,7 +109,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference of the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> AliasedType { get; private set; }
+    public SemanticEntityReference<TypeEntity> AliasedTypeReference { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the aliased type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity AliasedType
+    {
+      get
+      {
+        return AliasedTypeReference.TargetEntity;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -180,7 +194,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return (BuiltInType == BuiltInType.Decimal) || IsFloatingPointType || IsIntegralType;
-
       }
     }
 
@@ -202,34 +215,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the declaration space of the entity. 
     /// </summary>
     /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's declaration space.
+    /// If the aliased type is already resolved then returns that type's declaration space, 
+    /// otherwise returns the base class' empty declaration space.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public override DeclarationSpace DeclarationSpace
     {
       get
       {
-        return (AliasedType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasedType.TargetEntity.DeclarationSpace
-                 : base.DeclarationSpace;
+        return AliasedType == null ? base.DeclarationSpace : AliasedType.DeclarationSpace;
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets an iterate-only collection of base types.
+    /// Gets an iterate-only collection of base type references.
     /// </summary>
     /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's base types.
+    /// If the aliased type is already resolved then returns that type's base types,
+    /// otherwise returns the base class' empty base type reference list.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public override IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypes
+    public override IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypeReferences
     {
       get
       {
-        return (AliasedType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasedType.TargetEntity.BaseTypes
-                 : base.BaseTypes;
+        return AliasedType == null ? base.BaseTypeReferences : AliasedType.BaseTypeReferences;
       }
     }
 
@@ -238,16 +249,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of members.
     /// </summary>
     /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's members.
+    /// If the aliased type is already resolved then returns that type's members,
+    /// otherwise returns the base class' empty member list.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public override IEnumerable<MemberEntity> Members
     {
       get
       {
-        return (AliasedType.ResolutionState == ResolutionState.Resolved)
-                 ? AliasedType.TargetEntity.Members
-                 : base.Members;
+        return AliasedType == null ? base.Members : AliasedType.Members;
       }
     }
 

@@ -35,7 +35,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
       _TypeArguments = typeArguments;
 
-      _BaseTypes = (List<SemanticEntityReference<TypeEntity>>) underlyingType.BaseTypes;
+      _BaseTypeReferences = (List<SemanticEntityReference<TypeEntity>>) underlyingType.BaseTypeReferences;
       _Members = (List<MemberEntity>) underlyingType.Members;
     }
 

@@ -227,8 +227,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
 
-      // Process ?, *, [] parts of the typename, and create constructed (non-generic) types if necessary
-      typeEntity = GetConstructedNonGenericType(typeEntity, typeOrNamespaceNode);
+      // If the AST node has a nullable type indicating token, then create nullable type.
+      if (typeOrNamespaceNode.NullableToken != null)
+      {
+        typeEntity = GetConstructedNullableType(typeEntity);
+      }
+
+      // If the AST node has pointer token(s), then create pointer type(s).
+      bool isFirstStar = true;
+      foreach (var pointerToken in typeOrNamespaceNode.PointerTokens)
+      {
+        // If it's pointer to unknown type (void*) then the first '*' should be swallowed, because that's part of 'void*'
+        if (typeEntity is PointerToUnknownTypeEntity && isFirstStar)
+        {
+          isFirstStar = false;
+        }
+        else
+        {
+          typeEntity = GetConstructedPointerType(typeEntity);
+        }
+      }
+
+      // If the AST node has rank specifier(s), then create array type(s).
+      foreach (var rankSpecifier in typeOrNamespaceNode.RankSpecifiers)
+      {
+        typeEntity = GetConstructedArrayType(typeEntity, rankSpecifier.Rank);
+      }
 
       return typeEntity;
     }
@@ -304,13 +328,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     private SemanticEntity FindEntityByTraversingBaseClassesRecursively(TypeTagNodeCollection typeTags, TypeEntity contextEntity)
     {
       // If the context entity does not have a base type, then bail out.
-      if (contextEntity.BaseTypeEntity == null)
+      if (contextEntity.BaseType == null)
       {
         return null;
       }
 
       // Try to resolve the name in the base type
-      var foundEntity = FindTypeTagsInDeclarationSpaceHierarchy(typeTags, contextEntity.BaseTypeEntity);
+      var foundEntity = FindTypeTagsInDeclarationSpaceHierarchy(typeTags, contextEntity.BaseType);
 
       // If succeeded, then return it
       if (foundEntity != null)
@@ -319,7 +343,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // Otherwise, continue with the base type of the base type (recursion)
-      return FindEntityByTraversingBaseClassesRecursively(typeTags, contextEntity.BaseTypeEntity);
+      return FindEntityByTraversingBaseClassesRecursively(typeTags, contextEntity.BaseType);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -436,48 +460,78 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a constructed type (except constructed generic type) from a type entity, 
-    /// based on syntax node fixtures (?, *, [])
+    /// Gets a nullable type given its underlying type.
     /// </summary>
-    /// <param name="typeEntity">A type entity.</param>
-    /// <param name="syntaxNode">A type or namespace node.</param>
-    /// <returns>The type entity constructed from the input type entity.</returns>
+    /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int?')</param>
+    /// <returns>A nullable type entity with the given underlying type.</returns>
+    /// <remarks>
+    /// If the constructed type already exists, then retrieves it, otherwise creates it.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    private TypeEntity GetConstructedNonGenericType(TypeEntity typeEntity, TypeOrNamespaceNode syntaxNode)
+    private NullableTypeEntity GetConstructedNullableType(TypeEntity underlyingTypeEntity)
     {
-      // Create nullable type if necessary
-      if (syntaxNode.NullableToken != null)
+      // If the constructed type not exists yet then create it.
+      if (underlyingTypeEntity.NullableType == null)
       {
-        typeEntity = new NullableTypeEntity(typeEntity);
-        // Resolve the aliasd type too
-        ResolveTypeEntityReference(((IAliasType)typeEntity).AliasedType, null);
+        // The aliased type is a constructed generic type created from System.Nullable`1 and the underlying type
+        var aliasedType = new ConstructedGenericTypeEntity(_SemanticGraph.NullableGenericTypeDefinition,
+                                                           new List<TypeEntity> {underlyingTypeEntity});
+        underlyingTypeEntity.NullableType = new NullableTypeEntity(underlyingTypeEntity, aliasedType);
       }
 
-      // Create pointer types if necessary
-      bool isFirstStar = true;
-      foreach (var pointerToken in syntaxNode.PointerTokens)
+      return underlyingTypeEntity.NullableType;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a pointer type given its underlying type.
+    /// </summary>
+    /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int*')</param>
+    /// <returns>A pointer type entity with the given underlying type.</returns>
+    /// <remarks>
+    /// If the constructed type already exists, then retrieves it, otherwise creates it.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    private PointerToTypeEntity GetConstructedPointerType(TypeEntity underlyingTypeEntity)
+    {
+      // If the constructed type not exists yet then create it.
+      if (underlyingTypeEntity.PointerType == null)
       {
-        // If it's pointer to unknown type (void*) then the first '*' should be swallowed, because that's part of 'void*'
-        if (typeEntity is PointerToUnknownTypeEntity && isFirstStar)
-        {
-          isFirstStar = false;
-        }
-        else
-        {
-          typeEntity = new PointerToTypeEntity(typeEntity);
-        }
+        underlyingTypeEntity.PointerType = new PointerToTypeEntity(underlyingTypeEntity);
       }
 
-      // Create array types if necessary
-      foreach (var rankSpecifier in syntaxNode.RankSpecifiers)
+      return underlyingTypeEntity.PointerType;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an array type given its underlying type.
+    /// </summary>
+    /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int[]')</param>
+    /// <param name="rank">The rank of the array.</param>
+    /// <returns>An array type entity with the given underlying type.</returns>
+    /// <remarks>
+    /// If the constructed type already exists, then retrieves it, otherwise creates it.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    private ArrayTypeEntity GetConstructedArrayType(TypeEntity underlyingTypeEntity, int rank)
+    {
+      var arrayType = underlyingTypeEntity.GetArrayTypeByRank(rank);
+
+      // If the constructed type not exists yet then create it.
+      if (arrayType == null)
       {
-        typeEntity = new ArrayTypeEntity(typeEntity, rankSpecifier.Rank);
-        var baseTypeRef = new ReflectedTypeBasedTypeEntityReference(typeof (System.Array));
+        arrayType = new ArrayTypeEntity(underlyingTypeEntity, rank);
+
+        // Create a re
+        var baseTypeRef = new ReflectedTypeBasedTypeEntityReference(typeof(System.Array));
         ResolveTypeEntityReference(baseTypeRef, null);
-        typeEntity.AddBaseType(baseTypeRef);
+        arrayType.AddBaseTypeReference(baseTypeRef);
+
+        underlyingTypeEntity.AddArrayType(arrayType);
       }
 
-      return typeEntity;
+      return arrayType;
     }
 
     // ----------------------------------------------------------------------------------------------
