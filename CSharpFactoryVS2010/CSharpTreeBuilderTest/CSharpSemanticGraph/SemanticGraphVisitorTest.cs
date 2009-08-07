@@ -22,34 +22,69 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void NamespaceOrTypeEntityVisitor()
+    public void VisitNamespaceOrTypeEntity()
     {
       // Set up a syntax tree
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"SemanticGraphVisitor\NamespaceOrTypeEntityVisitor.cs");
+      project.AddFile(@"SemanticGraphVisitor\VisitNamespaceOrTypeEntity.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      // Create semantic graph
-      var semanticGraph = new SemanticGraph();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, semanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
 
       // Arrange
       var mocks = new MockRepository();
       var sgVisitorMock = mocks.StrictMock<SemanticGraphVisitor>();
       using (mocks.Ordered())
       {
-        sgVisitorMock.Visit(semanticGraph.GlobalNamespace);
-        sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0]);
-        sgVisitorMock.Visit(semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0]);
-        var class1 = semanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
+        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace);
+        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0]);
+        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0]);
+        var class1 = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
         sgVisitorMock.Visit(class1);
         sgVisitorMock.Visit(class1.Members.ToArray()[0] as FieldEntity);
-        sgVisitorMock.Visit((TypeEntity)semanticGraph.GlobalNamespace.ChildTypes[0]);
-        sgVisitorMock.Visit((TypeEntity)((ClassEntity)semanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0]);
+        sgVisitorMock.Visit((TypeEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
+        sgVisitorMock.Visit((TypeEntity)((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0]);
       }
       mocks.ReplayAll();
 
       // We only travers the global namespace, not the whole semantic graph, because that would include the built-in types too
-      semanticGraph.GlobalNamespace.AcceptVisitor(sgVisitorMock);
+      project.SemanticGraph.GlobalNamespace.AcceptVisitor(sgVisitorMock);
+
+      // Assert
+      mocks.VerifyAll();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the visiting of using entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void VisitUsingEntity()
+    {
+      // Set up a syntax tree
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SemanticGraphVisitor\VisitUsingEntity.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+
+      // Arrange
+      var mocks = new MockRepository();
+      var sgVisitorMock = mocks.StrictMock<SemanticGraphVisitor>();
+      using (mocks.Ordered())
+      {
+        var global = project.SemanticGraph.GlobalNamespace;
+        sgVisitorMock.Visit(global);
+        sgVisitorMock.Visit(global.UsingNamespaces.ToArray()[0]);
+        sgVisitorMock.Visit(global.UsingAliases.ToArray()[0]);
+        sgVisitorMock.Visit(global.ChildNamespaces[0]);
+        sgVisitorMock.Visit(global.ChildNamespaces[0].UsingNamespaces.ToArray()[0]);
+        sgVisitorMock.Visit(global.ChildNamespaces[0].UsingAliases.ToArray()[0]);
+        sgVisitorMock.Visit(global.ChildNamespaces[0].ChildNamespaces[0]);
+      }
+      mocks.ReplayAll();
+
+      // We only travers the global namespace, not the whole semantic graph, because that would include the built-in types too
+      project.SemanticGraph.GlobalNamespace.AcceptVisitor(sgVisitorMock);
 
       // Assert
       mocks.VerifyAll();

@@ -285,11 +285,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void CS0246_TypeOrNamespaceNameCouldNotBeFound()
+    public void CS0246_TypeNameCouldNotBeFound()
     {
       // Set up SyntaxTree and SemanticGraph
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"TypeDeclarationResolution\CS0246_TypeOrNamespaceNameCouldNotBeFound.cs");
+      project.AddFile(@"TypeDeclarationResolution\CS0246_TypeNameCouldNotBeFound.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
       project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
       project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
@@ -299,6 +299,117 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS0246");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier'
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore]
+    public void CS0576_UsingAliasConflictsWithDeclaration()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeDeclarationResolution\CS0576_UsingAliasConflictsWithDeclaration.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0576");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of namespace names in using namespace entities.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UsingNamespaceNames()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeDeclarationResolution\UsingNamespaceNames.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var global = project.SemanticGraph.GlobalNamespace;
+      var namespaceA = global.ChildNamespaces[0];
+      var namespaceB = namespaceA.ChildNamespaces[0];
+      var namespaceC = namespaceB.ChildNamespaces[0];
+
+      // using A;
+      {
+        var usingNamespace = global.UsingNamespaces.ToArray()[0];
+        usingNamespace.NamespaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        usingNamespace.NamespaceReference.TargetEntity.ShouldEqual(namespaceA);
+        usingNamespace.ImportedNamespace.ShouldEqual(namespaceA);
+      }
+      // using A.B;
+      {
+        var usingNamespace = global.UsingNamespaces.ToArray()[1];
+        usingNamespace.NamespaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        usingNamespace.NamespaceReference.TargetEntity.ShouldEqual(namespaceB);
+        usingNamespace.ImportedNamespace.ShouldEqual(namespaceB);
+      }
+
+      // using B;
+      {
+        var usingNamespace = namespaceA.UsingNamespaces.ToArray()[0];
+        usingNamespace.NamespaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        usingNamespace.NamespaceReference.TargetEntity.ShouldEqual(namespaceB);
+        usingNamespace.ImportedNamespace.ShouldEqual(namespaceB);
+      }
+      // using B.C;
+      {
+        var usingNamespace = namespaceA.UsingNamespaces.ToArray()[1];
+        usingNamespace.NamespaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        usingNamespace.NamespaceReference.TargetEntity.ShouldEqual(namespaceC);
+        usingNamespace.ImportedNamespace.ShouldEqual(namespaceC);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0138: A using namespace directive can only be applied to namespaces; 'A' is a type not a namespace
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0138_UsingNamespaceWithTypeName()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeDeclarationResolution\CS0138_UsingNamespaceWithTypeName.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0138");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0246: The type or namespace name 'A' could not be found (are you missing a using directive or an assembly reference?)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0246_NamespaceNameCouldNotBeFound()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeDeclarationResolution\CS0246_NamespaceNameCouldNotBeFound.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0246");
+      project.Warnings.Count.ShouldEqual(0);
     }
   }
 }

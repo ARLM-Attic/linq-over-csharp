@@ -1,5 +1,6 @@
 ﻿using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraph;
+using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
@@ -21,6 +22,41 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public TypeDeclarationResolverSemanticGraphVisitor(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
       :base(errorHandler,semanticGraph)
     {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves namespace reference in a using namespace entity.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(UsingNamespaceEntity entity)
+    {
+      if (entity.Parent == null)
+      {
+        throw new ApplicationException("UsingNamespaceEntity.Parent should not be null.");
+      }
+
+      if (entity.Parent is NamespaceEntity)
+      {
+        ResolveNamespaceEntityReference(entity.NamespaceReference, entity.Parent as NamespaceEntity);
+      }
+      else
+      {
+        throw new ApplicationException(string.Format("Unexpected parent type: '{0}'.", entity.Parent.GetType()));
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves namespace-or-type reference in a using alias entity.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(UsingAliasEntity entity)
+    {
+      // TODO: implement this
+      //ResolveNamespaceOrTypeEntityReference(entity.NamespaceOrTypeReference, entity.Parent as NamespaceEntity);
     }
 
     // ----------------------------------------------------------------------------------------------

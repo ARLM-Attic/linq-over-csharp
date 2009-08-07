@@ -52,7 +52,10 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public CompilationUnitNode Owner
     {
-      get { return _Owner; }
+      get
+      {
+        return _Owner;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -312,6 +315,24 @@ namespace CSharpTreeBuilder.Ast
     public List<SemanticEntity> SemanticEntities
     {
       get { throw new InvalidOperationException("SyntaxNodeCollection.SemanticEntities should not be called."); }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the compilation unit node for this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public CompilationUnitNode CompilationUnitNode
+    {
+      get
+      {
+        ISyntaxNode node = this;
+        while (node != null && !(node is CompilationUnitNode))
+        {
+          node = node.Parent;
+        }
+        return node as CompilationUnitNode;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

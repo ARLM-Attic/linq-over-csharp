@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -10,6 +11,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public class NamespaceEntity : NamespaceOrTypeEntity, IHasChildTypes
   {
+    /// <summary>A dictionary that stores using alias entities. The key is the alias name.</summary>
+    private Dictionary<string, UsingAliasEntity> _UsingAliases;
+
+    /// <summary>A list of using namespace entities.</summary>
+    private List<UsingNamespaceEntity> _UsingNamespaces;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceEntity"/> class.
@@ -17,6 +24,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public NamespaceEntity()
     {
+      _UsingAliases = new Dictionary<string, UsingAliasEntity>();
+      _UsingNamespaces = new List<UsingNamespaceEntity>();
+
       ChildNamespaces = new List<NamespaceEntity>();
       ChildTypes = new List<TypeEntity>();
     }
@@ -116,6 +126,128 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       return null;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of using namespaces entities.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<UsingNamespaceEntity> UsingNamespaces
+    {
+      get { return _UsingNamespaces; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a using namespace entity to this namespace.
+    /// </summary>
+    /// <param name="usingNamespaceEntity">A using namespace entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddUsingNamespace(UsingNamespaceEntity usingNamespaceEntity)
+    {
+      if (_UsingNamespaces.Contains(usingNamespaceEntity))
+      {
+        throw new ApplicationException(string.Format(
+                                         "The using directive for '{0}' appeared previously in this namespace.",
+                                         usingNamespaceEntity.NamespaceReference.SyntaxNode.TypeTags));
+      }
+
+      _UsingNamespaces.Add(usingNamespaceEntity);
+      usingNamespaceEntity.Parent = this;
+
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a given namespace name 
+    /// was already specified in this namespace as a using namespace directive.
+    /// </summary>
+    /// <param name="namespaceName">A namespace name as string.</param>
+    /// <returns>True if the namespace name was already specified, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsUsingNamespaceNameAlreadySpecified(string namespaceName)
+    {
+      return (from usingNamespace in _UsingNamespaces
+              where usingNamespace.NamespaceReference.SyntaxNode.TypeTags.ToString() == namespaceName
+              select usingNamespace).Count() > 0;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the iterate-only collection of those using namespace entities 
+    /// that can affect the resolution of a name at a given source point.
+    /// </summary>
+    /// <param name="sourcePoint">A source point.</param>
+    /// <returns>A iterate-only collection of using namespace entities.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<UsingNamespaceEntity> GetUsingNamespacesBySourcePoint(SourcePoint sourcePoint)
+    {
+      return from usingNamespace in _UsingNamespaces
+             where usingNamespace.LexicalScope.Contains(sourcePoint)
+             select usingNamespace;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of using alias entities.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<UsingAliasEntity> UsingAliases
+    {
+      get { return _UsingAliases.Values; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a using alias entity to this namespace.
+    /// </summary>
+    /// <param name="usingAliasEntity">A using alias entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddUsingAlias(UsingAliasEntity usingAliasEntity)
+    {
+      if (_UsingAliases.ContainsKey(usingAliasEntity.Alias))
+      {
+        throw new ApplicationException(string.Format("The using alias '{0}' appeared previously in this namespace",
+                                                     usingAliasEntity.Alias));
+      }
+
+      _UsingAliases.Add(usingAliasEntity.Alias, usingAliasEntity);
+      usingAliasEntity.Parent = this;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a given name was already defined as a using alias name.
+    /// </summary>
+    /// <param name="aliasName">An alias name.</param>
+    /// <returns>True if the name was already defined as a using alias name, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsUsingAliasNameDefined(string aliasName)
+    {
+      return _UsingAliases.ContainsKey(aliasName);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a using alias entity that has the given alias name, 
+    /// and can affect the resolution of a name at a given source point.
+    /// </summary>
+    /// <param name="aliasName">An alias name.</param>
+    /// <param name="sourcePoint">A source point.</param>
+    /// <returns>A using alias entity, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public UsingAliasEntity GetUsingAliasByNameAndSourcePoint(string aliasName, SourcePoint sourcePoint)
+    {
+      if (_UsingAliases.ContainsKey(aliasName))
+      {
+        var usingAliasEntity = _UsingAliases[aliasName];
+        if (usingAliasEntity.LexicalScope.Contains(sourcePoint))
+        {
+          return usingAliasEntity;
+        }
+      }
+      return null;
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------
@@ -127,6 +259,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       visitor.Visit(this);
+
+      foreach (var usingNamespace in UsingNamespaces)
+      {
+        usingNamespace.AcceptVisitor(visitor);
+      }
+
+      foreach (var usingAlias in UsingAliases)
+      {
+        usingAlias.AcceptVisitor(visitor);
+      }
 
       foreach (var childNamespace in ChildNamespaces)
       {

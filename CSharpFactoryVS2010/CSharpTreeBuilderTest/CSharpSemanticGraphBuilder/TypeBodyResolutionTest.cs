@@ -917,7 +917,286 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("D.F`1.G`1[int,int]");
         ((ConstructedGenericTypeEntity)field.Type.TargetEntity).UnderlyingType.FullyQualifiedName.ShouldEqual("D.F`1.G`1");
       }
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 1: name in local declaration space has precedence 1
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Precedence1_Local()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence1_Local.cs");
+      InvokeParser(project).ShouldBeTrue();
 
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("A.B.C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 2: name in base type's declaration space has precedence 2
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Precedence2_BaseType()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence2_BaseType.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("D.C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 3a: name in one level higher parent's declaration space has precedence 3.
+    /// If there's a using alias with the same name, that's error CS0576.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Precedence3a_Level1_Parent()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence3a_Level1_Parent.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("A.C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 3b: alias defined one level higher has precedence 3.
+    /// If there's a member with the same name, that's error CS0576.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore]
+    public void Precedence3b_Level1_UsingAlias()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence3b_Level1_UsingAlias.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("E");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 4: using namespace defined one level higher has precedence 4.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Precedence4_Level1_UsingNamespace()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence4_Level1_UsingNamespace.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("N.C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 5a: name in two level higher parent's declaration space has precedence 5.
+    /// If there's a using alias with the same name, that's error CS0576.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Precedence5a_Level2_Parent()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence5a_Level2_Parent.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 5b: alias defined one level higher has precedence 5.
+    /// If there's a member with the same name, that's error CS0576.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore]
+    public void Precedence5b_Level2_UsingAlias()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence5b_Level2_UsingAlias.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("E");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Precedence rule 6: using namespace defined two level higher has precedence 6.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Precedence6_Level2_UsingNamespace()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\Precedence6_Level2_UsingNamespace.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("N.C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// warning CS0108: 'A.C' hides inherited member 'B.C'. Use the new keyword if hiding was intended.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore]
+    public void CS0108_HidesInheritedMember()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\CS0108_HidesInheritedMember.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(1);
+      project.Warnings[0].Code.ShouldEqual("CS0108");
+
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("A.C");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests that namespaces are not imported with using namespace directives (only types).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void NamespacesAreNotImportedWithUsing()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\NamespacesAreNotImportedWithUsing.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0246");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests that only those usings are considered that has the name to be resolved in scope.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void NotInScopeForUsingNamespace()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\NotInScopeForUsingNamespace.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0246");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0104: 'C' is an ambiguous reference between 'B1.C' and 'B2.C'
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0104_AmbigousReference()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\CS0104_AmbigousReference.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0104");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests that using namespace directive finds embedded types too.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UsingFindsEmbeddedTypeToo()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\UsingFindsEmbeddedTypeToo.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("B.C.D");
+    }
+
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests that using namespace directive finds generic types too.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UsingFindsGenericTypeToo()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeBodyResolution\UsingFindsGenericTypeToo.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(0);
+      project.Warnings.Count.ShouldEqual(0);
+
+      var field = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToList()[0] as FieldEntity;
+      field.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      field.Type.TargetEntity.FullyQualifiedName.ShouldEqual("B.C`1.D`1[int,long]");
     }
   }
 }

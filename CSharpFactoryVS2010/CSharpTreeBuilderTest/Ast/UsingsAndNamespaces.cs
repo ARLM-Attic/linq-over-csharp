@@ -21,7 +21,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project,true,false));
 
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
@@ -89,7 +89,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
@@ -192,7 +192,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       // --- Check syntax tree
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
@@ -226,7 +226,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var treeWriter = new SyntaxTreeTextWriter(project.SyntaxTree, project.ProjectProvider) { WorkingFolder = TempOutputFolder };
       treeWriter.WriteTree();
       RunBoudaryTestOn(TempOutputFolder, @"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
@@ -238,7 +238,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(fileName);
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.NamespaceDeclarations.Count, 3);
@@ -295,7 +295,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
@@ -353,7 +353,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       foreach (var nsNode in sn.NamespaceDeclarations)

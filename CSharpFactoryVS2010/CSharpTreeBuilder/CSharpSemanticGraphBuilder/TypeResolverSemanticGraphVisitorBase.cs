@@ -71,7 +71,47 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       else
       {
-        throw new ApplicationException(string.Format("Unhandled case in ResolverDispatcher, TargetEntity type='{0}'",
+        throw new ApplicationException(string.Format("Unhandled case in ResolveTypeEntityReference, TargetEntity type='{0}'",
+                                                     reference.GetType()));
+      }
+
+      // Set the reference to the correct state
+      if (resolvedEntity != null)
+      {
+        reference.SetResolved(resolvedEntity);
+      }
+      else
+      {
+        reference.SetUnresolvable();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves a namespace reference.
+    /// </summary>
+    /// <param name="reference">A reference to a NamespaceEntity to be resolved.</param>
+    /// <param name="resolutionContextEntity">An entity that is the context (or starting point) of the resolution.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected void ResolveNamespaceEntityReference(SemanticEntityReference<NamespaceEntity> reference, SemanticEntity resolutionContextEntity)
+    {
+      // If already resolved then bail out.
+      if (reference.ResolutionState == ResolutionState.Resolved)
+      {
+        return;
+      }
+
+      NamespaceEntity resolvedEntity;
+
+      if (reference is TypeOrNamespaceNodeBasedNamespaceEntityReference && resolutionContextEntity is NamespaceEntity)
+      {
+        resolvedEntity = GetNamespaceEntityByTypeOrNamespaceNode(
+          ((TypeOrNamespaceNodeBasedNamespaceEntityReference) reference).SyntaxNode,
+          resolutionContextEntity as NamespaceEntity);
+      }
+      else
+      {
+        throw new ApplicationException(string.Format("Unhandled case in ResolveNamespaceEntityReference, TargetEntity type='{0}'",
                                                      reference.GetType()));
       }
 
@@ -153,7 +193,51 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Finds the type entity that is the meaning of a type-or-namespace node.
+    /// Finds a namespace entity denoted by a type-or-namespace node.
+    /// </summary>
+    /// <param name="typeOrNamespaceNode">A type-or-namespace node.</param>
+    /// <param name="resolutionContextEntity">The entity that is the context of the resolution.</param>
+    /// <returns>A NamespaceEntity or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private NamespaceEntity GetNamespaceEntityByTypeOrNamespaceNode(TypeOrNamespaceNode typeOrNamespaceNode, 
+                                                                    NamespaceEntity resolutionContextEntity)
+    {
+      // Try to find the entity by traversing the semantic graph.
+      SemanticEntity foundEntity = FindEntityInSemanticGraph(typeOrNamespaceNode.TypeTags, resolutionContextEntity,
+                                                             false, false);
+
+      // If an entity was found, but it's not a NamespaceEntity, then signal error
+      if (foundEntity != null && !(foundEntity is NamespaceEntity))
+      {
+        if (foundEntity is TypeEntity)
+        {
+          _ErrorHandler.Error("CS0138", typeOrNamespaceNode.StartToken,
+                              "A using namespace directive can only be applied to namespaces; '{0}' is a type not a namespace",
+                              typeOrNamespaceNode.ToString());
+        }
+        else
+        {
+          throw new ApplicationException(string.Format("Unexpected type of entity found: '{0}'.", foundEntity.GetType()));
+        }
+        return null;
+      }
+
+      // If couldn't resolve then signal error
+      if (foundEntity == null)
+      {
+        _ErrorHandler.Error("CS0246", typeOrNamespaceNode.StartToken,
+                            "The type or namespace name '{0}' could not be found (are you missing a using directive or an assembly reference?)",
+                            typeOrNamespaceNode.ToString());
+        return null;
+      }
+
+      // The entity is found, and is a namespace entity.
+      return foundEntity as NamespaceEntity;      
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Finds the type entity denoted by a type-or-namespace node.
     /// </summary>
     /// <param name="typeOrNamespaceNode">A type-or-namespace node.</param>
     /// <param name="resolutionContextEntity">The entity that is the context of the resolution.</param>
@@ -168,9 +252,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If not found, then continue with the resolution
       if (typeEntity == null)
       {
-        // Try to find the entity by traversing the semantic graph.
-        SemanticEntity foundEntity = FindEntityByTraversingParentsAndBaseClasses(typeOrNamespaceNode.TypeTags,
-                                                                                 resolutionContextEntity);
+        SemanticEntity foundEntity = null;
+
+        try
+        {
+          // Try to find the entity by traversing the semantic graph.
+          foundEntity = FindEntityInSemanticGraph(typeOrNamespaceNode.TypeTags, resolutionContextEntity, true, true);
+        }
+        catch (AmbigousReferenceInImportedNamespacesException e)
+        {
+          _ErrorHandler.Error("CS0104", typeOrNamespaceNode.TypeTags.StartToken,
+                              "'{0}' is an ambiguous reference between '{1}' and '{2}'",
+                              e.Reference, e.Identifier1, e.Identifier2);
+          return null;
+        }
 
         // If an entity was found, but it's not a TypeEntity, then signal error
         if (foundEntity != null && !(foundEntity is TypeEntity))
@@ -284,37 +379,120 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tries to find the entity for typeTags by walking parent declaration spaces and base classes.
+    /// Tries to find an entity in the following ways.
+    /// <list type="number">
+    /// <item>Look up in local declaration space.</item>
+    /// <item>Look up in the declaration space of base types, recursively.</item>
+    /// <item>Iterate the following steps for parent types/namespaces, till the root is reached.</item>
+    ///   <list type="number">
+    ///   <item>Look up in the local declaration space.</item>
+    ///   <item>Look up as using alias.</item>
+    ///   <item>Look up in using'd namespaces.</item>
+    ///   </list>
+    /// </list> 
     /// </summary>
     /// <param name="typeTags">The name of the entity to be found.</param>
     /// <param name="resolutionContextEntity">The entity, where the resolution starts.</param>
+    /// <param name="considerBaseTypes">Look up in base types too.</param>
+    /// <param name="considerUsings">Consider using namespace and using alias directives too.</param>
     /// <returns>A semantic entity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private SemanticEntity FindEntityByTraversingParentsAndBaseClasses(TypeTagNodeCollection typeTags, 
-                                                                       NamespaceOrTypeEntity resolutionContextEntity)
+    private SemanticEntity FindEntityInSemanticGraph(TypeTagNodeCollection typeTags,
+                                                     NamespaceOrTypeEntity resolutionContextEntity,
+                                                     bool considerBaseTypes,
+                                                     bool considerUsings)
     {
       SemanticEntity foundEntity = null;
 
-      // Try the resolution in every declaration space starting from resolutionContextEntity and proceeding towards the parents
+      // Step 1: Look up in local declaration space.
+      foundEntity = FindTypeTagsInDeclarationSpaceHierarchy<NamespaceOrTypeEntity>(typeTags, resolutionContextEntity);
+
+      // Step 2: Look up in the declaration space of base types, recursively.
+      if (foundEntity == null && considerBaseTypes && resolutionContextEntity is TypeEntity)
+      {
+        foundEntity = FindEntityByTraversingBaseClasses(typeTags, resolutionContextEntity as TypeEntity);
+      }
+
+      // If still not found then continue searching one level higher
+      if (resolutionContextEntity.Parent is NamespaceOrTypeEntity)
+      {
+        resolutionContextEntity = resolutionContextEntity.Parent as NamespaceOrTypeEntity;
+      }
+
+      // Loop until the entity is found, or we run out of parent entities
       while (foundEntity == null && resolutionContextEntity != null)
       {
-        // Try to resolve the name in this context
-        foundEntity = FindTypeTagsInDeclarationSpaceHierarchy(typeTags, resolutionContextEntity);
+        // Step 3a: Look up in the declaration space of parent type/namespace.
+        foundEntity = FindTypeTagsInDeclarationSpaceHierarchy<NamespaceOrTypeEntity>(typeTags, resolutionContextEntity);
 
-        // If not found, then try to resolve in the base classes
-        if (foundEntity == null && resolutionContextEntity is ClassEntity)
+        // Step 3b: Look up as using alias.
+        if (foundEntity == null && considerUsings && resolutionContextEntity is NamespaceEntity)
         {
-          foundEntity = FindEntityByTraversingBaseClassesRecursively(typeTags, resolutionContextEntity as ClassEntity);
+          // TODO: implement this
         }
 
-        // If nothing was found, then we should continue the lookup one level higher
-        if (foundEntity == null)
+        // Step 4: Look up in imported (using) namespaces.
+        if (foundEntity == null && considerUsings && resolutionContextEntity is NamespaceEntity)
         {
-          // To be able to continue the lookup one level higher, the parent entity must be a NamespaceOrTypeEntity
-          resolutionContextEntity = resolutionContextEntity.Parent as NamespaceOrTypeEntity;
+          foundEntity = FindTypeTagsInImportedNamespaces(typeTags, resolutionContextEntity as NamespaceEntity);
+        }
+
+        // If still not found then continue searching one level higher
+        resolutionContextEntity = resolutionContextEntity.Parent as NamespaceOrTypeEntity;
+      }
+
+      return foundEntity;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tries to find the entity for TypeTags by looking in imported namespaces.
+    /// </summary>
+    /// <param name="typeTags">The name of the entity to be found.</param>
+    /// <param name="resolutionContextEntity">
+    /// The context of the resolution, a namespace whose usings will be examined.
+    /// </param>
+    /// <returns>A TypeEntity, or null if not found, or more than one found.</returns>
+    /// <remarks>If more than one types are found in the imported namespaces that's an error.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    private TypeEntity FindTypeTagsInImportedNamespaces(TypeTagNodeCollection typeTags,
+                                                        NamespaceEntity resolutionContextEntity)
+    {
+      // We have to check whether more than one type can be found because that means error CS0104.
+      TypeEntity firstFoundEntity = null;
+      TypeEntity secondFoundEntity = null;
+
+      var sourcePoint = new SourcePoint(typeTags.CompilationUnitNode, typeTags.StartPosition);
+      foreach (var usingNamespaceEntity in resolutionContextEntity.GetUsingNamespacesBySourcePoint(sourcePoint))
+      {
+        if (usingNamespaceEntity.ImportedNamespace != null)
+        {
+          // Try to find TypeTags in the imported namespace, but only TypeEntities count 
+          var foundEntity = FindTypeTagsInDeclarationSpaceHierarchy<TypeEntity>(typeTags,
+                                                                                usingNamespaceEntity.ImportedNamespace);
+
+          // Put the 1st and 2nd found entities in the right slot
+          if (foundEntity != null && firstFoundEntity == null)
+          {
+            firstFoundEntity = foundEntity;
+          }
+          else if (foundEntity != null && secondFoundEntity == null)
+          {
+            secondFoundEntity = foundEntity;
+          }
+
+
+          // If two entities were found, then signal error and bail out.
+          if (firstFoundEntity != null && secondFoundEntity != null)
+          {
+            throw new AmbigousReferenceInImportedNamespacesException(typeTags.ToString(),
+                                                                     firstFoundEntity.FullyQualifiedName,
+                                                                     secondFoundEntity.FullyQualifiedName);
+          }
         }
       }
-      return foundEntity;
+
+      return firstFoundEntity;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -322,28 +500,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Tries to find the entity for TypeTags by traversing base class, recursively.
     /// </summary>
     /// <param name="typeTags">The name of the entity to be found.</param>
-    /// <param name="contextEntity">The current context of the resolution. Its base type will be examined first.</param>
+    /// <param name="resolutionContextEntity">The current context of the resolution. Its base type will be examined first.</param>
     /// <returns>A semantic entity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private SemanticEntity FindEntityByTraversingBaseClassesRecursively(TypeTagNodeCollection typeTags, TypeEntity contextEntity)
+    private SemanticEntity FindEntityByTraversingBaseClasses(TypeTagNodeCollection typeTags, TypeEntity resolutionContextEntity)
     {
-      // If the context entity does not have a base type, then bail out.
-      if (contextEntity.BaseType == null)
+      SemanticEntity foundEntity = null;
+
+      // Loop until the entity is found, or we run out of base classes
+      while (foundEntity == null && resolutionContextEntity != null)
       {
-        return null;
+        resolutionContextEntity = resolutionContextEntity.BaseType;
+
+        if (resolutionContextEntity != null)
+        {
+          // Try to resolve the name in the base type's declaration space
+          foundEntity = FindTypeTagsInDeclarationSpaceHierarchy<TypeEntity>(typeTags, resolutionContextEntity);
+        }
       }
 
-      // Try to resolve the name in the base type
-      var foundEntity = FindTypeTagsInDeclarationSpaceHierarchy(typeTags, contextEntity.BaseType);
-
-      // If succeeded, then return it
-      if (foundEntity != null)
-      {
-        return foundEntity;
-      }
-
-      // Otherwise, continue with the base type of the base type (recursion)
-      return FindEntityByTraversingBaseClassesRecursively(typeTags, contextEntity.BaseType);
+      return foundEntity;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -351,12 +527,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Tries to find an entity that can be reached from the given resolution context entity
     /// by matching all type tags in a hierarchy of declaration spaces.
     /// </summary>
+    /// <typeparam name="TTargetEntityType">Only these kind of entities will be found.</typeparam>
     /// <param name="typeTags">A multipart name.</param>
     /// <param name="resolutionContextEntity">The context of the resolution.</param>
-    /// <returns>A SemanticEntity, or null if not found.</returns>
+    /// <returns>A TTargetEntityType entity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private SemanticEntity FindTypeTagsInDeclarationSpaceHierarchy(TypeTagNodeCollection typeTags,
-                                                                   NamespaceOrTypeEntity resolutionContextEntity)
+    private TTargetEntityType FindTypeTagsInDeclarationSpaceHierarchy<TTargetEntityType>(TypeTagNodeCollection typeTags,
+                                                                                      NamespaceOrTypeEntity resolutionContextEntity)
+      where TTargetEntityType : SemanticEntity
     {
       SemanticEntity entity = null;
 
@@ -366,8 +544,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Look up the TypeTage's name in the current context's declaration space.
         entity = FindTypeTagInDeclarationSpace(typeTags[i], resolutionContextEntity.DeclarationSpace);
 
-        // If TypeTag was not found, then there's no point to continue matching the next tags, just return null (not found).
-        if (entity == null)
+        // If TypeTag was not found, or is not the expected type
+        // then there's no point to continue matching the next tags, just return null (not found).
+        if (entity == null || !(entity is TTargetEntityType))
         {
           return null;
         }
@@ -384,7 +563,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         resolutionContextEntity = entity as NamespaceOrTypeEntity;
       }
 
-      return entity;
+      return entity as TTargetEntityType;
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -290,8 +290,17 @@ namespace CSharpTreeBuilder.Ast
         result.Append("::");
       }
 
+      bool firstTag = true;
       foreach (var typeTag in TypeTags)
       {
+        if (firstTag)
+        {
+          firstTag = false;
+        }
+        else
+        {
+          result.Append(".");
+        }
         result.Append(typeTag.ToString());
       }
 

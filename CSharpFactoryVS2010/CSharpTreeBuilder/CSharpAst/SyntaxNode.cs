@@ -199,7 +199,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the starting token of this language element.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public Token StartToken { get; private set; }
+    public Token StartToken { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -325,6 +325,24 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public List<SemanticEntity> SemanticEntities { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the compilation unit node for this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public CompilationUnitNode CompilationUnitNode
+    {
+      get
+      {
+        ISyntaxNode node = this;
+        while (node != null && !(node is CompilationUnitNode))
+        {
+          node = node.Parent;
+        }
+        return node as CompilationUnitNode;
+      }
+    }
 
     #region Visitor methods
 

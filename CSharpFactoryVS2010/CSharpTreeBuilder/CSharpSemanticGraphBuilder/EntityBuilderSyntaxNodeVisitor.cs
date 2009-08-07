@@ -90,7 +90,125 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // The next parent is the current entity
         parentNamespaceEntity = namespaceEntity;
       }
-    }    
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a using namespace entity from a using namespace AST node.
+    /// </summary>
+    /// <param name="node">A using namespace AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(UsingNamespaceNode node)
+    {
+      CreateUsingEntityFromUsingNode<UsingNamespaceNode, UsingNamespaceEntity>(node);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a using alias entity from a using alias AST node.
+    /// </summary>
+    /// <param name="node">A using alias AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(UsingAliasNode node)
+    {
+      CreateUsingEntityFromUsingNode<UsingAliasNode, UsingAliasEntity>(node);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a using namespace entity or a using alias entity from an AST node.
+    /// </summary>
+    /// <typeparam name="TUsingNodeType">The type of the AST node. Must be a subclass of UsingNamespaceNode.</typeparam>
+    /// <typeparam name="TUsingEntityType">The type of the entity to be created. Must be a subclass of UsingEntity.</typeparam>
+    /// <param name="node">An AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void CreateUsingEntityFromUsingNode<TUsingNodeType, TUsingEntityType>(TUsingNodeType node)
+      where TUsingNodeType: UsingNamespaceNode
+      where TUsingEntityType: UsingEntity
+    {
+      // Determine the parent entity of the to-be-created using alias entity.
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      // The parent entity should be a NamespaceEntity.
+      if (!(parentEntity is NamespaceEntity))
+      {
+        throw new ApplicationException(string.Format("Expected NamespaceEntity but received '{0}'.",
+                                                     parentEntity.GetType()));
+      }
+
+      var parentNamespaceEntity = parentEntity as NamespaceEntity;
+
+      // The parent of AST node should not be null.
+      if (node.ParentNode == null)
+      {
+        throw new ApplicationException("Unexpected null ParentNode.");
+      }
+
+      // Find out the compilation unit that the AST node belongs to
+      var compilationUnitNode = node.CompilationUnitNode;
+
+      // Spec: "The scope of a using-directive extends over the namespace-member-declarations 
+      // of its immediately containing compilation unit or namespace body."
+      // But we just simplify it to be the whole parent AST node, 
+      // because we'll only use it to resolve names in the namespace-member-declarations anyway.
+      var lexicalScope = new SourceRegion(
+        new SourcePoint(compilationUnitNode, node.ParentNode.StartPosition),
+        new SourcePoint(compilationUnitNode, node.ParentNode.EndPosition));
+
+      UsingEntity usingEntity = null;
+
+      if (node is UsingAliasNode)
+      {
+        var aliasName = (node as UsingAliasNode).Alias;
+
+        // -- using alias branch
+
+        // Check error CS1537: The using alias 'alias' appeared previously in this namespace
+        if (parentNamespaceEntity.IsUsingAliasNameDefined(aliasName))
+        {
+          _ErrorHandler.Error("CS1537", node.StartToken, "The using alias '{0}' appeared previously in this namespace",
+                              aliasName);
+          return;
+        }
+
+        // TODO: move it to resolution
+        // Check error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier'
+        if (parentNamespaceEntity.DeclarationSpace.IsNameDefined(aliasName))
+        {
+          _ErrorHandler.Error("CS0576", node.StartToken,
+                              "Namespace '{0}' contains a definition conflicting with alias '{1}'",
+                              parentNamespaceEntity.FullyQualifiedName, aliasName);
+          return;
+        }
+
+        // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
+        var usingAliasEntity = new UsingAliasEntity(lexicalScope, aliasName, node.TypeName);
+        parentNamespaceEntity.AddUsingAlias(usingAliasEntity);
+        usingEntity = usingAliasEntity;
+      }
+      else 
+      {
+        // -- using namespace branch
+
+        var namespaceName = node.TypeName.TypeTags.ToString();
+
+        // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
+        if (parentNamespaceEntity.IsUsingNamespaceNameAlreadySpecified(namespaceName))
+        {
+          _ErrorHandler.Warning("CS0105", node.StartToken,
+                                "The using directive for '{0}' appeared previously in this namespace", namespaceName);
+          return;
+        }
+
+        // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
+        var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.TypeName);
+        parentNamespaceEntity.AddUsingNamespace(usingNamespaceEntity);
+        usingEntity = usingNamespaceEntity;
+      }
+
+      // Establish to two-way mapping between the AST node and the new semantic entity
+      AssociateSyntaxNodeWithSemanticEntity(node, usingEntity);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -3,15 +3,15 @@ using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 
-namespace CSharpTreeBuilderTest
+namespace CSharpTreeBuilderTest.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// Tests the parsing of simple expressions
+  /// Tests the parsing of expressions
   /// </summary>
   // ================================================================================================
   [TestClass]
-  public class SimpleExpressionTests : ParserTestBed
+  public class ExpressionTests : ParserTestBed
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -27,7 +27,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\IntegerLiteral.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -66,7 +66,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\RealLiteral.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -98,7 +98,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\CharLiteral.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -118,7 +118,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\StringLiteral.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -138,7 +138,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\ParenthesizedExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -162,7 +162,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\PrePostIncDecrementExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -195,7 +195,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\SimpleAssignment.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -218,7 +218,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\Multiplications.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -251,7 +251,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\Additions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -284,7 +284,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\AddAndMultiplyPrecedence.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -323,7 +323,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\AssignmentExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -363,7 +363,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\NullCoalescingExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -386,7 +386,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\TrueLiteral.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -407,7 +407,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\FalseLiteral.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -428,7 +428,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\PrimaryMemberAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -450,7 +450,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\PredefinedTypeMemberAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -472,7 +472,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\QualifiedAliasMemberAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -495,7 +495,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\MultipleMemberAccessExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -521,7 +521,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\PointerMemberAccessExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -545,7 +545,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\ThisAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -566,7 +566,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\BaseMemberAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -587,7 +587,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\BaseElementAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -608,7 +608,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\InvocationExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -628,7 +628,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\InvocationExpressionWithArgument.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -649,7 +649,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\ElementAccessExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -671,7 +671,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\IsExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -694,7 +694,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\EmbeddedIsExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -725,7 +725,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\AsExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -756,7 +756,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\TypeofExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -828,7 +828,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\SizeofExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -849,7 +849,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\DefaultValueExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -870,7 +870,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\CheckedExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -892,7 +892,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\UncheckedExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -919,7 +919,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\UnaryOperatorExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -978,7 +978,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\CastExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
@@ -1003,7 +1003,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\ConditionalExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -1066,7 +1066,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\LambdaExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
       {
@@ -1149,7 +1149,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\AnonymousMethodExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -1218,7 +1218,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\QueryExpressions.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 

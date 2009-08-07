@@ -167,6 +167,17 @@ namespace CSharpTreeBuilder.Ast
       UsingNodes.Add(node);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Sets the starting token.
+    /// </summary>
+    /// <param name="startToken">The starting token.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void SetStartToken(Token startToken)
+    {
+      StartToken = startToken;
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

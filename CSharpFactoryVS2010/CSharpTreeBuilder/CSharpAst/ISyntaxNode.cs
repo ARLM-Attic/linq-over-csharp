@@ -172,6 +172,13 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the compilation unit node for this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    CompilationUnitNode CompilationUnitNode { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Accepts a visitor object, according to the Visitor pattern.
     /// </summary>
     /// <param name="visitor">A visitor object</param>

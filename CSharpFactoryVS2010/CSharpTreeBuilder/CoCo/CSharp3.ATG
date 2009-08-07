@@ -253,10 +253,16 @@ PRODUCTIONS
 // ================================================================================================
 CS3
 =                                                               
+  (. 
+     CompilationUnitNode.SetStartToken(la); 
+  .)
   { IF (IsExternAliasDirective()) ExternAliasDirective<CompilationUnitNode> }
   { UsingDirective<CompilationUnitNode> }
   { IF (IsGlobalAttrTarget()) GlobalAttributes }
   { NamespaceMemberDeclaration<CompilationUnitNode> }
+  (. 
+     Terminate(CompilationUnitNode); 
+  .)
 .
 
 // ------------------------------------------------------------------------------------------------
