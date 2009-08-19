@@ -39,7 +39,7 @@ namespace CSharpTreeBuilder.Ast
   public class EnumDeclarationNode : TypeWithBodyDeclarationNode
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _EnumBase;
+    private TypeNode _EnumBase;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -59,7 +59,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the optional enum base type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode EnumBase
+    public TypeNode EnumBase
     {
       get { return _EnumBase; }
       internal set
@@ -74,11 +74,11 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override TypeOrNamespaceNodeCollection BaseTypes
+    public override TypeNodeCollection BaseTypes
     {
       get
       {
-        return new TypeOrNamespaceNodeCollection() {EnumBase};
+        return new TypeNodeCollection() {EnumBase};
       }
     }
 

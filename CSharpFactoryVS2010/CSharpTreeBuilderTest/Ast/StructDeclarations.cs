@@ -46,20 +46,20 @@ namespace CSharpTreeBuilderTest.Ast
       structDecl.TypeParameters[0].Identifier.ShouldEqual("X");
       structDecl.BaseTypes.Count.ShouldEqual(1);
       var typeDecl = structDecl.BaseTypes[0];
-      typeDecl.TypeTags.Count.ShouldEqual(1);
-      typeDecl.TypeTags[0].Identifier.ShouldEqual("IDictionary");
-      typeDecl.TypeTags[0].Arguments.Count.ShouldEqual(2);
-      typeDecl.TypeTags[0].Arguments[0].TypeTags.Count.ShouldEqual(1);
-      typeDecl.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("string");
-      typeDecl.TypeTags[0].Arguments[1].TypeTags.Count.ShouldEqual(1);
-      typeDecl.TypeTags[0].Arguments[1].TypeTags[0].Identifier.ShouldEqual("X");
+      typeDecl.TypeName.TypeTags.Count.ShouldEqual(1);
+      typeDecl.TypeName.TypeTags[0].Identifier.ShouldEqual("IDictionary");
+      typeDecl.TypeName.TypeTags[0].Arguments.Count.ShouldEqual(2);
+      typeDecl.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags.Count.ShouldEqual(1);
+      typeDecl.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Identifier.ShouldEqual("string");
+      typeDecl.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags.Count.ShouldEqual(1);
+      typeDecl.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0].Identifier.ShouldEqual("X");
       structDecl.TypeParameterConstraints.Count.ShouldEqual(1);
       structDecl.TypeParameterConstraints[0].Identifier.ShouldEqual("X");
       structDecl.TypeParameterConstraints[0].ConstraintTags.Count.ShouldEqual(2);
       structDecl.TypeParameterConstraints[0].ConstraintTags[0].IsStruct.ShouldBeTrue();
       structDecl.TypeParameterConstraints[0].ConstraintTags[1].IsTypeName.ShouldBeTrue();
-      structDecl.TypeParameterConstraints[0].ConstraintTags[1].TypeName.TypeTags.Count.ShouldEqual(1);
-      structDecl.TypeParameterConstraints[0].ConstraintTags[1].TypeName.TypeTags[0].
+      structDecl.TypeParameterConstraints[0].ConstraintTags[1].Type.TypeName.TypeTags.Count.ShouldEqual(1);
+      structDecl.TypeParameterConstraints[0].ConstraintTags[1].Type.TypeName.TypeTags[0].
         Identifier.ShouldEqual("IEnumerable");
 
       structDecl = source.NamespaceDeclarations[0].TypeDeclarations[2] as StructDeclarationNode;

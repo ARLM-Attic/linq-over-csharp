@@ -40,7 +40,7 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
       IdentifierToken = name;
-      BaseTypes = new TypeOrNamespaceNodeCollection { ParentNode = this };
+      BaseTypes = new TypeNodeCollection { ParentNode = this };
       NestedDeclarations = new TypeOrMemberNodeCollection { ParentNode = this };
       NestedTypes = new TypeDeclarationNodeCollection { ParentNode = this };
       MemberDeclarations = new MemberDeclarationNodeCollection { ParentNode = this };
@@ -72,7 +72,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual TypeOrNamespaceNodeCollection BaseTypes { get; private set; }
+    public virtual TypeNodeCollection BaseTypes { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -199,7 +199,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The entity that is the context of the resolution.</param>
     /// <returns>A NamespaceEntity or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private NamespaceEntity GetNamespaceEntityByTypeOrNamespaceNode(TypeOrNamespaceNode typeOrNamespaceNode, 
+    private NamespaceEntity GetNamespaceEntityByTypeOrNamespaceNode(NamespaceOrTypeNameNode typeOrNamespaceNode, 
                                                                     NamespaceEntity resolutionContextEntity)
     {
       // Try to find the entity by traversing the semantic graph.
@@ -243,7 +243,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The entity that is the context of the resolution.</param>
     /// <returns>A TypeEntity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private TypeEntity GetTypeEntityByTypeOrNamespaceNode(TypeOrNamespaceNode typeOrNamespaceNode,
+    private TypeEntity GetTypeEntityByTypeOrNamespaceNode(TypeNode typeOrNamespaceNode,
                                                           NamespaceOrTypeEntity resolutionContextEntity)
     {
       // First, try to resolve as built-in type.
@@ -257,11 +257,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         try
         {
           // Try to find the entity by traversing the semantic graph.
-          foundEntity = FindEntityInSemanticGraph(typeOrNamespaceNode.TypeTags, resolutionContextEntity, true, true);
+          foundEntity = FindEntityInSemanticGraph(typeOrNamespaceNode.TypeName.TypeTags, resolutionContextEntity, true, true);
         }
         catch (AmbigousReferenceInImportedNamespacesException e)
         {
-          _ErrorHandler.Error("CS0104", typeOrNamespaceNode.TypeTags.StartToken,
+          _ErrorHandler.Error("CS0104", typeOrNamespaceNode.TypeName.TypeTags.StartToken,
                               "'{0}' is an ambiguous reference between '{1}' and '{2}'",
                               e.Reference, e.Identifier1, e.Identifier2);
           return null;
@@ -359,11 +359,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeOrNamespaceNode">A type-or-namespace node</param>
     /// <returns>The list of type arguments.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeOrNamespaceNodeCollection GetTypeArgumentNodesFromTypeOrNamespaceNode(TypeOrNamespaceNode typeOrNamespaceNode)
+    private static TypeNodeCollection GetTypeArgumentNodesFromTypeOrNamespaceNode(TypeNode typeOrNamespaceNode)
     {
-      var typeArgumentNodes = new TypeOrNamespaceNodeCollection();
+      var typeArgumentNodes = new TypeNodeCollection();
 
-      foreach (var typeTag in typeOrNamespaceNode.TypeTags)
+      foreach (var typeTag in typeOrNamespaceNode.TypeName.TypeTags)
       {
         if (typeTag.HasTypeArguments)
         {
@@ -611,17 +611,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeOrNamespaceNode">A type-or-namespace node.</param>
     /// <returns>A TypeEntity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private TypeEntity FindBuiltInTypeByTypeOrNamespaceNode(TypeOrNamespaceNode typeOrNamespaceNode)
+    private TypeEntity FindBuiltInTypeByTypeOrNamespaceNode(TypeNode typeOrNamespaceNode)
     {
       // If the name is not a one-part-long name, then not a builtin type
-      if (typeOrNamespaceNode.TypeTags.Count != 1)
+      if (typeOrNamespaceNode.TypeName.TypeTags.Count != 1)
       {
         return null;
       }
 
       TypeEntity typeEntity = null;
 
-      string identifier = typeOrNamespaceNode.TypeTags[0].Identifier;
+      string identifier = typeOrNamespaceNode.TypeName.TypeTags[0].Identifier;
 
       // Resolve 'void*'
       if (identifier == "void" && typeOrNamespaceNode.PointerTokens.Count > 0)

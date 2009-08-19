@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   public sealed class StackAllocInitializerNode : VariableInitializerNode
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private TypeNode _Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -47,13 +47,13 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public TypeNode Type
     {
-      get { return _TypeName; }
+      get { return _Type; }
       internal set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _Type = value;
+        if (_Type != null) _Type.ParentNode = this;
       }
     }
 
@@ -83,9 +83,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName!=null)
+      if (Type!=null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
 
       if (Expression!=null)

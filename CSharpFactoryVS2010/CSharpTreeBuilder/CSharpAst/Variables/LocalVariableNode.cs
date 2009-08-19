@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.Ast
   public class LocalVariableNode : SyntaxNode<ISyntaxNode>
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private TypeNode _Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -21,10 +21,10 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <param name="typeNode">The type node.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode(TypeOrNamespaceNode typeNode)
+    public LocalVariableNode(TypeNode typeNode)
       : base(typeNode.StartToken)
     {
-      TypeName = typeNode;
+      Type = typeNode;
       VariableTags = new LocalVariableTagNodeCollection { ParentNode = this };
     }
 
@@ -33,13 +33,13 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public TypeNode Type
     {
-      get { return _TypeName; }
+      get { return _Type; }
       internal set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _Type = value;
+        if (_Type != null) _Type.ParentNode = this;
       }
     }
 
@@ -53,7 +53,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool IsImplicit
     {
-      get { return TypeName.TypeTags.Count == 1 && TypeName.StartToken.Value == "var"; }
+      get { return Type.TypeName.TypeTags.Count == 1 && Type.StartToken.Value == "var"; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -76,9 +76,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName!=null)
+      if (Type!=null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
 
       foreach (var variableTag in VariableTags)

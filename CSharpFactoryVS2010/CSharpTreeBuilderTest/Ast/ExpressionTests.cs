@@ -680,7 +680,7 @@ namespace CSharpTreeBuilderTest.Ast
       var expr = initializer.Expression as TypeTestingExpressionNode;
       expr.Operator.ShouldEqual(TypeTestingOperator.Is);
       ((TrueLiteralNode) expr.LeftOperand).Value.ShouldEqual(true);
-      expr.RightOperand.TypeTags[0].Identifier.ShouldEqual("bool");
+      expr.RightOperand.TypeName.TypeTags[0].Identifier.ShouldEqual("bool");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -706,7 +706,7 @@ namespace CSharpTreeBuilderTest.Ast
 
       var expr2 = expr1.RightOperand as TypeTestingExpressionNode;
       expr2.Operator.ShouldEqual(TypeTestingOperator.Is);
-      expr2.RightOperand.TypeTags[0].Identifier.ShouldEqual("bool");
+      expr2.RightOperand.TypeName.TypeTags[0].Identifier.ShouldEqual("bool");
 
       var expr3 = expr2.LeftOperand as BinaryExpressionNode;
       expr3.Operator.ShouldEqual(BinaryOperator.Addition);
@@ -734,7 +734,7 @@ namespace CSharpTreeBuilderTest.Ast
       var expr = initializer.Expression as TypeTestingExpressionNode;
       expr.Operator.ShouldEqual(TypeTestingOperator.As);
       ((StringLiteralNode)expr.LeftOperand).Value.ShouldEqual("a");
-      expr.RightOperand.TypeTags[0].Identifier.ShouldEqual("string");
+      expr.RightOperand.TypeName.TypeTags[0].Identifier.ShouldEqual("string");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -763,57 +763,57 @@ namespace CSharpTreeBuilderTest.Ast
       {
         var decl = method.Body.Statements[0] as VariableDeclarationStatementNode;
         var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-        var typeName = ((TypeofExpressionNode)init.Expression).TypeName;
-        typeName.TypeTags[0].Identifier.ShouldEqual("int");
-        typeName.TypeTags[0].IsUnbound.ShouldBeFalse();
-        typeName.TypeTags[0].GenericDimensions.ShouldEqual(0);
+        var typeName = ((TypeofExpressionNode)init.Expression).Type;
+        typeName.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        typeName.TypeName.TypeTags[0].IsUnbound.ShouldBeFalse();
+        typeName.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(0);
       }
       {
         var decl = method.Body.Statements[1] as VariableDeclarationStatementNode;
         var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-        var typeName = ((TypeofExpressionNode)init.Expression).TypeName;
-        typeName.TypeTags[0].Identifier.ShouldEqual("Generic");
-        typeName.TypeTags[0].IsUnbound.ShouldBeTrue();
-        typeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+        var typeName = ((TypeofExpressionNode)init.Expression).Type;
+        typeName.TypeName.TypeTags[0].Identifier.ShouldEqual("Generic");
+        typeName.TypeName.TypeTags[0].IsUnbound.ShouldBeTrue();
+        typeName.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
       }
       {
         var decl = method.Body.Statements[2] as VariableDeclarationStatementNode;
         var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-        var typeName = ((TypeofExpressionNode)init.Expression).TypeName;
-        typeName.TypeTags[0].Identifier.ShouldEqual("Generic");
-        typeName.TypeTags[0].IsUnbound.ShouldBeFalse();
-        typeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
-        typeName.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("int");
-        typeName.TypeTags[0].Arguments[1].TypeTags[0].Identifier.ShouldEqual("int");
+        var typeName = ((TypeofExpressionNode)init.Expression).Type;
+        typeName.TypeName.TypeTags[0].Identifier.ShouldEqual("Generic");
+        typeName.TypeName.TypeTags[0].IsUnbound.ShouldBeFalse();
+        typeName.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+        typeName.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        typeName.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
       }
       {
         var decl = method.Body.Statements[3] as VariableDeclarationStatementNode;
         var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-        var typeName = ((TypeofExpressionNode)init.Expression).TypeName;
-        typeName.Qualifier.ShouldEqual("myAlias");
-        typeName.TypeTags[0].Identifier.ShouldEqual("IList");
-        typeName.TypeTags[0].IsUnbound.ShouldBeTrue();
-        typeName.TypeTags[0].GenericDimensions.ShouldEqual(1);
+        var typeName = ((TypeofExpressionNode)init.Expression).Type;
+        typeName.TypeName.Qualifier.ShouldEqual("myAlias");
+        typeName.TypeName.TypeTags[0].Identifier.ShouldEqual("IList");
+        typeName.TypeName.TypeTags[0].IsUnbound.ShouldBeTrue();
+        typeName.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(1);
       }
       {
         var decl = method.Body.Statements[4] as VariableDeclarationStatementNode;
         var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-        var typeName = ((TypeofExpressionNode)init.Expression).TypeName;
-        typeName.Qualifier.ShouldBeNull();
-        typeName.TypeTags[0].Identifier.ShouldEqual("Generic");
-        typeName.TypeTags[0].IsUnbound.ShouldBeTrue();
-        typeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
-        typeName.TypeTags[1].Identifier.ShouldEqual("EmbeddedGeneric");
-        typeName.TypeTags[1].IsUnbound.ShouldBeTrue();
-        typeName.TypeTags[1].GenericDimensions.ShouldEqual(1);
+        var typeName = ((TypeofExpressionNode)init.Expression).Type;
+        typeName.TypeName.Qualifier.ShouldBeNull();
+        typeName.TypeName.TypeTags[0].Identifier.ShouldEqual("Generic");
+        typeName.TypeName.TypeTags[0].IsUnbound.ShouldBeTrue();
+        typeName.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+        typeName.TypeName.TypeTags[1].Identifier.ShouldEqual("EmbeddedGeneric");
+        typeName.TypeName.TypeTags[1].IsUnbound.ShouldBeTrue();
+        typeName.TypeName.TypeTags[1].GenericDimensions.ShouldEqual(1);
       }
       {
         var decl = method.Body.Statements[5] as VariableDeclarationStatementNode;
         var init = decl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
-        var typeName = ((TypeofExpressionNode)init.Expression).TypeName;
-        typeName.TypeTags[0].Identifier.ShouldEqual("void");
-        typeName.TypeTags[0].IsUnbound.ShouldBeFalse();
-        typeName.TypeTags[0].GenericDimensions.ShouldEqual(0);
+        var typeName = ((TypeofExpressionNode)init.Expression).Type;
+        typeName.TypeName.TypeTags[0].Identifier.ShouldEqual("void");
+        typeName.TypeName.TypeTags[0].IsUnbound.ShouldBeFalse();
+        typeName.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(0);
       }
     }
 
@@ -835,7 +835,7 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
       var expr = initializer.Expression as SizeofExpressionNode;
-      expr.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      expr.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -856,7 +856,7 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
       var expr = initializer.Expression as DefaultValueExpressionNode;
-      expr.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      expr.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -985,7 +985,7 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       
       var typecast = initializer.Expression as CastExpressionNode;
-      typecast.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      typecast.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
       ((Int32LiteralNode) typecast.Operand).Value.ShouldEqual(0);
     }
 
@@ -1032,9 +1032,9 @@ namespace CSharpTreeBuilderTest.Ast
         var isExpression = (conditional.Condition) as TypeTestingExpressionNode;
         ((Int32LiteralNode)isExpression.LeftOperand).Value.ShouldEqual(5);
         isExpression.Operator.ShouldEqual(TypeTestingOperator.Is);
-        isExpression.RightOperand.TypeTags[0].Identifier.ShouldEqual("int");
+        isExpression.RightOperand.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         var castExp = conditional.TrueExpression as CastExpressionNode;
-        castExp.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        castExp.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         ((Int32LiteralNode)castExp.Operand).Value.ShouldEqual(6);
         ((Int32LiteralNode)conditional.FalseExpression).Value.ShouldEqual(7);
       }
@@ -1092,13 +1092,13 @@ namespace CSharpTreeBuilderTest.Ast
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var lambda = initializer.Expression as LambdaExpressionNode;
         lambda.FormalParameters.Count.ShouldEqual(3);
-        lambda.FormalParameters[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        lambda.FormalParameters[0].Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         lambda.FormalParameters[0].Identifier.ShouldEqual("i");
         lambda.FormalParameters[0].Modifier.ShouldEqual(FormalParameterModifier.In);
-        lambda.FormalParameters[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        lambda.FormalParameters[1].Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         lambda.FormalParameters[1].Identifier.ShouldEqual("j");
         lambda.FormalParameters[1].Modifier.ShouldEqual(FormalParameterModifier.Ref);
-        lambda.FormalParameters[2].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        lambda.FormalParameters[2].Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         lambda.FormalParameters[2].Identifier.ShouldEqual("k");
         lambda.FormalParameters[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
         lambda.IsSimpleExpression.ShouldBeFalse();
@@ -1110,9 +1110,9 @@ namespace CSharpTreeBuilderTest.Ast
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var lambda = initializer.Expression as LambdaExpressionNode;
         lambda.FormalParameters.Count.ShouldEqual(2);
-        lambda.FormalParameters[0].TypeName.IsEmpty.ShouldBeTrue();
+        lambda.FormalParameters[0].Type.IsEmpty.ShouldBeTrue();
         lambda.FormalParameters[0].Identifier.ShouldEqual("i");
-        lambda.FormalParameters[1].TypeName.IsEmpty.ShouldBeTrue();
+        lambda.FormalParameters[1].Type.IsEmpty.ShouldBeTrue();
         lambda.FormalParameters[1].Identifier.ShouldEqual("j");
         lambda.IsSimpleExpression.ShouldBeTrue();
         ((BinaryExpressionNode)lambda.Expression).Operator.ShouldEqual(BinaryOperator.Addition);
@@ -1172,13 +1172,13 @@ namespace CSharpTreeBuilderTest.Ast
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var anonym = initializer.Expression as AnonymousMethodExpressionNode;
         anonym.FormalParameters.Count.ShouldEqual(3);
-        anonym.FormalParameters[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.FormalParameters[0].Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         anonym.FormalParameters[0].Identifier.ShouldEqual("i");
         anonym.FormalParameters[0].Modifier.ShouldEqual(FormalParameterModifier.In);
-        anonym.FormalParameters[1].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.FormalParameters[1].Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         anonym.FormalParameters[1].Identifier.ShouldEqual("j");
         anonym.FormalParameters[1].Modifier.ShouldEqual(FormalParameterModifier.Ref);
-        anonym.FormalParameters[2].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        anonym.FormalParameters[2].Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         anonym.FormalParameters[2].Identifier.ShouldEqual("k");
         anonym.FormalParameters[2].Modifier.ShouldEqual(FormalParameterModifier.Out);
         anonym.Body.Statements.Count.ShouldEqual(2);
@@ -1226,7 +1226,7 @@ namespace CSharpTreeBuilderTest.Ast
         var varDecl = method.Body.Statements[0] as VariableDeclarationStatementNode;
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var query = initializer.Expression as QueryExpressionNode;
-        query.FromClause.TypeName.IsEmpty.ShouldBeTrue();
+        query.FromClause.Type.IsEmpty.ShouldBeTrue();
         query.FromClause.Identifier.ShouldEqual("i1");
         ((SimpleNameNode)query.FromClause.Expression).Identifier.ShouldEqual("array");
         query.QueryBody.BodyClauses.Count.ShouldEqual(0);
@@ -1238,8 +1238,8 @@ namespace CSharpTreeBuilderTest.Ast
         var varDecl = method.Body.Statements[1] as VariableDeclarationStatementNode;
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var query = initializer.Expression as QueryExpressionNode;
-        query.FromClause.TypeName.IsEmpty.ShouldBeFalse();
-        query.FromClause.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        query.FromClause.Type.IsEmpty.ShouldBeFalse();
+        query.FromClause.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         query.FromClause.Identifier.ShouldEqual("i2");
         ((SimpleNameNode)query.FromClause.Expression).Identifier.ShouldEqual("array");
         query.QueryBody.BodyClauses.Count.ShouldEqual(0);
@@ -1255,15 +1255,15 @@ namespace CSharpTreeBuilderTest.Ast
         var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
         var query = initializer.Expression as QueryExpressionNode;
         
-        query.FromClause.TypeName.IsEmpty.ShouldBeTrue();
+        query.FromClause.Type.IsEmpty.ShouldBeTrue();
         query.FromClause.Identifier.ShouldEqual("i");
         ((SimpleNameNode)query.FromClause.Expression).Identifier.ShouldEqual("array");
 
         query.QueryBody.BodyClauses.Count.ShouldEqual(8);
         
         var fromClause = query.QueryBody.BodyClauses[0] as FromClauseNode;
-        fromClause.TypeName.IsEmpty.ShouldBeFalse();
-        fromClause.TypeName.TypeTags[0].Identifier.ShouldEqual("int"); 
+        fromClause.Type.IsEmpty.ShouldBeFalse();
+        fromClause.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int"); 
         fromClause.Identifier.ShouldEqual("j");
         ((SimpleNameNode) fromClause.Expression).Identifier.ShouldEqual("array");
 
@@ -1275,22 +1275,22 @@ namespace CSharpTreeBuilderTest.Ast
         ((TrueLiteralNode)whereClause.Expression).Value.ShouldEqual(true);
 
         var joinClause = query.QueryBody.BodyClauses[3] as JoinClauseNode;
-        joinClause.TypeName.IsEmpty.ShouldBeTrue();
+        joinClause.Type.IsEmpty.ShouldBeTrue();
         joinClause.Identifier.ShouldEqual("l");
         ((SimpleNameNode) joinClause.InExpression).Identifier.ShouldEqual("array");
         ((SimpleNameNode)joinClause.OnExpression).Identifier.ShouldEqual("i");
         ((SimpleNameNode)joinClause.EqualsExpression).Identifier.ShouldEqual("l");
 
         var joinClauseWithTypeName = query.QueryBody.BodyClauses[4] as JoinClauseNode;
-        joinClauseWithTypeName.TypeName.IsEmpty.ShouldBeFalse();
-        joinClauseWithTypeName.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        joinClauseWithTypeName.Type.IsEmpty.ShouldBeFalse();
+        joinClauseWithTypeName.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         joinClauseWithTypeName.Identifier.ShouldEqual("p");
         ((SimpleNameNode)joinClauseWithTypeName.InExpression).Identifier.ShouldEqual("array");
         ((SimpleNameNode)joinClauseWithTypeName.OnExpression).Identifier.ShouldEqual("i");
         ((SimpleNameNode)joinClauseWithTypeName.EqualsExpression).Identifier.ShouldEqual("p");
 
         var joinIntoClause = query.QueryBody.BodyClauses[5] as JoinIntoClauseNode;
-        joinIntoClause.TypeName.IsEmpty.ShouldBeTrue();
+        joinIntoClause.Type.IsEmpty.ShouldBeTrue();
         joinIntoClause.Identifier.ShouldEqual("n");
         ((SimpleNameNode)joinIntoClause.InExpression).Identifier.ShouldEqual("array");
         ((SimpleNameNode)joinIntoClause.OnExpression).Identifier.ShouldEqual("i");
@@ -1298,8 +1298,8 @@ namespace CSharpTreeBuilderTest.Ast
         joinIntoClause.IntoIdentifier.ShouldEqual("o");
 
         var joinIntoClauseWithTypeName = query.QueryBody.BodyClauses[6] as JoinIntoClauseNode;
-        joinIntoClauseWithTypeName.TypeName.IsEmpty.ShouldBeFalse();
-        joinIntoClauseWithTypeName.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+        joinIntoClauseWithTypeName.Type.IsEmpty.ShouldBeFalse();
+        joinIntoClauseWithTypeName.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
         joinIntoClauseWithTypeName.Identifier.ShouldEqual("q");
         ((SimpleNameNode)joinIntoClauseWithTypeName.InExpression).Identifier.ShouldEqual("array");
         ((SimpleNameNode)joinIntoClauseWithTypeName.OnExpression).Identifier.ShouldEqual("i");

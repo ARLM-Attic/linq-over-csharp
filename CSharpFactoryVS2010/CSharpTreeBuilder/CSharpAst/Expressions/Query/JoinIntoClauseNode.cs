@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>
   ///       '<strong>join</strong>': <see cref="ISyntaxNode.StartToken"/><br/>
-  /// 			<em>TypeOrNamespaceNode</em>: <see cref="JoinClauseNode.TypeName"/><br/>
+  /// 			<em>TypeOrNamespaceNode</em>: <see cref="JoinClauseNode.Type"/><br/>
   /// 			<em>identifier</em>: <see cref="JoinClauseNode.IdentifierToken"/><br/>
   ///             "<strong>in</strong>": <see cref="JoinClauseNode.InToken"/><br/>
   /// 			<em>ExpressionNode</em>: <see cref="JoinClauseNode.InExpression"/><br/>
@@ -80,9 +80,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName != null)
+      if (Type != null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
 
       if (InExpression != null)

@@ -125,13 +125,13 @@ namespace CSharpTreeBuilder.Ast
     /// Create a using node and add it to the source file node.
     /// </summary>
     /// <param name="start">The start.</param>
-    /// <param name="namespaceNode">The namespace node.</param>
+    /// <param name="namespaceOrTypeName">The namespace or type name node.</param>
     /// <param name="terminating">The terminating token.</param>
     /// <returns>The newly created using node.</returns>
     // ----------------------------------------------------------------------------------------------
-    public UsingNamespaceNode AddUsing(Token start, TypeOrNamespaceNode namespaceNode, Token terminating)
+    public UsingNamespaceNode AddUsing(Token start, NamespaceOrTypeNameNode namespaceOrTypeName, Token terminating)
     {
-      var node = new UsingNamespaceNode(this, start, namespaceNode, terminating);
+      var node = new UsingNamespaceNode(this, start, namespaceOrTypeName, terminating);
       UsingNodes.Add(node);
       return node;
     }
@@ -143,14 +143,14 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="start">The start.</param>
     /// <param name="alias">AliasToken of the using clause</param>
     /// <param name="equalToken">The equal token.</param>
-    /// <param name="typeName">Name of the type.</param>
+    /// <param name="namespaceOrTypeName">The namespace or type name node.</param>
     /// <param name="terminating">The terminating token.</param>
     /// <returns>The newly created using node.</returns>
     // ----------------------------------------------------------------------------------------------
     public UsingNamespaceNode AddUsingWithAlias(Token start, Token alias, Token equalToken,
-                                       TypeOrNamespaceNode typeName, Token terminating)
+                                       NamespaceOrTypeNameNode namespaceOrTypeName, Token terminating)
     {
-      var node = new UsingAliasNode(this, start, alias, equalToken, typeName, terminating);
+      var node = new UsingAliasNode(this, start, alias, equalToken, namespaceOrTypeName, terminating);
       UsingNodes.Add(node);
       return node;
     }

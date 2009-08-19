@@ -15,17 +15,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="UsingNamespaceEntity"/> class.
     /// </summary>
     /// <param name="lexicalScope">The region of program text where the using entity has effect.</param>
-    /// <param name="namespaceNameNode">The AST node that is name of the imported namespace.</param>
+    /// <param name="namespaceOrTypeName">The AST node that is name of the imported namespace.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingNamespaceEntity(SourceRegion lexicalScope, TypeOrNamespaceNode namespaceNameNode)
+    public UsingNamespaceEntity(SourceRegion lexicalScope, NamespaceOrTypeNameNode namespaceOrTypeName)
       : base(lexicalScope)
     {
-      if (namespaceNameNode == null)
+      if (namespaceOrTypeName == null)
       {
-        throw new ArgumentNullException("namespaceNameNode");
+        throw new ArgumentNullException("namespaceOrTypeName");
       }
 
-      NamespaceReference = new TypeOrNamespaceNodeBasedNamespaceEntityReference(namespaceNameNode);
+      NamespaceReference = new TypeOrNamespaceNodeBasedNamespaceEntityReference(namespaceOrTypeName);
     }
 
     // ----------------------------------------------------------------------------------------------

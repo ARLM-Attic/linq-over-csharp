@@ -161,13 +161,14 @@ D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\EnumDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\InterfaceDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\ModifierNode.cs
+D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\NamespaceOrTypeNameNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\NameTagNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\QualifiedAliasMemberNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\RankSpecifierNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\StructDeclarationNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeDeclarationNode.cs
+D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeOrMemberDeclarationNode.cs
-D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeOrNamespaceNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeParameterConstraintNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeParameterConstraintTagNode.cs
 D:\af\Work\LinqOverCSharp\CSharpFactoryVS2010\CSharpTreeBuilder\CSharpAst\Types\TypeParameterNode.cs

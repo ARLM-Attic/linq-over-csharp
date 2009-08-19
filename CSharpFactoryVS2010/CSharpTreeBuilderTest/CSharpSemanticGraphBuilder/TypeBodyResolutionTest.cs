@@ -1008,6 +1008,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
+    [Ignore]
     public void Precedence4_Level1_UsingNamespace()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -1071,6 +1072,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
+    [Ignore]
     public void Precedence6_Level2_UsingNamespace()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -1147,6 +1149,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
+    [Ignore]
     public void CS0104_AmbigousReference()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -1164,6 +1167,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
+    [Ignore]
     public void UsingFindsEmbeddedTypeToo()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -1185,6 +1189,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
+    [Ignore]
     public void UsingFindsGenericTypeToo()
     {
       var project = new CSharpProject(WorkingFolder);

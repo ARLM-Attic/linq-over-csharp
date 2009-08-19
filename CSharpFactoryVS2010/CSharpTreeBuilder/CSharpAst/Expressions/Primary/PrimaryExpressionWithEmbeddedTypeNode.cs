@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   public abstract class PrimaryExpressionWithEmbeddedTypeNode : PrimaryExpressionNodeBase, IParentheses
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private TypeNode _Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,13 +32,13 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the type embedded into this operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public TypeNode Type
     {
-      get { return _TypeName; }
+      get { return _Type; }
       internal set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _Type = value;
+        if (_Type != null) _Type.ParentNode = this;
       }
     }
 
@@ -66,9 +66,9 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      if (TypeName != null)
+      if (Type != null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
     }
 

@@ -1,112 +1,112 @@
-// ================================================================================================
-// ArrayCreationExpressionNode.cs
-//
-// Created: 2009.05.14, by Istvan Novak (DeepDiver)
-// ================================================================================================
+﻿using System.Text;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents an array creation expression.
+  /// This class represents a namespace-or-type-name AST node.
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayCreationExpressionNode : PrimaryExpressionNodeBase
+  public sealed class NamespaceOrTypeNameNode : SyntaxNode<ISyntaxNode>
   {
-    // --- Backing fields
-    private TypeNode _Type;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArrayCreationExpressionNode"/> class.
+    /// Initializes a new instance of the <see cref="NamespaceOrTypeNameNode"/> class.
     /// </summary>
-    /// <param name="start">Token providing information about the element.</param>
+    /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayCreationExpressionNode(Token start)
-      : base(start)
+    public NamespaceOrTypeNameNode(Token identifier)
+      : base(identifier)
     {
-      _Type = new TypeNode(null);
-      ArraySizeSpecifier = new ArraySizeSpecifierNode();
-      RankSpecifiers = new RankSpecifierNodeCollection();
+      TypeTags = new TypeTagNodeCollection {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the type of the array.
+    /// Gets or sets the type tags.
     /// </summary>
-    /// <value>The type of the array.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeNode Type
+    public TypeTagNodeCollection TypeTags { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an empty type name. (used in unbound generic types)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsEmpty
     {
-      get { return _Type; }
-      internal set
+      get { return TypeTags == null || TypeTags.Count == 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the qualifier token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token QualifierToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has qualifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasQualifier
+    {
+      get { return QualifierToken != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the qualifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Qualifier
+    {
+      get { return QualifierToken == null ? null : QualifierToken.Value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the qualifier separator ("::") token.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Token QualifierSeparatorToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Create a namespace-or-type-name node from the specified token used for a simple type.
+    /// </summary>
+    /// <param name="t">The token for the simple type.</param>
+    /// <returns>A new NamespaceOrTypeNameNode</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static NamespaceOrTypeNameNode CreateSimpleName(Token t)
+    {
+      var result = new NamespaceOrTypeNameNode(t);
+      result.TypeTags.Add(new TypeTagNode(t, null));
+      result.Terminate(t);
+      return result;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of this language element.
+    /// </summary>
+    /// <returns>Full name of the language element.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var result = new StringBuilder();
+
+      if (Qualifier != null)
       {
-        _Type = value;
-        if (_Type != null) _Type.ParentNode = this;
+        result.Append(Qualifier);
+        result.Append("::");
       }
-    }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this new operator is implicit (now explicit type used)
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsImplicit
-    {
-      get { return Type == null; }
-    }
+      result.Append(TypeTags.ToString());
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the array size specifier.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ArraySizeSpecifierNode ArraySizeSpecifier { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance has specified array sizes.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasSpecifiedArraySizes
-    {
-      get { return ArraySizeSpecifier.Expressions.Count > 0; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the rank specifier collection.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public RankSpecifierNodeCollection RankSpecifiers { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance has any rank specifiers.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasRankSpecifiers
-    {
-      get { return RankSpecifiers.Count > 0; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the initializer used to implicit array initialization.
-    /// </summary>
-    /// <value>The initializer.</value>
-    // ----------------------------------------------------------------------------------------------
-    public ArrayInitializerNode Initializer { get; internal set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance has an initializer.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasInitializer
-    {
-      get { return Initializer != null; }
+      return result.Length == 0 ? GetType().ToString() : result.ToString();
     }
 
     #region Visitor methods
@@ -121,19 +121,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (Type!=null)
+      foreach (var tag in TypeTags)
       {
-        Type.AcceptVisitor(visitor);
-      }
-
-      if (ArraySizeSpecifier!=null)
-      {
-        ArraySizeSpecifier.AcceptVisitor(visitor);
-      }
-
-      if (Initializer!=null)
-      {
-        Initializer.AcceptVisitor(visitor);
+        tag.AcceptVisitor(visitor);
       }
     }
 

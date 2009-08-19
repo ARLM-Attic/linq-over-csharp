@@ -14,14 +14,14 @@ namespace CSharpTreeBuilder.Ast
   /// <remarks>
   /// Syntax:
   ///   AttributeNode: 
-  ///     TypeOrNamespaceNode 
+  ///     NamespaceOrTypeName 
   ///       [ "(" [ AttributeArgumentNode ] { AttributeArgumentNode }  ")" ]
   /// </remarks>
   // ================================================================================================
   public class AttributeNode : SyntaxNode<AttributeDecorationNode>
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private NamespaceOrTypeNameNode _TypeName;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -39,9 +39,8 @@ namespace CSharpTreeBuilder.Ast
     /// <summary>
     /// Gets the full name of the attribute.
     /// </summary>
-    /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public NamespaceOrTypeNameNode TypeName
     {
       get { return _TypeName; }
       internal set
@@ -116,7 +115,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName != null) { TypeName.AcceptVisitor(visitor); }
+      if (TypeName != null)
+      {
+        TypeName.AcceptVisitor(visitor);
+      }
 
       foreach (var argument in Arguments)
       {

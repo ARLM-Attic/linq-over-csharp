@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	<para>Syntax:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>"<strong>using</strong>" <em>alias</em> "<strong>=</strong>"
-  ///         <em>TypeOrNamespaceNode</em> "<strong>;</strong>"</para>
+  ///         <em>NamespaceOrTypeName</em> "<strong>;</strong>"</para>
   /// 	</blockquote>
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
   ///             "<strong>using</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
   /// 			<em>alias</em>: <see cref="AliasToken"/><br/>
   ///             "<strong>=</strong>": <see cref="EqualToken"/><br/>
-  /// 			<em>TypeOrNamespaceNode</em>: <see cref="UsingNamespaceNode.TypeName"/><br/>
+  /// 			<em>NamespaceOrTypeName</em>: <see cref="UsingNamespaceNode.NamespaceOrTypeName"/><br/>
   ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
   /// 		</para>
   /// 	</blockquote>
@@ -39,12 +39,12 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="start">The start token.</param>
     /// <param name="alias">The alias token.</param>
     /// <param name="equalToken">The equal token.</param>
-    /// <param name="typeName">Name of the type.</param>
+    /// <param name="namespaceOrTypeName">A namespace or type name.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
     public UsingAliasNode(NamespaceScopeNode parent, Token start, Token alias, Token equalToken,
-                              TypeOrNamespaceNode typeName, Token terminating)
-      : base(parent, start, typeName, terminating)
+                              NamespaceOrTypeNameNode namespaceOrTypeName, Token terminating)
+      : base(parent, start, namespaceOrTypeName, terminating)
     {
       AliasToken = alias;
       EqualToken = equalToken;
@@ -116,7 +116,7 @@ namespace CSharpTreeBuilder.Ast
         MandatoryWhiteSpaceSegment.Default,
         AliasToken,
         SpaceAroundSegment.AssignmentOp(EqualToken),
-        TypeName,
+        NamespaceOrTypeName,
         TerminatingToken,
         ForceNewLineSegment.Default
         );
@@ -134,7 +134,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName != null) { TypeName.AcceptVisitor(visitor); }
+      if (NamespaceOrTypeName != null)
+      {
+        NamespaceOrTypeName.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.Ast
   public class TypeParameterConstraintTagNode : SyntaxNode<TypeOrMemberDeclarationNode>, IParentheses
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private TypeNode _Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -57,11 +57,11 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <param name="typeNode">The type node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterConstraintTagNode(TypeOrNamespaceNode typeNode) :
+    public TypeParameterConstraintTagNode(TypeNode typeNode) :
       base(typeNode.StartToken)
     {
       ConstraintToken = StartToken;
-      TypeName = typeNode;
+      Type = typeNode;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool IsTypeName
     {
-      get { return TypeName != null; }
+      get { return Type != null; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -120,13 +120,13 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the constarint type name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public TypeNode Type
     {
-      get { return _TypeName; }
+      get { return _Type; }
       protected set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _Type = value;
+        if (_Type != null) _Type.ParentNode = this;
       }
     }
 
@@ -161,7 +161,7 @@ namespace CSharpTreeBuilder.Ast
       if (IsClass || IsStruct) return new OutputSegment(separatorSegment, StartToken);
       return IsNew
         ? new OutputSegment(separatorSegment, StartToken, OpenParenthesis, CloseParenthesis)
-        : new OutputSegment(separatorSegment, TypeName);
+        : new OutputSegment(separatorSegment, Type);
     }
 
     #region Visitor methods
@@ -176,9 +176,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName!=null)
+      if (Type!=null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
     }
 

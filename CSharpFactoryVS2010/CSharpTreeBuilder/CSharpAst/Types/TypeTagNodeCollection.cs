@@ -24,7 +24,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
-  public class TypeTagNodeCollection : SyntaxNodeCollection<TypeTagNode, TypeOrNamespaceNode>
+  public class TypeTagNodeCollection : SyntaxNodeCollection<TypeTagNode, NamespaceOrTypeNameNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -20,7 +20,7 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
       QualifierToken = start;
-      Arguments = new TypeOrNamespaceNodeCollection();
+      Arguments = new TypeNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the node providing type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeCollection Arguments { get; internal set; }
+    public TypeNodeCollection Arguments { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

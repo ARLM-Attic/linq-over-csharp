@@ -16,22 +16,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="lexicalScope">The region of program text where the using entity has effect.</param>
     /// <param name="alias">The name of the alias.</param>
-    /// <param name="typeOrNamespaceNode">A type-or-namespace AST node.</param>
+    /// <param name="namespaceorTypeName">A namespace-or-type-name AST node.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingAliasEntity(SourceRegion lexicalScope, string alias, TypeOrNamespaceNode typeOrNamespaceNode)
+    public UsingAliasEntity(SourceRegion lexicalScope, string alias, NamespaceOrTypeNameNode namespaceorTypeName)
       : base(lexicalScope)
     {
       if (alias == null)
       {
         throw new ArgumentNullException("alias");
       }
-      if (typeOrNamespaceNode==null)
+      if (namespaceorTypeName == null)
       {
-        throw new ArgumentNullException("typeOrNamespaceNode");
+        throw new ArgumentNullException("namespaceorTypeName");
       }
 
       Alias = alias;
-      NamespaceOrTypeReference = new TypeOrNamespaceNodeBasedNamespaceOrTypeEntityReference(typeOrNamespaceNode);
+      NamespaceOrTypeReference = new TypeOrNamespaceNodeBasedNamespaceOrTypeEntityReference(namespaceorTypeName);
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -11,50 +11,31 @@ namespace CSharpTreeBuilder.Ast
 {
   // ================================================================================================
   /// <summary>
-  /// This node describes a type or namespace reference.
+  /// This node describes a type reference.
   /// </summary>
-  /// <remarks>
-  /// 	<para>Syntax:</para>
-  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>[ <em>qualifier</em> "<strong>::</strong>"] <em>TypeTagNode</em> {
-  ///         "<strong>.</strong>" <em>TypeTagNode</em> }</para>
-  /// 	</blockquote>
-  /// 	<para>Representation:</para>
-  /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>
-  /// 			<em>qualifier</em>: an item in <see cref="TypeTags"/><br/>
-  ///             "<strong>::</strong>" <em>TypeTagNode</em>: an item in <see cref="TypeTags"/><br/>
-  ///             "<strong>.</strong>" <em>TypeTagNode</em>: an item in <see cref="TypeTags"/>
-  /// 		</para>
-  /// 	</blockquote>
-  /// </remarks>
   // ================================================================================================
-  public class TypeOrNamespaceNode : SyntaxNode<ISyntaxNode>
+  public class TypeNode : SyntaxNode<ISyntaxNode>
   {
-    // Backing field for QualifierToken property
-    private Token _QualifierToken;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypeOrNamespaceNode"/> class.
+    /// Initializes a new instance of the <see cref="TypeNode"/> class.
     /// </summary>
     /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode(Token identifier) : base(identifier)
+    public TypeNode(Token identifier) : base(identifier)
     {
-      TypeTags = new TypeTagNodeCollection {ParentNode = this};
       RankSpecifiers = new RankSpecifierNodeCollection {ParentNode = this};
       PointerTokens = new ImmutableCollection<Token>();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypeOrNamespaceNode"/> class.
+    /// Initializes a new instance of the <see cref="TypeNode"/> class.
     /// </summary>
     /// <param name="separator">The separator token.</param>
     /// <param name="identifier">Token providing information about the element.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode(Token separator, Token identifier)
+    public TypeNode(Token separator, Token identifier)
       : this(identifier)
     {
       SeparatorToken = separator;
@@ -62,55 +43,10 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates an empty <see cref="TypeOrNamespaceNode"/> object with no token yet.
+    /// Gets or sets the type name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode()
-      : this(null)
-    {}
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the qualifier token.
-    /// </summary>
-    /// <value>The qualifier token.</value>
-    // ----------------------------------------------------------------------------------------------
-    public Token QualifierToken
-    {
-      get
-      {
-        return _QualifierToken;
-      }
-      set
-      {
-        _QualifierToken = value;
-        SetSeparatorTokens();
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the qualifier string.
-    /// </summary>
-    /// <value>The qualifier string.</value>
-    // ----------------------------------------------------------------------------------------------
-    public string Qualifier
-    {
-      get { return QualifierToken == null ? null : QualifierToken.Value; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this instance has qualifier.
-    /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance has qualifier; otherwise, <c>false</c>.
-    /// </value>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasQualifier
-    {
-      get { return QualifierToken != null; }
-    }
+    public NamespaceOrTypeNameNode TypeName { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -119,50 +55,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool IsEmpty
     {
-      get { return TypeTags == null || TypeTags.Count == 0; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the type tags.
-    /// </summary>
-    /// <value>The type tags.</value>
-    // ----------------------------------------------------------------------------------------------
-    public TypeTagNodeCollection TypeTags { get; protected set; }
-
-#warning TypeTags collection should not be publicly modified, only through AddTypeTag method, otherwise separatot tokens are not guaranteed to be set correctly
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a type tag to the TypeTags collection, and sets the separator tokens.
-    /// </summary>
-    /// <param name="typeTagNode">A type tag.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddTypeTag(TypeTagNode typeTagNode)
-    {
-      TypeTags.Add(null, typeTagNode);
-      SetSeparatorTokens();
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the separator tokens to null, double-colon or dot, 
-    /// according to the number of type tags, and whether a qualifier exists.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private void SetSeparatorTokens()
-    {
-      for (int i = 0; i < TypeTags.Count; i++)
-      {
-        if (i == 0)
-        {
-          TypeTags[i].SeparatorToken = (HasQualifier ? Token.DoubleColon : null);
-        }
-        else
-        {
-          TypeTags[i].SeparatorToken = Token.Dot;
-        }
-      }
+      get { return TypeName == null ? true : TypeName.IsEmpty; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -234,12 +127,13 @@ namespace CSharpTreeBuilder.Ast
     /// Create type or namespace node from the specified token used for a simple type.
     /// </summary>
     /// <param name="t">The token for the simple type.</param>
-    /// <returns>A new TypeOrNamespaceNode</returns>
+    /// <returns>A new TypeNode</returns>
     // ----------------------------------------------------------------------------------------------
-    public static TypeOrNamespaceNode CreateTypeNode(Token t)
+    public static TypeNode CreateTypeNode(Token t)
     {
-      var result = new TypeOrNamespaceNode(t);
-      result.TypeTags.Add(new TypeTagNode(t, null));
+      var result = new TypeNode(t);
+      result.TypeName = new NamespaceOrTypeNameNode(t);
+      result.TypeName.TypeTags.Add(new TypeTagNode(t, null));
       result.Terminate(t);
       return result;
     }
@@ -251,9 +145,9 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="separatorToken">Optional separator token.</param>
     /// <returns>A new TypeOrNamespaceNode with null identifier token.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static TypeOrNamespaceNode CreateEmptyTypeNode(Token separatorToken)
+    public static TypeNode CreateEmptyTypeNode(Token separatorToken)
     {
-      return new TypeOrNamespaceNode(separatorToken, null);
+      return new TypeNode(separatorToken, null);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -269,8 +163,7 @@ namespace CSharpTreeBuilder.Ast
       return new OutputSegment(
         SeparatorToken,
         SeparatorToken.IsComma() ? SpaceAfterSegment.AfterComma() : null,
-        QualifierToken,
-        TypeTags
+        TypeName
         );
     }
 
@@ -284,24 +177,9 @@ namespace CSharpTreeBuilder.Ast
     {
       var result = new StringBuilder();
 
-      if (Qualifier != null) 
+      if (TypeName != null)
       {
-        result.Append(Qualifier);
-        result.Append("::");
-      }
-
-      bool firstTag = true;
-      foreach (var typeTag in TypeTags)
-      {
-        if (firstTag)
-        {
-          firstTag = false;
-        }
-        else
-        {
-          result.Append(".");
-        }
-        result.Append(typeTag.ToString());
+        result.Append(TypeName.ToString());
       }
 
       if (NullableToken!=null)
@@ -333,10 +211,10 @@ namespace CSharpTreeBuilder.Ast
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
       visitor.Visit(this);
-            
-      foreach (var tag in TypeTags)
+
+      if (TypeName != null)
       {
-        tag.AcceptVisitor(visitor);
+        TypeName.AcceptVisitor(visitor);
       }
 
       foreach (var rankSpecifier in RankSpecifiers)

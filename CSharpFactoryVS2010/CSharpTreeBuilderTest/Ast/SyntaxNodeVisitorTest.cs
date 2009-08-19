@@ -36,11 +36,11 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(compilationUnitNode);
         visitorMock.Visit(compilationUnitNode.ExternAliasNodes[0]);
         visitorMock.Visit(compilationUnitNode.UsingNodes[0]);
-        visitorMock.Visit(compilationUnitNode.UsingNodes[0].TypeName);
-        visitorMock.Visit(compilationUnitNode.UsingNodes[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[0].NamespaceOrTypeName);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[0].NamespaceOrTypeName.TypeTags[0]);
         visitorMock.Visit((UsingAliasNode)compilationUnitNode.UsingNodes[1]);
-        visitorMock.Visit(compilationUnitNode.UsingNodes[1].TypeName);
-        visitorMock.Visit(compilationUnitNode.UsingNodes[1].TypeName.TypeTags[0]);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[1].NamespaceOrTypeName);
+        visitorMock.Visit(compilationUnitNode.UsingNodes[1].NamespaceOrTypeName.TypeTags[0]);
         visitorMock.Visit(compilationUnitNode.GlobalAttributes[0]);
         visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0]);
         visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName);
@@ -55,8 +55,9 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit((InterfaceDeclarationNode)compilationUnitNode.TypeDeclarations[2]);
         visitorMock.Visit((EnumDeclarationNode)compilationUnitNode.TypeDeclarations[3]);
         visitorMock.Visit((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]);
-        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).TypeName);
-        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).TypeName.TypeTags[0]);
+        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).Type);
+        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).Type.TypeName);
+        visitorMock.Visit(((DelegateDeclarationNode)compilationUnitNode.TypeDeclarations[4]).Type.TypeName.TypeTags[0]);
       }
       mocks.ReplayAll();
 
@@ -79,7 +80,7 @@ namespace CSharpTreeBuilderTest.Ast
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SyntaxNodeVisitor\TypeOrNamespaceNodeVisitorTest.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var typeOrNamespaceNode = project.SyntaxTree.CompilationUnitNodes[0].UsingNodes[0].TypeName;
+      var typeOrNamespaceNode = project.SyntaxTree.CompilationUnitNodes[0].UsingNodes[0].NamespaceOrTypeName;
 
       // Arrange
       var mocks = new MockRepository();
@@ -92,14 +93,17 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[2]); // Generic
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3]); // IDictionary
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0]); // System.Nullable<int>**[][,]
-        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[0]); // System
-        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1]); // Nullable
-        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1].Arguments[0]); // int
-        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeTags[1].Arguments[0].TypeTags[0]); // int
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeName); // System.Nullable<int>
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeName.TypeTags[0]); // System
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeName.TypeTags[1]); // Nullable
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeName.TypeTags[1].Arguments[0]); // int
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeName.TypeTags[1].Arguments[0].TypeName); // int
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].TypeName.TypeTags[1].Arguments[0].TypeName.TypeTags[0]); // int
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].RankSpecifiers[0]);     // []
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[0].RankSpecifiers[1]);     // [,]
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1]); // string**[][,]
-        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeTags[0]); // string
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeName); // string
+        visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].TypeName.TypeTags[0]); // string
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].RankSpecifiers[0]);     // []
         visitorMock.Visit(typeOrNamespaceNode.TypeTags[3].Arguments[1].RankSpecifiers[1]);     // [,]
       }
@@ -162,13 +166,16 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(classDeclarationNode.TypeParameters[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
         visitorMock.Visit(classDeclarationNode.TypeParameters[1]);
         visitorMock.Visit(classDeclarationNode.BaseTypes[0]);
-        visitorMock.Visit(classDeclarationNode.BaseTypes[0].TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[0].TypeName);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[0].TypeName.TypeTags[0]);
         visitorMock.Visit(classDeclarationNode.BaseTypes[1]);
-        visitorMock.Visit(classDeclarationNode.BaseTypes[1].TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[1].TypeName);
+        visitorMock.Visit(classDeclarationNode.BaseTypes[1].TypeName.TypeTags[0]);
         visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0]);
         visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
-        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].TypeName);
-        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].Type);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].Type.TypeName);
+        visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0].Type.TypeName.TypeTags[0]);
         visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[1]);
         visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
         visitorMock.Visit(classDeclarationNode.TypeParameterConstraints[1].ConstraintTags[1]);
@@ -181,8 +188,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(constDeclarationNode.TypeName);
-          visitorMock.Visit(constDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(constDeclarationNode.Type);
+          visitorMock.Visit(constDeclarationNode.Type.TypeName);
+          visitorMock.Visit(constDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(constDeclarationNode.ConstTags[0]);
           visitorMock.Visit((Int32LiteralNode)constDeclarationNode.ConstTags[0].Expression);
           visitorMock.Visit(constDeclarationNode.ConstTags[1]);
@@ -196,8 +204,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(fieldDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(fieldDeclarationNode.TypeName);
-          visitorMock.Visit(fieldDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(fieldDeclarationNode.Type);
+          visitorMock.Visit(fieldDeclarationNode.Type.TypeName);
+          visitorMock.Visit(fieldDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(fieldDeclarationNode.FieldTags[0]);
           visitorMock.Visit(fieldDeclarationNode.FieldTags[1]);
           var init = fieldDeclarationNode.FieldTags[1].Initializer as ExpressionInitializerNode;
@@ -212,8 +221,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(methodDeclarationNode.TypeName);
-          visitorMock.Visit(methodDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(methodDeclarationNode.Type);
+          visitorMock.Visit(methodDeclarationNode.Type.TypeName);
+          visitorMock.Visit(methodDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(methodDeclarationNode.TypeParameters[0]);
           visitorMock.Visit(methodDeclarationNode.TypeParameters[1]);
           visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[0]);
@@ -221,19 +231,22 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[1]);
           visitorMock.Visit(methodDeclarationNode.TypeParameterConstraints[1].ConstraintTags[0]);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[1]);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[1].TypeName);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[1].Type);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[1].Type.TypeName);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[1].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[2]);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[2].AttributeDecorations[0]);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[2].AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[2].AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(methodDeclarationNode.FormalParameters[2].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].TypeName);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].TypeName.TypeTags[0]);
-          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].TypeName.RankSpecifiers[0]);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].Type);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].Type.TypeName);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(methodDeclarationNode.FormalParameters[2].Type.RankSpecifiers[0]);
           visitorMock.Visit(methodDeclarationNode.Body);
           var expressionStatement = methodDeclarationNode.Body.Statements[0] as ExpressionStatementNode;
           visitorMock.Visit(expressionStatement);
@@ -242,15 +255,17 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit((SimpleNameNode)exp.LeftOperand);
           var defaultExp = exp.RightOperand as DefaultValueExpressionNode;
           visitorMock.Visit(defaultExp);
-          visitorMock.Visit(defaultExp.TypeName);
-          visitorMock.Visit(defaultExp.TypeName.TypeTags[0]);
+          visitorMock.Visit(defaultExp.Type);
+          visitorMock.Visit(defaultExp.Type.TypeName);
+          visitorMock.Visit(defaultExp.Type.TypeName.TypeTags[0]);
         }
         // Method declaration (explicit interface implementation)
         {
           var methodDeclarationNode2 = (MethodDeclarationNode)classDeclarationNode.MemberDeclarations[3];
           visitorMock.Visit(methodDeclarationNode2);
-          visitorMock.Visit(methodDeclarationNode2.TypeName);
-          visitorMock.Visit(methodDeclarationNode2.TypeName.TypeTags[0]);
+          visitorMock.Visit(methodDeclarationNode2.Type);
+          visitorMock.Visit(methodDeclarationNode2.Type.TypeName);
+          visitorMock.Visit(methodDeclarationNode2.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(methodDeclarationNode2.Body);
         }
         // Property declaration
@@ -261,8 +276,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(propertyDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(propertyDeclarationNode.TypeName);
-          visitorMock.Visit(propertyDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(propertyDeclarationNode.Type);
+          visitorMock.Visit(propertyDeclarationNode.Type.TypeName);
+          visitorMock.Visit(propertyDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(propertyDeclarationNode.GetAccessor);
           visitorMock.Visit(propertyDeclarationNode.SetAccessor);
         }
@@ -274,10 +290,12 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(eventDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(eventDeclarationNode.TypeName);
-          visitorMock.Visit(eventDeclarationNode.TypeName.TypeTags[0]);
-          visitorMock.Visit(eventDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(eventDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+          visitorMock.Visit(eventDeclarationNode.Type);
+          visitorMock.Visit(eventDeclarationNode.Type.TypeName);
+          visitorMock.Visit(eventDeclarationNode.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(eventDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(eventDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(eventDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
           visitorMock.Visit(eventDeclarationNode.FieldTags[0]);
           var init = eventDeclarationNode.FieldTags[0].Initializer as ExpressionInitializerNode;
           visitorMock.Visit(init);
@@ -291,10 +309,12 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(eventDeclarationNode2.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(eventDeclarationNode2.TypeName);
-          visitorMock.Visit(eventDeclarationNode2.TypeName.TypeTags[0]);
-          visitorMock.Visit(eventDeclarationNode2.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(eventDeclarationNode2.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+          visitorMock.Visit(eventDeclarationNode2.Type);
+          visitorMock.Visit(eventDeclarationNode2.Type.TypeName);
+          visitorMock.Visit(eventDeclarationNode2.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(eventDeclarationNode2.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(eventDeclarationNode2.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(eventDeclarationNode2.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
           visitorMock.Visit(eventDeclarationNode2.AddAccessor);
           visitorMock.Visit(eventDeclarationNode2.AddAccessor.Body);
           visitorMock.Visit(eventDeclarationNode2.RemoveAccessor);
@@ -308,14 +328,17 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(indexerDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(indexerDeclarationNode.TypeName);
-          visitorMock.Visit(indexerDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(indexerDeclarationNode.Type);
+          visitorMock.Visit(indexerDeclarationNode.Type.TypeName);
+          visitorMock.Visit(indexerDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(indexerDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(indexerDeclarationNode.FormalParameters[1]);
-          visitorMock.Visit(indexerDeclarationNode.FormalParameters[1].TypeName);
-          visitorMock.Visit(indexerDeclarationNode.FormalParameters[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[1].Type);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[1].Type.TypeName);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[1].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(indexerDeclarationNode.GetAccessor);
           visitorMock.Visit(indexerDeclarationNode.GetAccessor.Body);
           visitorMock.Visit((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0]);
@@ -331,19 +354,25 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(operatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(operatorDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(operatorDeclarationNode.Body);
           visitorMock.Visit((ReturnStatementNode)operatorDeclarationNode.Body.Statements[0]);
           visitorMock.Visit((NullLiteralNode)((ReturnStatementNode)operatorDeclarationNode.Body.Statements[0]).Expression);
@@ -356,15 +385,19 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(castOperatorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.TypeName);
-          visitorMock.Visit(castOperatorDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.Type);
+          visitorMock.Visit(castOperatorDeclarationNode.Type.TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(castOperatorDeclarationNode.Body);
           visitorMock.Visit((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]);
           visitorMock.Visit((NullLiteralNode)((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]).Expression);
@@ -378,11 +411,13 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(constructorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(constructorDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
           visitorMock.Visit(constructorDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(constructorDeclarationNode.FormalParameters[1]);
-          visitorMock.Visit(constructorDeclarationNode.FormalParameters[1].TypeName);
-          visitorMock.Visit(constructorDeclarationNode.FormalParameters[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[1].Type);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[1].Type.TypeName);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[1].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(constructorDeclarationNode.Body);
         }
         // Constructor declaration with this initializer
@@ -401,8 +436,9 @@ namespace CSharpTreeBuilderTest.Ast
           var constructorDeclarationNode3 = (ConstructorDeclarationNode)classDeclarationNode.MemberDeclarations[12];
           visitorMock.Visit(constructorDeclarationNode3);
           visitorMock.Visit(constructorDeclarationNode3.FormalParameters[0]);
-          visitorMock.Visit(constructorDeclarationNode3.FormalParameters[0].TypeName);
-          visitorMock.Visit(constructorDeclarationNode3.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(constructorDeclarationNode3.FormalParameters[0].Type);
+          visitorMock.Visit(constructorDeclarationNode3.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(constructorDeclarationNode3.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit((BaseConstructorInitializerNode)constructorDeclarationNode3.Initializer);
           visitorMock.Visit(constructorDeclarationNode3.Body);
         }
@@ -466,7 +502,8 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(structDeclarationNode.TypeParameters[0]);
         visitorMock.Visit(structDeclarationNode.TypeParameters[1]);
         visitorMock.Visit(structDeclarationNode.BaseTypes[0]);
-        visitorMock.Visit(structDeclarationNode.BaseTypes[0].TypeTags[0]);
+        visitorMock.Visit(structDeclarationNode.BaseTypes[0].TypeName);
+        visitorMock.Visit(structDeclarationNode.BaseTypes[0].TypeName.TypeTags[0]);
         visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[0]);
         visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
         visitorMock.Visit(structDeclarationNode.TypeParameterConstraints[1]);
@@ -480,8 +517,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0]);
           visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
           visitorMock.Visit(constDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(constDeclarationNode.TypeName);
-          visitorMock.Visit(constDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(constDeclarationNode.Type);
+          visitorMock.Visit(constDeclarationNode.Type.TypeName);
+          visitorMock.Visit(constDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(constDeclarationNode.ConstTags[0]);
           visitorMock.Visit((Int32LiteralNode)constDeclarationNode.ConstTags[0].Expression);
         }
@@ -489,24 +527,27 @@ namespace CSharpTreeBuilderTest.Ast
         {
           var fieldDeclarationNode = (FieldDeclarationNode)structDeclarationNode.MemberDeclarations[1];
           visitorMock.Visit(fieldDeclarationNode);
-          visitorMock.Visit(fieldDeclarationNode.TypeName);
-          visitorMock.Visit(fieldDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(fieldDeclarationNode.Type);
+          visitorMock.Visit(fieldDeclarationNode.Type.TypeName);
+          visitorMock.Visit(fieldDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(fieldDeclarationNode.FieldTags[0]);
         }
         // Method declaration
         {
           var methodDeclarationNode = (MethodDeclarationNode)structDeclarationNode.MemberDeclarations[2];
           visitorMock.Visit(methodDeclarationNode);
-          visitorMock.Visit(methodDeclarationNode.TypeName);
-          visitorMock.Visit(methodDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(methodDeclarationNode.Type);
+          visitorMock.Visit(methodDeclarationNode.Type.TypeName);
+          visitorMock.Visit(methodDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(methodDeclarationNode.Body);
         }
         // Property declaration
         {
           var propertyDeclarationNode = (PropertyDeclarationNode)structDeclarationNode.MemberDeclarations[3];
           visitorMock.Visit(propertyDeclarationNode);
-          visitorMock.Visit(propertyDeclarationNode.TypeName);
-          visitorMock.Visit(propertyDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(propertyDeclarationNode.Type);
+          visitorMock.Visit(propertyDeclarationNode.Type.TypeName);
+          visitorMock.Visit(propertyDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(propertyDeclarationNode.GetAccessor);
           visitorMock.Visit(propertyDeclarationNode.GetAccessor.Body);
           visitorMock.Visit((ReturnStatementNode)propertyDeclarationNode.GetAccessor.Body.Statements[0]);
@@ -518,10 +559,12 @@ namespace CSharpTreeBuilderTest.Ast
         {
           var eventPropertyDeclarationNode = (EventPropertyDeclarationNode)structDeclarationNode.MemberDeclarations[4];
           visitorMock.Visit(eventPropertyDeclarationNode);
-          visitorMock.Visit(eventPropertyDeclarationNode.TypeName);
-          visitorMock.Visit(eventPropertyDeclarationNode.TypeName.TypeTags[0]);
-          visitorMock.Visit(eventPropertyDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(eventPropertyDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+          visitorMock.Visit(eventPropertyDeclarationNode.Type);
+          visitorMock.Visit(eventPropertyDeclarationNode.Type.TypeName);
+          visitorMock.Visit(eventPropertyDeclarationNode.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(eventPropertyDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(eventPropertyDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(eventPropertyDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
           visitorMock.Visit(eventPropertyDeclarationNode.AddAccessor);
           visitorMock.Visit(eventPropertyDeclarationNode.AddAccessor.Body);
           visitorMock.Visit(eventPropertyDeclarationNode.RemoveAccessor);
@@ -531,11 +574,13 @@ namespace CSharpTreeBuilderTest.Ast
         {
           var indexerDeclarationNode = (IndexerDeclarationNode)structDeclarationNode.MemberDeclarations[5];
           visitorMock.Visit(indexerDeclarationNode);
-          visitorMock.Visit(indexerDeclarationNode.TypeName);
-          visitorMock.Visit(indexerDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(indexerDeclarationNode.Type);
+          visitorMock.Visit(indexerDeclarationNode.Type.TypeName);
+          visitorMock.Visit(indexerDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(indexerDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(indexerDeclarationNode.GetAccessor);
           visitorMock.Visit(indexerDeclarationNode.GetAccessor.Body);
           visitorMock.Visit((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0]);
@@ -545,44 +590,57 @@ namespace CSharpTreeBuilderTest.Ast
         {
           var operatorDeclarationNode = (OperatorDeclarationNode)structDeclarationNode.MemberDeclarations[6];
           visitorMock.Visit(operatorDeclarationNode);
-          visitorMock.Visit(operatorDeclarationNode.TypeName);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(operatorDeclarationNode.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(operatorDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(operatorDeclarationNode.Body);
           visitorMock.Visit((ReturnStatementNode)operatorDeclarationNode.Body.Statements[0]);
           var exp = ((ReturnStatementNode) operatorDeclarationNode.Body.Statements[0]).Expression as
             ObjectCreationExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
         }
         // Conversion operator declaration
         {
           var castOperatorDeclarationNode = (CastOperatorDeclarationNode)structDeclarationNode.MemberDeclarations[7];
           visitorMock.Visit(castOperatorDeclarationNode);
-          visitorMock.Visit(castOperatorDeclarationNode.TypeName);
-          visitorMock.Visit(castOperatorDeclarationNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.Type);
+          visitorMock.Visit(castOperatorDeclarationNode.Type.TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(castOperatorDeclarationNode.Body);
           visitorMock.Visit((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]);
           visitorMock.Visit((NullLiteralNode)((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]).Expression);
@@ -592,8 +650,9 @@ namespace CSharpTreeBuilderTest.Ast
           var constructorDeclarationNode = (ConstructorDeclarationNode) structDeclarationNode.MemberDeclarations[8];
           visitorMock.Visit(constructorDeclarationNode);
           visitorMock.Visit(constructorDeclarationNode.FormalParameters[0]);
-          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].TypeName);
-          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].Type);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(constructorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(constructorDeclarationNode.Body);
           var expressionStatement = constructorDeclarationNode.Body.Statements[0] as ExpressionStatementNode;
           visitorMock.Visit(expressionStatement);
@@ -645,7 +704,8 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(interfaceDeclarationNode.TypeParameters[0]);
         visitorMock.Visit(interfaceDeclarationNode.TypeParameters[1]);
         visitorMock.Visit(interfaceDeclarationNode.BaseTypes[0]);
-        visitorMock.Visit(interfaceDeclarationNode.BaseTypes[0].TypeTags[0]);
+        visitorMock.Visit(interfaceDeclarationNode.BaseTypes[0].TypeName);
+        visitorMock.Visit(interfaceDeclarationNode.BaseTypes[0].TypeName.TypeTags[0]);
         visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[0]);
         visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[0].ConstraintTags[0]);
         visitorMock.Visit(interfaceDeclarationNode.TypeParameterConstraints[1]);
@@ -658,33 +718,39 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0]);
         visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName);
         visitorMock.Visit(methodDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-        visitorMock.Visit(methodDeclarationNode.TypeName);
-        visitorMock.Visit(methodDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(methodDeclarationNode.Type);
+        visitorMock.Visit(methodDeclarationNode.Type.TypeName);
+        visitorMock.Visit(methodDeclarationNode.Type.TypeName.TypeTags[0]);
 
         // Property declaration
         var propertyDeclarationNode = (PropertyDeclarationNode)interfaceDeclarationNode.MemberDeclarations[1];
         visitorMock.Visit(propertyDeclarationNode);
-        visitorMock.Visit(propertyDeclarationNode.TypeName);
-        visitorMock.Visit(propertyDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(propertyDeclarationNode.Type);
+        visitorMock.Visit(propertyDeclarationNode.Type.TypeName);
+        visitorMock.Visit(propertyDeclarationNode.Type.TypeName.TypeTags[0]);
         visitorMock.Visit(propertyDeclarationNode.GetAccessor);
         visitorMock.Visit(propertyDeclarationNode.SetAccessor);
 
         // Event declaration
         var interfaceEventDeclarationNode = (InterfaceEventDeclarationNode)interfaceDeclarationNode.MemberDeclarations[2];
         visitorMock.Visit(interfaceEventDeclarationNode);
-        visitorMock.Visit(interfaceEventDeclarationNode.TypeName);
-        visitorMock.Visit(interfaceEventDeclarationNode.TypeName.TypeTags[0]);
-        visitorMock.Visit(interfaceEventDeclarationNode.TypeName.TypeTags[0].Arguments[0]);
-        visitorMock.Visit(interfaceEventDeclarationNode.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
+        visitorMock.Visit(interfaceEventDeclarationNode.Type);
+        visitorMock.Visit(interfaceEventDeclarationNode.Type.TypeName);
+        visitorMock.Visit(interfaceEventDeclarationNode.Type.TypeName.TypeTags[0]);
+        visitorMock.Visit(interfaceEventDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0]);
+        visitorMock.Visit(interfaceEventDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+        visitorMock.Visit(interfaceEventDeclarationNode.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
 
         // Indexer declaration
         var indexerDeclarationNode = (IndexerDeclarationNode)interfaceDeclarationNode.MemberDeclarations[3];
         visitorMock.Visit(indexerDeclarationNode);
-        visitorMock.Visit(indexerDeclarationNode.TypeName);
-        visitorMock.Visit(indexerDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.Type);
+        visitorMock.Visit(indexerDeclarationNode.Type.TypeName);
+        visitorMock.Visit(indexerDeclarationNode.Type.TypeName.TypeTags[0]);
         visitorMock.Visit(indexerDeclarationNode.FormalParameters[0]);
-        visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].TypeName);
-        visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type.TypeName);
+        visitorMock.Visit(indexerDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
         visitorMock.Visit(indexerDeclarationNode.GetAccessor);
       }
       mocks.ReplayAll();
@@ -725,7 +791,8 @@ namespace CSharpTreeBuilderTest.Ast
 
         // Base type
         visitorMock.Visit(enumDeclarationNode.EnumBase);
-        visitorMock.Visit(enumDeclarationNode.EnumBase.TypeTags[0]);
+        visitorMock.Visit(enumDeclarationNode.EnumBase.TypeName);
+        visitorMock.Visit(enumDeclarationNode.EnumBase.TypeName.TypeTags[0]);
 
         // Enum member declaration
         visitorMock.Visit(enumDeclarationNode.Values[0]);
@@ -773,8 +840,9 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(delegateDeclarationNode.AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
 
         // Return type, type parameters and constraints
-        visitorMock.Visit(delegateDeclarationNode.TypeName);
-        visitorMock.Visit(delegateDeclarationNode.TypeName.TypeTags[0]);
+        visitorMock.Visit(delegateDeclarationNode.Type);
+        visitorMock.Visit(delegateDeclarationNode.Type.TypeName);
+        visitorMock.Visit(delegateDeclarationNode.Type.TypeName.TypeTags[0]);
         visitorMock.Visit(delegateDeclarationNode.TypeParameters[0]);
         visitorMock.Visit(delegateDeclarationNode.TypeParameters[1]);
         visitorMock.Visit(delegateDeclarationNode.TypeParameterConstraints[0]);
@@ -788,11 +856,13 @@ namespace CSharpTreeBuilderTest.Ast
         visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].AttributeDecorations[0].Attributes[0]);
         visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].AttributeDecorations[0].Attributes[0].TypeName);
         visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0]);
-        visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].TypeName);
-        visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].TypeName.TypeTags[0]);
+        visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].Type);
+        visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].Type.TypeName);
+        visitorMock.Visit(delegateDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0]);
         visitorMock.Visit(delegateDeclarationNode.FormalParameters[1]);
-        visitorMock.Visit(delegateDeclarationNode.FormalParameters[1].TypeName);
-        visitorMock.Visit(delegateDeclarationNode.FormalParameters[1].TypeName.TypeTags[0]);
+        visitorMock.Visit(delegateDeclarationNode.FormalParameters[1].Type);
+        visitorMock.Visit(delegateDeclarationNode.FormalParameters[1].Type.TypeName);
+        visitorMock.Visit(delegateDeclarationNode.FormalParameters[1].Type.TypeName.TypeTags[0]);
       }
       mocks.ReplayAll();
 
@@ -842,8 +912,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(variableDeclarationStatementNode);
           visitorMock.Visit(variableDeclarationStatementNode.Labels[0]);
           visitorMock.Visit(variableDeclarationStatementNode.Declaration);
-          visitorMock.Visit(variableDeclarationStatementNode.Declaration.TypeName);
-          visitorMock.Visit(variableDeclarationStatementNode.Declaration.TypeName.TypeTags[0]);
+          visitorMock.Visit(variableDeclarationStatementNode.Declaration.Type);
+          visitorMock.Visit(variableDeclarationStatementNode.Declaration.Type.TypeName);
+          visitorMock.Visit(variableDeclarationStatementNode.Declaration.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(variableDeclarationStatementNode.Declaration.VariableTags[0]);
           visitorMock.Visit(variableDeclarationStatementNode.Declaration.VariableTags[1]);
           var expInit =
@@ -856,8 +927,9 @@ namespace CSharpTreeBuilderTest.Ast
           var varNode = (VariableDeclarationStatementNode)method1Body.Statements[i++];
           visitorMock.Visit(varNode);
           visitorMock.Visit(varNode.Declaration);
-          visitorMock.Visit(varNode.Declaration.TypeName);
-          visitorMock.Visit(varNode.Declaration.TypeName.TypeTags[0]);
+          visitorMock.Visit(varNode.Declaration.Type);
+          visitorMock.Visit(varNode.Declaration.Type.TypeName);
+          visitorMock.Visit(varNode.Declaration.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(varNode.Declaration.VariableTags[0]);
           var expInit =
             varNode.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
@@ -869,8 +941,9 @@ namespace CSharpTreeBuilderTest.Ast
           var constStatementNode = (ConstStatementNode)method1Body.Statements[i++];
           visitorMock.Visit(constStatementNode);
           visitorMock.Visit(constStatementNode.Labels[0]);
-          visitorMock.Visit(constStatementNode.TypeName);
-          visitorMock.Visit(constStatementNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(constStatementNode.Type);
+          visitorMock.Visit(constStatementNode.Type.TypeName);
+          visitorMock.Visit(constStatementNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(constStatementNode.ConstTags[0]);
           visitorMock.Visit((Int32LiteralNode)constStatementNode.ConstTags[0].Expression);
           visitorMock.Visit(constStatementNode.ConstTags[1]);
@@ -938,8 +1011,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(forStatementNode);
           visitorMock.Visit(forStatementNode.Labels[0]);
           visitorMock.Visit(forStatementNode.Initializer);
-          visitorMock.Visit(forStatementNode.Initializer.TypeName);
-          visitorMock.Visit(forStatementNode.Initializer.TypeName.TypeTags[0]);
+          visitorMock.Visit(forStatementNode.Initializer.Type);
+          visitorMock.Visit(forStatementNode.Initializer.Type.TypeName);
+          visitorMock.Visit(forStatementNode.Initializer.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(forStatementNode.Initializer.VariableTags[0]);
           var expInit = forStatementNode.Initializer.VariableTags[0].Initializer as ExpressionInitializerNode;
           visitorMock.Visit(expInit);
@@ -970,8 +1044,9 @@ namespace CSharpTreeBuilderTest.Ast
           var foreachStatementNode = (ForeachStatementNode)method1Body.Statements[i++];
           visitorMock.Visit(foreachStatementNode);
           visitorMock.Visit(foreachStatementNode.Labels[0]);
-          visitorMock.Visit(foreachStatementNode.TypeName);
-          visitorMock.Visit(foreachStatementNode.TypeName.TypeTags[0]);
+          visitorMock.Visit(foreachStatementNode.Type);
+          visitorMock.Visit(foreachStatementNode.Type.TypeName);
+          visitorMock.Visit(foreachStatementNode.Type.TypeName.TypeTags[0]);
           visitorMock.Visit((SimpleNameNode)foreachStatementNode.CollectionExpression);
           visitorMock.Visit((BlockStatementNode)foreachStatementNode.Statement);
         }
@@ -982,8 +1057,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(tryStatementNode.Labels[0]);
           visitorMock.Visit(tryStatementNode.TryBlock);
           visitorMock.Visit(tryStatementNode.CatchClauses[0]);
-          visitorMock.Visit(tryStatementNode.CatchClauses[0].TypeName);
-          visitorMock.Visit(tryStatementNode.CatchClauses[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(tryStatementNode.CatchClauses[0].Type);
+          visitorMock.Visit(tryStatementNode.CatchClauses[0].Type.TypeName);
+          visitorMock.Visit(tryStatementNode.CatchClauses[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(tryStatementNode.CatchClauses[0].Block);
           visitorMock.Visit(tryStatementNode.CatchClauses[1]);
           visitorMock.Visit(tryStatementNode.CatchClauses[1].Block);
@@ -1017,8 +1093,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(usingStatementNode);
           visitorMock.Visit(usingStatementNode.Labels[0]);
           visitorMock.Visit(usingStatementNode.Initializer);
-          visitorMock.Visit(usingStatementNode.Initializer.TypeName);
-          visitorMock.Visit(usingStatementNode.Initializer.TypeName.TypeTags[0]);
+          visitorMock.Visit(usingStatementNode.Initializer.Type);
+          visitorMock.Visit(usingStatementNode.Initializer.Type.TypeName);
+          visitorMock.Visit(usingStatementNode.Initializer.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(usingStatementNode.Initializer.VariableTags[0]);
           var expInit = usingStatementNode.Initializer.VariableTags[0].Initializer as ExpressionInitializerNode;
           visitorMock.Visit(expInit);
@@ -1052,8 +1129,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(throwStatementNode);
           visitorMock.Visit(throwStatementNode.Labels[0]);
           visitorMock.Visit((ObjectCreationExpressionNode)throwStatementNode.Expression);
-          visitorMock.Visit(((ObjectCreationExpressionNode)throwStatementNode.Expression).TypeName);
-          visitorMock.Visit(((ObjectCreationExpressionNode)throwStatementNode.Expression).TypeName.TypeTags[0]);
+          visitorMock.Visit(((ObjectCreationExpressionNode)throwStatementNode.Expression).Type);
+          visitorMock.Visit(((ObjectCreationExpressionNode)throwStatementNode.Expression).Type.TypeName);
+          visitorMock.Visit(((ObjectCreationExpressionNode)throwStatementNode.Expression).Type.TypeName.TypeTags[0]);
         }
         // unsafe-statement
         {
@@ -1067,8 +1145,9 @@ namespace CSharpTreeBuilderTest.Ast
           var stringVarNode = (VariableDeclarationStatementNode)unsafeStatementNode.Block.Statements[j++];
           visitorMock.Visit(stringVarNode);
           visitorMock.Visit(stringVarNode.Declaration);
-          visitorMock.Visit(stringVarNode.Declaration.TypeName);
-          visitorMock.Visit(stringVarNode.Declaration.TypeName.TypeTags[0]);
+          visitorMock.Visit(stringVarNode.Declaration.Type);
+          visitorMock.Visit(stringVarNode.Declaration.Type.TypeName);
+          visitorMock.Visit(stringVarNode.Declaration.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(stringVarNode.Declaration.VariableTags[0]);
           var expInit = stringVarNode.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
           visitorMock.Visit(expInit);
@@ -1079,8 +1158,9 @@ namespace CSharpTreeBuilderTest.Ast
             var fixedStatementNode = (FixedStatementNode)unsafeStatementNode.Block.Statements[j++];
             visitorMock.Visit(fixedStatementNode);
             visitorMock.Visit(fixedStatementNode.Labels[0]);
-            visitorMock.Visit(fixedStatementNode.TypeName);
-            visitorMock.Visit(fixedStatementNode.TypeName.TypeTags[0]);
+            visitorMock.Visit(fixedStatementNode.Type);
+            visitorMock.Visit(fixedStatementNode.Type.TypeName);
+            visitorMock.Visit(fixedStatementNode.Type.TypeName.TypeTags[0]);
             visitorMock.Visit(fixedStatementNode.Initializers[0]);
             visitorMock.Visit((SimpleNameNode)fixedStatementNode.Initializers[0].Expression);
             visitorMock.Visit(fixedStatementNode.Initializers[1]);
@@ -1093,13 +1173,15 @@ namespace CSharpTreeBuilderTest.Ast
             var stackallocDecl = (VariableDeclarationStatementNode)unsafeStatementNode.Block.Statements[j++];
             visitorMock.Visit(stackallocDecl);
             visitorMock.Visit(stackallocDecl.Declaration);
-            visitorMock.Visit(stackallocDecl.Declaration.TypeName);
-            visitorMock.Visit(stackallocDecl.Declaration.TypeName.TypeTags[0]);
+            visitorMock.Visit(stackallocDecl.Declaration.Type);
+            visitorMock.Visit(stackallocDecl.Declaration.Type.TypeName);
+            visitorMock.Visit(stackallocDecl.Declaration.Type.TypeName.TypeTags[0]);
             visitorMock.Visit(stackallocDecl.Declaration.VariableTags[0]);
             var stackallocInit = stackallocDecl.Declaration.VariableTags[0].Initializer as StackAllocInitializerNode;
             visitorMock.Visit(stackallocInit);
-            visitorMock.Visit(stackallocInit.TypeName);
-            visitorMock.Visit(stackallocInit.TypeName.TypeTags[0]);
+            visitorMock.Visit(stackallocInit.Type);
+            visitorMock.Visit(stackallocInit.Type.TypeName);
+            visitorMock.Visit(stackallocInit.Type.TypeName.TypeTags[0]);
             visitorMock.Visit((Int32LiteralNode)stackallocInit.Expression);
           }
         }
@@ -1164,8 +1246,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var exp = elemInit.NonAssignmentExpression as ArrayCreationExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(exp.ArraySizeSpecifier);
           visitorMock.Visit((Int32LiteralNode)exp.ArraySizeSpecifier.Expressions[0]);
           visitorMock.Visit((Int32LiteralNode)exp.ArraySizeSpecifier.Expressions[1]);
@@ -1323,7 +1406,8 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(exp);
           visitorMock.Visit((SimpleNameNode)exp.PrimaryExpression);
           visitorMock.Visit(((SimpleNameNode)exp.PrimaryExpression).Arguments[0]);
-          visitorMock.Visit(((SimpleNameNode)exp.PrimaryExpression).Arguments[0].TypeTags[0]);
+          visitorMock.Visit(((SimpleNameNode)exp.PrimaryExpression).Arguments[0].TypeName);
+          visitorMock.Visit(((SimpleNameNode)exp.PrimaryExpression).Arguments[0].TypeName.TypeTags[0]);
           visitorMock.Visit(exp.Arguments[0]);
           visitorMock.Visit((Int32LiteralNode)exp.Arguments[0].Expression);
           visitorMock.Visit(exp.Arguments[1]);
@@ -1385,12 +1469,15 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var exp = elemInit.NonAssignmentExpression as ObjectCreationExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
           visitorMock.Visit(exp.ObjectOrCollectionInitializer);
           visitorMock.Visit(exp.ObjectOrCollectionInitializer.ElementInitializers[0]);
           visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[0].ExpressionList[0]);
@@ -1405,8 +1492,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var exp = elemInit.NonAssignmentExpression as ObjectCreationExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
           visitorMock.Visit(exp.Arguments[0]);
           visitorMock.Visit((Int32LiteralNode)exp.Arguments[0].Expression);
           visitorMock.Visit(exp.Arguments[1]);
@@ -1446,9 +1534,10 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var exp = elemInit.NonAssignmentExpression as TypeofExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
-          visitorMock.Visit(exp.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[0]);
         }
         //// sizeof-expression
         //sizeof (int),
@@ -1457,8 +1546,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var exp = elemInit.NonAssignmentExpression as SizeofExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
         }
         // checked-expression
         {
@@ -1482,8 +1572,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var exp = elemInit.NonAssignmentExpression as DefaultValueExpressionNode;
           visitorMock.Visit(exp);
-          visitorMock.Visit(exp.TypeName);
-          visitorMock.Visit(exp.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.Type);
+          visitorMock.Visit(exp.Type.TypeName);
+          visitorMock.Visit(exp.Type.TypeName.TypeTags[0]);
         }
         // anonymous-method-expression (wrapped in a cast)
         // (Func<int, int, int>) delegate(int i1, int i2) { return 1; },
@@ -1492,22 +1583,28 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var castExp = elemInit.NonAssignmentExpression as CastExpressionNode;
           visitorMock.Visit(castExp);
-          visitorMock.Visit(castExp.TypeName);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[2]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[2].TypeTags[0]);
+          visitorMock.Visit(castExp.Type);
+          visitorMock.Visit(castExp.Type.TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[2]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[2].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[2].TypeName.TypeTags[0]);
           var exp = castExp.Operand as AnonymousMethodExpressionNode;
           visitorMock.Visit(exp);
           visitorMock.Visit(exp.FormalParameters[0]);
-          visitorMock.Visit(exp.FormalParameters[0].TypeName);
-          visitorMock.Visit(exp.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.FormalParameters[0].Type);
+          visitorMock.Visit(exp.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(exp.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(exp.FormalParameters[1]);
-          visitorMock.Visit(exp.FormalParameters[1].TypeName);
-          visitorMock.Visit(exp.FormalParameters[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.FormalParameters[1].Type);
+          visitorMock.Visit(exp.FormalParameters[1].Type.TypeName);
+          visitorMock.Visit(exp.FormalParameters[1].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(exp.Body);
           visitorMock.Visit((ReturnStatementNode)exp.Body.Statements[0]);
           visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)exp.Body.Statements[0]).Expression);
@@ -1519,24 +1616,29 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var castExp = elemInit.NonAssignmentExpression as CastExpressionNode;
           visitorMock.Visit(castExp);
-          visitorMock.Visit(castExp.TypeName);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Arguments[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Arguments[1]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Arguments[1].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Arguments[2]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Arguments[2].TypeTags[0]);
+          visitorMock.Visit(castExp.Type);
+          visitorMock.Visit(castExp.Type.TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[2]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[2].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Arguments[2].TypeName.TypeTags[0]);
           var paren = castExp.Operand as ParenthesizedExpressionNode;
           visitorMock.Visit(paren);
           var exp = paren.Expression as LambdaExpressionNode;
           visitorMock.Visit(exp);
           visitorMock.Visit(exp.FormalParameters[0]);
-          visitorMock.Visit(exp.FormalParameters[0].TypeName);
+          visitorMock.Visit(exp.FormalParameters[0].Type);
           visitorMock.Visit(exp.FormalParameters[1]);
-          visitorMock.Visit(exp.FormalParameters[1].TypeName);
+          visitorMock.Visit(exp.FormalParameters[1].Type);
           var binExp = exp.Expression as BinaryExpressionNode;
           visitorMock.Visit(binExp);
           visitorMock.Visit((SimpleNameNode)binExp.LeftOperand);
@@ -1549,24 +1651,30 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var castExp = elemInit.NonAssignmentExpression as CastExpressionNode;
           visitorMock.Visit(castExp);
-          visitorMock.Visit(castExp.TypeName);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[0].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[1]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[1].TypeTags[0]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[2]);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0].Arguments[2].TypeTags[0]);
+          visitorMock.Visit(castExp.Type);
+          visitorMock.Visit(castExp.Type.TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[1]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[1].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[2]);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[2].TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0].Arguments[2].TypeName.TypeTags[0]);
           var paren = castExp.Operand as ParenthesizedExpressionNode;
           visitorMock.Visit(paren);
           var exp = paren.Expression as LambdaExpressionNode;
           visitorMock.Visit(exp);
           visitorMock.Visit(exp.FormalParameters[0]);
-          visitorMock.Visit(exp.FormalParameters[0].TypeName);
-          visitorMock.Visit(exp.FormalParameters[0].TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.FormalParameters[0].Type);
+          visitorMock.Visit(exp.FormalParameters[0].Type.TypeName);
+          visitorMock.Visit(exp.FormalParameters[0].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(exp.FormalParameters[1]);
-          visitorMock.Visit(exp.FormalParameters[1].TypeName);
-          visitorMock.Visit(exp.FormalParameters[1].TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.FormalParameters[1].Type);
+          visitorMock.Visit(exp.FormalParameters[1].Type.TypeName);
+          visitorMock.Visit(exp.FormalParameters[1].Type.TypeName.TypeTags[0]);
           visitorMock.Visit(exp.Block);
           visitorMock.Visit((ReturnStatementNode)exp.Block.Statements[0]);
           visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)exp.Block.Statements[0]).Expression);
@@ -1605,8 +1713,9 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(elemInit);
           var castExp = elemInit.NonAssignmentExpression as CastExpressionNode;
           visitorMock.Visit(castExp);
-          visitorMock.Visit(castExp.TypeName);
-          visitorMock.Visit(castExp.TypeName.TypeTags[0]);
+          visitorMock.Visit(castExp.Type);
+          visitorMock.Visit(castExp.Type.TypeName);
+          visitorMock.Visit(castExp.Type.TypeName.TypeTags[0]);
           visitorMock.Visit((Int32LiteralNode)castExp.Operand);
         }
         // binary-expression
@@ -1628,7 +1737,8 @@ namespace CSharpTreeBuilderTest.Ast
           visitorMock.Visit(exp);
           visitorMock.Visit((Int32LiteralNode)exp.LeftOperand);
           visitorMock.Visit(exp.RightOperand);
-          visitorMock.Visit(exp.RightOperand.TypeTags[0]);
+          visitorMock.Visit(exp.RightOperand.TypeName);
+          visitorMock.Visit(exp.RightOperand.TypeName.TypeTags[0]);
         }
         // conditional-expression
         // true ? 1 : 2,
@@ -1670,16 +1780,18 @@ namespace CSharpTreeBuilderTest.Ast
           var exp = elemInit.NonAssignmentExpression as QueryExpressionNode;
           visitorMock.Visit(exp);
           visitorMock.Visit(exp.FromClause);
-          visitorMock.Visit(exp.FromClause.TypeName);
-          visitorMock.Visit(exp.FromClause.TypeName.TypeTags[0]);
+          visitorMock.Visit(exp.FromClause.Type);
+          visitorMock.Visit(exp.FromClause.Type.TypeName);
+          visitorMock.Visit(exp.FromClause.Type.TypeName.TypeTags[0]);
           visitorMock.Visit((SimpleNameNode) exp.FromClause.Expression);
           visitorMock.Visit(exp.QueryBody);
           int j = 0;
           {
             var bodyClause = exp.QueryBody.BodyClauses[j++] as FromClauseNode;
             visitorMock.Visit(bodyClause);
-            visitorMock.Visit(bodyClause.TypeName);
-            visitorMock.Visit(bodyClause.TypeName.TypeTags[0]);
+            visitorMock.Visit(bodyClause.Type);
+            visitorMock.Visit(bodyClause.Type.TypeName);
+            visitorMock.Visit(bodyClause.Type.TypeName.TypeTags[0]);
             visitorMock.Visit((SimpleNameNode)bodyClause.Expression);
           }
           {
@@ -1695,7 +1807,7 @@ namespace CSharpTreeBuilderTest.Ast
           {
             var bodyClause = exp.QueryBody.BodyClauses[j++] as JoinClauseNode;
             visitorMock.Visit(bodyClause);
-            visitorMock.Visit(bodyClause.TypeName);
+            visitorMock.Visit(bodyClause.Type);
             visitorMock.Visit((SimpleNameNode)bodyClause.InExpression);
             visitorMock.Visit((SimpleNameNode)bodyClause.OnExpression);
             visitorMock.Visit((SimpleNameNode)bodyClause.EqualsExpression);
@@ -1703,7 +1815,7 @@ namespace CSharpTreeBuilderTest.Ast
           {
             var bodyClause = exp.QueryBody.BodyClauses[j++] as JoinIntoClauseNode;
             visitorMock.Visit(bodyClause);
-            visitorMock.Visit(bodyClause.TypeName);
+            visitorMock.Visit(bodyClause.Type);
             visitorMock.Visit((SimpleNameNode)bodyClause.InExpression);
             visitorMock.Visit((SimpleNameNode)bodyClause.OnExpression);
             visitorMock.Visit((SimpleNameNode)bodyClause.EqualsExpression);

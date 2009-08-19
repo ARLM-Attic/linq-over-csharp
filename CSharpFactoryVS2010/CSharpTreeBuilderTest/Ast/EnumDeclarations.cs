@@ -122,7 +122,7 @@ namespace CSharpTreeBuilderTest
       Assert.IsTrue(InvokeParser(project));
 
       var enumDecl = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
-      enumDecl.EnumBase.TypeTags[0].Identifier.ShouldEqual("int");
+      enumDecl.EnumBase.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
     }
   }
 }

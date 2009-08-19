@@ -64,9 +64,9 @@ namespace CSharpTreeBuilder.Ast
         attributeDecoration.AcceptVisitor(visitor);
       }
 
-      if (TypeName!=null)
+      if (Type!=null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
 
       foreach (var formalParameter in FormalParameters)

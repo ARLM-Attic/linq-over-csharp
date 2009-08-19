@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a reference to a type entity, based on a type-or-namespace AST node.
   /// </summary>
   // ================================================================================================
-  public sealed class TypeOrNamespaceNodeBasedTypeEntityReference : SyntaxNodeBasedSemanticEntityReference<TypeEntity, TypeOrNamespaceNode>
+  public sealed class TypeOrNamespaceNodeBasedTypeEntityReference : SyntaxNodeBasedSemanticEntityReference<TypeEntity, TypeNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="syntaxNode">A syntax node that will be resolved to a semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeBasedTypeEntityReference(TypeOrNamespaceNode syntaxNode)
+    public TypeOrNamespaceNodeBasedTypeEntityReference(TypeNode syntaxNode)
       : base(syntaxNode)
     {
     }

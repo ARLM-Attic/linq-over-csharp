@@ -235,7 +235,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
         classEntity.BaseTypeReferences.Count().ShouldEqual(1);
-        ((TypeOrNamespaceNodeBasedTypeEntityReference)classEntity.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeTags[0].Identifier.ShouldEqual("A");
+        ((TypeOrNamespaceNodeBasedTypeEntityReference)classEntity.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("A");
       }
     }
 
@@ -731,7 +731,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         usingNamespace.LexicalScope.FromSourcePoint.Position.ShouldEqual(compilationUnitNode.StartPosition);
         usingNamespace.LexicalScope.ToSourcePoint.Position.ShouldEqual(compilationUnitNode.EndPosition);
         usingNamespace.NamespaceReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        usingNamespace.NamespaceReference.SyntaxNode.ShouldEqual(compilationUnitNode.UsingNodes[0].TypeName);
+        usingNamespace.NamespaceReference.SyntaxNode.ShouldEqual(compilationUnitNode.UsingNodes[0].NamespaceOrTypeName);
         usingNamespace.Parent.ShouldEqual(namespaceEntity);
         usingNamespace.ReflectedMetadata.ShouldBeNull();
         usingNamespace.SyntaxNodes.Count.ShouldEqual(1);
@@ -763,7 +763,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         usingNamespace.LexicalScope.FromSourcePoint.Position.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].StartPosition);
         usingNamespace.LexicalScope.ToSourcePoint.Position.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].EndPosition);
         usingNamespace.NamespaceReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        usingNamespace.NamespaceReference.SyntaxNode.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].TypeName);
+        usingNamespace.NamespaceReference.SyntaxNode.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].NamespaceOrTypeName);
         usingNamespace.Parent.ShouldEqual(namespaceB);
         usingNamespace.ReflectedMetadata.ShouldBeNull();
         usingNamespace.SyntaxNodes.Count.ShouldEqual(1);
@@ -830,7 +830,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         usingAlias.LexicalScope.FromSourcePoint.Position.ShouldEqual(compilationUnitNode.StartPosition);
         usingAlias.LexicalScope.ToSourcePoint.Position.ShouldEqual(compilationUnitNode.EndPosition);
         usingAlias.NamespaceOrTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        usingAlias.NamespaceOrTypeReference.SyntaxNode.ShouldEqual(compilationUnitNode.UsingNodes[0].TypeName);
+        usingAlias.NamespaceOrTypeReference.SyntaxNode.ShouldEqual(compilationUnitNode.UsingNodes[0].NamespaceOrTypeName);
         usingAlias.Parent.ShouldEqual(namespaceEntity);
         usingAlias.ReflectedMetadata.ShouldBeNull();
         usingAlias.SyntaxNodes.Count.ShouldEqual(1);
@@ -865,7 +865,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         usingAlias.LexicalScope.FromSourcePoint.Position.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].StartPosition);
         usingAlias.LexicalScope.ToSourcePoint.Position.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].EndPosition);
         usingAlias.NamespaceOrTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        usingAlias.NamespaceOrTypeReference.SyntaxNode.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].TypeName);
+        usingAlias.NamespaceOrTypeReference.SyntaxNode.ShouldEqual(compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].NamespaceOrTypeName);
         usingAlias.Parent.ShouldEqual(namespaceB);
         usingAlias.ReflectedMetadata.ShouldBeNull();
         usingAlias.SyntaxNodes.Count.ShouldEqual(1);

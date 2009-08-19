@@ -15,16 +15,16 @@ namespace CSharpTreeBuilder.Ast
     /// Initializes a new instance of the <see cref="PredefinedTypeMemberAccessNode"/> class.
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
-    /// <param name="typeNode">The node representing the predefined type.</param>
+    /// <param name="typeName">The node representing the predefined type.</param>
     // ----------------------------------------------------------------------------------------------
-    public PredefinedTypeMemberAccessNode(Token start, TypeOrNamespaceNode typeNode)
+    public PredefinedTypeMemberAccessNode(Token start, NamespaceOrTypeNameNode typeName)
       : base(start)
     {
-      if (typeNode == null)
+      if (typeName == null)
       {
-        throw new ArgumentNullException("typeNode");
+        throw new ArgumentNullException("typeName");
       }
-      TypeName = typeNode;
+      TypeName = typeName;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the name of the predefined type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName { get; private set; }
+    public NamespaceOrTypeNameNode TypeName { get; private set; }
 
     #region Visitor methods
 

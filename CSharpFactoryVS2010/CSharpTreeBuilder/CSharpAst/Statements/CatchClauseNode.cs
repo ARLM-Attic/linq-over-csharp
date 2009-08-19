@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	<para>Syntax:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>"<strong>catch</strong>" [ <em><see cref="BlockStatementNode"/></em>
-  ///         | "<strong>(</strong>" <em><see cref="TypeOrNamespaceNode"/></em> [
+  ///         | "<strong>(</strong>" <em><see cref="TypeNode"/></em> [
   ///         <em>identifier</em> ] "<strong>)</strong>" <em><see cref="BlockStatementNode"/></em> ]</para>
   /// 	</blockquote>
   /// 	<para>Representation:</para>
@@ -24,7 +24,7 @@ namespace CSharpTreeBuilder.Ast
   ///             "<strong>catch</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
   /// 			<em>BlockStatementNode</em>: <see cref="Block"/><br/>
   ///             "<strong>(</strong>": <see cref="OpenParenthesis"/><br/>
-  /// 			<em>TypeOrNamespaceNode</em>: <see cref="TypeName"/><br/>
+  /// 			<em>TypeOrNamespaceNode</em>: <see cref="Type"/><br/>
   /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
   ///             "<strong>)</strong>": <see cref="CloseParenthesis"/>
   /// 		</para>
@@ -36,7 +36,7 @@ namespace CSharpTreeBuilder.Ast
     IIdentifierSupport
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private TypeNode _Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -54,13 +54,13 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public TypeNode Type
     {
-      get { return _TypeName; }
+      get { return _Type; }
       internal set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _Type = value;
+        if (_Type != null) _Type.ParentNode = this;
       }
     }
 
@@ -127,9 +127,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName != null)
+      if (Type != null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
 
       if (Block != null)

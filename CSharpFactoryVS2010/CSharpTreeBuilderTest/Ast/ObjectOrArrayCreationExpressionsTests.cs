@@ -36,13 +36,13 @@ namespace CSharpTreeBuilderTest
 
       var init1 = ((VariableDeclarationStatementNode)method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp1 = init1.Expression as ObjectCreationExpressionNode;
-      exp1.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
+      exp1.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
       exp1.HasConstructorArguments.ShouldBeFalse();
       exp1.HasObjectInitializer.ShouldBeFalse();
 
       var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp2 = init2.Expression as ObjectCreationExpressionNode;
-      exp2.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
+      exp2.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
       exp2.HasConstructorArguments.ShouldBeTrue();
       ((Int32LiteralNode) exp2.Arguments[0].Expression).Value.ShouldEqual(1);
       ((Int32LiteralNode) exp2.Arguments[1].Expression).Value.ShouldEqual(2);
@@ -50,7 +50,7 @@ namespace CSharpTreeBuilderTest
 
       var init3 = ((VariableDeclarationStatementNode)method.Body.Statements[2]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp3 = init3.Expression as ObjectCreationExpressionNode;
-      exp3.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
+      exp3.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
       exp3.HasConstructorArguments.ShouldBeFalse();
       exp3.HasObjectInitializer.ShouldBeTrue();
       var memberInit3 = exp3.ObjectOrCollectionInitializer.MemberInitializers[0];
@@ -59,7 +59,7 @@ namespace CSharpTreeBuilderTest
 
       var init4 = ((VariableDeclarationStatementNode)method.Body.Statements[3]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp4 = init4.Expression as ObjectCreationExpressionNode;
-      exp4.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
+      exp4.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
       exp4.HasConstructorArguments.ShouldBeTrue();
       ((Int32LiteralNode)exp4.Arguments[0].Expression).Value.ShouldEqual(4);
       ((Int32LiteralNode)exp4.Arguments[1].Expression).Value.ShouldEqual(5);
@@ -70,7 +70,7 @@ namespace CSharpTreeBuilderTest
 
       var init5 = ((VariableDeclarationStatementNode)method.Body.Statements[4]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp5 = init5.Expression as ObjectCreationExpressionNode;
-      exp5.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
+      exp5.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("ObjectCreationExpression");
       exp5.HasConstructorArguments.ShouldBeFalse();
       exp5.HasObjectInitializer.ShouldBeTrue();
       var memberInit5 = exp5.ObjectOrCollectionInitializer.MemberInitializers[0];
@@ -101,9 +101,9 @@ namespace CSharpTreeBuilderTest
 
       var init1 = ((VariableDeclarationStatementNode) method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp1 = init1.Expression as ObjectCreationExpressionNode;
-      exp1.TypeName.TypeTags[0].Identifier.ShouldEqual("List");
-      exp1.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(1);
-      exp1.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("int");
+      exp1.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("List");
+      exp1.Type.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(1);
+      exp1.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
       exp1.HasConstructorArguments.ShouldBeFalse();
       exp1.HasObjectInitializer.ShouldBeTrue();
       var elementInit1 = exp1.ObjectOrCollectionInitializer.ElementInitializers[0].NonAssignmentExpression as Int32LiteralNode;
@@ -115,10 +115,10 @@ namespace CSharpTreeBuilderTest
 
       var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp2 = init2.Expression as ObjectCreationExpressionNode;
-      exp2.TypeName.TypeTags[0].Identifier.ShouldEqual("Dictionary");
-      exp2.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
-      exp2.TypeName.TypeTags[0].Arguments[0].TypeTags[0].Identifier.ShouldEqual("int");
-      exp2.TypeName.TypeTags[0].Arguments[1].TypeTags[0].Identifier.ShouldEqual("string");
+      exp2.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("Dictionary");
+      exp2.Type.TypeName.TypeTags[0].GenericDimensions.ShouldEqual(2);
+      exp2.Type.TypeName.TypeTags[0].Arguments[0].TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp2.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0].Identifier.ShouldEqual("string");
       exp2.HasConstructorArguments.ShouldBeFalse();
       exp2.HasObjectInitializer.ShouldBeTrue();
       ((Int32LiteralNode)exp2.ObjectOrCollectionInitializer.ElementInitializers[0].ExpressionList[0]).Value.ShouldEqual(4);
@@ -163,7 +163,7 @@ namespace CSharpTreeBuilderTest
 
       var init1 = ((VariableDeclarationStatementNode) method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp1 = init1.Expression as ObjectCreationExpressionNode;
-      exp1.TypeName.TypeTags[0].Identifier.ShouldEqual("MyDelegate");
+      exp1.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("MyDelegate");
       exp1.HasConstructorArguments.ShouldBeTrue();
       ((SimpleNameNode)exp1.Arguments[0].Expression).Identifier.ShouldEqual("MyTarget");
       exp1.HasObjectInitializer.ShouldBeFalse();
@@ -254,9 +254,9 @@ namespace CSharpTreeBuilderTest
 
       var init1 = ((VariableDeclarationStatementNode) method.Body.Statements[0]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp1 = init1.Expression as ArrayCreationExpressionNode;
-      exp1.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
-      exp1.TypeName.IsArray.ShouldBeFalse(); // note that the type is NOT an array type!
-      exp1.TypeName.IsPointer.ShouldBeFalse();
+      exp1.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp1.Type.IsArray.ShouldBeFalse(); // note that the type is NOT an array type!
+      exp1.Type.IsPointer.ShouldBeFalse();
       exp1.HasSpecifiedArraySizes.ShouldBeTrue();
       exp1.ArraySizeSpecifier.Rank.ShouldEqual(2);
       ((Int32LiteralNode)exp1.ArraySizeSpecifier.Expressions[0]).Value.ShouldEqual(1);
@@ -271,9 +271,9 @@ namespace CSharpTreeBuilderTest
 
       var init2 = ((VariableDeclarationStatementNode)method.Body.Statements[1]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp2 = init2.Expression as ArrayCreationExpressionNode;
-      exp2.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
-      exp2.TypeName.IsPointer.ShouldBeTrue();
-      exp2.TypeName.PointerSpecifierCount.ShouldEqual(2);
+      exp2.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp2.Type.IsPointer.ShouldBeTrue();
+      exp2.Type.PointerSpecifierCount.ShouldEqual(2);
       exp2.HasSpecifiedArraySizes.ShouldBeTrue();
       exp2.ArraySizeSpecifier.Rank.ShouldEqual(2);
       ((Int32LiteralNode)exp2.ArraySizeSpecifier.Expressions[0]).Value.ShouldEqual(5);
@@ -282,7 +282,7 @@ namespace CSharpTreeBuilderTest
 
       var init3 = ((VariableDeclarationStatementNode)method.Body.Statements[2]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp3 = init3.Expression as ArrayCreationExpressionNode;
-      exp3.TypeName.IsEmpty.ShouldBeTrue();
+      exp3.Type.IsEmpty.ShouldBeTrue();
       exp3.HasSpecifiedArraySizes.ShouldBeFalse();
       exp3.HasRankSpecifiers.ShouldBeTrue();
       exp3.RankSpecifiers.Count.ShouldEqual(1);
@@ -304,7 +304,7 @@ namespace CSharpTreeBuilderTest
 
       var init4 = ((VariableDeclarationStatementNode)method.Body.Statements[3]).Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
       var exp4 = init4.Expression as ArrayCreationExpressionNode;
-      exp4.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
+      exp4.Type.TypeName.TypeTags[0].Identifier.ShouldEqual("int");
       exp4.HasSpecifiedArraySizes.ShouldBeFalse();
       exp4.HasRankSpecifiers.ShouldBeTrue();
       exp4.RankSpecifiers[0].Rank.ShouldEqual(1);

@@ -107,6 +107,7 @@
     <Compile Include="CSharpAst\Initializers\VariableInitializerNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\ArraySizeSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\JoinIntoClauseNode.cs" />
+    <Compile Include="CSharpAst\Types\NamespaceOrTypeNameNode.cs" />
     <Compile Include="CSharpAst\Types\RankSpecifierNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\RankSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Lambda\LambdaExpressionNode.cs" />
@@ -150,11 +151,6 @@
     <Compile Include="CSharpAst\Expressions\Query\QueryExpressionNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\SelectClauseNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\WhereClauseNode.cs" />
-    <Compile Include="CSharpAst\FluentInterface\CompilationUnitNodeFluentInterface.cs" />
-    <Compile Include="CSharpAst\FluentInterface\TypeOrNamespaceNodeFluentInterface.cs" />
-    <Compile Include="CSharpAst\FluentInterface\TypeTagNodeFluentInterface.cs" />
-    <Compile Include="CSharpAst\FluentInterface\UsingAliasNodeFluentInterface.cs" />
-    <Compile Include="CSharpAst\FluentInterface\UsingNamespaceNodeFluentInterface.cs" />
     <Compile Include="CSharpAst\ISyntaxNodeVisitor.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -439,8 +435,8 @@
     <Compile Include="CSharpAst\Types\TypeDeclarationNode.cs" />
     <Compile Include="CSharpAst\Types\TypeDeclarationNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeOrMemberDeclarationNode.cs" />
-    <Compile Include="CSharpAst\Types\TypeOrNamespaceNode.cs" />
-    <Compile Include="CSharpAst\Types\TypeOrNamespaceNodeCollection.cs" />
+    <Compile Include="CSharpAst\Types\TypeNode.cs" />
+    <Compile Include="CSharpAst\Types\TypeNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterConstraintNode.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterConstraintNodeCollection.cs" />
     <Compile Include="CSharpAst\Types\TypeParameterConstraintTagNode.cs" />

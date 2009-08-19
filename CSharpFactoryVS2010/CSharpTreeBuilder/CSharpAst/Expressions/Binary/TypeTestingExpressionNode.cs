@@ -39,7 +39,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the right operand.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode RightOperand { get; internal set; }
+    public TypeNode RightOperand { get; internal set; }
 
     #region Visitor methods
 

@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
-  public class TypeTagNode : SyntaxNode<TypeOrNamespaceNode>, IIdentifierSupport, ITypeArguments
+  public class TypeTagNode : SyntaxNode<TypeNode>, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -35,14 +35,14 @@ namespace CSharpTreeBuilder.Ast
     /// <param name="identifierToken">Identifier token.</param>
     /// <param name="argumentListNode">The argument list node.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeTagNode(Token identifierToken, TypeOrNamespaceNodeCollection argumentListNode)
+    public TypeTagNode(Token identifierToken, TypeNodeCollection argumentListNode)
       : base(identifierToken)
     {
       IdentifierToken = identifierToken;
       Arguments = argumentListNode;
       if (Arguments == null)
       {
-        Arguments = new TypeOrNamespaceNodeCollection();
+        Arguments = new TypeNodeCollection();
       }
       Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
     }
@@ -107,48 +107,7 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The arguments.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeCollection Arguments { get; private set; }
-
-#warning Arguments collection should not be publicly modified, only through AddTypeTag method, otherwise separatot tokens are not guaranteed to be set correctly
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a type to the Arguments collection, and sets the separator tokens.
-    /// </summary>
-    /// <param name="typeOrNamespaceNode">A type.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddArgument(TypeOrNamespaceNode typeOrNamespaceNode)
-    {
-      Arguments.Add(typeOrNamespaceNode);
-      SetSeparatorTokens();
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Sets the type arguments' separator tokens to null or comma.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private void SetSeparatorTokens()
-    {
-      if (Arguments.Count>0)
-      {
-        Arguments.StartToken = Token.LessThan;
-        Arguments.Terminate(Token.GreatherThan);
-        Terminate(Token.GreatherThan);
-      }
-
-      for (int i = 0; i < Arguments.Count; i++)
-      {
-        if (i == 0)
-        {
-          Arguments[i].SeparatorToken = null;
-        }
-        else
-        {
-          Arguments[i].SeparatorToken = Token.Comma;
-        }
-      }
-    }
+    public TypeNodeCollection Arguments { get; internal set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

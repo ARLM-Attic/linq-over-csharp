@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>
   ///             '<strong>join</strong>': <see cref="ISyntaxNode.StartToken"/><br/>
-  /// 			<em>TypeOrNamespaceNode</em>: <see cref="TypeName"/><br/>
+  /// 			<em>TypeOrNamespaceNode</em>: <see cref="Type"/><br/>
   /// 			<em>identifier</em>: <see cref="IdentifierToken"/><br/>
   ///             "<strong>in</strong>": <see cref="InToken"/><br/>
   /// 			<em>ExpressionNode</em>: <see cref="InExpression"/><br/>
@@ -38,7 +38,7 @@ namespace CSharpTreeBuilder.Ast
   public class JoinClauseNode : QueryBodyClauseNode, IIdentifierSupport
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private TypeNode _Type;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -49,22 +49,21 @@ namespace CSharpTreeBuilder.Ast
     public JoinClauseNode(Token start)
       : base(start)
     {
-      _TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
+      _Type = TypeNode.CreateEmptyTypeNode(null);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the name of the type.
     /// </summary>
-    /// <value>The name of the type.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public TypeNode Type
     {
-      get { return _TypeName; }
+      get { return _Type; }
       internal set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _Type = value;
+        if (_Type != null) _Type.ParentNode = this;
       }
     }
 
@@ -154,9 +153,9 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName != null)
+      if (Type != null)
       {
-        TypeName.AcceptVisitor(visitor);
+        Type.AcceptVisitor(visitor);
       }
 
       if (InExpression != null)

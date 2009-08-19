@@ -296,7 +296,7 @@ UsingDirective<NamespaceScopeNode parentNode>
 (.
    Token alias = null;
    Token eq = null;
-   TypeOrNamespaceNode nsNode = null;
+   NamespaceOrTypeNameNode nsNode = null;
 .)                                     
 =                           
   "using"
@@ -310,7 +310,7 @@ UsingDirective<NamespaceScopeNode parentNode>
     "="
     (. eq = t; .)
   ]
-  TypeName<out nsNode> 
+  NamespaceOrTypeName<out nsNode> 
   ";"
   (. 
      var node = (alias == null)
@@ -481,7 +481,7 @@ ClassDeclaration<out TypeDeclarationNode typeDecl>
 // ------------------------------------------------------------------------------------------------
 BaseTypeList<TypeDeclarationNode typeDecl>
 =
-  (. TypeOrNamespaceNode typeNode; .)
+  (. TypeNode typeNode; .)
   ":"
   (. typeDecl.ColonToken = t; .)                        
   ClassType<out typeNode>     
@@ -598,7 +598,7 @@ EnumDeclaration<out TypeDeclarationNode typeDecl>
   .)
   [ 
     ":"                          
-    (. TypeOrNamespaceNode typeNode = null; .)
+    (. TypeNode typeNode = null; .)
     ( ClassType<out typeNode> | IntegralType<out typeNode> )
     (. enumDecl.EnumBase = typeNode; .)
   ] 
@@ -676,7 +676,7 @@ DelegateDeclaration<out TypeDeclarationNode typeDecl>
   "delegate"                                       
   (. 
      var start = t;
-     TypeOrNamespaceNode typeNode;
+     TypeNode typeNode;
   .)
   Type<out typeNode>
   ident
@@ -684,7 +684,7 @@ DelegateDeclaration<out TypeDeclarationNode typeDecl>
      var ddNode = new DelegateDeclarationNode(start, t);
      SetCommentOwner(ddNode);
      typeDecl = ddNode;
-     ddNode.TypeName = typeNode;
+     ddNode.Type = typeNode;
   .)
   [ TypeParameterList<typeDecl> ]
   "(" 
@@ -749,28 +749,28 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
     ident
     (. 
        var partialToken = t; 
-       TypeOrNamespaceNode typeNode; 
+       TypeNode typeNode; 
     .)
     Type<out typeNode>
-    (. TypeOrNamespaceNode nameNode; .)
+    (. NamespaceOrTypeNameNode nameNode; .)
     MemberName<out nameNode>
     (.
        var metNode = new MethodDeclarationNode(partialToken);
        SetCommentOwner(metNode);
-       metNode.TypeName = typeNode;
+       metNode.Type = typeNode;
        metNode.MemberName = nameNode;
        memNode = metNode;
     .)
     MethodDeclaration<metNode>
   | 
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeNode typeNode; .)
     Type<out typeNode>
     ( 
         // --- Overloadable operator declaration
         (. 
            var opNode = new OperatorDeclarationNode(typeNode.StartToken); 
            SetCommentOwner(opNode);
-           opNode.TypeName = typeNode;
+           opNode.Type = typeNode;
            memNode = opNode;
         .)
         OperatorDeclaration<opNode>
@@ -780,7 +780,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         (. 
            var fiNode = new FieldDeclarationNode(typeNode.StartToken); 
            SetCommentOwner(fiNode);
-           fiNode.TypeName = typeNode;
+           fiNode.Type = typeNode;
            memNode = fiNode;
         .)
         FieldMemberDeclarators<fiNode> 
@@ -789,13 +789,13 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
       |                                  
         // --- Members than can be used in explicit interface implementations:
         // --- Property declaration        
-        (. TypeOrNamespaceNode nameNode; .)
+        (. NamespaceOrTypeNameNode nameNode; .)
         MemberName<out nameNode>
         ( 
           (. 
              var propNode = new PropertyDeclarationNode(typeNode.StartToken);
              SetCommentOwner(propNode);
-             propNode.TypeName = typeNode; 
+             propNode.Type = typeNode; 
              propNode.MemberName = nameNode;
              memNode = propNode;
           .)
@@ -805,7 +805,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
           (.
              var indNode = new IndexerDeclarationNode(typeNode.StartToken);
              SetCommentOwner(indNode);
-             indNode.TypeName = typeNode;
+             indNode.Type = typeNode;
              indNode.MemberName = nameNode;
              memNode = indNode;
           .)
@@ -817,7 +817,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
           (.
              var metNode = new MethodDeclarationNode(typeNode.StartToken);
              SetCommentOwner(metNode);
-             metNode.TypeName = typeNode;
+             metNode.Type = typeNode;
              metNode.MemberName = nameNode;
              memNode = metNode;
           .)
@@ -828,7 +828,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
         (. 
            var indNode = new IndexerDeclarationNode(typeNode.StartToken);
            SetCommentOwner(indNode);
-           indNode.TypeName = typeNode;
+           indNode.Type = typeNode;
            memNode = indNode;
         .)
         IndexerDeclaration<indNode>
@@ -860,11 +860,11 @@ ConstMemberDeclaration<out MemberDeclarationNode memNode>
      var constNode = new ConstDeclarationNode(t);
      SetCommentOwner(constNode);
      memNode = constNode;
-     TypeOrNamespaceNode typeNode;
+     TypeNode typeNode;
   .)
   Type<out typeNode>
   (. 
-     memNode.TypeName = typeNode; 
+     memNode.Type = typeNode; 
      ConstTagNode tagNode;
   .)
   SingleConstMember<out tagNode>
@@ -907,7 +907,7 @@ SingleConstMember<out ConstTagNode tagNode>
 EventDeclaration<out MemberDeclarationNode memNode>
   (. memNode = null; .)
 =
-  (. TypeOrNamespaceNode typeNode; .)
+  (. TypeNode typeNode; .)
   "event"
   (. var eventToken = t; .)
   Type<out typeNode>
@@ -917,7 +917,7 @@ EventDeclaration<out MemberDeclarationNode memNode>
        var fiNode = new FieldDeclarationNode(eventToken); 
        SetCommentOwner(fiNode);
        memNode = fiNode;
-       fiNode.TypeName = typeNode;
+       fiNode.Type = typeNode;
     .)
     FieldMemberDeclarators<fiNode> 
     ";"
@@ -927,10 +927,10 @@ EventDeclaration<out MemberDeclarationNode memNode>
        var evpNode = new EventPropertyDeclarationNode(t);
        SetCommentOwner(evpNode);
        memNode = evpNode;
-       evpNode.TypeName = typeNode;
-       TypeOrNamespaceNode memberName = null;
+       evpNode.Type = typeNode;
+       NamespaceOrTypeNameNode memberName = null;
     .)
-    TypeName<out memberName> 
+    MemberName<out memberName> 
     (. evpNode.MemberName = memberName; .)
     "{"
     (. evpNode.OpenBrace = t; .)
@@ -1074,10 +1074,10 @@ CastOperatorDeclaration<out MemberDeclarationNode memNode>
   "operator"                        
   (. 
      copNode.OperatorToken = t; 
-     TypeOrNamespaceNode typeNode; 
+     TypeNode typeNode; 
   .)
   Type<out typeNode>
-  (. copNode.TypeName = typeNode; .)
+  (. copNode.Type = typeNode; .)
   "("   
   [ FormalParameterList<copNode.FormalParameters> ]   
   ")"
@@ -1163,7 +1163,7 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
   AttributeDecorations<attrNodes>
   ModifierList<mod>
   ( 
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeNode typeNode; .)
     Type<out typeNode>
     (                          
       ident                   
@@ -1172,8 +1172,8 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
         (.
            var metNode = new MethodDeclarationNode(typeNode.StartToken);
            SetCommentOwner(metNode);
-           metNode.TypeName = typeNode;
-           metNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
+           metNode.Type = typeNode;
+           metNode.MemberName = NamespaceOrTypeNameNode.CreateSimpleName(identifier);
            memNode = metNode;
         .)
         MethodDeclaration<metNode>        
@@ -1181,8 +1181,8 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
         (. 
            var propNode = new PropertyDeclarationNode(typeNode.StartToken);
            SetCommentOwner(propNode);
-           propNode.TypeName = typeNode;
-           propNode.MemberName = TypeOrNamespaceNode.CreateTypeNode(identifier);
+           propNode.Type = typeNode;
+           propNode.MemberName = NamespaceOrTypeNameNode.CreateSimpleName(identifier);
            memNode = propNode;
         .)
         "{" 
@@ -1199,7 +1199,7 @@ InterfaceMemberDeclaration<InterfaceDeclarationNode typeDecl>
       (. 
          var indNode = new IndexerDeclarationNode(typeNode.StartToken);
          SetCommentOwner(indNode);
-         indNode.TypeName = typeNode;
+         indNode.Type = typeNode;
          indNode.ThisToken = t;
          memNode = indNode;
       .)
@@ -1239,9 +1239,9 @@ InterfaceEventDeclaration<out MemberDeclarationNode memNode>
      SetCommentOwner(ieNode);
      memNode = ieNode;
   .)
-  (. TypeOrNamespaceNode typeNode; .)
+  (. TypeNode typeNode; .)
   Type<out typeNode>
-  (. ieNode.TypeName = typeNode; .)
+  (. ieNode.Type = typeNode; .)
   ident 
   (. ieNode.IdentifierToken = t; .)
   ";"
@@ -1254,13 +1254,13 @@ InterfaceEventDeclaration<out MemberDeclarationNode memNode>
 LocalVariableDeclaration<out LocalVariableNode varNode> 
 =
   (. 
-     TypeOrNamespaceNode typeNode = null;
+     TypeNode typeNode = null;
      varNode = null;
   .)
   (
     IF (IsVar())
     ident
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+    (. typeNode = TypeNode.CreateTypeNode(t); .)
   |
     Type<out typeNode>
   )
@@ -1307,9 +1307,9 @@ LocalVariableDeclarator<out LocalVariableTagNode varDeclNode>
          varDeclNode.Initializer = stcInitNode;
          stcInitNode.StackAllocToken = t;
       .)
-      (. TypeOrNamespaceNode typeNode; .)
+      (. TypeNode typeNode; .)
       Type<out typeNode> 
-      (. stcInitNode.TypeName = typeNode; .)
+      (. stcInitNode.Type = typeNode; .)
       "[" 
       (. 
          stcInitNode.OpenSquareToken = t;
@@ -1409,7 +1409,7 @@ FormalParameterTag<out FormalParameterNode parNode>
     )
     (. start = t; .)
   ] 
-  (. TypeOrNamespaceNode typeNode; .)
+  (. TypeNode typeNode; .)
   Type<out typeNode>
   (. if (start == null) start = typeNode.StartToken; .)
   ident                              
@@ -1419,7 +1419,7 @@ FormalParameterTag<out FormalParameterNode parNode>
      parNode.AttributeDecorations = attrNodes;
      parNode.Modifier = modifier;
      parNode.IdentifierToken = t;
-     parNode.TypeName = typeNode;
+     parNode.Type = typeNode;
      Terminate(parNode);
   .)
 .
@@ -1694,9 +1694,9 @@ Attribute<out AttributeNode attrNode>
   (. 
      attrNode = new AttributeNode(la);
      SetCommentOwner(attrNode);
-     TypeOrNamespaceNode nsNode = null;
+     NamespaceOrTypeNameNode nsNode = null;
   .)
-  TypeName<out nsNode>      
+  NamespaceOrTypeName<out nsNode>      
   (. attrNode.TypeName = nsNode; .)
   [ AttributeArguments<attrNode> ]
   (. Terminate(attrNode); .)
@@ -1776,7 +1776,7 @@ ModifierList<ModifierNodeCollection mods>
 // ------------------------------------------------------------------------------------------------
 // Gets a reference to a type name with optional type parameters.
 // ------------------------------------------------------------------------------------------------
-Type<out TypeOrNamespaceNode typeNode>    
+Type<out TypeNode typeNode>    
 =                                                    
   (. typeNode = null; .)      
   ( 
@@ -1785,7 +1785,7 @@ Type<out TypeOrNamespaceNode typeNode>
     ClassType<out typeNode>                                               
   |  
     "void"                                           
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+    (. typeNode = TypeNode.CreateTypeNode(t); .)
   )
   [ 
     "?"                                              
@@ -1798,7 +1798,7 @@ Type<out TypeOrNamespaceNode typeNode>
 // ------------------------------------------------------------------------------------------------
 // Gets a reference for a non-array type.
 // ------------------------------------------------------------------------------------------------
-NonArrayType<out TypeOrNamespaceNode typeNode>    
+NonArrayType<out TypeNode typeNode>    
 =                                                    
   (. typeNode = null; .)      
   ( 
@@ -1822,13 +1822,13 @@ NonArrayType<out TypeOrNamespaceNode typeNode>
 // ------------------------------------------------------------------------------------------------
 // Gets a reference for a type that can be used in a relational expression
 // ------------------------------------------------------------------------------------------------
-TypeInRelExpr<out TypeOrNamespaceNode typeNode>    
+TypeInRelExpr<out TypeNode typeNode>    
 =                                                    
   (. typeNode = null; .)      
   ( PrimitiveType<out typeNode>
   | ClassType<out typeNode>                                               
   | "void"                                           
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+    (. typeNode = TypeNode.CreateTypeNode(t); .)
   )
   [ IF (IsNullableTypeMark())
     "?" 
@@ -1841,7 +1841,7 @@ TypeInRelExpr<out TypeOrNamespaceNode typeNode>
 // ------------------------------------------------------------------------------------------------
 // Sets the appropriate flags of a type reference if the declaration shows it is a pointer or array.
 // ------------------------------------------------------------------------------------------------
-PointerOrArray<TypeOrNamespaceNode typeNode>
+PointerOrArray<TypeNode typeNode>
 =
   { IF (IsPointerOrDims())
     ( 
@@ -1871,32 +1871,32 @@ PointerOrArray<TypeOrNamespaceNode typeNode>
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------------------
-PredefinedType<out TypeOrNamespaceNode typeNode> 
+PredefinedType<out TypeNode typeNode> 
   (. typeNode = null; .)
 =
     PrimitiveType<out typeNode> 
   | 
     ( "object" | "string" )                                    
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
+    (. typeNode = TypeNode.CreateTypeNode(t); .)                                 
 .
 */
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as primitive types.
 // ------------------------------------------------------------------------------------------------
-PrimitiveType<out TypeOrNamespaceNode typeNode> 
+PrimitiveType<out TypeNode typeNode> 
   (. typeNode = null; .)
 =
     IntegralType<out typeNode> 
   | 
     ( "float" | "double" | "decimal" | "bool" )
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+    (. typeNode = TypeNode.CreateTypeNode(t); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as integral types.
 // ------------------------------------------------------------------------------------------------
-IntegralType<out TypeOrNamespaceNode typeNode> 
+IntegralType<out TypeNode typeNode> 
 = 
   (
     "sbyte"       
@@ -1909,35 +1909,43 @@ IntegralType<out TypeOrNamespaceNode typeNode>
   | "ulong"     
   | "char"     
   )               
-  (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+  (. typeNode = TypeNode.CreateTypeNode(t); .)
 .
 
 // ------------------------------------------------------------------------------------------------
 // Types that are taken into account as class types.
 // ------------------------------------------------------------------------------------------------
-ClassType<out TypeOrNamespaceNode typeNode>   
+ClassType<out TypeNode typeNode>   
   (. typeNode = null; .)
 =                 
-    TypeName<out typeNode> 
+    (.
+      NamespaceOrTypeNameNode namespaceOrTypeName;
+    .)
+    NamespaceOrTypeName<out namespaceOrTypeName> 
+    (.
+      typeNode = new TypeNode(namespaceOrTypeName.StartToken);
+      typeNode.TypeName = namespaceOrTypeName;
+      typeNode.Terminate(t);
+    .)
   |               
     ( "object" | "string" )                                    
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)                                 
+    (. typeNode = TypeNode.CreateTypeNode(t); .)                                 
 .
 
 // ------------------------------------------------------------------------------------------------
 // Declaration of a compound member name
 // ------------------------------------------------------------------------------------------------
-MemberName<out TypeOrNamespaceNode resultNode>                                              
+MemberName<out NamespaceOrTypeNameNode resultNode>                                              
   (.
      resultNode = null;
      Token separator = null;
      Token identifier = null;
-     TypeOrNamespaceNodeCollection argList = null;
+     TypeNodeCollection argList = null;
   .)
 =                                         
   ident
   (. 
-     resultNode = new TypeOrNamespaceNode(t);
+     resultNode = new NamespaceOrTypeNameNode(t);
      SetCommentOwner(resultNode);
      identifier = t; 
   .)
@@ -1978,17 +1986,17 @@ MemberName<out TypeOrNamespaceNode resultNode>
 // ------------------------------------------------------------------------------------------------
 // Declaration of a compound type name
 // ------------------------------------------------------------------------------------------------
-TypeName<out TypeOrNamespaceNode resultNode>                             
+NamespaceOrTypeName<out NamespaceOrTypeNameNode resultNode>                             
 =               
   (.
      resultNode = null;
      Token separator = null;
      Token identifier = null;
-     TypeOrNamespaceNodeCollection argList = null;
+     TypeNodeCollection argList = null;
   .)
   ident
   (. 
-     resultNode = new TypeOrNamespaceNode(t);
+     resultNode = new NamespaceOrTypeNameNode(t);
      SetCommentOwner(resultNode);
      identifier = t; 
   .)
@@ -2010,8 +2018,8 @@ TypeName<out TypeOrNamespaceNode resultNode>
   {
     "."
     (.
-       separator = t;
-       argList = null;
+      separator = t;
+      argList = null;
     .)
     ident 
     (. identifier = t; .)
@@ -2168,10 +2176,10 @@ ConstStatement<out StatementNode stmtNode>
      var csNode = new ConstStatementNode(t);
      SetCommentOwner(csNode);
      stmtNode = csNode;
-     TypeOrNamespaceNode typeNode;
+     TypeNode typeNode;
   .)
   Type<out typeNode> 
-  (. csNode.TypeName = typeNode; .)
+  (. csNode.Type = typeNode; .)
   ident
   (. 
      var cmTag = new ConstTagNode(t); 
@@ -2421,16 +2429,16 @@ ForEachStatement<out StatementNode stmtNode>
   "("
   (. 
      feNode.OpenParenthesis = t; 
-     TypeOrNamespaceNode typeNode = null; 
+     TypeNode typeNode = null; 
   .)
   ( 
     IF (IsVar())
     ident
-    (. typeNode = TypeOrNamespaceNode.CreateTypeNode(t); .)
+    (. typeNode = TypeNode.CreateTypeNode(t); .)
   |        
     Type<out typeNode>
   )
-  (. feNode.TypeName = typeNode; .)
+  (. feNode.Type = typeNode; .)
   ident
   (. feNode.IdentifierToken = t; .)
   "in"
@@ -2692,10 +2700,10 @@ FixedStatement<out StatementNode stmtNode>
   "("
   (.
      fixNode.OpenParenthesis = t; 
-     TypeOrNamespaceNode typeNode; 
+     TypeNode typeNode; 
   .)
   Type<out typeNode>
-  (. fixNode.TypeName = typeNode; .)
+  (. fixNode.Type = typeNode; .)
   ident
   (. 
      var fiNode = new FixedInitializerNode(t); 
@@ -2922,10 +2930,10 @@ CatchClauses<TryStatementNode tryNode>
     "("
     (. 
        ccNode.OpenParenthesis = t; 
-       TypeOrNamespaceNode typeNode;
+       TypeNode typeNode;
     .)
     ClassType<out typeNode>
-    (. ccNode.TypeName = typeNode; .)
+    (. ccNode.Type = typeNode; .)
     [ 
       ident
       (. ccNode.IdentifierToken = t; .)
@@ -2981,7 +2989,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
       (.
          parNode = new FormalParameterNode(t);
          SetCommentOwner(parNode);
-         parNode.TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
+         parNode.Type = TypeNode.CreateEmptyTypeNode(null);
          parNode.IdentifierToken = t;
          Terminate(parNode);
          lambdaNode.FormalParameters.Add(parNode);
@@ -2993,7 +3001,7 @@ LambdaFunctionSignature<LambdaExpressionNode lambdaNode>
         (.
            parNode = new FormalParameterNode(t);
            SetCommentOwner(parNode);
-           parNode.TypeName = TypeOrNamespaceNode.CreateEmptyTypeNode(null);
+           parNode.Type = TypeNode.CreateEmptyTypeNode(null);
            parNode.IdentifierToken = t;
            Terminate(parNode);
            lambdaNode.FormalParameters.Add(separator, parNode);
@@ -3021,9 +3029,9 @@ ExplicitLambdaParameter<out FormalParameterNode fpNode>
   | "out"
     (. fpNode.Modifier = FormalParameterModifier.Out; .)
   ]
-  (. TypeOrNamespaceNode typeNode; .)
+  (. TypeNode typeNode; .)
   Type<out typeNode>
-  (. fpNode.TypeName = typeNode; .)
+  (. fpNode.Type = typeNode; .)
   ident
   (. 
      fpNode.IdentifierToken = t; 
@@ -3062,9 +3070,9 @@ FromClause<out FromClauseNode fromNode>
   .)
   [                            
     IF (IsType(ref typeToken) && typeToken.val != "in")
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeNode typeNode; .)
     Type<out typeNode>
-    (. fromNode.TypeName = typeNode; .)
+    (. fromNode.Type = typeNode; .)
   ]                             
   ident
   (. fromNode.IdentifierToken = t; .)
@@ -3244,9 +3252,9 @@ JoinClause<out JoinClauseNode joinNode>
 
   [                    
     IF (IsType(ref typeToken) && typeToken.val != "in")
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeNode typeNode; .)
     Type<out typeNode>
-    (. joinNode.TypeName = typeNode; .)
+    (. joinNode.Type = typeNode; .)
   ]
 
   ident
@@ -3279,7 +3287,7 @@ JoinClause<out JoinClauseNode joinNode>
       // create a JoinIntoClauseNode based on the JoinClauseNode that was built so far
       var joinIntoNode = new JoinIntoClauseNode(joinNode.StartToken);
       joinIntoNode.Comment = joinNode.Comment;
-      joinIntoNode.TypeName = joinNode.TypeName;
+      joinIntoNode.Type = joinNode.Type;
       joinIntoNode.IdentifierToken = joinNode.IdentifierToken;
       joinIntoNode.InToken = joinNode.InToken;
       joinIntoNode.InExpression = joinNode.InExpression;
@@ -3706,7 +3714,7 @@ RelExpr<out BinaryExpressionNodeBase exprNode>
       )   
       (. 
          SetCommentOwner(typeTestingNode);
-         TypeOrNamespaceNode typeNode; 
+         TypeNode typeNode; 
       .)
       TypeInRelExpr<out typeNode>
       (. 
@@ -3850,12 +3858,12 @@ Unary<out ExpressionNode exprNode>
       (. unaryOp = new UnaryOperatorExpressionNode(t, UnaryOperator.AddressOf); .)
     | "("   
       (. 
-         TypeOrNamespaceNode typeNode; 
+         TypeNode typeNode; 
          var tcNode = new CastExpressionNode(t);
          unaryOp = tcNode;
       .)
       Type<out typeNode> 
-      (. tcNode.TypeName = typeNode; .)
+      (. tcNode.Type = typeNode; .)
       ")"
       (. Terminate(tcNode); .)
     )
@@ -4046,8 +4054,8 @@ PredefinedTypeMemberAccess<out ExpressionNode exprNode>
     | "ushort"
   )               
   (. 
-     var typeNode = TypeOrNamespaceNode.CreateTypeNode(t);
-     var predefMemAccessNode = new PredefinedTypeMemberAccessNode(t, typeNode);
+     var typeName = NamespaceOrTypeNameNode.CreateSimpleName(t);
+     var predefMemAccessNode = new PredefinedTypeMemberAccessNode(t, typeName);
      SetCommentOwner(predefMemAccessNode);
   .)
   "." 
@@ -4059,7 +4067,7 @@ PredefinedTypeMemberAccess<out ExpressionNode exprNode>
   ident           
   (. 
      nameNode.IdentifierToken = t;
-     TypeOrNamespaceNodeCollection argList;
+     TypeNodeCollection argList;
   .)
   [
     IF (IsGeneric()) TypeArgumentList<out argList>
@@ -4092,7 +4100,7 @@ QualifiedAliasMemberAccess<out ExpressionNode exprNode>
   .)
   [ 
     (. 
-      TypeOrNamespaceNodeCollection argList; 
+      TypeNodeCollection argList; 
     .)
     TypeArgumentList<out argList>
     (. 
@@ -4127,7 +4135,7 @@ SimpleName<out SimpleNameNode sn>
   (. 
     sn = new SimpleNameNode(t); 
     SetCommentOwner(sn);
-    TypeOrNamespaceNodeCollection argList; 
+    TypeNodeCollection argList; 
   .)
   [ 
     IF (IsGeneric()) TypeArgumentList<out argList>
@@ -4189,10 +4197,10 @@ TypeOfOperator<out ExpressionNode exprNode>
   "("                        
   (. 
      topNode.OpenParenthesis = t;
-     TypeOrNamespaceNode typeNode;
+     TypeNode typeNode;
   .)
   Type<out typeNode>
-  (. topNode.TypeName = typeNode; .)
+  (. topNode.Type = typeNode; .)
   ")"
   (. 
      topNode.CloseParenthesis = t;
@@ -4214,10 +4222,10 @@ SizeOfOperator<out ExpressionNode exprNode>
   "("                        
   (. 
      sopNode.OpenParenthesis = t;
-     TypeOrNamespaceNode typeNode;
+     TypeNode typeNode;
   .)
   Type<out typeNode>  
-  (. sopNode.TypeName = typeNode; .)
+  (. sopNode.Type = typeNode; .)
   ")"                        
   (. 
      sopNode.CloseParenthesis = t;
@@ -4289,10 +4297,10 @@ DefaultOperator<out ExpressionNode exprNode>
   "("                        
   (. 
      defNode.OpenParenthesis = t;
-     TypeOrNamespaceNode typeNode;
+     TypeNode typeNode;
   .)
   Type<out typeNode>  
-  (. defNode.TypeName = typeNode; .)
+  (. defNode.Type = typeNode; .)
   ")"                        
   (. 
      defNode.CloseParenthesis = t;
@@ -4327,7 +4335,7 @@ NewOperator<out ExpressionNode exprNode>
     //   new non-array-type [ expression-list ] rank-specifiers-opt array-initializer-opt
     //   new array-type array-initializer
 
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeNode typeNode; .)
     NonArrayType<out typeNode>
     NewOperatorWithType<newToken, typeNode, out exprNode>
   |
@@ -4417,7 +4425,7 @@ MemberDeclarator<out MemberDeclaratorNode mdNode>
 // ------------------------------------------------------------------------------------------------
 // Declaration of a "new" operator with explicit type.
 // ------------------------------------------------------------------------------------------------
-NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out ExpressionNode exprNode>
+NewOperatorWithType<Token newToken, TypeNode typeNode, out ExpressionNode exprNode>
   (. exprNode = null; .)
 =
   (
@@ -4425,7 +4433,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     (. 
        var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
        SetCommentOwner(objectCreationNode);
-       objectCreationNode.TypeName = typeNode;
+       objectCreationNode.Type = typeNode;
        exprNode = objectCreationNode;
     .)
     
@@ -4448,7 +4456,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     (. 
        var objectCreationNode = new ObjectCreationExpressionNode(newToken); 
        SetCommentOwner(objectCreationNode);
-       objectCreationNode.TypeName = typeNode;
+       objectCreationNode.Type = typeNode;
        exprNode = objectCreationNode;
        ObjectOrCollectionInitializerNode initNode; 
      .)
@@ -4463,7 +4471,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     (. 
        var arrayCreationNode = new ArrayCreationExpressionNode(t); 
        SetCommentOwner(arrayCreationNode);
-       arrayCreationNode.TypeName = typeNode;
+       arrayCreationNode.Type = typeNode;
        exprNode = arrayCreationNode;
     .)
     RankSpecifiers<arrayCreationNode>
@@ -4478,7 +4486,7 @@ NewOperatorWithType<Token newToken, TypeOrNamespaceNode typeNode, out Expression
     (. 
        var arrayCreationNode = new ArrayCreationExpressionNode(newToken); 
        SetCommentOwner(arrayCreationNode);
-       arrayCreationNode.TypeName = typeNode;
+       arrayCreationNode.Type = typeNode;
        exprNode = arrayCreationNode;
        ExpressionNode initExprNode; 
     .)
@@ -4782,7 +4790,7 @@ AnonymousMethodParameter<out FormalParameterNode parNode>
     )
     (. start = t; .)
   ]                             
-  (. TypeOrNamespaceNode typeNode; .)
+  (. TypeNode typeNode; .)
   Type<out typeNode>      
   (. if (start == null) start = typeNode.StartToken; .)
   ident                         
@@ -4791,7 +4799,7 @@ AnonymousMethodParameter<out FormalParameterNode parNode>
      SetCommentOwner(parNode);
      parNode.Modifier = modifier;
      parNode.IdentifierToken = t;
-     parNode.TypeName = typeNode;
+     parNode.Type = typeNode;
      Terminate(parNode);
   .)  
 .
@@ -4973,7 +4981,7 @@ TypeParameter<out AttributeDecorationNodeCollection attrNodes, out Token identif
 // ------------------------------------------------------------------------------------------------
 // Declaration of a type argument list.
 // ------------------------------------------------------------------------------------------------
-TypeArgumentList<out TypeOrNamespaceNodeCollection argList>  
+TypeArgumentList<out TypeNodeCollection argList>  
 = 
   (. argList = null; .) 
   // --- We are a bit sloppy here and allow the type arguments to be "empty" everywhere. This 
@@ -4981,17 +4989,17 @@ TypeArgumentList<out TypeOrNamespaceNodeCollection argList>
   // --- see ECMA-334: 14.5.11 and 25.5.
   "<"
   (. 
-     argList = new TypeOrNamespaceNodeCollection(); 
+     argList = new TypeNodeCollection(); 
      SetCommentOwner(argList);
      Start(argList);
   
-     TypeOrNamespaceNode typeNode = null;
+     TypeNode typeNode = null;
   .)
   [ 
     Type<out typeNode>
   ]                              
   (. 
-    if (typeNode==null) { typeNode = TypeOrNamespaceNode.CreateEmptyTypeNode(null); }
+    if (typeNode==null) { typeNode = TypeNode.CreateEmptyTypeNode(null); }
     argList.Add(typeNode); 
   .)          
   { 
@@ -5003,7 +5011,7 @@ TypeArgumentList<out TypeOrNamespaceNodeCollection argList>
       Type<out typeNode>           
     ]
   (. 
-    if (typeNode==null) { typeNode = TypeOrNamespaceNode.CreateEmptyTypeNode(t); }
+    if (typeNode==null) { typeNode = TypeNode.CreateEmptyTypeNode(t); }
     argList.Add(typeNode); 
   .)          
   } 
@@ -5066,7 +5074,7 @@ TypeParameterConstraintTag<out TypeParameterConstraintTagNode tag>
     ")" 
     (. tag = new TypeParameterConstraintTagNode(start, openPar, t); .)
   |
-    (. TypeOrNamespaceNode typeNode; .)
+    (. TypeNode typeNode; .)
     ClassType<out typeNode>     
     (. tag = new TypeParameterConstraintTagNode(typeNode); .)
   )

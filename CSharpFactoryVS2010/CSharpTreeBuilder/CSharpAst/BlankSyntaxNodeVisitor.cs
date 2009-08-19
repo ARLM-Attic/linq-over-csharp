@@ -1,7 +1,7 @@
 ﻿//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 07. 09. 17:58:34
+// Generated on: 2009. 08. 19. 14:41:17
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -123,6 +123,7 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(ModifierNode node) { }
     public virtual void Visit(MultiCommentNode node) { }
     public virtual void Visit(NamespaceDeclarationNode node) { }
+    public virtual void Visit(NamespaceOrTypeNameNode node) { }
     public virtual void Visit(NamespaceScopeNode node) { }
     public virtual void Visit(NameTagNode node) { }
     public virtual void Visit(NullLiteralNode node) { }
@@ -171,9 +172,9 @@ namespace CSharpTreeBuilder.Ast
     public virtual void Visit(TrueLiteralNode node) { }
     public virtual void Visit(TryStatementNode node) { }
     public virtual void Visit(TypeDeclarationNode node) { }
+    public virtual void Visit(TypeNode node) { }
     public virtual void Visit(TypeofExpressionNode node) { }
     public virtual void Visit(TypeOrMemberDeclarationNode node) { }
-    public virtual void Visit(TypeOrNamespaceNode node) { }
     public virtual void Visit(TypeParameterConstraintNode node) { }
     public virtual void Visit(TypeParameterConstraintTagNode node) { }
     public virtual void Visit(TypeParameterNode node) { }

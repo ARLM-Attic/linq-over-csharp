@@ -21,19 +21,19 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"UsingsAndNamespaces\UsingsAndNamespacesOK.cs");
       project.AddAssemblyReference("System.Data");
       project.AddAssemblyReference("System.Xml");
-      Assert.IsTrue(InvokeParser(project,true,false));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(sn.UsingNodes.Count, 6);
       Assert.AreEqual(sn.UsingWithAliasNodes.Count(), 2);
 
-      var typeName = sn.UsingNodes[0].TypeName;
+      var typeName = sn.UsingNodes[0].NamespaceOrTypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 1);
       var tag = typeName.TypeTags[0];
       Assert.AreEqual(tag.Identifier, "System");
 
-      typeName = sn.UsingNodes[1].TypeName;
+      typeName = sn.UsingNodes[1].NamespaceOrTypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 3);
       tag = typeName.TypeTags[0];
@@ -43,7 +43,7 @@ namespace CSharpTreeBuilderTest
       tag = typeName.TypeTags[2];
       Assert.AreEqual(tag.Identifier, "Generic");
 
-      typeName = sn.UsingNodes[2].TypeName;
+      typeName = sn.UsingNodes[2].NamespaceOrTypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 2);
       tag = typeName.TypeTags[0];
@@ -51,7 +51,7 @@ namespace CSharpTreeBuilderTest
       tag = typeName.TypeTags[1];
       Assert.AreEqual(tag.Identifier, "Text");
 
-      typeName = sn.UsingNodes[3].TypeName;
+      typeName = sn.UsingNodes[3].NamespaceOrTypeName;
       Assert.IsTrue(typeName.HasQualifier);
       Assert.AreEqual("global", typeName.Qualifier);
       Assert.AreEqual(2, typeName.TypeTags.Count);
@@ -59,10 +59,10 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual("System", tag.Identifier);
       tag = typeName.TypeTags[1];
       Assert.AreEqual("IO", tag.Identifier);
-      
+
       var aliasNodes = new List<UsingAliasNode>(sn.UsingWithAliasNodes);
       Assert.AreEqual(aliasNodes[0].Alias, "AliasName");
-      typeName = aliasNodes[0].TypeName;
+      typeName = aliasNodes[0].NamespaceOrTypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 3);
       tag = typeName.TypeTags[0];
@@ -73,7 +73,7 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(tag.Identifier, "Encoding");
 
       Assert.AreEqual(aliasNodes[1].Alias, "SecondAlias");
-      typeName = aliasNodes[1].TypeName;
+      typeName = aliasNodes[1].NamespaceOrTypeName;
       Assert.IsFalse(typeName.HasQualifier);
       Assert.AreEqual(typeName.TypeTags.Count, 2);
       tag = typeName.TypeTags[0];
@@ -102,8 +102,8 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(usingNode.StartColumn, 1);
       Assert.AreEqual(usingNode.EndLine, 1);
       Assert.AreEqual(usingNode.EndColumn, 13);
-      Assert.AreEqual(usingNode.TypeName.TypeTags.Count, 1);
-      var typeTag = usingNode.TypeName.TypeTags[0];
+      Assert.AreEqual(usingNode.NamespaceOrTypeName.TypeTags.Count, 1);
+      var typeTag = usingNode.NamespaceOrTypeName.TypeTags[0];
       Assert.AreEqual(typeTag.StartToken.Value, "System");
       Assert.AreEqual(typeTag.StartLine, 1);
       Assert.AreEqual(typeTag.StartColumn, 7);
@@ -120,21 +120,21 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(usingNode.StartColumn, 1);
       Assert.AreEqual(usingNode.EndLine, 2);
       Assert.AreEqual(usingNode.EndColumn, 33);
-      Assert.AreEqual(usingNode.TypeName.TypeTags.Count, 3);
-      typeTag = usingNode.TypeName.TypeTags[0];
+      Assert.AreEqual(usingNode.NamespaceOrTypeName.TypeTags.Count, 3);
+      typeTag = usingNode.NamespaceOrTypeName.TypeTags[0];
       Assert.AreEqual(typeTag.StartToken.Value, "System");
       Assert.AreEqual(typeTag.StartLine, 2);
       Assert.AreEqual(typeTag.StartColumn, 7);
       Assert.AreEqual(typeTag.EndLine, 2);
       Assert.AreEqual(typeTag.EndColumn, 12);
-      typeTag = usingNode.TypeName.TypeTags[1];
+      typeTag = usingNode.NamespaceOrTypeName.TypeTags[1];
       Assert.AreEqual(typeTag.StartToken.Value, "Collections");
       Assert.AreEqual(typeTag.SeparatorToken.Value, ".");
       Assert.AreEqual(typeTag.StartLine, 2);
       Assert.AreEqual(typeTag.StartColumn, 14);
       Assert.AreEqual(typeTag.EndLine, 2);
       Assert.AreEqual(typeTag.EndColumn, 24);
-      typeTag = usingNode.TypeName.TypeTags[2];
+      typeTag = usingNode.NamespaceOrTypeName.TypeTags[2];
       Assert.AreEqual(typeTag.StartToken.Value, "Generic");
       Assert.AreEqual(typeTag.SeparatorToken.Value, ".");
       Assert.AreEqual(typeTag.StartLine, 2);
@@ -152,21 +152,21 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(usingNode.StartColumn, 1);
       Assert.AreEqual(usingNode.EndLine, 5);
       Assert.AreEqual(usingNode.EndColumn, 39);
-      Assert.AreEqual(usingNode.TypeName.TypeTags.Count, 3);
-      typeTag = usingNode.TypeName.TypeTags[0];
+      Assert.AreEqual(usingNode.NamespaceOrTypeName.TypeTags.Count, 3);
+      typeTag = usingNode.NamespaceOrTypeName.TypeTags[0];
       Assert.AreEqual(typeTag.StartToken.Value, "System");
       Assert.AreEqual(typeTag.StartLine, 5);
       Assert.AreEqual(typeTag.StartColumn, 19);
       Assert.AreEqual(typeTag.EndLine, 5);
       Assert.AreEqual(typeTag.EndColumn, 24);
-      typeTag = usingNode.TypeName.TypeTags[1];
+      typeTag = usingNode.NamespaceOrTypeName.TypeTags[1];
       Assert.AreEqual(typeTag.StartToken.Value, "Text");
       Assert.AreEqual(typeTag.SeparatorToken.Value, ".");
       Assert.AreEqual(typeTag.StartLine, 5);
       Assert.AreEqual(typeTag.StartColumn, 26);
       Assert.AreEqual(typeTag.EndLine, 5);
       Assert.AreEqual(typeTag.EndColumn, 29);
-      typeTag = usingNode.TypeName.TypeTags[2];
+      typeTag = usingNode.NamespaceOrTypeName.TypeTags[2];
       Assert.AreEqual(typeTag.StartToken.Value, "Encoding");
       Assert.AreEqual(typeTag.SeparatorToken.Value, ".");
       Assert.AreEqual(typeTag.StartLine, 5);
@@ -302,7 +302,7 @@ namespace CSharpTreeBuilderTest
       foreach (var usingNode in sn.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, sn);
-        Assert.AreEqual(usingNode.TypeName.ParentNode, sn);
+        Assert.AreEqual(usingNode.NamespaceOrTypeName.ParentNode, sn);
       }
 
       var nsDecl = sn.NamespaceDeclarations[0];
@@ -310,7 +310,7 @@ namespace CSharpTreeBuilderTest
       foreach (var usingNode in nsDecl.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, nsDecl);
-        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.NamespaceOrTypeName.ParentNode, nsDecl);
       }
       
       nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0];
@@ -318,7 +318,7 @@ namespace CSharpTreeBuilderTest
       foreach (var usingNode in nsDecl.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, nsDecl);
-        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.NamespaceOrTypeName.ParentNode, nsDecl);
       }
 
       nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[0].NamespaceDeclarations[0];
@@ -326,7 +326,7 @@ namespace CSharpTreeBuilderTest
       foreach (var usingNode in nsDecl.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, nsDecl);
-        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.NamespaceOrTypeName.ParentNode, nsDecl);
       }
 
       nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[1];
@@ -334,7 +334,7 @@ namespace CSharpTreeBuilderTest
       foreach (var usingNode in nsDecl.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, nsDecl);
-        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.NamespaceOrTypeName.ParentNode, nsDecl);
       }
 
       nsDecl = sn.NamespaceDeclarations[0].NamespaceDeclarations[2].NamespaceDeclarations[0];
@@ -342,7 +342,7 @@ namespace CSharpTreeBuilderTest
       foreach (var usingNode in nsDecl.UsingNodes)
       {
         Assert.AreEqual(usingNode.ParentNode, nsDecl);
-        Assert.AreEqual(usingNode.TypeName.ParentNode, nsDecl);
+        Assert.AreEqual(usingNode.NamespaceOrTypeName.ParentNode, nsDecl);
       }
     }
 

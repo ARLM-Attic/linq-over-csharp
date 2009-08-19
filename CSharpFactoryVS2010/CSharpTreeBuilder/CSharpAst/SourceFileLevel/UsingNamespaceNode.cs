@@ -12,14 +12,14 @@ namespace CSharpTreeBuilder.Ast
   /// <remarks>
   /// 	<para>Syntax:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
-  /// 		<para>"<strong>using</strong>" <em>TypeOrNamespaceNode</em>
+  /// 		<para>"<strong>using</strong>" <em>NamespaceOrTypeName</em>
   ///         "<strong>;</strong>"</para>
   /// 	</blockquote>
   /// 	<para>Representation:</para>
   /// 	<blockquote style="MARGIN-RIGHT: 0px" dir="ltr">
   /// 		<para>
   ///             "<strong>using</strong>": <see cref="ISyntaxNode.StartToken"/><br/>
-  /// 			<em>TypeOrNamespaceNode</em>: <see cref="TypeName"/><br/>
+  /// 			<em>NamespaceOrTypeName</em>: <see cref="NamespaceOrTypeNameNode"/><br/>
   ///             "<strong>;</strong>": <see cref="ISyntaxNode.TerminatingToken"/>
   /// 		</para>
   /// 	</blockquote>
@@ -28,7 +28,7 @@ namespace CSharpTreeBuilder.Ast
   public class UsingNamespaceNode : SyntaxNode<NamespaceScopeNode>
   {
     // --- Backing fields
-    private TypeOrNamespaceNode _TypeName;
+    private NamespaceOrTypeNameNode _NamespaceOrTypeName;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -36,23 +36,19 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <param name="parent">The parent node.</param>
     /// <param name="start">Token providing information about the element.</param>
-    /// <param name="namespaceNode">The namespace node.</param>
+    /// <param name="namespaceOrTypeNode">The namespace-or-type-name node.</param>
     /// <param name="terminating">The terminating token.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingNamespaceNode(NamespaceScopeNode parent, Token start, TypeOrNamespaceNode namespaceNode, 
+    public UsingNamespaceNode(NamespaceScopeNode parent, Token start, NamespaceOrTypeNameNode namespaceOrTypeNode, 
       Token terminating)
       : base(start)
     {
       ParentNode = parent;
 
-      if (namespaceNode==null)
+      if (namespaceOrTypeNode!=null)
       {
-        TypeName = new TypeOrNamespaceNode();
-      }
-      else
-      {
-        TypeName = namespaceNode;
-        TypeName.ParentNode = parent;
+        NamespaceOrTypeName = namespaceOrTypeNode;
+        NamespaceOrTypeName.ParentNode = parent;
       }
 
       Terminate(terminating);
@@ -71,17 +67,23 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the namespace belonging to this using directive.
+    /// Gets the namespace-or-type-name belonging to this using directive.
     /// </summary>
-    /// <value>The namespace.</value>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNode TypeName
+    public NamespaceOrTypeNameNode NamespaceOrTypeName
     {
-      get { return _TypeName; }
+      get
+      {
+        return _NamespaceOrTypeName;
+      }
+
       private set
       {
-        _TypeName = value;
-        if (_TypeName != null) _TypeName.ParentNode = this;
+        _NamespaceOrTypeName = value;
+        if (_NamespaceOrTypeName != null) 
+        {
+          _NamespaceOrTypeName.ParentNode = this;
+        }
       }
     }
 
@@ -98,7 +100,7 @@ namespace CSharpTreeBuilder.Ast
       return new OutputSegment(
         StartToken,
         MandatoryWhiteSpaceSegment.Default,
-        TypeName,
+        NamespaceOrTypeName,
         TerminatingToken,
         ForceNewLineSegment.Default
         );
@@ -116,7 +118,10 @@ namespace CSharpTreeBuilder.Ast
     {
       visitor.Visit(this);
 
-      if (TypeName != null) { TypeName.AcceptVisitor(visitor); }
+      if (NamespaceOrTypeName != null)
+      {
+        NamespaceOrTypeName.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

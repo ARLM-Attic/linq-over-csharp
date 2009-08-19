@@ -182,7 +182,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
-        var usingAliasEntity = new UsingAliasEntity(lexicalScope, aliasName, node.TypeName);
+        var usingAliasEntity = new UsingAliasEntity(lexicalScope, aliasName, node.NamespaceOrTypeName);
         parentNamespaceEntity.AddUsingAlias(usingAliasEntity);
         usingEntity = usingAliasEntity;
       }
@@ -190,7 +190,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         // -- using namespace branch
 
-        var namespaceName = node.TypeName.TypeTags.ToString();
+        var namespaceName = node.NamespaceOrTypeName.TypeTags.ToString();
 
         // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
         if (parentNamespaceEntity.IsUsingNamespaceNameAlreadySpecified(namespaceName))
@@ -201,7 +201,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
-        var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.TypeName);
+        var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
         parentNamespaceEntity.AddUsingNamespace(usingNamespaceEntity);
         usingEntity = usingNamespaceEntity;
       }
@@ -442,7 +442,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // Create a semantic entity, add to its parent, and add to the graph.
         var fieldEntity = new FieldEntity(fieldTag.Identifier, true,
-                                          new TypeOrNamespaceNodeBasedTypeEntityReference(node.TypeName),
+                                          new TypeOrNamespaceNodeBasedTypeEntityReference(node.Type),
                                           node.IsStatic);
         parentTypeEntity.AddMember(fieldEntity);
 
