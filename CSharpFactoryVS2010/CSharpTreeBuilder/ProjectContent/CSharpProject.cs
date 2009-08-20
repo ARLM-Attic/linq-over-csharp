@@ -210,8 +210,8 @@ namespace CSharpTreeBuilder.ProjectContent
       SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this, SemanticGraph));
 
       // Resolve type references in 2 pass (1. type declarations, 2. type bodies)
-      SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(this, SemanticGraph));
-      SemanticGraph.AcceptVisitor(new TypeBodyResolverSemanticGraphVisitor(this, SemanticGraph));
+      SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(this, SemanticGraph));
+      SemanticGraph.AcceptVisitor(new TypeResolverPass2SemanticGraphVisitor(this, SemanticGraph));
 
       // TODO: continue
     }

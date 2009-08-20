@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.30, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using System.Text;
 namespace CSharpTreeBuilder.Ast
 {
@@ -26,6 +27,30 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class TypeTagNodeCollection : SyntaxNodeCollection<TypeTagNode, NamespaceOrTypeNameNode>
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a copy of the type tag collection, but without the last type tag.
+    /// </summary>
+    /// <returns>A new TypeTagNodeCollection.</returns>
+    /// <remarks>Throws an exception for a collection with less than 2 items.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TypeTagNodeCollection GetCopyWithoutLastTag()
+    {
+      if (Count < 2)
+      {
+        throw new InvalidOperationException(string.Format("This collection has only '{0}' items.", Count));
+      }
+
+      var newTypeTagNodeCollection = new TypeTagNodeCollection();
+
+      for (int i = 0; i < Count - 1; i++)
+      {
+        newTypeTagNodeCollection.Add(this[i]);
+      }
+
+      return newTypeTagNodeCollection;
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Returns the string representation of the object.

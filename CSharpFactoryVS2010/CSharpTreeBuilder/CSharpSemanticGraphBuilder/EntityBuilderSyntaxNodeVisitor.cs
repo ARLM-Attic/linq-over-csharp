@@ -326,7 +326,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         typeEntity = new TSemanticEntityType() { Name = node.Name };
         foreach (var baseType in node.BaseTypes)
         {
-          typeEntity.AddBaseTypeReference(new TypeOrNamespaceNodeBasedTypeEntityReference(baseType));
+          typeEntity.AddBaseTypeReference(new TypeNodeBasedTypeEntityReference(baseType));
         }
         if (typeEntity is GenericCapableTypeEntity)
         {
@@ -442,7 +442,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // Create a semantic entity, add to its parent, and add to the graph.
         var fieldEntity = new FieldEntity(fieldTag.Identifier, true,
-                                          new TypeOrNamespaceNodeBasedTypeEntityReference(node.Type),
+                                          new TypeNodeBasedTypeEntityReference(node.Type),
                                           node.IsStatic);
         parentTypeEntity.AddMember(fieldEntity);
 

@@ -30,7 +30,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\ObjectCreationExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -95,7 +95,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\CollectionInitializer.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -140,7 +140,8 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\CollectionInitializer_Error.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
+      project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS0747");
     }
     
@@ -157,7 +158,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\DelegateCreationExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -183,7 +184,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 
@@ -228,7 +229,8 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\AnonymousObjectCreationExpression_Error.cs");
-      InvokeParser(project).ShouldBeFalse();
+      InvokeParser(project, true, false).ShouldBeFalse();
+      project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS0746");
     }
 
@@ -248,7 +250,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ObjectOrArrayCreationExpressions\ArrayCreationExpression.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
 
       var method = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as MethodDeclarationNode;
 

@@ -18,7 +18,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project,true,false));
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(source.TypeDeclarations.Count, 1);
       var typeDecl = source.TypeDeclarations[0] as EnumDeclarationNode;
@@ -45,7 +45,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       var enumDecl = source.TypeDeclarations[0] as EnumDeclarationNode;
       Assert.IsNotNull(enumDecl);
@@ -72,13 +72,13 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var treeWriter = new SyntaxTreeTextWriter(project.SyntaxTree, project.ProjectProvider) 
       { WorkingFolder = TempOutputFolder };
       treeWriter.WriteTree();
       project = new CSharpProject(TempOutputFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration3.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
     [TestMethod]
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclaration2.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var source = project.SyntaxTree.CompilationUnitNodes[0];
       Assert.AreEqual(source.TypeDeclarations.Count, 2);
       var typeDecl = source.TypeDeclarations[0] as StructDeclarationNode;
@@ -119,7 +119,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EnumDeclaration\EnumDeclarationWithBaseType.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
 
       var enumDecl = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
       enumDecl.EnumBase.TypeName.TypeTags[0].Identifier.ShouldEqual("int");

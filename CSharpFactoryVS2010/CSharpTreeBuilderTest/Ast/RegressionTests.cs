@@ -44,7 +44,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Regression\ExpressionBug1.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
     [TestMethod]
@@ -52,7 +52,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"Expressions\ConditionalExpression1.cs");
-      InvokeParser(project).ShouldBeTrue();
+      InvokeParser(project, true, false).ShouldBeTrue();
     }
   }
 }

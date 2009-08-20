@@ -235,7 +235,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
         classEntity.BaseTypeReferences.Count().ShouldEqual(1);
-        ((TypeOrNamespaceNodeBasedTypeEntityReference)classEntity.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("A");
+        ((TypeNodeBasedTypeEntityReference)classEntity.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("A");
       }
     }
 
@@ -279,7 +279,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var baseTypes = enumEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+        ((TypeNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
           project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
       }
     }
@@ -332,7 +332,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var baseTypes = structEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+        ((TypeNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
           project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
       }
     }
@@ -385,7 +385,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var baseTypes = interfaceEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeOrNamespaceNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+        ((TypeNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
           project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
       }
     }

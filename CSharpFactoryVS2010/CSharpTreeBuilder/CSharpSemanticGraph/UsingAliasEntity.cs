@@ -1,5 +1,6 @@
 ﻿using System;
 using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -31,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       Alias = alias;
-      NamespaceOrTypeReference = new TypeOrNamespaceNodeBasedNamespaceOrTypeEntityReference(namespaceorTypeName);
+      NamespaceOrTypeReference = new NamespaceOrTypeNameNodeBasedNamespaceOrTypeEntityReference(namespaceorTypeName);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to the aliased namespace or type entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeBasedNamespaceOrTypeEntityReference NamespaceOrTypeReference { get; private set; }
+    public NamespaceOrTypeNameNodeBasedNamespaceOrTypeEntityReference NamespaceOrTypeReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

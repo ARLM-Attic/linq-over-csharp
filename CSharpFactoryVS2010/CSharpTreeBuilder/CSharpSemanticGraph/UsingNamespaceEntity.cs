@@ -1,5 +1,6 @@
 ﻿using System;
 using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -25,7 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new ArgumentNullException("namespaceOrTypeName");
       }
 
-      NamespaceReference = new TypeOrNamespaceNodeBasedNamespaceEntityReference(namespaceOrTypeName);
+      NamespaceReference = new NamespaceOrTypeNameNodeBasedNamespaceEntityReference(namespaceOrTypeName);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -33,7 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to the imported namespace entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeOrNamespaceNodeBasedNamespaceEntityReference NamespaceReference { get; private set; }
+    public NamespaceOrTypeNameNodeBasedNamespaceEntityReference NamespaceReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

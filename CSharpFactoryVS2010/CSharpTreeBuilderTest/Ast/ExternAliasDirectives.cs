@@ -17,7 +17,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ExternAliasDirective\ExternAliasDirectiveOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       Assert.AreEqual(project.Errors.Count, 0);
       var externs = project.SyntaxTree.CompilationUnitNodes[0].ExternAliasNodes;
       Assert.AreEqual(externs.Count, 3);
@@ -40,7 +40,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ExternAliasDirective\ExternAliasDirectiveOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       Assert.AreEqual(project.Errors.Count, 0);
       var treeWriter = new SyntaxTreeTextWriter(project.SyntaxTree, project.ProjectProvider) { WorkingFolder = TempOutputFolder };
       treeWriter.WriteTree();
@@ -51,7 +51,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(workingDir);
       project.AddFile(fileName);
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       Assert.AreEqual(project.Errors.Count, 0);
       var externs = project.SyntaxTree.CompilationUnitNodes[0].ExternAliasNodes;
       Assert.AreEqual(externs.Count, 3);
@@ -100,7 +100,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ExternAliasDirective\ExternAliasDirectiveOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var sn = project.SyntaxTree.CompilationUnitNodes[0];
       foreach (var extNode in sn.ExternAliasNodes)
       {

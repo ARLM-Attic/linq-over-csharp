@@ -17,7 +17,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var file = project.SyntaxTree.CompilationUnitNodes[0];
 
       // --- Check global attributes in the file
@@ -40,7 +40,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var file = project.SyntaxTree.CompilationUnitNodes[0];
 
       // --- Check global attributes in the file
@@ -131,13 +131,13 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       Assert.AreEqual(project.Errors.Count, 0);
       var treeWriter = new SyntaxTreeTextWriter(project.SyntaxTree, project.ProjectProvider) { WorkingFolder = TempOutputFolder };
       treeWriter.WriteTree();
       project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
     }
 
     [TestMethod]
@@ -145,7 +145,7 @@ namespace CSharpTreeBuilderTest
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"GlobalAttributes\GlobalAttributesOK.cs");
-      Assert.IsTrue(InvokeParser(project));
+      Assert.IsTrue(InvokeParser(project, true, false));
       var file = project.SyntaxTree.CompilationUnitNodes[0];
       foreach (var attrNode in file.GlobalAttributes)
       {

@@ -18,7 +18,7 @@ namespace CSharpTreeBuilderTest.AstBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ClassDeclaration\ClassDeclaration1.cs");
-      InvokeParser(project).ShouldBeTrue();
+      Assert.IsTrue(InvokeParser(project, true, false));
       var st = project.SyntaxTree.CompilationUnitNodes[0].SymbolStream;
       st.ShouldNotBeNull();
       // --- "public class A"

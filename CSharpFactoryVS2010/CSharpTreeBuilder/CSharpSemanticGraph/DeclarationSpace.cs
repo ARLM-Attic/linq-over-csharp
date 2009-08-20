@@ -98,5 +98,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return _NameTable.Keys.Count; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Looks up an object with the given name and of the specified type.
+    /// </summary>
+    /// <typeparam name="TTargetType">The type of object to be found. Must be a class.</typeparam>
+    /// <param name="name">A name.</param>
+    /// <returns>
+    /// An object of type TTargetType that is definitely defined by the given name. 
+    /// Null if not such name found, or not definitely defined, or not of the given type.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public TTargetType GetSpecificType<TTargetType>(string name) where TTargetType : class
+    {
+      var nameTableEntry = this[name];
+
+      if (nameTableEntry != null 
+        && nameTableEntry.State == NameTableEntryState.Definite 
+        && nameTableEntry.Entity is TTargetType)
+      {
+        return nameTableEntry.Entity as TTargetType;
+      }
+
+      return null;
+    }
   }
 }

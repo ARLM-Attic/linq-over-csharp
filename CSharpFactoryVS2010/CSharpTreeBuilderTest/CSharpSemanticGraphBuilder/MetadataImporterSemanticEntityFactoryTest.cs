@@ -162,7 +162,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       
       // First the entity builder and resolver
       project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
-      project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
+      project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       // Then the importer
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
@@ -194,7 +194,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       
       // Then the entity builder and resolver
       project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
-      project.SemanticGraph.AcceptVisitor(new TypeDeclarationResolverSemanticGraphVisitor(project, project.SemanticGraph));
+      project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       // Check resulting semantic graph
       CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace);
