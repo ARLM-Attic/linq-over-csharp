@@ -1,14 +1,14 @@
 B.1 Lexical grammar
 
 input:
-  input_sectionopt
+  input_section-opt
 
 input_section:
   input_section_part
   input_section   input_section_part
 
 input_section_part:
-  input_elementsopt   new_line
+  input_elements-opt   new_line
   pp_directive
 
 input_elements:
@@ -37,7 +37,7 @@ comment:
   delimited_comment
 
 single_line_comment:
-  //   input_charactersopt
+  //   input_characters-opt
 
 input_characters:
   input_character
@@ -54,7 +54,7 @@ new_line_character:
   Paragraph separator character (U+2029)
 
 delimited_comment:
-  /*   delimited_comment_textopt   asterisks   /
+  /*   delimited_comment_text-opt   asterisks   /
 
 delimited_comment_text:
   delimited_comment_section
@@ -62,7 +62,7 @@ delimited_comment_text:
 
 delimited_comment_section:
   /
-  asterisksopt   not_slash_or_asterisk
+  asterisks-opt   not_slash_or_asterisk
 
 asterisks:
   *
@@ -106,7 +106,7 @@ available_identifier:
   An identifier_or_keyword that is not a keyword
 
 identifier_or_keyword:
-  identifier_start_character   identifier_part_charactersopt
+  identifier_start_character   identifier_part_characters-opt
 
 identifier_start_character:
   letter_character
@@ -182,7 +182,7 @@ integer_literal:
   hexadecimal_integer_literal
 
 decimal_integer_literal:
-  decimal_digits   integer_type_suffixopt
+  decimal_digits   integer_type_suffix-opt
 
 decimal_digits:
   decimal_digit
@@ -195,8 +195,8 @@ integer_type_suffix:  one of
   U  u  L  l  UL  Ul  uL  ul  LU  Lu  lU  lu
 
 hexadecimal_integer_literal:
-  0x   hex_digits   integer_type_suffixopt
-  0X   hex_digits   integer_type_suffixopt
+  0x   hex_digits   integer_type_suffix-opt
+  0X   hex_digits   integer_type_suffix-opt
 
 hex_digits:
   hex_digit
@@ -206,14 +206,14 @@ hex_digit:  one of
   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  a  b  c  d  e  f
 
 real_literal:
-  decimal_digits   .   decimal_digits   exponent_partopt   real_type_suffixopt
-  .   decimal_digits   exponent_partopt   real_type_suffixopt
-  decimal_digits   exponent_part   real_type_suffixopt
+  decimal_digits   .   decimal_digits   exponent_part-opt   real_type_suffix-opt
+  .   decimal_digits   exponent_part-opt   real_type_suffix-opt
+  decimal_digits   exponent_part   real_type_suffix-opt
   decimal_digits   real_type_suffix
 
 exponent_part:
-  e   signopt   decimal_digits
-  E   signopt   decimal_digits
+  e   sign-opt   decimal_digits
+  E   sign-opt   decimal_digits
 
 sign:  one of
   +  -
@@ -237,14 +237,14 @@ simple_escape_sequence:  one of
   \'  \"  \\  \0  \a  \b  \f  \n  \r  \t  \v
 
 hexadecimal_escape_sequence:
-  \x   hex_digit   hex_digitopt   hex_digitopt   hex_digitopt
+  \x   hex_digit   hex_digit-opt   hex_digit-opt   hex_digit-opt
 
 string_literal:
   regular_string_literal
   verbatim_string_literal
 
 regular_string_literal:
-  "   regular_string_literal_charactersopt   "
+  "   regular_string_literal_characters-opt   "
 
 regular_string_literal_characters:
   regular_string_literal_character
@@ -260,7 +260,7 @@ single_regular_string_literal_character:
   Any character except " (U+0022), \ (U+005C), and new_line_character
 
 verbatim_string_literal:
-  @"   verbatim _string_literal_charactersopt   "
+  @"   verbatim _string_literal_characters-opt   "
 
 verbatim_string_literal_characters:
   verbatim_string_literal_character
@@ -307,56 +307,56 @@ conditional_symbol:
   Any identifier_or_keyword except true or false
 
 pp_expression:
-  whitespaceopt   pp_or_expression   whitespaceopt
+  whitespace-opt   pp_or_expression   whitespace-opt
 
 pp_or_expression:
   pp_and_expression
-  pp_or_expression   whitespaceopt   ||   whitespaceopt   pp_and_expression
+  pp_or_expression   whitespace-opt   ||   whitespace-opt   pp_and_expression
 
 pp_and_expression:
   pp_equality_expression
-  pp_and_expression   whitespaceopt   &&   whitespaceopt   pp_equality_expression
+  pp_and_expression   whitespace-opt   &&   whitespace-opt   pp_equality_expression
 
 pp_equality_expression:
   pp_unary_expression
-  pp_equality_expression   whitespaceopt   ==   whitespaceopt   pp_unary_expression
-  pp_equality_expression   whitespaceopt   !=   whitespaceopt   pp_unary_expression
+  pp_equality_expression   whitespace-opt   ==   whitespace-opt   pp_unary_expression
+  pp_equality_expression   whitespace-opt   !=   whitespace-opt   pp_unary_expression
 
 pp_unary_expression:
   pp_primary_expression
-  !   whitespaceopt   pp_unary_expression
+  !   whitespace-opt   pp_unary_expression
 
 pp_primary_expression:
   true
   false
   conditional_symbol
-  (   whitespaceopt   pp_expression   whitespaceopt   )
+  (   whitespace-opt   pp_expression   whitespace-opt   )
 
 pp_declaration:
-  whitespaceopt   #   whitespaceopt   define   whitespace   conditional_symbol   pp_new_line
-  whitespaceopt   #   whitespaceopt   undef   whitespace   conditional_symbol   pp_new_line
+  whitespace-opt   #   whitespace-opt   define   whitespace   conditional_symbol   pp_new_line
+  whitespace-opt   #   whitespace-opt   undef   whitespace   conditional_symbol   pp_new_line
 
 pp_new_line:
-  whitespaceopt   single_line_commentopt   new_line
+  whitespace-opt   single_line_comment-opt   new_line
 
 pp_conditional:
-  pp_if_section   pp_elif_sectionsopt   pp_else_sectionopt   pp_endif
+  pp_if_section   pp_elif_sections-opt   pp_else_section-opt   pp_endif
 
 pp_if_section:
-  whitespaceopt   #   whitespaceopt   if   whitespace   pp_expression   pp_new_line   conditional_sectionopt
+  whitespace-opt   #   whitespace-opt   if   whitespace   pp_expression   pp_new_line   conditional_section-opt
 
 pp_elif_sections:
   pp_elif_section
   pp_elif_sections   pp_elif_section
 
 pp_elif_section:
-  whitespaceopt   #   whitespaceopt   elif   whitespace   pp_expression   pp_new_line   conditional_sectionopt
+  whitespace-opt   #   whitespace-opt   elif   whitespace   pp_expression   pp_new_line   conditional_section-opt
 
 pp_else_section:
-  whitespaceopt   #   whitespaceopt   else   pp_new_line   conditional_sectionopt
+  whitespace-opt   #   whitespace-opt   else   pp_new_line   conditional_section-opt
 
 pp_endif:
-  whitespaceopt   #   whitespaceopt   endif   pp_new_line
+  whitespace-opt   #   whitespace-opt   endif   pp_new_line
 
 conditional_section:
   input_section
@@ -367,34 +367,34 @@ skipped_section:
   skipped_section   skipped_section_part
 
 skipped_section_part:
-  skipped_charactersopt   new_line
+  skipped_characters-opt   new_line
   pp_directive
 
 skipped_characters:
-  whitespaceopt   not_number_sign   input_charactersopt
+  whitespace-opt   not_number_sign   input_characters-opt
 
 not_number_sign:
   Any input_character except #
 
 pp_diagnostic:
-  whitespaceopt   #   whitespaceopt   error   pp_message
-  whitespaceopt   #   whitespaceopt   warning   pp_message
+  whitespace-opt   #   whitespace-opt   error   pp_message
+  whitespace-opt   #   whitespace-opt   warning   pp_message
 
 pp_message:
   new_line
-  whitespace   input_charactersopt   new_line
+  whitespace   input_characters-opt   new_line
 
 pp_region:
-  pp_start_region   conditional_sectionopt   pp_end_region
+  pp_start_region   conditional_section-opt   pp_end_region
 
 pp_start_region:
-  whitespaceopt   #   whitespaceopt   region   pp_message
+  whitespace-opt   #   whitespace-opt   region   pp_message
 
 pp_end_region:
-  whitespaceopt   #   whitespaceopt   endregion   pp_message
+  whitespace-opt   #   whitespace-opt   endregion   pp_message
 
 pp_line:
-  whitespaceopt   #   whitespaceopt   line   whitespace   line_indicator   pp_new_line
+  whitespace-opt   #   whitespace-opt   line   whitespace   line_indicator   pp_new_line
 
 line_indicator:
   decimal_digits   whitespace   file_name 
@@ -413,7 +413,7 @@ file_name_character:
   Any input_character except "
 
 pp_pragma:
-  whitespaceopt   #   whitespaceopt   pragma   whitespace   pragma_body   pp_new_line
+  whitespace-opt   #   whitespace-opt   pragma   whitespace   pragma_body   pp_new_line
 
 pragma_body:
   pragma_warning_body
@@ -428,7 +428,7 @@ warning_action:
 
 warning_list:
   decimal_digits
-  warning_list   whitespaceopt   ,   whitespaceopt   decimal_digits
+  warning_list   whitespace-opt   ,   whitespace-opt   decimal_digits
 
 B.2 Syntactic grammar
 
@@ -441,7 +441,7 @@ type_name:
   namespace_or_type_name
 
 namespace_or_type_name:
-  identifier   type_argument_listopt
+  identifier   type_argument_list-opt
   namespace_or_type_name   .   identifier   type_argument_listop
   qualified_alias_member
 
@@ -520,7 +520,7 @@ rank_specifiers:
   rank_specifiers   rank_specifier
 
 rank_specifier:
-  [   dim_separatorsopt   ]
+  [   dim_separators-opt   ]
 
 dim_separators:
   ,
@@ -593,14 +593,14 @@ primary_no_array_creation_expression:
   sizeof_expression
 
 simple_name:
-  identifier   type_argument_listopt
+  identifier   type_argument_list-opt
 
 parenthesized_expression:
   (   expression   )
 
 member_access:
-  primary_expression   .   identifier  type_argument_listopt
-  predefined_type   .   identifier  type_argument_listopt
+  primary_expression   .   identifier  type_argument_list-opt
+  predefined_type   .   identifier  type_argument_list-opt
   qualified_alias_member   .   identifier
 
 predefined_type:  one of
@@ -608,7 +608,7 @@ predefined_type:  one of
   object	sbyte		short		string	uint		ulong		ushort
 
 invocation_expression:
-  primary_expression   (   argument_listopt   )
+  primary_expression   (   argument_list-opt   )
 
 element_access:
   primary_no_array_creation_expression   [   expression_list   ]
@@ -631,7 +631,7 @@ post_decrement_expression:
   primary_expression   --
 
 object_creation_expression:
-  new   type   (   argument_listopt   )   object_or_collection_initializeropt 
+  new   type   (   argument_list-opt   )   object_or_collection_initializer-opt 
   new   type   object_or_collection_initializer
 
 object_or_collection_initializer:
@@ -639,7 +639,7 @@ object_or_collection_initializer:
   collection_initializer
 
 object_initializer:
-  {   member_initializer_listopt   }
+  {   member_initializer_list-opt   }
   {   member_initializer_list   ,   }
 
 member_initializer_list:
@@ -666,7 +666,7 @@ element_initializer:
   {   expression_list   }
 
 array_creation_expression:
-  new   non_array_type   [   expression_list   ]   rank_specifiersopt   array_initializeropt
+  new   non_array_type   [   expression_list   ]   rank_specifiers-opt   array_initializer-opt
   new   array_type   array_initializer 
   new   rank_specifier   array_initializer
 
@@ -677,7 +677,7 @@ anonymous_object_creation_expression:
   new   anonymous_object_initializer
 
 anonymous_object_initializer:
-  {   member_declarator_listopt   }
+  {   member_declarator_list-opt   }
   {   member_declarator_list   ,   }
 
 member_declarator_list:
@@ -695,12 +695,12 @@ typeof_expression:
   typeof ( void )
 
 unbound_type_name:
-  identifier   generic_dimension_specifieropt
-  identifier   ::   identifier   generic_dimension_specifieropt
-  unbound_type_name   .   identifier   generic_dimension_specifieropt
+  identifier   generic_dimension_specifier-opt
+  identifier   ::   identifier   generic_dimension_specifier-opt
+  unbound_type_name   .   identifier   generic_dimension_specifier-opt
 
 generic_dimension_specifier:
-  <   commasopt   >
+  <   commas-opt   >
 
 commas:
   ,
@@ -804,28 +804,28 @@ lambda_expression:
   anonymous_function_signature   =>   anonymous_function_body
 
 anonymous_method_expression:
-  delegate   explicit_anonymous_function_signatureopt   block
+  delegate   explicit_anonymous_function_signature-opt   block
 
 anonymous_function_signature:
   explicit_anonymous_function_signature 
   implicit_anonymous_function_signature
 
 explicit_anonymous_function_signature:
-(   explicit_anonymous_function_parameter_listopt   )
+(   explicit_anonymous_function_parameter_list-opt   )
 
 explicit_anonymous_function_parameter_list:
   explicit_anonymous_function_parameter
   explicit_anonymous_function_parameter_list   ,   explicit_anonymous_function_parameter
 
 explicit_anonymous_function_parameter:
-  anonymous_function_parameter_modifieropt   type   identifier
+  anonymous_function_parameter_modifier-opt   type   identifier
 
 anonymous_function_parameter_modifier: 
   ref
   out
 
 implicit_anonymous_function_signature:
-  (   implicit_anonymous_function_parameter_listopt   )
+  (   implicit_anonymous_function_parameter_list-opt   )
   implicit_anonymous_function_parameter
 
 implicit_anonymous_function_parameter_list:
@@ -843,10 +843,10 @@ query_expression:
   from_clause   query_body
 
 from_clause:
-  from   typeopt   identifier   in   expression
+  from   type-opt   identifier   in   expression
 
 query_body:
-  query_body_clausesopt   select_or_group_clause   query_continuationopt
+  query_body_clauses-opt   select_or_group_clause   query_continuation-opt
 
 query_body_clauses:
   query_body_clause
@@ -867,10 +867,10 @@ where_clause:
   where   boolean_expression
 
 join_clause:
-  join   typeopt   identifier   in   expression   on   expression   equals   expression 
+  join   type-opt   identifier   in   expression   on   expression   equals   expression 
 
 join_into_clause:
-  join   typeopt   identifier   in   expression   on   expression   equals   expression   into   identifier
+  join   type-opt   identifier   in   expression   on   expression   equals   expression   into   identifier
 
 orderby_clause:
   orderby   orderings
@@ -880,7 +880,7 @@ orderings:
   orderings   ,   ordering
 
 ordering:
-  expression    ordering_directionopt
+  expression    ordering_direction-opt
 
 ordering_direction:
   ascending
@@ -963,7 +963,7 @@ embedded_statement:
   fixed_statement
   
 block:
-  {   statement_listopt   }
+  {   statement_list-opt   }
 
 statement_list:
   statement
@@ -1036,7 +1036,7 @@ switch_statement:
   switch   (   expression   )   switch_block
 
 switch_block:
-  {   switch_sectionsopt   }
+  {   switch_sections-opt   }
 
 switch_sections:
   switch_section
@@ -1066,7 +1066,7 @@ do_statement:
   do   embedded_statement   while   (   boolean_expression   )   ;
 
 for_statement:
-  for   (   for_initializeropt   ;   for_conditionopt   ;   for_iteratoropt   )   embedded_statement
+  for   (   for_initializer-opt   ;   for_condition-opt   ;   for_iterator-opt   )   embedded_statement
 
 for_initializer:
   local_variable_declaration
@@ -1104,10 +1104,10 @@ goto_statement:
   goto   default   ;
 
 return_statement:
-  return   expressionopt   ;
+  return   expression-opt   ;
 
 throw_statement:
-  throw   expressionopt   ;
+  throw   expression-opt   ;
 
 try_statement:
   try   block   catch_clauses
@@ -1115,15 +1115,15 @@ try_statement:
   try   block   catch_clauses   finally_clause
 
 catch_clauses:
-  specific_catch_clauses   general_catch_clauseopt
-  specific_catch_clausesopt   general_catch_clause
+  specific_catch_clauses   general_catch_clause-opt
+  specific_catch_clauses-opt   general_catch_clause
 
 specific_catch_clauses:
   specific_catch_clause
   specific_catch_clauses   specific_catch_clause
 
 specific_catch_clause:
-  catch   (   class_type   identifieropt   )   block
+  catch   (   class_type   identifier-opt   )   block
 
 general_catch_clause:
   catch   block
@@ -1171,17 +1171,17 @@ fixed_pointer_initializer:
 B.2.6 Namespaces
 
 compilation_unit:
-  extern_alias_directivesopt   using_directivesopt  global_attributesopt  namespace_member_declarationsopt
+  extern_alias_directives-opt   using_directives-opt  global_attributes-opt  namespace_member_declarations-opt
 
 namespace_declaration:
-  namespace   qualified_identifier   namespace_body   ;opt
+  namespace   qualified_identifier   namespace_body   ;-opt
 
 qualified_identifier:
   identifier
   qualified_identifier   .   identifier
 
 namespace_body:
-  {   extern_alias_directivesopt   using_directivesopt   namespace_member_declarationsopt   }
+  {   extern_alias_directives-opt   using_directives-opt   namespace_member_declarations-opt   }
 
 extern_alias_directives:
   extern_alias_directive
@@ -1220,13 +1220,13 @@ type_declaration:
   delegate_declaration
 
 qualified_alias_member:
-  identifier   ::   identifier   type_argument_listopt
+  identifier   ::   identifier   type_argument_list-opt
 
 B.2.7 Classes
 
 class_declaration:
-  attributesopt   class_modifiersopt   partialopt   class   identifier   type_parameter_listopt  
-    class_baseopt   type_parameter_constraints_clausesopt   class_body   ;opt
+  attributes-opt   class_modifiers-opt   partial-opt   class   identifier   type_parameter_list-opt  
+    class_base-opt   type_parameter_constraints_clauses-opt   class_body   ;-opt
 
 class_modifiers:
   class_modifier
@@ -1247,8 +1247,8 @@ type_parameter_list:
   <   type_parameters   >
 
 type_parameters:
-  attributesopt   type_parameter
-  type_parameters   ,   attributesopt   type_parameter
+  attributes-opt   type_parameter
+  type_parameters   ,   attributes-opt   type_parameter
 
 type_parameter:
   identifier
@@ -1293,7 +1293,7 @@ constructor_constraint:
   new   (   )
 
 class_body:
-  {   class_member_declarationsopt   }
+  {   class_member_declarations-opt   }
 
 class_member_declarations:
   class_member_declaration
@@ -1313,7 +1313,7 @@ class_member_declaration:
   type_declaration
 
 constant_declaration:
-  attributesopt   constant_modifiersopt   const   type   constant_declarators   ;
+  attributes-opt   constant_modifiers-opt   const   type   constant_declarators   ;
 
 constant_modifiers:
   constant_modifier
@@ -1334,7 +1334,7 @@ constant_declarator:
   identifier   =   constant_expression
 
 field_declaration:
-  attributesopt   field_modifiersopt   type   variable_declarators   ;
+  attributes-opt   field_modifiers-opt   type   variable_declarators   ;
 
 field_modifiers:
   field_modifier
@@ -1367,8 +1367,8 @@ method_declaration:
   method_header   method_body
 
 method_header:
-  attributesopt   method_modifiersopt   partialopt   return_type   member_name   type_parameter_listopt
-		(   formal_parameter_listopt   )   type_parameter_constraints_clausesopt
+  attributes-opt   method_modifiers-opt   partial-opt   return_type   member_name   type_parameter_list-opt
+		(   formal_parameter_list-opt   )   type_parameter_constraints_clauses-opt
 
 method_modifiers:
   method_modifier
@@ -1410,7 +1410,7 @@ fixed_parameters:
   fixed_parameters   ,   fixed_parameter
 
 fixed_parameter:
-  attributesopt   parameter_modifieropt   type   identifier
+  attributes-opt   parameter_modifier-opt   type   identifier
 
 parameter_modifier:
   ref
@@ -1418,10 +1418,10 @@ parameter_modifier:
   this
 
 parameter_array:
-  attributesopt   params   array_type   identifier
+  attributes-opt   params   array_type   identifier
 
 property_declaration:
-  attributesopt   property_modifiersopt   type   member_name   {   accessor_declarations   }
+  attributes-opt   property_modifiers-opt   type   member_name   {   accessor_declarations   }
 
 property_modifiers:
   property_modifier
@@ -1446,14 +1446,14 @@ member_name:
   interface_type   .   identifier
 
 accessor_declarations:
-  get_accessor_declaration   set_accessor_declarationopt
-  set_accessor_declaration   get_accessor_declarationopt
+  get_accessor_declaration   set_accessor_declaration-opt
+  set_accessor_declaration   get_accessor_declaration-opt
 
 get_accessor_declaration:
-  attributesopt   accessor_modifieropt    get   accessor_body
+  attributes-opt   accessor_modifier-opt    get   accessor_body
 
 set_accessor_declaration:
-  attributesopt   accessor_modifieropt   set   accessor_body
+  attributes-opt   accessor_modifier-opt   set   accessor_body
 
 accessor_modifier:
   protected
@@ -1467,8 +1467,8 @@ accessor_body:
   ;
 
 event_declaration:
-  attributesopt   event_modifiersopt   event   type   variable_declarators   ;
-  attributesopt   event_modifiersopt   event   type   member_name   {   event_accessor_declarations   }
+  attributes-opt   event_modifiers-opt   event   type   variable_declarators   ;
+  attributes-opt   event_modifiers-opt   event   type   member_name   {   event_accessor_declarations   }
 
 event_modifiers:
   event_modifier
@@ -1493,13 +1493,13 @@ event_accessor_declarations:
   remove_accessor_declaration   add_accessor_declaration
 
 add_accessor_declaration:
-  attributesopt   add   block
+  attributes-opt   add   block
 
 remove_accessor_declaration:
-  attributesopt   remove   block
+  attributes-opt   remove   block
 
 indexer_declaration:
-  attributesopt   indexer_modifiersopt   indexer_declarator   {   accessor_declarations   }
+  attributes-opt   indexer_modifiers-opt   indexer_declarator   {   accessor_declarations   }
 
 indexer_modifiers:
   indexer_modifier
@@ -1523,7 +1523,7 @@ indexer_declarator:
   type   interface_type   .   this   [   formal_parameter_list   ]
 
 operator_declaration:
-  attributesopt   operator_modifiers   operator_declarator   operator_body
+  attributes-opt   operator_modifiers   operator_declarator   operator_body
 
 operator_modifiers:
   operator_modifier
@@ -1576,7 +1576,7 @@ operator_body:
   ;
 
 constructor_declaration:
-  attributesopt   constructor_modifiersopt   constructor_declarator   constructor_body
+  attributes-opt   constructor_modifiers-opt   constructor_declarator   constructor_body
 
 constructor_modifiers:
   constructor_modifier
@@ -1591,34 +1591,34 @@ constructor_modifier:
   unsafe
   
 constructor_declarator:
-  identifier   (   formal_parameter_listopt   )   constructor_initializeropt
+  identifier   (   formal_parameter_list-opt   )   constructor_initializer-opt
 
 constructor_initializer:
-  :   base   (   argument_listopt   )
-  :   this   (   argument_listopt   )
+  :   base   (   argument_list-opt   )
+  :   this   (   argument_list-opt   )
 
 constructor_body:
   block
   ;
 
 static_constructor_declaration:
-  attributesopt   static_constructor_modifiers  identifier   (   )   static_constructor_body
+  attributes-opt   static_constructor_modifiers  identifier   (   )   static_constructor_body
 
 static_constructor_modifiers:
-  externopt   unsafeopt   static
-  unsafeopt   externopt   static
-  externopt   static   unsafeopt 
-  unsafeopt   static   externopt
-  static   externopt   unsafeopt
-  static   unsafeopt   externopt
+  extern-opt   unsafe-opt   static
+  unsafe-opt   extern-opt   static
+  extern-opt   static   unsafe-opt 
+  unsafe-opt   static   extern-opt
+  static   extern-opt   unsafe-opt
+  static   unsafe-opt   extern-opt
 
 static_constructor_body:
   block
   ;
 
 destructor_declaration:
-  attributesopt   externopt   unsafeopt   ~   identifier   (   )    destructor_body
-  attributesopt   unsafeopt   externopt   ~   identifier   (   )    destructor_body
+  attributes-opt   extern-opt   unsafe-opt   ~   identifier   (   )    destructor_body
+  attributes-opt   unsafe-opt   extern-opt   ~   identifier   (   )    destructor_body
 
 destructor_body:
   block
@@ -1627,8 +1627,8 @@ destructor_body:
 B.2.8 Structs
 
 struct_declaration:
-  attributesopt   struct_modifiersopt   partialopt   struct   identifier   type_parameter_listopt
-    struct_interfacesopt   type_parameter_constraints_clausesopt   struct_body   ;opt
+  attributes-opt   struct_modifiers-opt   partial-opt   struct   identifier   type_parameter_list-opt
+    struct_interfaces-opt   type_parameter_constraints_clauses-opt   struct_body   ;-opt
 
 struct_modifiers:
   struct_modifier
@@ -1646,7 +1646,7 @@ struct_interfaces:
   :   interface_type_list
 
 struct_body:
-  {   struct_member_declarationsopt   }
+  {   struct_member_declarations-opt   }
 
 struct_member_declarations:
   struct_member_declaration
@@ -1666,7 +1666,7 @@ struct_member_declaration:
   fixed_size_buffer_declaration
   
 fixed_size_buffer_declaration:
-  attributesopt   fixed_size_buffer_modifiersopt   fixed   buffer_element_type  fixed_size_buffer_declarators   ;
+  attributes-opt   fixed_size_buffer_modifiers-opt   fixed   buffer_element_type  fixed_size_buffer_declarators   ;
 
 fixed_size_buffer_modifiers:
   fixed_size_buffer_modifier
@@ -1703,14 +1703,14 @@ rank_specifiers:
   rank_specifiers   rank_specifier
 
 rank_specifier:
-  [   dim_separatorsopt   ]
+  [   dim_separators-opt   ]
 
 dim_separators:
   ,
   dim_separators   ,
 
 array_initializer:
-  {   variable_initializer_listopt   }
+  {   variable_initializer_list-opt   }
   {   variable_initializer_list   ,   }
 
 variable_initializer_list:
@@ -1724,8 +1724,8 @@ variable_initializer:
 B.2.10 Interfaces
 
 interface_declaration:
-  attributesopt   interface_modifiersopt   partialopt   interface   identifier   type_parameter_listopt
-    interface_baseopt   type_parameter_constraints_clausesopt   interface_body   ;opt
+  attributes-opt   interface_modifiers-opt   partial-opt   interface   identifier   type_parameter_list-opt
+    interface_base-opt   type_parameter_constraints_clauses-opt   interface_body   ;-opt
 
 interface_modifiers:
   interface_modifier
@@ -1743,7 +1743,7 @@ interface_base:
   :   interface_type_list
 
 interface_body:
-  {   interface_member_declarationsopt   }
+  {   interface_member_declarations-opt   }
 
 interface_member_declarations:
   interface_member_declaration
@@ -1756,34 +1756,34 @@ interface_member_declaration:
   interface_indexer_declaration
 
 interface_method_declaration:
-  attributesopt   newopt   return_type   identifier   type_parameter_list
-    (   formal_parameter_listopt   )   type_parameter_constraints_clausesopt   ;
+  attributes-opt   new-opt   return_type   identifier   type_parameter_list
+    (   formal_parameter_list-opt   )   type_parameter_constraints_clauses-opt   ;
 
 interface_property_declaration:
-  attributesopt   newopt   type   identifier   {   interface_accessors   }
+  attributes-opt   new-opt   type   identifier   {   interface_accessors   }
 
 interface_accessors:
-  attributesopt   get   ;
-  attributesopt   set   ;
-  attributesopt   get   ;   attributesopt   set   ;
-  attributesopt   set   ;   attributesopt   get   ;
+  attributes-opt   get   ;
+  attributes-opt   set   ;
+  attributes-opt   get   ;   attributes-opt   set   ;
+  attributes-opt   set   ;   attributes-opt   get   ;
 
 interface_event_declaration:
-  attributesopt   newopt   event   type   identifier   ;
+  attributes-opt   new-opt   event   type   identifier   ;
 
 interface_indexer_declaration:
-  attributesopt   newopt   type   this   [   formal_parameter_list   ]   {   interface_accessors   }
+  attributes-opt   new-opt   type   this   [   formal_parameter_list   ]   {   interface_accessors   }
 
 B.2.11 Enums
 
 enum_declaration:
-  attributesopt   enum_modifiersopt   enum   identifier   enum_baseopt   enum_body   ;opt
+  attributes-opt   enum_modifiers-opt   enum   identifier   enum_base-opt   enum_body   ;-opt
 
 enum_base:
   :   integral_type
 
 enum_body:
-  {   enum_member_declarationsopt   }
+  {   enum_member_declarations-opt   }
   {   enum_member_declarations   ,   }
 
 enum_modifiers:
@@ -1802,14 +1802,14 @@ enum_member_declarations:
   enum_member_declarations   ,   enum_member_declaration
 
 enum_member_declaration:
-  attributesopt   identifier
-  attributesopt   identifier   =   constant_expression
+  attributes-opt   identifier
+  attributes-opt   identifier   =   constant_expression
 
 B.2.12 Delegates
 
 delegate_declaration:
-  attributesopt   delegate_modifiersopt   delegate   return_type   identifier  type_parameter_listopt   
-    (   formal_parameter_listopt   )   type_parameter_constraints_clausesopt   ;
+  attributes-opt   delegate_modifiers-opt   delegate   return_type   identifier  type_parameter_list-opt   
+    (   formal_parameter_list-opt   )   type_parameter_constraints_clauses-opt   ;
 
 delegate_modifiers:
   delegate_modifier
@@ -1851,8 +1851,8 @@ attribute_sections:
   attribute_sections   attribute_section
 
 attribute_section:
-  [   attribute_target_specifieropt   attribute_list   ]
-  [   attribute_target_specifieropt   attribute_list   ,   ]
+  [   attribute_target_specifier-opt   attribute_list   ]
+  [   attribute_target_specifier-opt   attribute_list   ,   ]
 
 attribute_target_specifier:
   attribute_target   :
@@ -1871,13 +1871,13 @@ attribute_list:
   attribute_list   ,   attribute
 
 attribute:
-  attribute_name   attribute_argumentsopt
+  attribute_name   attribute_arguments-opt
 
 attribute_name:
   type_name
 
 attribute_arguments:
-  (   positional_argument_listopt   )
+  (   positional_argument_list-opt   )
   (   positional_argument_list   ,   named_argument_list   )
   (   named_argument_list   )
 
