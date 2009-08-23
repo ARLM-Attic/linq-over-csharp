@@ -338,8 +338,11 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildExternAliasEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_ExternAliasDuplicateName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_ExternAndUsingAliasDuplicateName.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildEnumMemberEntities.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
-    <Compile Include="TestFiles\TypeResolution\UsingAliasQualifiedNames.cs" />
+    <None Include="TestFiles\SemanticGraphVisitor\VisitEnumEntity.cs" />
+    <None Include="TestFiles\TypeResolution\EnumUnderlyingType.cs" />
+    <None Include="TestFiles\TypeResolution\UsingAliasQualifiedNames.cs" />
     <None Include="TestFiles\TypeResolution\CS0576_ExternAliasConflictsWithTypeDeclaration.cs" />
     <None Include="TestFiles\TypeResolution\CS0576_ExternAliasConflictsWithNamespaceDeclaration.cs" />
     <None Include="TestFiles\TypeResolution\SameExternAliasSameNamespaceDifferentRegions.cs" />

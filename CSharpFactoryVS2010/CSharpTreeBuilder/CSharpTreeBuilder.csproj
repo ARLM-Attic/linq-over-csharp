@@ -258,6 +258,7 @@
     <Compile Include="CSharpSemanticGraph\ChildTypeCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstructedGenericTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeBasedNamespaceEntityReference.cs" />
+    <Compile Include="CSharpSemanticGraph\EnumMemberEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ExternAliasEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IHasLexicalScope.cs" />
     <Compile Include="CSharpSemanticGraph\UsingAliasEntity.cs" />

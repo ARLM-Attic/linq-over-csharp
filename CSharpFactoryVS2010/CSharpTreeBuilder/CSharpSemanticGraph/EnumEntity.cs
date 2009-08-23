@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -7,6 +9,13 @@
   // ================================================================================================
   public sealed class EnumEntity : TypeEntity
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the underlying type of the enum.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntityReference<TypeEntity> UnderlyingType { get; set; }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this type is a value type.

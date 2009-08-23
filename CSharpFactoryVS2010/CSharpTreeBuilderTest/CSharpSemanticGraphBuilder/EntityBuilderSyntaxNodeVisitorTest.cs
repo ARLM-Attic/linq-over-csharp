@@ -260,7 +260,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.ChildNamespaces.Count.ShouldEqual(1);
         namespaceEntity.ChildNamespaces[0].FullyQualifiedName.ShouldEqual("A");
       }
-      // enum A
+      // enum B
       {
         var enumEntity = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as EnumEntity;
         enumEntity.Name.ShouldEqual("B");
@@ -276,11 +276,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         enumEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
-        var baseTypes = enumEntity.BaseTypeReferences.ToArray();
-        baseTypes.Length.ShouldEqual(1);
-        baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
-          project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
+        enumEntity.BaseTypeReferences.ToList().Count.ShouldEqual(0);
+        enumEntity.UnderlyingType.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((TypeNodeBasedTypeEntityReference)enumEntity.UnderlyingType).SyntaxNode.ShouldEqual(
+          ((EnumDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]).EnumBase);
+      }
+
+      // enum C
+      {
+        var enumEntity = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[1] as EnumEntity;
+        enumEntity.Name.ShouldEqual("C");
+
+        enumEntity.UnderlyingType.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((ReflectedTypeBasedTypeEntityReference)enumEntity.UnderlyingType).Metadata.ShouldEqual(typeof(int));
       }
     }
 
@@ -871,7 +879,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceB.GetUsingAliasByNameAndSourcePoint("E", new SourcePoint(null, 0)).ShouldBeNull();
         namespaceB.GetUsingAliasByNameAndSourcePoint("X", new SourcePoint(compilationUnitNode,
           compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].StartPosition)).ShouldBeNull();
-        namespaceB.GetUsingAliasByNameAndSourcePoint("E", new SourcePoint(compilationUnitNode, 
+        namespaceB.GetUsingAliasByNameAndSourcePoint("E", new SourcePoint(compilationUnitNode,
           compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].StartPosition)).ShouldEqual(usingAlias);
       }
     }
@@ -977,6 +985,50 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(1);
       project.Warnings.Count.ShouldEqual(0);
       project.Errors[0].Code.ShouldEqual("CS1537");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of enum members
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildEnumMemberEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildEnumMemberEntities.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      int i = 0;
+
+      var enumDeclarationNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
+
+      {
+        var enumMember = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToList()[i] as EnumMemberEntity;
+        enumMember.Name.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
+        enumMember.DistinctiveName.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
+        enumMember.IsExplicitlyDefined.ShouldBeTrue();
+        enumMember.IsStatic.ShouldBeTrue();
+        enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
+        enumMember.ReflectedMetadata.ShouldBeNull();
+        enumMember.SyntaxNodes[0].ShouldEqual(enumDeclarationNode.Values[i]);
+        enumMember.Type.ShouldEqual(((EnumEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).UnderlyingType);
+      }
+
+      i++;
+      {
+        var enumMember = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToList()[i] as EnumMemberEntity;
+        enumMember.Name.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
+        enumMember.DistinctiveName.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
+        enumMember.IsExplicitlyDefined.ShouldBeTrue();
+        enumMember.IsStatic.ShouldBeTrue();
+        enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
+        enumMember.ReflectedMetadata.ShouldBeNull();
+        enumMember.SyntaxNodes[0].ShouldEqual(enumDeclarationNode.Values[i]);
+        enumMember.Type.ShouldEqual(((EnumEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).UnderlyingType);
+      }
     }
   }
 }

@@ -1,6 +1,10 @@
 ﻿namespace A
 {
-  enum B : int
+  enum B : long
+  {
+  }
+
+  enum C
   {
   }
 }

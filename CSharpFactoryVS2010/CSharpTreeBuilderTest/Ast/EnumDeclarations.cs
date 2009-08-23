@@ -102,6 +102,7 @@ namespace CSharpTreeBuilderTest
       Assert.AreEqual(enumDecl.Modifiers[1].Value, ModifierType.New);
       Assert.AreEqual(enumDecl.Values.Count, 2);
       Assert.AreEqual(enumDecl.Values[0].Identifier, "Value");
+      enumDecl.Values[0].ParentNode.ShouldEqual(enumDecl);
       Assert.AreEqual(enumDecl.Values[1].Identifier, "Value2");
 
       enumDecl = source.TypeDeclarations[1] as EnumDeclarationNode;

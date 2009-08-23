@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.Ast
     public EnumDeclarationNode(Token start, Token name)
       : base(start, name)
     {
-      Values = new EnumValueNodeCollection();
+      Values = new EnumValueNodeCollection() { ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -66,19 +66,6 @@ namespace CSharpTreeBuilder.Ast
       {
         _EnumBase = value;
         if (_EnumBase != null) _EnumBase.ParentNode = this;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the collection of base types.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override TypeNodeCollection BaseTypes
-    {
-      get
-      {
-        return new TypeNodeCollection() {EnumBase};
       }
     }
 

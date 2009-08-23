@@ -1931,7 +1931,32 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.Y3`2[int,long]");
       }
+    }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Enum underlying type resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void EnumUnderlyingType()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\EnumUnderlyingType.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      {
+        var enumEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as EnumEntity;
+        enumEntity.UnderlyingType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        enumEntity.UnderlyingType.TargetEntity.FullyQualifiedName.ShouldEqual("System.Int32");
+        (enumEntity.Members.ToList()[0] as EnumMemberEntity).Type.ShouldEqual(enumEntity.UnderlyingType);
+      }
+      {
+        var enumEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[1] as EnumEntity;
+        enumEntity.UnderlyingType.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        enumEntity.UnderlyingType.TargetEntity.FullyQualifiedName.ShouldEqual("long");
+        (enumEntity.Members.ToList()[0] as EnumMemberEntity).Type.ShouldEqual(enumEntity.UnderlyingType);
+      }
     }
   }
 }

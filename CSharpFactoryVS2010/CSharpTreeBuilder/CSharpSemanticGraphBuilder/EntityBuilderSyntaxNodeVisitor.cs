@@ -297,7 +297,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(EnumDeclarationNode node)
     {
-      CreateTypeEntityFromTypeDeclaration<EnumDeclarationNode, EnumEntity>(node);
+      var enumEntity = CreateTypeEntityFromTypeDeclaration<EnumDeclarationNode, EnumEntity>(node);
+
+      // Set the underlying type reference.
+      if (node.EnumBase != null)
+      {
+        enumEntity.UnderlyingType = new TypeNodeBasedTypeEntityReference(node.EnumBase);
+      }
+      else
+      {
+        enumEntity.UnderlyingType = new ReflectedTypeBasedTypeEntityReference(typeof (int));
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -486,7 +496,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           continue;
         }
 
-        // Create a semantic entity, add to its parent, and add to the graph.
+        // Create a semantic entity and add to its parent.
         var fieldEntity = new FieldEntity(fieldTag.Identifier, true,
                                           new TypeNodeBasedTypeEntityReference(node.Type),
                                           node.IsStatic);
@@ -494,6 +504,37 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an enum member entity from an enum value AST node.
+    /// </summary>
+    /// <param name="node">An enum value AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(EnumValueNode node)
+    {
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      var parentEnumEntity = parentEntity as EnumEntity;
+      if (parentEnumEntity == null)
+      {
+        throw new ApplicationException(String.Format("Parent expected to be EnumEntity but was {0}", parentEntity.GetType()));
+      }
+
+      // Check if this name is already in use in this declaration space
+      if (parentEnumEntity.DeclarationSpace.IsNameDefined(node.Identifier))
+      {
+        _ErrorHandler.Error("CS0102", node.StartToken, "The type '{0}' already contains a definition for '{1}'.",
+                            parentEnumEntity.FullyQualifiedName, node.Identifier);
+        return;
+      }
+
+      // Create a semantic entity and add to its parent.
+      var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEnumEntity.UnderlyingType);
+      parentEnumEntity.AddMember(enumMemberEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
