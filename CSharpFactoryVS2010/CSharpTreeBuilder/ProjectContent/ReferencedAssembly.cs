@@ -86,38 +86,39 @@ namespace CSharpTreeBuilder.ProjectContent
     public ReferencedAssembly(string name, string path, string alias)
       : base(name)
     {
+      FilePath = path;
       Alias = alias;
 
-      // --- Try to load the assembly in several ways
-      if (String.IsNullOrEmpty(path))
-      {
-        // --- Try to load the assembly with assemblyName
-        try
-        {
-          if (_FullNames.ContainsKey(name))
-          {
-            name = _FullNames[name];
-          }
-          Assembly = Assembly.Load(new AssemblyName(name));
-          return;
-        }
-        catch (FileNotFoundException)
-        {
-          // --- This exeption is caught intentionally
-        }
+      //// --- Try to load the assembly in several ways
+      //if (String.IsNullOrEmpty(path))
+      //{
+      //  // --- Try to load the assembly with assemblyName
+      //  try
+      //  {
+      //    if (_FullNames.ContainsKey(name))
+      //    {
+      //      name = _FullNames[name];
+      //    }
+      //    Assembly = Assembly.Load(new AssemblyName(name));
+      //    return;
+      //  }
+      //  catch (FileNotFoundException)
+      //  {
+      //    // --- This exeption is caught intentionally
+      //  }
 
-        Assembly = LoadFromPath(DotNet35SystemFolder, name);
-        if (Assembly != null) return;
+      //  Assembly = LoadFromPath(DotNet35SystemFolder, name);
+      //  if (Assembly != null) return;
 
-        Assembly = LoadFromPath(DotNet30SystemFolder, name);
-        if (Assembly != null) return;
+      //  Assembly = LoadFromPath(DotNet30SystemFolder, name);
+      //  if (Assembly != null) return;
 
-        Assembly = LoadFromPath(DotNet20SystemFolder, name);
-        return;
-      }
+      //  Assembly = LoadFromPath(DotNet20SystemFolder, name);
+      //  return;
+      //}
 
-      // --- Path is specified, so load the assembly with the specified path
-      Assembly = LoadFromPath(path, name);
+      //// --- Path is specified, so load the assembly with the specified path
+      //Assembly = LoadFromPath(path, name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -176,6 +177,13 @@ namespace CSharpTreeBuilder.ProjectContent
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public static string DotNet40SystemFolder { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the path of the assembly.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string FilePath { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

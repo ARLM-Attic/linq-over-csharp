@@ -11,8 +11,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public class NamespaceEntity : NamespaceOrTypeEntity, IHasChildTypes
   {
-    /// <summary>A dictionary that stores using alias entities. The key is the alias name.</summary>
-    private Dictionary<string, UsingAliasEntity> _UsingAliases;
+    /// <summary>A list of extern alias entities.</summary>
+    private List<ExternAliasEntity> _ExternAliases;
+
+    /// <summary>A list of using alias entities.</summary>
+    private List<UsingAliasEntity> _UsingAliases;
 
     /// <summary>A list of using namespace entities.</summary>
     private List<UsingNamespaceEntity> _UsingNamespaces;
@@ -24,7 +27,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public NamespaceEntity()
     {
-      _UsingAliases = new Dictionary<string, UsingAliasEntity>();
+      _ExternAliases = new List<ExternAliasEntity>();
+      _UsingAliases = new List<UsingAliasEntity>();
       _UsingNamespaces = new List<UsingNamespaceEntity>();
 
       ChildNamespaces = new List<NamespaceEntity>();
@@ -144,31 +148,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddUsingNamespace(UsingNamespaceEntity usingNamespaceEntity)
     {
-      if (_UsingNamespaces.Contains(usingNamespaceEntity))
-      {
-        throw new ApplicationException(string.Format(
-                                         "The using directive for '{0}' appeared previously in this namespace.",
-                                         usingNamespaceEntity.NamespaceReference.SyntaxNode.TypeTags));
-      }
-
       _UsingNamespaces.Add(usingNamespaceEntity);
       usingNamespaceEntity.Parent = this;
-
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether a given namespace name 
-    /// was already specified in this namespace as a using namespace directive.
-    /// </summary>
-    /// <param name="namespaceName">A namespace name as string.</param>
-    /// <returns>True if the namespace name was already specified, false otherwise.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsUsingNamespaceNameAlreadySpecified(string namespaceName)
-    {
-      return (from usingNamespace in _UsingNamespaces
-              where usingNamespace.NamespaceReference.SyntaxNode.TypeTags.ToString() == namespaceName
-              select usingNamespace).Count() > 0;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -188,12 +169,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether a using namespace was already specified with the same name
+    /// and the same lexical scope.
+    /// </summary>
+    /// <param name="name">A namespace name in string form.</param>
+    /// <param name="lexicalScope">A source region.</param>
+    /// <returns>True if a using namespace was already specified with the same name and the same lexical scope. 
+    /// False otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsUsingNamespaceAlreadySpecified(string name, SourceRegion lexicalScope)
+    {
+      return (from usingNamespace in _UsingNamespaces
+              where usingNamespace.NamespaceName == name && usingNamespace.LexicalScope == lexicalScope
+              select usingNamespace).Count() > 0;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets an iterate-only collection of using alias entities.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<UsingAliasEntity> UsingAliases
     {
-      get { return _UsingAliases.Values; }
+      get { return _UsingAliases; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -204,26 +202,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddUsingAlias(UsingAliasEntity usingAliasEntity)
     {
-      if (_UsingAliases.ContainsKey(usingAliasEntity.Alias))
-      {
-        throw new ApplicationException(string.Format("The using alias '{0}' appeared previously in this namespace",
-                                                     usingAliasEntity.Alias));
-      }
-
-      _UsingAliases.Add(usingAliasEntity.Alias, usingAliasEntity);
+      _UsingAliases.Add(usingAliasEntity);
       usingAliasEntity.Parent = this;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether a given name was already defined as a using alias name.
-    /// </summary>
-    /// <param name="aliasName">An alias name.</param>
-    /// <returns>True if the name was already defined as a using alias name, false otherwise.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsUsingAliasNameDefined(string aliasName)
-    {
-      return _UsingAliases.ContainsKey(aliasName);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -237,15 +217,81 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public UsingAliasEntity GetUsingAliasByNameAndSourcePoint(string aliasName, SourcePoint sourcePoint)
     {
-      if (_UsingAliases.ContainsKey(aliasName))
-      {
-        var usingAliasEntity = _UsingAliases[aliasName];
-        if (usingAliasEntity.LexicalScope.Contains(sourcePoint))
-        {
-          return usingAliasEntity;
-        }
-      }
-      return null;
+      return (from usingAlias in UsingAliases
+             where usingAlias.Alias == aliasName && usingAlias.LexicalScope.Contains(sourcePoint)
+             select usingAlias).FirstOrDefault();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a using alias was already specified with the same alias name
+    /// and the same lexical scope.
+    /// </summary>
+    /// <param name="alias">The alias name.</param>
+    /// <param name="lexicalScope">A source region.</param>
+    /// <returns>True if a using alias was already specified with the same alias name and the same lexical scope. 
+    /// False otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsUsingAliasAlreadySpecified(string alias, SourceRegion lexicalScope)
+    {
+      return (from usingAlias in _UsingAliases
+              where usingAlias.Alias == alias && usingAlias.LexicalScope == lexicalScope
+              select usingAlias).Count() > 0;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of extern alias entities.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<ExternAliasEntity> ExternAliases
+    {
+      get { return _ExternAliases; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds an extern alias entity to this namespace.
+    /// </summary>
+    /// <param name="externAliasEntity">An extern alias entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddExternAlias(ExternAliasEntity externAliasEntity)
+    {
+      _ExternAliases.Add(externAliasEntity);
+      externAliasEntity.Parent = this;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an extern alias entity that has the given alias name, 
+    /// and can affect the resolution of a name at a given source point.
+    /// </summary>
+    /// <param name="aliasName">An alias name.</param>
+    /// <param name="sourcePoint">A source point.</param>
+    /// <returns>An extern alias entity, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public ExternAliasEntity GetExternAliasByNameAndSourcePoint(string aliasName, SourcePoint sourcePoint)
+    {
+      return (from externAlias in ExternAliases
+              where externAlias.Alias == aliasName && externAlias.LexicalScope.Contains(sourcePoint)
+              select externAlias).FirstOrDefault();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether an extern alias was already specified with the same alias name
+    /// and the same lexical scope.
+    /// </summary>
+    /// <param name="alias">The alias name.</param>
+    /// <param name="lexicalScope">A source region.</param>
+    /// <returns>True if an extern alias was already specified with the same alias name and the same lexical scope. 
+    /// False otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsExternAliasAlreadySpecified(string alias, SourceRegion lexicalScope)
+    {
+      return (from externAlias in _ExternAliases
+              where externAlias.Alias == alias && externAlias.LexicalScope == lexicalScope
+              select externAlias).Count() > 0;
     }
 
     #region Visitor methods
@@ -259,6 +305,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       visitor.Visit(this);
+
+      foreach (var externAlias in ExternAliases)
+      {
+        externAlias.AcceptVisitor(visitor);
+      }
 
       foreach (var usingNamespace in UsingNamespaces)
       {

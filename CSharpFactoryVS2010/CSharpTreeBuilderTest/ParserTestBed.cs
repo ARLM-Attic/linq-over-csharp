@@ -5,6 +5,7 @@
 // ================================================================================================
 using System;
 using System.IO;
+using CSharpTreeBuilder.Cst;
 using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilderTest
@@ -47,9 +48,9 @@ namespace CSharpTreeBuilderTest
       get
       {
         var locDrive = Environment.GetEnvironmentVariable("LOCDrive") ?? WorkingDrive;
-        if (!locDrive.EndsWith(@"\")) 
+        if (!locDrive.EndsWith(@"\"))
         {
-          locDrive += @"\"; 
+          locDrive += @"\";
         }
         var locPath = Environment.GetEnvironmentVariable("LOCPath") ?? WorkingPath;
         return Path.Combine(Path.Combine(locDrive, locPath), TestFilePath);
@@ -142,18 +143,10 @@ namespace CSharpTreeBuilderTest
 
       var errors = project.Errors.Count;
       Console.WriteLine("{0} errors detected", errors);
-      foreach (var error in project.Errors)
-      {
-        Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", error.Line, error.Column,
-          error.Code, error.Message, error.CompilationUnitNode.Name);
-      }
+      DumpMessages(project.Errors,Console.Out);
       Console.WriteLine();
       Console.WriteLine("{0} warnings detected", project.Warnings.Count);
-      foreach (var warning in project.Warnings)
-      {
-        Console.WriteLine("({0}, {1}) in {4}: {2}: {3}", warning.Line, warning.Column,
-          warning.Code, warning.Message, warning.CompilationUnitNode.Name);
-      }
+      DumpMessages(project.Warnings, Console.Out);
       Console.WriteLine();
 
       return errors == 0;
@@ -167,6 +160,26 @@ namespace CSharpTreeBuilderTest
     // --------------------------------------------------------------------------------------------
     protected virtual void AddCommonSource(CSharpProject project)
     {
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Dumps a collection of compilation messages to the specified output.
+    /// </summary>
+    /// <param name="messages">A collection of compilation messages.</param>
+    /// <param name="writer">A TextWriter object.</param>
+    // --------------------------------------------------------------------------------------------
+    private static void DumpMessages(CompilationMessageCollection messages, TextWriter writer)
+    {
+      foreach (var message in messages)
+      {
+        writer.WriteLine(
+          message.MessageToken == null
+            ? string.Format("{0}: {1}", message.Code, message.Message)
+            : string.Format("({0}, {1}) in {4}: {2}: {3}", message.Line, message.Column,
+                            message.Code, message.Message, message.CompilationUnitNode.Name)
+          );
+      }
     }
   }
 }

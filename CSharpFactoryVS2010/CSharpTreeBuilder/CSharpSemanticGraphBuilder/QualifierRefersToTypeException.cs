@@ -1,34 +1,28 @@
-﻿using System;
-namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// This abstract class represents a using directive in the semantic graph.
+  /// This exception is raised when a qualifier references a type instead of a namespace.
   /// </summary>
   // ================================================================================================
-  public abstract class UsingEntity : SemanticEntity, IHasLexicalScope
+  public sealed class QualifierRefersToType : NamespaceOrTypeNameResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="UsingEntity"/> class.
+    /// Initializes a new instance of the <see cref="QualifierRefersToType"/> class.
     /// </summary>
-    /// <param name="lexicalScope">The region of program text where the using entity has effect.</param>
+    /// <param name="qualifier">The qualifier.</param>
     // ----------------------------------------------------------------------------------------------
-    protected UsingEntity(SourceRegion lexicalScope)
+    public QualifierRefersToType(string qualifier)
     {
-      if (lexicalScope==null)
-      {
-        throw new ArgumentNullException("lexicalScope");
-      }
-
-      LexicalScope = lexicalScope;
+      Qualifier = qualifier;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the region of program text where this object has effect on.
+    /// Gets the qualifier.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SourceRegion LexicalScope { get; private set; }
+    public string Qualifier { get; private set; }
   }
 }

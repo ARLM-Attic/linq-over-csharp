@@ -23,8 +23,8 @@ namespace CSharpTreeBuilder.ProjectContent
     {
       Name = path;
       WorkingFolder = path;
-      AddAssemblyReference("mscorlib");
-      AddAssemblyReference("System");
+      //AddAssemblyReference("mscorlib");
+      //AddAssemblyReference("System");
     }
   }
 }

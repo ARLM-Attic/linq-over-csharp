@@ -28,7 +28,7 @@ namespace CSharpTreeBuilder.ProjectContent
       SourceFiles = new ImmutableCollection<SourceFileBase>();
       ConditionalSymbols = new ImmutableCollection<string>();
       References = new ImmutableCollection<ReferencedUnit>();
-      AddAssemblyReference("mscorlib");
+      //AddAssemblyReference("mscorlib");
     }
 
     #endregion

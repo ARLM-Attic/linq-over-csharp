@@ -87,7 +87,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier'
+    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier' (using alias)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
@@ -104,7 +104,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier'
+    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier' (using alias)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
@@ -1589,6 +1589,349 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS0138");
       project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS1681: You cannot redefine the global extern alias
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS1681_ExternAliasCannotBeGlobal()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS1681_ExternAliasCannotBeGlobal.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS1681");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0430: The extern alias 'MyExternAlias' was not specified in a /reference option
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0430_ExternAliasNotResolved()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\ExternAlias.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0430");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Extern alias resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ExternAlias()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\ExternAlias.cs");
+      project.AddAliasedAssemblyReference("MyExternAlias", TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeTrue();
+
+      project.SemanticGraph.RootNamespaces.ToList().Count.ShouldEqual(2);
+
+      var namespaceRef = project.SemanticGraph.GlobalNamespace.ExternAliases.ToArray()[0].RootNamespaceReference;
+      namespaceRef.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+      namespaceRef.TargetEntity.ShouldEqual(project.SemanticGraph.GetRootNamespaceByName("MyExternAlias"));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier' (extern alias)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0576_ExternAliasConflictsWithNamespaceDeclaration()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0576_ExternAliasConflictsWithNamespaceDeclaration.cs");
+      project.AddAliasedAssemblyReference("MyExternAlias", TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0576");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier' (extern alias)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0576_ExternAliasConflictsWithTypeDeclaration()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0576_ExternAliasConflictsWithTypeDeclaration.cs");
+      project.AddAliasedAssemblyReference("MyExternAlias", TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0576");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// The same using namespace directive specified in the same namespace but in different source regions
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void SameUsingSameNamespaceDifferentRegions()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\SameUsingSameNamespaceDifferentRegions.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").UsingNamespaces.ToList().Count.ShouldEqual(2);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// The same using alias directive specified in the same namespace but in different source regions
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void SameUsingAliasSameNamespaceDifferentRegions()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\SameUsingAliasSameNamespaceDifferentRegions.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").UsingAliases.ToList().Count.ShouldEqual(2);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// The same extern alias directive specified in the same namespace but in different source regions
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void SameExternAliasSameNamespaceDifferentRegions()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\SameExternAliasSameNamespaceDifferentRegions.cs");
+      project.AddAliasedAssemblyReference("MyExternAlias", TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeTrue();
+
+      project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("A").ExternAliases.ToList().Count.ShouldEqual(2);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0246: global qualified type not found
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0246_GlobalQualifiedTypeNotFound()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0246_GlobalQualifiedTypeNotFound.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0246");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Namespace and type references with global qualifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void GlobalQualifiedNames()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\GlobalQualifiedNames.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      int i = 0;
+
+      // global::A x1;
+      {
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("A");
+      }
+      // global::B<int> x2;
+      {
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("B`1[int]");
+      }
+      // global::C.D x3;
+      {
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("C.D");
+      }
+      // global::C.E<int> x4;
+      {
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("C.E`1[int]");
+      }
+      // global::C.E<int>.F<long> x5;
+      {
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("C.E`1.F`1[int,long]");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0431: Cannot use alias 'C' with '::' since the alias references a type. Use '.' instead.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0431_QualifierRefersToType()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0431_QualifierRefersToType.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0431");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Namespace and type references with extern alias qualifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ExternAliasQualifiedNames()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\ExternAliasQualifiedNames.cs");
+      project.AddAliasedAssemblyReference("MyExternAlias", TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeTrue();
+
+      int i = 0;
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
+
+      // MyExternAlias::Class0 x0;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.ShouldEqual(
+          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildTypeByDistinctiveName("Class0"));
+      }
+      // MyExternAlias::A.B.Class1 x1;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.ShouldEqual(
+          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildNamespaceByName("A")
+          .GetChildNamespaceByName("B").GetChildTypeByDistinctiveName("Class1"));
+      }
+      // MyExternAlias::A.B.Generic1<int,long> x2;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("A.B.Generic1`2[int,long]");
+      }
+
+      i = 0;
+
+      classEntity = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("B").GetChildNamespaceByName("C")
+        .GetChildTypeByDistinctiveName("A") as ClassEntity;
+
+      // MyExternAlias::Class0 x0;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.ShouldEqual(
+          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildTypeByDistinctiveName("Class0"));
+      }
+      // MyExternAlias::A.B.Class1 x1;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.ShouldEqual(
+          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildNamespaceByName("A")
+          .GetChildNamespaceByName("B").GetChildTypeByDistinctiveName("Class1"));
+      }
+      // MyExternAlias::A.B.Generic1<int,long> x2;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("A.B.Generic1`2[int,long]");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Namespace and type references with using alias qualifier.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UsingAliasQualifiedNames()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\UsingAliasQualifiedNames.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      int i = 0;
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
+
+      // X::Y1 x0;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.Y1");
+      }
+      // X::V.W.Y2 x1;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.V.W.Y2");
+      }
+      // X::Y3<int,long> x2;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.Y3`2[int,long]");
+      }
+
+      i = 0;
+
+      classEntity = project.SemanticGraph.GlobalNamespace.GetChildNamespaceByName("B").GetChildNamespaceByName("C").ChildTypes[0];
+
+      // X::Y1 x0;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.Y1");
+      }
+      // X::V.W.Y2 x1;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.V.W.Y2");
+      }
+      // X::Y3<int,long> x2;
+      {
+        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.TargetEntity.FullyQualifiedName.ShouldEqual("Y.Y3`2[int,long]");
+      }
+
     }
   }
 }

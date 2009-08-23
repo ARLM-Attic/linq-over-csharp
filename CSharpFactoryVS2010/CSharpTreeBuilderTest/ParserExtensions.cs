@@ -37,5 +37,20 @@ namespace CSharpTreeBuilderTest
     {
       project.ProjectProvider.AddAssemblyReference(fileName);
     }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds the specified assembly reference to the project, with an alias name.
+    /// </summary>
+    /// <param name="project">The project.</param>
+    /// <param name="alias">The alias name.</param>
+    /// <param name="fileName">Name of the file.</param>
+    // --------------------------------------------------------------------------------------------
+    public static void AddAliasedAssemblyReference(this CSharpProject project, string alias, string fileName)
+    {
+      var path = fileName.Substring(0, fileName.LastIndexOf('\\'));
+      var fileNameWithoutPath = fileName.Remove(0, path.Length + 1);
+      project.ProjectProvider.AddAliasedReference(alias, fileNameWithoutPath, path);
+    }
   }
 }

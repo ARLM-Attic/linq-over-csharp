@@ -740,8 +740,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         compilationUnitNode.UsingNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.UsingNodes[0].SemanticEntities[0].ShouldEqual(usingNamespace);
 
-        namespaceEntity.IsUsingNamespaceNameAlreadySpecified("A.B").ShouldBeTrue();
-        namespaceEntity.IsUsingNamespaceNameAlreadySpecified("A").ShouldBeFalse();
         namespaceEntity.GetUsingNamespacesBySourcePoint(new SourcePoint(null, 0)).Count().ShouldEqual(0);
         namespaceEntity.GetUsingNamespacesBySourcePoint(new SourcePoint(compilationUnitNode, 4)).Count().ShouldEqual(1);
       }
@@ -772,8 +770,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].SemanticEntities[0].ShouldEqual(usingNamespace);
 
-        namespaceB.IsUsingNamespaceNameAlreadySpecified("B").ShouldBeTrue();
-        namespaceB.IsUsingNamespaceNameAlreadySpecified("A").ShouldBeFalse();
         namespaceB.GetUsingNamespacesBySourcePoint(new SourcePoint(null, 0)).Count().ShouldEqual(0);
         namespaceB.GetUsingNamespacesBySourcePoint(new SourcePoint(compilationUnitNode,
             compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].StartPosition)).Count().ShouldEqual(1);
@@ -839,8 +835,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         compilationUnitNode.UsingNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.UsingNodes[0].SemanticEntities[0].ShouldEqual(usingAlias);
 
-        namespaceEntity.IsUsingAliasNameDefined("S").ShouldBeTrue();
-        namespaceEntity.IsUsingAliasNameDefined("X").ShouldBeFalse();
         namespaceEntity.GetUsingAliasByNameAndSourcePoint("S", new SourcePoint(null, 0)).ShouldBeNull();
         namespaceEntity.GetUsingAliasByNameAndSourcePoint("X", new SourcePoint(compilationUnitNode, 4)).ShouldBeNull();
         namespaceEntity.GetUsingAliasByNameAndSourcePoint("S", new SourcePoint(compilationUnitNode, 4)).ShouldEqual(usingAlias);
@@ -874,8 +868,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].SemanticEntities[0].ShouldEqual(usingAlias);
 
-        namespaceB.IsUsingAliasNameDefined("E").ShouldBeTrue();
-        namespaceB.IsUsingAliasNameDefined("X").ShouldBeFalse();
         namespaceB.GetUsingAliasByNameAndSourcePoint("E", new SourcePoint(null, 0)).ShouldBeNull();
         namespaceB.GetUsingAliasByNameAndSourcePoint("X", new SourcePoint(compilationUnitNode,
           compilationUnitNode.NamespaceDeclarations[0].UsingNodes[0].StartPosition)).ShouldBeNull();
@@ -894,6 +886,90 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS1537_UsingAliasDuplicate.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Warnings.Count.ShouldEqual(0);
+      project.Errors[0].Code.ShouldEqual("CS1537");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of extern alias entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildExternAliasEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildExternAliasEntities.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      var compilationUnitNode = project.SyntaxTree.CompilationUnitNodes[0];
+      {
+        // global root namespace
+        var namespaceEntity = project.SemanticGraph.GlobalNamespace;
+        namespaceEntity.FullyQualifiedName.ShouldEqual("global");
+
+        // extern alias A;
+        var externAliases = namespaceEntity.ExternAliases.ToList();
+        externAliases.Count.ShouldEqual(1);
+        var externAlias = externAliases[0];
+        externAlias.Alias.ShouldEqual("A");
+        externAlias.AliasedRootNamespace.ShouldBeNull();
+        externAlias.LexicalScope.CompilationUnit.ShouldEqual(compilationUnitNode);
+        externAlias.LexicalScope.FromSourcePoint.Position.ShouldEqual(compilationUnitNode.StartPosition);
+        externAlias.LexicalScope.ToSourcePoint.Position.ShouldEqual(compilationUnitNode.EndPosition);
+        externAlias.RootNamespaceReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        externAlias.RootNamespaceReference.SyntaxNode.ShouldEqual(compilationUnitNode.ExternAliasNodes[0]);
+        externAlias.Parent.ShouldEqual(namespaceEntity);
+        externAlias.ReflectedMetadata.ShouldBeNull();
+        externAlias.SyntaxNodes.Count.ShouldEqual(1);
+        externAlias.SyntaxNodes[0].ShouldEqual(compilationUnitNode.ExternAliasNodes[0]);
+
+        compilationUnitNode.ExternAliasNodes[0].SemanticEntities.Count.ShouldEqual(1);
+        compilationUnitNode.ExternAliasNodes[0].SemanticEntities[0].ShouldEqual(externAlias);
+
+        namespaceEntity.GetExternAliasByNameAndSourcePoint("A", new SourcePoint(null, 0)).ShouldBeNull();
+        namespaceEntity.GetExternAliasByNameAndSourcePoint("X", new SourcePoint(compilationUnitNode, 4)).ShouldBeNull();
+        namespaceEntity.GetExternAliasByNameAndSourcePoint("A", new SourcePoint(compilationUnitNode, 4)).ShouldEqual(
+          externAlias);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1537: The using alias 'alias' appeared previously in this namespace (for extern alias)
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS1537_ExternAliasDuplicateName()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS1537_ExternAliasDuplicateName.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Warnings.Count.ShouldEqual(0);
+      project.Errors[0].Code.ShouldEqual("CS1537");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Error CS1537: conflicting extern and using alias names
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS1537_ExternAndUsingAliasDuplicateName()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS1537_ExternAndUsingAliasDuplicateName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
       var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);

@@ -225,6 +225,8 @@
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\QualifierRefersToTypeException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\ExternAliasNodeBasedRootNamespaceEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolverException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNotResolvedException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolver.cs" />
@@ -256,6 +258,8 @@
     <Compile Include="CSharpSemanticGraph\ChildTypeCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstructedGenericTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeBasedNamespaceEntityReference.cs" />
+    <Compile Include="CSharpSemanticGraph\ExternAliasEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IHasLexicalScope.cs" />
     <Compile Include="CSharpSemanticGraph\UsingAliasEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeBasedNamespaceOrTypeEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\UsingNamespaceEntity.cs" />

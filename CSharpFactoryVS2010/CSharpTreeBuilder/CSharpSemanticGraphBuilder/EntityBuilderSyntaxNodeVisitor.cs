@@ -94,6 +94,61 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Creates an extern alias entity from an extern alias AST node.
+    /// </summary>
+    /// <param name="node">An extern alias AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(ExternAliasNode node)
+    {
+      // Determine the parent entity of the to-be-created extern alias entity.
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      // The parent entity should be a NamespaceEntity.
+      if (!(parentEntity is NamespaceEntity))
+      {
+        throw new ApplicationException(string.Format("Expected NamespaceEntity but received '{0}'.",
+                                                     parentEntity.GetType()));
+      }
+
+      var parentNamespaceEntity = parentEntity as NamespaceEntity;
+
+      // The parent of AST node should not be null.
+      if (node.ParentNode == null)
+      {
+        throw new ApplicationException("Unexpected null ParentNode.");
+      }
+
+      // Find out the compilation unit that the AST node belongs to
+      var compilationUnitNode = node.CompilationUnitNode;
+
+      // Spec: "The scope of an extern-alias-directive extends over the using-directives,
+      // global-attributes and namespace-member-declarations 
+      // of its immediately containing compilation unit or namespace body."
+      // But we just simplify it to be the whole parent AST node, 
+      // because we'll only use it to resolve names in the namespace-member-declarations anyway.
+      var lexicalScope = new SourceRegion(
+        new SourcePoint(compilationUnitNode, node.ParentNode.StartPosition),
+        new SourcePoint(compilationUnitNode, node.ParentNode.EndPosition));
+
+      // Check error CS1537: The using alias 'alias' appeared previously in this namespace
+      // _Note: It should say 'extern alias' instead of 'using alias' but that's how csc.exe works.
+      if (parentNamespaceEntity.IsExternAliasAlreadySpecified(node.Identifier, lexicalScope))
+      {
+        _ErrorHandler.Error("CS1537", node.StartToken, "The using alias '{0}' appeared previously in this namespace",
+                            node.Identifier);
+        return;
+      }
+
+      // Create the extern alias entity and add it to the parent namespace (which can be a root namespace as well).
+      var externAliasEntity = new ExternAliasEntity(lexicalScope, node);
+      parentNamespaceEntity.AddExternAlias(externAliasEntity);
+
+      // Establish to two-way mapping between the AST node and the new semantic entity
+      AssociateSyntaxNodeWithSemanticEntity(node, externAliasEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Creates a using namespace entity from a using namespace AST node.
     /// </summary>
     /// <param name="node">A using namespace AST node.</param>
@@ -164,20 +219,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // -- using alias branch
 
         // Check error CS1537: The using alias 'alias' appeared previously in this namespace
-        if (parentNamespaceEntity.IsUsingAliasNameDefined(aliasName))
+        if (parentNamespaceEntity.IsUsingAliasAlreadySpecified(aliasName, lexicalScope)
+          || parentNamespaceEntity.IsExternAliasAlreadySpecified(aliasName, lexicalScope))
         {
           _ErrorHandler.Error("CS1537", node.StartToken, "The using alias '{0}' appeared previously in this namespace",
                               aliasName);
-          return;
-        }
-
-        // TODO: move it to resolution
-        // Check error CS0576: Namespace 'namespace' contains a definition conflicting with alias 'identifier'
-        if (parentNamespaceEntity.DeclarationSpace.IsNameDefined(aliasName))
-        {
-          _ErrorHandler.Error("CS0576", node.StartToken,
-                              "Namespace '{0}' contains a definition conflicting with alias '{1}'",
-                              parentNamespaceEntity.FullyQualifiedName, aliasName);
           return;
         }
 
@@ -193,7 +239,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var namespaceName = node.NamespaceOrTypeName.TypeTags.ToString();
 
         // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
-        if (parentNamespaceEntity.IsUsingNamespaceNameAlreadySpecified(namespaceName))
+        if (parentNamespaceEntity.IsUsingNamespaceAlreadySpecified(namespaceName,lexicalScope))
         {
           _ErrorHandler.Warning("CS0105", node.StartToken,
                                 "The using directive for '{0}' appeared previously in this namespace", namespaceName);

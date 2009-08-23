@@ -77,7 +77,10 @@ namespace CSharpTreeBuilder.Cst
     // ----------------------------------------------------------------------------------------------
     public int Line
     {
-      get { return MessageToken.Line + (ErrorLineOffset > 0 ? ErrorLineOffset : 0); }
+      get
+      {
+        return MessageToken == null ? -1 : MessageToken.Line + (ErrorLineOffset > 0 ? ErrorLineOffset : 0);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -85,7 +88,13 @@ namespace CSharpTreeBuilder.Cst
     /// Gets the columns number of the error token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public int Column { get { return MessageToken.Column; } }
+    public int Column
+    {
+      get
+      {
+        return MessageToken == null ? -1 : MessageToken.Column;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

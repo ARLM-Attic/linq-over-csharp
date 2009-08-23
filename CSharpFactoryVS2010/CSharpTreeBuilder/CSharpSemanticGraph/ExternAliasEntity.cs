@@ -6,54 +6,65 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a using namespace directive in the semantic graph.
+  /// This class represents an extern alias directive in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class UsingNamespaceEntity : UsingEntity
+  public sealed class ExternAliasEntity : SemanticEntity, IHasLexicalScope
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="UsingNamespaceEntity"/> class.
+    /// Initializes a new instance of the <see cref="ExternAliasEntity"/> class.
     /// </summary>
-    /// <param name="lexicalScope">The region of program text where the using entity has effect.</param>
-    /// <param name="namespaceOrTypeName">The AST node that is name of the imported namespace.</param>
+    /// <param name="lexicalScope">The region of program text where the extern alias has effect.</param>
+    /// <param name="externAliasNode">The name of the alias.</param>
     // ----------------------------------------------------------------------------------------------
-    public UsingNamespaceEntity(SourceRegion lexicalScope, NamespaceOrTypeNameNode namespaceOrTypeName)
-      : base(lexicalScope)
+    public ExternAliasEntity(SourceRegion lexicalScope, ExternAliasNode externAliasNode)
     {
-      if (namespaceOrTypeName == null)
+      if (lexicalScope == null)
       {
-        throw new ArgumentNullException("namespaceOrTypeName");
+        throw new ArgumentNullException("lexicalScope");
+      }
+      if (externAliasNode == null)
+      {
+        throw new ArgumentNullException("externAliasNode");
       }
 
-      NamespaceReference = new NamespaceOrTypeNameNodeBasedNamespaceEntityReference(namespaceOrTypeName);
-      NamespaceName = namespaceOrTypeName.TypeTags.ToString();
+      LexicalScope = lexicalScope;
+      RootNamespaceReference = new ExternAliasNodeBasedRootNamespaceEntityReference(externAliasNode);
+      Alias = externAliasNode.Identifier;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the imported namespace (eg. "A.B").
+    /// Gets the region of program text where this object has effect on.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string NamespaceName { get; private set; }
+    public SourceRegion LexicalScope { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the imported namespace entity.
+    /// Gets the alias name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeNameNodeBasedNamespaceEntityReference NamespaceReference { get; private set; }
+    public string Alias { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the imported namespace entity, or null if not yet resolved.
+    /// Gets the reference to a namespace entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceEntity ImportedNamespace
+    public ExternAliasNodeBasedRootNamespaceEntityReference RootNamespaceReference { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the aliased namespace entity. Null if not yet resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceEntity AliasedRootNamespace
     {
       get
       {
-        return NamespaceReference.TargetEntity;
+        return RootNamespaceReference.TargetEntity;
       }
     }
 
@@ -68,9 +79,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       visitor.Visit(this);
+
     }
 
     #endregion
-
   }
 }

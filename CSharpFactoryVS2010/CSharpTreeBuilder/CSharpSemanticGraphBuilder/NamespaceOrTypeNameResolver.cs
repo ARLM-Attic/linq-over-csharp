@@ -127,13 +127,38 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       NamespaceOrTypeEntity foundEntity = null;
+      TypeTagNodeCollection typeTagsToBeResolved = namespaceOrTypeName.TypeTags;
 
       // If the namespace-or-type-name is a qualified-alias-member its meaning is as described in §9.7.
       if (namespaceOrTypeName.HasQualifier)
       {
-        // TODO: resolve qualified-alias-member
+        try
+        {
+          foundEntity = ResolveQualifiedAliasMember(
+            namespaceOrTypeName.Qualifier, namespaceOrTypeName.TypeTags[0], resolutionContextEntity, _SemanticGraph.GlobalNamespace);
+        }
+        catch (Exception e)
+        {
+          TranslateExceptionToError(e, _ErrorHandler, namespaceOrTypeName);
+        }
 
-        return foundEntity;
+        // If the qualified-alias-member part of the name could not be resolved, then we can't continue the resolution.
+        if (foundEntity == null)
+        {
+          return null;
+        }
+
+        // If the namespace-or-type-name has no more typetag, then we're finished with the resolution
+        if (namespaceOrTypeName.TypeTags.Count == 1)
+        {
+          return foundEntity;
+        }
+
+        // Otherwise the resolution must be continued, 
+        // - only the remaining typetags need to be resolved,
+        // - and the resolution context is the found entity.
+        typeTagsToBeResolved = namespaceOrTypeName.TypeTags.GetCopyWithoutFirstTag();
+        resolutionContextEntity = foundEntity;
       }
 
       // Otherwise, a namespace-or-type-name has one of four forms:
@@ -148,7 +173,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       try
       {
         // The meaning of a namespace-or-type-name is determined as follows:
-        foundEntity = ResolveTypeTags(namespaceOrTypeName.TypeTags, resolutionContextEntity);
+        foundEntity = ResolveTypeTags(typeTagsToBeResolved, resolutionContextEntity);
       }
       catch(Exception e)
       {
@@ -191,6 +216,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                            namespaceOrTypeName.ToString(),
                            (e as AmbigousReferenceException).FullyQualifiedName1,
                            (e as AmbigousReferenceException).FullyQualifiedName2);
+      }
+      else if (e is QualifierRefersToType)
+      {
+        errorHandler.Error("CS0431", namespaceOrTypeName.StartToken,
+                           "Cannot use alias '{0}' with '::' since the alias references a type. Use '.' instead.",
+                           (e as QualifierRefersToType).Qualifier);
       }
       else
       {
@@ -372,9 +403,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             // If the location where the namespace-or-type-name occurs is enclosed by a namespace declaration for N 
             // and the namespace declaration contains an extern-alias-directive or using-alias-directive 
             // that associates the name I with a namespace or type, ...
-            if (namespaceContext.GetUsingAliasByNameAndSourcePoint(typeTagNode.Identifier, typeTagNode.SourcePoint) != null)
-
-            // TODO: check extern-alias-directive too!
+            if (namespaceContext.GetUsingAliasByNameAndSourcePoint(typeTagNode.Identifier, typeTagNode.SourcePoint) != null
+              || namespaceContext.GetExternAliasByNameAndSourcePoint(typeTagNode.Identifier, typeTagNode.SourcePoint) != null)
             {
               // ... then the namespace-or-type-name is ambiguous and a compile-time error occurs. (CS0576)
               throw new AliasNameConflictException(namespaceContext.FullyQualifiedName, typeTagNode.Identifier);
@@ -395,10 +425,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // and the namespace declaration contains an extern-alias-directive or using-alias-directive 
           // that associates the name I with a namespace or type, then the namespace-or-type-name is ambiguous 
           // and a compile-time error occurs.
-          if (typeTagNode.GenericDimensions == 0
-            && namespaceContext.GetUsingAliasByNameAndSourcePoint(typeTagNode.Identifier, typeTagNode.SourcePoint) != null)
-
-          // TODO: check extern-alias-directive too!
+          if (typeTagNode.GenericDimensions == 0 &&
+            (namespaceContext.GetUsingAliasByNameAndSourcePoint(typeTagNode.Identifier, typeTagNode.SourcePoint) != null
+              || namespaceContext.GetExternAliasByNameAndSourcePoint(typeTagNode.Identifier, typeTagNode.SourcePoint) != null)
+            )
           {
             // ... then the namespace-or-type-name is ambiguous and a compile-time error occurs. (CS0576)
             throw new AliasNameConflictException(namespaceContext.FullyQualifiedName, typeTagNode.Identifier);
@@ -526,6 +556,131 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       return typeEntities;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Applies qualified alias member resolution logic described in the spec (§9.7 Namespace alias qualifiers).
+    /// A qualified-alias-member has one of two forms:
+    /// - N::I{A1, ..., AK}, where N and I represent identifiers, and {A1, ..., AK} is a type argument list. (K is always at least one.)
+    /// - N::I, where N and I represent identifiers. (In this case, K is considered to be zero.)
+    /// </summary>
+    /// <param name="qualifier">An identifier, the left-hand side of the qualified alias member.</param>
+    /// <param name="typeTagNode">The right-hand side of the qualified alias member.</param>
+    /// <param name="resolutionContextEntity">The context of the resolution.</param>
+    /// <param name="globalNamespace">The global root namespace.</param>
+    /// <returns>A NamespaceOrTypeEntity, or null if could not resolve.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static NamespaceOrTypeEntity ResolveQualifiedAliasMember(
+      string qualifier, TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity, RootNamespaceEntity globalNamespace)
+    {
+      // A qualified-alias-member has one of two forms:
+      // - N::I{A1, ..., AK}, where N and I represent identifiers, and {A1, ..., AK} is a type argument list. (K is always at least one.)
+      // - N::I, where N and I represent identifiers. (In this case, K is considered to be zero.)
+      // Using this notation, the meaning of a qualified-alias-member is determined as follows:
+
+      // If N is the identifier global, then the global namespace is searched for I:
+      if (qualifier == globalNamespace.Name)
+      {
+        // If the global namespace contains a namespace named I and K is zero, ...
+        if (typeTagNode.GenericDimensions == 0)
+        {
+          var namespaceEntity = globalNamespace.DeclarationSpace.GetSpecificType<NamespaceEntity>(typeTagNode.Identifier);
+          if (namespaceEntity != null)
+          {
+            // ... then the qualified-alias-member refers to that namespace.
+            return namespaceEntity;
+          }
+        }
+
+        // Otherwise, if the global namespace contains a non-generic type named I and K is zero, ...
+        // Otherwise, if the global namespace contains a type named I that has K type parameters, ... 
+        var typeEntity = globalNamespace.DeclarationSpace.GetSpecificType<TypeEntity>(typeTagNode.NameWithGenericDimensions);
+        if (typeEntity != null)
+        {
+          // ... then the qualified-alias-member refers to that type.
+          // ... then the qualified-alias-member refers to that type constructed with the given type arguments. 
+          //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
+          //  --> Here we just return the resolved generic type definition entity.
+          return typeEntity;
+        }
+
+        // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
+        throw new NamespaceOrTypeNameNotResolvedException();
+      }
+
+      var sourcePoint = typeTagNode.SourcePoint;
+
+      // Otherwise, starting with the namespace declaration immediately containing the qualified-alias-member (if any), 
+      var namespaceContext = resolutionContextEntity.GetEnclosing<NamespaceEntity>();
+      // continuing with each enclosing namespace declaration (if any), 
+      // and ending with the compilation unit containing the qualified-alias-member, ...
+      while (namespaceContext != null)
+      {
+        // ... the following steps are evaluated until an entity is located:
+
+        // If the namespace declaration or compilation unit contains a using-alias-directive ...
+        var usingAliasEntity = namespaceContext.GetUsingAliasByNameAndSourcePoint(qualifier, sourcePoint);
+        if (usingAliasEntity != null)
+        {
+          // ... that associates N with a type, ...
+          if (usingAliasEntity.AliasedType != null)
+          {
+            // ... then the qualified-alias-member is undefined and a compile-time error occurs.
+            throw new QualifierRefersToType(qualifier);
+          }
+        }
+
+        // Otherwise, if the namespace declaration or compilation unit 
+        // contains an extern-alias-directive or using-alias-directive that associates N with a namespace, then:
+        var externAliasEntity = namespaceContext.GetExternAliasByNameAndSourcePoint(qualifier, sourcePoint);
+        if ((usingAliasEntity != null && usingAliasEntity.AliasedNamespace != null)
+          || (externAliasEntity != null && externAliasEntity.AliasedRootNamespace != null))
+        {
+          NamespaceEntity qualifierNamespaceEntity =
+            (usingAliasEntity != null ? usingAliasEntity.AliasedNamespace : null)
+            ?? (externAliasEntity != null ? externAliasEntity.AliasedRootNamespace : null);
+
+          // If the namespace associated with N contains a namespace named I and K is zero, ... 
+          if (typeTagNode.GenericDimensions == 0)
+          {
+            var childNamespaceEntity =
+              qualifierNamespaceEntity.DeclarationSpace.GetSpecificType<NamespaceEntity>(typeTagNode.Identifier);
+
+            if (childNamespaceEntity != null)
+            {
+              // ... then the qualified-alias-member refers to that namespace.
+              return childNamespaceEntity;
+            }
+          }
+
+          // Otherwise, if the namespace associated with N contains a non-generic type named I and K is zero, ...
+          // Otherwise, if the namespace associated with N contains a type named I that has K type parameters, ...
+          var childTypeEntity =
+            qualifierNamespaceEntity.DeclarationSpace.GetSpecificType<TypeEntity>(typeTagNode.NameWithGenericDimensions);
+          if (childTypeEntity != null)
+          {
+            // ... then the qualified-alias-member refers to that type.
+            // ... then the qualified-alias-member refers to that type constructed with the given type arguments.
+            //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
+            //  --> Here we just return the resolved generic type definition entity.
+            return childTypeEntity;
+          }
+
+          // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
+          throw new NamespaceOrTypeNameNotResolvedException();
+        }
+
+        // "... continuing with each enclosing namespace declaration (if any), ..."
+        namespaceContext = namespaceContext.Parent.GetEnclosing<NamespaceEntity>();
+      }
+
+      // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
+      throw new NamespaceOrTypeNameNotResolvedException();
+
+      // _Note that using the namespace alias qualifier with an alias that references a type causes a compile-time error. 
+      // Also _note that if the identifier N is global, then lookup is performed in the global namespace, 
+      // even if there is a using alias associating global with a type or namespace.
     }
 
     #endregion

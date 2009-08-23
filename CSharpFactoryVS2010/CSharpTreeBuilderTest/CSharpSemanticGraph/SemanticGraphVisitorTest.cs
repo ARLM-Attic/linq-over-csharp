@@ -89,5 +89,39 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       // Assert
       mocks.VerifyAll();
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the visiting of extern alias entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void VisitExternAliasEntity()
+    {
+      // Set up a syntax tree
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SemanticGraphVisitor\VisitExternAliasEntity.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+
+      // Arrange
+      var mocks = new MockRepository();
+      var sgVisitorMock = mocks.StrictMock<SemanticGraphVisitor>();
+      using (mocks.Ordered())
+      {
+        var global = project.SemanticGraph.GlobalNamespace;
+        sgVisitorMock.Visit(global);
+        sgVisitorMock.Visit(global.ExternAliases.ToArray()[0]);
+        sgVisitorMock.Visit(global.ChildNamespaces[0]);
+        sgVisitorMock.Visit(global.ChildNamespaces[0].ExternAliases.ToArray()[0]);
+      }
+      mocks.ReplayAll();
+
+      // We only travers the global namespace, not the whole semantic graph, because that would include the built-in types too
+      project.SemanticGraph.GlobalNamespace.AcceptVisitor(sgVisitorMock);
+
+      // Assert
+      mocks.VerifyAll();
+    }
   }
 }

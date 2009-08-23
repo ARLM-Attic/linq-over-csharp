@@ -29,6 +29,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Resolves extern alias reference.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(ExternAliasEntity entity)
+    {
+      if (entity.Parent == null)
+      {
+        throw new ApplicationException("UsingNamespaceEntity.Parent should not be null.");
+      }
+
+      entity.RootNamespaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Resolves namespace reference in a using namespace entity.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>

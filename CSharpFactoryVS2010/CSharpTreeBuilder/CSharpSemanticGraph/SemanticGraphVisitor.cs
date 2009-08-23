@@ -11,6 +11,7 @@
     #pragma warning disable 1591 
 
     public virtual void Visit(NamespaceEntity entity) { }
+    public virtual void Visit(ExternAliasEntity entity) { }
     public virtual void Visit(UsingNamespaceEntity entity) { }
     public virtual void Visit(UsingAliasEntity entity) { }
     public virtual void Visit(TypeEntity entity) { }

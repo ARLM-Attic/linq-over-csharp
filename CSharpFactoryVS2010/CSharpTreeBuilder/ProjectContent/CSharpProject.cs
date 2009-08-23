@@ -5,6 +5,7 @@
 // ================================================================================================
 using System;
 using System.Collections.Generic;
+using System.IO;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 
@@ -37,7 +38,6 @@ namespace CSharpTreeBuilder.ProjectContent
       Warnings = new CompilationMessageCollection();
       SemanticGraph = new SemanticGraph();
       ConditionalSymbols = new List<string>();
-      ReferencedAssemblyFilenames = new List<string>();
 
       // --- Set up the default error handling parameters
       ErrorMessageFormat = "-- line {0} col {1}: {2}";
@@ -130,13 +130,6 @@ namespace CSharpTreeBuilder.ProjectContent
     // --------------------------------------------------------------------------------------------
     public List<string> ConditionalSymbols { get; private set; }
 
-    // --------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the list of referenced assembly filenames.
-    /// </summary>
-    // --------------------------------------------------------------------------------------------
-    public List<string> ReferencedAssemblyFilenames { get; private set; }
-
     #endregion
 
     #region Public methods
@@ -201,9 +194,15 @@ namespace CSharpTreeBuilder.ProjectContent
       factory.CreateEntitiesFromAssembly(typeof(int).Assembly.Location, "global");
 
       // Load other referenced assemblies into the semantic graph
-      foreach (string filename in ReferencedAssemblyFilenames)
+      foreach (var referencedUnit in ProjectProvider.References)
       {
-        factory.CreateEntitiesFromAssembly(filename, "global");
+        if (referencedUnit is ReferencedAssembly)
+        {
+          var referencedAssembly = referencedUnit as ReferencedAssembly;
+          var alias = string.IsNullOrEmpty(referencedAssembly.Alias) ? "global" : referencedAssembly.Alias;
+
+          factory.CreateEntitiesFromAssembly(Path.Combine(referencedAssembly.FilePath, referencedAssembly.Name), alias);
+        }
       }
 
       // Create entities from ASTs

@@ -335,7 +335,23 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_UsingAliasDuplicate.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildUsingAliasEntities.cs" />
     <None Include="TestFiles\TypeResolution\Error_NoTypeArgumentsCanBePresentInANamespaceName.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildExternAliasEntities.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_ExternAliasDuplicateName.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_ExternAndUsingAliasDuplicateName.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <Compile Include="TestFiles\TypeResolution\UsingAliasQualifiedNames.cs" />
+    <None Include="TestFiles\TypeResolution\CS0576_ExternAliasConflictsWithTypeDeclaration.cs" />
+    <None Include="TestFiles\TypeResolution\CS0576_ExternAliasConflictsWithNamespaceDeclaration.cs" />
+    <None Include="TestFiles\TypeResolution\SameExternAliasSameNamespaceDifferentRegions.cs" />
+    <None Include="TestFiles\TypeResolution\SameUsingAliasSameNamespaceDifferentRegions.cs" />
+    <None Include="TestFiles\TypeResolution\CS0246_GlobalQualifiedTypeNotFound.cs" />
+    <None Include="TestFiles\TypeResolution\ExternAliasQualifiedNames.cs" />
+    <None Include="TestFiles\TypeResolution\ExternAlias.cs" />
+    <None Include="TestFiles\TypeResolution\CS0431_QualifierRefersToType.cs" />
+    <None Include="TestFiles\TypeResolution\GlobalQualifiedNames.cs" />
+    <None Include="TestFiles\TypeResolution\SameUsingSameNamespaceDifferentRegions.cs" />
+    <None Include="TestFiles\SemanticGraphVisitor\VisitExternAliasEntity.cs" />
+    <None Include="TestFiles\TypeResolution\CS1681_ExternAliasCannotBeGlobal.cs" />
     <None Include="TestFiles\TypeResolution\CS0576_UsingAliasConflictsWithTypeDeclaration.cs" />
     <None Include="TestFiles\TypeResolution\CS0576_UsingAliasConflictsWithNamespaceDeclaration.cs" />
     <None Include="TestFiles\TypeResolution\UsingNamespaceNames_SingleTag.cs" />
@@ -425,6 +441,11 @@
     <ProjectReference Include="..\CSharpTreeBuilder\CSharpTreeBuilder.csproj">
       <Project>{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}</Project>
       <Name>CSharpTreeBuilder</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MetadataImportTestSubject\MetadataImportTestSubject.csproj">
+      <Project>{E74A7D6D-CCF2-4015-B400-A5D63524D99B}</Project>
+      <Name>MetadataImportTestSubject</Name>
+      <Aliases>MyExternAlias</Aliases>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -53,6 +53,30 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Creates a copy of the type tag collection, but without the first type tag.
+    /// </summary>
+    /// <returns>A new TypeTagNodeCollection.</returns>
+    /// <remarks>Throws an exception for a collection with less than 2 items.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TypeTagNodeCollection GetCopyWithoutFirstTag()
+    {
+      if (Count < 2)
+      {
+        throw new InvalidOperationException(string.Format("This collection has only '{0}' items.", Count));
+      }
+
+      var newTypeTagNodeCollection = new TypeTagNodeCollection();
+
+      for (int i = 1; i < Count; i++)
+      {
+        newTypeTagNodeCollection.Add(this[i]);
+      }
+
+      return newTypeTagNodeCollection;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Returns the string representation of the object.
     /// </summary>
     /// <returns>The string representation of the object.</returns>
