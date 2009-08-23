@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.Ast
   /// 	</blockquote>
   /// </remarks>
   // ================================================================================================
-  public class TypeTagNode : SyntaxNode<TypeNode>, IIdentifierSupport, ITypeArguments
+  public class TypeTagNode : SyntaxNode<NamespaceOrTypeNameNode>, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -140,6 +140,19 @@ namespace CSharpTreeBuilder.Ast
     public int GenericDimensions
     {
       get { return Arguments.Count; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the typetag name with generic dimensions (eg. A`1).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string NameWithGenericDimensions
+    {
+      get
+      {
+        return GenericDimensions > 0 ? Identifier + "`" + GenericDimensions : Identifier;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

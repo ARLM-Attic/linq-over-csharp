@@ -16,6 +16,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class TypeNode : SyntaxNode<ISyntaxNode>
   {
+    /// <summary>Backing field for TypeName property.</summary>
+    private NamespaceOrTypeNameNode _TypeName;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeNode"/> class.
@@ -46,7 +49,22 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the type name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeNameNode TypeName { get; internal set; }
+    public NamespaceOrTypeNameNode TypeName
+    {
+      get
+      {
+        return _TypeName;
+      }
+
+      internal set
+      {
+        if (value != null)
+        {
+          value.ParentNode = this;
+        }
+        _TypeName = value;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

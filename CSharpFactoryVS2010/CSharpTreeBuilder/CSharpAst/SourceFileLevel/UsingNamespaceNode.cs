@@ -56,17 +56,6 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a new blank <see cref="UsingNamespaceNode"/> object 
-    /// with no parent and empty namespace name.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public UsingNamespaceNode()
-      : this(null, Token.Using, null, Token.Semicolon)
-    {
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the namespace-or-type-name belonging to this using directive.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

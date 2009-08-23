@@ -69,6 +69,7 @@
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactoryTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityExtensionsTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphVisitorTest.cs" />
@@ -332,10 +333,12 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildUsingNamespaceEntities.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0105_UsingNamespaceDuplicate.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_UsingAliasDuplicate.cs" />
-    <None Include="TestFiles\TypeResolution\CS0576_UsingAliasConflictsWithDeclaration.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildUsingAliasEntities.cs" />
     <None Include="TestFiles\TypeResolution\Error_NoTypeArgumentsCanBePresentInANamespaceName.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeResolution\CS0576_UsingAliasConflictsWithTypeDeclaration.cs" />
+    <None Include="TestFiles\TypeResolution\CS0576_UsingAliasConflictsWithNamespaceDeclaration.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespaceNames_SingleTag.cs" />
     <None Include="TestFiles\TypeResolution\NotInScopeForUsingNamespace.cs" />
     <None Include="TestFiles\TypeResolution\UsingFindsGenericTypeToo.cs" />
     <None Include="TestFiles\TypeResolution\UsingFindsEmbeddedTypeToo.cs" />
@@ -343,9 +346,8 @@
     <None Include="TestFiles\TypeResolution\NamespacesAreNotImportedWithUsing.cs" />
     <None Include="TestFiles\TypeResolution\CS0138_UsingNamespaceWithTypeName.cs" />
     <None Include="TestFiles\TypeResolution\CS0246_NamespaceNameCouldNotBeFound.cs" />
-    <None Include="TestFiles\TypeResolution\UsingNamespaceNames.cs" />
+    <None Include="TestFiles\TypeResolution\UsingNamespaceNames_MultiTag.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\VisitUsingEntity.cs" />
-    <None Include="TestFiles\TypeResolution\CS0108_HidesInheritedMember.cs" />
     <None Include="TestFiles\TypeResolution\Precedence5b_Level2_UsingAlias.cs" />
     <None Include="TestFiles\TypeResolution\Precedence6_Level2_UsingNamespace.cs" />
     <None Include="TestFiles\TypeResolution\Precedence5a_Level2_Parent.cs" />

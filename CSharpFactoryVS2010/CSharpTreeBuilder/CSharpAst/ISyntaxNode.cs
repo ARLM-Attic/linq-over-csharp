@@ -179,6 +179,13 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the SourcePoint of the start position of this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    SourcePoint SourcePoint { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Accepts a visitor object, according to the Visitor pattern.
     /// </summary>
     /// <param name="visitor">A visitor object</param>

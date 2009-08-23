@@ -35,5 +35,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public int Position { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a dummy source point.
+    /// </summary>
+    /// <returns>A dummy source point.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SourcePoint GetDummy()
+    {
+      return new SourcePoint(null, -1);
+    }
   }
 }

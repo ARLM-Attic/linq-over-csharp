@@ -67,5 +67,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
              && FromSourcePoint.Position <= sourcePoint.Position
              && sourcePoint.Position <= ToSourcePoint.Position;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a dummy source region.
+    /// </summary>
+    /// <returns>A dummy source region.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static SourceRegion GetDummy()
+    {
+      return new SourceRegion(SourcePoint.GetDummy(),SourcePoint.GetDummy());
+    }
   }
 }

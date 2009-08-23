@@ -90,6 +90,33 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Create a namespace-or-type-name node from a dotted name string (eg. "System.Text").
+    /// </summary>
+    /// <param name="dottedName">A dotted name string (eg. "System.Text").</param>
+    /// <returns>A new NamespaceOrTypeNameNode</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static NamespaceOrTypeNameNode CreateFromDottedName(string dottedName)
+    {
+      NamespaceOrTypeNameNode result = null;
+
+      bool isFirstTag = true;
+      foreach (var namePart in dottedName.Split('.'))
+      {
+        var token = new Token(namePart);
+        if (isFirstTag)
+        {
+          result = new NamespaceOrTypeNameNode(token);
+          isFirstTag = false;
+        }
+        result.TypeTags.Add(new TypeTagNode(token, null));
+        result.Terminate(token);
+      }
+
+      return result;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the string representation of this language element.
     /// </summary>
     /// <returns>Full name of the language element.</returns>

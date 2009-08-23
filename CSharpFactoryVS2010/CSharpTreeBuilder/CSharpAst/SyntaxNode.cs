@@ -344,6 +344,19 @@ namespace CSharpTreeBuilder.Ast
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the SourcePoint of the start position of this node.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SourcePoint SourcePoint
+    {
+      get
+      {
+        return new SourcePoint(CompilationUnitNode, StartPosition);
+      }
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------
