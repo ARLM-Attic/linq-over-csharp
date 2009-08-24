@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -7,6 +9,26 @@
   // ================================================================================================
   public sealed class DelegateEntity : GenericCapableTypeEntity
   {
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the reference to the return type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the return type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity ReturnType 
+    { 
+      get
+      {
+        return ReturnTypeReference == null ? null : ReturnTypeReference.TargetEntity;
+      }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this type is a reference type.
@@ -26,5 +48,22 @@
     {
       get { return true; }
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

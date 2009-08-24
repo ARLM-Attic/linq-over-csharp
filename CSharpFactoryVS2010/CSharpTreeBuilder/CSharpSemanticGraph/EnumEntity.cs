@@ -11,11 +11,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the underlying type of the enum.
+    /// Gets or sets the reference to the underlying type of the enum.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> UnderlyingType { get; set; }
+    public SemanticEntityReference<TypeEntity> UnderlyingTypeReference { get; set; }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the underlying type of the enum.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity UnderlyingType
+    {
+      get { return UnderlyingTypeReference == null ? null : UnderlyingTypeReference.TargetEntity; }
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this type is a value type.
@@ -35,5 +45,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return true; }
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

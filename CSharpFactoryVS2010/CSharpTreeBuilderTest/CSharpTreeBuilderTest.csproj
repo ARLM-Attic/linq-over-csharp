@@ -340,6 +340,8 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_ExternAndUsingAliasDuplicateName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildEnumMemberEntities.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeResolution\CS1008_EnumBaseNonIntegral.cs" />
+    <None Include="TestFiles\TypeResolution\DelegateType.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\VisitEnumEntity.cs" />
     <None Include="TestFiles\TypeResolution\EnumUnderlyingType.cs" />
     <None Include="TestFiles\TypeResolution\UsingAliasQualifiedNames.cs" />
@@ -383,6 +385,7 @@
     <None Include="TestFiles\TypeResolution\DeclaredInBaseClass.cs" />
     <None Include="TestFiles\TypeResolution\BuiltInTypes.cs" />
     <None Include="TestFiles\TypeResolution\ArrayType.cs" />
+    <None Include="TestFiles\TypeResolution\CS0670_VoidField.cs" />
     <None Include="TestFiles\TypeResolution\PointerToUnknown.cs" />
     <None Include="TestFiles\TypeResolution\NullableType.cs" />
     <None Include="TestFiles\TypeResolution\PointerToType.cs" />

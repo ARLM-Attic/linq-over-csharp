@@ -33,9 +33,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(FieldEntity entity)
     {
       // Resolve the type of the field
-      if (entity.Type != null)
+      if (entity.TypeReference != null)
       {
-        entity.Type.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+        entity.TypeReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+
+        if (entity.Type == _SemanticGraph.GetBuiltInTypeByName("void"))
+        {
+          var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
+                             ? ((TypeNodeBasedTypeEntityReference) entity.TypeReference).SyntaxNode.StartToken
+                             : null;
+
+          _ErrorHandler.Error("CS0670", errorPoint, "Field cannot have void type");
+        }
       }
     }
   }

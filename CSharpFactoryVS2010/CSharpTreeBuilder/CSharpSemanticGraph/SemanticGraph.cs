@@ -196,6 +196,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _BuiltInTypes.Add("decimal",new BuiltInTypeEntity(BuiltInType.Decimal));
       _BuiltInTypes.Add("object",new BuiltInTypeEntity(BuiltInType.Object));
       _BuiltInTypes.Add("string",new BuiltInTypeEntity(BuiltInType.String));
+      _BuiltInTypes.Add("void", new BuiltInTypeEntity(BuiltInType.Void));
     }
 
     #endregion

@@ -17,9 +17,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the type reference of the variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    SemanticEntityReference<TypeEntity> TypeReference { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the type of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntityReference<TypeEntity> Type { get; }
+    TypeEntity Type { get; }
   }
 }

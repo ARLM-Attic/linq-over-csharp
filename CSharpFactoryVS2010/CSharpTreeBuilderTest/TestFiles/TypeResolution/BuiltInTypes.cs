@@ -15,7 +15,9 @@
   decimal a13;
   object a14;
   string a15;
-
+  
   int? a16;
   int*[] a17;
 }
+
+delegate void D();

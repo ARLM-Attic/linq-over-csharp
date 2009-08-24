@@ -88,19 +88,110 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resolves type references in a TypeEntity node.
+    /// Resolves type references in a ClassEntity node.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Visit(TypeEntity entity)
+    public override void Visit(ClassEntity entity)
     {
-      // Resolve base type references
+      ResolveBaseTypeReferences(entity);
+      AssignImplicitBaseType(entity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a StructEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(StructEntity entity)
+    {
+      ResolveBaseTypeReferences(entity);
+      AssignImplicitBaseType(entity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a InterfaceEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(InterfaceEntity entity)
+    {
+      ResolveBaseTypeReferences(entity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a DelegateEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(DelegateEntity entity)
+    {
+      // Resolve return type
+      if (entity.ReturnTypeReference != null)
+      {
+        entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      }
+
+      AssignImplicitBaseType(entity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a EnumEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(EnumEntity entity)
+    {
+      // Resolve underlying type
+      if (entity.UnderlyingTypeReference != null)
+      {
+        entity.UnderlyingTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+
+        if (entity.UnderlyingType != null)
+        {
+          if (!CanBeEnumBase(entity.UnderlyingType))
+          {
+            var errorPoint = entity.UnderlyingTypeReference is TypeNodeBasedTypeEntityReference
+                               ? ((TypeNodeBasedTypeEntityReference) entity.UnderlyingTypeReference).SyntaxNode.StartToken
+                               : null;
+
+            _ErrorHandler.Error("CS1008", errorPoint, "Type byte, sbyte, short, ushort, int, uint, long, or ulong expect");
+          }
+        }
+      }
+
+      AssignImplicitBaseType(entity);
+    }
+
+    #region Private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves base type references in a type.
+    /// </summary>
+    /// <param name="entity">A type entity</param>
+    // ----------------------------------------------------------------------------------------------
+    private void ResolveBaseTypeReferences(TypeEntity entity)
+    {
       foreach (var typeEntityReference in entity.BaseTypeReferences)
       {
         typeEntityReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
       }
+    }
 
-      // Assign implicit base class, if necessary
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Assigns and resolves implicit base type, if an explicit base type is not present.
+    /// </summary>
+    /// <param name="entity">A type entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void AssignImplicitBaseType(TypeEntity entity)
+    {
+      // Interfaces and System.Object don't have a base type. All other types have.
       if (!entity.IsInterfaceType && entity.ReflectedMetadata != typeof(object) && entity.BaseType == null)
       {
         System.Type baseType = null;
@@ -130,5 +221,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns a value indicating whether a type can be enum base.
+    /// </summary>
+    /// <param name="typeEntity">A type entity.</param>
+    /// <returns>True if the type can be enum base, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private bool CanBeEnumBase(TypeEntity typeEntity)
+    {
+      if (typeEntity == _SemanticGraph.GetBuiltInTypeByName("byte")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("byte").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("sbyte")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("sbyte").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("short")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("short").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ushort")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ushort").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("int")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("int").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("uint")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("uint").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("long")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("long").AliasedType
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ulong")
+        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ulong").AliasedType
+        )
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    #endregion
   }
 }

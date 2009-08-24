@@ -24,7 +24,8 @@
     Float,
     Double,
     Object,
-    String
+    String,
+    Void
 
 #pragma warning restore 1591
   }

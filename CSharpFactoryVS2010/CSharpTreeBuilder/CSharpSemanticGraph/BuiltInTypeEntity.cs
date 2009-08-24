@@ -13,6 +13,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// Builtin types are identified through reserved words, but these reserved words are simply aliases
   /// for predefined types in the System namespace. These are: sbyte, byte, short, ushort, int, uint,
   /// long, ulong, char, float, double, bool, decimal, bool, string, object.
+  /// Void is also treated as a builtin type, though strictly speaking it is not a type.
   /// </remarks>
   // ================================================================================================
   public sealed class BuiltInTypeEntity : TypeEntity, IAliasType
@@ -91,6 +92,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           Name = "ushort";
           aliasedType = typeof(ushort);
           break;
+        case BuiltInType.Void:
+          Name = "void";
+          aliasedType = typeof(void);
+          break;
         default:
           throw new ApplicationException(string.Format("Unexpected BuiltInType: '{0}'", builtInType));
       }
@@ -147,7 +152,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return !IsReferenceType;
+        return !IsReferenceType && BuiltInType != BuiltInType.Void;
       }
     }
 

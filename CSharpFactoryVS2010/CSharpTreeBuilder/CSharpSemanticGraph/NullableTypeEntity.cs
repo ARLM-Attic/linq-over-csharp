@@ -118,23 +118,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return AliasedType.Members;
       }
     }
-
-    #region Visitor methods
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Accepts a visitor object, according to the Visitor pattern.
-    /// </summary>
-    /// <param name="visitor">A visitor object</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void AcceptVisitor(SemanticGraphVisitor visitor)
-    {
-      base.AcceptVisitor(visitor);
-
-      visitor.Visit(this);
-    }
-
-    #endregion
-
   }
 }

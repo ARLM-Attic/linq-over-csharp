@@ -284,8 +284,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      visitor.Visit(this);
-
       foreach (var member in Members)
       {
         member.AcceptVisitor(visitor);

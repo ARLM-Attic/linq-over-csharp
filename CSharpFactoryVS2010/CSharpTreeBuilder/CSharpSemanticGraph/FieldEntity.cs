@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public FieldEntity(string name, bool isExplicitlyDefined, SemanticEntityReference<TypeEntity> type, bool isStatic)
       : base(name, isExplicitlyDefined)
     {
-      Type = type;
+      TypeReference = type;
       IsStatic = isStatic;
     }
 
@@ -30,7 +30,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the type of the field.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> Type { get; private set; }
+    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type of the field.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity Type
+    {
+      get { return TypeReference == null ? null : TypeReference.TargetEntity; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

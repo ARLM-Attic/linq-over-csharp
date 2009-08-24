@@ -171,93 +171,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a using namespace entity or a using alias entity from an AST node.
-    /// </summary>
-    /// <typeparam name="TUsingNodeType">The type of the AST node. Must be a subclass of UsingNamespaceNode.</typeparam>
-    /// <typeparam name="TUsingEntityType">The type of the entity to be created. Must be a subclass of UsingEntity.</typeparam>
-    /// <param name="node">An AST node.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void CreateUsingEntityFromUsingNode<TUsingNodeType, TUsingEntityType>(TUsingNodeType node)
-      where TUsingNodeType: UsingNamespaceNode
-      where TUsingEntityType: UsingEntity
-    {
-      // Determine the parent entity of the to-be-created using alias entity.
-      SemanticEntity parentEntity = GetParentEntity(node);
-
-      // The parent entity should be a NamespaceEntity.
-      if (!(parentEntity is NamespaceEntity))
-      {
-        throw new ApplicationException(string.Format("Expected NamespaceEntity but received '{0}'.",
-                                                     parentEntity.GetType()));
-      }
-
-      var parentNamespaceEntity = parentEntity as NamespaceEntity;
-
-      // The parent of AST node should not be null.
-      if (node.ParentNode == null)
-      {
-        throw new ApplicationException("Unexpected null ParentNode.");
-      }
-
-      // Find out the compilation unit that the AST node belongs to
-      var compilationUnitNode = node.CompilationUnitNode;
-
-      // Spec: "The scope of a using-directive extends over the namespace-member-declarations 
-      // of its immediately containing compilation unit or namespace body."
-      // But we just simplify it to be the whole parent AST node, 
-      // because we'll only use it to resolve names in the namespace-member-declarations anyway.
-      var lexicalScope = new SourceRegion(
-        new SourcePoint(compilationUnitNode, node.ParentNode.StartPosition),
-        new SourcePoint(compilationUnitNode, node.ParentNode.EndPosition));
-
-      UsingEntity usingEntity = null;
-
-      if (node is UsingAliasNode)
-      {
-        var aliasName = (node as UsingAliasNode).Alias;
-
-        // -- using alias branch
-
-        // Check error CS1537: The using alias 'alias' appeared previously in this namespace
-        if (parentNamespaceEntity.IsUsingAliasAlreadySpecified(aliasName, lexicalScope)
-          || parentNamespaceEntity.IsExternAliasAlreadySpecified(aliasName, lexicalScope))
-        {
-          _ErrorHandler.Error("CS1537", node.StartToken, "The using alias '{0}' appeared previously in this namespace",
-                              aliasName);
-          return;
-        }
-
-        // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
-        var usingAliasEntity = new UsingAliasEntity(lexicalScope, aliasName, node.NamespaceOrTypeName);
-        parentNamespaceEntity.AddUsingAlias(usingAliasEntity);
-        usingEntity = usingAliasEntity;
-      }
-      else 
-      {
-        // -- using namespace branch
-
-        var namespaceName = node.NamespaceOrTypeName.TypeTags.ToString();
-
-        // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
-        if (parentNamespaceEntity.IsUsingNamespaceAlreadySpecified(namespaceName,lexicalScope))
-        {
-          _ErrorHandler.Warning("CS0105", node.StartToken,
-                                "The using directive for '{0}' appeared previously in this namespace", namespaceName);
-          return;
-        }
-
-        // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
-        var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
-        parentNamespaceEntity.AddUsingNamespace(usingNamespaceEntity);
-        usingEntity = usingNamespaceEntity;
-      }
-
-      // Establish to two-way mapping between the AST node and the new semantic entity
-      AssociateSyntaxNodeWithSemanticEntity(node, usingEntity);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Creates a class entity from a class declaration.
     /// </summary>
     /// <param name="node">A class declaration syntax node.</param>
@@ -302,11 +215,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Set the underlying type reference.
       if (node.EnumBase != null)
       {
-        enumEntity.UnderlyingType = new TypeNodeBasedTypeEntityReference(node.EnumBase);
+        enumEntity.UnderlyingTypeReference = new TypeNodeBasedTypeEntityReference(node.EnumBase);
       }
       else
       {
-        enumEntity.UnderlyingType = new ReflectedTypeBasedTypeEntityReference(typeof (int));
+        enumEntity.UnderlyingTypeReference = new ReflectedTypeBasedTypeEntityReference(typeof (int));
       }
     }
 
@@ -318,7 +231,178 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(DelegateDeclarationNode node)
     {
-      CreateTypeEntityFromTypeDeclaration<DelegateDeclarationNode, DelegateEntity>(node);
+      var delegateEntity = CreateTypeEntityFromTypeDeclaration<DelegateDeclarationNode, DelegateEntity>(node);
+
+      // Set the return type.
+      if (node.Type != null)
+      {
+        delegateEntity.ReturnTypeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+      }
+      else
+      {
+        throw new ApplicationException("DelegateDeclarationNode.Type should not be null!");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a field entity from a field declaration.
+    /// </summary>
+    /// <param name="node">A field declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(FieldDeclarationNode node)
+    {
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      var parentTypeEntity = parentEntity as TypeEntity;
+      if (parentTypeEntity == null)
+      {
+        throw new ApplicationException(String.Format("Parent expected to be TypeEntity but was {0}", parentEntity.GetType()));
+      }
+
+      // Looping through every tag in the field declaration
+      foreach (var fieldTag in node.FieldTags)
+      {
+        // Check if this name is already in use in this declaration space
+        if (parentTypeEntity.DeclarationSpace.IsNameDefined(fieldTag.Identifier))
+        {
+          _ErrorHandler.Error("CS0102", node.StartToken, "The type '{0}' already contains a definition for '{1}'.",
+                              parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
+
+          // Continue with the next field tag.
+          continue;
+        }
+
+        // Create a semantic entity and add to its parent.
+        var fieldEntity = new FieldEntity(fieldTag.Identifier, true,
+                                          new TypeNodeBasedTypeEntityReference(node.Type),
+                                          node.IsStatic);
+        parentTypeEntity.AddMember(fieldEntity);
+
+        AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an enum member entity from an enum value AST node.
+    /// </summary>
+    /// <param name="node">An enum value AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(EnumValueNode node)
+    {
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      var parentEnumEntity = parentEntity as EnumEntity;
+      if (parentEnumEntity == null)
+      {
+        throw new ApplicationException(String.Format("Parent expected to be EnumEntity but was {0}", parentEntity.GetType()));
+      }
+
+      // Check if this name is already in use in this declaration space
+      if (parentEnumEntity.DeclarationSpace.IsNameDefined(node.Identifier))
+      {
+        _ErrorHandler.Error("CS0102", node.StartToken, "The type '{0}' already contains a definition for '{1}'.",
+                            parentEnumEntity.FullyQualifiedName, node.Identifier);
+        return;
+      }
+
+      // Create a semantic entity and add to its parent.
+      var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEnumEntity.UnderlyingTypeReference);
+      parentEnumEntity.AddMember(enumMemberEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
+    }
+
+    #region Private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a using namespace entity or a using alias entity from an AST node.
+    /// </summary>
+    /// <typeparam name="TUsingNodeType">The type of the AST node. Must be a subclass of UsingNamespaceNode.</typeparam>
+    /// <typeparam name="TUsingEntityType">The type of the entity to be created. Must be a subclass of UsingEntity.</typeparam>
+    /// <param name="node">An AST node.</param>
+    // ----------------------------------------------------------------------------------------------
+    private TUsingEntityType CreateUsingEntityFromUsingNode<TUsingNodeType, TUsingEntityType>(TUsingNodeType node)
+      where TUsingNodeType : UsingNamespaceNode
+      where TUsingEntityType : UsingEntity
+    {
+      // Determine the parent entity of the to-be-created using alias entity.
+      SemanticEntity parentEntity = GetParentEntity(node);
+
+      // The parent entity should be a NamespaceEntity.
+      if (!(parentEntity is NamespaceEntity))
+      {
+        throw new ApplicationException(string.Format("Expected NamespaceEntity but received '{0}'.",
+                                                     parentEntity.GetType()));
+      }
+
+      var parentNamespaceEntity = parentEntity as NamespaceEntity;
+
+      // The parent of AST node should not be null.
+      if (node.ParentNode == null)
+      {
+        throw new ApplicationException("Unexpected null ParentNode.");
+      }
+
+      // Find out the compilation unit that the AST node belongs to
+      var compilationUnitNode = node.CompilationUnitNode;
+
+      // Spec: "The scope of a using-directive extends over the namespace-member-declarations 
+      // of its immediately containing compilation unit or namespace body."
+      // But we just simplify it to be the whole parent AST node, 
+      // because we'll only use it to resolve names in the namespace-member-declarations anyway.
+      var lexicalScope = new SourceRegion(
+        new SourcePoint(compilationUnitNode, node.ParentNode.StartPosition),
+        new SourcePoint(compilationUnitNode, node.ParentNode.EndPosition));
+
+      UsingEntity usingEntity = null;
+
+      if (node is UsingAliasNode)
+      {
+        var aliasName = (node as UsingAliasNode).Alias;
+
+        // -- using alias branch
+
+        // Check error CS1537: The using alias 'alias' appeared previously in this namespace
+        if (parentNamespaceEntity.IsUsingAliasAlreadySpecified(aliasName, lexicalScope)
+          || parentNamespaceEntity.IsExternAliasAlreadySpecified(aliasName, lexicalScope))
+        {
+          _ErrorHandler.Error("CS1537", node.StartToken, "The using alias '{0}' appeared previously in this namespace",
+                              aliasName);
+          return null;
+        }
+
+        // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
+        var usingAliasEntity = new UsingAliasEntity(lexicalScope, aliasName, node.NamespaceOrTypeName);
+        parentNamespaceEntity.AddUsingAlias(usingAliasEntity);
+        usingEntity = usingAliasEntity;
+      }
+      else
+      {
+        // -- using namespace branch
+
+        var namespaceName = node.NamespaceOrTypeName.TypeTags.ToString();
+
+        // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
+        if (parentNamespaceEntity.IsUsingNamespaceAlreadySpecified(namespaceName, lexicalScope))
+        {
+          _ErrorHandler.Warning("CS0105", node.StartToken,
+                                "The using directive for '{0}' appeared previously in this namespace", namespaceName);
+          return null;
+        }
+
+        // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
+        var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
+        parentNamespaceEntity.AddUsingNamespace(usingNamespaceEntity);
+        usingEntity = usingNamespaceEntity;
+      }
+
+      // Establish to two-way mapping between the AST node and the new semantic entity
+      AssociateSyntaxNodeWithSemanticEntity(node, usingEntity);
+
+      return usingEntity as TUsingEntityType;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -469,76 +553,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a field entity from a field declaration.
-    /// </summary>
-    /// <param name="node">A field declaration syntax node.</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void Visit(FieldDeclarationNode node)
-    {
-      SemanticEntity parentEntity = GetParentEntity(node);
-
-      var parentTypeEntity = parentEntity as TypeEntity;
-      if (parentTypeEntity == null)
-      {
-        throw new ApplicationException(String.Format("Parent expected to be TypeEntity but was {0}", parentEntity.GetType()));
-      }
-
-      // Looping through every tag in the field declaration
-      foreach (var fieldTag in node.FieldTags)
-      {
-        // Check if this name is already in use in this declaration space
-        if (parentTypeEntity.DeclarationSpace.IsNameDefined(fieldTag.Identifier))
-        {
-          _ErrorHandler.Error("CS0102", node.StartToken, "The type '{0}' already contains a definition for '{1}'.",
-                              parentTypeEntity.FullyQualifiedName, fieldTag.Identifier);
-          
-          // Continue with the next field tag.
-          continue;
-        }
-
-        // Create a semantic entity and add to its parent.
-        var fieldEntity = new FieldEntity(fieldTag.Identifier, true,
-                                          new TypeNodeBasedTypeEntityReference(node.Type),
-                                          node.IsStatic);
-        parentTypeEntity.AddMember(fieldEntity);
-
-        AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates an enum member entity from an enum value AST node.
-    /// </summary>
-    /// <param name="node">An enum value AST node.</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void Visit(EnumValueNode node)
-    {
-      SemanticEntity parentEntity = GetParentEntity(node);
-
-      var parentEnumEntity = parentEntity as EnumEntity;
-      if (parentEnumEntity == null)
-      {
-        throw new ApplicationException(String.Format("Parent expected to be EnumEntity but was {0}", parentEntity.GetType()));
-      }
-
-      // Check if this name is already in use in this declaration space
-      if (parentEnumEntity.DeclarationSpace.IsNameDefined(node.Identifier))
-      {
-        _ErrorHandler.Error("CS0102", node.StartToken, "The type '{0}' already contains a definition for '{1}'.",
-                            parentEnumEntity.FullyQualifiedName, node.Identifier);
-        return;
-      }
-
-      // Create a semantic entity and add to its parent.
-      var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEnumEntity.UnderlyingType);
-      parentEnumEntity.AddMember(enumMemberEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Establishis a bi-directional link between an AST (abstract syntax tree) node and an SG (semantic graph) node.
     /// </summary>
     /// <param name="syntaxNode">A syntax tree node.</param>
@@ -549,5 +563,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       semanticEntity.AddSyntaxNode(syntaxNode);
       syntaxNode.SemanticEntities.Add(semanticEntity);
     }
+
+    #endregion
   }
 }

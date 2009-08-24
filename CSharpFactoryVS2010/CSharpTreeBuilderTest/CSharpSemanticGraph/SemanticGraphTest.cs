@@ -55,7 +55,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     {
       var semanticGraph = new SemanticGraph();
       var builtInTypes = semanticGraph.BuiltInTypes.ToArray();
-      builtInTypes.Length.ShouldEqual(15);
+      builtInTypes.Length.ShouldEqual(16);
       // mscorlib is not yet imported, so alias is null
       builtInTypes[0].AliasedType.ShouldBeNull();
       builtInTypes[0].BaseTypeReferences.Count().ShouldEqual(0);

@@ -277,8 +277,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumEntity.DeclarationSpace.NameCount.ShouldEqual(0);
 
         enumEntity.BaseTypeReferences.ToList().Count.ShouldEqual(0);
-        enumEntity.UnderlyingType.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeNodeBasedTypeEntityReference)enumEntity.UnderlyingType).SyntaxNode.ShouldEqual(
+        enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((TypeNodeBasedTypeEntityReference)enumEntity.UnderlyingTypeReference).SyntaxNode.ShouldEqual(
           ((EnumDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]).EnumBase);
       }
 
@@ -287,8 +287,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var enumEntity = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[1] as EnumEntity;
         enumEntity.Name.ShouldEqual("C");
 
-        enumEntity.UnderlyingType.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((ReflectedTypeBasedTypeEntityReference)enumEntity.UnderlyingType).Metadata.ShouldEqual(typeof(int));
+        enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        ((ReflectedTypeBasedTypeEntityReference)enumEntity.UnderlyingTypeReference).Metadata.ShouldEqual(typeof(int));
       }
     }
 
@@ -604,7 +604,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
         ((FieldTagNode)fieldEntity.SyntaxNodes[0]).ShouldEqual(
           ((FieldDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0]).FieldTags[0]);
-        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
       }
       // A a1, a2;
       {
@@ -616,7 +616,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         ((ClassEntity)fieldEntity.Parent).FullyQualifiedName.ShouldEqual("A");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
         ((FieldTagNode)fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a2");
-        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
       }
       // static A a3;
       {
@@ -628,7 +628,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         ((ClassEntity)fieldEntity.Parent).FullyQualifiedName.ShouldEqual("A");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
         ((FieldTagNode)fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a3");
-        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
       }
       // struct S
       {
@@ -652,7 +652,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         ((StructEntity)fieldEntity.Parent).FullyQualifiedName.ShouldEqual("S");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
         ((FieldTagNode)fieldEntity.SyntaxNodes[0]).Identifier.ShouldEqual("a4");
-        fieldEntity.Type.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
       }
     }
 
@@ -1005,8 +1005,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var enumDeclarationNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
 
+      var enumEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as EnumEntity;
+      enumEntity.DeclarationSpace.NameCount.ShouldEqual(2);
+
       {
-        var enumMember = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToList()[i] as EnumMemberEntity;
+        var enumMember = enumEntity.Members.ToList()[i] as EnumMemberEntity;
         enumMember.Name.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
         enumMember.DistinctiveName.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
         enumMember.IsExplicitlyDefined.ShouldBeTrue();
@@ -1014,21 +1017,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
         enumMember.ReflectedMetadata.ShouldBeNull();
         enumMember.SyntaxNodes[0].ShouldEqual(enumDeclarationNode.Values[i]);
-        enumMember.Type.ShouldEqual(((EnumEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).UnderlyingType);
+        enumMember.TypeReference.ShouldEqual(((EnumEntity) project.SemanticGraph.GlobalNamespace.ChildTypes[0]).UnderlyingTypeReference);
+        enumEntity.DeclarationSpace["E1"].Entity.ShouldEqual(enumMember);
       }
-
       i++;
       {
-        var enumMember = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToList()[i] as EnumMemberEntity;
-        enumMember.Name.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
-        enumMember.DistinctiveName.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
-        enumMember.IsExplicitlyDefined.ShouldBeTrue();
-        enumMember.IsStatic.ShouldBeTrue();
-        enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
-        enumMember.ReflectedMetadata.ShouldBeNull();
-        enumMember.SyntaxNodes[0].ShouldEqual(enumDeclarationNode.Values[i]);
-        enumMember.Type.ShouldEqual(((EnumEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).UnderlyingType);
+        var enumMember = enumEntity.Members.ToList()[i] as EnumMemberEntity;
+        enumEntity.DeclarationSpace["E2"].Entity.ShouldEqual(enumMember);
       }
+
     }
   }
 }

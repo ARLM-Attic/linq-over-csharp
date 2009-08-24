@@ -14,9 +14,16 @@
     public virtual void Visit(ExternAliasEntity entity) { }
     public virtual void Visit(UsingNamespaceEntity entity) { }
     public virtual void Visit(UsingAliasEntity entity) { }
-    public virtual void Visit(TypeEntity entity) { }
+
+    public virtual void Visit(EnumEntity entity) { }
+    public virtual void Visit(ClassEntity entity) { }
+    public virtual void Visit(StructEntity entity) { }
+    public virtual void Visit(DelegateEntity entity) { }
+    public virtual void Visit(InterfaceEntity entity) { }
     public virtual void Visit(BuiltInTypeEntity entity) { }
+
     public virtual void Visit(FieldEntity entity) { }
+    public virtual void Visit(EnumMemberEntity entity) { }
 
     #pragma warning restore 1591
 

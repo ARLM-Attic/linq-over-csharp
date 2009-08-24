@@ -41,8 +41,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         var class1 = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
         sgVisitorMock.Visit(class1);
         sgVisitorMock.Visit(class1.Members.ToArray()[0] as FieldEntity);
-        sgVisitorMock.Visit((TypeEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
-        sgVisitorMock.Visit((TypeEntity)((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0]);
+        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity);
+        sgVisitorMock.Visit(((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0] as ClassEntity);
       }
       mocks.ReplayAll();
 
