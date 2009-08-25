@@ -9,6 +9,30 @@
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="ClassEntity"/> class.
+    /// </summary>
+    /// <param name="name">The name of the entity.</param>
+    /// <param name="isPartial">A value indicating whether this type was declared as partial.</param>
+    // ----------------------------------------------------------------------------------------------
+    public ClassEntity(string name, bool isPartial)
+      : base(name)
+    {
+      _IsPartial = isPartial;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ClassEntity"/> class with no partial.
+    /// </summary>
+    /// <param name="name">The name of the entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public ClassEntity(string name)
+      : this(name, false)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this type is a reference type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

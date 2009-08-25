@@ -25,6 +25,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="builtInType">A built in type.</param>
     // ----------------------------------------------------------------------------------------------
     public BuiltInTypeEntity(BuiltInType builtInType)
+      : base("")
     {
       BuiltInType = builtInType;
 
@@ -38,63 +39,63 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           break;
         case BuiltInType.Byte:
           Name = "byte";
-          aliasedType = typeof(byte);
+          aliasedType = typeof (byte);
           break;
         case BuiltInType.Char:
           Name = "char";
-          aliasedType = typeof(char);
+          aliasedType = typeof (char);
           break;
         case BuiltInType.Decimal:
           Name = "decimal";
-          aliasedType = typeof(decimal);
+          aliasedType = typeof (decimal);
           break;
         case BuiltInType.Double:
           Name = "double";
-          aliasedType = typeof(double);
+          aliasedType = typeof (double);
           break;
         case BuiltInType.Float:
           Name = "float";
-          aliasedType = typeof(float);
+          aliasedType = typeof (float);
           break;
         case BuiltInType.Int:
           Name = "int";
-          aliasedType = typeof(int);
+          aliasedType = typeof (int);
           break;
         case BuiltInType.Long:
           Name = "long";
-          aliasedType = typeof(long);
+          aliasedType = typeof (long);
           break;
         case BuiltInType.Object:
           Name = "object";
-          aliasedType = typeof(object);
+          aliasedType = typeof (object);
           break;
         case BuiltInType.Sbyte:
           Name = "sbyte";
-          aliasedType = typeof(sbyte);
+          aliasedType = typeof (sbyte);
           break;
         case BuiltInType.Short:
           Name = "short";
-          aliasedType = typeof(short);
+          aliasedType = typeof (short);
           break;
         case BuiltInType.String:
           Name = "string";
-          aliasedType = typeof(string);
+          aliasedType = typeof (string);
           break;
         case BuiltInType.Uint:
           Name = "uint";
-          aliasedType = typeof(uint);
+          aliasedType = typeof (uint);
           break;
         case BuiltInType.Ulong:
           Name = "ulong";
-          aliasedType = typeof(ulong);
+          aliasedType = typeof (ulong);
           break;
         case BuiltInType.Ushort:
           Name = "ushort";
-          aliasedType = typeof(ushort);
+          aliasedType = typeof (ushort);
           break;
         case BuiltInType.Void:
           Name = "void";
-          aliasedType = typeof(void);
+          aliasedType = typeof (void);
           break;
         default:
           throw new ApplicationException(string.Format("Unexpected BuiltInType: '{0}'", builtInType));

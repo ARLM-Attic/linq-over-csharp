@@ -225,12 +225,14 @@
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\DirectSemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\QualifierRefersToTypeException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExternAliasNodeBasedRootNamespaceEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolverException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNotResolvedException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolver.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityExtensions.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityReferenceEqualityComparer.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverPass2SemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ConstructedTypeHelper.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverSemanticGraphVisitorBase.cs" />

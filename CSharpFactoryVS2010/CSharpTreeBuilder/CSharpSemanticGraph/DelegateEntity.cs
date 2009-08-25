@@ -11,6 +11,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="DelegateEntity"/> class.
+    /// </summary>
+    /// <param name="name">The name of the entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public DelegateEntity(string name)
+      : base(name)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the reference to the return type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

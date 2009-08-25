@@ -24,8 +24,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceEntity"/> class.
     /// </summary>
+    /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceEntity()
+    public NamespaceEntity(string name)
+      : base(name)
     {
       _ExternAliases = new List<ExternAliasEntity>();
       _UsingAliases = new List<UsingAliasEntity>();

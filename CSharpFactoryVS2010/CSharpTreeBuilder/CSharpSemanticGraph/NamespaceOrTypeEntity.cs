@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using System;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -7,17 +9,21 @@
   // ================================================================================================
   public abstract class NamespaceOrTypeEntity : SemanticEntity, INamedEntity, IDefinesDeclarationSpace
   {
-    /// <summary>Backing field for DeclarationSpace property.</summary>
-    private readonly DeclarationSpace _DeclarationSpace;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespaceOrTypeEntity"/> class.
     /// </summary>
+    /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NamespaceOrTypeEntity()
+    protected NamespaceOrTypeEntity(string name)
     {
-      _DeclarationSpace = new DeclarationSpace();
+      if (name == null)
+      {
+        throw new ArgumentNullException("name");
+      }
+
+      Name = name;
+      DeclarationSpace = new DeclarationSpace();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -25,22 +31,19 @@
     /// Gets the declaration space of the entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual DeclarationSpace DeclarationSpace
-    {
-      get { return _DeclarationSpace; }
-    }
+    public virtual DeclarationSpace DeclarationSpace { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the namespace or type.
+    /// Gets the name of the namespace or type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public string Name { get; set; }
+    public string Name { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
-    /// Eg. for a class it's the name + number of type params; for methods it's the signature; etc.
+    /// Eg. for a class it's the name + number of type params.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public virtual string DistinctiveName
@@ -55,9 +58,7 @@
     /// </summary>
     /// <remarks>
     /// The fully qualified name of N is the complete hierarchical path of identifiers that lead to N,
-    /// starting from the global namespace.
-    /// However, in our implementation the root namespace name is also part of the fully qualified name,
-    /// to allow storing all namespace and type names in a single collection regardless of the root namespace.
+    /// starting from the root namespace.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public virtual string FullyQualifiedName 

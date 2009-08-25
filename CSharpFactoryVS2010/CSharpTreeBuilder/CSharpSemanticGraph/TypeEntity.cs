@@ -20,18 +20,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected List<MemberEntity> _Members;
 
     /// <summary>Stores array types created from this type. The key is the rank of the array.</summary>
-    protected Dictionary<int,ArrayTypeEntity> _ArrayTypes;
+    protected Dictionary<int, ArrayTypeEntity> _ArrayTypes;
+
+    /// <summary>Backing field for IsPartial property.</summary>
+    protected bool _IsPartial;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeEntity"/> class.
     /// </summary>
+    /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected TypeEntity()
+    protected TypeEntity(string name)
+      : base(name)
     {
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
+      _IsPartial = false;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type was declared as partial.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsPartial
+    {
+      get { return _IsPartial; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -59,7 +75,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value indicating whether this type is a pointer type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual bool IsPointerType 
+    public virtual bool IsPointerType
     {
       get { return false; }
     }
@@ -157,6 +173,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Eliminates duplicates in the base type reference list. 
+    /// Duplicates are references that point to the same entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public void EliminateDuplicateBaseTypeReferences()
+    {
+      _BaseTypeReferences = BaseTypeReferences.Distinct(new SemanticEntityReferenceEqualityComparer<TypeEntity>()).ToList();
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the base type entity of this type.
     /// </summary>
     /// <remarks>
@@ -170,12 +197,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         var baseTypes = (from baseType in BaseTypeReferences
-                            where
-                              baseType.ResolutionState == ResolutionState.Resolved &&
-                              baseType.TargetEntity.IsClassType
-                            select baseType.TargetEntity).ToArray();
+                         where
+                           baseType.ResolutionState == ResolutionState.Resolved &&
+                           baseType.TargetEntity.IsClassType
+                         select baseType.TargetEntity).ToArray();
 
         return baseTypes.Length == 1 ? baseTypes[0] : null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of base types resolved to class.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int BaseTypeCount
+    {
+      get
+      {
+        return (from baseType in BaseTypeReferences
+                where
+                  baseType.ResolutionState == ResolutionState.Resolved &&
+                  baseType.TargetEntity.IsClassType
+                select baseType.TargetEntity).Count();
       }
     }
 
@@ -192,8 +236,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return (from baseType in BaseTypeReferences
-               where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
-               select baseType.TargetEntity as InterfaceEntity).ToList().AsReadOnly();
+                where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
+                select baseType.TargetEntity as InterfaceEntity).ToList().AsReadOnly();
       }
     }
 

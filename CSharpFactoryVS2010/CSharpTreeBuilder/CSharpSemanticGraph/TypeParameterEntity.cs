@@ -14,8 +14,8 @@
     /// <param name="name">The name of the type parameter.</param>
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity(string name)
+      : base(name)
     {
-      Name = name;
     }
   }
 }

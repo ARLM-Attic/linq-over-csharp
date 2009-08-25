@@ -24,7 +24,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void GetEnclosingType_ForNamespace()
     {
       var semanticGraph = new SemanticGraph();
-      var ns = new NamespaceEntity() { Name = "A" };
+      var ns = new NamespaceEntity("A");
       semanticGraph.GlobalNamespace.AddChildNamespace(ns);
 
       ns.GetEnclosing<TypeEntity>().ShouldBeNull();
@@ -39,7 +39,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void GetEnclosingType_ForType()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity() { Name = "Class" };
+      var type = new ClassEntity("Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
 
       type.GetEnclosing<TypeEntity>().ShouldEqual(type);
@@ -54,7 +54,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void GetEnclosingType_ForField()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity() { Name = "Class" };
+      var type = new ClassEntity("Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
       var field = new FieldEntity("Field", true, null, false);
       type.AddMember(field);
@@ -71,7 +71,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void IsInTypeDeclarationBody_ForNamespace()
     {
       var semanticGraph = new SemanticGraph();
-      var ns = new NamespaceEntity() { Name = "A" };
+      var ns = new NamespaceEntity("A");
       semanticGraph.GlobalNamespace.AddChildNamespace(ns);
 
       ns.IsInTypeDeclarationBody().ShouldBeFalse();
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void IsInTypeDeclarationBody_ForUsingNamespace()
     {
       var semanticGraph = new SemanticGraph();
-      var ns = new NamespaceEntity() { Name = "A" };
+      var ns = new NamespaceEntity("A");
       semanticGraph.GlobalNamespace.AddChildNamespace(ns);
       var usingNamespace = new UsingNamespaceEntity(SourceRegion.GetDummy(), NamespaceOrTypeNameNode.CreateFromDottedName("a"));
       ns.AddUsingNamespace(usingNamespace);
@@ -103,7 +103,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void IsInTypeDeclarationBody_ForType()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity() { Name = "Class" };
+      var type = new ClassEntity("Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
 
       type.IsInTypeDeclarationBody().ShouldBeFalse();
@@ -118,7 +118,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void IsInTypeDeclarationBody_ForField()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity() { Name = "Class" };
+      var type = new ClassEntity("Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
       var field = new FieldEntity("Field", true, null, false);
       type.AddMember(field);

@@ -13,8 +13,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="ChildTypeCapableTypeEntity"/> class.
     /// </summary>
+    /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected ChildTypeCapableTypeEntity()
+    protected ChildTypeCapableTypeEntity(string name)
+      : base(name)
     {
       ChildTypes = new List<TypeEntity>();
     }

@@ -18,6 +18,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="underlyingType">A type that this constructed type builds upon.</param>
     // ----------------------------------------------------------------------------------------------
     protected ConstructedTypeEntity(TypeEntity underlyingType)
+      : base(underlyingType.Name)
     {
       if (underlyingType == null )
       {
@@ -26,7 +27,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       UnderlyingType = underlyingType;
       Parent = underlyingType.Parent; 
-      Name = underlyingType.Name;
     }
 
     // ----------------------------------------------------------------------------------------------

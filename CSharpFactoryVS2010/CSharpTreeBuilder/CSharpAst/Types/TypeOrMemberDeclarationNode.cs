@@ -55,13 +55,33 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this instance is partial type declaration.
+    /// Gets the name with generic dimensions (eg. A`1).
     /// </summary>
-    /// <value>
-    /// 	<c>true</c> if this instance is partial; otherwise, <c>false</c>.
-    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public string NameWithGenericDimensions
+    {
+      get
+      {
+        return TypeParameters.Count > 0 ? Identifier + "`" + TypeParameters.Count : Identifier;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the partial modifier token.
+    /// </summary>
     // ----------------------------------------------------------------------------------------------
     public Token PartialToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance is partial type declaration.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsPartial
+    {
+      get { return PartialToken != null; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

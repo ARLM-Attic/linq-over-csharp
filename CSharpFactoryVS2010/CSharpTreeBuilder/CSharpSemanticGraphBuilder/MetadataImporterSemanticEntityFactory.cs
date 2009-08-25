@@ -159,7 +159,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // If the namespace is not found, then we have to create it.
         if (nameTableEntry == null)
         {
-          var namespaceEntity = new NamespaceEntity() {Name = namespaceTag};
+          var namespaceEntity = new NamespaceEntity(namespaceTag);
           contextEntity.AddChildNamespace(namespaceEntity);
           
           // The newly created namespace will be the context for the next part of the namespace name.
@@ -237,26 +237,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (type.IsClass && type.BaseType != null && type.BaseType.FullName == "System.MulticastDelegate")
       {
-        typeEntity = new DelegateEntity() {Name = typeName};
+        typeEntity = new DelegateEntity(typeName);
       }
       else
         // type.FullName == "System.Enum" is a hack needed because reflection thinks that System.Enum is 
         // not a class, and not an enum, and not a value type, and not an interface. So what is it? We assume a class.
         if (type.IsClass || type.FullName == "System.Enum")
         {
-          typeEntity = new ClassEntity() {Name = typeName};
+          typeEntity = new ClassEntity(typeName);
         }
         else if (type.IsEnum)
         {
-          typeEntity = new EnumEntity() {Name = typeName};
+          typeEntity = new EnumEntity(typeName);
         }
         else if (type.IsValueType)
         {
-          typeEntity = new StructEntity() {Name = typeName};
+          typeEntity = new StructEntity(typeName);
         }
         else if (type.IsInterface)
         {
-          typeEntity = new InterfaceEntity() {Name = typeName};
+          typeEntity = new InterfaceEntity(typeName);
         }
         else
         {

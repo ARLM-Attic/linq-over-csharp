@@ -37,8 +37,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="GenericCapableTypeEntity"/> class.
     /// </summary>
+    /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected GenericCapableTypeEntity()
+    protected GenericCapableTypeEntity(string name)
+      : base(name)
     {
       _AllTypeParameters = new List<TypeParameterEntity>();
       _ConstructedGenericTypes = new List<ConstructedGenericTypeEntity>();

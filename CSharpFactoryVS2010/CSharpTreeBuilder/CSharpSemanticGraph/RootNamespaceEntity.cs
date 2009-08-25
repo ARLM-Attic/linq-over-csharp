@@ -16,8 +16,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="name">The name of the root namespace.</param>
     // ----------------------------------------------------------------------------------------------
     public RootNamespaceEntity(string name)
+      : base(name)
     {
-      Name = name;
     }
   }
 }

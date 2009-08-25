@@ -11,6 +11,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="EnumEntity"/> class.
+    /// </summary>
+    /// <param name="name">The name of the entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public EnumEntity(string name)
+      : base(name)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the reference to the underlying type of the enum.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

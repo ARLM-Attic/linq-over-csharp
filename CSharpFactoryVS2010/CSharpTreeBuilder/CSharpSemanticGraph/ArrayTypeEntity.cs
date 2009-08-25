@@ -29,6 +29,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the rank of the array (the number of array dimensions).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Rank { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type of the type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity BaseType
+    {
+      get { return _BaseType; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this type is a reference type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -63,22 +80,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return stringBuilder.ToString();
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the base type of the type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override TypeEntity BaseType 
-    { 
-      get { return _BaseType; } 
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the rank of the array (the number of array dimensions).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public int Rank { get; private set; }
   }
 }

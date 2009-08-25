@@ -58,7 +58,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     {
       var declarationSpace = new DeclarationSpace();
       var entity1 = new RootNamespaceEntity("A");
-      var entity2 = new ClassEntity() {Name = "A"};
+      var entity2 = new ClassEntity("A");
       declarationSpace.Define(entity1);
       declarationSpace.Define(entity2);
 
@@ -95,7 +95,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var entity1 = new RootNamespaceEntity("A");
       declarationSpace.Define(entity1);
 
-      var entity2 = new ClassEntity() { Name = "A" };
+      var entity2 = new ClassEntity("A");
       declarationSpace.Redefine(entity2);
 
       declarationSpace.NameCount.ShouldEqual(1);

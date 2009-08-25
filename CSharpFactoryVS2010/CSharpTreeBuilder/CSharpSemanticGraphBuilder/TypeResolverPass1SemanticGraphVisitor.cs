@@ -1,4 +1,5 @@
-﻿using CSharpTreeBuilder.ProjectContent;
+﻿using System.Linq;
+using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using System;
 
@@ -151,6 +152,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         entity.UnderlyingTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
 
+        // Check the underlying type if it is legal
         if (entity.UnderlyingType != null)
         {
           if (!CanBeEnumBase(entity.UnderlyingType))
@@ -177,9 +179,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private void ResolveBaseTypeReferences(TypeEntity entity)
     {
+      // Resolve all base type references
       foreach (var typeEntityReference in entity.BaseTypeReferences)
       {
         typeEntityReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      }
+
+      // If it's a partial type then there may be duplicates in the base type list that has to be eliminated
+      if (entity.IsPartial)
+      {
+        entity.EliminateDuplicateBaseTypeReferences();
+
+        // If more than one (different) base classes were specified, that's an error
+        if (entity.BaseTypeCount > 1)
+        {
+          _ErrorHandler.Error("CS0263", null, "Partial declarations of '{0}' must not specify different base classes",
+                              entity.FullyQualifiedName);
+        }
       }
     }
 

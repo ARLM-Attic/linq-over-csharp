@@ -2037,5 +2037,59 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors[1].Code.ShouldEqual("CS1008");
       project.Warnings.Count.ShouldEqual(0);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Partial class: if the base type is specified multiple times then only one instance is kept.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void PartialClassDuplicateBaseTypes()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\PartialClassDuplicateBaseTypes.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+      var baseTypeRefs = classEntity.BaseTypeReferences.ToList();
+      baseTypeRefs.Count.ShouldEqual(1);
+      classEntity.BaseType.FullyQualifiedName.ShouldEqual("B");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Partial class: if a base interface is specified multiple times then only one instance is kept.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void PartialClassDuplicateBaseInterfaces()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\PartialClassDuplicateBaseInterfaces.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+      classEntity.BaseInterfaces.Count.ShouldEqual(3);
+      classEntity.BaseInterfaces[0].FullyQualifiedName.ShouldEqual("I1");
+      classEntity.BaseInterfaces[1].FullyQualifiedName.ShouldEqual("I2");
+      classEntity.BaseInterfaces[2].FullyQualifiedName.ShouldEqual("I3");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0263: Partial declarations of 'A' must not specify different base classes
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0263_PartialClassConflictingBaseTypes()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0263_PartialClassConflictingBaseTypes.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0263");
+      project.Warnings.Count.ShouldEqual(0);
+    }
   }
 }
