@@ -347,6 +347,7 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\PartialStruct.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\PartialInterface.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildPropertyEntities.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\MemberOfAnErronousClass.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\CS0547_VoidProperty.cs" />
     <None Include="TestFiles\TypeResolution\Property.cs" />

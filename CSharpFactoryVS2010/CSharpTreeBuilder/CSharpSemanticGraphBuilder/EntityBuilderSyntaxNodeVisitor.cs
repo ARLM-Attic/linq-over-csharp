@@ -42,6 +42,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
 
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
+
       // Looping through every tag in the namespace name
       foreach (var nameTag in node.NameTags)
       {
@@ -81,6 +84,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Determine the parent entity of the to-be-created extern alias entity.
       NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
 
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
+      
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
@@ -110,6 +116,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       // Determine the parent entity of the to-be-created using entity.
       NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
@@ -142,6 +151,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Determine the parent entity of the to-be-created using entity.
       NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
 
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
+
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
@@ -171,6 +183,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
+
       // Find out whether a class was already declared with this name
       var classEntity = parentEntity.DeclarationSpace.GetSpecificType<ClassEntity>(node.NameWithGenericDimensions);
 
@@ -191,7 +206,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       else
       {
-        MergePartialDeclaration(node, classEntity, parentEntity);
+        if (!MergePartialDeclaration(node, classEntity, parentEntity))
+        {
+          // If there was an error in partial declaration processing, then bail out.
+          return;
+        }
       }
 
       AssociateSyntaxNodeWithSemanticEntity(node, classEntity);
@@ -206,6 +225,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(StructDeclarationNode node)
     {
       NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Find out whether a struct was already declared with this name
       var structEntity = parentEntity.DeclarationSpace.GetSpecificType<StructEntity>(node.NameWithGenericDimensions);
@@ -227,7 +249,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       else
       {
-        MergePartialDeclaration(node, structEntity, parentEntity);
+        if (!MergePartialDeclaration(node, structEntity, parentEntity))
+        {
+          // If there was an error in partial declaration processing, then bail out.
+          return;
+        }
       }
 
       AssociateSyntaxNodeWithSemanticEntity(node, structEntity);
@@ -242,6 +268,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(InterfaceDeclarationNode node)
     {
       NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Find out whether an interface was already declared with this name
       var interfaceEntity = parentEntity.DeclarationSpace.GetSpecificType<InterfaceEntity>(node.NameWithGenericDimensions);
@@ -263,7 +292,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       else
       {
-        MergePartialDeclaration(node, interfaceEntity, parentEntity);
+        if (!MergePartialDeclaration(node, interfaceEntity, parentEntity))
+        {
+          // If there was an error in partial declaration processing, then bail out.
+          return;
+        }
       }
 
       AssociateSyntaxNodeWithSemanticEntity(node, interfaceEntity);
@@ -278,6 +311,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(EnumDeclarationNode node)
     {
       NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Find out whether an enum was already declared with this name
       var enumEntity = parentEntity.DeclarationSpace.GetSpecificType<EnumEntity>(node.NameWithGenericDimensions);
@@ -316,6 +352,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
+
       // Find out whether a delegate was already declared with this name
       var delegateEntity = parentEntity.DeclarationSpace.GetSpecificType<DelegateEntity>(node.NameWithGenericDimensions);
 
@@ -351,7 +390,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(FieldDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<TypeEntity>(node);
+      TypeEntity parentEntity = GetParentEntity<TypeEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Looping through every tag in the field declaration
       foreach (var fieldTag in node.FieldTags)
@@ -381,7 +423,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(EnumValueNode node)
     {
-      var parentEntity = GetParentEntity<EnumEntity>(node);
+      EnumEntity parentEntity = GetParentEntity<EnumEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Check if this name is already in use in this declaration space
       if (parentEntity.DeclarationSpace.IsNameDefined(node.Identifier))
@@ -405,7 +450,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(PropertyDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<TypeEntity>(node);
+      TypeEntity parentEntity = GetParentEntity<TypeEntity>(node);
+
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
       // Check if this name is already in use in this declaration space
       if (parentEntity.DeclarationSpace.IsNameDefined(node.Identifier))
@@ -433,37 +481,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the entity that will be the parent of a new entity created from a syntax node.
+    /// Gets the entity that belongs to the parent of a syntax node.
     /// </summary>
     /// <param name="node">A syntax node.</param>
-    /// <returns>The parent of the entity to be created from the given syntax node.</returns>
-    /// <remarks>
-    /// Walks the syntax tree up from the given node, looking for a syntax node 
-    /// that already has an associated semantic entity.
-    /// </remarks>
+    /// <returns>The parent entity</returns>
     // ----------------------------------------------------------------------------------------------
     private SemanticEntity GetParentEntity(ISyntaxNode node)
     {
-      // Going up in the syntax tree, looking for a node that has a semantic entity
-      while (node.Parent.SemanticEntities.Count==0 && !(node.Parent is CompilationUnitNode))
+      if (node.Parent == null)
       {
-        node = node.Parent;
+        throw new ApplicationException("Unexpected null parent.");
       }
 
-      // If we reached the compilation unit level, then the entity will be created under the "global" namespace.
+      // If we are at the compilation unit level, then the entity will be created under the "global" namespace.
       if (node.Parent is CompilationUnitNode)
       {
         return _SemanticGraph.GlobalNamespace;
       }
 
-      // If the found node has only 1 semantic entity associated, then this will be the parent entity.
+      // If the parent node has only 1 semantic entity associated, then this will be the parent entity.
       var parentEntityCount = node.Parent.SemanticEntities.Count;
       if (parentEntityCount == 1)
       {
         return node.Parent.SemanticEntities[0];
       }
 
-      // If the found node is a NamespaceDeclarationNode, then it can have several entities associated with it
+      // If the parent node is a NamespaceDeclarationNode, then it can have several entities associated with it
       // (eg. namespace A.B.C where A, B, C are all distinct semantic entities), 
       // then the parent entity is the last in the list.
       if (node.Parent is NamespaceDeclarationNode)
@@ -471,8 +514,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return node.Parent.SemanticEntities[parentEntityCount - 1];
       }
       
-      // All other cases are error.
-      throw new ApplicationException("Cannot determine parent entity.");
+      // Otherwise no parent can be determined.
+      return null;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -488,13 +531,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       SemanticEntity entity = GetParentEntity(node);
 
+      // If no parent found then return null
+      if (entity == null)
+      {
+        return null;
+      }
+      
       if (entity is TExpectedEntityType)
       {
         return entity as TExpectedEntityType;
       }
 
       throw new ApplicationException(
-        String.Format("Parent expected to be '{0}' but was '{1}'.", typeof(TExpectedEntityType), entity.GetType()));
+        String.Format("Parent expected to be '{0}' but was '{1}'.", typeof (TExpectedEntityType), entity.GetType()));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -682,14 +731,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeDeclaration">A type declaration AST node.</param>
     /// <param name="typeEntity">A type entity.</param>
     /// <param name="parentEntity">The parent of type entity.</param>
+    /// <returns>True if no error occured, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    private void MergePartialDeclaration(TypeDeclarationNode typeDeclaration, TypeEntity typeEntity, NamespaceOrTypeEntity parentEntity)
+    private bool MergePartialDeclaration(TypeDeclarationNode typeDeclaration, TypeEntity typeEntity, NamespaceOrTypeEntity parentEntity)
     {
       // If nor the type entity neither this declaration is partial then report duplicate name error
       if (!typeEntity.IsPartial && !typeDeclaration.IsPartial)
       {
         ReportDuplicateNameError(parentEntity, typeDeclaration);
-        return;
+        return false;
       }
 
       // If the entity is partial but this declaration is not (or vica versa) then report missing partial error
@@ -705,7 +755,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var errorPoint = typeDeclaration.IsPartial ? typeEntityErrorPoint : typeDeclaration.StartToken;
 
         ErrorMissingPartialModifier(errorPoint, typeEntity.Name);
-        return;
+        return false;
       }
 
       // This partial type declaration must be merged with the already created type entity.
@@ -722,6 +772,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // When the unsafe modifier is used on a partial type declaration, only that particular part is considered an unsafe context 
       // Attributes: combined
       // Members: union
+
+      return true;
     }
 
     // ----------------------------------------------------------------------------------------------

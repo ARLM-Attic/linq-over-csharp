@@ -191,8 +191,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // base class is not yet resolved, so it's null
         classEntity.BaseType.ShouldBeNull();
-
-        // TODO: basetypes, members
       }
       // class B
       {
@@ -1237,5 +1235,23 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         property.AutoImplementedField.IsStatic.ShouldBeTrue();
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Member of an erronous class is not built
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void MemberOfAnErronousClass()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\MemberOfAnErronousClass.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      project.Errors.Count.ShouldEqual(1);
+    }
+
   }
 }
