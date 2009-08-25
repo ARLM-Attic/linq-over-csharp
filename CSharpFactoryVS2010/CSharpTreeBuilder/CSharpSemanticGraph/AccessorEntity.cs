@@ -12,9 +12,12 @@
     /// Initializes a new instance of the <see cref="AccessorEntity"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AccessorEntity()
+    public AccessorEntity(bool isAbstract)
     {
-      Body = new BlockEntity();
+      if (!isAbstract)
+      {
+        Body = new BlockEntity();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -23,5 +26,15 @@
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public BlockEntity Body { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this accessor is abstract (means no implementation).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsAbstract
+    {
+      get { return Body == null; }
+    }
   }
 }

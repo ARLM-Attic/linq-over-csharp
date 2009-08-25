@@ -15,6 +15,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for SyntaxNodes property.</summary>
     private List<ISyntaxNode> _SyntaxNodes;
 
+    /// <summary>Backing field for Parent property.</summary>
+    private SemanticEntity _Parent;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SemanticEntity"/> class.
@@ -30,7 +33,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the parent of this entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity Parent { get; set;}
+    public virtual SemanticEntity Parent
+    {
+      get { return _Parent; }
+      set { _Parent = value; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

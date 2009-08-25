@@ -2091,5 +2091,43 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors[0].Code.ShouldEqual("CS0263");
       project.Warnings.Count.ShouldEqual(0);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Property type resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Property()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\Property.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      {
+        var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+        var propertyEntity = classEntity.Members.ToList()[0] as PropertyEntity;
+        propertyEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        propertyEntity.Type.FullyQualifiedName.ShouldEqual("int");
+        propertyEntity.AutoImplementedField.Type.FullyQualifiedName.ShouldEqual("int");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0547: 'a': property or indexer cannot have void type
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0547_VoidProperty()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0547_VoidProperty.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0547");
+      project.Warnings.Count.ShouldEqual(0);
+    }
   }
 }

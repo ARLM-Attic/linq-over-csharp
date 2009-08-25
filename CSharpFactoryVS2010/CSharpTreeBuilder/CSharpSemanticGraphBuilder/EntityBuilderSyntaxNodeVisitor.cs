@@ -397,6 +397,38 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a field entity from a field declaration.
+    /// </summary>
+    /// <param name="node">A field declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(PropertyDeclarationNode node)
+    {
+      var parentEntity = GetParentEntity<TypeEntity>(node);
+
+      // Check if this name is already in use in this declaration space
+      if (parentEntity.DeclarationSpace.IsNameDefined(node.Identifier))
+      {
+        ErrorDuplicateNameInType(node.StartToken, parentEntity.FullyQualifiedName, node.Identifier);
+        return;
+      }
+
+      // The property is auto-implemented if both get and set accessors are abstract
+      var isAutoImplemented = node.GetAccessor != null && !node.GetAccessor.HasBody
+                              && node.SetAccessor != null && !node.SetAccessor.HasBody;
+
+      // Create a semantic entity and add to its parent.
+      var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+      var propertyEntity = new PropertyEntity(node.Name, true, typeReference, node.IsStatic, isAutoImplemented);
+      parentEntity.AddMember(propertyEntity);
+      AssociateSyntaxNodeWithSemanticEntity(node, propertyEntity);
+
+      // Create the accessors and add to the entity
+      propertyEntity.GetAccessor = CreateAccessor(node.GetAccessor);
+      propertyEntity.SetAccessor = CreateAccessor(node.SetAccessor);
+    }
+
     #region Private methods
 
     // ----------------------------------------------------------------------------------------------
@@ -690,6 +722,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // When the unsafe modifier is used on a partial type declaration, only that particular part is considered an unsafe context 
       // Attributes: combined
       // Members: union
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an accessor entity from an accessor AST node.
+    /// </summary>
+    /// <param name="node">An accessor AST node.</param>
+    /// <returns>An accessor entity, or null if the AST node was null.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static AccessorEntity CreateAccessor(AccessorNode node)
+    {
+      if (node==null)
+      {
+        return null;
+      }
+
+      var accessor = new AccessorEntity(!node.HasBody);
+      AssociateSyntaxNodeWithSemanticEntity(node, accessor);
+
+      return accessor;
     }
 
     #endregion

@@ -2,6 +2,11 @@
 
 public class Class0
 {
+  int A;
+
+  int B { get { return A; } set { A = value; } }
+
+  int C { get; set; }
 }
 
 namespace A.B

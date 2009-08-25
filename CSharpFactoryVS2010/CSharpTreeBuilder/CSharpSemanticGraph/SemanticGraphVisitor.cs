@@ -23,7 +23,7 @@
     public virtual void Visit(BuiltInTypeEntity entity) { }
 
     public virtual void Visit(FieldEntity entity) { }
-    public virtual void Visit(EnumMemberEntity entity) { }
+    public virtual void Visit(PropertyEntity entity) { }
 
     #pragma warning restore 1591
 

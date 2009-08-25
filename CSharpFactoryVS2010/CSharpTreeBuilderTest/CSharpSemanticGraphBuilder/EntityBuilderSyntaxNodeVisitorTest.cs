@@ -1168,5 +1168,74 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("CS0260");
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of property member entities
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void BuildPropertyEntities()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\BuildPropertyEntities.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // class A
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
+      classEntity.FullyQualifiedName.ShouldEqual("A");
+
+      // class A declaration
+      var classNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+      var propertyNode = classNode.MemberDeclarations[0] as PropertyDeclarationNode;
+
+      // int B
+      {
+        var property = classEntity.Members.ToList()[0] as PropertyEntity;
+        property.Name.ShouldEqual("B");
+        property.DistinctiveName.ShouldEqual("B");
+        property.IsStatic.ShouldBeFalse();
+        property.IsAutoImplemented.ShouldBeFalse();
+        property.AutoImplementedField.ShouldBeNull();
+        property.IsExplicitlyDefined.ShouldBeTrue();
+        property.Parent.ShouldEqual(classEntity);
+        property.SyntaxNodes[0].ShouldEqual(propertyNode);
+        property.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        property.GetAccessor.ShouldNotBeNull();
+        property.GetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.GetAccessor);
+        property.GetAccessor.Parent.ShouldEqual(property);
+        property.SetAccessor.ShouldNotBeNull();
+        property.SetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.SetAccessor);
+        property.SetAccessor.Parent.ShouldEqual(property);
+
+        var accessors = property.Accessors.ToList();
+        accessors.Count.ShouldEqual(2);
+        accessors[0].ShouldEqual(property.GetAccessor);
+        accessors[1].ShouldEqual(property.SetAccessor);
+      }
+      // int C { get; set; }
+      {
+        var property = classEntity.Members.ToList()[1] as PropertyEntity;
+        property.Name.ShouldEqual("C");
+        property.IsAutoImplemented.ShouldBeTrue();
+        property.AutoImplementedField.IsExplicitlyDefined.ShouldBeFalse();
+        property.AutoImplementedField.IsStatic.ShouldBeFalse();
+        property.AutoImplementedField.Name.ShouldEqual("<C>k_BackingField");
+        property.AutoImplementedField.Parent.ShouldEqual(classEntity);
+        property.AutoImplementedField.SyntaxNodes.Count.ShouldEqual(0);
+        property.AutoImplementedField.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+
+        classEntity.Members.Contains(property.AutoImplementedField).ShouldBeTrue();
+      }
+      // static int D { get; set; }
+      {
+        var property = classEntity.Members.ToList()[3] as PropertyEntity;
+        property.Name.ShouldEqual("D");
+        property.IsStatic.ShouldBeTrue();
+        property.AutoImplementedField.IsStatic.ShouldBeTrue();
+      }
+    }
   }
 }

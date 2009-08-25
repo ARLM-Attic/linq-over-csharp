@@ -346,7 +346,10 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0260_MissingPartialOnClass1.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\PartialStruct.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\PartialInterface.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\BuildPropertyEntities.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeResolution\CS0547_VoidProperty.cs" />
+    <None Include="TestFiles\TypeResolution\Property.cs" />
     <None Include="TestFiles\TypeResolution\CS0263_PartialClassConflictingBaseTypes.cs" />
     <None Include="TestFiles\TypeResolution\PartialClassDuplicateBaseTypes.cs" />
     <None Include="TestFiles\TypeResolution\PartialClassDuplicateBaseInterfaces.cs" />
