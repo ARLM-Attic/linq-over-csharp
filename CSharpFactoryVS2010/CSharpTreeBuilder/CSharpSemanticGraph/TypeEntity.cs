@@ -14,16 +14,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public abstract class TypeEntity : NamespaceOrTypeEntity
   {
     /// <summary>Backing field for BaseTypeReferences property.</summary>
-    protected List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences;
+    private List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences;
 
     /// <summary>Backing field for Members property.</summary>
-    protected List<MemberEntity> _Members;
+    private readonly List<MemberEntity> _Members;
 
     /// <summary>Stores array types created from this type. The key is the rank of the array.</summary>
-    protected Dictionary<int, ArrayTypeEntity> _ArrayTypes;
-
-    /// <summary>Backing field for IsPartial property.</summary>
-    protected bool _IsPartial;
+    private readonly Dictionary<int, ArrayTypeEntity> _ArrayTypes;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -37,7 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
-      _IsPartial = false;
+      IsPartial = false;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -45,10 +42,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value indicating whether this type was declared as partial.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsPartial
-    {
-      get { return _IsPartial; }
-    }
+    public bool IsPartial { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

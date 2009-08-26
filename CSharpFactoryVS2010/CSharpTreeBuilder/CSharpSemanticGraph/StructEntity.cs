@@ -17,7 +17,7 @@
     public StructEntity(string name, bool isPartial)
       : base(name)
     {
-      _IsPartial = isPartial;
+      IsPartial = isPartial;
     }
 
     // ----------------------------------------------------------------------------------------------

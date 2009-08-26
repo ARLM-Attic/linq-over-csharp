@@ -12,13 +12,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public class NamespaceEntity : NamespaceOrTypeEntity, IHasChildTypes
   {
     /// <summary>A list of extern alias entities.</summary>
-    private List<ExternAliasEntity> _ExternAliases;
+    private readonly List<ExternAliasEntity> _ExternAliases;
 
     /// <summary>A list of using alias entities.</summary>
-    private List<UsingAliasEntity> _UsingAliases;
+    private readonly List<UsingAliasEntity> _UsingAliases;
 
     /// <summary>A list of using namespace entities.</summary>
-    private List<UsingNamespaceEntity> _UsingNamespaces;
+    private readonly List<UsingNamespaceEntity> _UsingNamespaces;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

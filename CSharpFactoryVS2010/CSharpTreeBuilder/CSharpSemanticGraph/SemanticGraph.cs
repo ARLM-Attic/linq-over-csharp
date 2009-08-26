@@ -15,13 +15,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private const string GLOBAL_NAMESPACE_NAME = "global";
 
     /// <summary>A dictionary of root namespace entities. The key is the name of the root namespace.</summary>
-    private Dictionary<string, RootNamespaceEntity> _RootNamespaces;
+    private readonly Dictionary<string, RootNamespaceEntity> _RootNamespaces;
 
     /// <summary>A dictionary of built-in types. The key is the name of the built-in type.</summary>
-    private Dictionary<string, BuiltInTypeEntity> _BuiltInTypes;
+    private readonly Dictionary<string, BuiltInTypeEntity> _BuiltInTypes;
 
     /// <summary>A cache that maps metadata objects to semantic entities.</summary>
-    private Dictionary<System.Reflection.MemberInfo, SemanticEntity> _MetadataToEntityMap;
+    private readonly Dictionary<System.Reflection.MemberInfo, SemanticEntity> _MetadataToEntityMap;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

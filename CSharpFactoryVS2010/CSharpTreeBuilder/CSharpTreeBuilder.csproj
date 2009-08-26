@@ -262,6 +262,11 @@
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeBasedNamespaceEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\BlockEntity.cs" />
     <Compile Include="CSharpSemanticGraph\AccessorEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\ParameterEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\NonFieldVariableEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IOverloadableMember.cs" />
+    <Compile Include="CSharpSemanticGraph\MethodEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\ParameterMode.cs" />
     <Compile Include="CSharpSemanticGraph\PropertyEntity.cs" />
     <Compile Include="CSharpSemanticGraph\FunctionMemberWithAccessorsEntity.cs" />
     <Compile Include="CSharpSemanticGraph\FunctionMemberWithBodyEntity.cs" />

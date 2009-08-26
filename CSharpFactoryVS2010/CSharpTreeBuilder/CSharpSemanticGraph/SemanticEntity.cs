@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public abstract class SemanticEntity
   {
     /// <summary>Backing field for SyntaxNodes property.</summary>
-    private List<ISyntaxNode> _SyntaxNodes;
+    private readonly List<ISyntaxNode> _SyntaxNodes;
 
     /// <summary>Backing field for Parent property.</summary>
     private SemanticEntity _Parent;
@@ -37,6 +37,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return _Parent; }
       set { _Parent = value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the root namespace of this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public RootNamespaceEntity RootNamespace
+    {
+      get 
+      {
+        if (this is RootNamespaceEntity)
+        {
+          return this as RootNamespaceEntity;
+        }
+
+        if (Parent == null)
+        {
+          return null;
+        }
+
+        return Parent.RootNamespace; 
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

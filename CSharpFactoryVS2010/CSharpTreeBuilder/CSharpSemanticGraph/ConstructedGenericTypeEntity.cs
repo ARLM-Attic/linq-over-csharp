@@ -14,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class ConstructedGenericTypeEntity : ConstructedTypeEntity
   {
     /// <summary>Backing field for TypeArguments property to disallow direct adding or removing.</summary>
-    private List<TypeEntity> _TypeArguments;
+    private readonly List<TypeEntity> _TypeArguments;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -34,9 +34,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           "typeArguments");
       }
       _TypeArguments = typeArguments;
+    }
 
-      _BaseTypeReferences = (List<SemanticEntityReference<TypeEntity>>) underlyingType.BaseTypeReferences;
-      _Members = (List<MemberEntity>) underlyingType.Members;
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of base types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypeReferences
+    {
+      get { return UnderlyingType.BaseTypeReferences; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of member references.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override IEnumerable<MemberEntity> Members
+    {
+      get { return UnderlyingType.Members; }
     }
 
     // ----------------------------------------------------------------------------------------------

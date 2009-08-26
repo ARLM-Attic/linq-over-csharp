@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class ArrayTypeEntity: ConstructedTypeEntity
   {
     /// <summary>Backing field for BaseType property.</summary>
-    private ClassEntity _BaseType;
+    private readonly ClassEntity _BaseType;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

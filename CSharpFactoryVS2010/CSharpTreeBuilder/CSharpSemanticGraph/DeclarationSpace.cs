@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public class DeclarationSpace
   {
     /// <summary>A dictionary of name + NameTableEntry pairs.</summary>
-    private Dictionary<string, NameTableEntry> _NameTable;
+    private readonly Dictionary<string, NameTableEntry> _NameTable;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

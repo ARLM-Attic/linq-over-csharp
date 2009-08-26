@@ -29,7 +29,7 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this accessor is abstract (means no implementation).
+    /// Gets a value indicating whether this accessor is abstract (ie. no implementation).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public bool IsAbstract

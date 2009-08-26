@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class BlockEntity : StatementEntity 
   {
     /// <summary>Backing field for Statements property.</summary>
-    private List<StatementEntity> _Statements;
+    private readonly List<StatementEntity> _Statements;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

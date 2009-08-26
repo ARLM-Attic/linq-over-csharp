@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class NameTableEntry
   {
     /// <summary>The list of named entities associated with the name.</summary>
-    private List<INamedEntity> _Entities;
+    private readonly List<INamedEntity> _Entities;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

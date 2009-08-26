@@ -14,10 +14,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   public class EntityBuilderSyntaxNodeVisitor : BlankSyntaxNodeVisitor
   {
     /// <summary>The semantic graph that will hold the built entities.</summary>
-    private SemanticGraph _SemanticGraph;
+    private readonly SemanticGraph _SemanticGraph;
 
     /// <summary>Error handler object used for reporting compilation messages.</summary>
-    private ICompilationErrorHandler _ErrorHandler;
+    private readonly ICompilationErrorHandler _ErrorHandler;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -444,9 +444,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a field entity from a field declaration.
+    /// Creates a property entity from a property declaration.
     /// </summary>
-    /// <param name="node">A field declaration syntax node.</param>
+    /// <param name="node">A property declaration syntax node.</param>
     // ----------------------------------------------------------------------------------------------
     public override void Visit(PropertyDeclarationNode node)
     {
@@ -475,6 +475,52 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Create the accessors and add to the entity
       propertyEntity.GetAccessor = CreateAccessor(node.GetAccessor);
       propertyEntity.SetAccessor = CreateAccessor(node.SetAccessor);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a method entity from a method declaration.
+    /// </summary>
+    /// <param name="node">A method declaration syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(MethodDeclarationNode node)
+    {
+      //TypeEntity parentEntity = GetParentEntity<TypeEntity>(node);
+
+      //// If no parent entity then this entity cannot be built.
+      //if (parentEntity == null) { return; }
+
+      //// Find out whether a method was already declared with this name
+      //var methodEntity = parentEntity.DeclarationSpace.GetSpecificType<MethodEntity>(node.NameWithGenericDimensions);
+
+      //// If no method declared with this name, but the name is already taken, then signal error
+      //if (methodEntity == null && parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
+      //{
+      //  // TODO: report error
+      //  // ReportDuplicateNameError(parentEntity, node);
+      //  return;
+      //}
+
+      //bool isAbstract = (node.Body == null);
+
+      //if (methodEntity == null)
+      //{
+      //  // Build the new entity
+      //  methodEntity = new MethodEntity(node.Name, true, isAbstract, node.IsPartial);
+      //  // TODO: AddTypeParametersToMethod(methodEntity, parentEntity, node);
+      //  parentEntity.AddMember(methodEntity);
+      //}
+      //else
+      //{
+      //  // TODO
+      //  //if (!MergePartialDeclaration(node, methodEntity, parentEntity))
+      //  //{
+      //  //  // If there was an error in partial declaration processing, then bail out.
+      //  //  return;
+      //  //}
+      //}
+
+      //AssociateSyntaxNodeWithSemanticEntity(node, methodEntity);
     }
 
     #region Private methods

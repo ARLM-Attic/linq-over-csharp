@@ -14,10 +14,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   public class MetadataImporterSemanticEntityFactory
   {
     /// <summary>Error handler object used for reporting compilation messages.</summary>
-    private ICompilationErrorHandler _ErrorHandler;
+    private readonly ICompilationErrorHandler _ErrorHandler;
 
     /// <summary>The semantic graph that this factory is working on.</summary>
-    private SemanticGraph _SemanticGraph;
+    private readonly SemanticGraph _SemanticGraph;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

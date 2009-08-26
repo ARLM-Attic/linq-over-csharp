@@ -28,10 +28,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public abstract class GenericCapableTypeEntity : TypeEntity
   {
     /// <summary>Backing field for AllTypeParameters property to disallow direct adding or removing.</summary>
-    private List<TypeParameterEntity> _AllTypeParameters;
+    private readonly List<TypeParameterEntity> _AllTypeParameters;
 
     /// <summary>Backing field for ConstructedGenericTypes property to disallow direct adding or removing.</summary>
-    private List<ConstructedGenericTypeEntity> _ConstructedGenericTypes;
+    private readonly List<ConstructedGenericTypeEntity> _ConstructedGenericTypes;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
