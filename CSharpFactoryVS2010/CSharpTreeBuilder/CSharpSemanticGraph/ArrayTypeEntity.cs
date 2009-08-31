@@ -66,19 +66,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
+    /// Gets the string representation of the object.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override string DistinctiveName
+    public override string ToString()
     {
-      get
-      {
-        var stringBuilder = new StringBuilder(UnderlyingType.DistinctiveName);
+        var stringBuilder = new StringBuilder(UnderlyingType.ToString());
         stringBuilder.Append('[');
         stringBuilder.Append(',',Rank-1);
         stringBuilder.Append(']');
         return stringBuilder.ToString();
-      }
     }
   }
 }

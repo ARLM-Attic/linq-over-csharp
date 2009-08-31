@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private readonly List<ISyntaxNode> _SyntaxNodes;
 
     /// <summary>Backing field for Parent property.</summary>
-    private SemanticEntity _Parent;
+    protected SemanticEntity _Parent;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

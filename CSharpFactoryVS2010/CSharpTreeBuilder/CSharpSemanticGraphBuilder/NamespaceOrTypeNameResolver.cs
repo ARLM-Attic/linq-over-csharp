@@ -273,8 +273,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (lastTypeTag.GenericDimensions == 0 && handleEntity is NamespaceEntity)
         {
           // ... and N contains a nested namespace with name I, ...
-          var foundNamespaceEntity =
-            handleEntity.DeclarationSpace.GetSpecificType<NamespaceEntity>(lastTypeTag.Identifier);
+          var foundNamespaceEntity = (handleEntity is NamespaceEntity)
+            ? (handleEntity as NamespaceEntity).GetChildNamespace(lastTypeTag.Identifier)
+            : null;
+
           if (foundNamespaceEntity != null)
           {
             // ... then the namespace-or-type-name refers to that nested namespace.
@@ -287,8 +289,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // ... and N contains an accessible type having name I and K type parameters, ...
           // BUGBUG: accessibility is not checked!
-          var foundTypeEntity =
-            handleEntity.DeclarationSpace.GetSpecificType<TypeEntity>(lastTypeTag.NameWithGenericDimensions);
+          var foundTypeEntity = (handleEntity is IHasChildTypes)
+            ? (handleEntity as IHasChildTypes).GetChildType(lastTypeTag.Identifier, lastTypeTag.GenericDimensions)
+            : null;
 
           if (foundTypeEntity != null)
           {
@@ -337,16 +340,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private static NamespaceOrTypeEntity ResolveSingleTypeTag(TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity)
     {
-      // If K is zero and the namespace-or-type-name appears within a generic method declaration (§10.6) ...
-      // ... and if that declaration includes a type parameter (§10.1.3) with name I, 
-      // then the namespace-or-type-name refers to that type parameter.
-
-      // TODO: implement this branch
+      // If K is zero ...
+      if (typeTagNode.Arguments.Count == 0)
+      {
+        // ... and the namespace-or-type-name appears within a generic method declaration (§10.6) ...
+        var genericMethodEntity = resolutionContextEntity.GetEnclosingGenericMethodDeclaration();
+        if (genericMethodEntity != null)
+        {
+          // ... and if that declaration includes a type parameter (§10.1.3) with name I, ...
+          var methodTypeParameter = genericMethodEntity.GetOwnTypeParameterByName(typeTagNode.Identifier);
+          if (methodTypeParameter != null)
+          {
+            // ... then the namespace-or-type-name refers to that type parameter.
+            return methodTypeParameter;
+          }
+        }
+      }
 
       // Otherwise, if the namespace-or-type-name appears within a type declaration, 
       // then for each instance type T (§10.3.1), starting with the instance type of that type declaration
       // and continuing with the instance type of each enclosing class or struct declaration (if any):
-      TypeEntity typeContext = resolutionContextEntity.GetEnclosing<TypeEntity>();
+      var typeContext = resolutionContextEntity.GetEnclosing<TypeEntity>();
 
       while (typeContext != null)
       {
@@ -354,7 +368,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (typeTagNode.Arguments.Count == 0)
         {
           // ... and the declaration of T includes a type parameter with name I, ...
-          var foundTypeParameterEntity = typeContext.DeclarationSpace.GetSpecificType<TypeParameterEntity>(typeTagNode.Identifier);
+          var foundTypeParameterEntity = (typeContext is GenericCapableTypeEntity)
+            ? (typeContext as GenericCapableTypeEntity).GetOwnTypeParameterByName(typeTagNode.Identifier)
+            : null;
 
           if (foundTypeParameterEntity != null)
           {
@@ -396,7 +412,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (typeTagNode.GenericDimensions == 0)
         {
           // ... and I is the name of a namespace in N, then:
-          var foundNamespaceEntity = namespaceContext.DeclarationSpace.GetSpecificType<NamespaceEntity>(typeTagNode.Identifier);
+          var foundNamespaceEntity = namespaceContext.GetChildNamespace(typeTagNode.Identifier);
 
           if (foundNamespaceEntity != null)
           {
@@ -417,7 +433,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // Otherwise, if N contains an accessible type having name I and K type parameters, then:
         // BUGBUG: accessibility is not checked!
-        var foundTypeEntity = namespaceContext.DeclarationSpace.GetSpecificType<TypeEntity>(typeTagNode.NameWithGenericDimensions);
+        var foundTypeEntity = (namespaceContext is IHasChildTypes)
+          ? (namespaceContext as IHasChildTypes).GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions)
+          : null;
 
         if (foundTypeEntity != null)
         {
@@ -511,7 +529,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       while (typeEntity == null && contextType != null)
       {
-        typeEntity = contextType.DeclarationSpace.GetSpecificType<TypeEntity>(typeTagNode.NameWithGenericDimensions);
+        typeEntity = (contextType is IHasChildTypes)
+          ? (contextType as IHasChildTypes).GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions)
+          : null;
 
         if (typeEntity == null)
         {
@@ -544,8 +564,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (usingNamespaceEntity.ImportedNamespace != null)
         {
           // Find out if the imported namespace contains a type declared with the given name and number of type parameters
-          var typeEntity = usingNamespaceEntity.ImportedNamespace.DeclarationSpace.GetSpecificType<TypeEntity>(
-            typeTagNode.NameWithGenericDimensions);
+          var typeEntity = usingNamespaceEntity.ImportedNamespace.GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions);
 
           // If a type is found then add it to the result list.
           if (typeEntity != null)
@@ -585,7 +604,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // If the global namespace contains a namespace named I and K is zero, ...
         if (typeTagNode.GenericDimensions == 0)
         {
-          var namespaceEntity = globalNamespace.DeclarationSpace.GetSpecificType<NamespaceEntity>(typeTagNode.Identifier);
+          var namespaceEntity = globalNamespace.GetChildNamespace(typeTagNode.Identifier);
           if (namespaceEntity != null)
           {
             // ... then the qualified-alias-member refers to that namespace.
@@ -595,7 +614,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // Otherwise, if the global namespace contains a non-generic type named I and K is zero, ...
         // Otherwise, if the global namespace contains a type named I that has K type parameters, ... 
-        var typeEntity = globalNamespace.DeclarationSpace.GetSpecificType<TypeEntity>(typeTagNode.NameWithGenericDimensions);
+        var typeEntity = globalNamespace.GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions);
         if (typeEntity != null)
         {
           // ... then the qualified-alias-member refers to that type.
@@ -644,8 +663,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // If the namespace associated with N contains a namespace named I and K is zero, ... 
           if (typeTagNode.GenericDimensions == 0)
           {
-            var childNamespaceEntity =
-              qualifierNamespaceEntity.DeclarationSpace.GetSpecificType<NamespaceEntity>(typeTagNode.Identifier);
+            var childNamespaceEntity = qualifierNamespaceEntity.GetChildNamespace(typeTagNode.Identifier);
 
             if (childNamespaceEntity != null)
             {
@@ -656,8 +674,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
           // Otherwise, if the namespace associated with N contains a non-generic type named I and K is zero, ...
           // Otherwise, if the namespace associated with N contains a type named I that has K type parameters, ...
-          var childTypeEntity =
-            qualifierNamespaceEntity.DeclarationSpace.GetSpecificType<TypeEntity>(typeTagNode.NameWithGenericDimensions);
+          var childTypeEntity = qualifierNamespaceEntity.GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions);
           if (childTypeEntity != null)
           {
             // ... then the qualified-alias-member refers to that type.

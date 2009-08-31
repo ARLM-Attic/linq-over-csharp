@@ -59,36 +59,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override string DistinctiveName
-    {
-      get
-      {
-        return Name + '?';
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the aliased type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity AliasedType { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the declaration space of the entity. 
-    /// </summary>
-    /// <remarks>    
-    /// Returns the aliased type's declaration space.
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public override DeclarationSpace DeclarationSpace
-    {
-      get { return AliasedType.DeclarationSpace; }
-    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -118,5 +92,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return AliasedType.Members;
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of the object.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return AliasedType.ToString();
+    }
+
   }
 }

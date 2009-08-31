@@ -18,12 +18,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name. 
+    /// Gets a child type by name and number of type parameters.
     /// </summary>
-    /// <param name="distinctiveName">A distinctive name.</param>
-    /// <returns>The type with the given name, or null if not found.</returns>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>The type with the given name and number of type parameters, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    TypeEntity GetChildTypeByDistinctiveName(string distinctiveName);
+    TypeEntity GetChildType(string name, int typeParameterCount);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -39,27 +39,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       ChildTypes.Add(typeEntity);
       typeEntity.Parent = this;
-      DeclarationSpace.Define(typeEntity);
+      _DeclarationSpace.Register(typeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name. 
+    /// Gets a child type by name and number of type parameters.
     /// </summary>
-    /// <param name="distinctiveName">A distinctive name.</param>
-    /// <returns>The type with the given name, or null if not found.</returns>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>The type with the given name and number of type parameters, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity GetChildTypeByDistinctiveName(string distinctiveName)
+    public TypeEntity GetChildType(string name, int typeParameterCount)
     {
-      if (DeclarationSpace.IsNameDefined(distinctiveName))
-      {
-        var nameTableEntry = DeclarationSpace[distinctiveName];
-        if (nameTableEntry.State == NameTableEntryState.Definite && nameTableEntry.Entity is TypeEntity)
-        {
-          return nameTableEntry.Entity as TypeEntity;
-        }
-      }
-      return null;
+      return _DeclarationSpace.FindEntityByNameAndTypeParameterCount<TypeEntity>(name, typeParameterCount);
     }
 
     #region Visitor methods

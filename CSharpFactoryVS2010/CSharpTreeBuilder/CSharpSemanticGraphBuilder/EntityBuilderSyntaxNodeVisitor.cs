@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpAstBuilder;
 using CSharpTreeBuilder.CSharpSemanticGraph;
@@ -48,21 +49,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Looping through every tag in the namespace name
       foreach (var nameTag in node.NameTags)
       {
-        // Find out whether a namespace was already declared with this name
-        var namespaceEntity = parentEntity.DeclarationSpace.GetSpecificType<NamespaceEntity>(nameTag.Identifier);
-
-        // If no namespace declared with this name, but the name is already taken, then signal error
-        if (namespaceEntity == null && parentEntity.DeclarationSpace.IsNameDefined(nameTag.Identifier))
-        {
-          ErrorDuplicateNameInNamespace(node.StartToken, parentEntity.FullyQualifiedName, nameTag.Identifier);
-          return;
-        }
+        // Find out whether this child namespace already exists
+        var namespaceEntity = parentEntity.GetChildNamespace(nameTag.Identifier);
         
         // If no such namespace yet then create it
         if (namespaceEntity == null)
         {
           namespaceEntity = new NamespaceEntity(nameTag.Identifier);
-          parentEntity.AddChildNamespace(namespaceEntity);
+
+          // Try to add to its parent
+          try
+          {
+            parentEntity.AddChildNamespace(namespaceEntity);
+          }
+          catch (DeclarationConflictException)
+          {
+            ReportDuplicateNameError(parentEntity, node.StartToken, nameTag.Identifier);
+            return;
+          }
         }
 
         // Associate the syntax node with the found or the newly created namespace entity
@@ -181,28 +185,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(ClassDeclarationNode node)
     {
-      NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Find out whether a class was already declared with this name
-      var classEntity = parentEntity.DeclarationSpace.GetSpecificType<ClassEntity>(node.NameWithGenericDimensions);
+      // Cast the parent to a child-type-capable entity.
+      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
-      // If no class declared with this name, but the name is already taken, then signal error
-      if (classEntity == null && parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
-      {
-        ReportDuplicateNameError(parentEntity,node);
-        return;
-      }
+      // Find the class if it already exists
+      var classEntity = childTypeCapableParentEntity.GetChildType(node.Name, node.TypeParameters.Count) as ClassEntity;
 
+      // If it does not exist then build a new entity
       if (classEntity == null)
       {
-        // Build the new entity
+        // If the parent entity doesn't allow the declaration then report error
+        if (!parentEntity.AllowsDeclaration<ClassEntity>(node.Name, node.TypeParameters.Count))
+        {
+          ReportDuplicateNameError(parentEntity, node.StartToken, node.NameWithGenericDimensions);
+          return;
+        }
+
         classEntity = new ClassEntity(node.Name, node.IsPartial);
         AddBaseTypesToTypeEntity(classEntity, node);
-        AddTypeParametersToTypeEntity(classEntity, parentEntity, node);
-        AddChildTypeToParent(classEntity, parentEntity);
+        AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters);
+        childTypeCapableParentEntity.AddChildType(classEntity);
       }
       else
       {
@@ -224,28 +232,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(StructDeclarationNode node)
     {
-      NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Find out whether a struct was already declared with this name
-      var structEntity = parentEntity.DeclarationSpace.GetSpecificType<StructEntity>(node.NameWithGenericDimensions);
+      // Cast the parent to a child-type-capable entity.
+      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
-      // If no struct declared with this name, but the name is already taken, then signal error
-      if (structEntity == null && parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
-      {
-        ReportDuplicateNameError(parentEntity, node);
-        return;
-      }
+      // Find the class if it already exists
+      var structEntity = childTypeCapableParentEntity.GetChildType(node.Name, node.TypeParameters.Count) as StructEntity;
 
+      // If it does not exist then build a new entity
       if (structEntity == null)
       {
-        // Build the new entity
+        // If the parent entity doesn't allow the declaration then report error
+        if (!parentEntity.AllowsDeclaration<StructEntity>(node.Name, node.TypeParameters.Count))
+        {
+          ReportDuplicateNameError(parentEntity, node.StartToken, node.NameWithGenericDimensions);
+          return;
+        }
+
         structEntity = new StructEntity(node.Name, node.IsPartial);
         AddBaseTypesToTypeEntity(structEntity, node);
-        AddTypeParametersToTypeEntity(structEntity, parentEntity, node);
-        AddChildTypeToParent(structEntity, parentEntity);
+        AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters);
+        childTypeCapableParentEntity.AddChildType(structEntity);
       }
       else
       {
@@ -267,28 +279,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(InterfaceDeclarationNode node)
     {
-      NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Find out whether an interface was already declared with this name
-      var interfaceEntity = parentEntity.DeclarationSpace.GetSpecificType<InterfaceEntity>(node.NameWithGenericDimensions);
+      // Cast the parent to a child-type-capable entity.
+      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
-      // If no interface declared with this name, but the name is already taken, then signal error
-      if (interfaceEntity == null && parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
-      {
-        ReportDuplicateNameError(parentEntity, node);
-        return;
-      }
+      // Find the class if it already exists
+      var interfaceEntity = childTypeCapableParentEntity.GetChildType(node.Name, node.TypeParameters.Count) as InterfaceEntity;
 
+      // If it does not exist then build a new entity
       if (interfaceEntity == null)
       {
-        // Build the new entity
+        // If the parent entity doesn't allow the declaration then report error
+        if (!parentEntity.AllowsDeclaration<InterfaceEntity>(node.Name, node.TypeParameters.Count))
+        {
+          ReportDuplicateNameError(parentEntity, node.StartToken, node.NameWithGenericDimensions);
+          return;
+        }
+
         interfaceEntity = new InterfaceEntity(node.Name, node.IsPartial);
         AddBaseTypesToTypeEntity(interfaceEntity, node);
-        AddTypeParametersToTypeEntity(interfaceEntity, parentEntity, node);
-        AddChildTypeToParent(interfaceEntity, parentEntity);
+        AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters);
+        childTypeCapableParentEntity.AddChildType(interfaceEntity);
       }
       else
       {
@@ -310,24 +326,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(EnumDeclarationNode node)
     {
-      NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Find out whether an enum was already declared with this name
-      var enumEntity = parentEntity.DeclarationSpace.GetSpecificType<EnumEntity>(node.NameWithGenericDimensions);
-
-      // If the enum already exists or the name is already taken by an other entity, then signal error
-      if (enumEntity != null || parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
+      // If the parent entity doesn't allow the declaration then report error
+      if (!parentEntity.AllowsDeclaration<EnumEntity>(node.Name))
       {
-        ReportDuplicateNameError(parentEntity, node);
+        ReportDuplicateNameError(parentEntity, node.StartToken, node.NameWithGenericDimensions);
         return;
       }
 
+      // Cast the parent to a child-type-capable entity.
+      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
+
       // Build the new entity
-      enumEntity = new EnumEntity(node.Name);
-      AddChildTypeToParent(enumEntity, parentEntity);
+      var enumEntity = new EnumEntity(node.Name);
+      childTypeCapableParentEntity.AddChildType(enumEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
 
       // Set the underlying type reference.
@@ -350,25 +367,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(DelegateDeclarationNode node)
     {
-      NamespaceOrTypeEntity parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Find out whether a delegate was already declared with this name
-      var delegateEntity = parentEntity.DeclarationSpace.GetSpecificType<DelegateEntity>(node.NameWithGenericDimensions);
-
-      // If the delegate already exists or the name is already taken by an other entity, then signal error
-      if (delegateEntity != null || parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
+      // If the parent entity doesn't allow the declaration then report error
+      if (!parentEntity.AllowsDeclaration<DelegateEntity>(node.Name))
       {
-        ReportDuplicateNameError(parentEntity, node);
+        ReportDuplicateNameError(parentEntity, node.StartToken, node.NameWithGenericDimensions);
         return;
       }
 
+      // Cast the parent to a child-type-capable entity.
+      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
+
       // Build the new entity
-      delegateEntity = new DelegateEntity(node.Name);
-      AddTypeParametersToTypeEntity(delegateEntity, parentEntity, node);
-      AddChildTypeToParent(delegateEntity, parentEntity);
+      var delegateEntity = new DelegateEntity(node.Name);
+      AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters);
+      childTypeCapableParentEntity.AddChildType(delegateEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, delegateEntity);
 
       // Set the return type.
@@ -390,7 +408,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(FieldDeclarationNode node)
     {
-      TypeEntity parentEntity = GetParentEntity<TypeEntity>(node);
+      var parentEntity = GetParentEntity<TypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
@@ -398,8 +416,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Looping through every tag in the field declaration
       foreach (var fieldTag in node.FieldTags)
       {
-        // Check if this name is already in use in this declaration space
-        if (parentEntity.DeclarationSpace.IsNameDefined(fieldTag.Identifier))
+        // In classes and structs: member name cannot be the same as the type name
+        if ((parentEntity is ClassEntity || parentEntity is StructEntity)
+          && parentEntity.Name == fieldTag.Identifier)
+        {
+          ErrorMemberNameAndTypeNameConflict(node.StartToken, node.Identifier);
+          // Continue with the next field tag.
+          continue;
+        }
+
+        // Check whether the field can be declared
+        if (!parentEntity.AllowsDeclaration<FieldEntity>(fieldTag.Identifier))
         {
           ErrorDuplicateNameInType(node.StartToken, parentEntity.FullyQualifiedName, node.Identifier);
           // Continue with the next field tag.
@@ -423,13 +450,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(EnumValueNode node)
     {
-      EnumEntity parentEntity = GetParentEntity<EnumEntity>(node);
+      var parentEntity = GetParentEntity<EnumEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Check if this name is already in use in this declaration space
-      if (parentEntity.DeclarationSpace.IsNameDefined(node.Identifier))
+      // Check whether the enum value can be declared
+      if (!parentEntity.AllowsDeclaration<EnumMemberEntity>(node.Identifier))
       {
         ErrorDuplicateNameInType(node.StartToken, parentEntity.FullyQualifiedName, node.Identifier);
         return;
@@ -438,7 +465,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Create a semantic entity and add to its parent.
       var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEntity.UnderlyingTypeReference);
       parentEntity.AddMember(enumMemberEntity);
-
       AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
     }
 
@@ -450,13 +476,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(PropertyDeclarationNode node)
     {
-      TypeEntity parentEntity = GetParentEntity<TypeEntity>(node);
+      var parentEntity = GetParentEntity<TypeEntity>(node);
 
       // If no parent entity then this entity cannot be built.
       if (parentEntity == null) { return; }
 
-      // Check if this name is already in use in this declaration space
-      if (parentEntity.DeclarationSpace.IsNameDefined(node.Identifier))
+      // In classes and structs: member name cannot be the same as the type name
+      if ((parentEntity is ClassEntity || parentEntity is StructEntity)
+        && parentEntity.Name == node.Name)
+      {
+        ErrorMemberNameAndTypeNameConflict(node.StartToken, node.Identifier);
+        return;
+      }
+
+      // Check whether the property can be declared
+      if (!parentEntity.AllowsDeclaration<PropertyEntity>(node.Identifier))
       {
         ErrorDuplicateNameInType(node.StartToken, parentEntity.FullyQualifiedName, node.Identifier);
         return;
@@ -485,42 +519,57 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(MethodDeclarationNode node)
     {
-      //TypeEntity parentEntity = GetParentEntity<TypeEntity>(node);
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<TypeEntity>(node);
 
-      //// If no parent entity then this entity cannot be built.
-      //if (parentEntity == null) { return; }
+      // If no parent entity then this entity cannot be built.
+      if (parentEntity == null) { return; }
 
-      //// Find out whether a method was already declared with this name
-      //var methodEntity = parentEntity.DeclarationSpace.GetSpecificType<MethodEntity>(node.NameWithGenericDimensions);
+      // In classes and structs: member name cannot be the same as the type name
+      if ((parentEntity is ClassEntity || parentEntity is StructEntity)
+        && parentEntity.Name == node.Name)
+      {
+        ErrorMemberNameAndTypeNameConflict(node.StartToken, node.Identifier);
+        return;
+      }
 
-      //// If no method declared with this name, but the name is already taken, then signal error
-      //if (methodEntity == null && parentEntity.DeclarationSpace.IsNameDefined(node.NameWithGenericDimensions))
-      //{
-      //  // TODO: report error
-      //  // ReportDuplicateNameError(parentEntity, node);
-      //  return;
-      //}
+      // Create parameter entities from parameter nodes
+      var parameters = new List<ParameterEntity>();
 
-      //bool isAbstract = (node.Body == null);
+      // Create the signature of the method
+      var signature = new Signature(node.Name, node.TypeParameters.Count, parameters);
 
-      //if (methodEntity == null)
-      //{
-      //  // Build the new entity
-      //  methodEntity = new MethodEntity(node.Name, true, isAbstract, node.IsPartial);
-      //  // TODO: AddTypeParametersToMethod(methodEntity, parentEntity, node);
-      //  parentEntity.AddMember(methodEntity);
-      //}
-      //else
-      //{
-      //  // TODO
-      //  //if (!MergePartialDeclaration(node, methodEntity, parentEntity))
-      //  //{
-      //  //  // If there was an error in partial declaration processing, then bail out.
-      //  //  return;
-      //  //}
-      //}
+      // Find the method if it already exists
+      var methodEntity = parentEntity.GetMethod(signature);
 
-      //AssociateSyntaxNodeWithSemanticEntity(node, methodEntity);
+      // If it does not exist then build a new entity
+      if (methodEntity == null)
+      {
+        // If the parent entity doesn't allow the declaration then report error
+        if (!parentEntity.AllowsDeclaration<MethodEntity>(signature))
+        {
+          ReportDuplicateNameError(parentEntity, node.StartToken, node.Name);
+          return;
+        }
+
+        var isAbstract = (node.Body == null);
+        var returnTypeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+
+        methodEntity = new MethodEntity(node.Name, true, isAbstract, node.IsPartial, node.IsStatic, returnTypeReference);
+        AddTypeParametersToEntity(methodEntity, parentEntity, node.TypeParameters);
+        AddParametersToOverloadableEntity(methodEntity, node.FormalParameters);
+        parentEntity.AddMember(methodEntity);
+      }
+      else
+      {
+        //if (!MergePartialDeclaration(node, methodEntity, parentEntity))
+        //{
+        //  // If there was an error in partial declaration processing, then bail out.
+        //  return;
+        //}
+      }
+
+      AssociateSyntaxNodeWithSemanticEntity(node, methodEntity);
     }
 
     #region Private methods
@@ -594,6 +643,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Checks whether a namespace-or-type entity can have child types, and returns an IHasChildTypes
+    /// interface is possible.
+    /// </summary>
+    /// <param name="namespaceOrTypeEntity">A namespace or type entity.</param>
+    /// <returns>An IHasChildTypes interface.</returns>
+    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    private static IHasChildTypes CastToChildTypeCapableEntity(NamespaceOrTypeEntity namespaceOrTypeEntity)
+    {
+      var childTypeCapableEntity = namespaceOrTypeEntity as IHasChildTypes;
+      if (childTypeCapableEntity == null)
+      {
+        // This case is not allowed by the syntax analyzer, but we check anyway to be future-proof...
+        throw new ApplicationException(string.Format("'{0}' cannot have child types.", namespaceOrTypeEntity.GetType()));
+      }
+      return childTypeCapableEntity;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Establishis a bi-directional link between an AST (abstract syntax tree) node and an SG (semantic graph) node.
     /// </summary>
     /// <param name="syntaxNode">A syntax tree node.</param>
@@ -636,6 +705,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Signals error: error CS0542: 'A': member names cannot be the same as their enclosing type
+    /// </summary>
+    /// <param name="errorPoint">The token where the error occured.</param>
+    /// <param name="name">The conflicting name.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void ErrorMemberNameAndTypeNameConflict(Token errorPoint, string name)
+    {
+      _ErrorHandler.Error("CS0542", errorPoint, "'{0}': member names cannot be the same as their enclosing type.",
+                          name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Signals error: The using alias '{0}' appeared previously in this namespace
     /// </summary>
     /// <param name="errorPoint">The token where the error occured.</param>
@@ -666,19 +748,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Reports the right error message for a duplicate name.
     /// </summary>
     /// <param name="namespaceOrTypeEntity">The entity where the duplication occured.</param>
-    /// <param name="node">The type declaration AST node that caused the duplicaton.</param>
+    /// <param name="errorPoint">The token where the error occured.</param>
+    /// <param name="conflictingName">The conflicting name.</param>
     // ----------------------------------------------------------------------------------------------
-    private void ReportDuplicateNameError(NamespaceOrTypeEntity namespaceOrTypeEntity, TypeDeclarationNode node)
+    private void ReportDuplicateNameError(NamespaceOrTypeEntity namespaceOrTypeEntity, Token errorPoint, string conflictingName)
     {
       if (namespaceOrTypeEntity is NamespaceEntity)
       {
-        ErrorDuplicateNameInNamespace(node.StartToken, namespaceOrTypeEntity.FullyQualifiedName,
-                                      node.NameWithGenericDimensions);
+        ErrorDuplicateNameInNamespace(errorPoint, namespaceOrTypeEntity.FullyQualifiedName, conflictingName);
       }
       else
       {
-        ErrorDuplicateNameInType(node.StartToken, namespaceOrTypeEntity.FullyQualifiedName,
-                                 node.NameWithGenericDimensions);
+        ErrorDuplicateNameInType(errorPoint, namespaceOrTypeEntity.FullyQualifiedName, conflictingName);
       }
     }
 
@@ -722,30 +803,64 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds type parameters to a type entity from its parent and its AST declaration node.
+    /// Adds type parameters to an entity from its parent and its AST declaration node.
     /// </summary>
-    /// <param name="typeEntity">The type entity that will receive the type parameters.</param>
-    /// <param name="parentEntity">The (to-be) parent of typeEntity.</param>
-    /// <param name="typeNode">An AST node that is the declaration of typeEntity.</param>
+    /// <param name="typeParameterHolder">An entity that will receive the type parameters.</param>
+    /// <param name="parentEntity">The (to-be) parent of entity.</param>
+    /// <param name="typeParameterNodes">A collection of type parameter AST nodes.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void AddTypeParametersToTypeEntity(
-      GenericCapableTypeEntity typeEntity, NamespaceOrTypeEntity parentEntity, TypeDeclarationNode typeNode)
+    private static void AddTypeParametersToEntity(
+      ICanHaveTypeParameters typeParameterHolder, SemanticEntity parentEntity, TypeParameterNodeCollection typeParameterNodes)
     {
       // First add the (inherited) type parameters from the parent type
       if (parentEntity is GenericCapableTypeEntity)
       {
         foreach (var typeParameterEntity in ((GenericCapableTypeEntity) parentEntity).AllTypeParameters)
         {
-          typeEntity.AddTypeParameter(typeParameterEntity);
+          typeParameterHolder.AddTypeParameter(typeParameterEntity);
         }
       }
 
       // Then add the "own" type parameters
-      foreach (var typeParameter in typeNode.TypeParameters)
+      foreach (var typeParameter in typeParameterNodes)
       {
         var typeParameterEntity = new TypeParameterEntity(typeParameter.Identifier);
-        typeEntity.AddTypeParameter(typeParameterEntity);
+        typeParameterHolder.AddTypeParameter(typeParameterEntity);
         AssociateSyntaxNodeWithSemanticEntity(typeParameter, typeParameterEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds parameters to an entity.
+    /// </summary>
+    /// <param name="overloadableEntity">An overloadable entity that will receive the parameter.</param>
+    /// <param name="parameterNodes">A collection of parameter AST nodes.</param>
+    // ----------------------------------------------------------------------------------------------
+    private static void AddParametersToOverloadableEntity(
+      IOverloadableEntity overloadableEntity, FormalParameterNodeCollection parameterNodes)
+    {
+      foreach (var parameter in parameterNodes)
+      {
+        var typeReference = new TypeNodeBasedTypeEntityReference(parameter.Type);
+
+        var parameterKind = ParameterKind.Value;
+        switch (parameter.Modifier)
+        {
+          case (FormalParameterModifier.In):
+            parameterKind = ParameterKind.Value;
+            break;
+          case (FormalParameterModifier.Out):
+            parameterKind = ParameterKind.Output;
+            break;
+          case (FormalParameterModifier.Ref):
+            parameterKind = ParameterKind.Reference;
+            break;
+        }
+
+        var parameterEntity = new ParameterEntity(parameter.Identifier, typeReference, parameterKind);
+        overloadableEntity.AddParameter(parameterEntity);
+        AssociateSyntaxNodeWithSemanticEntity(parameter, parameterEntity);
       }
     }
 
@@ -781,16 +896,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private bool MergePartialDeclaration(TypeDeclarationNode typeDeclaration, TypeEntity typeEntity, NamespaceOrTypeEntity parentEntity)
     {
+      var entityIsPartial = (typeEntity is ICanBePartial && ((ICanBePartial)typeEntity).IsPartial);
+
       // If nor the type entity neither this declaration is partial then report duplicate name error
-      if (!typeEntity.IsPartial && !typeDeclaration.IsPartial)
+      if (!entityIsPartial && !typeDeclaration.IsPartial)
       {
-        ReportDuplicateNameError(parentEntity, typeDeclaration);
+        ReportDuplicateNameError(parentEntity, typeDeclaration.StartToken, typeDeclaration.NameWithGenericDimensions);
         return false;
       }
 
       // If the entity is partial but this declaration is not (or vica versa) then report missing partial error
-      if ((typeEntity.IsPartial && !typeDeclaration.IsPartial)
-          || (!typeEntity.IsPartial && typeDeclaration.IsPartial))
+      if ((entityIsPartial && !typeDeclaration.IsPartial)
+          || (!entityIsPartial && typeDeclaration.IsPartial))
       {
         Token typeEntityErrorPoint = null;
         if (typeEntity.SyntaxNodes.Count == 1 && typeEntity.SyntaxNodes[0] != null)

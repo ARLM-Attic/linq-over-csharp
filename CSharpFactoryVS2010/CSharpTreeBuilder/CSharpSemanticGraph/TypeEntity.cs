@@ -34,15 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
-      IsPartial = false;
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type was declared as partial.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsPartial { get; protected set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -252,11 +244,42 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="memberEntity">The member entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddMember(MemberEntity memberEntity)
+    public virtual void AddMember(MemberEntity memberEntity)
     {
       _Members.Add(memberEntity);
       memberEntity.Parent = this;
-      DeclarationSpace.Define(memberEntity);
+      _DeclarationSpace.Register(memberEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a member by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of member to found.</typeparam>
+    /// <param name="name">The name of the member to found.</param>
+    /// <returns>The found member, or null if not found.</returns>
+    /// <remarks>If getting a method then assumes zero type parameters and zero parameters.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetMember<TEntityType>(string name) where TEntityType : MemberEntity
+    {
+      if (typeof(TEntityType) == typeof(MethodEntity))
+      {
+        return GetMethod(new Signature(name, 0, null)) as TEntityType;
+      }
+
+      return _DeclarationSpace.FindEntityByName<TEntityType>(name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a method by signature.
+    /// </summary>
+    /// <param name="signature">A signature.</param>
+    /// <returns>The found method, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public MethodEntity GetMethod(Signature signature)
+    {
+      return _DeclarationSpace.FindEntityBySignature<MethodEntity>(signature);
     }
 
     // ----------------------------------------------------------------------------------------------

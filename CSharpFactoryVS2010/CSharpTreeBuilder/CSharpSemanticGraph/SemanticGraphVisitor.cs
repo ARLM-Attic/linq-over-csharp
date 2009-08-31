@@ -24,6 +24,7 @@
 
     public virtual void Visit(FieldEntity entity) { }
     public virtual void Visit(PropertyEntity entity) { }
+    public virtual void Visit(MethodEntity entity) { }
 
     #pragma warning restore 1591
 

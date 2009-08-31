@@ -29,21 +29,22 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the member, which is unique for all entities in a declaration space.
-    /// Eg. a method's distinctive name is its signature.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual string DistinctiveName
-    {
-      get { return Name; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets a value indicating whether the member is explicitly defined, or created by the parser.
     /// Eg. value types have a default constructor which is implicitly declared.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public bool IsExplicitlyDefined { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of the object.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var result = (this is IOverloadableEntity) ? (this as IOverloadableEntity).Signature.ToString() : Name;
+
+      return Parent == null ? result : Parent.ToString() + "_" + result;
+    }
   }
 }

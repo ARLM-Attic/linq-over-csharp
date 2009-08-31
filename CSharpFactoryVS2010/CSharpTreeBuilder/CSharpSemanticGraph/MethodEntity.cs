@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -11,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a method.
   /// </summary>
   // ================================================================================================
-  public sealed class MethodEntity : FunctionMemberWithBodyEntity, IOverloadableMember
+  public sealed class MethodEntity : FunctionMemberWithBodyEntity, IOverloadableEntity, ICanBePartial, ICanHaveTypeParameters
   {
     /// <summary>Backing field for Parameters property.</summary>
     private readonly List<ParameterEntity> _Parameters;
@@ -27,13 +28,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="isExplicitlyDefined">A value indicating whether the member is explicitly defined.</param>
     /// <param name="isAbstract">A value indicating whether the function member is abstract.</param>
     /// <param name="isPartial">A value indicating whether this method is partial.</param>
+    /// <param name="isStatic">A value indicating whether this method is static.</param>
+    /// <param name="returnTypeReference">Reference to the return type.</param>
     // ----------------------------------------------------------------------------------------------
-    public MethodEntity(string name, bool isExplicitlyDefined, bool isAbstract, bool isPartial)
+    public MethodEntity(string name, bool isExplicitlyDefined, bool isAbstract, bool isPartial, bool isStatic, 
+      SemanticEntityReference<TypeEntity> returnTypeReference)
       : base(name, isExplicitlyDefined, isAbstract)
     {
       _Parameters = new List<ParameterEntity>();
       _AllTypeParameters = new List<TypeParameterEntity>();
       IsPartial = isPartial;
+      IsStatic = isStatic;
+      ReturnTypeReference = returnTypeReference;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -42,6 +48,33 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public bool IsPartial { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the method is static.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsStatic { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reference to the return type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the return type. Null if not yet resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity ReturnType
+    {
+      get
+      {
+        return ReturnTypeReference == null ? null : ReturnTypeReference.TargetEntity;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -65,6 +98,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         parameterEntity.Parent = this;
         _Parameters.Add(parameterEntity);
+        _DeclarationSpace.Register(parameterEntity);
       }
     }
 
@@ -79,47 +113,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// The signature of a method does not include the return type.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public string Signature
+    public Signature Signature
     {
-      get
-      {
-        var stringBuilder = new StringBuilder(DistinctiveName);
-        
-        stringBuilder.Append('(');
-
-        bool isFirst = true;
-        foreach (var parameter in Parameters)
-        {
-          if (isFirst)
-          {
-            isFirst = false;
-          }
-          else
-          {
-            stringBuilder.Append(", ");
-          }
-
-          switch (parameter.Mode)
-          {
-            case (ParameterMode.Reference):
-              stringBuilder.Append("ref ");
-              break;
-            case (ParameterMode.Output):
-              stringBuilder.Append("out ");
-              break;
-            default:
-              break;
-          }
-
-          stringBuilder.Append(parameter.Type.RootNamespace.Name);
-          stringBuilder.Append("::");
-          stringBuilder.Append(parameter.Type.FullyQualifiedName);
-        }
-
-        stringBuilder.Append(')');
-
-        return stringBuilder.ToString();
-      }
+      get { return new Signature(Name, OwnTypeParameterCount, Parameters); }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -152,16 +148,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
+    /// Gets the number of own type parameters.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override string DistinctiveName
+    public int OwnTypeParameterCount
     {
       get
       {
-        return OwnTypeParameters.Count == 0
-                 ? Name
-                 : string.Format("{0}`{1}", Name, OwnTypeParameters.Count);
+        return OwnTypeParameters.Count;
       }
     }
 
@@ -190,22 +184,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       if (typeParameterEntity.Parent == null)
       {
         typeParameterEntity.Parent = this;
-      }
-
-      // A type parameter defined in a nested type/method can hide a type parameter inherited from parents
-      var nameTableEntry = DeclarationSpace[typeParameterEntity.Name];
-
-      if (nameTableEntry != null
-        && nameTableEntry.State == NameTableEntryState.Definite
-        && nameTableEntry.Entity is TypeParameterEntity
-        && ((TypeParameterEntity)nameTableEntry.Entity).Parent != this)
-      {
-        DeclarationSpace.Redefine(typeParameterEntity);
-      }
-      else
-      {
-        DeclarationSpace.Define(typeParameterEntity);
+        _DeclarationSpace.Register(typeParameterEntity);
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an own type parameter by name.
+    /// </summary>
+    /// <param name="name">The name of the type parameter to be found.</param>
+    /// <returns>A type parameter entity, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterEntity GetOwnTypeParameterByName(string name)
+    {
+      return _DeclarationSpace.FindEntityByName<TypeParameterEntity>(name);
+    }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+    }
+
+    #endregion
   }
 }

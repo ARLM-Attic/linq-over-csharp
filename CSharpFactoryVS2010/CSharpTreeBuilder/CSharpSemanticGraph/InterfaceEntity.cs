@@ -5,7 +5,7 @@
   /// This class represents an interface entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class InterfaceEntity : GenericCapableTypeEntity
+  public sealed class InterfaceEntity : GenericCapableTypeEntity, ICanBePartial
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -30,6 +30,13 @@
       : this(name, false)
     {
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity is declared as partial. 
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsPartial { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

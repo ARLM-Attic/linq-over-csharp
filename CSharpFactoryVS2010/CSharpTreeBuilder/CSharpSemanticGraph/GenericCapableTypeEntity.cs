@@ -25,7 +25,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// </p>
   /// </remarks>
   // ================================================================================================
-  public abstract class GenericCapableTypeEntity : TypeEntity
+  public abstract class GenericCapableTypeEntity : TypeEntity, ICanHaveTypeParameters
   {
     /// <summary>Backing field for AllTypeParameters property to disallow direct adding or removing.</summary>
     private readonly List<TypeParameterEntity> _AllTypeParameters;
@@ -76,17 +76,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
-    /// Eg. for a class it's the name + number of type params; for methods it's the signature; etc.
+    /// Gets the number of type parameters.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override string DistinctiveName
+    public int OwnTypeParameterCount
     {
       get
       {
-        return OwnTypeParameters.Count == 0
-                 ? Name
-                 : string.Format("{0}`{1}", Name, OwnTypeParameters.Count);
+        return OwnTypeParameters.Count;
       }
     }
 
@@ -98,7 +95,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public bool IsGeneric
     {
-      get { return AllTypeParameters.Count() > 0; }
+      get { return _AllTypeParameters.Count > 0; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -111,26 +108,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       _AllTypeParameters.Add(typeParameterEntity);
 
-      // If the type parameter is inherited, then the Parent property is already set, and we leave it as is.
+      // If the type parameter is not inherited from Parent, then add to the declaration space
       if (typeParameterEntity.Parent == null)
       {
         typeParameterEntity.Parent = this;
+        _DeclarationSpace.Register(typeParameterEntity);
       }
+    }
 
-      // A type parameter defined in a nested type can hide a type parameter inherited from parent
-      var nameTableEntry = DeclarationSpace[typeParameterEntity.Name];
-
-      if (nameTableEntry != null
-        && nameTableEntry.State == NameTableEntryState.Definite
-        && nameTableEntry.Entity is TypeParameterEntity
-        && ((TypeParameterEntity)nameTableEntry.Entity).Parent != this)
-      {
-        DeclarationSpace.Redefine(typeParameterEntity);
-      }
-      else
-      {
-        DeclarationSpace.Define(typeParameterEntity);
-      }
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an own type parameter by name.
+    /// </summary>
+    /// <param name="name">The name of the type parameter to be found.</param>
+    /// <returns>A type parameter entity, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterEntity GetOwnTypeParameterByName(string name)
+    {
+      return _DeclarationSpace.FindEntityByName<TypeParameterEntity>(name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -213,5 +208,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       return foundEntity;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of the object.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      return OwnTypeParameters.Count == 0
+               ? base.ToString()
+               : string.Format("{0}`{1}", base.ToString(), OwnTypeParameters.Count);
+    }
+
   }
 }

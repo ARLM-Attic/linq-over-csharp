@@ -144,19 +144,6 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the typetag name with generic dimensions (eg. A`1).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string NameWithGenericDimensions
-    {
-      get
-      {
-        return GenericDimensions > 0 ? Identifier + "`" + GenericDimensions : Identifier;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the output segment representing this syntax node.
     /// </summary>
     /// <returns>

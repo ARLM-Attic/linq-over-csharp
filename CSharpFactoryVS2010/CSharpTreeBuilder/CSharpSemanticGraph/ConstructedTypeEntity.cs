@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -26,7 +27,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       UnderlyingType = underlyingType;
-      Parent = underlyingType.Parent; 
+      _Parent = underlyingType.Parent; 
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -35,19 +36,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity UnderlyingType { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the declaration space of the entity. 
-    /// For a constructed type, the declaration space is the underlying type's declaration space.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override DeclarationSpace DeclarationSpace
-    {
-      get
-      {
-        return UnderlyingType.DeclarationSpace;
-      }
-    }
   }
 }

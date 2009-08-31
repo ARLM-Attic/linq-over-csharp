@@ -186,7 +186,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // If it's a partial type then there may be duplicates in the base type list that has to be eliminated
-      if (entity.IsPartial)
+      if (entity is ICanBePartial && ((ICanBePartial)entity).IsPartial)
       {
         entity.EliminateDuplicateBaseTypeReferences();
 

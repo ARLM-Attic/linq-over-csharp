@@ -131,35 +131,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
-    /// The distinctive name for a constructed generic type is:
-    /// UnderlyingType.DistinctiveName&lt;TypeArg1.TypeEntity.DistinctiveName,...&gt;
+    /// Gets the string representation of the object.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override string DistinctiveName
+    public override string ToString()
     {
-      get
+      var result = new StringBuilder(UnderlyingType.ToString());
+
+      result.Append('[');
+      bool firstTypeArg = true;
+      foreach (var typeArgument in TypeArguments)
       {
-        var distinctiveName = new StringBuilder(UnderlyingType.DistinctiveName);
-
-        distinctiveName.Append('[');
-        bool firstTypeArg = true;
-        foreach (var typeArgument in TypeArguments)
+        if (firstTypeArg)
         {
-          if (firstTypeArg)
-          {
-            firstTypeArg = false;
-          }
-          else
-          {
-            distinctiveName.Append(',');
-          }
-          distinctiveName.Append(typeArgument.FullyQualifiedName);
+          firstTypeArg = false;
         }
-        distinctiveName.Append(']');
-
-        return distinctiveName.ToString();
+        else
+        {
+          result.Append(',');
+        }
+        result.Append(typeArgument.ToString());
       }
+      result.Append(']');
+
+      return result.ToString();
     }
 
   }

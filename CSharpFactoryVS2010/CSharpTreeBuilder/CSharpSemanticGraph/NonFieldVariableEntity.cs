@@ -1,4 +1,5 @@
 ﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -14,12 +15,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="NonFieldVariableEntity"/> class.
     /// </summary>
     /// <param name="name">The name of the variable.</param>
-    /// <param name="type">The type of the variable (a type entity reference).</param>
+    /// <param name="typeReference">A reference to the type of the variable.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NonFieldVariableEntity(string name, SemanticEntityReference<TypeEntity> type)
+    protected NonFieldVariableEntity(string name, SemanticEntityReference<TypeEntity> typeReference)
     {
+      if (name == null)
+      {
+        throw new ArgumentNullException("name");
+      }
+      if (typeReference == null)
+      {
+        throw new ArgumentNullException("typeReference");
+      }
+
       Name = name;
-      TypeReference = type;
+      TypeReference = typeReference;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -31,24 +41,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the distinctive name of the entity, which is unique for all entities in a declaration space.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string DistinctiveName
-    {
-      get { return Name; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type of the field.
+    /// Gets the type reference of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type of the field.
+    /// Gets the type of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity Type

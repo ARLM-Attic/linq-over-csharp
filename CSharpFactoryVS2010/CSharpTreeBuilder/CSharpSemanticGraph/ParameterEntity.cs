@@ -15,19 +15,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the variable.</param>
     /// <param name="type">The type of the variable (a type entity reference).</param>
-    /// <param name="mode">The parameter mode.</param>
+    /// <param name="kind">The parameter kind (eg. ref, out).</param>
     // ----------------------------------------------------------------------------------------------
-    public ParameterEntity(string name, SemanticEntityReference<TypeEntity> type, ParameterMode mode)
+    public ParameterEntity(string name, SemanticEntityReference<TypeEntity> type, ParameterKind kind)
       : base (name, type)
     {
-      Mode = mode;
+      Kind = kind;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the parameter mode.
+    /// Gets the parameter kind (eg. ref, out).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ParameterMode Mode { get; private set; }
+    public ParameterKind Kind { get; private set; }
   }
 }

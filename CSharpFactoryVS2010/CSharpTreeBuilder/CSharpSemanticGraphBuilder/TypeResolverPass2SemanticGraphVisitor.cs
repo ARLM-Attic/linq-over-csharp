@@ -71,5 +71,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a MethodEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(MethodEntity entity)
+    {
+      // Resolve the return type
+      if (entity.ReturnTypeReference != null)
+      {
+        entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      }
+
+      // Resolve parameter types
+      foreach (var parameter in entity.Parameters)
+      {
+        if (parameter.TypeReference != null)
+        {
+          parameter.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        }
+      }
+    }
   }
 }

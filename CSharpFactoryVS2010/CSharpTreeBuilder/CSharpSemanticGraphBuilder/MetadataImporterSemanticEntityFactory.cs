@@ -114,25 +114,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       for (int i = 0; i < typeNameArray.Length-1; i++)
       {
-        var nameTableEntry = contextEntity.DeclarationSpace[typeNameArray[i]];
-        if (nameTableEntry == null)
+        var nameAndTypeParameterCountArray = typeNameArray[i].Split('`');
+        
+        var typeParameterCount = nameAndTypeParameterCountArray.Length > 1
+                                   ? int.Parse(nameAndTypeParameterCountArray[1])
+                                   : 0;
+        
+        var foundEntity = (contextEntity is IHasChildTypes)
+          ? (contextEntity as IHasChildTypes).GetChildType(nameAndTypeParameterCountArray[0], typeParameterCount)
+          : null;
+
+        if (foundEntity == null)
         {
           throw new ApplicationException(string.Format("Type name '{0}' not found in the declaration space of '{1}'.",
                                                        typeNameArray[i], contextEntity.FullyQualifiedName));
         }
-
-        if (nameTableEntry.State == NameTableEntryState.Definite && nameTableEntry.Entity is TypeEntity)
-        {
-          contextEntity = nameTableEntry.Entity as TypeEntity;
-        }
-        else
-        {
-          throw new ApplicationException(
-            string.Format("Error traversing type hierarchy. NameTableEntry name='{0}', state='{1}', type='{2}'.",
-                          nameTableEntry.Name, 
-                          Enum.GetName(typeof (NameTableEntryState), nameTableEntry.State),
-                          nameTableEntry.Entity.GetType()));
-        }
+        contextEntity = foundEntity;
       }
 
       // Create entity for the type
@@ -154,38 +151,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       foreach (var namespaceTag in namespaceName.Split('.'))
       {
         // Find out whether this namespace already exists
-        var nameTableEntry = contextEntity.DeclarationSpace[namespaceTag];
+        var namespaceEntity = contextEntity.GetChildNamespace(namespaceTag);
 
         // If the namespace is not found, then we have to create it.
-        if (nameTableEntry == null)
+        if (namespaceEntity == null)
         {
-          var namespaceEntity = new NamespaceEntity(namespaceTag);
+          namespaceEntity = new NamespaceEntity(namespaceTag);
           contextEntity.AddChildNamespace(namespaceEntity);
-          
-          // The newly created namespace will be the context for the next part of the namespace name.
-          contextEntity = namespaceEntity;
         }
-        else
-        {
-          // If the namespace name is found, but is not definite then we stop creating new entities.
-          if (nameTableEntry.State != NameTableEntryState.Definite)
-          {
-            _ErrorHandler.Warning("TBD", null, "Ambigous name '{0}' found in declaration space '{1}'.",
-                                  namespaceTag, contextEntity.FullyQualifiedName);
-            return null;
-          }
 
-          // If the namespace name is found and is definite, but is not a namespace then throw an exception
-          if (!(nameTableEntry.Entity is NamespaceEntity))
-          {
-            throw new ApplicationException(
-              string.Format("Expected to find a namespace with name '{0}', but found a '{1}'.", namespaceTag,
-                            nameTableEntry.Entity.GetType()));
-          }
-
-          // The namespace name is found, and definite, and denotes a namespace, so it will be our next contextEntity.
-          contextEntity = nameTableEntry.Entity as NamespaceEntity;
-        }
+        contextEntity = namespaceEntity;
       }
 
       return contextEntity;
@@ -200,15 +175,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private void CreateTypeEntityFromReflectedType(NamespaceOrTypeEntity contextEntity, Type type)
     {
-      // Find out whether this name already exists in this declaration space.
-      var nameTableEntry = contextEntity.DeclarationSpace[type.Name
-                                                          +
-                                                          (type.ContainsGenericParameters
-                                                             ? "`" + type.GetGenericArguments().Length
-                                                             : "")];
-
       // If the name already exists, that's an error
-      if (nameTableEntry != null)
+      if (contextEntity is IHasChildTypes
+        && (contextEntity as IHasChildTypes).GetChildType(type.Name, type.GetGenericArguments().Length) != null)
       {
         throw new ApplicationException(string.Format("Name '{0}' is already defined in declaration space '{1}'.",
                                                      type.Name,

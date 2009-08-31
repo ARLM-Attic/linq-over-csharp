@@ -30,7 +30,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global");
 
-      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace);
+      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
 
       // check namespace A
       project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeFalse();
@@ -42,7 +42,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="rootNamespace">The root namespace that contains the entities to be checked.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void CheckTestAssemblyImportResult(RootNamespaceEntity rootNamespace)
+    private static void CheckTestAssemblyImportResult(RootNamespaceEntity rootNamespace, string rootName)
     {
       rootNamespace.ShouldNotBeNull();
 
@@ -50,8 +50,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = rootNamespace.ChildTypes[0] as ClassEntity;
         entity.Name.ShouldEqual("Class0");
-        entity.DistinctiveName.ShouldEqual("Class0");
         entity.FullyQualifiedName.ShouldEqual("Class0");
+        entity.ToString().ShouldEqual(rootName + "::Class0");
         entity.Parent.ShouldEqual(rootNamespace);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
@@ -60,15 +60,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = rootNamespace.ChildNamespaces[0];
         entity.Name.ShouldEqual("A");
-        entity.DistinctiveName.ShouldEqual("A");
         entity.FullyQualifiedName.ShouldEqual("A");
+        entity.ToString().ShouldEqual(rootName + "::A");
       }
       // namespace B
       {
         var entity = rootNamespace.ChildNamespaces[0].ChildNamespaces[0];
         entity.Name.ShouldEqual("B");
-        entity.DistinctiveName.ShouldEqual("B");
         entity.FullyQualifiedName.ShouldEqual("A.B");
+        entity.ToString().ShouldEqual(rootName + "::A.B");
         entity.IsExplicit.ShouldBeFalse();
       }
 
@@ -78,8 +78,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = namespaceAB.ChildTypes[0] as ClassEntity;
         entity.Name.ShouldEqual("Class1");
-        entity.DistinctiveName.ShouldEqual("Class1");
         entity.FullyQualifiedName.ShouldEqual("A.B.Class1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.Class1");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
@@ -88,8 +88,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = ((ClassEntity) namespaceAB.ChildTypes[0]).ChildTypes[0] as ClassEntity;
         entity.Name.ShouldEqual("SubClass1");
-        entity.DistinctiveName.ShouldEqual("SubClass1");
         entity.FullyQualifiedName.ShouldEqual("A.B.Class1.SubClass1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.Class1+SubClass1");
         entity.Parent.ShouldEqual(namespaceAB.ChildTypes[0]);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
@@ -98,8 +98,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = namespaceAB.ChildTypes[1] as EnumEntity;
         entity.Name.ShouldEqual("Enum1");
-        entity.DistinctiveName.ShouldEqual("Enum1");
         entity.FullyQualifiedName.ShouldEqual("A.B.Enum1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.Enum1");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
       }
@@ -107,8 +107,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = namespaceAB.ChildTypes[2] as StructEntity;
         entity.Name.ShouldEqual("Struct1");
-        entity.DistinctiveName.ShouldEqual("Struct1");
         entity.FullyQualifiedName.ShouldEqual("A.B.Struct1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.Struct1");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
@@ -117,8 +117,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = namespaceAB.ChildTypes[3] as InterfaceEntity;
         entity.Name.ShouldEqual("IInterface1");
-        entity.DistinctiveName.ShouldEqual("IInterface1");
         entity.FullyQualifiedName.ShouldEqual("A.B.IInterface1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.IInterface1");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
@@ -127,8 +127,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = namespaceAB.ChildTypes[4] as DelegateEntity;
         entity.Name.ShouldEqual("Delegate1");
-        entity.DistinctiveName.ShouldEqual("Delegate1");
         entity.FullyQualifiedName.ShouldEqual("A.B.Delegate1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.Delegate1");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
@@ -137,13 +137,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var entity = namespaceAB.ChildTypes[5] as ClassEntity;
         entity.Name.ShouldEqual("Generic1");
-        entity.DistinctiveName.ShouldEqual("Generic1`2");
-        entity.FullyQualifiedName.ShouldEqual("A.B.Generic1`2");
+        entity.FullyQualifiedName.ShouldEqual("A.B.Generic1");
+        entity.ToString().ShouldEqual(rootName + "::A.B.Generic1`2");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeTrue();
-        entity.OwnTypeParameters[0].FullyQualifiedName.ShouldEqual("A.B.Generic1`2.T1");
-        entity.OwnTypeParameters[1].FullyQualifiedName.ShouldEqual("A.B.Generic1`2.T2");
+        entity.OwnTypeParameters[0].ToString().ShouldEqual(rootName + "::A.B.Generic1`2'T1");
+        entity.OwnTypeParameters[1].ToString().ShouldEqual(rootName + "::A.B.Generic1`2'T2");
       }
     }
 
@@ -169,7 +169,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global");
 
       // Check resulting semantic graph
-      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace);
+      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
 
       // check namespace A
       project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeTrue();
@@ -197,7 +197,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       // Check resulting semantic graph
-      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace);
+      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
 
       // check namespace A
       project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeTrue();
@@ -259,13 +259,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // check System.Nullable`1
       // It's not a reference to be resolved, but a lookup in metadata map, so it is already populated
-      project.SemanticGraph.NullableGenericTypeDefinition.FullyQualifiedName.ShouldEqual("System.Nullable`1");
+      project.SemanticGraph.NullableGenericTypeDefinition.ToString().ShouldEqual("global::System.Nullable`1");
       project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters.Count.ShouldEqual(1);
-      project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters[0].FullyQualifiedName.ShouldEqual("System.Nullable`1.T");
+      project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters[0].ToString().ShouldEqual("global::System.Nullable`1'T");
 
       // check System.Array
       // It's not a reference to be resolved, but a lookup in metadata map, so it is already populated
-      project.SemanticGraph.SystemArray.FullyQualifiedName.ShouldEqual("System.Array");
+      project.SemanticGraph.SystemArray.ToString().ShouldEqual("global::System.Array");
 
       // check BuiltIn types
       // The alias is a reference, and it is not yet resolved
@@ -285,7 +285,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "MyAlias");
 
-      CheckTestAssemblyImportResult(project.SemanticGraph.GetRootNamespaceByName("MyAlias"));
+      CheckTestAssemblyImportResult(project.SemanticGraph.GetRootNamespaceByName("MyAlias"), "MyAlias");
 
       project.SemanticGraph.GlobalNamespace.ChildNamespaces.Count.ShouldEqual(0);
       project.SemanticGraph.GlobalNamespace.ChildTypes.Count.ShouldEqual(0);

@@ -76,7 +76,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       ChildNamespaces.Add(namespaceEntity);
       namespaceEntity.Parent = this;
-      DeclarationSpace.Define(namespaceEntity);
+      _DeclarationSpace.Register(namespaceEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -86,16 +86,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="name">An identifier.</param>
     /// <returns>A child namespace entity, if one found by name. Null if none or more was found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceEntity GetChildNamespaceByName(string name)
+    public NamespaceEntity GetChildNamespace(string name)
     {
-      var resultSet = from childNamespace in ChildNamespaces 
-                      where childNamespace.Name == name 
-                      select childNamespace;
-      if (resultSet.Count()==1)
-      {
-        return resultSet.First();
-      }
-      return null;
+      return _DeclarationSpace.FindEntityByName<NamespaceEntity>(name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -109,27 +102,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       ChildTypes.Add(typeEntity);
       typeEntity.Parent = this;
-      DeclarationSpace.Define(typeEntity);
+      _DeclarationSpace.Register(typeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name. 
+    /// Gets a child type by name and number of type parameters.
     /// </summary>
-    /// <param name="distinctiveName">A distinctive name.</param>
-    /// <returns>The type with the given name, or null if not found.</returns>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>The type with the given name and number of type parameters, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity GetChildTypeByDistinctiveName(string distinctiveName)
+    public TypeEntity GetChildType(string name, int typeParameterCount)
     {
-      if (DeclarationSpace.IsNameDefined(distinctiveName))
-      {
-        var nameTableEntry = DeclarationSpace[distinctiveName];
-        if (nameTableEntry.State == NameTableEntryState.Definite && nameTableEntry.Entity is TypeEntity)
-        {
-          return nameTableEntry.Entity as TypeEntity;
-        }
-      }
-      return null;
+      return _DeclarationSpace.FindEntityByNameAndTypeParameterCount<TypeEntity>(name, typeParameterCount);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type by name (assuming no type parameters).
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <returns>The type with the given name and no type parameters, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity GetChildType(string name)
+    {
+      return GetChildType(name, 0);
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -219,23 +219,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the declaration space of the entity. 
-    /// </summary>
-    /// <remarks>    
-    /// If the aliased type is already resolved then returns that type's declaration space, 
-    /// otherwise returns the base class' empty declaration space.
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public override DeclarationSpace DeclarationSpace
-    {
-      get
-      {
-        return AliasedType == null ? base.DeclarationSpace : AliasedType.DeclarationSpace;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets an iterate-only collection of base type references.
     /// </summary>
     /// <remarks>    

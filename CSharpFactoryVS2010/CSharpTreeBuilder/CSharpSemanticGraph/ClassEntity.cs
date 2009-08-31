@@ -1,11 +1,13 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
   /// This class represents a class entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public sealed class ClassEntity : ChildTypeCapableTypeEntity
+  public sealed class ClassEntity : ChildTypeCapableTypeEntity, ICanBePartial
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -19,7 +21,6 @@
     {
       IsPartial = isPartial;
     }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class with no partial.
@@ -29,6 +30,31 @@
     public ClassEntity(string name)
       : this(name, false)
     {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity is declared as partial. 
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsPartial { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a member. 
+    /// Also sets the member's parent property, and defines member's name in the declaration space.
+    /// </summary>
+    /// <param name="memberEntity">The member entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddMember(MemberEntity memberEntity)
+    {
+      // Member name and type name cannot be the same.
+      if ( memberEntity.Name == Name)
+      {
+        throw new TypeNameMemberNameConflictException(Name);
+      }
+
+      base.AddMember(memberEntity);
     }
 
     // ----------------------------------------------------------------------------------------------

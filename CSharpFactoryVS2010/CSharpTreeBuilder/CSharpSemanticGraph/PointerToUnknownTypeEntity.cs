@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -29,20 +31,6 @@
     public override bool IsPointerType
     {
       get { return true; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the declaration space of the entity. 
-    /// For a void* it is null.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override DeclarationSpace DeclarationSpace
-    {
-      get
-      {
-        return null;
-      }
     }
   }
 }
