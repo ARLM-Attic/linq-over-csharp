@@ -33,6 +33,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Removes a parameter from the entity.
+    /// </summary>
+    /// <param name="parameter">A parameter entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    void RemoveParameter(ParameterEntity parameter);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the signature of the member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

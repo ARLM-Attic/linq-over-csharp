@@ -39,6 +39,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Removes an entity from this slot.
+    /// </summary>
+    /// <param name="entity">A named entity.</param>
+    /// <returns>True if the slot also has to be deleted.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public abstract bool Unregister(INamedEntity entity);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the number of entities in the slot.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

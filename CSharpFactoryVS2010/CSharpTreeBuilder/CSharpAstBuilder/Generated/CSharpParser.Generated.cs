@@ -857,6 +857,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			NamespaceOrTypeNameNode nameNode; 
 			MemberName(out nameNode);
 			var metNode = new MethodDeclarationNode(partialToken);
+			
+			metNode.PartialToken = partialToken;
 			SetCommentOwner(metNode);
 			metNode.Type = typeNode;
 			metNode.MemberName = nameNode;

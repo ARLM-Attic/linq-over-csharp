@@ -77,6 +77,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Removes an entity from the declaration space.
+    /// </summary>
+    /// <param name="entity">A named entity.</param>
+    /// <remarks>If the entity is not registered then just returns without error.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public void Unregister(INamedEntity entity)
+    {
+      if (!_Slots.ContainsKey(entity.Name))
+      {
+        return;
+      }
+
+      var slot = _Slots[entity.Name];
+
+      var slotMustBeDeleted = slot.Unregister(entity);
+
+      if (slotMustBeDeleted)
+      {
+        _Slots.Remove(entity.Name);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Finds an entity that can be identified be name only.
     /// </summary>
     /// <typeparam name="TEntityType">

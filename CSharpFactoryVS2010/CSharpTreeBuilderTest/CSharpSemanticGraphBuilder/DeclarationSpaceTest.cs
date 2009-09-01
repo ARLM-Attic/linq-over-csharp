@@ -293,5 +293,81 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       declarationSpace.FindEntityByName<MethodEntity>("A").ShouldEqual(methodEntity);
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the unregistration of a field entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UnregisterFieldEntity()
+    {
+      var declarationSpace = new DeclarationSpace();
+      var fieldEntity = new FieldEntity("A", true, new DirectSemanticEntityReference<TypeEntity>(new ClassEntity("A")),
+                                        false);
+      declarationSpace.Register(fieldEntity);
+
+      declarationSpace.SlotCount.ShouldEqual(1);
+      declarationSpace.EntityCount.ShouldEqual(1);
+
+      declarationSpace.Unregister(fieldEntity);
+
+      declarationSpace.SlotCount.ShouldEqual(0);
+      declarationSpace.EntityCount.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the unregistration of a generic class entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UnregisterGenericClassEntity()
+    {
+      var declarationSpace = new DeclarationSpace();
+      var classEntity = new ClassEntity("A");
+      classEntity.AddTypeParameter(new TypeParameterEntity("T"));
+      declarationSpace.Register(classEntity);
+
+      declarationSpace.SlotCount.ShouldEqual(1);
+      declarationSpace.EntityCount.ShouldEqual(1);
+
+      declarationSpace.Unregister(classEntity);
+
+      declarationSpace.SlotCount.ShouldEqual(0);
+      declarationSpace.EntityCount.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the unregistration of a generic class entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UnregisterMethodEntity()
+    {
+      var classA = new ClassEntity("A");
+      var classB = new ClassEntity("B");
+      var classC = new ClassEntity("C");
+
+      var declarationSpace = new DeclarationSpace();
+      var methodEntity = new MethodEntity("A", true, false, false, false, null);
+      methodEntity.AddTypeParameter(new TypeParameterEntity("T"));
+      methodEntity.AddParameter(new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(classA),
+                                                    ParameterKind.Value));
+      methodEntity.AddParameter(new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(classB),
+                                                    ParameterKind.Reference));
+      methodEntity.AddParameter(new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(classC),
+                                                    ParameterKind.Output));
+      declarationSpace.Register(methodEntity);
+
+      declarationSpace.SlotCount.ShouldEqual(1);
+      declarationSpace.EntityCount.ShouldEqual(1);
+
+      declarationSpace.Unregister(methodEntity);
+
+      declarationSpace.SlotCount.ShouldEqual(0);
+      declarationSpace.EntityCount.ShouldEqual(0);
+    }
   }
 }

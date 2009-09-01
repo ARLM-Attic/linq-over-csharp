@@ -60,6 +60,7 @@
     <Compile Include="Ast\ExternAliasDirectives.cs" />
     <Compile Include="Ast\GlobalAttributes.cs" />
     <Compile Include="Ast\LargeTestProjects.cs" />
+    <Compile Include="Ast\PartialMethodDeclaration.cs" />
     <Compile Include="Ast\Pragmas.cs" />
     <Compile Include="Ast\QueryExpressions.cs" />
     <Compile Include="Ast\RegressionTests.cs" />
@@ -353,6 +354,9 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\MemberOfAnErronousClass.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0542_ClassOrStructAndMemberName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Method.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0752_PartialMethodCannotHaveOutParameter.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\PartialMethod.cs" />
+    <None Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />
     <None Include="TestFiles\TypeResolution\CS0547_VoidProperty.cs" />

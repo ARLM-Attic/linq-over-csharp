@@ -26,10 +26,10 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the body of the function member.
+    /// Gets or sets the body of the function member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockEntity Body { get; private set; }
+    public BlockEntity Body { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

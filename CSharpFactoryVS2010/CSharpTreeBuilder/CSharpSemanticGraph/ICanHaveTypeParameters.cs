@@ -44,9 +44,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Adds a type parameter to this type.
     /// </summary>
-    /// <param name="typeParameterEntity">The type parameter entity.</param>
+    /// <param name="typeParameterEntity">The type parameter entity to add.</param>
     // ----------------------------------------------------------------------------------------------
     void AddTypeParameter(TypeParameterEntity typeParameterEntity);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes a type parameter entity from the type.
+    /// </summary>
+    /// <param name="typeParameterEntity">The type parameter entity to remove.</param>
+    // ----------------------------------------------------------------------------------------------
+    void RemoveTypeParameter(TypeParameterEntity typeParameterEntity);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

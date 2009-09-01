@@ -743,7 +743,7 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
   | IF (la.kind == _ident && Peek(1).kind == _lpar)                         
       ConstructorDeclaration<out memNode> 
   | 
-    // --- Partial method declaration
+    // --- Partial method declaration (the resolver also makes sure that the return type is void)
     IF (IsPartialMethod())
     // --- At this point ident is "partial"
     ident
@@ -755,7 +755,10 @@ StructMemberDeclaration<AttributeDecorationNodeCollection attrNodes, ModifierNod
     (. NamespaceOrTypeNameNode nameNode; .)
     MemberName<out nameNode>
     (.
+       // BUGBUG: the following line seems incorrect becuase partialToken can be null, so startToken won't be set
        var metNode = new MethodDeclarationNode(partialToken);
+       
+       metNode.PartialToken = partialToken;
        SetCommentOwner(metNode);
        metNode.Type = typeNode;
        metNode.MemberName = nameNode;

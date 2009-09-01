@@ -104,6 +104,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Removes a parameter from the entity.
+    /// </summary>
+    /// <param name="parameter">A parameter entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveParameter(ParameterEntity parameter)
+    {
+      if (parameter != null)
+      {
+        _Parameters.Remove(parameter);
+        _DeclarationSpace.Unregister(parameter);
+      }
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the signature of the member.
     /// </summary>
     /// <remarks>
@@ -185,6 +200,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         typeParameterEntity.Parent = this;
         _DeclarationSpace.Register(typeParameterEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes a type parameter entity from the type.
+    /// </summary>
+    /// <param name="typeParameterEntity">The type parameter entity to remove.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
+    {
+      if (typeParameterEntity != null)
+      {
+        _AllTypeParameters.Remove(typeParameterEntity);
+        _DeclarationSpace.Unregister(typeParameterEntity);
       }
     }
 

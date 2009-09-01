@@ -1382,5 +1382,71 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0752: A partial method cannot have out parameters
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0752_PartialMethodCannotHaveOutParameter()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0752_PartialMethodCannotHaveOutParameter.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0752");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of partial methods
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void PartialMethod()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\PartialMethod.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.GetChildType("A1") as ClassEntity;
+      {
+        var method = classEntity.Members.ToList()[0] as MethodEntity;
+        method.IsPartial.ShouldBeTrue();
+        method.IsAbstract.ShouldBeTrue();
+
+        method.IsGeneric.ShouldBeTrue();
+        method.OwnTypeParameterCount.ShouldEqual(1);
+        method.GetOwnTypeParameterByName("T1").ShouldNotBeNull();
+ 
+        var parameters = method.Parameters.ToList();
+        parameters.Count.ShouldEqual(1);
+        parameters[0].Name.ShouldEqual("a");
+        var typeref = parameters[0].TypeReference as TypeNodeBasedTypeEntityReference;
+        typeref.SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("T1");
+      }
+
+      {
+        var method = classEntity.Members.ToList()[1] as MethodEntity;
+        method.IsPartial.ShouldBeTrue();
+        method.IsAbstract.ShouldBeFalse();
+
+        method.IsGeneric.ShouldBeTrue();
+        method.OwnTypeParameterCount.ShouldEqual(1);
+        method.GetOwnTypeParameterByName("T2").ShouldNotBeNull();
+
+        var parameters = method.Parameters.ToList();
+        parameters.Count.ShouldEqual(1);
+        parameters[0].Name.ShouldEqual("b");
+        var typeref = parameters[0].TypeReference as TypeNodeBasedTypeEntityReference;
+        typeref.SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("T2");
+      }
+    }
   }
 }

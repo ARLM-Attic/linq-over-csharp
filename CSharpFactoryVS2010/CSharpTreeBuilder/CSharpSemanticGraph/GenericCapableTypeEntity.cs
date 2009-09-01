@@ -118,6 +118,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Removes a type parameter entity from the type.
+    /// </summary>
+    /// <param name="typeParameterEntity">The type parameter entity to remove.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
+    {
+      if (typeParameterEntity != null)
+      {
+        _AllTypeParameters.Remove(typeParameterEntity);
+        _DeclarationSpace.Unregister(typeParameterEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets an own type parameter by name.
     /// </summary>
     /// <param name="name">The name of the type parameter to be found.</param>
