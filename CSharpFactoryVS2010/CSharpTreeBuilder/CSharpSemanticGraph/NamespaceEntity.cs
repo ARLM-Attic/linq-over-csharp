@@ -88,7 +88,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public NamespaceEntity GetChildNamespace(string name)
     {
-      return _DeclarationSpace.FindEntityByName<NamespaceEntity>(name);
+      return _DeclarationSpace.GetSingleEntity<NamespaceEntity>(name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeEntity GetChildType(string name, int typeParameterCount)
     {
-      return _DeclarationSpace.FindEntityByNameAndTypeParameterCount<TypeEntity>(name, typeParameterCount);
+      return _DeclarationSpace.GetSingleEntity<TypeEntity>(name, typeParameterCount);
     }
 
     // ----------------------------------------------------------------------------------------------

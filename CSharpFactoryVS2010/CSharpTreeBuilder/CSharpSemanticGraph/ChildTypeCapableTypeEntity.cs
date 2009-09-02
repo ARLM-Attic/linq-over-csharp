@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -52,7 +53,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeEntity GetChildType(string name, int typeParameterCount)
     {
-      return _DeclarationSpace.FindEntityByNameAndTypeParameterCount<TypeEntity>(name, typeParameterCount);
+      return _DeclarationSpace.GetSingleEntity<TypeEntity>(name, typeParameterCount);
     }
 
     #region Visitor methods

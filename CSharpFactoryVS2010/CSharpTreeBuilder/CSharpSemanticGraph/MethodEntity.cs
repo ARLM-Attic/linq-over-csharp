@@ -227,7 +227,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
-      return _DeclarationSpace.FindEntityByName<TypeParameterEntity>(name);
+      return _DeclarationSpace.GetSingleEntity<TypeParameterEntity>(name);
     }
 
     #region Visitor methods

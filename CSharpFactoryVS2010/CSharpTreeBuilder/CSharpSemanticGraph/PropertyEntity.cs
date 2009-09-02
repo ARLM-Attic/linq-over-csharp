@@ -148,7 +148,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         if (IsAutoImplemented && value is TypeEntity)
         {
           var parentType = value as TypeEntity;
-          if (parentType.AllowsDeclaration<FieldEntity>(_AutoImplementedField.Name))
+          if (parentType.GetMember<FieldEntity>(_AutoImplementedField.Name) == null)
           {
             parentType.AddMember(_AutoImplementedField);
           }

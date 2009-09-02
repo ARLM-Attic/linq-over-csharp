@@ -50,6 +50,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\CSharpParserException.cs" />
     <Compile Include="CSharpAstBuilder\Buffer.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Comments.cs" />
     <Compile Include="CSharpAstBuilder\CSharpParser.Common.cs" />
@@ -225,6 +226,9 @@
     <Compile Include="CSharpCst\CompilationMessageNode.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpaceEntry.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\PartialEntityMerger.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeNameMemberNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DirectSemanticEntityReference.cs" />
@@ -265,9 +269,6 @@
     <Compile Include="CSharpSemanticGraph\BlockEntity.cs" />
     <Compile Include="CSharpSemanticGraph\AccessorEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpace.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\OverloadableEntityDeclarationSlot.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeDeclarationSlot.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\DeclarationSlot.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraph\ICanHaveTypeParameters.cs" />
     <Compile Include="CSharpSemanticGraph\ICanBePartial.cs" />
@@ -287,7 +288,6 @@
     <Compile Include="CSharpSemanticGraph\IHasLexicalScope.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForCompleteMatching.cs" />
     <Compile Include="CSharpSemanticGraph\Signature.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\SimpleDeclarationSlot.cs" />
     <Compile Include="CSharpSemanticGraph\StatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\UsingAliasEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeBasedNamespaceOrTypeEntityReference.cs" />
@@ -296,7 +296,6 @@
     <Compile Include="CSharpSemanticGraphBuilder\ReflectedTypeBasedTypeEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\SourcePoint.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SyntaxNodeBasedSemanticEntityReference.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\IHasDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataBasedSemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeNodeBasedTypeEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\IAliasType.cs" />

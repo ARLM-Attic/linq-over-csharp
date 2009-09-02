@@ -267,7 +267,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return GetMethod(new Signature(name, 0, null)) as TEntityType;
       }
 
-      return _DeclarationSpace.FindEntityByName<TEntityType>(name);
+      return _DeclarationSpace.GetSingleEntity<TEntityType>(name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public MethodEntity GetMethod(Signature signature)
     {
-      return _DeclarationSpace.FindEntityBySignature<MethodEntity>(signature);
+      return _DeclarationSpace.GetSingleEntity<MethodEntity>(signature);
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using System;
 
 namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 {
@@ -24,350 +26,166 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var declarationSpace = new DeclarationSpace();
 
-      declarationSpace.SlotCount.ShouldEqual(0);
-      declarationSpace.EntityCount.ShouldEqual(0);
+      declarationSpace.DeclarationCount.ShouldEqual(0);
 
-      declarationSpace.FindEntityByName<FieldEntity>("A").ShouldBeNull();
-      declarationSpace.FindEntityByNameAndTypeParameterCount<TypeEntity>("A", 1).ShouldBeNull();
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("A", 1, null)).ShouldBeNull();
-      
-      declarationSpace.AllowsDeclaration<FieldEntity>("A").ShouldBeTrue();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A", 1).ShouldBeTrue();
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 1, null)).ShouldBeTrue();
+      declarationSpace.GetDeclarationSpaceEntry(new NamespaceEntity("A")).ShouldBeNull();
+
+      declarationSpace.GetEntities<FieldEntity>("A").ToList().Count.ShouldEqual(0);
+      declarationSpace.GetSingleEntity<FieldEntity>("A").ShouldBeNull();
+
+      declarationSpace.GetEntities<ClassEntity>("A", 0).ToList().Count.ShouldEqual(0);
+      declarationSpace.GetSingleEntity<ClassEntity>("A", 0).ShouldBeNull();
+
+      declarationSpace.GetEntities<MethodEntity>(new Signature("A", 0, null)).ToList().Count.ShouldEqual(0);
+      declarationSpace.GetSingleEntity<MethodEntity>(new Signature("A", 0, null)).ShouldBeNull();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the properties of a declaration space with a registered field entity.
+    /// Entities cannot be registered multiple times.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void RegisteredFieldEntity()
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void RegisteredMultipleTimes()
     {
       var declarationSpace = new DeclarationSpace();
-      var fieldEntity = new FieldEntity("A", true, new DirectSemanticEntityReference<TypeEntity>(new ClassEntity("A")),
-                                        false);
-      declarationSpace.Register(fieldEntity);
 
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.FindEntityByName<FieldEntity>("A").ShouldEqual(fieldEntity);
-      declarationSpace.FindEntityByName<FieldEntity>("X").ShouldBeNull();
-      
-      declarationSpace.AllowsDeclaration<FieldEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<NamespaceEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 0, null)).ShouldBeFalse();
-
-      declarationSpace.AllowsDeclaration<FieldEntity>("X").ShouldBeTrue();
+      var namespaceEntity = new NamespaceEntity("A");
+      declarationSpace.Register(namespaceEntity);
+      declarationSpace.Register(namespaceEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the properties of a declaration space with a registered type parameter entity.
+    /// Entities cannot be registered multiple times.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void RegisteredTypeParameterEntity()
+    public void Retrieval()
     {
-      var declarationSpace = new DeclarationSpace();
+      // Setting up entities
+      var namespaceEntity = new NamespaceEntity("A");
       var typeParameterEntity = new TypeParameterEntity("A");
+      var classEntity = new ClassEntity("A");
+      classEntity.AddTypeParameter(typeParameterEntity);
+      var typeRef = new DirectSemanticEntityReference<TypeEntity>(classEntity);
+      var methodEntity = new MethodEntity("A", true, true, false, false, typeRef);
+      var parameterEntity = new ParameterEntity("a", typeRef, ParameterKind.Value);
+      methodEntity.AddTypeParameter(typeParameterEntity);
+      methodEntity.AddParameter(parameterEntity);
+      var propertyEntity = new PropertyEntity("A", true, typeRef, false, true);
+
+      var methodSignature = new Signature("A", 1, new List<ParameterEntity> {parameterEntity});
+
+      // Setting up declaration space
+      var declarationSpace = new DeclarationSpace();
+      declarationSpace.Register(namespaceEntity);
       declarationSpace.Register(typeParameterEntity);
+      declarationSpace.Register(classEntity);
+      declarationSpace.Register(methodEntity);
+      declarationSpace.Register(propertyEntity);
 
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
+      declarationSpace.DeclarationCount.ShouldEqual(5);
 
-      declarationSpace.FindEntityByName<TypeParameterEntity>("A").ShouldEqual(typeParameterEntity);
-      declarationSpace.FindEntityByName<TypeParameterEntity>("X").ShouldBeNull();
+      declarationSpace.GetDeclarationSpaceEntry(namespaceEntity).Entity.ShouldEqual(namespaceEntity);
 
-      declarationSpace.AllowsDeclaration<TypeParameterEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<FieldEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<NamespaceEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 0, null)).ShouldBeFalse();
+      // Check GetSingleEntity with the right parameters
+      declarationSpace.GetSingleEntity<NamespaceEntity>("A").ShouldEqual(namespaceEntity);
+      declarationSpace.GetSingleEntity<TypeParameterEntity>("A").ShouldEqual(typeParameterEntity);
+      declarationSpace.GetSingleEntity<ClassEntity>("A", 1).ShouldEqual(classEntity);
+      declarationSpace.GetSingleEntity<MethodEntity>(methodSignature).ShouldEqual(methodEntity);
+      declarationSpace.GetSingleEntity<PropertyEntity>("A").ShouldEqual(propertyEntity);
 
-      declarationSpace.AllowsDeclaration<TypeParameterEntity>("X").ShouldBeTrue();
+      // Get all entities named 'A'
+      var entitiesNamedA = declarationSpace.GetEntities<INamedEntity>("A").ToList();
+      entitiesNamedA.Count.ShouldEqual(5);
+      entitiesNamedA.Contains(namespaceEntity).ShouldBeTrue();
+      entitiesNamedA.Contains(typeParameterEntity).ShouldBeTrue();
+      entitiesNamedA.Contains(classEntity).ShouldBeTrue();
+      entitiesNamedA.Contains(methodEntity).ShouldBeTrue();
+      entitiesNamedA.Contains(propertyEntity).ShouldBeTrue();
+
+      // Get all entities named 'A', with 1 type parameter
+      var entitiesNamedAWithTypeParam = declarationSpace.GetEntities<INamedEntity>("A",1).ToList();
+      entitiesNamedAWithTypeParam.Count.ShouldEqual(2);
+      entitiesNamedAWithTypeParam.Contains(classEntity).ShouldBeTrue();
+      entitiesNamedAWithTypeParam.Contains(methodEntity).ShouldBeTrue();
+
+      // Get all entities named 'A', with 1 type parameter and a parameter
+      var entitiesWithSignature = declarationSpace.GetEntities<IOverloadableEntity>(methodSignature).ToList();
+      entitiesWithSignature.Count.ShouldEqual(1);
+      entitiesWithSignature.Contains(methodEntity).ShouldBeTrue();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the properties of a declaration space with a registered namespace entity.
+    /// Tests that method retrievel with different ParamterKind values.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void RegisteredNamespaceEntity()
+    public void MethodParameterKinds()
+    {
+      var declarationSpace = new DeclarationSpace();
+
+      var typeRef = new DirectSemanticEntityReference<TypeEntity>(new ClassEntity("A"));
+      var methodEntity = new MethodEntity("A", true, true, false, false, typeRef);
+      methodEntity.AddTypeParameter(new TypeParameterEntity("T"));
+      methodEntity.AddParameter(new ParameterEntity("a", typeRef, ParameterKind.Reference));
+
+      declarationSpace.Register(methodEntity);
+
+      var goodSignature = new Signature("A", 1,
+        new List<ParameterEntity> { new ParameterEntity("a", typeRef, ParameterKind.Reference) });
+
+      declarationSpace.GetSingleEntity<MethodEntity>(goodSignature).ShouldEqual(methodEntity);
+
+      var wrongSignature = new Signature("A", 1,
+        new List<ParameterEntity> {new ParameterEntity("a", typeRef, ParameterKind.Output)});
+      
+      declarationSpace.GetSingleEntity<MethodEntity>(wrongSignature).ShouldBeNull();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests unregistration.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Unregister()
     {
       var declarationSpace = new DeclarationSpace();
       var namespaceEntity = new NamespaceEntity("A");
+      var namespaceEntity2 = new NamespaceEntity("A");
+
       declarationSpace.Register(namespaceEntity);
+      declarationSpace.Register(namespaceEntity2);
 
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
+      declarationSpace.DeclarationCount.ShouldEqual(2);
 
-      declarationSpace.FindEntityByName<NamespaceEntity>("A").ShouldEqual(namespaceEntity);
-      declarationSpace.FindEntityByNameAndTypeParameterCount<NamespaceEntity>("A", 0).ShouldEqual(namespaceEntity);
+      declarationSpace.Unregister(namespaceEntity);
 
-      declarationSpace.FindEntityByName<NamespaceEntity>("X").ShouldBeNull();
-      declarationSpace.FindEntityByNameAndTypeParameterCount<NamespaceEntity>("X", 0).ShouldBeNull();
-      declarationSpace.FindEntityByNameAndTypeParameterCount<NamespaceEntity>("A", 1).ShouldBeNull();
-      
-      declarationSpace.AllowsDeclaration<NamespaceEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<FieldEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A", 0).ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 0, null)).ShouldBeFalse();
-
-      declarationSpace.AllowsDeclaration<NamespaceEntity>("X").ShouldBeTrue();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A", 1).ShouldBeTrue();
+      declarationSpace.DeclarationCount.ShouldEqual(1);
+      declarationSpace.GetDeclarationSpaceEntry(namespaceEntity2).Entity.ShouldEqual(namespaceEntity2);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the properties of a declaration space with a registered generic class entity.
+    /// Ambigous declaration.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void RegisteredClassEntityWithTypeParameter()
+    [ExpectedException(typeof(AmbiguousDeclarationsException))]
+    public void AmbiguousDeclaration()
     {
       var declarationSpace = new DeclarationSpace();
+      var namespaceEntity = new NamespaceEntity("A");
       var classEntity = new ClassEntity("A");
-      classEntity.AddTypeParameter(new TypeParameterEntity("T"));
+
+      declarationSpace.Register(namespaceEntity);
       declarationSpace.Register(classEntity);
 
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.FindEntityByNameAndTypeParameterCount<ClassEntity>("A", 1).ShouldEqual(classEntity);
-
-      declarationSpace.FindEntityByName<ClassEntity>("A").ShouldBeNull();
-      declarationSpace.FindEntityByNameAndTypeParameterCount<ClassEntity>("X", 1).ShouldBeNull();
-
-      declarationSpace.AllowsDeclaration<FieldEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 0, null)).ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<TypeParameterEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A", 1).ShouldBeFalse();
-
-      declarationSpace.AllowsDeclaration<NamespaceEntity>("A").ShouldBeTrue();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A").ShouldBeTrue();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A", 2).ShouldBeTrue();
-
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the properties of a declaration space with a registered method entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void RegisteredMethod()
-    {
-      var classA = new ClassEntity("A");
-      var classB = new ClassEntity("B");
-      var classC = new ClassEntity("C");
-
-      var declarationSpace = new DeclarationSpace();
-      var methodEntity = new MethodEntity("A", true, false, false, false, null);
-      methodEntity.AddTypeParameter(new TypeParameterEntity("T"));
-      methodEntity.AddParameter(new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(classA),
-                                                    ParameterKind.Value));
-      methodEntity.AddParameter(new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(classB),
-                                                    ParameterKind.Reference));
-      methodEntity.AddParameter(new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(classC),
-                                                    ParameterKind.Output));
-      declarationSpace.Register(methodEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.FindEntityByName<MethodEntity>("A").ShouldBeNull();
-
-      // Matching signature
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldEqual(methodEntity);
-
-      // Method name mismatch
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("B", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeNull();
-
-      // Type parameter count mismatch
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("A", 0, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeNull();
-
-      // Parameter type mismatch
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeNull();
-
-      // Parameter kind mismatch value/ref
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Reference),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeNull();
-
-      // Parameter kind mismatch ref/out
-      declarationSpace.FindEntityBySignature<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Output),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Reference)
-      })).ShouldBeNull();
-
-      declarationSpace.AllowsDeclaration<FieldEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<TypeParameterEntity>("A").ShouldBeFalse();
-      declarationSpace.AllowsDeclaration<ClassEntity>("A", 1).ShouldBeFalse();
-
-      // Same signature cannot be declared
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeFalse();
-
-      // Signature that differs only in ref/out cannot be declared
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Output),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Reference)
-      })).ShouldBeFalse();
-
-      // Allowed: signature with different name
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("X", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeTrue();
-
-      // Allowed: signature with different number of type parameters
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 0, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Value),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeTrue();
-
-      // Allowed: signature with different parameter kind (not ref/out)
-      declarationSpace.AllowsDeclaration<MethodEntity>(new Signature("A", 1, new List<ParameterEntity>
-      {
-        new ParameterEntity("a2", new DirectSemanticEntityReference<TypeEntity>(classA), ParameterKind.Reference),
-        new ParameterEntity("b2", new DirectSemanticEntityReference<TypeEntity>(classB), ParameterKind.Reference),
-        new ParameterEntity("c2", new DirectSemanticEntityReference<TypeEntity>(classC), ParameterKind.Output)
-      })).ShouldBeTrue();
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the properties of a declaration space with a registered method entity 
-    /// that has zero type parameters and has zero parameters.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void RegisteredMethodWithZeroTypeParametersAndNoParameters()
-    {
-      var declarationSpace = new DeclarationSpace();
-      var methodEntity = new MethodEntity("A", true, false, false, false, null);
-      declarationSpace.Register(methodEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.FindEntityByName<MethodEntity>("A").ShouldEqual(methodEntity);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the unregistration of a field entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void UnregisterFieldEntity()
-    {
-      var declarationSpace = new DeclarationSpace();
-      var fieldEntity = new FieldEntity("A", true, new DirectSemanticEntityReference<TypeEntity>(new ClassEntity("A")),
-                                        false);
-      declarationSpace.Register(fieldEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.Unregister(fieldEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(0);
-      declarationSpace.EntityCount.ShouldEqual(0);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the unregistration of a generic class entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void UnregisterGenericClassEntity()
-    {
-      var declarationSpace = new DeclarationSpace();
-      var classEntity = new ClassEntity("A");
-      classEntity.AddTypeParameter(new TypeParameterEntity("T"));
-      declarationSpace.Register(classEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.Unregister(classEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(0);
-      declarationSpace.EntityCount.ShouldEqual(0);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the unregistration of a generic class entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void UnregisterMethodEntity()
-    {
-      var classA = new ClassEntity("A");
-      var classB = new ClassEntity("B");
-      var classC = new ClassEntity("C");
-
-      var declarationSpace = new DeclarationSpace();
-      var methodEntity = new MethodEntity("A", true, false, false, false, null);
-      methodEntity.AddTypeParameter(new TypeParameterEntity("T"));
-      methodEntity.AddParameter(new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(classA),
-                                                    ParameterKind.Value));
-      methodEntity.AddParameter(new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(classB),
-                                                    ParameterKind.Reference));
-      methodEntity.AddParameter(new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(classC),
-                                                    ParameterKind.Output));
-      declarationSpace.Register(methodEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(1);
-      declarationSpace.EntityCount.ShouldEqual(1);
-
-      declarationSpace.Unregister(methodEntity);
-
-      declarationSpace.SlotCount.ShouldEqual(0);
-      declarationSpace.EntityCount.ShouldEqual(0);
+      declarationSpace.GetSingleEntity<NamespaceOrTypeEntity>("A");
     }
   }
 }
