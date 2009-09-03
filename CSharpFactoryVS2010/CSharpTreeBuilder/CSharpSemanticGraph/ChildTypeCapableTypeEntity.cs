@@ -45,15 +45,71 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name and number of type parameters.
+    /// Removes a child type. 
+    /// </summary>
+    /// <param name="typeEntity">The type entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveChildType(TypeEntity typeEntity)
+    {
+      ChildTypes.Remove(typeEntity);
+      typeEntity.Parent = null;
+      _DeclarationSpace.Unregister(typeEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of child type entities by type and name.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <returns>A collection of child type entities, possibly empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name)
+      where TEntityType : TypeEntity
+    {
+      return GetChildTypes<TEntityType>(name, 0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of child type entities by type, name and number of type parameters.
     /// </summary>
     /// <param name="name">The name of the type.</param>
     /// <param name="typeParameterCount">The number of type parameters.</param>
-    /// <returns>The type with the given name and number of type parameters, or null if not found.</returns>
+    /// <returns>A collection of child type entities, possibly empty.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity GetChildType(string name, int typeParameterCount)
+    public IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name, int typeParameterCount)
+      where TEntityType : TypeEntity
     {
-      return _DeclarationSpace.GetSingleEntity<TypeEntity>(name, typeParameterCount);
+      return _DeclarationSpace.GetEntities<TEntityType>(name, typeParameterCount);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type entity by type and name.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetSingleChildType<TEntityType>(string name)
+      where TEntityType : TypeEntity
+    {
+      return GetSingleChildType<TEntityType>(name, 0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type entity by type, name and number of type parameters.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetSingleChildType<TEntityType>(string name, int typeParameterCount)
+      where TEntityType : TypeEntity
+    {
+      return _DeclarationSpace.GetSingleEntity<TEntityType>(name, typeParameterCount);
     }
 
     #region Visitor methods
@@ -68,10 +124,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       base.AcceptVisitor(visitor);
 
-      foreach (var childTypes in ChildTypes)
-      {
-        childTypes.AcceptVisitor(visitor);
-      }
+      VisitMutableCollection(ChildTypes, visitor);
     }
 
     #endregion

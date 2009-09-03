@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Linq;
 using CSharpTreeBuilder.Ast;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -101,6 +102,28 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       throw new ApplicationException(string.Format("SemanticEntity.AcceptVisitor called on type: {0}", GetType()));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Visits a collection where the items can change during the visiting. 
+    /// Therefore first creates a copy of the collection 
+    /// and checks before the visiting of a node if it still has its parent.
+    /// </summary>
+    /// <typeparam name="T">The type of collection items.</typeparam>
+    /// <param name="collection">A collection.</param>
+    /// <param name="visitor">A semantic graph visitor object.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected static void VisitMutableCollection<T>(IEnumerable<T> collection, SemanticGraphVisitor visitor)
+      where T : SemanticEntity
+    {
+      foreach (var item in collection.ToArray())
+      {
+        if (item.Parent != null)
+        {
+          item.AcceptVisitor(visitor);
+        }
+      }
     }
 
     #endregion

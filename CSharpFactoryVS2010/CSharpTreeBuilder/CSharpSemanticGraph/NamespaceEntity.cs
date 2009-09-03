@@ -96,7 +96,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Adds a child type. 
     /// Also sets the child's parent property, and defines child's name in the declaration space.
     /// </summary>
-    /// <param name="typeEntity">The child type entity.</param>
+    /// <param name="typeEntity">The type entity.</param>
     // ----------------------------------------------------------------------------------------------
     public void AddChildType(TypeEntity typeEntity)
     {
@@ -107,27 +107,71 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name and number of type parameters.
+    /// Removes a child type. 
     /// </summary>
-    /// <param name="name">The name of the type.</param>
-    /// <param name="typeParameterCount">The number of type parameters.</param>
-    /// <returns>The type with the given name and number of type parameters, or null if not found.</returns>
+    /// <param name="typeEntity">The type entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity GetChildType(string name, int typeParameterCount)
+    public void RemoveChildType(TypeEntity typeEntity)
     {
-      return _DeclarationSpace.GetSingleEntity<TypeEntity>(name, typeParameterCount);
+      ChildTypes.Remove(typeEntity);
+      typeEntity.Parent = null;
+      _DeclarationSpace.Unregister(typeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name (assuming no type parameters).
+    /// Gets a collection of child type entities by type and name.
     /// </summary>
     /// <param name="name">The name of the type.</param>
-    /// <returns>The type with the given name and no type parameters, or null if not found.</returns>
+    /// <returns>A collection of child type entities, possibly empty.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity GetChildType(string name)
+    public IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name)
+      where TEntityType : TypeEntity
     {
-      return GetChildType(name, 0);
+      return GetChildTypes<TEntityType>(name, 0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of child type entities by type, name and number of type parameters.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>A collection of child type entities, possibly empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name, int typeParameterCount)
+      where TEntityType : TypeEntity
+    {
+      return _DeclarationSpace.GetEntities<TEntityType>(name, typeParameterCount);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type entity by type and name.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetSingleChildType<TEntityType>(string name)
+      where TEntityType : TypeEntity
+    {
+      return GetSingleChildType<TEntityType>(name, 0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type entity by type, name and number of type parameters.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetSingleChildType<TEntityType>(string name, int typeParameterCount)
+      where TEntityType : TypeEntity
+    {
+      return _DeclarationSpace.GetSingleEntity<TEntityType>(name, typeParameterCount);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -326,10 +370,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         childNamespace.AcceptVisitor(visitor);
       }
 
-      foreach (var childTypes in ChildTypes)
-      {
-        childTypes.AcceptVisitor(visitor);
-      }
+      VisitMutableCollection(ChildTypes, visitor);
     }
 
     #endregion

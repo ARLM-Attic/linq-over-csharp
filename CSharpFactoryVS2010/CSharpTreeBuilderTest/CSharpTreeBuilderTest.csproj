@@ -68,6 +68,7 @@
     <Compile Include="Ast\StructDeclarations.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\PartialTypeMergingSemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForCompleteMatchingTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactoryTest.cs" />
@@ -346,11 +347,11 @@
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS1537_ExternAndUsingAliasDuplicateName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\EnumMember.cs" />
     <None Include="TestFiles\Orphan\CS0101_ClassAndClassSameName.cs" />
-    <None Include="TestFiles\Orphan\PartialClass.cs" />
+    <None Include="TestFiles\PartialTypeMergingSemanticGraphVisitor\PartialClass.cs" />
     <None Include="TestFiles\Orphan\CS0260_MissingPartialOnClass2.cs" />
     <None Include="TestFiles\Orphan\CS0260_MissingPartialOnClass1.cs" />
-    <None Include="TestFiles\Orphan\PartialStruct.cs" />
-    <None Include="TestFiles\Orphan\PartialInterface.cs" />
+    <None Include="TestFiles\PartialTypeMergingSemanticGraphVisitor\PartialStruct.cs" />
+    <None Include="TestFiles\PartialTypeMergingSemanticGraphVisitor\PartialInterface.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Property.cs" />
     <None Include="TestFiles\Orphan\MemberOfAnErronousClass.cs" />
     <None Include="TestFiles\Orphan\CS0542_ClassOrStructAndMemberName.cs" />

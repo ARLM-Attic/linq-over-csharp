@@ -227,6 +227,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\PartialTypeMergingSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpaceEntry.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\PartialEntityMerger.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeNameMemberNameConflictException.cs" />

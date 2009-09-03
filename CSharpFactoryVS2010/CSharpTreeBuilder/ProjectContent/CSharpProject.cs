@@ -208,6 +208,9 @@ namespace CSharpTreeBuilder.ProjectContent
       // Create entities from ASTs
       SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this, SemanticGraph));
 
+      // Merge partial type entities.
+      SemanticGraph.AcceptVisitor(new PartialTypeMergingSemanticGraphVisitor());
+
       // Resolve type references in 2 pass (1. type declarations, 2. type bodies)
       SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(this, SemanticGraph));
       SemanticGraph.AcceptVisitor(new TypeResolverPass2SemanticGraphVisitor(this, SemanticGraph));

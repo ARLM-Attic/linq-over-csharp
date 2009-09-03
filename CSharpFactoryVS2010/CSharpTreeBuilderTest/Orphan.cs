@@ -86,94 +86,6 @@ namespace CSharpTreeBuilderTest
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the building of partial classes
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void PartialClass()
-    {
-      var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\PartialClass.cs");
-      InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
-      project.SyntaxTree.AcceptVisitor(visitor);
-
-      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
-      classEntity.FullyQualifiedName.ShouldEqual("A");
-
-      classEntity.SyntaxNodes.Count.ShouldEqual(2);
-      classEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0]);
-      classEntity.SyntaxNodes[1].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[1]);
-
-      var baseTypeRefs = classEntity.BaseTypeReferences.ToList();
-      baseTypeRefs.Count.ShouldEqual(5);
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[0]).SyntaxNode.TypeName.ToString().ShouldEqual("B");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[1]).SyntaxNode.TypeName.ToString().ShouldEqual("I1");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[2]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[3]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[4]).SyntaxNode.TypeName.ToString().ShouldEqual("I3");
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the building of partial structs
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void PartialStruct()
-    {
-      var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\PartialStruct.cs");
-      InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
-      project.SyntaxTree.AcceptVisitor(visitor);
-
-      var structEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as StructEntity;
-      structEntity.FullyQualifiedName.ShouldEqual("A");
-
-      structEntity.SyntaxNodes.Count.ShouldEqual(2);
-      structEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0]);
-      structEntity.SyntaxNodes[1].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[1]);
-
-      var baseTypeRefs = structEntity.BaseTypeReferences.ToList();
-      baseTypeRefs.Count.ShouldEqual(4);
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[0]).SyntaxNode.TypeName.ToString().ShouldEqual("I1");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[1]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[2]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[3]).SyntaxNode.TypeName.ToString().ShouldEqual("I3");
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the building of partial interfaces
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void PartialInterface()
-    {
-      var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\PartialInterface.cs");
-      InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
-      project.SyntaxTree.AcceptVisitor(visitor);
-
-      var interfaceEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as InterfaceEntity;
-      interfaceEntity.FullyQualifiedName.ShouldEqual("A");
-
-      interfaceEntity.SyntaxNodes.Count.ShouldEqual(2);
-      interfaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0]);
-      interfaceEntity.SyntaxNodes[1].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[1]);
-
-      var baseTypeRefs = interfaceEntity.BaseTypeReferences.ToList();
-      baseTypeRefs.Count.ShouldEqual(4);
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[0]).SyntaxNode.TypeName.ToString().ShouldEqual("I1");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[1]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[2]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[3]).SyntaxNode.TypeName.ToString().ShouldEqual("I3");
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Error CS0260: Missing partial modifier on declaration (missing partial on 1st declaration)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -261,7 +173,7 @@ namespace CSharpTreeBuilderTest
       var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
       project.SyntaxTree.AcceptVisitor(visitor);
 
-      var classEntity = project.SemanticGraph.GlobalNamespace.GetChildType("A1") as ClassEntity;
+      var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
       {
         var method = classEntity.Members.ToList()[0] as MethodEntity;
         method.IsPartial.ShouldBeTrue();

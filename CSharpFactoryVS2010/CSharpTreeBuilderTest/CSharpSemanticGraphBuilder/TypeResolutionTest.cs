@@ -1501,10 +1501,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var collection = project.SemanticGraph.GlobalNamespace.GetChildNamespace("System")
         .GetChildNamespace("Collections").GetChildNamespace("ObjectModel")
-        .GetChildType("Collection", 1);
+        .GetSingleChildType<TypeEntity>("Collection", 1);
       var keyedCollection = project.SemanticGraph.GlobalNamespace.GetChildNamespace("System")
         .GetChildNamespace("Collections").GetChildNamespace("ObjectModel")
-        .GetChildType("KeyedCollection", 2);
+        .GetSingleChildType<TypeEntity>("KeyedCollection", 2);
       keyedCollection.ToString().ShouldEqual("global::System.Collections.ObjectModel.KeyedCollection`2");
       ((ConstructedGenericTypeEntity)keyedCollection.BaseType).UnderlyingType.ShouldEqual(collection);
     }
@@ -1807,7 +1807,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.TargetEntity.ShouldEqual(
-          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildType("Class0"));
+          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetSingleChildType<ClassEntity>("Class0"));
       }
       // MyExternAlias::A.B.Class1 x1;
       {
@@ -1815,7 +1815,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.TargetEntity.ShouldEqual(
           project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildNamespace("A")
-          .GetChildNamespace("B").GetChildType("Class1"));
+          .GetChildNamespace("B").GetSingleChildType<ClassEntity>("Class1"));
       }
       // MyExternAlias::A.B.Generic1<int,long> x2;
       {
@@ -1827,14 +1827,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       i = 0;
 
       classEntity = project.SemanticGraph.GlobalNamespace.GetChildNamespace("B").GetChildNamespace("C")
-        .GetChildType("A") as ClassEntity;
+        .GetSingleChildType<ClassEntity>("A");
 
       // MyExternAlias::Class0 x0;
       {
         var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.TargetEntity.ShouldEqual(
-          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildType("Class0"));
+          project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetSingleChildType<ClassEntity>("Class0"));
       }
       // MyExternAlias::A.B.Class1 x1;
       {
@@ -1842,7 +1842,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.TargetEntity.ShouldEqual(
           project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildNamespace("A")
-          .GetChildNamespace("B").GetChildType("Class1"));
+          .GetChildNamespace("B").GetSingleChildType<ClassEntity>("Class1"));
       }
       // MyExternAlias::A.B.Generic1<int,long> x2;
       {

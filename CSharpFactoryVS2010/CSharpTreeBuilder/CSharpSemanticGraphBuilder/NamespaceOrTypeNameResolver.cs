@@ -290,7 +290,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // ... and N contains an accessible type having name I and K type parameters, ...
           // BUGBUG: accessibility is not checked!
           var foundTypeEntity = (handleEntity is IHasChildTypes)
-            ? (handleEntity as IHasChildTypes).GetChildType(lastTypeTag.Identifier, lastTypeTag.GenericDimensions)
+            ? (handleEntity as IHasChildTypes).GetSingleChildType<TypeEntity>(lastTypeTag.Identifier, lastTypeTag.GenericDimensions)
             : null;
 
           if (foundTypeEntity != null)
@@ -434,7 +434,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Otherwise, if N contains an accessible type having name I and K type parameters, then:
         // BUGBUG: accessibility is not checked!
         var foundTypeEntity = (namespaceContext is IHasChildTypes)
-          ? (namespaceContext as IHasChildTypes).GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions)
+          ? (namespaceContext as IHasChildTypes).GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions)
           : null;
 
         if (foundTypeEntity != null)
@@ -530,7 +530,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       while (typeEntity == null && contextType != null)
       {
         typeEntity = (contextType is IHasChildTypes)
-          ? (contextType as IHasChildTypes).GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions)
+          ? (contextType as IHasChildTypes).GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions)
           : null;
 
         if (typeEntity == null)
@@ -564,7 +564,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (usingNamespaceEntity.ImportedNamespace != null)
         {
           // Find out if the imported namespace contains a type declared with the given name and number of type parameters
-          var typeEntity = usingNamespaceEntity.ImportedNamespace.GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions);
+          var typeEntity = usingNamespaceEntity.ImportedNamespace.GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions);
 
           // If a type is found then add it to the result list.
           if (typeEntity != null)
@@ -614,7 +614,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // Otherwise, if the global namespace contains a non-generic type named I and K is zero, ...
         // Otherwise, if the global namespace contains a type named I that has K type parameters, ... 
-        var typeEntity = globalNamespace.GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions);
+        var typeEntity = globalNamespace.GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions);
         if (typeEntity != null)
         {
           // ... then the qualified-alias-member refers to that type.
@@ -674,7 +674,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
           // Otherwise, if the namespace associated with N contains a non-generic type named I and K is zero, ...
           // Otherwise, if the namespace associated with N contains a type named I that has K type parameters, ...
-          var childTypeEntity = qualifierNamespaceEntity.GetChildType(typeTagNode.Identifier, typeTagNode.GenericDimensions);
+          var childTypeEntity = qualifierNamespaceEntity.GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions);
           if (childTypeEntity != null)
           {
             // ... then the qualified-alias-member refers to that type.

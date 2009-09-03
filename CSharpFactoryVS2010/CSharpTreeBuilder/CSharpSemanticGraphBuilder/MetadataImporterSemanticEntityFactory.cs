@@ -121,7 +121,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                                    : 0;
         
         var foundEntity = (contextEntity is IHasChildTypes)
-          ? (contextEntity as IHasChildTypes).GetChildType(nameAndTypeParameterCountArray[0], typeParameterCount)
+          ? (contextEntity as IHasChildTypes).GetSingleChildType<TypeEntity>(nameAndTypeParameterCountArray[0], typeParameterCount)
           : null;
 
         if (foundEntity == null)
@@ -177,7 +177,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       // If the name already exists, that's an error
       if (contextEntity is IHasChildTypes
-        && (contextEntity as IHasChildTypes).GetChildType(type.Name, type.GetGenericArguments().Length) != null)
+        && (contextEntity as IHasChildTypes).GetSingleChildType<TypeEntity>(type.Name, type.GetGenericArguments().Length) != null)
       {
         throw new ApplicationException(string.Format("Name '{0}' is already defined in declaration space '{1}'.",
                                                      type.Name,

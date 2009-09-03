@@ -11,6 +11,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child type. 
+    /// </summary>
+    /// <param name="typeEntity">The type entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    void AddChildType(TypeEntity typeEntity);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes a child type. 
+    /// </summary>
+    /// <param name="typeEntity">The type entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    void RemoveChildType(TypeEntity typeEntity);
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets an iterate-only collection of child types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -18,20 +34,42 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type by name and number of type parameters.
+    /// Gets a collection of child type entities by type and name.
     /// </summary>
     /// <param name="name">The name of the type.</param>
-    /// <param name="typeParameterCount">The number of type parameters.</param>
-    /// <returns>The type with the given name and number of type parameters, or null if not found.</returns>
+    /// <returns>A collection of child type entities, possibly empty.</returns>
     // ----------------------------------------------------------------------------------------------
-    TypeEntity GetChildType(string name, int typeParameterCount);
+    IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name) where TEntityType : TypeEntity;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a child type. 
+    /// Gets a collection of child type entities by type, name and number of type parameters.
     /// </summary>
-    /// <param name="typeEntity">The child type entity.</param>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>A collection of child type entities, possibly empty.</returns>
     // ----------------------------------------------------------------------------------------------
-    void AddChildType(TypeEntity typeEntity);
+    IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name, int typeParameterCount) where TEntityType : TypeEntity;
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type entity by type and name.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    TEntityType GetSingleChildType<TEntityType>(string name) where TEntityType : TypeEntity;
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a child type entity by type, name and number of type parameters.
+    /// </summary>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    TEntityType GetSingleChildType<TEntityType>(string name, int typeParameterCount) where TEntityType : TypeEntity;
   }
 }
