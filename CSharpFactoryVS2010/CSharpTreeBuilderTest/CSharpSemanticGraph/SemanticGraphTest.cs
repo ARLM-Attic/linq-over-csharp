@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.CSharpSemanticGraph;
@@ -47,23 +48,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the BuiltInTypes property.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void BuiltInTypes()
-    {
-      var semanticGraph = new SemanticGraph();
-      var builtInTypes = semanticGraph.BuiltInTypes.ToArray();
-      builtInTypes.Length.ShouldEqual(16);
-      // mscorlib is not yet imported, so alias is null
-      builtInTypes[0].AliasedType.ShouldBeNull();
-      builtInTypes[0].BaseTypeReferences.Count().ShouldEqual(0);
-      builtInTypes[0].Members.Count().ShouldEqual(0);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Tests the NullableGenericTypeDefinition property.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -86,20 +70,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var semanticGraph = new SemanticGraph();
       // mscorlib is not yet imported, so this is null 
       semanticGraph.SystemArray.ShouldBeNull();
-    }
-
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Tests the PointerToUnknownType property.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void PointerToUnknownType()
-    {
-      var semanticGraph = new SemanticGraph();
-      semanticGraph.PointerToUnknownType.FullyQualifiedName.ShouldEqual("void*");
-      semanticGraph.PointerToUnknownType.IsPointerType.ShouldBeTrue();
     }
   }
 }

@@ -361,7 +361,7 @@
     <None Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />
-    <None Include="TestFiles\TypeResolution\CS0547_VoidProperty.cs" />
+    <None Include="TestFiles\Orphan\CS0547_VoidProperty.cs" />
     <None Include="TestFiles\TypeResolution\Property.cs" />
     <None Include="TestFiles\Orphan\CS0263_PartialClassConflictingBaseTypes.cs" />
     <None Include="TestFiles\Orphan\PartialClassDuplicateBaseTypes.cs" />
@@ -411,7 +411,7 @@
     <None Include="TestFiles\TypeResolution\DeclaredInBaseClass.cs" />
     <None Include="TestFiles\TypeResolution\BuiltInTypes.cs" />
     <None Include="TestFiles\TypeResolution\ArrayType.cs" />
-    <None Include="TestFiles\TypeResolution\CS0670_VoidField.cs" />
+    <None Include="TestFiles\Orphan\CS0670_VoidField.cs" />
     <None Include="TestFiles\TypeResolution\PointerToUnknown.cs" />
     <None Include="TestFiles\TypeResolution\NullableType.cs" />
     <None Include="TestFiles\TypeResolution\PointerToType.cs" />

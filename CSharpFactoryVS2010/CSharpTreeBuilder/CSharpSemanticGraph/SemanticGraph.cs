@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -17,9 +18,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>A dictionary of root namespace entities. The key is the name of the root namespace.</summary>
     private readonly Dictionary<string, RootNamespaceEntity> _RootNamespaces;
 
-    /// <summary>A dictionary of built-in types. The key is the name of the built-in type.</summary>
-    private readonly Dictionary<string, BuiltInTypeEntity> _BuiltInTypes;
-
     /// <summary>A cache that maps metadata objects to semantic entities.</summary>
     private readonly Dictionary<System.Reflection.MemberInfo, SemanticEntity> _MetadataToEntityMap;
 
@@ -32,11 +30,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       _RootNamespaces = new Dictionary<string, RootNamespaceEntity>();
       AddRootNamespace(new RootNamespaceEntity(GLOBAL_NAMESPACE_NAME));
-      
-      _BuiltInTypes = new Dictionary<string, BuiltInTypeEntity>();
-      InitializeBuiltInTypeDictionary();
-
-      PointerToUnknownType = new PointerToUnknownTypeEntity();
 
       _MetadataToEntityMap = new Dictionary<System.Reflection.MemberInfo, SemanticEntity>();
     }
@@ -90,32 +83,71 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets an iterate-only collection of root namespace entities. The key is the namespace name.
+    /// Gets the semantic entity for a built-in type.
     /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<BuiltInTypeEntity> BuiltInTypes
-    {
-      get { return _BuiltInTypes.Values; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the semantic entity for a built-in type name.
-    /// </summary>
-    /// <param name="name">A built-in type name.</param>
+    /// <param name="builtInType">A built-in type.</param>
     /// <returns>The semantic entity representing a built-in type. Null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public BuiltInTypeEntity GetBuiltInTypeByName(string name)
+    public TypeEntity GetTypeEntityByBuiltInType(BuiltInType builtInType)
     {
-      return _BuiltInTypes.ContainsKey(name) ? _BuiltInTypes[name] : null;
-    }
+      System.Type type = null;
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the pointer-to-unknown-type singleton entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public PointerToUnknownTypeEntity PointerToUnknownType { get; private set; }
+      switch (builtInType)
+      {
+        case (BuiltInType.Sbyte):
+          type = typeof(sbyte);
+          break;
+        case (BuiltInType.Byte):
+          type = typeof(byte);
+          break;
+        case (BuiltInType.Short):
+          type = typeof(short);
+          break;
+        case (BuiltInType.Ushort):
+          type = typeof(ushort);
+          break;
+        case (BuiltInType.Int):
+          type = typeof(int);
+          break;
+        case (BuiltInType.Uint):
+          type = typeof(uint);
+          break;
+        case (BuiltInType.Long):
+          type = typeof(long);
+          break;
+        case (BuiltInType.Ulong):
+          type = typeof(ulong);
+          break;
+        case (BuiltInType.Char):
+          type = typeof(char);
+          break;
+        case (BuiltInType.Float):
+          type = typeof(float);
+          break;
+        case (BuiltInType.Double):
+          type = typeof(double);
+          break;
+        case (BuiltInType.Bool):
+          type = typeof(bool);
+          break;
+        case (BuiltInType.Decimal):
+          type = typeof(decimal);
+          break;
+        case (BuiltInType.Object):
+          type = typeof(object);
+          break;
+        case (BuiltInType.String):
+          type = typeof(string);
+          break;
+        case (BuiltInType.Void):
+          type = typeof(void);
+          break;
+        default:
+          throw new ApplicationException(string.Format("Unexpected BuiltInType: '{0}'", builtInType));
+      }
+
+      return _MetadataToEntityMap.ContainsKey(type) ? _MetadataToEntityMap[type] as TypeEntity : null;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -172,35 +204,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return _MetadataToEntityMap.ContainsKey(metadataObject) ? _MetadataToEntityMap[metadataObject] : null;
     }
 
-    #region Private methods
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Fills up the dictionary that maps built-in type names to semantic entities.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    private void InitializeBuiltInTypeDictionary()
-    {
-      _BuiltInTypes.Add("sbyte", new BuiltInTypeEntity(BuiltInType.Sbyte));
-      _BuiltInTypes.Add("byte", new BuiltInTypeEntity(BuiltInType.Byte));
-      _BuiltInTypes.Add("short", new BuiltInTypeEntity(BuiltInType.Short));
-      _BuiltInTypes.Add("ushort",new BuiltInTypeEntity(BuiltInType.Ushort));
-      _BuiltInTypes.Add("int",new BuiltInTypeEntity(BuiltInType.Int));
-      _BuiltInTypes.Add("uint",new BuiltInTypeEntity(BuiltInType.Uint));
-      _BuiltInTypes.Add("long",new BuiltInTypeEntity(BuiltInType.Long));
-      _BuiltInTypes.Add("ulong",new BuiltInTypeEntity(BuiltInType.Ulong));
-      _BuiltInTypes.Add("char",new BuiltInTypeEntity(BuiltInType.Char));
-      _BuiltInTypes.Add("float",new BuiltInTypeEntity(BuiltInType.Float));
-      _BuiltInTypes.Add("double",new BuiltInTypeEntity(BuiltInType.Double));
-      _BuiltInTypes.Add("bool",new BuiltInTypeEntity(BuiltInType.Bool));
-      _BuiltInTypes.Add("decimal",new BuiltInTypeEntity(BuiltInType.Decimal));
-      _BuiltInTypes.Add("object",new BuiltInTypeEntity(BuiltInType.Object));
-      _BuiltInTypes.Add("string",new BuiltInTypeEntity(BuiltInType.String));
-      _BuiltInTypes.Add("void", new BuiltInTypeEntity(BuiltInType.Void));
-    }
-
-    #endregion
-
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------
@@ -211,11 +214,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      foreach (var builtInType in BuiltInTypes)
-      {
-        builtInType.AcceptVisitor(visitor);
-      }
-
       foreach (var rootNamespace in RootNamespaces)
       {
         rootNamespace.AcceptVisitor(visitor);

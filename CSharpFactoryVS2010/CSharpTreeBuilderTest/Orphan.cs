@@ -14,6 +14,41 @@ namespace CSharpTreeBuilderTest
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// error CS0547: 'a': property or indexer cannot have void type
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0547_VoidProperty()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0547_VoidProperty.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0547");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0670: Field cannot have void type
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0670_VoidField()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0670_VoidField.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0670");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Error CS0101: The namespace 'A' already contains a definition for 'B' (namespace and class)
     /// </summary>
     // ----------------------------------------------------------------------------------------------

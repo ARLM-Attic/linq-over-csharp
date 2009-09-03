@@ -12,31 +12,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a nullable type given its underlying type.
-    /// </summary>
-    /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int?')</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
-    /// <returns>A nullable type entity with the given underlying type.</returns>
-    /// <remarks>
-    /// If the constructed type already exists, then retrieves it, otherwise creates it.
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public static NullableTypeEntity GetConstructedNullableType(TypeEntity underlyingTypeEntity, SemanticGraph semanticGraph)
-    {
-      // If the constructed type not exists yet then create it.
-      if (underlyingTypeEntity.NullableType == null)
-      {
-        // The aliased type is a constructed generic type created from System.Nullable`1 and the underlying type
-        var aliasedType = new ConstructedGenericTypeEntity(semanticGraph.NullableGenericTypeDefinition,
-                                                           new List<TypeEntity> { underlyingTypeEntity });
-        underlyingTypeEntity.NullableType = new NullableTypeEntity(underlyingTypeEntity, aliasedType);
-      }
-
-      return underlyingTypeEntity.NullableType;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a pointer type given its underlying type.
     /// </summary>
     /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int*')</param>

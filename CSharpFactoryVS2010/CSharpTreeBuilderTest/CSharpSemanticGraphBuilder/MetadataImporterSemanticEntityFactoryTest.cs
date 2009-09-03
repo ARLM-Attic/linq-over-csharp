@@ -268,9 +268,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.SemanticGraph.SystemArray.ToString().ShouldEqual("global::System.Array");
 
       // check BuiltIn types
-      // The alias is a reference, and it is not yet resolved
-      project.SemanticGraph.GetBuiltInTypeByName("int").AliasedTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-      project.SemanticGraph.GetBuiltInTypeByName("int").AliasedType.ShouldBeNull();
+      project.SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Int).ToString().ShouldEqual("global::System.Int32");
     }
 
     // ----------------------------------------------------------------------------------------------

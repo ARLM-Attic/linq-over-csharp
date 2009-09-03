@@ -37,7 +37,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         entity.TypeReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
 
-        if (entity.Type == _SemanticGraph.GetBuiltInTypeByName("void"))
+        if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
           var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
                              ? ((TypeNodeBasedTypeEntityReference) entity.TypeReference).SyntaxNode.StartToken
@@ -61,7 +61,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         entity.TypeReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
 
-        if (entity.Type == _SemanticGraph.GetBuiltInTypeByName("void"))
+        if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
           var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
                              ? ((TypeNodeBasedTypeEntityReference)entity.TypeReference).SyntaxNode.StartToken

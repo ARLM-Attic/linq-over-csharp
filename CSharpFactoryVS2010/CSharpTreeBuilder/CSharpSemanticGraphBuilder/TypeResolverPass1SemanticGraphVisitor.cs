@@ -78,17 +78,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resolves type references in a BuiltInTypeEntity node.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void Visit(BuiltInTypeEntity entity)
-    {
-      entity.AliasedTypeReference.Resolve(null, _SemanticGraph, _ErrorHandler);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Resolves type references in a ClassEntity node.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
@@ -247,22 +236,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private bool CanBeEnumBase(TypeEntity typeEntity)
     {
-      if (typeEntity == _SemanticGraph.GetBuiltInTypeByName("byte")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("byte").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("sbyte")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("sbyte").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("short")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("short").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ushort")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ushort").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("int")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("int").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("uint")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("uint").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("long")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("long").AliasedType
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ulong")
-        || typeEntity == _SemanticGraph.GetBuiltInTypeByName("ulong").AliasedType
+      if (typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Byte)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Sbyte)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Short)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Ushort)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Int)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Uint)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Long)
+        || typeEntity == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Ulong)
         )
       {
         return true;

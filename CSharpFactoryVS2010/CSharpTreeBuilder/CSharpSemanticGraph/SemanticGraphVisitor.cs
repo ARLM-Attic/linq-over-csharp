@@ -20,7 +20,6 @@
     public virtual void Visit(StructEntity entity) { }
     public virtual void Visit(DelegateEntity entity) { }
     public virtual void Visit(InterfaceEntity entity) { }
-    public virtual void Visit(BuiltInTypeEntity entity) { }
 
     public virtual void Visit(FieldEntity entity) { }
     public virtual void Visit(PropertyEntity entity) { }

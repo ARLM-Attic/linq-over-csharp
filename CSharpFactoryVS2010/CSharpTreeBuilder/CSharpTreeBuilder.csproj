@@ -260,7 +260,6 @@
     <Compile Include="CSharpCst\CSharpSemanticsTree.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactory.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverPass1SemanticGraphVisitor.cs" />
-    <Compile Include="CSharpSemanticGraph\BuiltInTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\BuiltInType.cs" />
     <Compile Include="CSharpSemanticGraph\ClassEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayTypeEntity.cs" />
@@ -299,15 +298,12 @@
     <Compile Include="CSharpSemanticGraphBuilder\SyntaxNodeBasedSemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataBasedSemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeNodeBasedTypeEntityReference.cs" />
-    <Compile Include="CSharpSemanticGraph\IAliasType.cs" />
-    <Compile Include="CSharpSemanticGraph\PointerToUnknownTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\FieldEntity.cs" />
     <Compile Include="CSharpSemanticGraph\GenericCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IHasChildTypes.cs" />
     <Compile Include="CSharpSemanticGraph\IVariableEntity.cs" />
     <Compile Include="CSharpSemanticGraph\MemberEntity.cs" />
     <Compile Include="CSharpSemanticGraph\PointerToTypeEntity.cs" />
-    <Compile Include="CSharpSemanticGraph\NullableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\DelegateEntity.cs" />
     <Compile Include="CSharpSemanticGraph\InterfaceEntity.cs" />
     <Compile Include="CSharpSemanticGraph\EnumEntity.cs" />

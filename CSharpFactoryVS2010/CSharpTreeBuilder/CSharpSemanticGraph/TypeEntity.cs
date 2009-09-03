@@ -284,13 +284,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the nullable type constructed from this type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NullableTypeEntity NullableType { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets the pointer type constructed from this type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
