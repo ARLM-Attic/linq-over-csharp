@@ -1830,5 +1830,22 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// This test case was introduced because of a problem in the name resolution process.
+    /// During the resolution process type argument AST nodes are separated from the AST tree,
+    /// and their parent becomes null. Unfortunately, determining the compilation unit is using the
+    /// parent property, and using namespaces can be used in the resolution only if the
+    /// compilation unit of the AST node is known.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore]
+    public void TypeArgumentCanBeResolvedWithUsingNamespace()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\TypeArgumentCanBeResolvedWithUsingNamespace.cs");
+      InvokeParser(project).ShouldBeTrue();
+    }
   }
 }
