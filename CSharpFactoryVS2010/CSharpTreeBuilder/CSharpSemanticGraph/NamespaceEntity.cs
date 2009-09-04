@@ -84,7 +84,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a child namespace by name. 
     /// </summary>
     /// <param name="name">An identifier.</param>
-    /// <returns>A child namespace entity, if one found by name. Null if none or more was found.</returns>
+    /// <returns>A child namespace entity, if one found by name. Null if none was found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public NamespaceEntity GetChildNamespace(string name)
     {

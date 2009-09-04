@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -115,6 +116,33 @@ namespace CSharpTreeBuilder.Ast
       return result;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a copy of the namespace-or-type-name node without the last type tag.
+    /// </summary>
+    /// <returns>A new NamespaceOrTypeNameNode.</returns>
+    /// <remarks>Throws an exception if there are less than 2 type tags.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceOrTypeNameNode GetCopyWithoutLastTag()
+    {
+      if (TypeTags.Count < 2)
+      {
+        throw new InvalidOperationException(
+          string.Format("This NamespaceOrTypeNameNode has only '{0}' TypeTags.", TypeTags.Count));
+      }
+      
+      var newNamespaceOrTypeNameNode = new NamespaceOrTypeNameNode(StartToken);
+
+      newNamespaceOrTypeNameNode.Comment = Comment;
+      newNamespaceOrTypeNameNode.ParentNode = ParentNode;
+      newNamespaceOrTypeNameNode.QualifierSeparatorToken = QualifierSeparatorToken;
+      newNamespaceOrTypeNameNode.QualifierToken = QualifierToken;
+      newNamespaceOrTypeNameNode.SeparatorToken = SeparatorToken;
+      newNamespaceOrTypeNameNode.Terminate(TerminatingToken);
+      newNamespaceOrTypeNameNode.TypeTags = TypeTags.GetCopyWithoutLastTag();
+
+      return newNamespaceOrTypeNameNode;
+    }
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the string representation of this language element.

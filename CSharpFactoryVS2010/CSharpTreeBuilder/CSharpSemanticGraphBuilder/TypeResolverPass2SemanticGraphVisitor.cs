@@ -70,6 +70,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           _ErrorHandler.Error("CS0547", errorPoint, "'{0}': property or indexer cannot have void type", entity.Name);
         }
       }
+
+      // Resolve the interface reference for explicitly implemented members
+      if (entity.InterfaceReference != null)
+      {
+        entity.InterfaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+      }
+
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -83,7 +90,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the return type
       if (entity.ReturnTypeReference != null)
       {
+        // Note that the resolution context is the method, because it can be the method's type parameter too
         entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      }
+  
+      // Resolve the interface reference for explicitly implemented members
+      if (entity.InterfaceReference != null)
+      {
+        // Note that the resolution context is not the method, but its parent
+        entity.InterfaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
       }
 
       // Resolve parameter types
@@ -91,6 +106,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         if (parameter.TypeReference != null)
         {
+          // Note that the resolution context is the method, because it can be the method's type parameter too
           parameter.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
         }
       }

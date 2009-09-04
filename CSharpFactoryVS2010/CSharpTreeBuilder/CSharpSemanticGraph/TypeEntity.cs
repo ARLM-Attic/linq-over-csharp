@@ -248,7 +248,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       _Members.Add(memberEntity);
       memberEntity.Parent = this;
-      _DeclarationSpace.Register(memberEntity);
+
+      // Register into the declaration space only if it's not an explicitly implemented interface member
+      if (!(memberEntity is ICanBeExplicitlyImplementedMember)
+        || !(memberEntity as ICanBeExplicitlyImplementedMember).IsExplicitlyImplemented)
+      {
+        _DeclarationSpace.Register(memberEntity);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -280,6 +286,70 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public MethodEntity GetMethod(Signature signature)
     {
       return _DeclarationSpace.GetSingleEntity<MethodEntity>(signature);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an explicitly implemented interface member by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of member to found.</typeparam>
+    /// <param name="name">The name of the member to found.</param>
+    /// <param name="implementedInterface">The interface whose method is implemented.</param>
+    /// <returns>The found member, or null if not found.</returns>
+    /// <remarks>
+    /// Throws AmbiguousDeclarationsException if there are more then one matching entities.
+    /// If getting a method then assumes zero type parameters and zero parameters.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetMember<TEntityType>(string name, TypeEntity implementedInterface)
+      where TEntityType : MemberEntity, ICanBeExplicitlyImplementedMember
+    {
+      if (typeof(TEntityType) == typeof(MethodEntity))
+      {
+        return GetMethod(new Signature(name, 0, null), implementedInterface) as TEntityType;
+      }
+
+      var members = (from member in Members
+                     where (member is TEntityType)
+                           && (member as TEntityType).Interface == implementedInterface
+                           && member.Name == name
+                     select member as TEntityType).ToList();
+
+      if (members.Count > 1)
+      {
+        throw new AmbiguousDeclarationsException(members.Cast<INamedEntity>());
+      }
+
+      return members.FirstOrDefault();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an explicitly implemented interface method by signature.
+    /// </summary>
+    /// <param name="signature">A signature.</param>
+    /// <param name="implementedInterface">The interface whose method is implemented.</param>
+    /// <returns>The found method, or null if not found.</returns>
+    /// <remarks>
+    /// Throws AmbiguousDeclarationsException if there are more then one matching entities.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public MethodEntity GetMethod(Signature signature, TypeEntity implementedInterface)
+    {
+      var comparer = new SignatureEqualityComparerForCompleteMatching();
+
+      var methods = (from member in Members
+                     where (member is MethodEntity)
+                           && (member as MethodEntity).Interface == implementedInterface
+                           && comparer.Equals((member as MethodEntity).Signature, signature)
+                     select member as MethodEntity).ToList();
+
+      if (methods.Count>1)
+      {
+        throw new AmbiguousDeclarationsException(methods.Cast<INamedEntity>());
+      }
+
+      return methods.FirstOrDefault();
     }
 
     // ----------------------------------------------------------------------------------------------

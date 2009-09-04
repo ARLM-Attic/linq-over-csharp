@@ -83,5 +83,20 @@ namespace CSharpTreeBuilder.Ast
                  : Identifier;
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the interface-type part of the member-name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public NamespaceOrTypeNameNode InterfaceType
+    {
+      get
+      {
+        return MemberName != null && MemberName.TypeTags.Count > 1
+                 ? MemberName.GetCopyWithoutLastTag()
+                 : null;
+      }
+    }
   }
 }

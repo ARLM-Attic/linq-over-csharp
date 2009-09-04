@@ -442,7 +442,7 @@ type_name:
 
 namespace_or_type_name:
   identifier   type_argument_list-opt
-  namespace_or_type_name   .   identifier   type_argument_listop
+  namespace_or_type_name   .   identifier   type_argument_list-opt
   qualified_alias_member
 
 B.2.2 Types

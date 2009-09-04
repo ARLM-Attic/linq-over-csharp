@@ -56,17 +56,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (namespaceEntity == null)
         {
           namespaceEntity = new NamespaceEntity(nameTag.Identifier);
-
-          // Try to add to its parent
-          try
-          {
-            parentEntity.AddChildNamespace(namespaceEntity);
-          }
-          catch (DeclarationConflictException)
-          {
-            ReportDuplicateNameError(parentEntity, node.StartToken, nameTag.Identifier);
-            return;
-          }
+          parentEntity.AddChildNamespace(namespaceEntity);
         }
 
         // Associate the syntax node with the found or the newly created namespace entity
@@ -131,8 +121,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       var namespaceName = node.NamespaceOrTypeName.TypeTags.ToString();
       if (parentEntity.IsUsingNamespaceAlreadySpecified(namespaceName, lexicalScope))
       {
-        _ErrorHandler.Warning("CS0105", node.StartToken,
-                              "The using directive for '{0}' appeared previously in this namespace", namespaceName);
+        ErrorDuplicateUsingNamespace(node.StartToken, namespaceName);
         return;
       }
 
@@ -383,8 +372,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                               && node.SetAccessor != null && !node.SetAccessor.HasBody;
 
       // Create a semantic entity and add to its parent.
+      var interfaceReference = node.InterfaceType != null
+                                 ? new NamespaceOrTypeNameNodeBasedTypeEntityReference(node.InterfaceType)
+                                 : null;
       var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
-      var propertyEntity = new PropertyEntity(node.Name, true, typeReference, node.IsStatic, isAutoImplemented);
+      var propertyEntity = new PropertyEntity(node.Name, interfaceReference, true, typeReference, node.IsStatic,
+                                              isAutoImplemented);
+
       parentEntity.AddMember(propertyEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, propertyEntity);
@@ -411,16 +405,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return;
       }
 
-
-      // We cannot determine whether the method already exists, because the parameter types are not yet resolved
-      // so a meaningful signature comparison cannot be made yet.
-      // We just blindly create a method entity from all method declarations, 
-      // and we'll check for duplicates after the type resolution.
-
+      var interfaceReference = node.InterfaceType != null
+                                 ? new NamespaceOrTypeNameNodeBasedTypeEntityReference(node.InterfaceType)
+                                 : null;
       var isAbstract = (node.Body == null);
       var returnTypeReference = new TypeNodeBasedTypeEntityReference(node.Type);
 
-      var methodEntity = new MethodEntity(node.Name, true, isAbstract, node.IsPartial, node.IsStatic, returnTypeReference);
+      var methodEntity = new MethodEntity(node.Name, interfaceReference, true, isAbstract, node.IsPartial, node.IsStatic,
+                         returnTypeReference);
 
       AddTypeParametersToEntity(methodEntity, parentEntity, node.TypeParameters);
       AddParametersToOverloadableEntity(methodEntity, node.FormalParameters);
@@ -534,95 +526,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Signals error: The namespace '{0}' already contains a definition for '{1}'
-    /// </summary>
-    /// <param name="errorPoint">The token where the error occured.</param>
-    /// <param name="namespaceName">The name of the namespace.</param>
-    /// <param name="identifier">The name of the identifier.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ErrorDuplicateNameInNamespace(Token errorPoint, string namespaceName, string identifier)
-    {
-      _ErrorHandler.Error("CS0101", errorPoint,
-                          "The namespace '{0}' already contains a definition for '{1}'.",
-                          namespaceName, identifier);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Signals error: The type '{0}' already contains a definition for '{1}'
-    /// </summary>
-    /// <param name="errorPoint">The token where the error occured.</param>
-    /// <param name="typeName">The name of the type.</param>
-    /// <param name="identifier">The name of the identifier.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ErrorDuplicateNameInType(Token errorPoint, string typeName, string identifier)
-    {
-      _ErrorHandler.Error("CS0102", errorPoint, "The type '{0}' already contains a definition for '{1}'.",
-                          typeName, identifier);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Signals error: error CS0542: 'A': member names cannot be the same as their enclosing type
-    /// </summary>
-    /// <param name="errorPoint">The token where the error occured.</param>
-    /// <param name="name">The conflicting name.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ErrorMemberNameAndTypeNameConflict(Token errorPoint, string name)
-    {
-      _ErrorHandler.Error("CS0542", errorPoint, "'{0}': member names cannot be the same as their enclosing type.",
-                          name);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Signals error: The using alias '{0}' appeared previously in this namespace
-    /// </summary>
-    /// <param name="errorPoint">The token where the error occured.</param>
-    /// <param name="identifier">The name of the alias.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ErrorDuplicateUsingAlias(Token errorPoint, string identifier)
-    {
-      _ErrorHandler.Error("CS1537", errorPoint, "The using alias '{0}' appeared previously in this namespace",
-                          identifier);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Signals error: Missing partial modifier on declaration of type '{0}' ...
-    /// </summary>
-    /// <param name="errorPoint">The token where the error occured.</param>
-    /// <param name="identifier">The name of the type.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ErrorMissingPartialModifier(Token errorPoint, string identifier)
-    {
-      _ErrorHandler.Error("CS0260", errorPoint,
-                          "Missing partial modifier on declaration of type '{0}'; another partial declaration of this type exists",
-                          identifier);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Reports the right error message for a duplicate name.
-    /// </summary>
-    /// <param name="namespaceOrTypeEntity">The entity where the duplication occured.</param>
-    /// <param name="errorPoint">The token where the error occured.</param>
-    /// <param name="conflictingName">The conflicting name.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void ReportDuplicateNameError(NamespaceOrTypeEntity namespaceOrTypeEntity, Token errorPoint, string conflictingName)
-    {
-      if (namespaceOrTypeEntity is NamespaceEntity)
-      {
-        ErrorDuplicateNameInNamespace(errorPoint, namespaceOrTypeEntity.FullyQualifiedName, conflictingName);
-      }
-      else
-      {
-        ErrorDuplicateNameInType(errorPoint, namespaceOrTypeEntity.FullyQualifiedName, conflictingName);
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the source region of the parent node.
     /// </summary>
     /// <param name="node">An AST node.</param>
@@ -724,29 +627,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a child type to a parent entity, if possible.
-    /// </summary>
-    /// <param name="childType">A child type.</param>
-    /// <param name="parentEntity">The parent entity</param>
-    // ----------------------------------------------------------------------------------------------
-    private static void AddChildTypeToParent(TypeEntity childType, NamespaceOrTypeEntity parentEntity)
-    {
-      // Add the entity to its parent (but only if the parent can have child types)
-      if (parentEntity is IHasChildTypes)
-      {
-        ((IHasChildTypes)parentEntity).AddChildType(childType);
-      }
-      else
-      {
-        // This case is not allowed by the syntax analyzer, but we check anyway to be future-proof...
-        throw new ApplicationException(string.Format("'{0}' cannot have child types.", parentEntity.GetType()));
-      }
-    }
-
-
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Creates an accessor entity from an accessor AST node.
     /// </summary>
     /// <param name="node">An accessor AST node.</param>
@@ -763,6 +643,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       AssociateSyntaxNodeWithSemanticEntity(node, accessor);
 
       return accessor;
+    }
+
+    #endregion
+
+    #region Error reporting private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Signals error CS1537: The using alias '{0}' appeared previously in this namespace
+    /// </summary>
+    /// <param name="errorPoint">The token where the error occured.</param>
+    /// <param name="identifier">The name of the duplicated alias.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void ErrorDuplicateUsingAlias(Token errorPoint, string identifier)
+    {
+      _ErrorHandler.Error("CS1537", errorPoint, "The using alias '{0}' appeared previously in this namespace",
+                          identifier);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Signals error CS0105: The using directive for '{0}' appeared previously in this namespace
+    /// </summary>
+    /// <param name="errorPoint">The token where the error occured.</param>
+    /// <param name="identifier">The name of the duplicated namespace.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void ErrorDuplicateUsingNamespace(Token errorPoint, string identifier)
+    {
+      _ErrorHandler.Warning("CS0105", errorPoint,
+                            "The using directive for '{0}' appeared previously in this namespace", identifier);
     }
 
     #endregion

@@ -205,7 +205,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </typeparam>
     /// <param name="name">A name.</param>
     /// <returns>The found entity, or null if not found.</returns>
-    /// <remarks>Throws an exception if there are multiple matching entities.</remarks>
+    /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetSingleEntity<TEntityType>(string name)
       where TEntityType : class, INamedEntity
@@ -235,7 +235,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="name">A name.</param>
     /// <param name="typeParameterCount">Number of type parameters.</param>
     /// <returns>The found entity, or null if not found.</returns>
-    /// <remarks>Throws an exception if there are multiple matching entities.</remarks>
+    /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetSingleEntity<TEntityType>(string name, int typeParameterCount)
       where TEntityType : class, INamedEntity
@@ -264,7 +264,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </typeparam>
     /// <param name="signature">A signature.</param>
     /// <returns>The found entity, or null if not found.</returns>
-    /// <remarks>Throws an exception if there are multiple matching entities.</remarks>
+    /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetSingleEntity<TEntityType>(Signature signature)
       where TEntityType : class, IOverloadableEntity

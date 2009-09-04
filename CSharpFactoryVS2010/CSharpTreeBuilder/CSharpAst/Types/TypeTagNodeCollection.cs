@@ -41,6 +41,8 @@ namespace CSharpTreeBuilder.Ast
         throw new InvalidOperationException(string.Format("This collection has only '{0}' items.", Count));
       }
 
+      // BUGBUG: a semmibõl létrehozott AST node-nak nincs beállítva a Parent-je, emiatt nem találja a CompilationUnit-ját sem
+      // akkor lesz jó, ha a Symbol-ok meg tudják mondani a CompilationUnit-ot anélkül, hogy felmennének a parent-eken.
       var newTypeTagNodeCollection = new TypeTagNodeCollection();
 
       for (int i = 0; i < Count - 1; i++)
@@ -65,6 +67,8 @@ namespace CSharpTreeBuilder.Ast
         throw new InvalidOperationException(string.Format("This collection has only '{0}' items.", Count));
       }
 
+      // BUGBUG: a semmibõl létrehozott AST node-nak nincs beállítva a Parent-je, emiatt nem találja a CompilationUnit-ját sem
+      // akkor lesz jó, ha a Symbol-ok meg tudják mondani a CompilationUnit-ot anélkül, hogy felmennének a parent-eken.
       var newTypeTagNodeCollection = new TypeTagNodeCollection();
 
       for (int i = 1; i < Count; i++)

@@ -10,9 +10,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class PropertyEntity : FunctionMemberWithAccessorsEntity
   {
-    /// <summary>Template for creating auto-implemented field names.</summary>
-    private const string _AutoImplementedFieldNameTemplate = "<{0}>k_BackingField";
-
     /// <summary>Backing field for GetAccessor property.</summary>
     private AccessorEntity _GetAccessor;
 
@@ -27,14 +24,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="PropertyEntity"/> class.
     /// </summary>
     /// <param name="name">The name of the member.</param>
+    /// <param name="interfaceReference">
+    /// A reference to in interface, if the member is explicitly implemented interface member.
+    /// Null otherwise.
+    /// </param>
     /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
     /// <param name="typeReference">A reference to the type of the member.</param>
     /// <param name="isStatic">A value indicating whether this property is static.</param>
     /// <param name="isAutoImplemented">A value indicating whether this property is auto-implemented.</param>
     // ----------------------------------------------------------------------------------------------
     public PropertyEntity(
-      string name, bool isExplicitlyDefined, SemanticEntityReference<TypeEntity> typeReference, bool isStatic, bool isAutoImplemented)
-      : base(name, isExplicitlyDefined, typeReference)
+      string name, 
+      SemanticEntityReference<TypeEntity> interfaceReference, 
+      bool isExplicitlyDefined, 
+      SemanticEntityReference<TypeEntity> typeReference, 
+      bool isStatic, 
+      bool isAutoImplemented)
+      : 
+      base(name, interfaceReference, isExplicitlyDefined, typeReference)
     {
       IsStatic = isStatic;
       IsAutoImplemented = isAutoImplemented;
@@ -42,8 +49,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       // If the property is auto-implemented then create the backing field.
       if (isAutoImplemented)
       {
-        _AutoImplementedField = new FieldEntity(string.Format(_AutoImplementedFieldNameTemplate, name),
-                                                false, typeReference, isStatic);
+        // csc.exe uses '<{PropertyName}>k_BackingField' but we don't follow it, 
+        // because the uniqueness of the field name gets tricky with explicitly implemented interface members.
+        // We just use a good old GUID, because its name has no significance at all.
+        var fieldName = System.Guid.NewGuid().ToString();
+        _AutoImplementedField = new FieldEntity(fieldName, false, typeReference, isStatic);
       }
     }
 

@@ -362,7 +362,7 @@
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />
     <None Include="TestFiles\Orphan\CS0547_VoidProperty.cs" />
-    <None Include="TestFiles\TypeResolution\Property.cs" />
+    <Compile Include="TestFiles\TypeResolution\Property.cs" />
     <None Include="TestFiles\Orphan\CS0263_PartialClassConflictingBaseTypes.cs" />
     <None Include="TestFiles\Orphan\PartialClassDuplicateBaseTypes.cs" />
     <None Include="TestFiles\Orphan\PartialClassDuplicateBaseInterfaces.cs" />

@@ -8,20 +8,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a function member that has accessors (as opposed to having a body).
   /// </summary>
   // ================================================================================================
-  public abstract class FunctionMemberWithAccessorsEntity : FunctionMemberEntity
+  public abstract class FunctionMemberWithAccessorsEntity : FunctionMemberEntity, ICanBeExplicitlyImplementedMember
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberWithAccessorsEntity"/> class.
     /// </summary>
     /// <param name="name">The name of the member.</param>
+    /// <param name="interfaceReference">
+    /// A reference to in interface, if the member is explicitly implemented interface member.
+    /// Null otherwise.
+    /// </param>
     /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
     /// <param name="typeReference">A reference to the type of the member.</param>
     // ----------------------------------------------------------------------------------------------
     protected FunctionMemberWithAccessorsEntity(
-      string name, bool isExplicitlyDefined, SemanticEntityReference<TypeEntity> typeReference)
-      : base(name, isExplicitlyDefined)
+      string name,
+      SemanticEntityReference<TypeEntity> interfaceReference,
+      bool isExplicitlyDefined,
+      SemanticEntityReference<TypeEntity> typeReference)
+      :
+      base(name, isExplicitlyDefined)
     {
+      InterfaceReference = interfaceReference;
       TypeReference = typeReference;
     }
 
@@ -48,5 +57,51 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public abstract IEnumerable<AccessorEntity> Accessors { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this member is an explicitly implemented interface member.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsExplicitlyImplemented
+    {
+      get
+      {
+        return InterfaceReference != null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the reference to the interface entity whose member is explicitly implemented.
+    /// Null if this member is not an explicitly implemented interface member.
+    /// </summary>
+    /// <remarks>
+    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
+    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the interface entity whose member is explicitly implemented.
+    /// Null if this member is not an explicitly implemented interface member 
+    /// or if the reference to the interface entity is not yet resolved.
+    /// </summary>
+    /// <remarks>
+    /// The type is a TypeEntity rather then an InterfaceEntity, 
+    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity Interface
+    {
+      get
+      {
+        return InterfaceReference != null && InterfaceReference.ResolutionState == ResolutionState.Resolved
+                 ? InterfaceReference.TargetEntity
+                 : null;
+      }
+    }
   }
 }

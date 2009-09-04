@@ -119,13 +119,65 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeEntity ResolveToNamespaceOrTypeEntity(NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
+    public NamespaceOrTypeEntity ResolveToNamespaceOrTypeEntity(
+      NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
     {
       if (namespaceOrTypeName.TypeTags.Count < 1)
       {
         throw new ArgumentException("Namespace-or-type-name must have at least 1 type tag.", "namespaceOrTypeName");
       }
 
+      // Resolve the underlying type.
+      var foundEntity = ResolveNamespaceOrTypeNodeButNotTheTypeArguments(namespaceOrTypeName, resolutionContextEntity);
+
+      // We have to collect all type arguments, because constructed generic types need their parents's type arguments as well.
+      var typeArgumentNodes = GetTypeArgumentNodesFromTypeOrNamespaceNode(namespaceOrTypeName);
+
+      var genericCapableTypeEntity = foundEntity as GenericCapableTypeEntity;
+
+      // If no type arguments in the syntax node and the found entity is not a generic, then we are finished.
+      if (typeArgumentNodes.Count == 0
+          && (genericCapableTypeEntity == null || !genericCapableTypeEntity.IsGeneric))
+      {
+        return foundEntity;
+      }
+
+      // Unnecessary type arguments.
+      if ((genericCapableTypeEntity == null || !genericCapableTypeEntity.IsGeneric)
+        && typeArgumentNodes.Count > 0)
+      {
+        // TODO: error CS0308: The non-generic type 'A' cannot be used with type arguments
+        return null;
+      }
+
+      // The number of type arguments are not right.
+      if (genericCapableTypeEntity != null && genericCapableTypeEntity.IsGeneric
+          && typeArgumentNodes.Count != genericCapableTypeEntity.AllTypeParameters.Count)
+      {
+        // TODO: error CS0305: Using the generic type 'A<T>' requires '1' type arguments
+        return null;
+      }
+
+      // The underlying type is a generic, and the number of type arguments are right.
+      foundEntity = ResolveToConstructedGenericType(genericCapableTypeEntity, typeArgumentNodes,
+                                                    resolutionContextEntity);
+
+      return foundEntity;
+    }
+
+    #region Private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolve a namespace-or-type-name AST node, but not the type arguments involved.
+    /// </summary>
+    /// <param name="namespaceOrTypeName">A namespace-or-type-name AST node.</param>
+    /// <param name="resolutionContextEntity">The context of the resolution.</param>
+    /// <returns>A namespace or type entity.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private NamespaceOrTypeEntity ResolveNamespaceOrTypeNodeButNotTheTypeArguments(
+      NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
+    {
       NamespaceOrTypeEntity foundEntity = null;
       TypeTagNodeCollection typeTagsToBeResolved = namespaceOrTypeName.TypeTags;
 
@@ -135,7 +187,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         try
         {
           foundEntity = ResolveQualifiedAliasMember(
-            namespaceOrTypeName.Qualifier, namespaceOrTypeName.TypeTags[0], resolutionContextEntity, _SemanticGraph.GlobalNamespace);
+            namespaceOrTypeName.Qualifier, namespaceOrTypeName.TypeTags[0], resolutionContextEntity,
+            _SemanticGraph.GlobalNamespace);
         }
         catch (Exception e)
         {
@@ -175,7 +228,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // The meaning of a namespace-or-type-name is determined as follows:
         foundEntity = ResolveTypeTags(typeTagsToBeResolved, resolutionContextEntity);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
         TranslateExceptionToError(e, _ErrorHandler, namespaceOrTypeName);
       }
@@ -183,7 +236,68 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       return foundEntity;
     }
 
-    #region Private methods
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Extracts the list of type arguments from a namespace-or-type-name AST node.
+    /// </summary>
+    /// <param name="namespaceOrTypeNameNode">A namespace-or-type-name node</param>
+    /// <returns>The list of type arguments.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static TypeNodeCollection GetTypeArgumentNodesFromTypeOrNamespaceNode(NamespaceOrTypeNameNode namespaceOrTypeNameNode)
+    {
+      var typeArgumentNodes = new TypeNodeCollection();
+
+      foreach (var typeTag in namespaceOrTypeNameNode.TypeTags)
+      {
+        if (typeTag.HasTypeArguments)
+        {
+          foreach (var argument in typeTag.Arguments)
+          {
+            typeArgumentNodes.Add(argument);
+          }
+        }
+      }
+
+      return typeArgumentNodes;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type argument AST nodes, and creates a constructed generic type.
+    /// </summary>
+    /// <param name="underlyingTypeEntity">An already resolved generic capable type entity.</param>
+    /// <param name="typeArgumentNodes">A collection if type argument AST nodes.</param>
+    /// <param name="resolutionContextEntity">The context of the resolution.</param>
+    /// <returns>A constructed generic type entity.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private TypeEntity ResolveToConstructedGenericType(
+      GenericCapableTypeEntity underlyingTypeEntity, TypeNodeCollection typeArgumentNodes, SemanticEntity resolutionContextEntity)
+    {
+      // Resolve all type arguments
+      var typeArguments = new List<TypeEntity>();
+      foreach (var typeArgumentSyntaxNode in typeArgumentNodes)
+      {
+        var typeArgumentRef = new TypeNodeBasedTypeEntityReference(typeArgumentSyntaxNode);
+        typeArgumentRef.Resolve(resolutionContextEntity, _SemanticGraph, _ErrorHandler);
+
+        if (typeArgumentRef.ResolutionState != ResolutionState.Resolved)
+        {
+          // No need to signal error here, because the resolution has already signaled it, just bail out.
+          return null;
+        }
+        typeArguments.Add(typeArgumentRef.TargetEntity);
+      }
+
+      // Create the constructed type
+      var resultTypeEntity = ConstructedTypeHelper.GetConstructedGenericType(underlyingTypeEntity, typeArguments);
+
+      if (resultTypeEntity == null)
+      {
+        throw new ApplicationException("GetConstructedGenericType returned null.");
+      }
+
+      return resultTypeEntity;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

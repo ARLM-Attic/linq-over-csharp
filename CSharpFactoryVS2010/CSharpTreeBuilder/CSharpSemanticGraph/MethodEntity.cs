@@ -12,7 +12,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a method.
   /// </summary>
   // ================================================================================================
-  public sealed class MethodEntity : FunctionMemberWithBodyEntity, IOverloadableEntity, ICanBePartial, ICanHaveTypeParameters
+  public sealed class MethodEntity : FunctionMemberWithBodyEntity, 
+    IOverloadableEntity, ICanBePartial, ICanHaveTypeParameters, ICanBeExplicitlyImplementedMember
   {
     /// <summary>Backing field for Parameters property.</summary>
     private readonly List<ParameterEntity> _Parameters;
@@ -25,18 +26,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="MethodEntity"/> class.
     /// </summary>
     /// <param name="name">The name of the member.</param>
+    /// <param name="interfaceReference">
+    /// A reference to in interface, if the member is explicitly implemented interface member.
+    /// Null otherwise.
+    /// </param>
     /// <param name="isExplicitlyDefined">A value indicating whether the member is explicitly defined.</param>
     /// <param name="isAbstract">A value indicating whether the function member is abstract.</param>
     /// <param name="isPartial">A value indicating whether this method is partial.</param>
     /// <param name="isStatic">A value indicating whether this method is static.</param>
     /// <param name="returnTypeReference">Reference to the return type.</param>
     // ----------------------------------------------------------------------------------------------
-    public MethodEntity(string name, bool isExplicitlyDefined, bool isAbstract, bool isPartial, bool isStatic, 
+    public MethodEntity(
+      string name, 
+      SemanticEntityReference<TypeEntity> interfaceReference,  
+      bool isExplicitlyDefined, 
+      bool isAbstract, 
+      bool isPartial, 
+      bool isStatic, 
       SemanticEntityReference<TypeEntity> returnTypeReference)
-      : base(name, isExplicitlyDefined, isAbstract)
+      : 
+      base(name, isExplicitlyDefined, isAbstract)
     {
       _Parameters = new List<ParameterEntity>();
       _AllTypeParameters = new List<TypeParameterEntity>();
+
+      InterfaceReference = interfaceReference;
       IsPartial = isPartial;
       IsStatic = isStatic;
       ReturnTypeReference = returnTypeReference;
@@ -228,6 +242,52 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
       return _DeclarationSpace.GetSingleEntity<TypeParameterEntity>(name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this member is an explicitly implemented interface member.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsExplicitlyImplemented 
+    {
+      get 
+      { 
+        return InterfaceReference != null; 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the reference to the interface entity whose member is explicitly implemented.
+    /// Null if this member is not an explicitly implemented interface member.
+    /// </summary>
+    /// <remarks>
+    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
+    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the interface entity whose member is explicitly implemented.
+    /// Null if this member is not an explicitly implemented interface member 
+    /// or if the reference to the interface entity is not yet resolved.
+    /// </summary>
+    /// <remarks>
+    /// The type is a TypeEntity rather then an InterfaceEntity, 
+    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TypeEntity Interface
+    {
+      get 
+      {
+        return InterfaceReference != null && InterfaceReference.ResolutionState == ResolutionState.Resolved
+                 ? InterfaceReference.TargetEntity
+                 : null;
+      }
     }
 
     #region Visitor methods

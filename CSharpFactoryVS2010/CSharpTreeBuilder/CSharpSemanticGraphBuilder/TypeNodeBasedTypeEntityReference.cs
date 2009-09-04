@@ -72,40 +72,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
 
-      // We have to collect all type arguments, because constructed generic types need their parents's type arguments as well.
-      var typeArgumentNodes = GetTypeArgumentNodesFromTypeOrNamespaceNode(typeNode.TypeName);
-
-      // If there are type arguments, but the found entity is not a generic type definition, then it's an error.
-      if (typeArgumentNodes.Count > 0 && !(typeEntity is GenericCapableTypeEntity))
-      {
-        throw new ApplicationException(
-          string.Format("Expected to find GenericCapableTypeEntity, but found '{0}'.", typeEntity.GetType()));
-      }
-
-      // If there are type arguments then we have to create a constructed generic type.
-      if (typeArgumentNodes.Count > 0 && typeEntity is GenericCapableTypeEntity)
-      {
-        // Resolve all type arguments
-        var typeArguments = new List<TypeEntity>();
-        foreach (var typeArgumentSyntaxNode in typeArgumentNodes)
-        {
-          var typeArgumentRef = new TypeNodeBasedTypeEntityReference(typeArgumentSyntaxNode);
-          var typeArgument = GetTypeEntityByTypeNode(typeArgumentRef.SyntaxNode, resolutionContextEntity, semanticGraph, errorHandler);
-          if (typeArgument == null)
-          {
-            // No need to signal error here, because the GetTypeEntityByTypeOrNamespaceNode method already signaled it, just bail out.
-            return null;
-          }
-          typeArguments.Add(typeArgument);
-        }
-
-        typeEntity = ConstructedTypeHelper.GetConstructedGenericType(typeEntity as GenericCapableTypeEntity, typeArguments);
-        if (typeEntity == null)
-        {
-          throw new ApplicationException("GetConstructedGenericType returned null.");
-        }
-      }
-
       // If the AST node has a nullable type indicating token, then create nullable type.
       if (typeNode.NullableToken != null)
       {
@@ -126,31 +92,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       return typeEntity;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Extracts the list of type arguments from a namespace-or-type-name AST node.
-    /// </summary>
-    /// <param name="namespaceOrTypeNameNode">A namespace-or-type-name node</param>
-    /// <returns>The list of type arguments.</returns>
-    // ----------------------------------------------------------------------------------------------
-    private static TypeNodeCollection GetTypeArgumentNodesFromTypeOrNamespaceNode(NamespaceOrTypeNameNode namespaceOrTypeNameNode)
-    {
-      var typeArgumentNodes = new TypeNodeCollection();
-
-      foreach (var typeTag in namespaceOrTypeNameNode.TypeTags)
-      {
-        if (typeTag.HasTypeArguments)
-        {
-          foreach (var argument in typeTag.Arguments)
-          {
-            typeArgumentNodes.Add(argument);
-          }
-        }
-      }
-
-      return typeArgumentNodes;
     }
 
     // ----------------------------------------------------------------------------------------------

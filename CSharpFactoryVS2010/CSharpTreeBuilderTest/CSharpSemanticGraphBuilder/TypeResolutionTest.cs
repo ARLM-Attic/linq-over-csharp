@@ -1671,10 +1671,46 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
-      var propertyEntity = classEntity.Members.ToList()[0] as PropertyEntity;
-      propertyEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      propertyEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
-      propertyEntity.AutoImplementedField.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+
+      int i = 0;
+
+      // int B { get; set; }
+      {
+        var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+
+        // Check property type resolution
+        propertyEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        propertyEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+        propertyEntity.AutoImplementedField.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+
+        // Check explicitly implemented interface resolution
+        propertyEntity.InterfaceReference.ShouldBeNull();
+        propertyEntity.Interface.ShouldBeNull();
+
+        // Check that the property can be retrieved by name.
+        classEntity.GetMember<PropertyEntity>(propertyEntity.Name).ShouldEqual(propertyEntity);
+      }
+
+      // Have to skip a member, the auto-implemented property's backing field.
+      i++;
+      i++;
+
+      // int I.B { get; set; }
+      {
+        var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+
+        // Check property type resolution
+        propertyEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        propertyEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+        propertyEntity.AutoImplementedField.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+
+        // Check explicitly implemented interface resolution
+        propertyEntity.InterfaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        propertyEntity.Interface.ToString().ShouldEqual("global::C.I`1[global::System.Int32]");
+
+        // Check that the property can be retrieved by name.
+        classEntity.GetMember<PropertyEntity>(propertyEntity.Name, propertyEntity.Interface).ShouldEqual(propertyEntity);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -1690,19 +1726,108 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
-      var methodEntity = classEntity.Members.ToList()[0] as MethodEntity;
-      methodEntity.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      methodEntity.ReturnType.ToString().ShouldEqual("global::System.Void");
-      
-      var parameters = methodEntity.Parameters.ToList();
-      parameters[0].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      (parameters[0].Type as ConstructedGenericTypeEntity).UnderlyingType.ShouldEqual(classEntity);
-      parameters[1].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      parameters[1].Type.ShouldEqual(classEntity.GetOwnTypeParameterByName("T1"));
-      parameters[2].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      parameters[2].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T2"));
-      parameters[3].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      parameters[3].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T3"));
+      var members = classEntity.Members.ToList();
+
+      int i = 0;
+
+      // void B<T2, T3>(A<int, long> a, T1 t1, T2 t2, T3 t3) { }
+      {
+        var methodEntity = members[i] as MethodEntity;
+
+        // Check return type resolution
+        methodEntity.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        methodEntity.ReturnType.ToString().ShouldEqual("T3");
+
+        // Check explicitly implemented interface resolution
+        methodEntity.InterfaceReference.ShouldBeNull();
+        methodEntity.Interface.ShouldBeNull();
+
+        // Check parameter type resolution
+        var parameters = methodEntity.Parameters.ToList();
+        parameters[0].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        (parameters[0].Type as ConstructedGenericTypeEntity).UnderlyingType.ShouldEqual(classEntity);
+        parameters[1].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        parameters[1].Type.ShouldEqual(classEntity.GetOwnTypeParameterByName("T1"));
+        parameters[2].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        parameters[2].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T2"));
+        parameters[3].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        parameters[3].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T3"));
+
+        classEntity.GetMethod(methodEntity.Signature).ShouldEqual(methodEntity);
+      }
+
+      i++;
+
+      // void C() {}
+      {
+        var methodEntity = members[i] as MethodEntity;
+
+        // Check return type resolution
+        methodEntity.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        methodEntity.ReturnType.ToString().ShouldEqual("global::System.Void");
+
+        // Check explicitly implemented interface resolution
+        methodEntity.InterfaceReference.ShouldBeNull();
+        methodEntity.Interface.ShouldBeNull();
+
+        // Check parameter type resolution
+        methodEntity.Parameters.ToList().Count.ShouldEqual(0);
+
+        classEntity.GetMethod(methodEntity.Signature).ShouldEqual(methodEntity);
+      }
+
+      i++;
+
+      // void I<T1, T2>.B<T2, T3>(A<int, long> a, T1 t1, T2 t2, T3 t3) { }
+      {
+        var methodEntity = members[i] as MethodEntity;
+
+        // Check return type resolution
+        methodEntity.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        methodEntity.ReturnType.ToString().ShouldEqual("T3");
+
+        // Check explicitly implemented interface resolution
+        methodEntity.InterfaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        methodEntity.Interface.ToString().ShouldEqual("global::I`2[global::A`2'T1,global::A`2'T2]");
+
+        // Check parameter type resolution
+        var parameters = methodEntity.Parameters.ToList();
+        parameters[0].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        (parameters[0].Type as ConstructedGenericTypeEntity).UnderlyingType.ShouldEqual(classEntity);
+        parameters[1].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        parameters[1].Type.ShouldEqual(classEntity.GetOwnTypeParameterByName("T1"));
+        parameters[2].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        parameters[2].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T2"));
+        parameters[3].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        parameters[3].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T3"));
+
+        // Check that explicitly implemented interface members are not registered into the declaration space,
+        // but can be retrieved by specifying the interface too.
+        classEntity.GetMethod(methodEntity.Signature).ShouldBeNull();
+        classEntity.GetMethod(methodEntity.Signature, methodEntity.Interface).ShouldEqual(members[2]);
+      }
+
+      i++;
+
+      // void global::I<T1, T2>.C() { }
+      {
+        var methodEntity = members[i] as MethodEntity;
+
+        // Check return type resolution
+        methodEntity.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        methodEntity.ReturnType.ToString().ShouldEqual("global::System.Void");
+
+        // Check explicitly implemented interface resolution
+        methodEntity.InterfaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        methodEntity.Interface.ToString().ShouldEqual("global::I`2[global::A`2'T1,global::A`2'T2]");
+
+        // Check parameter type resolution
+        methodEntity.Parameters.ToList().Count.ShouldEqual(0);
+
+        // Without specifying the interface, the method's signature can be confused with void C().
+        classEntity.GetMethod(methodEntity.Signature).ShouldEqual(members[1]);
+        classEntity.GetMethod(methodEntity.Signature, methodEntity.Interface).ShouldEqual(members[3]);
+      }
     }
 
   }

@@ -959,7 +959,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         property.IsAutoImplemented.ShouldBeTrue();
         property.AutoImplementedField.IsExplicitlyDefined.ShouldBeFalse();
         property.AutoImplementedField.IsStatic.ShouldBeFalse();
-        property.AutoImplementedField.Name.ShouldEqual("<C>k_BackingField");
+        // The name of the auto-implemented field is a guid, so we just check that it's not null.
+        property.AutoImplementedField.Name.ShouldNotBeNull();
         property.AutoImplementedField.Parent.ShouldEqual(classEntity);
         property.AutoImplementedField.SyntaxNodes.Count.ShouldEqual(0);
         property.AutoImplementedField.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
