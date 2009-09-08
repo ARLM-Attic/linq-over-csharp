@@ -215,6 +215,9 @@ namespace CSharpTreeBuilder.ProjectContent
       SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(this, SemanticGraph));
       SemanticGraph.AcceptVisitor(new TypeResolverPass2SemanticGraphVisitor(this, SemanticGraph));
 
+      // Evaluate expressions in the semantic graph.
+      SemanticGraph.AcceptVisitor(new ExpressionEvaluatorSemanticGraphVisitor());
+
       // TODO: continue
     }
 

@@ -68,6 +68,7 @@
     <Compile Include="Ast\StructDeclarations.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\PartialTypeMergingSemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForCompleteMatchingTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitorTest.cs" />
@@ -353,16 +354,16 @@
     <None Include="TestFiles\PartialTypeMergingSemanticGraphVisitor\PartialStruct.cs" />
     <None Include="TestFiles\PartialTypeMergingSemanticGraphVisitor\PartialInterface.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Property.cs" />
-    <None Include="TestFiles\Orphan\MemberOfAnErronousClass.cs" />
     <None Include="TestFiles\Orphan\CS0542_ClassOrStructAndMemberName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Method.cs" />
     <None Include="TestFiles\Orphan\CS0752_PartialMethodCannotHaveOutParameter.cs" />
     <None Include="TestFiles\Orphan\PartialMethod.cs" />
     <None Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
+    <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\NullLiteral.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />
     <None Include="TestFiles\Orphan\CS0547_VoidProperty.cs" />
-    <Compile Include="TestFiles\TypeResolution\TypeArgumentCanBeResolvedWithUsingNamespace.cs" />
+    <None Include="TestFiles\TypeResolution\TypeArgumentCanBeResolvedWithUsingNamespace.cs" />
     <None Include="TestFiles\TypeResolution\Property.cs" />
     <None Include="TestFiles\Orphan\CS0263_PartialClassConflictingBaseTypes.cs" />
     <None Include="TestFiles\Orphan\PartialClassDuplicateBaseTypes.cs" />

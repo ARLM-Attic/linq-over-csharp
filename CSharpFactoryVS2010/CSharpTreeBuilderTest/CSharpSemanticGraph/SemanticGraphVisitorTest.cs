@@ -35,15 +35,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var sgVisitorMock = mocks.StrictMock<SemanticGraphVisitor>();
       using (mocks.Ordered())
       {
-        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace);
-        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0]);
-        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0]);
+        Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0])).Return(true);
         var class1 = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
-        sgVisitorMock.Visit(class1);
-        sgVisitorMock.Visit(class1.Members.ToArray()[0] as FieldEntity);
-        sgVisitorMock.Visit(class1.Members.ToArray()[1] as MethodEntity);
-        sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity);
-        sgVisitorMock.Visit(((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0] as ClassEntity);
+        Expect.Call(sgVisitorMock.Visit(class1)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(class1.Members.ToArray()[0] as FieldEntity)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(class1.Members.ToArray()[1] as MethodEntity)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0] as ClassEntity)).Return(true);
       }
       mocks.ReplayAll();
 
@@ -74,13 +74,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       using (mocks.Ordered())
       {
         var global = project.SemanticGraph.GlobalNamespace;
-        sgVisitorMock.Visit(global);
-        sgVisitorMock.Visit(global.UsingNamespaces.ToArray()[0]);
-        sgVisitorMock.Visit(global.UsingAliases.ToArray()[0]);
-        sgVisitorMock.Visit(global.ChildNamespaces[0]);
-        sgVisitorMock.Visit(global.ChildNamespaces[0].UsingNamespaces.ToArray()[0]);
-        sgVisitorMock.Visit(global.ChildNamespaces[0].UsingAliases.ToArray()[0]);
-        sgVisitorMock.Visit(global.ChildNamespaces[0].ChildNamespaces[0]);
+        Expect.Call(sgVisitorMock.Visit(global)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.UsingNamespaces.ToArray()[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.UsingAliases.ToArray()[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildNamespaces[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildNamespaces[0].UsingNamespaces.ToArray()[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildNamespaces[0].UsingAliases.ToArray()[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildNamespaces[0].ChildNamespaces[0])).Return(true);
       }
       mocks.ReplayAll();
 
@@ -111,10 +111,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       using (mocks.Ordered())
       {
         var global = project.SemanticGraph.GlobalNamespace;
-        sgVisitorMock.Visit(global);
-        sgVisitorMock.Visit(global.ExternAliases.ToArray()[0]);
-        sgVisitorMock.Visit(global.ChildNamespaces[0]);
-        sgVisitorMock.Visit(global.ChildNamespaces[0].ExternAliases.ToArray()[0]);
+        Expect.Call(sgVisitorMock.Visit(global)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ExternAliases.ToArray()[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildNamespaces[0])).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildNamespaces[0].ExternAliases.ToArray()[0])).Return(true);
       }
       mocks.ReplayAll();
 
@@ -145,10 +145,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       using (mocks.Ordered())
       {
         var global = project.SemanticGraph.GlobalNamespace;
-        sgVisitorMock.Visit(global);
-        sgVisitorMock.Visit(global.ChildTypes[0] as EnumEntity);
-        sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[0] as EnumMemberEntity);
-        sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[1] as EnumMemberEntity);
+        Expect.Call(sgVisitorMock.Visit(global)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0] as EnumEntity)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[0] as EnumMemberEntity)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[1] as EnumMemberEntity)).Return(true);
       }
       mocks.ReplayAll();
 

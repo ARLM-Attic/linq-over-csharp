@@ -16,8 +16,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the variable.</param>
     /// <param name="typeReference">A reference to the type of the variable.</param>
+    /// <param name="initializer">The initializer of the variable.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NonFieldVariableEntity(string name, SemanticEntityReference<TypeEntity> typeReference)
+    protected NonFieldVariableEntity(
+      string name, 
+      SemanticEntityReference<TypeEntity> typeReference, 
+      IVariableInitializer initializer)
     {
       if (name == null)
       {
@@ -30,6 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       Name = name;
       TypeReference = typeReference;
+      Initializer = initializer;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -55,5 +60,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return TypeReference == null ? null : TypeReference.TargetEntity; }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this variable is an array. 
+    /// Null if the type of the variable is not yet resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool? IsArray
+    {
+      get
+      {
+        return Type == null ? null : Type.IsArrayType as bool?;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the initializer of the variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IVariableInitializer Initializer { get; private set; }
+
   }
 }

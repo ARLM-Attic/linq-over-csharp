@@ -295,23 +295,5 @@ namespace CSharpTreeBuilderTest
       project.Errors[0].Code.ShouldEqual("CS0263");
       project.Warnings.Count.ShouldEqual(0);
     }
-
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Member of an erronous class is not built
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    [TestMethod]
-    public void MemberOfAnErronousClass()
-    {
-      var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\MemberOfAnErronousClass.cs");
-      InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
-      project.SyntaxTree.AcceptVisitor(visitor);
-
-      project.Errors.Count.ShouldEqual(1);
-    }
   }
 }

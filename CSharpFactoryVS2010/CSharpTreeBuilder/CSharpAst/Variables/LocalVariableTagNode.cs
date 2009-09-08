@@ -14,6 +14,11 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class LocalVariableTagNode : SyntaxNode<ISyntaxNode>, IIdentifierSupport
   {
+    /// <summary>
+    /// Backing field for Initializer property.
+    /// </summary>
+    private VariableInitializerNode _Initializer;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalVariableTagNode"/> class.
@@ -31,7 +36,22 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <value>The initializer.</value>
     // ----------------------------------------------------------------------------------------------
-    public VariableInitializerNode Initializer { get; internal set; }
+    public VariableInitializerNode Initializer
+    {
+      get
+      {
+        return _Initializer;
+      }
+
+      internal set
+      {
+        _Initializer = value;
+        if (value != null)
+        {
+          value.ParentNode = this;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -95,7 +115,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      visitor.Visit(this);
+      if (!visitor.Visit(this)) { return; }
 
       if (Initializer!=null)
       {

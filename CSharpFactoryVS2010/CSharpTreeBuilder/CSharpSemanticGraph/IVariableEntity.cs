@@ -28,5 +28,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     TypeEntity Type { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this variable is an array. 
+    /// Null if the type of the variable is not yet resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    bool? IsArray { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the initializer of the variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    IVariableInitializer Initializer { get; }
   }
 }

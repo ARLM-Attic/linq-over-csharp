@@ -53,7 +53,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         // because the uniqueness of the field name gets tricky with explicitly implemented interface members.
         // We just use a good old GUID, because its name has no significance at all.
         var fieldName = System.Guid.NewGuid().ToString();
-        _AutoImplementedField = new FieldEntity(fieldName, false, typeReference, isStatic);
+        _AutoImplementedField = new FieldEntity(fieldName, false, typeReference, isStatic, null);
       }
     }
 
@@ -176,7 +176,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      visitor.Visit(this);
+      if (!visitor.Visit(this)) { return; }
     }
 
     #endregion

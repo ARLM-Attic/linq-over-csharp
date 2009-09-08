@@ -1,4 +1,4 @@
-﻿<#@ template language="C#" hostspecific="True" debug="True" #>
+<#@ template language="C#" hostspecific="True" debug="True" #>
 <#@ output extension="cs" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
@@ -29,7 +29,7 @@ namespace CSharpTreeBuilder.Ast
 <#
 	foreach (string element in CodeGenHelper.GetTypeNameList().Keys)
 	{
-		WriteLine("    public virtual void Visit({0} node) {{ }}", element);
+		WriteLine("    public virtual bool Visit({0} node) {{ return true; }}", element);
 	}
 #>
   }

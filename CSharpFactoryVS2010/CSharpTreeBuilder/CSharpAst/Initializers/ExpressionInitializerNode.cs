@@ -23,6 +23,12 @@ namespace CSharpTreeBuilder.Ast
       : base(expression.StartToken)
     {
       Expression = expression;
+
+      if (expression != null)
+      {
+        expression.ParentNode = this;
+      }
+
       Terminate(expression.TerminatingToken);
     }
 
@@ -43,7 +49,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      visitor.Visit(this);
+      if (!visitor.Visit(this)) { return; }
 
       if (Expression!=null)
       {

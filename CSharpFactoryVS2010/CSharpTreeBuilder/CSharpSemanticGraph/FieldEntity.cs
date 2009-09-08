@@ -17,12 +17,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
     /// <param name="isStatic">True, if the field is static, false otherwise.</param>
+    /// <param name="initializer">The initializer of the field.</param>
     // ----------------------------------------------------------------------------------------------
-    public FieldEntity(string name, bool isExplicitlyDefined, SemanticEntityReference<TypeEntity> type, bool isStatic)
-      : base(name, isExplicitlyDefined)
+    public FieldEntity(
+      string name, 
+      bool isExplicitlyDefined, 
+      SemanticEntityReference<TypeEntity> type,
+      bool isStatic,
+      IVariableInitializer initializer)
+      : 
+      base(name, isExplicitlyDefined)
     {
       TypeReference = type;
       IsStatic = isStatic;
+      Initializer = initializer;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -44,6 +52,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this variable is an array. 
+    /// Null if the type of the variable is not yet resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool? IsArray
+    {
+      get
+      {
+        return Type == null ? null : Type.IsArrayType as bool?;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the initializer of the variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IVariableInitializer Initializer { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether the field is static.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -59,7 +88,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      visitor.Visit(this);
+      if (!visitor.Visit(this)) { return; }
+
+      if (Initializer!=null)
+      {
+        Initializer.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

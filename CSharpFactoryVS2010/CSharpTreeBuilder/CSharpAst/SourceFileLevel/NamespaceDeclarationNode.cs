@@ -108,7 +108,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      visitor.Visit(this);
+      if (!visitor.Visit(this)) { return; }
 
       // Visit extern alias nodes
       foreach (var externAliasNode in ExternAliasNodes)

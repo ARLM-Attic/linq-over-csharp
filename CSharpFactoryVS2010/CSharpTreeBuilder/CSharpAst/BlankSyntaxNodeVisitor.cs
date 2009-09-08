@@ -1,7 +1,7 @@
-﻿//
+//
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 08. 19. 14:41:17
+// Generated on: 2009. 09. 07. 14:40:27
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //
@@ -20,184 +20,184 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class BlankSyntaxNodeVisitor : ISyntaxNodeVisitor
   {
-    public virtual void Visit(AccessorNode node) { }
-    public virtual void Visit(AnonymousMethodExpressionNode node) { }
-    public virtual void Visit(AnonymousObjectCreationExpressionNode node) { }
-    public virtual void Visit(ArgumentNode node) { }
-    public virtual void Visit(ArrayCreationExpressionNode node) { }
-    public virtual void Visit(ArrayInitializerNode node) { }
-    public virtual void Visit(ArraySizeSpecifierNode node) { }
-    public virtual void Visit(AssignmentExpressionNode node) { }
-    public virtual void Visit(AttributeArgumentNode node) { }
-    public virtual void Visit(AttributedDeclarationNode node) { }
-    public virtual void Visit(AttributeDecorationNode node) { }
-    public virtual void Visit(AttributeNode node) { }
-    public virtual void Visit(BaseAccessNode node) { }
-    public virtual void Visit(BaseConstructorInitializerNode node) { }
-    public virtual void Visit(BaseElementAccessNode node) { }
-    public virtual void Visit(BaseMemberAccessMemberDeclaratorNode node) { }
-    public virtual void Visit(BaseMemberAccessNode node) { }
-    public virtual void Visit(BinaryExpressionNode node) { }
-    public virtual void Visit(BlockCommentNode node) { }
-    public virtual void Visit(BlockStatementNode node) { }
-    public virtual void Visit(BlockWrappingStatementNode node) { }
-    public virtual void Visit(BooleanLiteralNode node) { }
-    public virtual void Visit(BreakStatementNode node) { }
-    public virtual void Visit(CastExpressionNode node) { }
-    public virtual void Visit(CastOperatorDeclarationNode node) { }
-    public virtual void Visit(CatchClauseNode node) { }
-    public virtual void Visit(CharLiteralNode node) { }
-    public virtual void Visit(CheckedExpressionNode node) { }
-    public virtual void Visit(CheckedStatementNode node) { }
-    public virtual void Visit(ClassDeclarationNode node) { }
-    public virtual void Visit(CompilationUnitNode node) { }
-    public virtual void Visit(ConditionalExpressionNode node) { }
-    public virtual void Visit(ConditionalPragmaNode node) { }
-    public virtual void Visit(ConstDeclarationNode node) { }
-    public virtual void Visit(ConstructorDeclarationNode node) { }
-    public virtual void Visit(ConstructorInitializerNode node) { }
-    public virtual void Visit(ConstStatementNode node) { }
-    public virtual void Visit(ConstTagNode node) { }
-    public virtual void Visit(ContinueStatementNode node) { }
-    public virtual void Visit(DecimalLiteralNode node) { }
-    public virtual void Visit(DefaultValueExpressionNode node) { }
-    public virtual void Visit(DefinePragmaNode node) { }
-    public virtual void Visit(DelegateDeclarationNode node) { }
-    public virtual void Visit(DestructorDeclarationNode node) { }
-    public virtual void Visit(DoubleLiteralNode node) { }
-    public virtual void Visit(DoWhileStatementNode node) { }
-    public virtual void Visit(ElementAccessNode node) { }
-    public virtual void Visit(ElementInitializerNode node) { }
-    public virtual void Visit(ElseIfPragmaNode node) { }
-    public virtual void Visit(ElsePragmaNode node) { }
-    public virtual void Visit(EmptyStatementNode node) { }
-    public virtual void Visit(EndIfPragmaNode node) { }
-    public virtual void Visit(EndRegionPragmaNode node) { }
-    public virtual void Visit(EnumDeclarationNode node) { }
-    public virtual void Visit(EnumValueNode node) { }
-    public virtual void Visit(EventPropertyDeclarationNode node) { }
-    public virtual void Visit(ExpressionInitializerNode node) { }
-    public virtual void Visit(ExpressionNode node) { }
-    public virtual void Visit(ExpressionStatementNode node) { }
-    public virtual void Visit(ExternAliasNode node) { }
-    public virtual void Visit(FalseLiteralNode node) { }
-    public virtual void Visit(FieldDeclarationNode node) { }
-    public virtual void Visit(FieldTagNode node) { }
-    public virtual void Visit(FixedInitializerNode node) { }
-    public virtual void Visit(FixedStatementNode node) { }
-    public virtual void Visit(ForeachStatementNode node) { }
-    public virtual void Visit(FormalParameterNode node) { }
-    public virtual void Visit(ForStatementNode node) { }
-    public virtual void Visit(FromClauseNode node) { }
-    public virtual void Visit(GotoStatementNode node) { }
-    public virtual void Visit(GroupClauseNode node) { }
-    public virtual void Visit(ICommentNode node) { }
-    public virtual void Visit(IdentifierMemberDeclaratorNode node) { }
-    public virtual void Visit(IfPragmaNode node) { }
-    public virtual void Visit(IfStatementNode node) { }
-    public virtual void Visit(IndexerDeclarationNode node) { }
-    public virtual void Visit(Int32LiteralNode node) { }
-    public virtual void Visit(Int64LiteralNode node) { }
-    public virtual void Visit(IntegerLiteralNode node) { }
-    public virtual void Visit(InterfaceDeclarationNode node) { }
-    public virtual void Visit(InterfaceEventDeclarationNode node) { }
-    public virtual void Visit(InvocationExpressionNode node) { }
-    public virtual void Visit(ISyntaxNode node) { }
-    public virtual void Visit(JoinClauseNode node) { }
-    public virtual void Visit(JoinIntoClauseNode node) { }
-    public virtual void Visit(LabelNode node) { }
-    public virtual void Visit(LambdaExpressionNode node) { }
-    public virtual void Visit(LetClauseNode node) { }
-    public virtual void Visit(LineCommentNode node) { }
-    public virtual void Visit(LiteralNode node) { }
-    public virtual void Visit(LocalVariableNode node) { }
-    public virtual void Visit(LocalVariableTagNode node) { }
-    public virtual void Visit(LockStatementNode node) { }
-    public virtual void Visit(MemberAccessMemberDeclaratorNode node) { }
-    public virtual void Visit(MemberAccessNode node) { }
-    public virtual void Visit(MemberDeclarationNode node) { }
-    public virtual void Visit(MemberDeclaratorNode node) { }
-    public virtual void Visit(MemberInitializerNode node) { }
-    public virtual void Visit(MemberWithBodyDeclarationNode node) { }
-    public virtual void Visit(MethodDeclarationNode node) { }
-    public virtual void Visit(ModifierNode node) { }
-    public virtual void Visit(MultiCommentNode node) { }
-    public virtual void Visit(NamespaceDeclarationNode node) { }
-    public virtual void Visit(NamespaceOrTypeNameNode node) { }
-    public virtual void Visit(NamespaceScopeNode node) { }
-    public virtual void Visit(NameTagNode node) { }
-    public virtual void Visit(NullLiteralNode node) { }
-    public virtual void Visit(ObjectCreationExpressionNode node) { }
-    public virtual void Visit(ObjectOrCollectionInitializerNode node) { }
-    public virtual void Visit(OperatorDeclarationNode node) { }
-    public virtual void Visit(OrderByClauseNode node) { }
-    public virtual void Visit(OrderingClauseNode node) { }
-    public virtual void Visit(ParenthesizedExpressionNode node) { }
-    public virtual void Visit(PointerMemberAccessNode node) { }
-    public virtual void Visit(PostDecrementExpressionNode node) { }
-    public virtual void Visit(PostIncrementExpressionNode node) { }
-    public virtual void Visit(PragmaNode node) { }
-    public virtual void Visit(PragmaPragmaNode node) { }
-    public virtual void Visit(PreDecrementExpressionNode node) { }
-    public virtual void Visit(PredefinedTypeMemberAccessNode node) { }
-    public virtual void Visit(PreIncrementExpressionNode node) { }
-    public virtual void Visit(PrimaryExpressionMemberAccessNode node) { }
-    public virtual void Visit(PrimaryExpressionWithEmbeddedTypeNode node) { }
-    public virtual void Visit(PropertyDeclarationNode node) { }
-    public virtual void Visit(QualifiedAliasMemberAccessNode node) { }
-    public virtual void Visit(QualifiedAliasMemberNode node) { }
-    public virtual void Visit(QueryBodyClauseNode node) { }
-    public virtual void Visit(QueryBodyNode node) { }
-    public virtual void Visit(QueryContinuationNode node) { }
-    public virtual void Visit(QueryExpressionNode node) { }
-    public virtual void Visit(RankSpecifierNode node) { }
-    public virtual void Visit(RealLiteralNode node) { }
-    public virtual void Visit(RegionPragmaNode node) { }
-    public virtual void Visit(ReturnStatementNode node) { }
-    public virtual void Visit(SelectClauseNode node) { }
-    public virtual void Visit(SimpleNameMemberDeclaratorNode node) { }
-    public virtual void Visit(SimpleNameNode node) { }
-    public virtual void Visit(SingleLiteralNode node) { }
-    public virtual void Visit(SizeofExpressionNode node) { }
-    public virtual void Visit(StackAllocInitializerNode node) { }
-    public virtual void Visit(StatementNode node) { }
-    public virtual void Visit(StringLiteralNode node) { }
-    public virtual void Visit(StructDeclarationNode node) { }
-    public virtual void Visit(SwitchLabelNode node) { }
-    public virtual void Visit(SwitchSectionNode node) { }
-    public virtual void Visit(SwitchStatementNode node) { }
-    public virtual void Visit(ThisAccessNode node) { }
-    public virtual void Visit(ThisConstructorInitializerNode node) { }
-    public virtual void Visit(ThrowStatementNode node) { }
-    public virtual void Visit(TrueLiteralNode node) { }
-    public virtual void Visit(TryStatementNode node) { }
-    public virtual void Visit(TypeDeclarationNode node) { }
-    public virtual void Visit(TypeNode node) { }
-    public virtual void Visit(TypeofExpressionNode node) { }
-    public virtual void Visit(TypeOrMemberDeclarationNode node) { }
-    public virtual void Visit(TypeParameterConstraintNode node) { }
-    public virtual void Visit(TypeParameterConstraintTagNode node) { }
-    public virtual void Visit(TypeParameterNode node) { }
-    public virtual void Visit(TypeTagNode node) { }
-    public virtual void Visit(TypeTestingExpressionNode node) { }
-    public virtual void Visit(TypeWithBodyDeclarationNode node) { }
-    public virtual void Visit(TypeWithMembersDeclarationNode node) { }
-    public virtual void Visit(UInt32LiteralNode node) { }
-    public virtual void Visit(UInt64LiteralNode node) { }
-    public virtual void Visit(UnaryOperatorExpressionNode node) { }
-    public virtual void Visit(UncheckedExpressionNode node) { }
-    public virtual void Visit(UncheckedStatementNode node) { }
-    public virtual void Visit(UndefPragmaNode node) { }
-    public virtual void Visit(UnsafeStatementNode node) { }
-    public virtual void Visit(UsingAliasNode node) { }
-    public virtual void Visit(UsingNamespaceNode node) { }
-    public virtual void Visit(UsingStatementNode node) { }
-    public virtual void Visit(VariableDeclarationStatementNode node) { }
-    public virtual void Visit(VariableInitializerNode node) { }
-    public virtual void Visit(WhereClauseNode node) { }
-    public virtual void Visit(WhileStatementNode node) { }
-    public virtual void Visit(YieldBreakStatementNode node) { }
-    public virtual void Visit(YieldReturnStatementNode node) { }
+    public virtual bool Visit(AccessorNode node) { return true; }
+    public virtual bool Visit(AnonymousMethodExpressionNode node) { return true; }
+    public virtual bool Visit(AnonymousObjectCreationExpressionNode node) { return true; }
+    public virtual bool Visit(ArgumentNode node) { return true; }
+    public virtual bool Visit(ArrayCreationExpressionNode node) { return true; }
+    public virtual bool Visit(ArrayInitializerNode node) { return true; }
+    public virtual bool Visit(ArraySizeSpecifierNode node) { return true; }
+    public virtual bool Visit(AssignmentExpressionNode node) { return true; }
+    public virtual bool Visit(AttributeArgumentNode node) { return true; }
+    public virtual bool Visit(AttributedDeclarationNode node) { return true; }
+    public virtual bool Visit(AttributeDecorationNode node) { return true; }
+    public virtual bool Visit(AttributeNode node) { return true; }
+    public virtual bool Visit(BaseAccessNode node) { return true; }
+    public virtual bool Visit(BaseConstructorInitializerNode node) { return true; }
+    public virtual bool Visit(BaseElementAccessNode node) { return true; }
+    public virtual bool Visit(BaseMemberAccessMemberDeclaratorNode node) { return true; }
+    public virtual bool Visit(BaseMemberAccessNode node) { return true; }
+    public virtual bool Visit(BinaryExpressionNode node) { return true; }
+    public virtual bool Visit(BlockCommentNode node) { return true; }
+    public virtual bool Visit(BlockStatementNode node) { return true; }
+    public virtual bool Visit(BlockWrappingStatementNode node) { return true; }
+    public virtual bool Visit(BooleanLiteralNode node) { return true; }
+    public virtual bool Visit(BreakStatementNode node) { return true; }
+    public virtual bool Visit(CastExpressionNode node) { return true; }
+    public virtual bool Visit(CastOperatorDeclarationNode node) { return true; }
+    public virtual bool Visit(CatchClauseNode node) { return true; }
+    public virtual bool Visit(CharLiteralNode node) { return true; }
+    public virtual bool Visit(CheckedExpressionNode node) { return true; }
+    public virtual bool Visit(CheckedStatementNode node) { return true; }
+    public virtual bool Visit(ClassDeclarationNode node) { return true; }
+    public virtual bool Visit(CompilationUnitNode node) { return true; }
+    public virtual bool Visit(ConditionalExpressionNode node) { return true; }
+    public virtual bool Visit(ConditionalPragmaNode node) { return true; }
+    public virtual bool Visit(ConstDeclarationNode node) { return true; }
+    public virtual bool Visit(ConstructorDeclarationNode node) { return true; }
+    public virtual bool Visit(ConstructorInitializerNode node) { return true; }
+    public virtual bool Visit(ConstStatementNode node) { return true; }
+    public virtual bool Visit(ConstTagNode node) { return true; }
+    public virtual bool Visit(ContinueStatementNode node) { return true; }
+    public virtual bool Visit(DecimalLiteralNode node) { return true; }
+    public virtual bool Visit(DefaultValueExpressionNode node) { return true; }
+    public virtual bool Visit(DefinePragmaNode node) { return true; }
+    public virtual bool Visit(DelegateDeclarationNode node) { return true; }
+    public virtual bool Visit(DestructorDeclarationNode node) { return true; }
+    public virtual bool Visit(DoubleLiteralNode node) { return true; }
+    public virtual bool Visit(DoWhileStatementNode node) { return true; }
+    public virtual bool Visit(ElementAccessNode node) { return true; }
+    public virtual bool Visit(ElementInitializerNode node) { return true; }
+    public virtual bool Visit(ElseIfPragmaNode node) { return true; }
+    public virtual bool Visit(ElsePragmaNode node) { return true; }
+    public virtual bool Visit(EmptyStatementNode node) { return true; }
+    public virtual bool Visit(EndIfPragmaNode node) { return true; }
+    public virtual bool Visit(EndRegionPragmaNode node) { return true; }
+    public virtual bool Visit(EnumDeclarationNode node) { return true; }
+    public virtual bool Visit(EnumValueNode node) { return true; }
+    public virtual bool Visit(EventPropertyDeclarationNode node) { return true; }
+    public virtual bool Visit(ExpressionInitializerNode node) { return true; }
+    public virtual bool Visit(ExpressionNode node) { return true; }
+    public virtual bool Visit(ExpressionStatementNode node) { return true; }
+    public virtual bool Visit(ExternAliasNode node) { return true; }
+    public virtual bool Visit(FalseLiteralNode node) { return true; }
+    public virtual bool Visit(FieldDeclarationNode node) { return true; }
+    public virtual bool Visit(FieldTagNode node) { return true; }
+    public virtual bool Visit(FixedInitializerNode node) { return true; }
+    public virtual bool Visit(FixedStatementNode node) { return true; }
+    public virtual bool Visit(ForeachStatementNode node) { return true; }
+    public virtual bool Visit(FormalParameterNode node) { return true; }
+    public virtual bool Visit(ForStatementNode node) { return true; }
+    public virtual bool Visit(FromClauseNode node) { return true; }
+    public virtual bool Visit(GotoStatementNode node) { return true; }
+    public virtual bool Visit(GroupClauseNode node) { return true; }
+    public virtual bool Visit(ICommentNode node) { return true; }
+    public virtual bool Visit(IdentifierMemberDeclaratorNode node) { return true; }
+    public virtual bool Visit(IfPragmaNode node) { return true; }
+    public virtual bool Visit(IfStatementNode node) { return true; }
+    public virtual bool Visit(IndexerDeclarationNode node) { return true; }
+    public virtual bool Visit(Int32LiteralNode node) { return true; }
+    public virtual bool Visit(Int64LiteralNode node) { return true; }
+    public virtual bool Visit(IntegerLiteralNode node) { return true; }
+    public virtual bool Visit(InterfaceDeclarationNode node) { return true; }
+    public virtual bool Visit(InterfaceEventDeclarationNode node) { return true; }
+    public virtual bool Visit(InvocationExpressionNode node) { return true; }
+    public virtual bool Visit(ISyntaxNode node) { return true; }
+    public virtual bool Visit(JoinClauseNode node) { return true; }
+    public virtual bool Visit(JoinIntoClauseNode node) { return true; }
+    public virtual bool Visit(LabelNode node) { return true; }
+    public virtual bool Visit(LambdaExpressionNode node) { return true; }
+    public virtual bool Visit(LetClauseNode node) { return true; }
+    public virtual bool Visit(LineCommentNode node) { return true; }
+    public virtual bool Visit(LiteralNode node) { return true; }
+    public virtual bool Visit(LocalVariableNode node) { return true; }
+    public virtual bool Visit(LocalVariableTagNode node) { return true; }
+    public virtual bool Visit(LockStatementNode node) { return true; }
+    public virtual bool Visit(MemberAccessMemberDeclaratorNode node) { return true; }
+    public virtual bool Visit(MemberAccessNode node) { return true; }
+    public virtual bool Visit(MemberDeclarationNode node) { return true; }
+    public virtual bool Visit(MemberDeclaratorNode node) { return true; }
+    public virtual bool Visit(MemberInitializerNode node) { return true; }
+    public virtual bool Visit(MemberWithBodyDeclarationNode node) { return true; }
+    public virtual bool Visit(MethodDeclarationNode node) { return true; }
+    public virtual bool Visit(ModifierNode node) { return true; }
+    public virtual bool Visit(MultiCommentNode node) { return true; }
+    public virtual bool Visit(NamespaceDeclarationNode node) { return true; }
+    public virtual bool Visit(NamespaceOrTypeNameNode node) { return true; }
+    public virtual bool Visit(NamespaceScopeNode node) { return true; }
+    public virtual bool Visit(NameTagNode node) { return true; }
+    public virtual bool Visit(NullLiteralNode node) { return true; }
+    public virtual bool Visit(ObjectCreationExpressionNode node) { return true; }
+    public virtual bool Visit(ObjectOrCollectionInitializerNode node) { return true; }
+    public virtual bool Visit(OperatorDeclarationNode node) { return true; }
+    public virtual bool Visit(OrderByClauseNode node) { return true; }
+    public virtual bool Visit(OrderingClauseNode node) { return true; }
+    public virtual bool Visit(ParenthesizedExpressionNode node) { return true; }
+    public virtual bool Visit(PointerMemberAccessNode node) { return true; }
+    public virtual bool Visit(PostDecrementExpressionNode node) { return true; }
+    public virtual bool Visit(PostIncrementExpressionNode node) { return true; }
+    public virtual bool Visit(PragmaNode node) { return true; }
+    public virtual bool Visit(PragmaPragmaNode node) { return true; }
+    public virtual bool Visit(PreDecrementExpressionNode node) { return true; }
+    public virtual bool Visit(PredefinedTypeMemberAccessNode node) { return true; }
+    public virtual bool Visit(PreIncrementExpressionNode node) { return true; }
+    public virtual bool Visit(PrimaryExpressionMemberAccessNode node) { return true; }
+    public virtual bool Visit(PrimaryExpressionWithEmbeddedTypeNode node) { return true; }
+    public virtual bool Visit(PropertyDeclarationNode node) { return true; }
+    public virtual bool Visit(QualifiedAliasMemberAccessNode node) { return true; }
+    public virtual bool Visit(QualifiedAliasMemberNode node) { return true; }
+    public virtual bool Visit(QueryBodyClauseNode node) { return true; }
+    public virtual bool Visit(QueryBodyNode node) { return true; }
+    public virtual bool Visit(QueryContinuationNode node) { return true; }
+    public virtual bool Visit(QueryExpressionNode node) { return true; }
+    public virtual bool Visit(RankSpecifierNode node) { return true; }
+    public virtual bool Visit(RealLiteralNode node) { return true; }
+    public virtual bool Visit(RegionPragmaNode node) { return true; }
+    public virtual bool Visit(ReturnStatementNode node) { return true; }
+    public virtual bool Visit(SelectClauseNode node) { return true; }
+    public virtual bool Visit(SimpleNameMemberDeclaratorNode node) { return true; }
+    public virtual bool Visit(SimpleNameNode node) { return true; }
+    public virtual bool Visit(SingleLiteralNode node) { return true; }
+    public virtual bool Visit(SizeofExpressionNode node) { return true; }
+    public virtual bool Visit(StackAllocInitializerNode node) { return true; }
+    public virtual bool Visit(StatementNode node) { return true; }
+    public virtual bool Visit(StringLiteralNode node) { return true; }
+    public virtual bool Visit(StructDeclarationNode node) { return true; }
+    public virtual bool Visit(SwitchLabelNode node) { return true; }
+    public virtual bool Visit(SwitchSectionNode node) { return true; }
+    public virtual bool Visit(SwitchStatementNode node) { return true; }
+    public virtual bool Visit(ThisAccessNode node) { return true; }
+    public virtual bool Visit(ThisConstructorInitializerNode node) { return true; }
+    public virtual bool Visit(ThrowStatementNode node) { return true; }
+    public virtual bool Visit(TrueLiteralNode node) { return true; }
+    public virtual bool Visit(TryStatementNode node) { return true; }
+    public virtual bool Visit(TypeDeclarationNode node) { return true; }
+    public virtual bool Visit(TypeNode node) { return true; }
+    public virtual bool Visit(TypeofExpressionNode node) { return true; }
+    public virtual bool Visit(TypeOrMemberDeclarationNode node) { return true; }
+    public virtual bool Visit(TypeParameterConstraintNode node) { return true; }
+    public virtual bool Visit(TypeParameterConstraintTagNode node) { return true; }
+    public virtual bool Visit(TypeParameterNode node) { return true; }
+    public virtual bool Visit(TypeTagNode node) { return true; }
+    public virtual bool Visit(TypeTestingExpressionNode node) { return true; }
+    public virtual bool Visit(TypeWithBodyDeclarationNode node) { return true; }
+    public virtual bool Visit(TypeWithMembersDeclarationNode node) { return true; }
+    public virtual bool Visit(UInt32LiteralNode node) { return true; }
+    public virtual bool Visit(UInt64LiteralNode node) { return true; }
+    public virtual bool Visit(UnaryOperatorExpressionNode node) { return true; }
+    public virtual bool Visit(UncheckedExpressionNode node) { return true; }
+    public virtual bool Visit(UncheckedStatementNode node) { return true; }
+    public virtual bool Visit(UndefPragmaNode node) { return true; }
+    public virtual bool Visit(UnsafeStatementNode node) { return true; }
+    public virtual bool Visit(UsingAliasNode node) { return true; }
+    public virtual bool Visit(UsingNamespaceNode node) { return true; }
+    public virtual bool Visit(UsingStatementNode node) { return true; }
+    public virtual bool Visit(VariableDeclarationStatementNode node) { return true; }
+    public virtual bool Visit(VariableInitializerNode node) { return true; }
+    public virtual bool Visit(WhereClauseNode node) { return true; }
+    public virtual bool Visit(WhileStatementNode node) { return true; }
+    public virtual bool Visit(YieldBreakStatementNode node) { return true; }
+    public virtual bool Visit(YieldReturnStatementNode node) { return true; }
   }
 }
 #pragma warning restore 1591

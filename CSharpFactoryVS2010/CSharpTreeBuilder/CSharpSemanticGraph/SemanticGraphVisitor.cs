@@ -10,20 +10,23 @@
     // disable warnings about missing XML comments
     #pragma warning disable 1591 
 
-    public virtual void Visit(NamespaceEntity entity) { }
-    public virtual void Visit(ExternAliasEntity entity) { }
-    public virtual void Visit(UsingNamespaceEntity entity) { }
-    public virtual void Visit(UsingAliasEntity entity) { }
+    public virtual bool Visit(NamespaceEntity entity) { return true; }
+    public virtual bool Visit(ExternAliasEntity entity) { return true; }
+    public virtual bool Visit(UsingNamespaceEntity entity) { return true; }
+    public virtual bool Visit(UsingAliasEntity entity) { return true; }
 
-    public virtual void Visit(EnumEntity entity) { }
-    public virtual void Visit(ClassEntity entity) { }
-    public virtual void Visit(StructEntity entity) { }
-    public virtual void Visit(DelegateEntity entity) { }
-    public virtual void Visit(InterfaceEntity entity) { }
+    public virtual bool Visit(EnumEntity entity) { return true; }
+    public virtual bool Visit(ClassEntity entity) { return true; }
+    public virtual bool Visit(StructEntity entity) { return true; }
+    public virtual bool Visit(DelegateEntity entity) { return true; }
+    public virtual bool Visit(InterfaceEntity entity) { return true; }
 
-    public virtual void Visit(FieldEntity entity) { }
-    public virtual void Visit(PropertyEntity entity) { }
-    public virtual void Visit(MethodEntity entity) { }
+    public virtual bool Visit(FieldEntity entity) { return true; }
+    public virtual bool Visit(PropertyEntity entity) { return true; }
+    public virtual bool Visit(MethodEntity entity) { return true; }
+
+    public virtual bool Visit(ScalarInitializerEntity entity) { return true; }
+    public virtual bool Visit(ArrayInitializerEntity entity) { return true; }
 
     #pragma warning restore 1591
 

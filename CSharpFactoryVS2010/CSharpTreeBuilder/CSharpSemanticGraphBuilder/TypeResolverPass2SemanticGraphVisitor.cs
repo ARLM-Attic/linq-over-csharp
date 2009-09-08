@@ -30,7 +30,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Visit(FieldEntity entity)
+    public override bool Visit(FieldEntity entity)
     {
       // Resolve the type of the field
       if (entity.IsExplicitlyDefined && entity.TypeReference != null)
@@ -46,6 +46,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           _ErrorHandler.Error("CS0670", errorPoint, "Field cannot have void type");
         }
       }
+
+      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -54,7 +56,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Visit(PropertyEntity entity)
+    public override bool Visit(PropertyEntity entity)
     {
       // Resolve the type of the property
       if (entity.TypeReference != null)
@@ -68,6 +70,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                              : null;
 
           _ErrorHandler.Error("CS0547", errorPoint, "'{0}': property or indexer cannot have void type", entity.Name);
+
         }
       }
 
@@ -77,6 +80,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         entity.InterfaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
       }
 
+      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -85,7 +89,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Visit(MethodEntity entity)
+    public override bool Visit(MethodEntity entity)
     {
       // Resolve the return type
       if (entity.ReturnTypeReference != null)
@@ -110,6 +114,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           parameter.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
         }
       }
+
+      return true;
     }
   }
 }

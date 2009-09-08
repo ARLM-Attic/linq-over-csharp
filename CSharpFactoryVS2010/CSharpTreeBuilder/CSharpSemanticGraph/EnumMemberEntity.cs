@@ -15,9 +15,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the member.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
+    /// <param name="hasInitializer">Indicates whether this enum member has an initializer.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumMemberEntity(string name, SemanticEntityReference<TypeEntity> type)
-      : base(name, true, type, true)
+    public EnumMemberEntity(string name, SemanticEntityReference<TypeEntity> type, bool hasInitializer)
+      : base(name, true, type, true, hasInitializer ? new ScalarInitializerEntity() : null)
     {
     }
   }

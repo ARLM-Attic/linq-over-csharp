@@ -65,7 +65,10 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      visitor.Visit(this);
+      if (!visitor.Visit(this))
+      {
+        return;
+      }
 
       foreach (var declarator in Declarators)
       {
