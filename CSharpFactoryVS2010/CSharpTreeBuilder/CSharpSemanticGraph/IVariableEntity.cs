@@ -42,6 +42,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the initializer of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    IVariableInitializer Initializer { get; }
+    VariableInitializer Initializer { get; }
   }
 }

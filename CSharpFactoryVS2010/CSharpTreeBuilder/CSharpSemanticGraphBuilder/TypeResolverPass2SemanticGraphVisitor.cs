@@ -8,6 +8,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// This class implements a semantic graph visitor that resolves the following references.
   /// - Resolves type references in type bodies (members, member bodies).
   /// - Creates constructed types when needed.
+  /// Type references in expression are not resolved by this visitor. 
+  /// Those are resolved by <see cref="ExpressionEvaluatorSemanticGraphVisitor"/> at a later stage.
   /// </summary>
   // ================================================================================================
   public sealed class TypeResolverPass2SemanticGraphVisitor : TypeResolverSemanticGraphVisitorBase
@@ -20,7 +22,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="semanticGraph">The semantic graph that this visitor is working on.</param>
     // ----------------------------------------------------------------------------------------------
     public TypeResolverPass2SemanticGraphVisitor(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
-      :base(errorHandler,semanticGraph)
+      : base(errorHandler, semanticGraph)
     {
     }
 
@@ -40,7 +42,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
           var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
-                             ? ((TypeNodeBasedTypeEntityReference) entity.TypeReference).SyntaxNode.StartToken
+                             ? ((TypeNodeBasedTypeEntityReference)entity.TypeReference).SyntaxNode.StartToken
                              : null;
 
           _ErrorHandler.Error("CS0670", errorPoint, "Field cannot have void type");
@@ -97,7 +99,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Note that the resolution context is the method, because it can be the method's type parameter too
         entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
       }
-  
+
       // Resolve the interface reference for explicitly implemented members
       if (entity.InterfaceReference != null)
       {

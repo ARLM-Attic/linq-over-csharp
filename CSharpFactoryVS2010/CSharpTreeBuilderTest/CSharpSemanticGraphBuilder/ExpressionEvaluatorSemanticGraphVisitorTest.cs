@@ -17,20 +17,128 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tests the evaluation of null literal.
+    /// Tests the evaluation of literals.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void NullLiteral()
+    public void Literal()
     {
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\NullLiteral.cs");
+      project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\Literal.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var field = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").GetMember<FieldEntity>("a");
-      field.Initializer.IsExpression.ShouldBeTrue();
-      field.Initializer.Expression.ShouldNotBeNull();
-      field.Initializer.Expression.Result.GetType().ShouldEqual(typeof (NullExpressionResult));
+      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").Members.ToList();
+
+      int i = 0;
+
+      // object a0 = null;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        exp.Result.GetType().ShouldEqual(typeof (NullExpressionResult));
+      }
+      // bool a1 = true;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Boolean");
+      }
+      // decimal a2 = 2m;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Decimal");
+      }
+      // int a3 = 3;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
+      }
+      // uint a4 = 4u;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.UInt32");
+      }
+      // long a5 = 5l;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Int64");
+      }
+      // ulong a6 = 6ul;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.UInt64");
+      }
+      // char a7 = '7';
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Char");
+      }
+      // float a8 = 8f;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Single");
+      }
+      // double a9 = 9d;
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Double");
+      }
+      // string a10 = "10";
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.String");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the evaluation of simple names.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore] // TODO: remove ignore when simple name resolution is implemented
+    public void SimpleName()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\SimpleName.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").Members.ToList();
+      
+      // static int a = b;
+
+      var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+      
+      var simpleName = exp as SimpleNameExpressionEntity;
+      simpleName.Entity.ShouldEqual(members[1]);
+
+      var variableExpressionResult = simpleName.Result as VariableExpressionResult;
+      variableExpressionResult.Variable.ShouldEqual(members[1] as IVariableEntity);
+      variableExpressionResult.Type.ShouldEqual((members[1] as FieldEntity).Type);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the evaluation of default value expression.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void DefaultValue()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\DefaultValue.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var members = classEntity.Members.ToList();
+
+      // A a = default(A);
+
+      var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+
+      var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
+      defaultValueExpressionEntity.Type.ShouldEqual(classEntity);
+
+      var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
+      valueExpressionResult.Type.ShouldEqual(classEntity);
     }
   }
 }

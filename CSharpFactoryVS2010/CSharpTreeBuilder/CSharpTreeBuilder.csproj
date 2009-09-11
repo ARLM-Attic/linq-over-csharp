@@ -227,6 +227,9 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\VariableExpressionResult.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SimpleNameNodeBasedSemanticEntityReference.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolver.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NullExpressionResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ValueExpressionResult.cs" />
@@ -277,10 +280,16 @@
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayInitializerEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\LocalVariableDeclarationStatementEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\LocalVariableEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\DefaultValueExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\SimpleNameExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\TypedLiteralExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\LiteralExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\NullLiteralExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ScalarInitializerEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IHasExpressions.cs" />
-    <Compile Include="CSharpSemanticGraph\IVariableInitializer.cs" />
+    <Compile Include="CSharpSemanticGraph\VariableInitializer.cs" />
     <Compile Include="CSharpSemanticGraph\ExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ICanBeExplicitlyImplementedMember.cs" />
     <Compile Include="CSharpSemanticGraph\ICanHaveTypeParameters.cs" />

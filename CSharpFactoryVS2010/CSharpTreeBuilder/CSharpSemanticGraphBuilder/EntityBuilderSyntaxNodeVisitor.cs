@@ -422,24 +422,132 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a null literal entity from a null literal AST node.
+    /// Creates a literal entity from a literal AST node.
     /// </summary>
-    /// <param name="node">A null literal AST node.</param>
+    /// <param name="node">A literal AST node.</param>
     /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(NullLiteralNode node)
+    public override bool Visit(LiteralNode node)
     {
       // Get the parent entity of the to-be created entity
       var parentEntity = GetParentEntity<SemanticEntity>(node);
 
+      LiteralExpressionEntity literal = null;
+
+      if (node is NullLiteralNode)
+      {
+        literal  = new NullLiteralExpressionEntity();
+      }
+      else if (node is BooleanLiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(bool)));
+      }
+      else if (node is DecimalLiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(decimal)));
+      }
+      else if (node is Int32LiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(int)));    
+      }
+      else if (node is UInt32LiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(uint)));
+      }
+      else if (node is Int64LiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(long)));
+      }
+      else if (node is UInt64LiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(ulong)));
+      }
+      else if (node is CharLiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(char)));
+      }
+      else if (node is SingleLiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(float)));
+      }
+      else if (node is DoubleLiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(double)));
+      }
+      else if (node is StringLiteralNode)
+      {
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(string)));
+      }
+
       var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(literal);
 
-      var nullLiteralEntity = new NullLiteralExpressionEntity();
-      hasExpressions.AddExpression(nullLiteralEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, nullLiteralEntity);
+      AssociateSyntaxNodeWithSemanticEntity(node, literal);
 
       return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(SimpleNameNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeBasedSemanticEntityReference(node));
+      
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(simpleNameEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, simpleNameEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(DefaultValueExpressionNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var defaultValueEntity = new DefaultValueExpressionEntity(new TypeNodeBasedTypeEntityReference(node.Type));
+
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(defaultValueEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, defaultValueEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(BlockStatementNode node)
+    {
+      //var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      //var blockEntity = new BlockEntity();
+
+      //var hasBody = CastToIHasBody(parentEntity);
+      //hasBody.Body = blockEntity;
+
+      //AssociateSyntaxNodeWithSemanticEntity(node, blockEntity);
+
+      return false; // for testing only
     }
 
     #region Private methods
@@ -548,6 +656,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           string.Format("Expected a type that has expressions, but found '{0}'.", entity.GetType()));
       }
       return hasExpressions;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks whether a semantic entity implements the IHasBody interface.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>An IHasBody interface.</returns>
+    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    private static IHasBody CastToIHasBody(SemanticEntity entity)
+    {
+      var hasBody = entity as IHasBody;
+      if (hasBody == null)
+      {
+        throw new ApplicationException(
+          string.Format("Expected a type that has body, but found '{0}'.", entity.GetType()));
+      }
+      return hasBody;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -691,7 +818,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="node">A variable initializer AST node.</param>
     /// <returns>A variable initializer entity.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static IVariableInitializer CreateInitializer(VariableInitializerNode node)
+    private static VariableInitializer CreateInitializer(VariableInitializerNode node)
     {
       if (node == null)
       {
@@ -727,7 +854,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       AssociateSyntaxNodeWithSemanticEntity(node, result);
 
-      return result as IVariableInitializer;
+      return result as VariableInitializer;
     }
 
     #endregion

@@ -14,6 +14,11 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public abstract class MemberWithBodyDeclarationNode : MemberDeclarationNode
   {
+    /// <summary>
+    /// Backing field for Body property.
+    /// </summary>
+    private BlockStatementNode _Body;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MemberWithBodyDeclarationNode"/> class.
@@ -30,7 +35,18 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the body of this member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockStatementNode Body { get; internal set; }
+    public BlockStatementNode Body
+    {
+      get { return _Body; }
+      internal set
+      {
+        _Body = value;
+        if (_Body != null)
+        {
+          _Body.ParentNode = this;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

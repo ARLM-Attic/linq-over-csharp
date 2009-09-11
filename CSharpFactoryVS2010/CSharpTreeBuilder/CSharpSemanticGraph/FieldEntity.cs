@@ -24,13 +24,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       bool isExplicitlyDefined, 
       SemanticEntityReference<TypeEntity> type,
       bool isStatic,
-      IVariableInitializer initializer)
+      VariableInitializer initializer)
       : 
       base(name, isExplicitlyDefined)
     {
       TypeReference = type;
       IsStatic = isStatic;
       Initializer = initializer;
+
+      if (Initializer != null)
+      {
+        Initializer.Parent = this;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -69,7 +74,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the initializer of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IVariableInitializer Initializer { get; private set; }
+    public VariableInitializer Initializer { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

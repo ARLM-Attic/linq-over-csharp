@@ -1,4 +1,5 @@
 ﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -18,9 +19,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Evaluates this expressions.
+    /// Evaluates this expression.
     /// </summary>
+    /// <param name="semanticGraph">The semantic graph.</param>
+    /// <param name="errorHandler">An error handler object.</param>
     // ----------------------------------------------------------------------------------------------
-    public abstract void Evaluate();
+    public abstract void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler);
   }
 }

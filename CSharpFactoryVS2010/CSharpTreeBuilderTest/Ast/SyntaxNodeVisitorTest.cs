@@ -77,7 +77,7 @@ namespace CSharpTreeBuilderTest.Ast
         Expect.Call(visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName)).Return(true);
         Expect.Call(visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].TypeName.TypeTags[0])).Return(true);
         Expect.Call(visitorMock.Visit(compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0])).Return(true);
-        Expect.Call(visitorMock.Visit((StringLiteralNode)compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0].Expression)).Return(true);
+        Expect.Call(visitorMock.Visit((LiteralNode)compilationUnitNode.GlobalAttributes[0].Attributes[0].Arguments[0].Expression)).Return(true);
         Expect.Call(visitorMock.Visit(compilationUnitNode.NamespaceDeclarations[0])).Return(true);
         Expect.Call(visitorMock.Visit(compilationUnitNode.NamespaceDeclarations[0].NamespaceDeclarations[0])).Return(true);
         Expect.Call(visitorMock.Visit((ClassDeclarationNode)compilationUnitNode.NamespaceDeclarations[0].NamespaceDeclarations[0].TypeDeclarations[0])).Return(true);
@@ -177,17 +177,17 @@ namespace CSharpTreeBuilderTest.Ast
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].TypeName)).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].TypeName.TypeTags[0])).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[0].Attributes[1].Arguments[0])).Return(true);
-        Expect.Call(visitorMock.Visit((FalseLiteralNode)classDeclarationNode.AttributeDecorations[0].Attributes[1].Arguments[0].Expression)).Return(true);
+        Expect.Call(visitorMock.Visit((LiteralNode)classDeclarationNode.AttributeDecorations[0].Attributes[1].Arguments[0].Expression)).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1])).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0])).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].TypeName)).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].TypeName.TypeTags[0])).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[0])).Return(true);
-        Expect.Call(visitorMock.Visit((StringLiteralNode)classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[0].Expression)).Return(true);
+        Expect.Call(visitorMock.Visit((LiteralNode)classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[0].Expression)).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[1])).Return(true);
-        Expect.Call(visitorMock.Visit((StringLiteralNode)classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[1].Expression)).Return(true);
+        Expect.Call(visitorMock.Visit((LiteralNode)classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[1].Expression)).Return(true);
         Expect.Call(visitorMock.Visit(classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[2])).Return(true);
-        Expect.Call(visitorMock.Visit((StringLiteralNode)classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[2].Expression)).Return(true);
+        Expect.Call(visitorMock.Visit((LiteralNode)classDeclarationNode.AttributeDecorations[1].Attributes[0].Arguments[2].Expression)).Return(true);
 
         // Type params and base types
         Expect.Call(visitorMock.Visit(classDeclarationNode.TypeParameters[0])).Return(true);
@@ -223,9 +223,9 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(constDeclarationNode.Type.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(constDeclarationNode.Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(constDeclarationNode.ConstTags[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constDeclarationNode.ConstTags[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constDeclarationNode.ConstTags[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(constDeclarationNode.ConstTags[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constDeclarationNode.ConstTags[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constDeclarationNode.ConstTags[1].Expression)).Return(true);
         }
         // Field declaration
         {
@@ -242,7 +242,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(fieldDeclarationNode.FieldTags[1])).Return(true);
           var init = fieldDeclarationNode.FieldTags[1].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(init)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)init.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)init.Expression)).Return(true);
         }
         // Method declaration
         {
@@ -330,7 +330,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(eventDeclarationNode.FieldTags[0])).Return(true);
           var init = eventDeclarationNode.FieldTags[0].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(init)).Return(true);
-          Expect.Call(visitorMock.Visit((NullLiteralNode)init.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)init.Expression)).Return(true);
         }
         // Event declaration (property-like)
         {
@@ -373,7 +373,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(indexerDeclarationNode.GetAccessor)).Return(true);
           Expect.Call(visitorMock.Visit(indexerDeclarationNode.GetAccessor.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0]).Expression)).Return(true);
           Expect.Call(visitorMock.Visit(indexerDeclarationNode.SetAccessor)).Return(true);
           Expect.Call(visitorMock.Visit(indexerDeclarationNode.SetAccessor.Body)).Return(true);
         }
@@ -406,7 +406,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(operatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(operatorDeclarationNode.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)operatorDeclarationNode.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((NullLiteralNode)((ReturnStatementNode)operatorDeclarationNode.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)operatorDeclarationNode.Body.Statements[0]).Expression)).Return(true);
         }
         // Conversion operator declaration
         {
@@ -431,7 +431,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(castOperatorDeclarationNode.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((NullLiteralNode)((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]).Expression)).Return(true);
         }
         // Constructor declaration 
         {
@@ -457,9 +457,9 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(constructorDeclarationNode2)).Return(true);
           Expect.Call(visitorMock.Visit((ThisConstructorInitializerNode)constructorDeclarationNode2.Initializer)).Return(true);
           Expect.Call(visitorMock.Visit(constructorDeclarationNode2.Initializer.Arguments[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constructorDeclarationNode2.Initializer.Arguments[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constructorDeclarationNode2.Initializer.Arguments[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(constructorDeclarationNode2.Initializer.Arguments[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constructorDeclarationNode2.Initializer.Arguments[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constructorDeclarationNode2.Initializer.Arguments[1].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(constructorDeclarationNode2.Body)).Return(true);
         }
         // Constructor declaration with base initializer
@@ -552,7 +552,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(constDeclarationNode.Type.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(constDeclarationNode.Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(constDeclarationNode.ConstTags[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constDeclarationNode.ConstTags[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constDeclarationNode.ConstTags[0].Expression)).Return(true);
         }
         // Field declaration
         {
@@ -582,7 +582,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(propertyDeclarationNode.GetAccessor)).Return(true);
           Expect.Call(visitorMock.Visit(propertyDeclarationNode.GetAccessor.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)propertyDeclarationNode.GetAccessor.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)propertyDeclarationNode.GetAccessor.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)propertyDeclarationNode.GetAccessor.Body.Statements[0]).Expression)).Return(true);
           Expect.Call(visitorMock.Visit(propertyDeclarationNode.SetAccessor)).Return(true);
           Expect.Call(visitorMock.Visit(propertyDeclarationNode.SetAccessor.Body)).Return(true);
         }
@@ -615,7 +615,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(indexerDeclarationNode.GetAccessor)).Return(true);
           Expect.Call(visitorMock.Visit(indexerDeclarationNode.GetAccessor.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)indexerDeclarationNode.GetAccessor.Body.Statements[0]).Expression)).Return(true);
         }
         // Operator declaration
         {
@@ -674,7 +674,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(castOperatorDeclarationNode.FormalParameters[0].Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(castOperatorDeclarationNode.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((NullLiteralNode)((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)castOperatorDeclarationNode.Body.Statements[0]).Expression)).Return(true);
         }
         // Constructor declaration 
         {
@@ -690,7 +690,7 @@ namespace CSharpTreeBuilderTest.Ast
           var assignment = expressionStatement.Expression as AssignmentExpressionNode;
           Expect.Call(visitorMock.Visit(assignment)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode) assignment.LeftOperand)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode) assignment.RightOperand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode) assignment.RightOperand)).Return(true);
         }
         // Nested class declaration
         Expect.Call(visitorMock.Visit((ClassDeclarationNode)structDeclarationNode.NestedTypes[0])).Return(true);
@@ -831,7 +831,7 @@ namespace CSharpTreeBuilderTest.Ast
         Expect.Call(visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0])).Return(true);
         Expect.Call(visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0].TypeName)).Return(true);
         Expect.Call(visitorMock.Visit(enumDeclarationNode.Values[0].AttributeDecorations[0].Attributes[0].TypeName.TypeTags[0])).Return(true);
-        Expect.Call(visitorMock.Visit((Int32LiteralNode)enumDeclarationNode.Values[0].Expression)).Return(true);
+        Expect.Call(visitorMock.Visit((LiteralNode)enumDeclarationNode.Values[0].Expression)).Return(true);
         Expect.Call(visitorMock.Visit(enumDeclarationNode.Values[1])).Return(true);
       }
       mocks.ReplayAll();
@@ -951,7 +951,7 @@ namespace CSharpTreeBuilderTest.Ast
           var expInit =
             variableDeclarationStatementNode.Declaration.VariableTags[1].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(expInit)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)expInit.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)expInit.Expression)).Return(true);
         }
         // local variable declaration (var)
         {
@@ -965,7 +965,7 @@ namespace CSharpTreeBuilderTest.Ast
           var expInit =
             varNode.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(expInit)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)expInit.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)expInit.Expression)).Return(true);
         }
         // local constant declaration
         {
@@ -976,9 +976,9 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(constStatementNode.Type.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(constStatementNode.Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(constStatementNode.ConstTags[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constStatementNode.ConstTags[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constStatementNode.ConstTags[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(constStatementNode.ConstTags[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)constStatementNode.ConstTags[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)constStatementNode.ConstTags[1].Expression)).Return(true);
         }
         // expression statement
         {
@@ -994,7 +994,7 @@ namespace CSharpTreeBuilderTest.Ast
           var ifStatementNode = (IfStatementNode)method1Body.Statements[i++];
           Expect.Call(visitorMock.Visit(ifStatementNode)).Return(true);
           Expect.Call(visitorMock.Visit(ifStatementNode.Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((TrueLiteralNode)ifStatementNode.Condition)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)ifStatementNode.Condition)).Return(true);
           Expect.Call(visitorMock.Visit((BlockStatementNode)ifStatementNode.ThenStatement)).Return(true);
           Expect.Call(visitorMock.Visit((BlockStatementNode)ifStatementNode.ElseStatement)).Return(true);
         }
@@ -1006,15 +1006,15 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit((SimpleNameNode)switchStatementNode.Expression)).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[0])).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[0].Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)switchStatementNode.SwitchSections[0].Labels[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)switchStatementNode.SwitchSections[0].Labels[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[0].Labels[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)switchStatementNode.SwitchSections[0].Labels[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)switchStatementNode.SwitchSections[0].Labels[1].Expression)).Return(true);
           var goto1 = switchStatementNode.SwitchSections[0].Statements[0] as GotoStatementNode;
           Expect.Call(visitorMock.Visit(goto1)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)goto1.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)goto1.Expression)).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[1])).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[1].Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)switchStatementNode.SwitchSections[1].Labels[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)switchStatementNode.SwitchSections[1].Labels[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit((GotoStatementNode)switchStatementNode.SwitchSections[1].Statements[0])).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[2])).Return(true);
           Expect.Call(visitorMock.Visit(switchStatementNode.SwitchSections[2].Labels[0])).Return(true);
@@ -1025,7 +1025,7 @@ namespace CSharpTreeBuilderTest.Ast
           var whileStatementNode = (WhileStatementNode)method1Body.Statements[i++];
           Expect.Call(visitorMock.Visit(whileStatementNode)).Return(true);
           Expect.Call(visitorMock.Visit(whileStatementNode.Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((FalseLiteralNode)whileStatementNode.Condition)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)whileStatementNode.Condition)).Return(true);
           Expect.Call(visitorMock.Visit((BlockStatementNode)whileStatementNode.Statement)).Return(true);
         }
         // do statement
@@ -1034,7 +1034,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(doWhileStatementNode)).Return(true);
           Expect.Call(visitorMock.Visit(doWhileStatementNode.Labels[0])).Return(true);
           Expect.Call(visitorMock.Visit((BlockStatementNode)doWhileStatementNode.Statement)).Return(true);
-          Expect.Call(visitorMock.Visit((FalseLiteralNode)doWhileStatementNode.Condition)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)doWhileStatementNode.Condition)).Return(true);
         }
         // for-statement (with local-variable-declaration)
         {
@@ -1048,8 +1048,8 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(forStatementNode.Initializer.VariableTags[0])).Return(true);
           var expInit = forStatementNode.Initializer.VariableTags[0].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(expInit)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)expInit.Expression)).Return(true);
-          Expect.Call(visitorMock.Visit((FalseLiteralNode)forStatementNode.Condition)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)expInit.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)forStatementNode.Condition)).Return(true);
           Expect.Call(visitorMock.Visit((PostIncrementExpressionNode)forStatementNode.Iterators[0])).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)((PostIncrementExpressionNode)forStatementNode.Iterators[0]).Operand)).Return(true);
           Expect.Call(visitorMock.Visit((ContinueStatementNode)forStatementNode.Statement)).Return(true);
@@ -1063,7 +1063,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit((SimpleNameNode)((PostIncrementExpressionNode)forStatementNode2.Initializers[0]).Operand)).Return(true);
           Expect.Call(visitorMock.Visit((PostIncrementExpressionNode)forStatementNode2.Initializers[1])).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)((PostIncrementExpressionNode)forStatementNode2.Initializers[1]).Operand)).Return(true);
-          Expect.Call(visitorMock.Visit((FalseLiteralNode)forStatementNode2.Condition)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)forStatementNode2.Condition)).Return(true);
           Expect.Call(visitorMock.Visit((PostIncrementExpressionNode)forStatementNode2.Iterators[0])).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)((PostIncrementExpressionNode)forStatementNode2.Iterators[0]).Operand)).Return(true);
           Expect.Call(visitorMock.Visit((PostIncrementExpressionNode)forStatementNode2.Iterators[1])).Return(true);
@@ -1130,7 +1130,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(usingStatementNode.Initializer.VariableTags[0])).Return(true);
           var expInit = usingStatementNode.Initializer.VariableTags[0].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(expInit)).Return(true);
-          Expect.Call(visitorMock.Visit((NullLiteralNode)expInit.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)expInit.Expression)).Return(true);
           Expect.Call(visitorMock.Visit((BlockStatementNode)usingStatementNode.Statement)).Return(true);
         }
         // using-statement (with expression)
@@ -1138,7 +1138,7 @@ namespace CSharpTreeBuilderTest.Ast
           var usingStatementNode = (UsingStatementNode)method1Body.Statements[i++];
           Expect.Call(visitorMock.Visit(usingStatementNode)).Return(true);
           Expect.Call(visitorMock.Visit(usingStatementNode.Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((NullLiteralNode)usingStatementNode.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)usingStatementNode.Expression)).Return(true);
           Expect.Call(visitorMock.Visit((BlockStatementNode)usingStatementNode.Statement)).Return(true);
         }
         // return statement
@@ -1146,7 +1146,7 @@ namespace CSharpTreeBuilderTest.Ast
           var returnStatementNode = (ReturnStatementNode)method1Body.Statements[i++];
           Expect.Call(visitorMock.Visit(returnStatementNode)).Return(true);
           Expect.Call(visitorMock.Visit(returnStatementNode.Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)returnStatementNode.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)returnStatementNode.Expression)).Return(true);
         }
         // goto-statement
         {
@@ -1182,7 +1182,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(stringVarNode.Declaration.VariableTags[0])).Return(true);
           var expInit = stringVarNode.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
           Expect.Call(visitorMock.Visit(expInit)).Return(true);
-          Expect.Call(visitorMock.Visit((StringLiteralNode)expInit.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)expInit.Expression)).Return(true);
 
           // fixed-statement
           {
@@ -1213,7 +1213,7 @@ namespace CSharpTreeBuilderTest.Ast
             Expect.Call(visitorMock.Visit(stackallocInit.Type)).Return(true);
             Expect.Call(visitorMock.Visit(stackallocInit.Type.TypeName)).Return(true);
             Expect.Call(visitorMock.Visit(stackallocInit.Type.TypeName.TypeTags[0])).Return(true);
-            Expect.Call(visitorMock.Visit((Int32LiteralNode)stackallocInit.Expression)).Return(true);
+            Expect.Call(visitorMock.Visit((LiteralNode)stackallocInit.Expression)).Return(true);
           }
         }
 
@@ -1225,7 +1225,7 @@ namespace CSharpTreeBuilderTest.Ast
           var yieldReturnStatementNode = (YieldReturnStatementNode) method2Body.Statements[0];
           Expect.Call(visitorMock.Visit(yieldReturnStatementNode)).Return(true);
           Expect.Call(visitorMock.Visit(yieldReturnStatementNode.Labels[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)yieldReturnStatementNode.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)yieldReturnStatementNode.Expression)).Return(true);
         }
         // yield-break-statement
         {
@@ -1281,98 +1281,98 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(exp.Type.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(exp.Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(exp.ArraySizeSpecifier)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ArraySizeSpecifier.Expressions[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ArraySizeSpecifier.Expressions[1])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ArraySizeSpecifier.Expressions[0])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ArraySizeSpecifier.Expressions[1])).Return(true);
           Expect.Call(visitorMock.Visit(exp.Initializer)).Return(true);
           var arrInit = exp.Initializer.VariableInitializers[0] as ArrayInitializerNode;
           Expect.Call(visitorMock.Visit(arrInit)).Return(true);
           Expect.Call(visitorMock.Visit((ExpressionInitializerNode)arrInit.VariableInitializers[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ExpressionInitializerNode)arrInit.VariableInitializers[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ExpressionInitializerNode)arrInit.VariableInitializers[0]).Expression)).Return(true);
           Expect.Call(visitorMock.Visit((ExpressionInitializerNode)arrInit.VariableInitializers[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ExpressionInitializerNode)arrInit.VariableInitializers[1]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ExpressionInitializerNode)arrInit.VariableInitializers[1]).Expression)).Return(true);
         }
         // true-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as TrueLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // false-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as FalseLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // char-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as CharLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // decimal-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as DecimalLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // double-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as DoubleLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // int32-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as Int32LiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // int64-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as Int64LiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // null-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as NullLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // single-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as SingleLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // string-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as StringLiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // uint32-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as UInt32LiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // uint64-literal
         {
           var elemInit = collInit.ElementInitializers[i++];
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
-          var exp = elemInit.NonAssignmentExpression as UInt64LiteralNode;
+          var exp = elemInit.NonAssignmentExpression as LiteralNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
         }
         // simple-name
@@ -1388,7 +1388,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as ParenthesizedExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expression)).Return(true);
         }
         // primary-expression-member-access
         {
@@ -1440,9 +1440,9 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(((SimpleNameNode)exp.PrimaryExpression).Arguments[0].TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(((SimpleNameNode)exp.PrimaryExpression).Arguments[0].TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(exp.Arguments[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Arguments[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Arguments[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(exp.Arguments[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Arguments[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Arguments[1].Expression)).Return(true);
         }
         // element-access
         {
@@ -1451,8 +1451,8 @@ namespace CSharpTreeBuilderTest.Ast
           var exp = elemInit.NonAssignmentExpression as ElementAccessNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)exp.PrimaryExpression)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expressions[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expressions[1])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expressions[0])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expressions[1])).Return(true);
         }
         // this-access
         {
@@ -1475,8 +1475,8 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as BaseElementAccessNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expressions[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expressions[1])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expressions[0])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expressions[1])).Return(true);
         }
         // post-increment-expression
         {
@@ -1511,11 +1511,11 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(exp.Type.TypeName.TypeTags[0].Arguments[1].TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(exp.ObjectOrCollectionInitializer)).Return(true);
           Expect.Call(visitorMock.Visit(exp.ObjectOrCollectionInitializer.ElementInitializers[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[0].ExpressionList[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[0].ExpressionList[1])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[0].ExpressionList[0])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[0].ExpressionList[1])).Return(true);
           Expect.Call(visitorMock.Visit(exp.ObjectOrCollectionInitializer.ElementInitializers[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[1])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[0])).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ObjectOrCollectionInitializer.ElementInitializers[1].ExpressionList[1])).Return(true);
         }
         // object-creation-expression (with argument-list and object-initializer
         {
@@ -1527,14 +1527,14 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(exp.Type.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(exp.Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(exp.Arguments[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Arguments[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Arguments[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(exp.Arguments[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Arguments[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Arguments[1].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(exp.ObjectOrCollectionInitializer)).Return(true);
           Expect.Call(visitorMock.Visit(exp.ObjectOrCollectionInitializer.MemberInitializers[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.MemberInitializers[0].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ObjectOrCollectionInitializer.MemberInitializers[0].Expression)).Return(true);
           Expect.Call(visitorMock.Visit(exp.ObjectOrCollectionInitializer.MemberInitializers[1])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.ObjectOrCollectionInitializer.MemberInitializers[1].Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.ObjectOrCollectionInitializer.MemberInitializers[1].Expression)).Return(true);
         }
         // anonymous-object-creation-expression
         {
@@ -1557,7 +1557,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(baseMemberAccessMemberDeclarator.BaseMemberAccess.MemberName)).Return(true);
           var identifierMemberDeclarator = exp.Declarators[3] as IdentifierMemberDeclaratorNode;
           Expect.Call(visitorMock.Visit(identifierMemberDeclarator)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)identifierMemberDeclarator.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)identifierMemberDeclarator.Expression)).Return(true);
         }
         // typeof-expression (with unbound typename)
         {
@@ -1587,7 +1587,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as CheckedExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expression)).Return(true);
         }
         // unchecked-expression
         {
@@ -1595,7 +1595,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as UncheckedExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Expression)).Return(true);
         }
         // default-value-expression
         {
@@ -1638,7 +1638,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(exp.FormalParameters[1].Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(exp.Body)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)exp.Body.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)exp.Body.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)exp.Body.Statements[0]).Expression)).Return(true);
         }
         // lambda-expression (with implicit signature, expression body) (wrapped in a cast + parens)
         // (Expression<Func<int, int, int>>) ((x, y) => x + y),
@@ -1708,7 +1708,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(exp.FormalParameters[1].Type.TypeName.TypeTags[0])).Return(true);
           Expect.Call(visitorMock.Visit(exp.Block)).Return(true);
           Expect.Call(visitorMock.Visit((ReturnStatementNode)exp.Block.Statements[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)((ReturnStatementNode)exp.Block.Statements[0]).Expression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)((ReturnStatementNode)exp.Block.Statements[0]).Expression)).Return(true);
         }
         // unary-expression
         // -1,
@@ -1717,7 +1717,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as UnaryOperatorExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.Operand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Operand)).Return(true);
         }
         // pre-increment-expression
         // ++p,
@@ -1747,7 +1747,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(castExp.Type)).Return(true);
           Expect.Call(visitorMock.Visit(castExp.Type.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(castExp.Type.TypeName.TypeTags[0])).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)castExp.Operand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)castExp.Operand)).Return(true);
         }
         // binary-expression
         // 1 + 1,
@@ -1756,8 +1756,8 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as BinaryExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.LeftOperand)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.RightOperand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.LeftOperand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.RightOperand)).Return(true);
         }
         // type-testing-expression
         // 1 is int,
@@ -1766,7 +1766,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as TypeTestingExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.LeftOperand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.LeftOperand)).Return(true);
           Expect.Call(visitorMock.Visit(exp.RightOperand)).Return(true);
           Expect.Call(visitorMock.Visit(exp.RightOperand.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(exp.RightOperand.TypeName.TypeTags[0])).Return(true);
@@ -1778,9 +1778,9 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(elemInit)).Return(true);
           var exp = elemInit.NonAssignmentExpression as ConditionalExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
-          Expect.Call(visitorMock.Visit((TrueLiteralNode)exp.Condition)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.TrueExpression)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.FalseExpression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.Condition)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.TrueExpression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.FalseExpression)).Return(true);
         }
         // assignment (wrapped in parens, otherwise assignment is not permitted here)
         // (p = 1),
@@ -1792,7 +1792,7 @@ namespace CSharpTreeBuilderTest.Ast
           var exp = paren.Expression as AssignmentExpressionNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)exp.LeftOperand)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)exp.RightOperand)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)exp.RightOperand)).Return(true);
         }
         //query-expression
         //from int i in myList
@@ -1833,7 +1833,7 @@ namespace CSharpTreeBuilderTest.Ast
           {
             var bodyClause = exp.QueryBody.BodyClauses[j++] as WhereClauseNode;
             Expect.Call(visitorMock.Visit(bodyClause)).Return(true);
-            Expect.Call(visitorMock.Visit((TrueLiteralNode)bodyClause.Expression)).Return(true);
+            Expect.Call(visitorMock.Visit((LiteralNode)bodyClause.Expression)).Return(true);
           }
           {
             var bodyClause = exp.QueryBody.BodyClauses[j++] as JoinClauseNode;
@@ -1866,7 +1866,7 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(cont.QueryBody)).Return(true);
           Expect.Call(visitorMock.Visit(cont.QueryBody.GroupClause)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)cont.QueryBody.GroupClause.GroupExpression)).Return(true);
-          Expect.Call(visitorMock.Visit((Int32LiteralNode)cont.QueryBody.GroupClause.ByExpression)).Return(true);
+          Expect.Call(visitorMock.Visit((LiteralNode)cont.QueryBody.GroupClause.ByExpression)).Return(true);
         }
 
       }

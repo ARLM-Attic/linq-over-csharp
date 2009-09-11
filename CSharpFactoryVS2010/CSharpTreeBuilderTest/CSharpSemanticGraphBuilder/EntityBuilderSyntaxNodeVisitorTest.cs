@@ -1151,5 +1151,176 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of literal entities.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Literal()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Literal.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // class A
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
+      var members = classEntity.Members.ToList();
+
+      int i = 0;
+
+      // object a0 = null;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        (expression is NullLiteralExpressionEntity).ShouldBeTrue();
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // bool a1 = true;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(bool));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // decimal a2 = 2m;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(decimal));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // int a3 = 3;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(int));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // uint a4 = 4u;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(uint));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // long a5 = 5l;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(long));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // ulong a6 = 6ul;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(ulong));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // char a7 = '7';
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(char));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // float a8 = 8f;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(float));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // double a9 = 9d;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(double));
+        expression.Parent.ShouldEqual(initializer);
+      }
+      // string a10 = "10";
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var literal = expression as TypedLiteralExpressionEntity;
+        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(string));
+        expression.Parent.ShouldEqual(initializer);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of a simple name entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void SimpleName()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\SimpleName.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // class A
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
+      var members = classEntity.Members.ToList();
+
+      int i = 0;
+
+      // static int a = b;
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var simpleName = expression as SimpleNameExpressionEntity;
+        simpleName.EntityReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        expression.Parent.ShouldEqual(initializer);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the building of a default value entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void DefaultValue()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"EntityBuilderSyntaxNodeVisitor\DefaultValue.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      // class A
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
+      var members = classEntity.Members.ToList();
+
+      int i = 0;
+
+      // A a = default(A);
+      {
+        var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
+        var expression = initializer.Expression;
+        var defaultValueExpressionEntity = expression as DefaultValueExpressionEntity;
+        var typeReference = defaultValueExpressionEntity.TypeReference as TypeNodeBasedTypeEntityReference;
+        typeReference.SyntaxNode.ToString().ShouldEqual("A");
+        defaultValueExpressionEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        expression.Parent.ShouldEqual(initializer);
+      }
+    }
+
   }
 }

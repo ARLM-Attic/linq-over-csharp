@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected NonFieldVariableEntity(
       string name, 
       SemanticEntityReference<TypeEntity> typeReference, 
-      IVariableInitializer initializer)
+      VariableInitializer initializer)
     {
       if (name == null)
       {
@@ -80,7 +80,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the initializer of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IVariableInitializer Initializer { get; private set; }
+    public VariableInitializer Initializer { get; private set; }
 
   }
 }

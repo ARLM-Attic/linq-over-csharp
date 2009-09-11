@@ -14,6 +14,16 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public abstract class PropertyDeclarationNodeBase : MemberDeclarationNode
   {
+    /// <summary>
+    /// Backing field for FirstAccessor property.
+    /// </summary>
+    private AccessorNode _FirstAccessor;
+
+    /// <summary>
+    /// Backing field for SecondAccessor property.
+    /// </summary>
+    private AccessorNode _SecondAccessor;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="PropertyDeclarationNodeBase"/> class.
@@ -44,14 +54,36 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the first accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AccessorNode FirstAccessor { get; internal set; }
+    public AccessorNode FirstAccessor
+    {
+      get { return _FirstAccessor; }
+      internal set
+      {
+        _FirstAccessor = value;
+        if (_FirstAccessor != null)
+        {
+          _FirstAccessor.ParentNode = this;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the second accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public AccessorNode SecondAccessor { get; internal set; }
+    public AccessorNode SecondAccessor
+    {
+      get { return _SecondAccessor; }
+      internal set
+      {
+        _SecondAccessor = value;
+        if (_SecondAccessor != null)
+        {
+          _SecondAccessor.ParentNode = this;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

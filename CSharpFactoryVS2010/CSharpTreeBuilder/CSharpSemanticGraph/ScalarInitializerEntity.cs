@@ -8,44 +8,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents an initialier that is an expression.
   /// </summary>
   // ================================================================================================
-  public sealed class ScalarInitializerEntity : SemanticEntity, IVariableInitializer, IHasExpressions
+  public sealed class ScalarInitializerEntity : VariableInitializer, IHasExpressions
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this initializer is an expression.
+    /// Gets the expression of the initializer.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsExpression
-    {
-      get { return true; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is an array initializer.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsArrayInitializer
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the expression, if this initializer is an expression. Null if it's not an expression.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionEntity Expression { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the collection of variable initializers. Null if it's not an array initializer.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<IVariableInitializer> VariableInitializers
-    {
-      get { return null; }
-    }
+    public ExpressionEntity Expression { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -56,6 +26,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public void AddExpression(ExpressionEntity expressionEntity)
     {
       Expression = expressionEntity;
+
+      if (expressionEntity != null)
+      {
+        expressionEntity.Parent = this;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -82,6 +57,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       if (!visitor.Visit(this)) { return; }
+
+      if (Expression != null)
+      {
+        Expression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

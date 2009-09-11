@@ -25,6 +25,11 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
       Expression = expression;
+      
+      if (expression != null)
+      {
+        expression.ParentNode = this;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

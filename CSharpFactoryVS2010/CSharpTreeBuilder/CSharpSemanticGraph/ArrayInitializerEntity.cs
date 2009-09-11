@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -8,10 +7,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents an array initialier which is a list of expressions.
   /// </summary>
   // ================================================================================================
-  public sealed class ArrayInitializerEntity : SemanticEntity, IVariableInitializer
+  public sealed class ArrayInitializerEntity : VariableInitializer
   {
     /// <summary>Backing field for VariableInitializers property.</summary>
-    private readonly List<IVariableInitializer> _VariableInitializers;
+    private readonly List<VariableInitializer> _VariableInitializers;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -20,37 +19,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public ArrayInitializerEntity()
     {
-      _VariableInitializers = new List<IVariableInitializer>();
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this initializer is an expression.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsExpression
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is an array initializer.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsArrayInitializer
-    {
-      get { return true; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the expression, if this initializer is an expression. Null if it's not an expression.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionEntity Expression
-    {
-      get { return null; }
+      _VariableInitializers = new List<VariableInitializer>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -58,7 +27,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the collection of variable initializers.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<IVariableInitializer> VariableInitializers
+    public IEnumerable<VariableInitializer> VariableInitializers
     {
       get { return _VariableInitializers; }
     }
@@ -69,9 +38,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="initializer">A variable initializer.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddVariableInitializer(IVariableInitializer initializer)
+    public void AddVariableInitializer(VariableInitializer initializer)
     {
-      _VariableInitializers.Add(initializer);
+      if (initializer != null)
+      {
+        _VariableInitializers.Add(initializer);
+        initializer.Parent = this;
+      }
     }
 
     #region Visitor methods

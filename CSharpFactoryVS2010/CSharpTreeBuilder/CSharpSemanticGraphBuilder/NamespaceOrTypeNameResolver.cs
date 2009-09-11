@@ -455,7 +455,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     private static NamespaceOrTypeEntity ResolveSingleTypeTag(TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity)
     {
       // If K is zero ...
-      if (typeTagNode.Arguments.Count == 0)
+      if (!typeTagNode.HasTypeArguments)
       {
         // ... and the namespace-or-type-name appears within a generic method declaration (§10.6) ...
         var genericMethodEntity = resolutionContextEntity.GetEnclosingGenericMethodDeclaration();

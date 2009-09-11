@@ -7,6 +7,11 @@
   // ================================================================================================
   public class AccessorEntity : SemanticEntity, IHasBody
   {
+    /// <summary>
+    /// Backing field for Body property.
+    /// </summary>
+    private BlockEntity _Body;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="AccessorEntity"/> class.
@@ -22,10 +27,25 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the body of the accessor.
+    /// Gets or sets the body of the accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockEntity Body { get; private set; }
+    public BlockEntity Body
+    {
+      get
+      {
+        return _Body;
+      }
+      
+      set
+      {
+        _Body = value;
+        if (_Body != null)
+        {
+          _Body.Parent = this;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

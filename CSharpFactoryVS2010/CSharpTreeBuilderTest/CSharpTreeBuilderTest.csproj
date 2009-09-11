@@ -68,6 +68,7 @@
     <Compile Include="Ast\StructDeclarations.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\PartialTypeMergingSemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForCompleteMatchingTest.cs" />
@@ -359,8 +360,15 @@
     <None Include="TestFiles\Orphan\CS0752_PartialMethodCannotHaveOutParameter.cs" />
     <None Include="TestFiles\Orphan\PartialMethod.cs" />
     <None Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
-    <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\NullLiteral.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Literal.cs" />
+    <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\Literal.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\SimpleName.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\DefaultValue.cs" />
+    <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\DefaultValue.cs" />
+    <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\SimpleName.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <Compile Include="TestFiles\SimpleNameResolution\MethodTypeParameter.cs" />
+    <None Include="TestFiles\SimpleNameResolution\CS0103_SimpleNameUndefined.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />
     <None Include="TestFiles\Orphan\CS0547_VoidProperty.cs" />
     <None Include="TestFiles\TypeResolution\TypeArgumentCanBeResolvedWithUsingNamespace.cs" />

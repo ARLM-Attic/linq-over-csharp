@@ -28,6 +28,11 @@
     public virtual bool Visit(ScalarInitializerEntity entity) { return true; }
     public virtual bool Visit(ArrayInitializerEntity entity) { return true; }
 
+    public virtual bool Visit(NullLiteralExpressionEntity entity) { return true; }
+    public virtual bool Visit(TypedLiteralExpressionEntity entity) { return true; }
+    public virtual bool Visit(SimpleNameExpressionEntity entity) { return true; }
+    public virtual bool Visit(DefaultValueExpressionEntity entity) { return true; }
+
     #pragma warning restore 1591
 
   }
