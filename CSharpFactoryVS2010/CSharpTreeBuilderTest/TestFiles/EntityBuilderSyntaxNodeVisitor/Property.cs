@@ -1,4 +1,4 @@
-﻿class A
+﻿class A : B
 {
   int B
   {
@@ -10,4 +10,15 @@
 
   static int D { get; set; }
 
+  public virtual int E { get; set; }
+
+  public override int F { get; set; }
+
+  public new int G { get; set; }
+}
+
+class B
+{
+  public virtual int F { get; set; }
+  public int G { get; set; }
 }

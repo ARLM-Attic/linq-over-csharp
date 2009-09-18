@@ -13,22 +13,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     /// <param name="isPartial">A value indicating whether this type was declared as partial.</param>
     // ----------------------------------------------------------------------------------------------
-    public ClassEntity(string name, bool isPartial)
-      : base(name)
+    public ClassEntity(AccessibilityKind? accessibility, string name, bool isPartial)
+      : base(accessibility, name)
     {
       IsPartial = isPartial;
+      IsAbstract = false;
+      IsSealed = false;
+      IsStatic = false;
     }
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class with no partial.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public ClassEntity(string name)
-      : this(name, false)
+    public ClassEntity(AccessibilityKind? accessibility, string name)
+      : this(accessibility, name, false)
     {
     }
 
@@ -38,6 +43,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public bool IsPartial { get; private set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this class is static (contains only static members).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsStatic { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this class is abstract (cannot be instantiated directly).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsAbstract { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this class is sealed (no derivation allowed from the class).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsSealed { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

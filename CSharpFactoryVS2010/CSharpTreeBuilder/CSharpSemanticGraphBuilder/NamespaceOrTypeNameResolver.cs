@@ -421,7 +421,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // ... and N or any of its base classes contain a nested accessible type having name I and K type parameters,
           // BUGBUG: accessibility is not checked!
-          var foundNestesTypeEntity = FindNestedTypeInTypeOrBaseTypes(lastTypeTag, handleEntity as TypeEntity);
+          var foundNestesTypeEntity = FindNestedAccessibleTypeInTypeOrBaseTypes(lastTypeTag, handleEntity as TypeEntity);
 
           if (foundNestesTypeEntity != null)
           {
@@ -499,7 +499,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // ... and T or any of its base types contain a nested accessible type having name I and K type parameters, ...
           // BUGBUG: accessibility is not checked!
-          var foundNestesTypeEntity = FindNestedTypeInTypeOrBaseTypes(typeTagNode, typeContext);
+          var foundNestesTypeEntity = FindNestedAccessibleTypeInTypeOrBaseTypes(typeTagNode, typeContext);
 
           if (foundNestesTypeEntity != null)
           {
@@ -622,13 +622,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Finds a nested type by a typeTagNode in a type entity or any of its base types.
+    /// Finds a nested accessible type by a typeTagNode in a type entity or any of its base types.
     /// </summary>
     /// <param name="typeTagNode">The typeTag to be found.</param>
     /// <param name="contextType">The type where the searching starts.</param>
     /// <returns>A TypeEntity with the name and number of type parameters defined in typeTagNode, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeEntity FindNestedTypeInTypeOrBaseTypes(TypeTagNode typeTagNode, TypeEntity contextType)
+    private static TypeEntity FindNestedAccessibleTypeInTypeOrBaseTypes(TypeTagNode typeTagNode, TypeEntity contextType)
     {
       // If there is more than one such type, the type declared within the more derived type is selected. 
       // _Note that non-type members (constants, fields, methods, properties, indexers, operators, instance constructors, 

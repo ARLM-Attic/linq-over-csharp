@@ -5,9 +5,6 @@
 
   class Class1
   {
-    int a;
-
-    void A() {}
   }
 }
 

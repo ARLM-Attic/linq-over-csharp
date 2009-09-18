@@ -28,6 +28,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Resolves type references in a TypeParameterEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(TypeParameterEntity entity)
+    {
+      foreach (var typeReference in entity.TypeReferenceConstraints)
+      {
+        typeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      }
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Resolves type references in a FieldEntity node.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>

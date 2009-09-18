@@ -20,7 +20,9 @@
     public virtual bool Visit(StructEntity entity) { return true; }
     public virtual bool Visit(DelegateEntity entity) { return true; }
     public virtual bool Visit(InterfaceEntity entity) { return true; }
+    public virtual bool Visit(TypeParameterEntity entity) { return true; }
 
+    public virtual bool Visit(ConstantMemberEntity entity) { return true; }
     public virtual bool Visit(FieldEntity entity) { return true; }
     public virtual bool Visit(PropertyEntity entity) { return true; }
     public virtual bool Visit(MethodEntity entity) { return true; }

@@ -20,6 +20,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>The semantic graph that is the context of the type resolution.</summary>
     private readonly SemanticGraph _SemanticGraph;
 
+    /// <summary>An object that implements the member lookup logic.</summary>
+    private readonly MemberLookup _MemberLookup;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SimpleNameResolver"/> class.
@@ -31,6 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       _ErrorHandler = errorHandler;
       _SemanticGraph = semanticGraph;
+      _MemberLookup = new MemberLookup(errorHandler, semanticGraph);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -149,10 +153,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           }
         }
 
-        // - Otherwise, if a member lookup (§7.3) of I in T with K type arguments produces a match:
-        //   - If T is the instance type of the immediately enclosing class or struct type and the lookup identifies one or more methods, the result is a method group with an associated instance expression of this. If a type argument list was specified, it is used in calling a generic method (§7.5.5.1).
-        //   - Otherwise, if T is the instance type of the immediately enclosing class or struct type, if the lookup identifies an instance member, and if the reference occurs within the block of an instance constructor, an instance method, or an instance accessor, the result is the same as a member access (§7.5.4) of the form this.I. This can only happen when K is zero.
-        //   - Otherwise, the result is the same as a member access (§7.5.4) of the form T.I or T.I<A1, ..., AK>. In this case, it is a compile-time error for the simple-name to refer to an instance member.
+        // Otherwise, if a member lookup (§7.3) of I in T with K type arguments produces a match:
+        //var members = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext).ToList();
+        //if (members.Count > 0)
+        {
+          // - If T is the instance type of the immediately enclosing class or struct type 
+          //   and the lookup identifies one or more methods, the result is a method group 
+          //   with an associated instance expression of this. 
+          //   If a type argument list was specified, it is used in calling a generic method (§7.5.5.1).
+          // - Otherwise, if T is the instance type of the immediately enclosing class or struct type, 
+          //   if the lookup identifies an instance member, and if the reference occurs 
+          //   within the block of an instance constructor, an instance method, or an instance accessor, 
+          //   the result is the same as a member access (§7.5.4) of the form this.I. This can only happen when K is zero.
+          // - Otherwise, the result is the same as a member access (§7.5.4) of the form T.I or T.I<A1, ..., AK>. 
+          //   In this case, it is a compile-time error for the simple-name to refer to an instance member.
+        }
 
         // "... and continuing with the instance type of each enclosing class or struct declaration (if any):"
         typeContext = typeContext.Parent.GetEnclosing<TypeEntity>();

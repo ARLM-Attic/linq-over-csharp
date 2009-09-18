@@ -23,27 +23,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="PropertyEntity"/> class.
     /// </summary>
-    /// <param name="name">The name of the member.</param>
+    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
+    /// <param name="isStatic">A value indicating whether this property is static.</param>
+    /// <param name="typeReference">A reference to the type of the member.</param>
     /// <param name="interfaceReference">
     /// A reference to in interface, if the member is explicitly implemented interface member.
     /// Null otherwise.
     /// </param>
-    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
-    /// <param name="typeReference">A reference to the type of the member.</param>
-    /// <param name="isStatic">A value indicating whether this property is static.</param>
+    /// <param name="name">The name of the member.</param>
     /// <param name="isAutoImplemented">A value indicating whether this property is auto-implemented.</param>
     // ----------------------------------------------------------------------------------------------
     public PropertyEntity(
+      bool isExplicitlyDefined,
+      AccessibilityKind? accessibility,
+      bool isStatic,
+      SemanticEntityReference<TypeEntity> typeReference,
+      SemanticEntityReference<TypeEntity> interfaceReference,
       string name, 
-      SemanticEntityReference<TypeEntity> interfaceReference, 
-      bool isExplicitlyDefined, 
-      SemanticEntityReference<TypeEntity> typeReference, 
-      bool isStatic, 
       bool isAutoImplemented)
       : 
-      base(name, interfaceReference, isExplicitlyDefined, typeReference)
+      base(isExplicitlyDefined, accessibility, typeReference, interfaceReference, name)
     {
-      IsStatic = isStatic;
+      _IsStatic = isStatic;
       IsAutoImplemented = isAutoImplemented;
       
       // If the property is auto-implemented then create the backing field.
@@ -53,16 +55,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         // because the uniqueness of the field name gets tricky with explicitly implemented interface members.
         // We just use a good old GUID, because its name has no significance at all.
         var fieldName = System.Guid.NewGuid().ToString();
-        _AutoImplementedField = new FieldEntity(fieldName, false, typeReference, isStatic, null);
+        _AutoImplementedField = new FieldEntity(false, AccessibilityKind.Private, isStatic, typeReference, fieldName, null);
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the property is static.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsStatic { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

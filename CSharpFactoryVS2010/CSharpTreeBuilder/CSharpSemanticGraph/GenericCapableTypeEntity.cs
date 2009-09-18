@@ -37,10 +37,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="GenericCapableTypeEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected GenericCapableTypeEntity(string name)
-      : base(name)
+    protected GenericCapableTypeEntity(AccessibilityKind? accessibility, string name)
+      : base(accessibility, name)
     {
       _AllTypeParameters = new List<TypeParameterEntity>();
       _ConstructedGenericTypes = new List<ConstructedGenericTypeEntity>();
@@ -236,5 +237,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
                : string.Format("{0}`{1}", base.ToString(), OwnTypeParameters.Count);
     }
 
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      foreach (var typeParameter in OwnTypeParameters)
+      {
+        typeParameter.AcceptVisitor(visitor);
+      }
+
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

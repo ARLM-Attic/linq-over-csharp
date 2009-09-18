@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -19,7 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="underlyingType">A type that this constructed type builds upon.</param>
     // ----------------------------------------------------------------------------------------------
     protected ConstructedTypeEntity(TypeEntity underlyingType)
-      : base(underlyingType.Name)
+      : base(null, underlyingType.Name)
     {
       if (underlyingType == null )
       {

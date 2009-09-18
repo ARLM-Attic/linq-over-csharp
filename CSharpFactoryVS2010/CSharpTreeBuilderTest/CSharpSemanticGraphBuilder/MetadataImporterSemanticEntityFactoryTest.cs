@@ -32,8 +32,83 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
 
+      var global = project.SemanticGraph.GlobalNamespace;
+
       // check namespace A
-      project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsExplicit.ShouldBeFalse();
+      global.ChildNamespaces[0].IsExplicit.ShouldBeFalse();
+
+      var classCounter = 1;
+
+      // public class PublicClass
+      {
+        var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("PublicClass");
+        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Public);
+        classEntity.ReflectedMetadata.Name.ShouldEqual("PublicClass");
+
+        var childClassCounter = 0;
+
+        // public class PublicNestedClass
+        {
+          var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
+          nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.PublicNestedClass");
+          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Public);
+          nestedClass.ReflectedMetadata.Name.ShouldEqual("PublicNestedClass");
+        }
+        // public class InternalNestedClass
+        {
+          var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
+          nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.InternalNestedClass");
+          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+          nestedClass.ReflectedMetadata.Name.ShouldEqual("InternalNestedClass");
+        }
+        // public class ProtectedNestedClass
+        {
+          var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
+          nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.ProtectedNestedClass");
+          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Family);
+        }
+        // public class ProtectedInternalNestedClass
+        {
+          var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
+          nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.ProtectedInternalNestedClass");
+          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
+        }
+        // public class PrivateNestedClass
+        {
+          var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
+          nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.PrivateNestedClass");
+          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Private);
+        }
+      }
+
+      // internal class InternalClass
+      {
+        var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("InternalClass");
+        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+      }
+
+      // static class StaticClass
+      {
+        var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("StaticClass");
+        classEntity.IsStatic.ShouldBeTrue();
+      }
+
+      // abstract class AbstractClass
+      {
+        var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("AbstractClass");
+        classEntity.IsAbstract.ShouldBeTrue();
+      }
+
+      // sealed class SealedClass
+      {
+        var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
+        classEntity.FullyQualifiedName.ShouldEqual("SealedClass");
+        classEntity.IsSealed.ShouldBeTrue();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -256,19 +331,23 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var objectEntity = project.SemanticGraph.GetEntityByMetadataObject(typeof(System.Object)) as ClassEntity;
       objectEntity.Name.ShouldEqual("Object");
       objectEntity.FullyQualifiedName.ShouldEqual("System.Object");
+      objectEntity.ReflectedMetadata.ShouldEqual(typeof (object));
 
       // check System.Nullable`1
       // It's not a reference to be resolved, but a lookup in metadata map, so it is already populated
       project.SemanticGraph.NullableGenericTypeDefinition.ToString().ShouldEqual("global::System.Nullable`1");
       project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters.Count.ShouldEqual(1);
       project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters[0].ToString().ShouldEqual("global::System.Nullable`1'T");
+      project.SemanticGraph.NullableGenericTypeDefinition.ReflectedMetadata.ShouldEqual(typeof (System.Nullable<>));
 
       // check System.Array
       // It's not a reference to be resolved, but a lookup in metadata map, so it is already populated
       project.SemanticGraph.SystemArray.ToString().ShouldEqual("global::System.Array");
+      project.SemanticGraph.SystemArray.ReflectedMetadata.ShouldEqual(typeof (System.Array));
 
       // check BuiltIn types
       project.SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Int).ToString().ShouldEqual("global::System.Int32");
+      project.SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Int).ReflectedMetadata.ShouldEqual(typeof (int));
     }
 
     // ----------------------------------------------------------------------------------------------

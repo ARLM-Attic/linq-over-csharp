@@ -24,8 +24,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var signature = new Signature("M",1,new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity("A")), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity("B")), ParameterKind.Reference)
+        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "A")), ParameterKind.Value),
+        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "B")), ParameterKind.Reference)
       });
       var comparer = new SignatureEqualityComparerForDeclarationSpace();
       comparer.Equals(signature, signature).ShouldBeTrue();
@@ -56,9 +56,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void EqualSignatures()
     {
-      var type1 = new ClassEntity("A");
-      var type2 = new ClassEntity("B");
-      var type3 = new ClassEntity("C");
+      var type1 = new ClassEntity(null, "A");
+      var type2 = new ClassEntity(null, "B");
+      var type3 = new ClassEntity(null, "C");
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
@@ -131,7 +131,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void NonEqualSignatures_DifferentNumberOfParameters()
     {
-      var type1 = new ClassEntity("A");
+      var type1 = new ClassEntity(null, "A");
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
@@ -152,9 +152,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void EqualSignatures_WithOutAndRef()
     {
-      var type1 = new ClassEntity("A");
-      var type2 = new ClassEntity("B");
-      var type3 = new ClassEntity("C");
+      var type1 = new ClassEntity(null, "A");
+      var type2 = new ClassEntity(null, "B");
+      var type3 = new ClassEntity(null, "C");
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
@@ -182,7 +182,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void NonEqualSignatures_WithOutAndValue()
     {
-      var type1 = new ClassEntity("A");
+      var type1 = new ClassEntity(null, "A");
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {

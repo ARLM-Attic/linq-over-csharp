@@ -13,27 +13,84 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class TypeEntity : NamespaceOrTypeEntity
   {
-    /// <summary>Backing field for BaseTypeReferences property.</summary>
+    /// <summary>
+    /// Backing field for BaseTypeReferences property.
+    /// </summary>
     private List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences;
 
-    /// <summary>Backing field for Members property.</summary>
+    /// <summary>
+    /// Backing field for Members property.
+    /// </summary>
     private readonly List<MemberEntity> _Members;
 
-    /// <summary>Stores array types created from this type. The key is the rank of the array.</summary>
+    /// <summary>
+    /// Stores array types created from this type. The key is the rank of the array.
+    /// </summary>
     private readonly Dictionary<int, ArrayTypeEntity> _ArrayTypes;
+
+    /// <summary>
+    /// Backing field for Accessibility property.
+    /// </summary>
+    protected AccessibilityKind? _Accessibility;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected TypeEntity(string name)
+    protected TypeEntity(AccessibilityKind? accessibility, string name)
       : base(name)
     {
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
+      _Accessibility = accessibility;
+      IsNew = false;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the accessibility of the member.
+    /// </summary>
+    /// <remarks>If the accessibility was not set then a default is returned 
+    /// which depends on the type of the containing type.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public virtual AccessibilityKind? Accessibility
+    {
+      get
+      {
+        if (_Accessibility != null)
+        {
+          return _Accessibility;
+        }
+
+        // If no declared accessibility then the default has to be returned,
+        // which is based on the type of the containing type.
+        if (Parent != null)
+        {
+          // Types declared in compilation units or namespaces default to internal declared accessibility.
+          if (Parent is NamespaceEntity)
+          {
+            return AccessibilityKind.Assembly;
+          }
+
+          // Nested types can only be declared in class or struct where the default accessibility is private.
+          if (Parent is TypeEntity)
+          {
+            return AccessibilityKind.Private;
+          }
+        }
+
+        // If there's no parent, then a default accessibility cannot be determined.
+        return null;
+      }
+
+      set
+      {
+        _Accessibility = value;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -128,13 +185,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this type is an alias of another type.
+    /// Gets a value indicating whether this type intentionally hides an inherited member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual bool IsAlias
-    {
-      get { return false; }
-    }
+    public virtual bool IsNew { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -257,6 +311,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of inherited members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <returns>A collection of the inherited members. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetInheritedMembers<TEntityType>(string name) where TEntityType : MemberEntity
+    {
+      return BaseType.GetMembers<TEntityType>(name).Union(BaseType.GetInheritedMembers<TEntityType>(name));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <returns>A collection of the found member. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetMembers<TEntityType>(string name) where TEntityType : MemberEntity
+    {
+      return _DeclarationSpace.GetEntities<TEntityType>(name);
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a member by name.

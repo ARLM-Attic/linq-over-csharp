@@ -36,3 +36,33 @@ namespace A.B
   public class Generic1<T1,T2>
   {}
 }
+
+public class PublicClass
+{
+  public class PublicNestedClass
+  { }
+
+  internal class InternalNestedClass
+  { }
+
+  protected class ProtectedNestedClass
+  { }
+  
+  protected internal class ProtectedInternalNestedClass
+  { }
+  
+  private class PrivateNestedClass
+  { }
+}
+
+internal class InternalClass
+{ }
+
+static class StaticClass
+{ }
+
+abstract class AbstractClass
+{ }
+
+sealed class SealedClass
+{ }

@@ -13,10 +13,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="DelegateEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public DelegateEntity(string name)
-      : base(name)
+    public DelegateEntity(AccessibilityKind? accessibility, string name)
+      : base(accessibility, name)
     {
     }
 

@@ -17,11 +17,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberEntity"/> class.
     /// </summary>
-    /// <param name="name">The name of the member.</param>
     /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
+    /// <param name="name">The name of the member.</param>
     // ----------------------------------------------------------------------------------------------
-    protected FunctionMemberEntity(string name, bool isExplicitlyDefined)
-      : base(name, isExplicitlyDefined)
+    protected FunctionMemberEntity(bool isExplicitlyDefined, AccessibilityKind? accessibility, string name)
+      : base(isExplicitlyDefined, accessibility, name)
     {
       _DeclarationSpace = new LocalVariableDeclarationSpace();
     }

@@ -11,11 +11,12 @@
     /// <summary>
     /// Initializes a new instance of the <see cref="InterfaceEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     /// <param name="isPartial">A value indicating whether this type was declared as partial.</param>
     // ----------------------------------------------------------------------------------------------
-    public InterfaceEntity(string name, bool isPartial)
-      : base(name)
+    public InterfaceEntity(AccessibilityKind? accessibility, string name, bool isPartial)
+      : base(accessibility, name)
     {
       IsPartial = isPartial;
     }
@@ -24,10 +25,11 @@
     /// <summary>
     /// Initializes a new instance of the <see cref="InterfaceEntity"/> class with no partial.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public InterfaceEntity(string name)
-      : this(name, false)
+    public InterfaceEntity(AccessibilityKind? accessibility, string name)
+      : this(accessibility, name, false)
     {
     }
 

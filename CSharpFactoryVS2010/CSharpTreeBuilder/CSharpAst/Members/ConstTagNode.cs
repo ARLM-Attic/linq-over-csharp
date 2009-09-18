@@ -14,6 +14,11 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class ConstTagNode : MemberDeclarationNode
   {
+    /// <summary>
+    /// Backing field for Expression property.
+    /// </summary>
+    private ExpressionNode _Expression;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstTagNode"/> class.
@@ -38,7 +43,21 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the expression belonging to this const member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public ExpressionNode Expression
+    {
+      get
+      {
+        return _Expression;
+      }
+      internal set
+      {
+        _Expression = value;
+        if (_Expression != null)
+        {
+          _Expression.ParentNode = this;
+        }
+      }
+    }
 
     #region Visitor methods
 

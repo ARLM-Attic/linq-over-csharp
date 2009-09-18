@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -14,10 +13,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="ChildTypeCapableTypeEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    protected ChildTypeCapableTypeEntity(string name)
-      : base(name)
+    protected ChildTypeCapableTypeEntity(AccessibilityKind? accessibility, string name)
+      : base(accessibility, name)
     {
       ChildTypes = new List<TypeEntity>();
     }

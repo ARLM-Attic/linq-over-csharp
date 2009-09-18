@@ -1,4 +1,5 @@
 ﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -7,29 +8,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a field of a type.
   /// </summary>
   // ================================================================================================
-  public class FieldEntity : MemberEntity, IVariableEntity
+  public sealed class FieldEntity : MemberEntity, IVariableEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FieldEntity"/> class.
     /// </summary>
-    /// <param name="name">The name of the member.</param>
     /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
-    /// <param name="type">The type of the field (a type entity reference).</param>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="isStatic">True, if the field is static, false otherwise.</param>
+    /// <param name="type">The type of the field (a type entity reference).</param>
+    /// <param name="name">The name of the member.</param>
     /// <param name="initializer">The initializer of the field.</param>
     // ----------------------------------------------------------------------------------------------
     public FieldEntity(
-      string name, 
-      bool isExplicitlyDefined, 
-      SemanticEntityReference<TypeEntity> type,
+      bool isExplicitlyDefined,
+      AccessibilityKind? accessibility,
       bool isStatic,
+      SemanticEntityReference<TypeEntity> type,
+      string name, 
       VariableInitializer initializer)
       : 
-      base(name, isExplicitlyDefined)
+      base(isExplicitlyDefined, accessibility, name)
     {
+      _IsStatic = isStatic;
       TypeReference = type;
-      IsStatic = isStatic;
       Initializer = initializer;
 
       if (Initializer != null)
@@ -75,13 +78,28 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public VariableInitializer Initializer { get; private set; }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets a value indicating whether this member can be overridden.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsVirtual
+    {
+      get { return false; }
+      set { throw new InvalidOperationException("Fields are unalterably non-virtual."); }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether the field is static.
+    /// Gets or sets a value indicating whether this member is on override of an inherited member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsStatic { get; private set; }
+    public override bool IsOverride
+    {
+      get { return false; }
+      set { throw new InvalidOperationException("Fields are unalterably non-override."); }
+    }
 
     #region Visitor methods
 

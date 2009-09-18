@@ -13,11 +13,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="StructEntity"/> class.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     /// <param name="isPartial">A value indicating whether this type was declared as partial.</param>
     // ----------------------------------------------------------------------------------------------
-    public StructEntity(string name, bool isPartial)
-      : base(name)
+    public StructEntity(AccessibilityKind? accessibility, string name, bool isPartial)
+      : base(accessibility, name)
     {
       IsPartial = isPartial;
     }
@@ -26,10 +27,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="StructEntity"/> class with no partial.
     /// </summary>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public StructEntity(string name)
-      : this(name, false)
+    public StructEntity(AccessibilityKind? accessibility, string name)
+      : this(accessibility, name, false)
     {
     }
 

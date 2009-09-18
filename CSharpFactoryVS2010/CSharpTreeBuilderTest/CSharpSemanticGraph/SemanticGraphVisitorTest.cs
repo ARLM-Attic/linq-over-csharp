@@ -40,8 +40,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0])).Return(true);
         var class1 = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
         Expect.Call(sgVisitorMock.Visit(class1)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(class1.Members.ToArray()[0] as FieldEntity)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(class1.Members.ToArray()[1] as MethodEntity)).Return(true);
         Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity)).Return(true);
         Expect.Call(sgVisitorMock.Visit(((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0] as ClassEntity)).Return(true);
       }
@@ -149,6 +147,47 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0] as EnumEntity)).Return(true);
         Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[0] as EnumMemberEntity)).Return(true);
         Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[1] as EnumMemberEntity)).Return(true);
+      }
+      mocks.ReplayAll();
+
+      // We only travers the global namespace, not the whole semantic graph, because that would include the built-in types too
+      project.SemanticGraph.GlobalNamespace.AcceptVisitor(sgVisitorMock);
+
+      // Assert
+      mocks.VerifyAll();
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the visiting of class members
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void VisitClassMembers()
+    {
+      // Set up a syntax tree
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SemanticGraphVisitor\VisitClassMembers.cs");
+      InvokeParser(project, true, false).ShouldBeTrue();
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+
+      // Arrange
+      var mocks = new MockRepository();
+      var sgVisitorMock = mocks.StrictMock<SemanticGraphVisitor>();
+      using (mocks.Ordered())
+      {
+        var global = project.SemanticGraph.GlobalNamespace;
+        Expect.Call(sgVisitorMock.Visit(global)).Return(true);
+        var class1 = global.ChildTypes[0] as ClassEntity;
+        Expect.Call(sgVisitorMock.Visit(class1)).Return(true);
+        var members = class1.Members.ToList();
+        var constMember = members[0] as ConstantMemberEntity;
+        Expect.Call(sgVisitorMock.Visit(constMember)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(constMember.InitializerExpression as TypedLiteralExpressionEntity)).Return(true);
+        var fieldMember = members[1] as FieldEntity;
+        Expect.Call(sgVisitorMock.Visit(fieldMember)).Return(true);
+        var methodMember = members[2] as MethodEntity;
+        Expect.Call(sgVisitorMock.Visit(methodMember)).Return(true);
       }
       mocks.ReplayAll();
 

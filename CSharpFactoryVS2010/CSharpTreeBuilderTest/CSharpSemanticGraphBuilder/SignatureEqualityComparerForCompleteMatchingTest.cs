@@ -22,9 +22,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void EqualSignatures()
     {
-      var type1 = new ClassEntity("A");
-      var type2 = new ClassEntity("B");
-      var type3 = new ClassEntity("C");
+      var type1 = new ClassEntity(null, "A");
+      var type2 = new ClassEntity(null, "B");
+      var type3 = new ClassEntity(null, "C");
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
@@ -52,9 +52,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void EqualSignatures_WithOutAndRef()
     {
-      var type1 = new ClassEntity("A");
-      var type2 = new ClassEntity("B");
-      var type3 = new ClassEntity("C");
+      var type1 = new ClassEntity(null, "A");
+      var type2 = new ClassEntity(null, "B");
+      var type3 = new ClassEntity(null, "C");
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {

@@ -1,4 +1,8 @@
-﻿class A
+﻿class A<T>
 {
-  A a = default(A);
+  B a1 = default(B);
+  object a2 = default(T);
 }
+
+class B
+{}

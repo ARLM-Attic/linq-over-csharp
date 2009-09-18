@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpAstBuilder;
 using CSharpTreeBuilder.CSharpSemanticGraph;
@@ -180,9 +181,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Cast the parent to a child-type-capable entity.
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
       
-      var classEntity = new ClassEntity(node.Name, node.IsPartial);
+      var classEntity = new ClassEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+      classEntity.IsNew = IsNew(node.Modifiers);
+      classEntity.IsStatic = IsStatic(node.Modifiers);
+      classEntity.IsAbstract = IsAbstract(node.Modifiers);
+      classEntity.IsSealed = IsSealed(node.Modifiers);
       AddBaseTypesToTypeEntity(classEntity, node);
-      AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters);
+      AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(classEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, classEntity);
@@ -205,9 +210,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Cast the parent to a child-type-capable entity.
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
-      var structEntity = new StructEntity(node.Name, node.IsPartial);
+      var structEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+      structEntity.IsNew = IsNew(node.Modifiers);
       AddBaseTypesToTypeEntity(structEntity, node);
-      AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters);
+      AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(structEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, structEntity);
@@ -230,9 +236,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Cast the parent to a child-type-capable entity.
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
-      var interfaceEntity = new InterfaceEntity(node.Name, node.IsPartial);
+      var interfaceEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+      interfaceEntity.IsNew = IsNew(node.Modifiers);
       AddBaseTypesToTypeEntity(interfaceEntity, node);
-      AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters);
+      AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(interfaceEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, interfaceEntity);
@@ -256,7 +263,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
       // Build the new entity
-      var enumEntity = new EnumEntity(node.Name);
+      var enumEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
+      enumEntity.IsNew = IsNew(node.Modifiers);
       childTypeCapableParentEntity.AddChildType(enumEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
 
@@ -290,8 +298,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
       // Build the new entity
-      var delegateEntity = new DelegateEntity(node.Name);
-      AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters);
+      var delegateEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
+      delegateEntity.IsNew = IsNew(node.Modifiers);
+      AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(delegateEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, delegateEntity);
 
@@ -325,10 +334,39 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Create a semantic entity and add to its parent.
         var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
         var initializer = CreateInitializer(fieldTag.Initializer);
-        var fieldEntity = new FieldEntity(fieldTag.Identifier, true, typeReference, node.IsStatic, initializer);
+        var fieldEntity = new FieldEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
+                                          typeReference, fieldTag.Identifier, initializer);
+        fieldEntity.IsNew = IsNew(node.Modifiers);
         parentEntity.AddMember(fieldEntity);
 
         AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
+      }
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a constant member entity from a const declaration.
+    /// </summary>
+    /// <param name="node">A const declaration syntax node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ConstDeclarationNode node)
+    {
+      var parentEntity = GetParentEntity<TypeEntity>(node);
+
+      // Looping through every tag in the field declaration
+      foreach (var constTag in node.ConstTags)
+      {
+        // Create a semantic entity and add to its parent.
+        var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+        var constantEntity = new ConstantMemberEntity(true, GetAccessibility(node.Modifiers), typeReference,
+                                                      constTag.Identifier);
+        constantEntity.IsNew = IsNew(node.Modifiers);
+        parentEntity.AddMember(constantEntity);
+
+        AssociateSyntaxNodeWithSemanticEntity(constTag, constantEntity);
       }
 
       return true;
@@ -346,10 +384,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       var parentEntity = GetParentEntity<EnumEntity>(node);
 
       // Create a semantic entity and add to its parent.
-      var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEntity.UnderlyingTypeReference,
-                                                  node.Expression != null);
+      var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEntity.UnderlyingTypeReference);
       parentEntity.AddMember(enumMemberEntity);
-
+      
       AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
 
       return true;
@@ -375,8 +412,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                                  ? new NamespaceOrTypeNameNodeBasedTypeEntityReference(node.InterfaceType)
                                  : null;
       var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
-      var propertyEntity = new PropertyEntity(node.Name, interfaceReference, true, typeReference, node.IsStatic,
-                                              isAutoImplemented);
+      var propertyEntity = new PropertyEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
+                                              typeReference, interfaceReference, node.Name, isAutoImplemented);
+      propertyEntity.IsNew = IsNew(node.Modifiers);
+      propertyEntity.IsOverride = IsOverride(node.Modifiers);
+      propertyEntity.IsVirtual = IsVirtual(node.Modifiers);
 
       parentEntity.AddMember(propertyEntity);
 
@@ -407,10 +447,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       var isAbstract = (node.Body == null);
       var returnTypeReference = new TypeNodeBasedTypeEntityReference(node.Type);
 
-      var methodEntity = new MethodEntity(node.Name, interfaceReference, true, isAbstract, node.IsPartial, node.IsStatic,
-                         returnTypeReference);
+      var methodEntity = new MethodEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
+                                          node.IsPartial, returnTypeReference, interfaceReference, node.Name, isAbstract);
 
-      AddTypeParametersToEntity(methodEntity, parentEntity, node.TypeParameters);
+      methodEntity.IsNew = IsNew(node.Modifiers);
+      methodEntity.IsOverride = IsOverride(node.Modifiers);
+      methodEntity.IsVirtual = IsVirtual(node.Modifiers);
+
+      AddTypeParametersToEntity(methodEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       AddParametersToOverloadableEntity(methodEntity, node.FormalParameters);
 
       parentEntity.AddMember(methodEntity);
@@ -735,9 +779,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeParameterHolder">An entity that will receive the type parameters.</param>
     /// <param name="parentEntity">The (to-be) parent of entity.</param>
     /// <param name="typeParameterNodes">A collection of type parameter AST nodes.</param>
+    /// <param name="typeParameterConstraints">A collection of type parameter constraint AST nodes.</param>
     // ----------------------------------------------------------------------------------------------
     private static void AddTypeParametersToEntity(
-      ICanHaveTypeParameters typeParameterHolder, SemanticEntity parentEntity, TypeParameterNodeCollection typeParameterNodes)
+      ICanHaveTypeParameters typeParameterHolder, 
+      SemanticEntity parentEntity, 
+      TypeParameterNodeCollection typeParameterNodes,
+      TypeParameterConstraintNodeCollection typeParameterConstraints)
     {
       // First add the (inherited) type parameters from the parent type
       if (parentEntity is GenericCapableTypeEntity)
@@ -751,9 +799,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Then add the "own" type parameters
       foreach (var typeParameter in typeParameterNodes)
       {
-        var typeParameterEntity = new TypeParameterEntity(typeParameter.Identifier);
+        var typeParameterName = typeParameter.Identifier;
+        var typeParameterEntity = new TypeParameterEntity(typeParameterName);
         typeParameterHolder.AddTypeParameter(typeParameterEntity);
         AssociateSyntaxNodeWithSemanticEntity(typeParameter, typeParameterEntity);
+
+        // Find the constraints of the type parameter
+        var constraints = from typeParameterConstraint in typeParameterConstraints
+                          where typeParameterConstraint.Identifier == typeParameterName
+                          select typeParameterConstraint;
+
+        // Add the constraints to the type parameter entity
+        foreach (var constraint in constraints)
+        {
+          foreach(var constraintTag in constraint.ConstraintTags)
+          {
+            typeParameterEntity.HasConstructorConstraint = constraintTag.IsNew;
+            typeParameterEntity.HasReferenceTypeConstraint = constraintTag.IsClass;
+            typeParameterEntity.HasValueTypeConstraint = constraintTag.IsStruct;
+
+            if (constraintTag.IsTypeName)
+            {
+              typeParameterEntity.AddTypeReferenceConstraint(new TypeNodeBasedTypeEntityReference(constraintTag.Type));
+            }
+          }
+        }
       }
     }
 
@@ -857,9 +927,176 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       return result as VariableInitializer;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "abstract" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "abstract" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsAbstract(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.Abstract));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "sealed" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "sealed" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsSealed(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.Sealed));
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "static" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "static" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsStatic(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.Static));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "new" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "new" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsNew(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.New));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "override" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "override" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsOverride(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.Override));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "virtual" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "virtual" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsVirtual(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.Virtual));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the accessibility defined in a collection of modifier AST nodes.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>The accessibility defined in the collection of modifier AST nodes. 
+    /// Null if not defined or ambiguous.</returns>
+    /// <remarks>Signals error CS0107 for ambiguous accessibility specifiers.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public AccessibilityKind? GetAccessibility(ModifierNodeCollection modifiers)
+    {
+      AccessibilityKind? accessibility = null;
+
+      if (modifiers != null)
+      {
+        foreach (var modifier in modifiers)
+        {
+          switch (modifier.Value)
+          {
+            case (ModifierType.Private):
+              if (accessibility == null)
+              {
+                accessibility = AccessibilityKind.Private;
+              }
+              else
+              {
+                ErrorTooManyProtectionModifier(modifier.StartToken);
+                return null;
+              }
+              break;
+
+            case (ModifierType.Protected):
+              if (accessibility == null)
+              {
+                accessibility = AccessibilityKind.Family;
+              }
+              else if (accessibility == AccessibilityKind.Assembly)
+              {
+                accessibility = AccessibilityKind.FamilyOrAssembly;
+              }
+              else
+              {
+                ErrorTooManyProtectionModifier(modifier.StartToken);
+                return null;
+              }
+              break;
+
+            case (ModifierType.Internal):
+              if (accessibility == null)
+              {
+                accessibility = AccessibilityKind.Assembly;
+              }
+              else if (accessibility == AccessibilityKind.Family)
+              {
+                accessibility = AccessibilityKind.FamilyOrAssembly;
+              }
+              else
+              {
+                ErrorTooManyProtectionModifier(modifier.StartToken);
+                return null;
+              }
+              break;
+
+            case (ModifierType.Public):
+              if (accessibility == null)
+              {
+                accessibility = AccessibilityKind.Public;
+              }
+              else
+              {
+                ErrorTooManyProtectionModifier(modifier.StartToken);
+                return null;
+              }
+              break;
+
+            default:
+              break;
+          }
+        }
+      }
+
+      return accessibility;
+    }
+    
     #endregion
 
     #region Error reporting private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Signals error CS0107: More than one protection modifier
+    /// </summary>
+    /// <param name="errorPoint">The token where the error occured.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void ErrorTooManyProtectionModifier(Token errorPoint)
+    {
+      _ErrorHandler.Error("CS0107", errorPoint, "More than one protection modifier");
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

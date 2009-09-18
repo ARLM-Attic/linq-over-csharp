@@ -45,16 +45,6 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether the "static" modifier appears in the modifier list.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsStatic
-    {
-      get { return (Modifiers != null && Modifiers.Contains(ModifierType.Static)); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets the name of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 ﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -7,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents an enum member (a named constant).
   /// </summary>
   // ================================================================================================
-  public sealed class EnumMemberEntity : FieldEntity
+  public sealed class EnumMemberEntity : ConstantMemberEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -15,10 +16,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the member.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
-    /// <param name="hasInitializer">Indicates whether this enum member has an initializer.</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumMemberEntity(string name, SemanticEntityReference<TypeEntity> type, bool hasInitializer)
-      : base(name, true, type, true, hasInitializer ? new ScalarInitializerEntity() : null)
+    public EnumMemberEntity(string name, SemanticEntityReference<TypeEntity> type)
+      : base(true, null, type, name)
     {
     }
   }

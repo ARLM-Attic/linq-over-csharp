@@ -39,7 +39,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void GetEnclosingType_ForType()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity("Class");
+      var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
 
       type.GetEnclosing<TypeEntity>().ShouldEqual(type);
@@ -54,9 +54,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void GetEnclosingType_ForField()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity("Class");
+      var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
-      var field = new FieldEntity("Field", true, null, false, null);
+      var field = new FieldEntity(true, null, false, null, "Field", null);
       type.AddMember(field);
 
       field.GetEnclosing<TypeEntity>().ShouldEqual(type);
@@ -103,7 +103,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void IsInTypeDeclarationBody_ForType()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity("Class");
+      var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
 
       type.IsInTypeDeclarationBody().ShouldBeFalse();
@@ -118,9 +118,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void IsInTypeDeclarationBody_ForField()
     {
       var semanticGraph = new SemanticGraph();
-      var type = new ClassEntity("Class");
+      var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
-      var field = new FieldEntity("Field", true, null, false, null);
+      var field = new FieldEntity(true, null, false, null, "Field", null);
       type.AddMember(field);
 
       field.IsInTypeDeclarationBody().ShouldBeTrue();

@@ -63,7 +63,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return;
       }
 
-      foreach (var type in assembly.GetExportedTypes())
+      foreach (var type in assembly.GetTypes())
       {
         CreateEntitiesFromReflectedType(type, alias);
       }
@@ -103,7 +103,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the type has a namespace name, then create the corresponding namespace entity hierarchy.
       if (type.Namespace != null)
       {
-        contextEntity = CreateNamespaceHierarchyFromNamespaceName((NamespaceEntity)contextEntity, type.Namespace);
+        contextEntity = CreateNamespaceHierarchyFromNamespaceName((NamespaceEntity)contextEntity, type.Namespace, type);
         if (contextEntity==null) { return; }
       }
 
@@ -145,7 +145,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="namespaceName">A multipart namespace name.</param>
     /// <returns>The resulting context entity. Null if there was an ambigous name in the hierarchy.</returns>
     // ----------------------------------------------------------------------------------------------
-    private NamespaceEntity CreateNamespaceHierarchyFromNamespaceName(NamespaceEntity contextEntity, string namespaceName)
+    private NamespaceEntity CreateNamespaceHierarchyFromNamespaceName(
+      NamespaceEntity contextEntity, string namespaceName, Type type)
     {
       // Loop through all parts of the namespace name
       foreach (var namespaceTag in namespaceName.Split('.'))
@@ -201,31 +202,37 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       var typeName = nameArray[0];
 
+      var accessibility = GetAccessibility(type);
+
       // Create the appropriate kind of type entity
       TypeEntity typeEntity = null;
 
       if (type.IsClass && type.BaseType != null && type.BaseType.FullName == "System.MulticastDelegate")
       {
-        typeEntity = new DelegateEntity(typeName);
+        typeEntity = new DelegateEntity(accessibility, typeName);
       }
       else
         // type.FullName == "System.Enum" is a hack needed because reflection thinks that System.Enum is 
         // not a class, and not an enum, and not a value type, and not an interface. So what is it? We assume a class.
         if (type.IsClass || type.FullName == "System.Enum")
         {
-          typeEntity = new ClassEntity(typeName);
+          var classEntity = new ClassEntity(accessibility, typeName);
+          classEntity.IsStatic = type.IsSealed && type.IsAbstract;
+          classEntity.IsAbstract = type.IsAbstract;
+          classEntity.IsSealed = type.IsSealed;
+          typeEntity = classEntity;
         }
         else if (type.IsEnum)
         {
-          typeEntity = new EnumEntity(typeName);
+          typeEntity = new EnumEntity(accessibility, typeName);
         }
         else if (type.IsValueType)
         {
-          typeEntity = new StructEntity(typeName);
+          typeEntity = new StructEntity(accessibility, typeName);
         }
         else if (type.IsInterface)
         {
-          typeEntity = new InterfaceEntity(typeName);
+          typeEntity = new InterfaceEntity(accessibility, typeName);
         }
         else
         {
@@ -272,6 +279,63 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       entity.ReflectedMetadata = metadata;
       _SemanticGraph.AddMetadataToEntityMapping(metadata, entity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the accessibility of a reflected type.
+    /// </summary>
+    /// <param name="type">A reflected type.</param>
+    /// <returns>An AccessibilityKind value.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static AccessibilityKind GetAccessibility(System.Type type)
+    {
+      AccessibilityKind accessibility;
+
+      if (type.IsNested)
+      {
+        if (type.IsNestedAssembly)
+        {
+          accessibility = AccessibilityKind.Assembly;
+        }
+        else if (type.IsNestedFamANDAssem)
+        {
+          accessibility = AccessibilityKind.FamilyAndAssembly;
+        }
+        else if (type.IsNestedFamily)
+        {
+          accessibility = AccessibilityKind.Family;
+        }
+        else if (type.IsNestedFamORAssem)
+        {
+          accessibility = AccessibilityKind.FamilyOrAssembly;
+        }
+        else if (type.IsNestedPrivate)
+        {
+          accessibility = AccessibilityKind.Private;
+        }
+        else if (type.IsNestedPublic)
+        {
+          accessibility = AccessibilityKind.Public;
+        }
+        else
+        {
+          throw new ApplicationException("Unable to determine accessibility.");
+        }
+      }
+      else
+      {
+        if (type.IsPublic)
+        {
+          accessibility = AccessibilityKind.Public;
+        }
+        else
+        {
+          accessibility = AccessibilityKind.Assembly;
+        }
+      }
+
+      return accessibility;
     }
   }
 }

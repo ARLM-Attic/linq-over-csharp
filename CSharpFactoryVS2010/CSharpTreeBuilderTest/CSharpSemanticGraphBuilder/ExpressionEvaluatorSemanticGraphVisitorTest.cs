@@ -102,17 +102,18 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").Members.ToList();
-      
+
       // static int a = b;
+      {
+        var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
 
-      var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-      
-      var simpleName = exp as SimpleNameExpressionEntity;
-      simpleName.Entity.ShouldEqual(members[1]);
+        var simpleName = exp as SimpleNameExpressionEntity;
+        simpleName.Entity.ShouldEqual(members[1]);
 
-      var variableExpressionResult = simpleName.Result as VariableExpressionResult;
-      variableExpressionResult.Variable.ShouldEqual(members[1] as IVariableEntity);
-      variableExpressionResult.Type.ShouldEqual((members[1] as FieldEntity).Type);
+        var variableExpressionResult = simpleName.Result as VariableExpressionResult;
+        variableExpressionResult.Variable.ShouldEqual(members[1] as IVariableEntity);
+        variableExpressionResult.Type.ShouldEqual((members[1] as FieldEntity).Type);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -127,18 +128,34 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\DefaultValue.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var members = classEntity.Members.ToList();
+      var classA = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A",1);
+      var members = classA.Members.ToList();
 
-      // A a = default(A);
+      int i = 0;
 
-      var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+      // B a1 = default(B);
+      {
+        var classB = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("B");
 
-      var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
-      defaultValueExpressionEntity.Type.ShouldEqual(classEntity);
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
 
-      var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
-      valueExpressionResult.Type.ShouldEqual(classEntity);
+        var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
+        defaultValueExpressionEntity.Type.ShouldEqual(classB);
+
+        var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
+        valueExpressionResult.Type.ShouldEqual(classB);
+      }
+
+      // object a2 = default(T);
+      {
+        var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
+
+        var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
+        defaultValueExpressionEntity.Type.ShouldEqual(classA.OwnTypeParameters[0]);
+
+        var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
+        valueExpressionResult.Type.ShouldEqual(classA.OwnTypeParameters[0]);
+      }
     }
   }
 }

@@ -227,6 +227,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MemberLookup.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\VariableExpressionResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameNodeBasedSemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolver.cs" />
@@ -269,6 +270,7 @@
     <Compile Include="CSharpCst\CSharpSemanticsTree.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MetadataImporterSemanticEntityFactory.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverPass1SemanticGraphVisitor.cs" />
+    <Compile Include="CSharpSemanticGraph\AccessibilityKind.cs" />
     <Compile Include="CSharpSemanticGraph\BuiltInType.cs" />
     <Compile Include="CSharpSemanticGraph\ClassEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayTypeEntity.cs" />
@@ -280,6 +282,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayInitializerEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\ConstantMemberEntity.cs" />
     <Compile Include="CSharpSemanticGraph\LocalVariableDeclarationStatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\LocalVariableEntity.cs" />
     <Compile Include="CSharpSemanticGraph\DefaultValueExpressionEntity.cs" />

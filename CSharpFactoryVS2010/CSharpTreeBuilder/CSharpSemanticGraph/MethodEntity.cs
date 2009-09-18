@@ -25,34 +25,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="MethodEntity"/> class.
     /// </summary>
-    /// <param name="name">The name of the member.</param>
+    /// <param name="isExplicitlyDefined">A value indicating whether the member is explicitly defined.</param>
+    /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
+    /// <param name="isStatic">A value indicating whether this method is static.</param>
+    /// <param name="isPartial">A value indicating whether this method is partial.</param>
+    /// <param name="returnTypeReference">Reference to the return type.</param>
     /// <param name="interfaceReference">
     /// A reference to in interface, if the member is explicitly implemented interface member.
     /// Null otherwise.
     /// </param>
-    /// <param name="isExplicitlyDefined">A value indicating whether the member is explicitly defined.</param>
+    /// <param name="name">The name of the member.</param>
     /// <param name="isAbstract">A value indicating whether the function member is abstract.</param>
-    /// <param name="isPartial">A value indicating whether this method is partial.</param>
-    /// <param name="isStatic">A value indicating whether this method is static.</param>
-    /// <param name="returnTypeReference">Reference to the return type.</param>
     // ----------------------------------------------------------------------------------------------
     public MethodEntity(
-      string name, 
-      SemanticEntityReference<TypeEntity> interfaceReference,  
-      bool isExplicitlyDefined, 
-      bool isAbstract, 
-      bool isPartial, 
+      bool isExplicitlyDefined,
+      AccessibilityKind? accessibility,
       bool isStatic, 
-      SemanticEntityReference<TypeEntity> returnTypeReference)
+      bool isPartial, 
+      SemanticEntityReference<TypeEntity> returnTypeReference,
+      SemanticEntityReference<TypeEntity> interfaceReference,
+      string name, 
+      bool isAbstract)
       : 
-      base(name, isExplicitlyDefined, isAbstract)
+      base(isExplicitlyDefined, accessibility, name, isAbstract)
     {
       _Parameters = new List<ParameterEntity>();
       _AllTypeParameters = new List<TypeParameterEntity>();
 
       InterfaceReference = interfaceReference;
       IsPartial = isPartial;
-      IsStatic = isStatic;
+      _IsStatic = isStatic;
       ReturnTypeReference = returnTypeReference;
     }
 
@@ -62,13 +64,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public bool IsPartial { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether the method is static.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsStatic { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
