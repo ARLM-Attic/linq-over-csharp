@@ -42,6 +42,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the fully qualified name of the member.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string FullyQualifiedName
+    {
+      get
+      {
+        return Parent is TypeEntity
+          ? Name 
+          : string.Format("{0}.{1}", (Parent as TypeEntity).FullyQualifiedName, Name);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets a value indicating whether the member is explicitly defined, or created by the parser.
     /// Eg. value types have a default constructor which is implicitly declared.
     /// </summary>
@@ -99,7 +114,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Gets a value indicating whether this entity is accessible by another entity.
     /// </summary>
-    /// <param name="entity">The accessing entity.</param>
+    /// <param name="accessingEntity">The accessing entity.</param>
     /// <returns>True if the accessing entity can access this entity, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
     public bool IsAccessibleBy(SemanticEntity accessingEntity)

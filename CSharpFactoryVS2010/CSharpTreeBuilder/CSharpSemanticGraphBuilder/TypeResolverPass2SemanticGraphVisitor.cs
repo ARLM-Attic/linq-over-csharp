@@ -53,7 +53,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the type of the field
       if (entity.IsExplicitlyDefined && entity.TypeReference != null)
       {
-        entity.TypeReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+        entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
 
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
@@ -79,7 +79,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the type of the property
       if (entity.TypeReference != null)
       {
-        entity.TypeReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+        entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
 
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {

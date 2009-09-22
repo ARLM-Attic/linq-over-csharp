@@ -47,7 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// starting from the root namespace.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual string FullyQualifiedName 
+    public string FullyQualifiedName 
     { 
       get
       {

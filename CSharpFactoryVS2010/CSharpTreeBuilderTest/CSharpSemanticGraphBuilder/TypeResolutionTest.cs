@@ -1595,6 +1595,32 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Using alias resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void UsingAlias()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\UsingAlias.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var global = project.SemanticGraph.GlobalNamespace;
+
+      var namespaceA = global.GetChildNamespace("A");
+      var classB = namespaceA.GetSingleChildType<ClassEntity>("B");
+      var namespaceC = global.GetChildNamespace("C");
+      var classD = namespaceC.GetSingleChildType<ClassEntity>("D");
+      var usingAliasE = namespaceC.GetUsingAliasByNameAndSourcePoint("E", classD.SyntaxNodes[0].SourcePoint);
+
+      usingAliasE.AliasedNamespace.ShouldEqual(namespaceA);
+      usingAliasE.AliasedType.ShouldBeNull();
+
+      classD.BaseType.ShouldEqual(classB);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Namespace and type references with using alias qualifier.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -1908,6 +1934,103 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"TypeResolution\TypeArgumentCanBeResolvedWithUsingNamespace.cs");
       InvokeParser(project).ShouldBeTrue();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0122: 'N.InternalClass' is inaccessible due to its protection level.
+    /// Testing with a qualified reference: "using X2 = N.InternalClass;"
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0122_ClassInaccessible_Qualified()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0122_ClassInaccessible_Qualified.cs");
+      project.AddAssemblyReference(TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0122");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0122: 'N.InternalClass' is inaccessible due to its protection level.
+    /// Testing with an unqualified reference: "using X2 = InternalClass;"
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0122_ClassInaccessible_Unqualified()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0122_ClassInaccessible_Unqualified.cs");
+      project.AddAssemblyReference(TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0122");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Testing that when looking for a nested type in base classes, the accessible one 
+    /// beats the inaccessible even if it's in the less derived class.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void NestedAccessibleType()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\NestedAccessibleType.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var global = project.SemanticGraph.GlobalNamespace;
+      var classA = global.GetSingleChildType<ClassEntity>("A");
+      var member = classA.GetMember<FieldEntity>("a");
+      member.Type.ShouldEqual(global.GetSingleChildType<ClassEntity>("C").GetSingleChildType<ClassEntity>("Nested"));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Testing that when only an inaccessible type is found then CS0122 is reported.
+    /// 
+    /// TODO: CS0246 is reported which seems like conforming to the spec, but csc.exe reports CS0122.
+    /// 
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore]
+    public void NestedInaccessibleType_Unresolvable()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\NestedInaccessibleType_Unresolvable.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0122");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Testing that when an inaccessible type is found but also an imported type is found with the
+    /// same name, then the imported type wins.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void NestedInaccessibleType_Resolvable()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\NestedInaccessibleType_Resolvable.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var global = project.SemanticGraph.GlobalNamespace;
+      var classA = global.GetSingleChildType<ClassEntity>("A");
+      var member = classA.GetMember<FieldEntity>("a");
+      member.Type.ShouldEqual(global.GetChildNamespace("N").GetSingleChildType<ClassEntity>("Nested"));
     }
   }
 }

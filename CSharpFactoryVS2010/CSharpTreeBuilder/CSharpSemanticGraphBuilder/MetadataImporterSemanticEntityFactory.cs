@@ -113,7 +113,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the type has a namespace name, then create the corresponding namespace entity hierarchy.
       if (type.Namespace != null)
       {
-        contextEntity = CreateNamespaceHierarchyFromNamespaceName((NamespaceEntity)contextEntity, type.Namespace, type);
+        contextEntity = CreateNamespaceHierarchyFromNamespaceName((NamespaceEntity)contextEntity, type.Namespace);
         if (contextEntity==null) { return; }
       }
 
@@ -156,7 +156,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resulting context entity. Null if there was an ambigous name in the hierarchy.</returns>
     // ----------------------------------------------------------------------------------------------
     private NamespaceEntity CreateNamespaceHierarchyFromNamespaceName(
-      NamespaceEntity contextEntity, string namespaceName, Type type)
+      NamespaceEntity contextEntity, string namespaceName)
     {
       // Loop through all parts of the namespace name
       foreach (var namespaceTag in namespaceName.Split('.'))

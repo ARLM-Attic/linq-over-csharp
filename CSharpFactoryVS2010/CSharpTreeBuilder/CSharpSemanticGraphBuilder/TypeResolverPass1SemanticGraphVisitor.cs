@@ -41,7 +41,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException("UsingNamespaceEntity.Parent should not be null.");
       }
 
-      entity.RootNamespaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+      entity.RootNamespaceReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
       
       return true;
     }
@@ -59,7 +59,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException("UsingNamespaceEntity.Parent should not be null.");
       }
 
-      entity.NamespaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+      entity.NamespaceReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
 
       return true;
     }
@@ -77,7 +77,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException("UsingAliasEntity.Parent should not be null.");
       }
 
-      entity.NamespaceOrTypeReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+      entity.NamespaceOrTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
     
       return true;
     }

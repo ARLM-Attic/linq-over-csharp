@@ -379,6 +379,12 @@
     <None Include="TestFiles\Accessibility\ProtectedAccessForInstanceMembers.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Unresolvable.cs" />
+    <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Resolvable.cs" />
+    <None Include="TestFiles\TypeResolution\NestedAccessibleType.cs" />
+    <None Include="TestFiles\TypeResolution\CS0122_ClassInaccessible_Unqualified.cs" />
+    <None Include="TestFiles\TypeResolution\CS0122_ClassInaccessible_Qualified.cs" />
+    <None Include="TestFiles\TypeResolution\UsingAlias.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\VisitClassMembers.cs" />
     <None Include="TestFiles\TypeResolution\TypeParameterConstraints.cs" />
     <None Include="TestFiles\SimpleNameResolution\MethodTypeParameter.cs" />

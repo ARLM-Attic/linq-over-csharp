@@ -16,7 +16,7 @@ namespace C
   class D {}
   class E<T1> 
   {
-    class F<T2> { }
+    public class F<T2> { }
   }
 }
 

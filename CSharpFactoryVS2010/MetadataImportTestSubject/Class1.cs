@@ -76,3 +76,9 @@ abstract class AbstractClass
 
 sealed class SealedClass
 { }
+
+namespace N
+{
+  public class PublicClass { }
+  internal class InternalClass { }
+}

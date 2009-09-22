@@ -180,6 +180,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       NamespaceOrTypeEntity foundEntity = null;
       TypeTagNodeCollection typeTagsToBeResolved = namespaceOrTypeName.TypeTags;
+      SemanticEntity accessingEntity = resolutionContextEntity;
 
       // If the namespace-or-type-name is a qualified-alias-member its meaning is as described in §9.7.
       if (namespaceOrTypeName.HasQualifier)
@@ -226,7 +227,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       try
       {
         // The meaning of a namespace-or-type-name is determined as follows:
-        foundEntity = ResolveTypeTags(typeTagsToBeResolved, resolutionContextEntity);
+        foundEntity = ResolveTypeTags(typeTagsToBeResolved, resolutionContextEntity, accessingEntity);
       }
       catch (Exception e)
       {
@@ -337,6 +338,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                            "Cannot use alias '{0}' with '::' since the alias references a type. Use '.' instead.",
                            (e as QualifierRefersToType).Qualifier);
       }
+      else if (e is EntityIsInaccessibleException)
+      {
+        errorHandler.Error("CS0122", namespaceOrTypeName.StartToken,
+                           "'{0}' is inaccessible due to its protection level",
+                           ((e as EntityIsInaccessibleException).InaccessibleEntity as INamedEntity).FullyQualifiedName);
+      }
       else
       {
         throw new ApplicationException("Could not translate namespace-or-type-name resolution exception.", e);
@@ -356,23 +363,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="typeTags">A namespace-or-type-name with any number of type-tags.</param>
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
-    private static NamespaceOrTypeEntity ResolveTypeTags(TypeTagNodeCollection typeTags, SemanticEntity resolutionContextEntity)
+    private static NamespaceOrTypeEntity ResolveTypeTags(
+      TypeTagNodeCollection typeTags, SemanticEntity resolutionContextEntity, SemanticEntity accessingEntity)
     {
       NamespaceOrTypeEntity foundEntity = null;
 
       // If the namespace-or-type-name is of the form I or of the form I<A1, ..., AK>
       if (typeTags.Count == 1)
       {
-        foundEntity = ResolveSingleTypeTag(typeTags[0], resolutionContextEntity);
+        foundEntity = ResolveSingleTypeTag(typeTags[0], resolutionContextEntity, accessingEntity);
       }
       else
       {
         // Otherwise, the namespace-or-type-name is of the form N.I or of the form N.I<A1, ..., AK>. 
         // N is first resolved as a namespace-or-type-name.  
-        var handleEntity = ResolveTypeTags(typeTags.GetCopyWithoutLastTag(), resolutionContextEntity);
+        var handleEntity = ResolveTypeTags(typeTags.GetCopyWithoutLastTag(), resolutionContextEntity, accessingEntity);
         var lastTypeTag = typeTags[typeTags.Count - 1];
 
         // If the resolution of N is not successful, a compile-time error occurs. 
@@ -402,13 +411,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (handleEntity is NamespaceEntity)
         {
           // ... and N contains an accessible type having name I and K type parameters, ...
-          // BUGBUG: accessibility is not checked!
+          
+          // (First we try to find a type with name I and K type parameters, and we'll check the accessibility later.)
           var foundTypeEntity = (handleEntity is IHasChildTypes)
             ? (handleEntity as IHasChildTypes).GetSingleChildType<TypeEntity>(lastTypeTag.Identifier, lastTypeTag.GenericDimensions)
             : null;
 
           if (foundTypeEntity != null)
           {
+            // (Checking whether the found entity is indeed accessible.)
+            if (!foundTypeEntity.IsAccessibleBy(accessingEntity))
+            {
+              throw new EntityIsInaccessibleException(foundTypeEntity);
+            }
+
             // ... then the namespace-or-type-name refers to that type constructed with the given type arguments.
             //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
             //  --> Here we just return the resolved generic type definition entity.
@@ -420,8 +436,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (handleEntity is TypeEntity)
         {
           // ... and N or any of its base classes contain a nested accessible type having name I and K type parameters,
-          // BUGBUG: accessibility is not checked!
-          var foundNestesTypeEntity = FindNestedAccessibleTypeInTypeOrBaseTypes(lastTypeTag, handleEntity as TypeEntity);
+          var foundNestesTypeEntity = FindNestedAccessibleTypeInTypeOrBaseTypes(lastTypeTag, handleEntity as TypeEntity, accessingEntity);
 
           if (foundNestesTypeEntity != null)
           {
@@ -449,10 +464,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="typeTagNode">A single-tag namespace-or-type-name.</param>
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
-    private static NamespaceOrTypeEntity ResolveSingleTypeTag(TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity)
+    private static NamespaceOrTypeEntity ResolveSingleTypeTag(
+      TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity, SemanticEntity accessingEntity)
     {
       // If K is zero ...
       if (!typeTagNode.HasTypeArguments)
@@ -498,8 +515,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         //if (resolutionContextEntity.IsInTypeDeclarationBody())
         {
           // ... and T or any of its base types contain a nested accessible type having name I and K type parameters, ...
-          // BUGBUG: accessibility is not checked!
-          var foundNestesTypeEntity = FindNestedAccessibleTypeInTypeOrBaseTypes(typeTagNode, typeContext);
+          var foundNestesTypeEntity = FindNestedAccessibleTypeInTypeOrBaseTypes(typeTagNode, typeContext, accessingEntity);
 
           if (foundNestesTypeEntity != null)
           {
@@ -546,13 +562,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Otherwise, if N contains an accessible type having name I and K type parameters, then:
-        // BUGBUG: accessibility is not checked!
+
+        // (First we try to find a type with name I and K type parameters, and we'll check the accessibility later.)
         var foundTypeEntity = (namespaceContext is IHasChildTypes)
           ? (namespaceContext as IHasChildTypes).GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions)
           : null;
 
         if (foundTypeEntity != null)
         {
+          // (Checking whether the found entity is indeed accessible.)
+          if (!foundTypeEntity.IsAccessibleBy(accessingEntity))
+          {
+            throw new EntityIsInaccessibleException(foundTypeEntity);
+          }
+
           // If K is zero and the location where the namespace-or-type-name occurs is enclosed by a namespace declaration for N 
           // and the namespace declaration contains an extern-alias-directive or using-alias-directive 
           // that associates the name I with a namespace or type, then the namespace-or-type-name is ambiguous 
@@ -626,34 +649,51 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="typeTagNode">The typeTag to be found.</param>
     /// <param name="contextType">The type where the searching starts.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <returns>A TypeEntity with the name and number of type parameters defined in typeTagNode, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeEntity FindNestedAccessibleTypeInTypeOrBaseTypes(TypeTagNode typeTagNode, TypeEntity contextType)
+    private static TypeEntity FindNestedAccessibleTypeInTypeOrBaseTypes(
+      TypeTagNode typeTagNode, TypeEntity contextType, SemanticEntity accessingEntity)
     {
-      // If there is more than one such type, the type declared within the more derived type is selected. 
-      // _Note that non-type members (constants, fields, methods, properties, indexers, operators, instance constructors, 
+      // Spec: If there is more than one such type, the type declared within the more derived type is selected. 
+      
+      // Supplemental info:
+      // The spec is not explicit about it, but csc.exe works like this:
+      // if an inaccessible type is found in a more derived type 
+      // and an accessible type is found in a less derived type,
+      // then the one in the less derived type is selected, obviously, because the other one is inaccessible.
+      
+      // TODO: If only an inaccessible type is found, 
+      // then "CS0122: 'member' is inaccessible due to its protection level" error is reported
+      // instead of the usual "CS0246: The type or namespace name '{0}' could not be found" error.
+
+      // Spec: _Note that non-type members (constants, fields, methods, properties, indexers, operators, instance constructors, 
       // destructors, and static constructors) and type members with a different number of type parameters 
       // are ignored when determining the meaning of the namespace-or-type-name.
 
-      // _Note that if the meaning of N.I is being determined as part of resolving the base class specification of N 
+      // Spec: _Note that if the meaning of N.I is being determined as part of resolving the base class specification of N 
       // then the direct base class of N is considered to be object (§10.1.4.1).
       // TODO: how to interpret and test this?
 
-      TypeEntity typeEntity = null;
+      TypeEntity accessibleTypeEntity = null;
 
-      while (typeEntity == null && contextType != null)
+      // We can stop looking for a type only if an accessible one is found, or we reached the end of the inheritance hierarchy. 
+      while (accessibleTypeEntity == null && contextType != null)
       {
-        typeEntity = (contextType is IHasChildTypes)
+        var candidateTypeEntity = (contextType is IHasChildTypes)
           ? (contextType as IHasChildTypes).GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions)
           : null;
 
-        if (typeEntity == null)
+        // It's a match only if it's also accessible.
+        if (candidateTypeEntity != null && candidateTypeEntity.IsAccessibleBy(accessingEntity))
         {
-          contextType = contextType.BaseType;
+          accessibleTypeEntity = candidateTypeEntity;
         }
+
+        contextType = contextType.BaseType;
       }
 
-      return typeEntity;
+      return accessibleTypeEntity;
     }
 
     // ----------------------------------------------------------------------------------------------

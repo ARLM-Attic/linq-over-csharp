@@ -227,6 +227,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\EntityIsInaccessibleException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookup.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\VariableExpressionResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameNodeBasedSemanticEntityReference.cs" />
