@@ -36,31 +36,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Returns a value indicating whether a given entity is in the body of a type declaration
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    /// <returns>True if the entity is in the body of a type declaration, false otherwise.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public static bool IsInTypeDeclarationBody(this SemanticEntity entity)
-    {
-      // If reached the root or a namespace or type entity then it's not in type declaration body.
-      if (entity == null || entity is NamespaceOrTypeEntity)
-      {
-        return false;
-      }
-
-      // Members are in type declaration body.
-      if (entity is MemberEntity)
-      {
-        return true;
-      }
-
-      // If not yet reached to decision then continue at the parent node.
-      return IsInTypeDeclarationBody(entity.Parent);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Returns a value indicating whether a given entity is in a generic method declaration.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
@@ -84,5 +59,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       return GetEnclosingGenericMethodDeclaration(entity.Parent);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns a value indicating whether a given entity is in the body of a type declaration
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>True if the entity is in the body of a type declaration, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public static bool IsInTypeDeclarationBody(this SemanticEntity entity)
+    {
+      // If reached the root or a namespace or type entity then it's not in type declaration body.
+      if (entity == null || entity is NamespaceOrTypeEntity)
+      {
+        return false;
+      }
+
+      // Members are in type declaration body.
+      if (entity is MemberEntity)
+      {
+        return true;
+      }
+
+      // If not yet reached to decision then continue at the parent node.
+      return IsInTypeDeclarationBody(entity.Parent);
+    }
   }
 }

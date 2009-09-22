@@ -206,7 +206,7 @@ namespace CSharpTreeBuilder.ProjectContent
       }
 
       // Create entities from ASTs
-      SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this, SemanticGraph));
+      SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this));
 
       // Merge partial type entities.
       SemanticGraph.AcceptVisitor(new PartialTypeMergingSemanticGraphVisitor());

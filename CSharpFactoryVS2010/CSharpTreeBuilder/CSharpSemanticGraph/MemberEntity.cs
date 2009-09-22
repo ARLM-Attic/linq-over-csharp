@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This abstract class represents a member of a type.
   /// </summary>
   // ================================================================================================
-  public abstract class MemberEntity : SemanticEntity, INamedEntity
+  public abstract class MemberEntity : SemanticEntity, INamedEntity, IHasAccessibility
   {
     /// <summary>
     /// Backing field for IsStatic property.
@@ -17,11 +17,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// in descendant classes that want to initiliaze this property in the constructor.
     /// </remarks>
     protected bool _IsStatic;
-
-    /// <summary>
-    /// Backing field for Accessibility property.
-    /// </summary>
-    protected AccessibilityKind? _Accessibility;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -34,7 +29,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected MemberEntity(bool isExplicitlyDefined, AccessibilityKind? accessibility, string name)
     {
       IsExplicitlyDefined = isExplicitlyDefined;
-      _Accessibility = accessibility;
+      DeclaredAccessibility = accessibility;
       Name = name;
     }
 
@@ -55,18 +50,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the accessibility of the member.
+    /// Gets or sets the declared accessibility of the entity.
     /// </summary>
-    /// <remarks>If the accessibility was not set then a default is returned 
-    /// which depends on the type of the containing type.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual AccessibilityKind? Accessibility
+    public AccessibilityKind? DeclaredAccessibility { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the effective accessibility of the entity.
+    /// </summary>
+    /// <remarks>
+    /// If there's no declared accessibility then returns the default accessibility.
+    /// If the default cannot be determined (eg. no parent entity) then returns null.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public AccessibilityKind? EffectiveAccessibility
     {
       get
       {
-        if (_Accessibility != null)
+        if (DeclaredAccessibility != null)
         {
-          return _Accessibility;
+          return DeclaredAccessibility.Value;
         }
 
         // If no declared accessibility then the default has to be returned,
@@ -79,19 +83,55 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           {
             return AccessibilityKind.Private;
           }
-          
+
           if (parentType.IsInterfaceType || parentType.IsEnumType)
           {
             return AccessibilityKind.Public;
           }
         }
 
+        // If the default accessibility cannot be determined then return null.
         return null;
       }
+    }
 
-      set
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity is accessible by another entity.
+    /// </summary>
+    /// <param name="entity">The accessing entity.</param>
+    /// <returns>True if the accessing entity can access this entity, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsAccessibleBy(SemanticEntity accessingEntity)
+    {
+      // First check the accessibility of the parent type.
+      var parentType = Parent as TypeEntity;
+
+      if (parentType == null || !parentType.IsAccessibleBy(accessingEntity))
       {
-        _Accessibility = value;
+        return false;
+      }
+
+      // Then check the accessibility of this entity.
+      switch (EffectiveAccessibility)
+      {
+        case AccessibilityKind.Public:
+          return true;
+
+        case AccessibilityKind.Assembly:
+          return accessingEntity.Program == this.Program;
+
+        case AccessibilityKind.FamilyOrAssembly:
+          return accessingEntity.Program == this.Program || parentType.ContainsInFamily(accessingEntity);
+
+        case AccessibilityKind.Family:
+          return parentType.ContainsInFamily(accessingEntity);
+
+        case AccessibilityKind.Private:
+          return parentType.Contains(accessingEntity);
+
+        default:
+          throw new ApplicationException("Effective accessibility is undefined.");
       }
     }
 

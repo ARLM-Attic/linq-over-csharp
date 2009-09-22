@@ -28,7 +28,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SemanticGraphVisitor\VisitNamespaceOrTypeEntity.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
 
       // Arrange
       var mocks = new MockRepository();
@@ -64,7 +64,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SemanticGraphVisitor\VisitUsingEntity.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
 
       // Arrange
       var mocks = new MockRepository();
@@ -101,7 +101,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SemanticGraphVisitor\VisitExternAliasEntity.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
 
       // Arrange
       var mocks = new MockRepository();
@@ -135,7 +135,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SemanticGraphVisitor\VisitEnumEntity.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
 
       // Arrange
       var mocks = new MockRepository();
@@ -169,7 +169,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SemanticGraphVisitor\VisitClassMembers.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
 
       // Arrange
       var mocks = new MockRepository();

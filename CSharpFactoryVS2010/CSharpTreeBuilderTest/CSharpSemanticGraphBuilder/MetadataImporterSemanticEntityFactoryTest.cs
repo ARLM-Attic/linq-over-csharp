@@ -43,7 +43,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
         classEntity.FullyQualifiedName.ShouldEqual("PublicClass");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Public);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
         classEntity.ReflectedMetadata.Name.ShouldEqual("PublicClass");
 
         var childClassCounter = 0;
@@ -52,33 +52,33 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         {
           var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.PublicNestedClass");
-          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Public);
+          nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
           nestedClass.ReflectedMetadata.Name.ShouldEqual("PublicNestedClass");
         }
         // public class InternalNestedClass
         {
           var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.InternalNestedClass");
-          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+          nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
           nestedClass.ReflectedMetadata.Name.ShouldEqual("InternalNestedClass");
         }
         // public class ProtectedNestedClass
         {
           var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.ProtectedNestedClass");
-          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Family);
+          nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
         }
         // public class ProtectedInternalNestedClass
         {
           var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.ProtectedInternalNestedClass");
-          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
+          nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
         }
         // public class PrivateNestedClass
         {
           var nestedClass = classEntity.ChildTypes[childClassCounter++] as ClassEntity;
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.PrivateNestedClass");
-          nestedClass.Accessibility.ShouldEqual(AccessibilityKind.Private);
+          nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
         }
       }
 
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var classEntity = global.ChildTypes[classCounter++] as ClassEntity;
         classEntity.FullyQualifiedName.ShouldEqual("InternalClass");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
       }
 
       // static class StaticClass
@@ -130,6 +130,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         entity.Parent.ShouldEqual(rootNamespace);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeFalse();
+        entity.Program.TargetAssemblyName.Name.ShouldEqual(TestAssemblyName);
       }
       // namespace A
       {
@@ -236,7 +237,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project, true, false).ShouldBeTrue();
       
       // First the entity builder and resolver
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
       project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       // Then the importer
@@ -268,7 +269,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       factory.CreateEntitiesFromAssembly(TestAssemblyPathAndFilename, "global");
       
       // Then the entity builder and resolver
-      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph));
+      project.SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(project));
       project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       // Check resulting semantic graph

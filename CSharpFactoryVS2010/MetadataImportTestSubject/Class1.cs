@@ -53,10 +53,20 @@ public class PublicClass
   
   private class PrivateNestedClass
   { }
+
+  public static int publicNestedMember;
+  internal static int internalNestedMember;
+  protected static int protectedNestedMember;
+  protected internal static int protectedInternalNestedMember;
+  private static int privateNestedCMember;
+
 }
 
 internal class InternalClass
-{ }
+{
+  public class PublicNestedInInternalClass
+  { }
+}
 
 static class StaticClass
 { }

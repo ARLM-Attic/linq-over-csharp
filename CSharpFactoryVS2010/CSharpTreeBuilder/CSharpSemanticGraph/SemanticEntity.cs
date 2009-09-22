@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
 using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -18,6 +19,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     /// <summary>Backing field for Parent property.</summary>
     protected SemanticEntity _Parent;
+
+    /// <summary>Backing field for Program property.</summary>
+    private Program _Program;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -69,6 +73,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public System.Reflection.MemberInfo ReflectedMetadata { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the program that this entity belongs to.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public Program Program
+    {
+      get
+      {
+        if (_Program != null)
+        {
+          return _Program;
+        }
+
+        if (Parent != null)
+        {
+          return Parent.Program;
+        }
+
+        throw new InvalidOperationException("Cannot determine the program that this entity belongs to.");
+      }
+
+      set
+      {
+        _Program = value;
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

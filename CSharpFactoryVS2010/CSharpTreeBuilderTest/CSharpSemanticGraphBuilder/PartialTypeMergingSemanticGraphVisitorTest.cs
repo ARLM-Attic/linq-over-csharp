@@ -27,7 +27,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"PartialTypeMergingSemanticGraphVisitor\PartialClass.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // There are 2 partial classes named A
@@ -79,7 +79,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"PartialTypeMergingSemanticGraphVisitor\PartialStruct.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // There are 2 partial structs named A
@@ -105,7 +105,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"PartialTypeMergingSemanticGraphVisitor\PartialInterface.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // There are 2 partial interfaces named A

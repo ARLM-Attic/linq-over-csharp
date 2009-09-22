@@ -77,6 +77,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityExtensionsTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityReferenceEqualityComparerTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpaceTest.cs" />
+    <Compile Include="CSharpSemanticGraph\AccessibilityTest.cs" />
     <Compile Include="CSharpSemanticGraph\SignatureTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphTest.cs" />
@@ -326,7 +327,7 @@
     <None Include="TestFiles\Expressions\QueryExpressions.cs" />
     <None Include="TestFiles\ObjectOrArrayCreationExpressions\CollectionInitializer_Error.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Namespace.cs" />
-    <Compile Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Class.cs" />
+    <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Class.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\Enum.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\GenericClass.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\CS0107_TooManyProtectionModifier.cs" />
@@ -368,6 +369,14 @@
     <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\DefaultValue.cs" />
     <None Include="TestFiles\ExpressionEvaluatorSemanticGraphVisitor\SimpleName.cs" />
     <None Include="TestFiles\EntityBuilderSyntaxNodeVisitor\ConstantMember.cs" />
+    <None Include="TestFiles\Accessibility\AccessibleAtCompilationUnitLevel.cs" />
+    <None Include="TestFiles\Accessibility\Internal.cs" />
+    <None Include="TestFiles\Accessibility\Public.cs" />
+    <None Include="TestFiles\Accessibility\Private.cs" />
+    <None Include="TestFiles\Accessibility\ProtectedInternalInImportedProgram.cs" />
+    <None Include="TestFiles\Accessibility\ProtectedInternalInSameProgram.cs" />
+    <None Include="TestFiles\Accessibility\Protected.cs" />
+    <None Include="TestFiles\Accessibility\ProtectedAccessForInstanceMembers.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\VisitClassMembers.cs" />
@@ -492,7 +501,7 @@
     <ProjectReference Include="..\MetadataImportTestSubject\MetadataImportTestSubject.csproj">
       <Project>{E74A7D6D-CCF2-4015-B400-A5D63524D99B}</Project>
       <Name>MetadataImportTestSubject</Name>
-      <Aliases>MyExternAlias</Aliases>
+      <Aliases>global</Aliases>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

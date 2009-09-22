@@ -79,12 +79,22 @@ namespace CSharpTreeBuilderTest
 
     // --------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the folder and filename for test assemlby.
+    /// Gets the simple name opf the test assembly.
+    /// </summary>
+    // --------------------------------------------------------------------------------------------
+    protected static string TestAssemblyName
+    {
+      get { return "MetadataImportTestSubject"; }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the folder and filename for test assembly.
     /// </summary>
     // --------------------------------------------------------------------------------------------
     protected static string TestAssemblyPathAndFilename
     {
-      get { return WorkingFolder + @"\..\..\MetadataImportTestSubject\bin\debug\MetadataImportTestSubject.dll"; }
+      get { return WorkingFolder + @"\..\..\MetadataImportTestSubject\bin\debug\" + TestAssemblyName + ".dll"; }
     }
 
     // --------------------------------------------------------------------------------------------

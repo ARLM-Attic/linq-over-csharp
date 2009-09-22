@@ -13,11 +13,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   // ================================================================================================
   public class MetadataImporterSemanticEntityFactory
   {
-    /// <summary>Error handler object used for reporting compilation messages.</summary>
+    /// <summary>
+    /// Error handler object used for reporting compilation messages.
+    /// </summary>
     private readonly ICompilationErrorHandler _ErrorHandler;
 
-    /// <summary>The semantic graph that this factory is working on.</summary>
+    /// <summary>
+    /// The semantic graph that this factory is working on.
+    /// </summary>
     private readonly SemanticGraph _SemanticGraph;
+
+    /// <summary>
+    /// The imported assembly represented as a Program object.
+    /// </summary>
+    private Program _Program;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -50,6 +59,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       try
       {
         assembly = Assembly.ReflectionOnlyLoadFrom(filename);
+        _Program = new Program(null, assembly.GetName());
       }
       catch (System.IO.FileNotFoundException)
       {
@@ -212,6 +222,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         typeEntity = new DelegateEntity(accessibility, typeName);
       }
       else
+      {
         // type.FullName == "System.Enum" is a hack needed because reflection thinks that System.Enum is 
         // not a class, and not an enum, and not a value type, and not an interface. So what is it? We assume a class.
         if (type.IsClass || type.FullName == "System.Enum")
@@ -238,6 +249,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           throw new ApplicationException(string.Format("Type '{0}' not handled by CreatSemanticEntityFromType", type));
         }
+      }
+
+      typeEntity.Program = _Program;
 
       // Populate base type and base interfaces
       if (type.BaseType != null)

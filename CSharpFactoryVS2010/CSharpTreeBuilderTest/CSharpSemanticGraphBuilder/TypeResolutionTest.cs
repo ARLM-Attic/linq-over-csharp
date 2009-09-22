@@ -1203,8 +1203,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"TypeResolution\ImplicitBaseTypes.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      int i = 0;
-
       // class A1 // implicitly : System.Object
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");

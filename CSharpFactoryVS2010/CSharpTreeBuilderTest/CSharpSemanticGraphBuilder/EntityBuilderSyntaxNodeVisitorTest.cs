@@ -5,6 +5,7 @@ using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.Ast;
+using System;
 
 namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 {
@@ -27,7 +28,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Namespace.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -127,6 +128,22 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// The Program property of a namespace entity cannot be determined and throws an exception.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [ExpectedException(typeof(InvalidOperationException))]
+    public void Error_ProgramOfNamespaceCannotBeDetermined()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
+      project.SyntaxTree.AcceptVisitor(visitor);
+
+      var program = project.SemanticGraph.GlobalNamespace.Program;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Tests the building of class entities
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -136,7 +153,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Class.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -169,11 +186,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // base class is not yet resolved, so it's null
         classEntity.BaseType.ShouldBeNull();
 
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
         classEntity.IsNew.ShouldBeFalse();
         classEntity.IsStatic.ShouldBeFalse();
         classEntity.IsAbstract.ShouldBeFalse();
         classEntity.IsSealed.ShouldBeFalse();
+
+        classEntity.Program.SourceProject.ShouldEqual(project);
       }
 
       var childTypeCount = 0;
@@ -189,37 +208,37 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         classEntity.ChildTypes.Count.ShouldEqual(0);
 
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Private);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
       }
       // public class B2
       {
         var classEntity = classA.ChildTypes[childTypeCount++] as ClassEntity;
         classEntity.Name.ShouldEqual("B2");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Public);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
       }
       // internal class B3
       {
         var classEntity = classA.ChildTypes[childTypeCount++] as ClassEntity;
         classEntity.Name.ShouldEqual("B3");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
       }
       // protected class B4
       {
         var classEntity = classA.ChildTypes[childTypeCount++] as ClassEntity;
         classEntity.Name.ShouldEqual("B4");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Family);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
       }
       // protected internal class B5
       {
         var classEntity = classA.ChildTypes[childTypeCount++] as ClassEntity;
         classEntity.Name.ShouldEqual("B5");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
       }
       // private class B6
       {
         var classEntity = classA.ChildTypes[childTypeCount++] as ClassEntity;
         classEntity.Name.ShouldEqual("B6");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Private);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
       }
       // new class B7
       {
@@ -264,13 +283,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[classCounter++] as ClassEntity;
         classEntity.Name.ShouldEqual("A2");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Public);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
       }
       // internal class A3
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[classCounter++] as ClassEntity;
         classEntity.Name.ShouldEqual("A3");
-        classEntity.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+        classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
       }
       // static class A4
       {
@@ -304,7 +323,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Enum.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -328,6 +347,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumEntity.IsReferenceType.ShouldBeFalse();
         enumEntity.IsValueType.ShouldBeTrue();
 
+        enumEntity.Program.SourceProject.ShouldEqual(project);
+        
         enumEntity.BaseTypeReferences.ToList().Count.ShouldEqual(0);
         enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
         ((TypeNodeBasedTypeEntityReference)enumEntity.UnderlyingTypeReference).SyntaxNode.ShouldEqual(
@@ -355,7 +376,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Struct.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -385,6 +406,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         structEntity.IsReferenceType.ShouldBeFalse();
         structEntity.IsValueType.ShouldBeTrue();
 
+        structEntity.Program.SourceProject.ShouldEqual(project);
+
         var baseTypes = structEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
@@ -404,7 +427,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Interface.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -434,6 +457,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         interfaceEntity.IsReferenceType.ShouldBeTrue();
         interfaceEntity.IsValueType.ShouldBeFalse();
 
+        interfaceEntity.Program.SourceProject.ShouldEqual(project);
+        
         var baseTypes = interfaceEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
@@ -453,7 +478,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Delegate.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -483,6 +508,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         delegateEntity.IsPointerType.ShouldBeFalse();
         delegateEntity.IsReferenceType.ShouldBeTrue();
         delegateEntity.IsValueType.ShouldBeFalse();
+
+        delegateEntity.Program.SourceProject.ShouldEqual(project);
       }
     }
 
@@ -497,7 +524,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\GenericClass.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // global root namespace
@@ -610,7 +637,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Field.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -647,7 +674,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.IsOverride.ShouldBeFalse();
         fieldEntity.IsStatic.ShouldBeFalse();
         fieldEntity.IsVirtual.ShouldBeFalse();
-        fieldEntity.Accessibility.ShouldEqual(AccessibilityKind.Private);
+        fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
       }
       // A a1, a2;
       {
@@ -674,31 +701,31 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[4] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a5");
-        fieldEntity.Accessibility.ShouldEqual(AccessibilityKind.Private);
+        fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
       }
       // protected A a6;
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[5] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a6");
-        fieldEntity.Accessibility.ShouldEqual(AccessibilityKind.Family);
+        fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
       }
       // internal int a7;
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[6] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a7");
-        fieldEntity.Accessibility.ShouldEqual(AccessibilityKind.Assembly);
+        fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
       }
       // protected internal A a8;
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[7] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a8");
-        fieldEntity.Accessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
+        fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
       }
       // public int a9;
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[8] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a9");
-        fieldEntity.Accessibility.ShouldEqual(AccessibilityKind.Public);
+        fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
       }
 
       // struct S
@@ -735,7 +762,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0107_TooManyProtectionModifier.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -754,7 +781,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\ConstantMember.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -815,7 +842,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\UsingNamespace.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       var compilationUnitNode = project.SyntaxTree.CompilationUnitNodes[0];
@@ -838,7 +865,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         usingNamespace.ReflectedMetadata.ShouldBeNull();
         usingNamespace.SyntaxNodes.Count.ShouldEqual(1);
         usingNamespace.SyntaxNodes[0].ShouldEqual(compilationUnitNode.UsingNodes[0]);
-
+        usingNamespace.Program.SourceProject.ShouldEqual(project);
+        
         compilationUnitNode.UsingNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.UsingNodes[0].SemanticEntities[0].ShouldEqual(usingNamespace);
 
@@ -889,7 +917,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0105_UsingNamespaceDuplicate.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(0);
@@ -908,7 +936,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\UsingAlias.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       var compilationUnitNode = project.SyntaxTree.CompilationUnitNodes[0];
@@ -933,6 +961,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         usingAlias.ReflectedMetadata.ShouldBeNull();
         usingAlias.SyntaxNodes.Count.ShouldEqual(1);
         usingAlias.SyntaxNodes[0].ShouldEqual(compilationUnitNode.UsingNodes[0]);
+        usingAlias.Program.SourceProject.ShouldEqual(project);
 
         compilationUnitNode.UsingNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.UsingNodes[0].SemanticEntities[0].ShouldEqual(usingAlias);
@@ -989,7 +1018,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS1537_UsingAliasDuplicate.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -1008,7 +1037,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\ExternAlias.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       var compilationUnitNode = project.SyntaxTree.CompilationUnitNodes[0];
@@ -1032,6 +1061,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         externAlias.ReflectedMetadata.ShouldBeNull();
         externAlias.SyntaxNodes.Count.ShouldEqual(1);
         externAlias.SyntaxNodes[0].ShouldEqual(compilationUnitNode.ExternAliasNodes[0]);
+        externAlias.Program.SourceProject.ShouldEqual(project);
 
         compilationUnitNode.ExternAliasNodes[0].SemanticEntities.Count.ShouldEqual(1);
         compilationUnitNode.ExternAliasNodes[0].SemanticEntities[0].ShouldEqual(externAlias);
@@ -1054,7 +1084,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS1537_ExternAliasDuplicateName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -1073,7 +1103,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS1537_ExternAndUsingAliasDuplicateName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -1092,7 +1122,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\EnumMember.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       var enumDeclarationNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
@@ -1110,7 +1140,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumMember.IsNew.ShouldBeFalse();
         enumMember.IsOverride.ShouldBeFalse();
         enumMember.IsVirtual.ShouldBeFalse();
-        enumMember.Accessibility.ShouldEqual(AccessibilityKind.Public);
+        enumMember.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
         enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
         enumMember.ReflectedMetadata.ShouldBeNull();
         enumMember.SyntaxNodes[0].ShouldEqual(enumDeclarationNode.Values[i]);
@@ -1130,7 +1160,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Property.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -1222,7 +1252,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Method.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       {
@@ -1257,6 +1287,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           method.OwnTypeParameterCount.ShouldEqual(0);
           method.Parameters.Count().ShouldEqual(0);
           method.Signature.ToString().ShouldEqual("A()");
+
+          method.Program.SourceProject.ShouldEqual(project);
         }
 
         i++;
@@ -1402,7 +1434,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\Literal.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -1511,7 +1543,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\SimpleName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -1541,7 +1573,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\DefaultValue.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A
@@ -1559,6 +1591,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeReference.SyntaxNode.ToString().ShouldEqual("A");
         defaultValueExpressionEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
         expression.Parent.ShouldEqual(initializer);
+        expression.Program.SourceProject.ShouldEqual(project);
       }
     }
 
@@ -1573,7 +1606,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\TypeParameter.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       // class A

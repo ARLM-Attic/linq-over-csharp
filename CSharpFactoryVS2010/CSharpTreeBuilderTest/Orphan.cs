@@ -58,7 +58,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndNamespaceSameName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -76,7 +76,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndStructSameName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -94,7 +94,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0101_ClassAndClassSameName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -112,7 +112,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0102_TypeAlreadyContainsADefinition.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -130,7 +130,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0260_MissingPartialOnClass1.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -148,7 +148,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0260_MissingPartialOnClass2.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -166,7 +166,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0542_ClassOrStructAndMemberName.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(6);
@@ -187,7 +187,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\CS0752_PartialMethodCannotHaveOutParameter.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       project.Errors.Count.ShouldEqual(1);
@@ -205,7 +205,7 @@ namespace CSharpTreeBuilderTest
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"EntityBuilderSyntaxNodeVisitor\PartialMethod.cs");
       InvokeParser(project, true, false).ShouldBeTrue();
-      var visitor = new EntityBuilderSyntaxNodeVisitor(project, project.SemanticGraph);
+      var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");

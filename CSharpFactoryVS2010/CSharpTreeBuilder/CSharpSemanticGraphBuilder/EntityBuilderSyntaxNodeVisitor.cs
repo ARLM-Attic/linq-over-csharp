@@ -14,23 +14,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   // ================================================================================================
   public class EntityBuilderSyntaxNodeVisitor : BlankSyntaxNodeVisitor
   {
-    /// <summary>The semantic graph that will hold the built entities.</summary>
-    private readonly SemanticGraph _SemanticGraph;
+    /// <summary>
+    /// The program entity representing the source project under processing.
+    /// </summary>
+    private readonly Program _Program;
 
-    /// <summary>Error handler object used for reporting compilation messages.</summary>
+    /// <summary>
+    /// Error handler object used for reporting compilation messages.
+    /// </summary>
     private readonly ICompilationErrorHandler _ErrorHandler;
 
+    /// <summary>
+    /// The semantic graph that will hold the built entities.
+    /// </summary>
+    private readonly SemanticGraph _SemanticGraph;
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="EntityBuilderSyntaxNodeVisitor"/> class.
     /// </summary>
-    /// <param name="semanticGraph">The semantic graph that will receive the built entities.</param>
-    /// <param name="errorHandler">Error handler object used for reporting compilation messages.</param>
+    /// <param name="project">The project containing the source under processing.</param>
     // ----------------------------------------------------------------------------------------------
-    public EntityBuilderSyntaxNodeVisitor(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
+    public EntityBuilderSyntaxNodeVisitor(CSharpProject project)
     {
-      _SemanticGraph = semanticGraph;
-      _ErrorHandler = errorHandler;
+      _Program = new Program(project, null);
+      _ErrorHandler = project;
+      _SemanticGraph = project.SemanticGraph;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -92,6 +101,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // Create the extern alias entity and add it to the parent namespace (which can be a root namespace as well).
       var externAliasEntity = new ExternAliasEntity(lexicalScope, node);
+      externAliasEntity.Program = _Program;
       parentEntity.AddExternAlias(externAliasEntity);
 
       // Establish to two-way mapping between the AST node and the new semantic entity
@@ -125,6 +135,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
       var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
+      usingNamespaceEntity.Program = _Program;
       parentEntity.AddUsingNamespace(usingNamespaceEntity);
       
       // Establish to two-way mapping between the AST node and the new semantic entity
@@ -158,6 +169,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
       var usingAliasEntity = new UsingAliasEntity(lexicalScope, node.Alias, node.NamespaceOrTypeName);
+      usingAliasEntity.Program = _Program;
       parentEntity.AddUsingAlias(usingAliasEntity);
 
       // Establish to two-way mapping between the AST node and the new semantic entity
@@ -186,6 +198,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       classEntity.IsStatic = IsStatic(node.Modifiers);
       classEntity.IsAbstract = IsAbstract(node.Modifiers);
       classEntity.IsSealed = IsSealed(node.Modifiers);
+      classEntity.Program = _Program;
       AddBaseTypesToTypeEntity(classEntity, node);
       AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(classEntity);
@@ -212,6 +225,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       var structEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
       structEntity.IsNew = IsNew(node.Modifiers);
+      structEntity.Program = _Program;
       AddBaseTypesToTypeEntity(structEntity, node);
       AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(structEntity);
@@ -238,6 +252,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       var interfaceEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
       interfaceEntity.IsNew = IsNew(node.Modifiers);
+      interfaceEntity.Program = _Program;
       AddBaseTypesToTypeEntity(interfaceEntity, node);
       AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(interfaceEntity);
@@ -265,6 +280,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Build the new entity
       var enumEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
       enumEntity.IsNew = IsNew(node.Modifiers);
+      enumEntity.Program = _Program;
       childTypeCapableParentEntity.AddChildType(enumEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
 
@@ -300,6 +316,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Build the new entity
       var delegateEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
       delegateEntity.IsNew = IsNew(node.Modifiers);
+      delegateEntity.Program = _Program;
       AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(delegateEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, delegateEntity);

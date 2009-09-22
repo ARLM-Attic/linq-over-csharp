@@ -283,6 +283,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayInitializerEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstantMemberEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IHasAccessibility.cs" />
     <Compile Include="CSharpSemanticGraph\LocalVariableDeclarationStatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\LocalVariableEntity.cs" />
     <Compile Include="CSharpSemanticGraph\DefaultValueExpressionEntity.cs" />
@@ -360,6 +361,7 @@
     <Compile Include="ProjectContent\ICompilationErrorHandler.cs" />
     <Compile Include="ProjectContent\PhysicalSourceFile.cs" />
     <Compile Include="ProjectContent\CSharpProject.cs" />
+    <Compile Include="ProjectContent\Program.cs" />
     <Compile Include="ProjectContent\ProjectProviderBase.cs" />
     <Compile Include="ProjectContent\ReferencedAssembly.cs" />
     <Compile Include="ProjectContent\ReferencedCompliation.cs" />

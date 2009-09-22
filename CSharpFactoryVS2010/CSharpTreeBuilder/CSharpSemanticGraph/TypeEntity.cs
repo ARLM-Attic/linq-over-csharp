@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This abstract class represents a type entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public abstract class TypeEntity : NamespaceOrTypeEntity
+  public abstract class TypeEntity : NamespaceOrTypeEntity, IHasAccessibility
   {
     /// <summary>
     /// Backing field for BaseTypeReferences property.
@@ -28,11 +28,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     private readonly Dictionary<int, ArrayTypeEntity> _ArrayTypes;
 
-    /// <summary>
-    /// Backing field for Accessibility property.
-    /// </summary>
-    protected AccessibilityKind? _Accessibility;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeEntity"/> class.
@@ -46,24 +41,33 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
-      _Accessibility = accessibility;
+      DeclaredAccessibility = accessibility;
       IsNew = false;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the accessibility of the member.
+    /// Gets or sets the declared accessibility of the entity.
     /// </summary>
-    /// <remarks>If the accessibility was not set then a default is returned 
-    /// which depends on the type of the containing type.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual AccessibilityKind? Accessibility
+    public AccessibilityKind? DeclaredAccessibility { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the effective accessibility of the entity.
+    /// </summary>
+    /// <remarks>
+    /// If there's no declared accessibility then returns the default accessibility.
+    /// If the default cannot be determined (eg. no parent entity) then returns null.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public AccessibilityKind? EffectiveAccessibility
     {
       get
       {
-        if (_Accessibility != null)
+        if (DeclaredAccessibility != null)
         {
-          return _Accessibility;
+          return DeclaredAccessibility;
         }
 
         // If no declared accessibility then the default has to be returned,
@@ -86,10 +90,45 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         // If there's no parent, then a default accessibility cannot be determined.
         return null;
       }
+    }
 
-      set
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity is accessible by another entity.
+    /// </summary>
+    /// <param name="accessingEntity">The accessing entity.</param>
+    /// <returns>True if the parameter entity can access this entity, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsAccessibleBy(SemanticEntity accessingEntity)
+    {
+      // First check the accessibility of the parent type (if any)
+      var parentType = Parent as TypeEntity;
+      
+      if (IsNestedType && !parentType.IsAccessibleBy(accessingEntity))
       {
-        _Accessibility = value;
+        return false;
+      }
+      
+      // Then check the accessibility of this entity.
+      switch (EffectiveAccessibility)
+      {
+        case AccessibilityKind.Public:
+          return true;
+
+        case AccessibilityKind.Assembly:
+          return accessingEntity.Program == this.Program;
+
+        case AccessibilityKind.FamilyOrAssembly:
+          return accessingEntity.Program == this.Program || parentType.ContainsInFamily(accessingEntity);
+
+        case AccessibilityKind.Family:
+          return parentType.ContainsInFamily(accessingEntity);
+
+        case AccessibilityKind.Private:
+          return parentType.Contains(accessingEntity);
+
+        default:
+          throw new ApplicationException("Effective accessibility is undefined.");
       }
     }
 
@@ -185,10 +224,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this type is declared in the body of a type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsNestedType
+    {
+      get 
+      { 
+        return (this.Parent != null) && (this.Parent is TypeEntity); 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this type intentionally hides an inherited member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual bool IsNew { get; set; }
+    public bool IsNew { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -476,6 +528,81 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       _ArrayTypes.Add(arrayType.Rank, arrayType);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity contains another entity (directly or indirectly).
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>
+    /// True if this entity contains the parameter entity (directly or indirectly), false otherwise.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool Contains(SemanticEntity entity)
+    {
+      if (entity == null)
+      {
+        return false;
+      }
+
+      if (entity == this)
+      {
+        return true;
+      }
+
+      return Contains(entity.Parent);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity or any of its base types contain another entity 
+    /// (directly or indirectly).
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>
+    /// True if this entity or any of its base types contain the parameter entity 
+    /// (directly or indirectly), false otherwise.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool ContainsInFamily(SemanticEntity entity)
+    {
+      if (entity == null)
+      {
+        return false;
+      }
+
+      if (entity == this 
+        || (entity is TypeEntity && this.IsBaseOf(entity as TypeEntity)))
+      {
+        return true;
+      }
+
+      return ContainsInFamily(entity.Parent);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type is a (direct or indirect) base type of another type.
+    /// </summary>
+    /// <param name="typeEntity">A type entity.</param>
+    /// <returns>
+    /// True if this type is a (direct or indirect) base type of the parameter type, false otherwise.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsBaseOf(TypeEntity typeEntity)
+    {
+      if (typeEntity == null || typeEntity.BaseType == null)
+      {
+        return false;
+      }
+
+      if (typeEntity.BaseType == this)
+      {
+        return true;
+      }
+
+      return this.IsBaseOf(typeEntity.BaseType);
     }
 
     #region Visitor methods
