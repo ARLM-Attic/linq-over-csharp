@@ -420,9 +420,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var parentEntity = GetParentEntity<TypeEntity>(node);
 
-      // The property is auto-implemented if both get and set accessors are abstract
-      var isAutoImplemented = node.GetAccessor != null && !node.GetAccessor.HasBody
-                              && node.SetAccessor != null && !node.SetAccessor.HasBody;
+      // The property is auto-implemented it's not an interface member
+      // and if both get and set accessors are abstract 
+      var isAutoImplemented = !parentEntity.IsInterfaceType
+        && node.GetAccessor != null && !node.GetAccessor.HasBody
+        && node.SetAccessor != null && !node.SetAccessor.HasBody;
 
       // Create a semantic entity and add to its parent.
       var interfaceReference = node.InterfaceType != null
@@ -885,14 +887,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="node">An accessor AST node.</param>
     /// <returns>An accessor entity, or null if the AST node was null.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static AccessorEntity CreateAccessor(AccessorNode node)
+    private AccessorEntity CreateAccessor(AccessorNode node)
     {
-      if (node==null)
+      if (node == null)
       {
         return null;
       }
+      var accessibility = GetAccessibility(node.Modifiers);
 
-      var accessor = new AccessorEntity(!node.HasBody);
+      var accessor = new AccessorEntity(accessibility, !node.HasBody);
       AssociateSyntaxNodeWithSemanticEntity(node, accessor);
 
       return accessor;

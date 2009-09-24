@@ -1235,7 +1235,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
-      factory.CreateEntitiesFromAssembly(Assembly.GetAssembly(typeof(int)).Location, "global");
+      factory.ImportTypesIntoSemanticGraph(Assembly.GetAssembly(typeof(int)).Location, "global");
       project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       project.Warnings.Count.ShouldEqual(0);
@@ -1261,7 +1261,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var project = new CSharpProject(WorkingFolder);
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
-      factory.CreateEntitiesFromAssembly(Assembly.GetAssembly(typeof(int)).Location, "global");
+      factory.ImportTypesIntoSemanticGraph(Assembly.GetAssembly(typeof(int)).Location, "global");
       project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       project.Warnings.Count.ShouldEqual(0);

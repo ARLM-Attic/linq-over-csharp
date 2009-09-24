@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="PropertyEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="isStatic">A value indicating whether this property is static.</param>
     /// <param name="typeReference">A reference to the type of the member.</param>
@@ -35,7 +35,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="isAutoImplemented">A value indicating whether this property is auto-implemented.</param>
     // ----------------------------------------------------------------------------------------------
     public PropertyEntity(
-      bool isExplicitlyDefined,
+      bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       bool isStatic,
       SemanticEntityReference<TypeEntity> typeReference,
@@ -43,7 +43,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       string name, 
       bool isAutoImplemented)
       : 
-      base(isExplicitlyDefined, accessibility, typeReference, interfaceReference, name)
+      base(isDeclaredInSource, accessibility, typeReference, interfaceReference, name)
     {
       _IsStatic = isStatic;
       IsAutoImplemented = isAutoImplemented;

@@ -16,18 +16,18 @@
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberWithBodyEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">A value indicating whether the member is explicitly defined.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the member.</param>
     /// <param name="isAbstract">A value indicating whether the function member is abstract.</param>
     // ----------------------------------------------------------------------------------------------
     protected FunctionMemberWithBodyEntity(
-      bool isExplicitlyDefined, 
+      bool isDeclaredInSource, 
       AccessibilityKind? accessibility, 
       string name,
       bool isAbstract)
       : 
-      base(isExplicitlyDefined, accessibility, name)
+      base(isDeclaredInSource, accessibility, name)
     {
       if (!isAbstract)
       {

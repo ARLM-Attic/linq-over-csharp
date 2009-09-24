@@ -222,19 +222,17 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var b1 = classB.GetMember<FieldEntity>("b1");
       b1.ShouldNotBeNull();
 
-      // TODO: uncomment when member importing is done.
-      //var protectedInternalMember = publicClass.GetMember<FieldEntity>("ProtectedInternalMember");
-      //protectedInternalMember.IsAccessibleBy(a1).ShouldBeFalse();
-      //protectedInternalMember.IsAccessibleBy(b1).ShouldBeTrue();
+      var protectedInternalMember = publicClass.GetMember<FieldEntity>("protectedInternalNestedMember");
+      protectedInternalMember.IsAccessibleBy(a1).ShouldBeFalse();
+      protectedInternalMember.IsAccessibleBy(b1).ShouldBeTrue();
 
       var protectedInternalNestedClass = publicClass.GetSingleChildType<ClassEntity>("ProtectedInternalNestedClass");
       protectedInternalNestedClass.IsAccessibleBy(a1).ShouldBeFalse();
       protectedInternalNestedClass.IsAccessibleBy(b1).ShouldBeTrue();
 
-      // TODO: uncomment when member importing is done.
-      //var internalMember = publicClass.GetMember<FieldEntity>("InternalMember");
-      //internalMember.IsAccessibleBy(a1).ShouldBeFalse();
-      //internalMember.IsAccessibleBy(b1).ShouldBeFalse();
+      var internalMember = publicClass.GetMember<FieldEntity>("internalNestedMember");
+      internalMember.IsAccessibleBy(a1).ShouldBeFalse();
+      internalMember.IsAccessibleBy(b1).ShouldBeFalse();
 
       var internalNestedClass = publicClass.GetSingleChildType<ClassEntity>("InternalNestedClass");
       internalNestedClass.IsAccessibleBy(a1).ShouldBeFalse();

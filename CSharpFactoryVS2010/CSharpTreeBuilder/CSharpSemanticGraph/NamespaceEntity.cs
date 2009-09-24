@@ -39,11 +39,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this namespace is explicitly defined in code 
+    /// Gets a value indicating whether this namespace is explicitly declared in source code 
     /// (not inferred from assembly metadata).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsExplicit
+    public bool IsDeclaredInSource
     {
       get
       {

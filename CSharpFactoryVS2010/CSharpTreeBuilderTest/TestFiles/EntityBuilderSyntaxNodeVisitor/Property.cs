@@ -1,9 +1,9 @@
 ﻿class A : B
 {
-  int B
+  protected int B
   {
     get { return 0; }
-    set { }
+    private set { }
   }
   
   int C { get; set; }
@@ -21,4 +21,9 @@ class B
 {
   public virtual int F { get; set; }
   public int G { get; set; }
+}
+
+interface I
+{
+  int I { get; set; }
 }

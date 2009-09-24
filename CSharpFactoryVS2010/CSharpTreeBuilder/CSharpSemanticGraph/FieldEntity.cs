@@ -14,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="FieldEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="isStatic">True, if the field is static, false otherwise.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
@@ -22,14 +22,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="initializer">The initializer of the field.</param>
     // ----------------------------------------------------------------------------------------------
     public FieldEntity(
-      bool isExplicitlyDefined,
+      bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       bool isStatic,
       SemanticEntityReference<TypeEntity> type,
       string name, 
       VariableInitializer initializer)
       : 
-      base(isExplicitlyDefined, accessibility, name)
+      base(isDeclaredInSource, accessibility, name)
     {
       _IsStatic = isStatic;
       TypeReference = type;

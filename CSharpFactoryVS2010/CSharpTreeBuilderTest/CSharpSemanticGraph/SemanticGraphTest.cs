@@ -28,7 +28,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       semanticGraph.GlobalNamespace.ChildNamespaces.Count.ShouldEqual(0);
       semanticGraph.GlobalNamespace.ChildTypes.Count.ShouldEqual(0);
       semanticGraph.GlobalNamespace.SyntaxNodes.Count.ShouldEqual(0);
-      semanticGraph.GlobalNamespace.IsExplicit.ShouldBeFalse();
+      semanticGraph.GlobalNamespace.IsDeclaredInSource.ShouldBeFalse();
       semanticGraph.GlobalNamespace.ReflectedMetadata.ShouldBeNull();
       semanticGraph.GlobalNamespace.Parent.ShouldBeNull();
     }

@@ -68,6 +68,7 @@
     <Compile Include="Ast\StructDeclarations.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MemberLookupTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\PartialTypeMergingSemanticGraphVisitorTest.cs" />
@@ -373,10 +374,11 @@
     <None Include="TestFiles\Accessibility\Internal.cs" />
     <None Include="TestFiles\Accessibility\Public.cs" />
     <None Include="TestFiles\Accessibility\Private.cs" />
-    <None Include="TestFiles\Accessibility\ProtectedInternalInImportedProgram.cs" />
+    <Compile Include="TestFiles\Accessibility\ProtectedInternalInImportedProgram.cs" />
     <None Include="TestFiles\Accessibility\ProtectedInternalInSameProgram.cs" />
     <None Include="TestFiles\Accessibility\Protected.cs" />
     <None Include="TestFiles\Accessibility\ProtectedAccessForInstanceMembers.cs" />
+    <None Include="TestFiles\MemberLookup\TypeParameter.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Unresolvable.cs" />

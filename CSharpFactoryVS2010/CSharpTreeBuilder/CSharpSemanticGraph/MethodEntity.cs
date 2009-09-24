@@ -25,7 +25,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="MethodEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">A value indicating whether the member is explicitly defined.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="isStatic">A value indicating whether this method is static.</param>
     /// <param name="isPartial">A value indicating whether this method is partial.</param>
@@ -38,7 +38,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="isAbstract">A value indicating whether the function member is abstract.</param>
     // ----------------------------------------------------------------------------------------------
     public MethodEntity(
-      bool isExplicitlyDefined,
+      bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       bool isStatic, 
       bool isPartial, 
@@ -47,7 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       string name, 
       bool isAbstract)
       : 
-      base(isExplicitlyDefined, accessibility, name, isAbstract)
+      base(isDeclaredInSource, accessibility, name, isAbstract)
     {
       _Parameters = new List<ParameterEntity>();
       _AllTypeParameters = new List<TypeParameterEntity>();

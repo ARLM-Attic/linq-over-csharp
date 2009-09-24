@@ -22,13 +22,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="MemberEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="name">The name of the member.</param>
     // ----------------------------------------------------------------------------------------------
-    protected MemberEntity(bool isExplicitlyDefined, AccessibilityKind? accessibility, string name)
+    protected MemberEntity(bool isDeclaredInSource, AccessibilityKind? accessibility, string name)
     {
-      IsExplicitlyDefined = isExplicitlyDefined;
+      IsDeclaredInSource = isDeclaredInSource;
       DeclaredAccessibility = accessibility;
       Name = name;
     }
@@ -57,11 +57,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets a value indicating whether the member is explicitly defined, or created by the parser.
-    /// Eg. value types have a default constructor which is implicitly declared.
+    /// Gets or sets a value indicating whether the member is explicitly declared in source code.
     /// </summary>
+    /// <remarks>
+    /// False for members created by the parser (eg. a backing field for an auto-implemented property)
+    /// and for members created from reflected metadata.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public bool IsExplicitlyDefined { get; private set; }
+    public bool IsDeclaredInSource { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

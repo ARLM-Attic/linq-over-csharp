@@ -15,18 +15,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstantMemberEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="type">The type of the member (a type entity reference).</param>
     /// <param name="name">The name of the member.</param>
     // ----------------------------------------------------------------------------------------------
     public ConstantMemberEntity(
-      bool isExplicitlyDefined, 
+      bool isDeclaredInSource, 
       AccessibilityKind? accessibility, 
       SemanticEntityReference<TypeEntity> type,
       string name)
       : 
-      base(isExplicitlyDefined, accessibility, name)
+      base(isDeclaredInSource, accessibility, name)
     {
       TypeReference = type;
       _IsStatic = true;

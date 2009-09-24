@@ -14,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberWithAccessorsEntity"/> class.
     /// </summary>
-    /// <param name="isExplicitlyDefined">True, if the member is explicitly defined, false otherwise.</param>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="typeReference">A reference to the type of the member.</param>
     /// <param name="interfaceReference">
@@ -24,13 +24,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="name">The name of the member.</param>
     // ----------------------------------------------------------------------------------------------
     protected FunctionMemberWithAccessorsEntity(
-      bool isExplicitlyDefined,
+      bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       SemanticEntityReference<TypeEntity> typeReference,
       SemanticEntityReference<TypeEntity> interfaceReference,
       string name)
       :
-      base(isExplicitlyDefined, accessibility, name)
+      base(isDeclaredInSource, accessibility, name)
     {
       TypeReference = typeReference;
       InterfaceReference = interfaceReference;

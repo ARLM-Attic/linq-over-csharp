@@ -24,6 +24,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private readonly List<MemberEntity> _Members;
 
     /// <summary>
+    /// A flag for lazy importing reflected members (expensive operation).
+    /// True if the reflected members were already imported, false otherwise.
+    /// </summary>
+    private bool _ReflectedMembersImported;
+
+    /// <summary>
     /// Stores array types created from this type. The key is the rank of the array.
     /// </summary>
     private readonly Dictionary<int, ArrayTypeEntity> _ArrayTypes;
@@ -40,10 +46,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
       _Members = new List<MemberEntity>();
+      _ReflectedMembersImported = false;
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
       DeclaredAccessibility = accessibility;
       IsNew = false;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the factory object needed for lazy importing reflected members.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public MetadataImporterSemanticEntityFactory MetadataImporterFactory { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -340,7 +354,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public virtual IEnumerable<MemberEntity> Members
     {
-      get { return _Members; }
+      get 
+      {
+        LazyImportReflectedMembers();
+
+        return _Members; 
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -365,32 +384,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a collection of inherited members by name.
-    /// </summary>
-    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
-    /// <param name="name">The name of the members to found.</param>
-    /// <returns>A collection of the inherited members. Can be empty.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TEntityType> GetInheritedMembers<TEntityType>(string name) where TEntityType : MemberEntity
-    {
-      return BaseType.GetMembers<TEntityType>(name).Union(BaseType.GetInheritedMembers<TEntityType>(name));
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a collection of members by name.
-    /// </summary>
-    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
-    /// <param name="name">The name of the members to found.</param>
-    /// <returns>A collection of the found member. Can be empty.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TEntityType> GetMembers<TEntityType>(string name) where TEntityType : MemberEntity
-    {
-      return _DeclarationSpace.GetEntities<TEntityType>(name);
-    }
-    
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a member by name.
     /// </summary>
     /// <typeparam name="TEntityType">The type of member to found.</typeparam>
@@ -400,12 +393,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetMember<TEntityType>(string name) where TEntityType : MemberEntity
     {
+      LazyImportReflectedMembers();
+
       if (typeof(TEntityType) == typeof(MethodEntity))
       {
         return GetMethod(new Signature(name, 0, null)) as TEntityType;
       }
 
       return _DeclarationSpace.GetSingleEntity<TEntityType>(name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <returns>A collection of the found members. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetMembers<TEntityType>(string name)
+      where TEntityType : MemberEntity
+    {
+      LazyImportReflectedMembers();
+
+      return _DeclarationSpace.GetEntities<TEntityType>(name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -417,6 +428,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public MethodEntity GetMethod(Signature signature)
     {
+      LazyImportReflectedMembers();
+      
       return _DeclarationSpace.GetSingleEntity<MethodEntity>(signature);
     }
 
@@ -482,6 +495,51 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       return methods.FirstOrDefault();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of accessible members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <param name="accessingEntity">An entity for accessibility checking.</param>
+    /// <returns>A collection of accessible members with a given name. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetAccessibleMembers<TEntityType>(
+      string name, SemanticEntity accessingEntity)
+      where TEntityType : MemberEntity
+    {
+      var result = new HashSet<TEntityType>();
+
+      foreach (var entity in GetMembers<TEntityType>(name))
+      {
+        if (entity.IsAccessibleBy(accessingEntity))
+        {
+          result.Add(entity);
+        }
+      }
+
+      return result;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of accessible inherited members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <param name="accessingEntity">An entity for accessibility checking.</param>
+    /// <returns>A collection of accessible inherited members with a given name. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetAccessibleInheritedMembers<TEntityType>(
+      string name, SemanticEntity accessingEntity)
+      where TEntityType : MemberEntity
+    {
+      return (BaseType == null)
+        ? new List<TEntityType>()
+        : BaseType.GetAccessibleMembers<TEntityType>(name, accessingEntity)
+          .Union(BaseType.GetAccessibleInheritedMembers<TEntityType>(name, accessingEntity));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -605,6 +663,39 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       return this.IsBaseOf(typeEntity.BaseType);
     }
 
+    #region Private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Imports reflected members if needed. 
+    /// That is, if this type was created from metadata and members are not yet imported.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    private void LazyImportReflectedMembers()
+    {
+      // Don't have to import if already did or the type is not created from metadata.
+      if (_ReflectedMembersImported || ReflectedMetadata == null)
+      {
+        return;
+      }
+
+      if (MetadataImporterFactory == null)
+      {
+        throw new ApplicationException("No MetadataImporterFactory supplied for lazy importing members.");
+      }
+
+      if (!(ReflectedMetadata is Type))
+      {
+        throw new ApplicationException("ReflectedMetadat does not contain a Type object.");
+      }
+
+      MetadataImporterFactory.ImportMembersIntoSemanticGraph(ReflectedMetadata as Type, this);
+
+      _ReflectedMembersImported = true;
+    }
+
+    #endregion
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------
@@ -615,9 +706,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      foreach (var member in Members)
+      // Visit members only if those are not subject of lazy importing.
+      if (_ReflectedMembersImported || ReflectedMetadata == null)
       {
-        member.AcceptVisitor(visitor);
+        foreach (var member in Members)
+        {
+          member.AcceptVisitor(visitor);
+        }
       }
     }
 

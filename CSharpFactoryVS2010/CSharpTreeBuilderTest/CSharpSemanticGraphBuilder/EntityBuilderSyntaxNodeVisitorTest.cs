@@ -38,7 +38,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("global");
         namespaceEntity.FullyQualifiedName.ShouldEqual("global");
         namespaceEntity.Parent.ShouldBeNull();
-        namespaceEntity.IsExplicit.ShouldBeFalse();
+        namespaceEntity.IsDeclaredInSource.ShouldBeFalse();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(0);
 
         namespaceEntity.ChildNamespaces.Count.ShouldEqual(2);
@@ -51,7 +51,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("A");
         namespaceEntity.FullyQualifiedName.ShouldEqual("A");
         namespaceEntity.Parent.ToString().ShouldEqual("global");
-        namespaceEntity.IsExplicit.ShouldBeTrue();
+        namespaceEntity.IsDeclaredInSource.ShouldBeTrue();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(2);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0]);
         namespaceEntity.SyntaxNodes[1].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[2]);
@@ -65,7 +65,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("B");
         namespaceEntity.FullyQualifiedName.ShouldEqual("A.B");
         namespaceEntity.Parent.ToString().ShouldEqual("global::A");
-        namespaceEntity.IsExplicit.ShouldBeTrue();
+        namespaceEntity.IsDeclaredInSource.ShouldBeTrue();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(2);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].NamespaceDeclarations[0]);
         namespaceEntity.SyntaxNodes[1].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[2]);
@@ -78,7 +78,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("C");
         namespaceEntity.FullyQualifiedName.ShouldEqual("C");
         namespaceEntity.Parent.ToString().ShouldEqual("global");
-        namespaceEntity.IsExplicit.ShouldBeTrue();
+        namespaceEntity.IsDeclaredInSource.ShouldBeTrue();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(1);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[1]);
 
@@ -91,7 +91,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("D");
         namespaceEntity.FullyQualifiedName.ShouldEqual("C.D");
         namespaceEntity.Parent.ToString().ShouldEqual("global::C");
-        namespaceEntity.IsExplicit.ShouldBeTrue();
+        namespaceEntity.IsDeclaredInSource.ShouldBeTrue();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(1);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[1]);
 
@@ -104,7 +104,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("E");
         namespaceEntity.FullyQualifiedName.ShouldEqual("C.D.E");
         namespaceEntity.Parent.ToString().ShouldEqual("global::C.D");
-        namespaceEntity.IsExplicit.ShouldBeTrue();
+        namespaceEntity.IsDeclaredInSource.ShouldBeTrue();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(1);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[1].NamespaceDeclarations[0]);
 
@@ -118,7 +118,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Name.ShouldEqual("F");
         namespaceEntity.FullyQualifiedName.ShouldEqual("C.D.E.F");
         namespaceEntity.Parent.ToString().ShouldEqual("global::C.D.E");
-        namespaceEntity.IsExplicit.ShouldBeTrue();
+        namespaceEntity.IsDeclaredInSource.ShouldBeTrue();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(1);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[1].NamespaceDeclarations[0]);
 
@@ -662,7 +662,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a1");
-        fieldEntity.IsExplicitlyDefined.ShouldBeTrue();
+        fieldEntity.IsDeclaredInSource.ShouldBeTrue();
         fieldEntity.Parent.ToString().ShouldEqual("global::A");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
         var fieldNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0].MemberDeclarations[0] as FieldDeclarationNode;
@@ -741,7 +741,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[1].Members.ToArray()[0] as FieldEntity;
         fieldEntity.Name.ShouldEqual("s1");
-        fieldEntity.IsExplicitlyDefined.ShouldBeTrue();
+        fieldEntity.IsDeclaredInSource.ShouldBeTrue();
         fieldEntity.IsStatic.ShouldBeFalse();
         fieldEntity.Parent.ToString().ShouldEqual("global::S");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
@@ -802,7 +802,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0].Members.ToArray()[0] as ConstantMemberEntity;
         constEntity.Name.ShouldEqual("a1");
-        constEntity.IsExplicitlyDefined.ShouldBeTrue();
+        constEntity.IsDeclaredInSource.ShouldBeTrue();
         constEntity.IsStatic.ShouldBeTrue();
         constEntity.IsOverride.ShouldBeFalse();
         constEntity.IsVirtual.ShouldBeFalse();
@@ -1135,7 +1135,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var enumMember = enumEntity.Members.ToList()[i] as EnumMemberEntity;
         enumMember.Name.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
-        enumMember.IsExplicitlyDefined.ShouldBeTrue();
+        enumMember.IsDeclaredInSource.ShouldBeTrue();
         enumMember.IsStatic.ShouldBeTrue();
         enumMember.IsNew.ShouldBeFalse();
         enumMember.IsOverride.ShouldBeFalse();
@@ -1163,81 +1163,107 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var visitor = new EntityBuilderSyntaxNodeVisitor(project);
       project.SyntaxTree.AcceptVisitor(visitor);
 
-      // class A
-      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0];
-      classEntity.FullyQualifiedName.ShouldEqual("A");
-
-      // class A declaration
-      var classNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
-      var propertyNode = classNode.MemberDeclarations[0] as PropertyDeclarationNode;
-
-      // int B
       {
-        var property = classEntity.Members.ToList()[0] as PropertyEntity;
-        property.Name.ShouldEqual("B");
-        property.IsAutoImplemented.ShouldBeFalse();
-        property.AutoImplementedField.ShouldBeNull();
-        property.IsExplicitlyDefined.ShouldBeTrue();
-        property.Parent.ShouldEqual(classEntity);
-        property.SyntaxNodes[0].ShouldEqual(propertyNode);
-        property.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        // class A
+        var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
 
-        property.IsStatic.ShouldBeFalse();
-        property.IsNew.ShouldBeFalse();
-        property.IsOverride.ShouldBeFalse();
-        property.IsVirtual.ShouldBeFalse();
+        // class A declaration
+        var classNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as ClassDeclarationNode;
+        var propertyNode = classNode.MemberDeclarations[0] as PropertyDeclarationNode;
 
-        property.GetAccessor.ShouldNotBeNull();
-        property.GetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.GetAccessor);
-        property.GetAccessor.Parent.ShouldEqual(property);
-        property.SetAccessor.ShouldNotBeNull();
-        property.SetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.SetAccessor);
-        property.SetAccessor.Parent.ShouldEqual(property);
+        // Check the number of properties and auto-created backing fields
+        var properties = classEntity.Members.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
+        properties.Count.ShouldEqual(6);
+        var fields = classEntity.Members.Where(x => x is FieldEntity).Cast<FieldEntity>().ToList();
+        fields.Count.ShouldEqual(5);
 
-        var accessors = property.Accessors.ToList();
-        accessors.Count.ShouldEqual(2);
-        accessors[0].ShouldEqual(property.GetAccessor);
-        accessors[1].ShouldEqual(property.SetAccessor);
+        var propertyCounter = 0;
+
+        // int B
+        {
+          var property = properties[propertyCounter++];
+          property.Name.ShouldEqual("B");
+          property.IsAutoImplemented.ShouldBeFalse();
+          property.AutoImplementedField.ShouldBeNull();
+          property.IsDeclaredInSource.ShouldBeTrue();
+          property.Parent.ShouldEqual(classEntity);
+          property.SyntaxNodes[0].ShouldEqual(propertyNode);
+          property.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+          property.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Family);
+
+          property.IsStatic.ShouldBeFalse();
+          property.IsNew.ShouldBeFalse();
+          property.IsOverride.ShouldBeFalse();
+          property.IsVirtual.ShouldBeFalse();
+
+          property.GetAccessor.ShouldNotBeNull();
+          property.GetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.GetAccessor);
+          property.GetAccessor.Parent.ShouldEqual(property);
+          property.GetAccessor.DeclaredAccessibility.ShouldBeNull();
+          property.GetAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
+
+          property.SetAccessor.ShouldNotBeNull();
+          property.SetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.SetAccessor);
+          property.SetAccessor.Parent.ShouldEqual(property);
+          property.SetAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Private);
+          property.SetAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
+
+          var accessors = property.Accessors.ToList();
+          accessors.Count.ShouldEqual(2);
+          accessors[0].ShouldEqual(property.GetAccessor);
+          accessors[1].ShouldEqual(property.SetAccessor);
+        }
+        // protected int C { get; private set; }
+        {
+          var property = properties[propertyCounter++];
+          property.Name.ShouldEqual("C");
+          property.IsAutoImplemented.ShouldBeTrue();
+          property.AutoImplementedField.IsDeclaredInSource.ShouldBeFalse();
+          property.AutoImplementedField.IsStatic.ShouldBeFalse();
+          // The name of the auto-implemented field is a guid, so we just check that it's not null.
+          property.AutoImplementedField.Name.ShouldNotBeNull();
+          property.AutoImplementedField.Parent.ShouldEqual(classEntity);
+          property.AutoImplementedField.SyntaxNodes.Count.ShouldEqual(0);
+          property.AutoImplementedField.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+
+          classEntity.Members.Contains(property.AutoImplementedField).ShouldBeTrue();
+        }
+        // static int D { get; set; }
+        {
+          var property = properties[propertyCounter++];
+          property.Name.ShouldEqual("D");
+          property.IsStatic.ShouldBeTrue();
+          property.AutoImplementedField.IsStatic.ShouldBeTrue();
+        }
+        // public virtual int E { get; set; }
+        {
+          var property = properties[propertyCounter++];
+          property.Name.ShouldEqual("E");
+          property.IsVirtual.ShouldBeTrue();
+        }
+        // public override int F { get; set; }
+        {
+          var property = properties[propertyCounter++];
+          property.Name.ShouldEqual("F");
+          property.IsOverride.ShouldBeTrue();
+        }
+        // public new int G { get; set; }
+        {
+          var property = properties[propertyCounter++];
+          property.Name.ShouldEqual("G");
+          property.IsNew.ShouldBeTrue();
+        }
       }
-      // int C { get; set; }
-      {
-        var property = classEntity.Members.ToList()[1] as PropertyEntity;
-        property.Name.ShouldEqual("C");
-        property.IsAutoImplemented.ShouldBeTrue();
-        property.AutoImplementedField.IsExplicitlyDefined.ShouldBeFalse();
-        property.AutoImplementedField.IsStatic.ShouldBeFalse();
-        // The name of the auto-implemented field is a guid, so we just check that it's not null.
-        property.AutoImplementedField.Name.ShouldNotBeNull();
-        property.AutoImplementedField.Parent.ShouldEqual(classEntity);
-        property.AutoImplementedField.SyntaxNodes.Count.ShouldEqual(0);
-        property.AutoImplementedField.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
 
-        classEntity.Members.Contains(property.AutoImplementedField).ShouldBeTrue();
-      }
-      // static int D { get; set; }
       {
-        var property = classEntity.Members.ToList()[3] as PropertyEntity;
-        property.Name.ShouldEqual("D");
-        property.IsStatic.ShouldBeTrue();
-        property.AutoImplementedField.IsStatic.ShouldBeTrue();
-      }
-      // public virtual int E { get; set; }
-      {
-        var property = classEntity.Members.ToList()[5] as PropertyEntity;
-        property.Name.ShouldEqual("E");
-        property.IsVirtual.ShouldBeTrue();
-      }
-      // public override int F { get; set; }
-      {
-        var property = classEntity.Members.ToList()[7] as PropertyEntity;
-        property.Name.ShouldEqual("F");
-        property.IsOverride.ShouldBeTrue();
-      }
-      // public new int G { get; set; }
-      {
-        var property = classEntity.Members.ToList()[9] as PropertyEntity;
-        property.Name.ShouldEqual("G");
-        property.IsNew.ShouldBeTrue();
+        // interface I
+        var interfaceEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<InterfaceEntity>("I");
+
+        // Check the number of properties and auto-created backing fields
+        var properties = interfaceEntity.Members.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
+        properties.Count.ShouldEqual(1);
+        var fields = interfaceEntity.Members.Where(x => x is FieldEntity).Cast<FieldEntity>().ToList();
+        fields.Count.ShouldEqual(0);
       }
     }
 
@@ -1271,7 +1297,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           method.Name.ShouldEqual("A");
           
           method.IsAbstract.ShouldBeFalse();
-          method.IsExplicitlyDefined.ShouldBeTrue();
+          method.IsDeclaredInSource.ShouldBeTrue();
           method.IsGeneric.ShouldBeFalse();
           method.IsPartial.ShouldBeFalse();
           method.IsStatic.ShouldBeFalse();
@@ -1298,7 +1324,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           var method = classEntity.Members.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A");
           method.IsAbstract.ShouldBeFalse();
-          method.IsExplicitlyDefined.ShouldBeTrue();
+          method.IsDeclaredInSource.ShouldBeTrue();
           method.IsGeneric.ShouldBeTrue();
           method.IsPartial.ShouldBeFalse();
           method.IsStatic.ShouldBeFalse();
@@ -1402,7 +1428,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           var method = classEntity.Members.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("B");
           method.IsAbstract.ShouldBeFalse();
-          method.IsExplicitlyDefined.ShouldBeTrue();
+          method.IsDeclaredInSource.ShouldBeTrue();
           method.IsGeneric.ShouldBeTrue();
           method.IsPartial.ShouldBeFalse();
           method.IsStatic.ShouldBeFalse();

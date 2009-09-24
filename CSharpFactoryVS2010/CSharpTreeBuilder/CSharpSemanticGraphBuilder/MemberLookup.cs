@@ -48,9 +48,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="name">A name.</param>
     /// <param name="typeParameterCount">The number of type parameters.</param>
     /// <param name="contextEntity">A type entity.</param>
+    /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns></returns>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<MemberEntity> Lookup(string name, int typeParameterCount, TypeEntity contextEntity)
+    public IEnumerable<MemberEntity> Lookup(
+      string name, int typeParameterCount, TypeEntity contextEntity, SemanticEntity accessingEntity)
     {
       // A member lookup of a name N with K type parameters in a type T is processed as follows:
       string N = name;
@@ -58,8 +60,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       TypeEntity T = contextEntity;
 
       // First, a set of accessible members named N is determined:
-      // TODO: accessibility is not checked!
-      var members = GetMembersByName(N, T);
+      var members = GetAccessibleMembersByName(N, T, accessingEntity);
 
       //•	Next, if K is zero, all nested types whose declarations include type parameters are removed. If K is not zero, all members with a different number of type parameters are removed. Note that when K is zero, methods having type parameters are not removed, since the type inference process (§7.4.2) might be able to infer the type arguments.
       //•	Next, if the member is invoked, all non-invocable members are removed from the set.
@@ -76,20 +77,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       //o	Otherwise, the lookup is ambiguous, and a compile-time error occurs.
       //For member lookups in types other than type parameters and interfaces, and member lookups in interfaces that are strictly single-inheritance (each interface in the inheritance chain has exactly zero or one direct base interface), the effect of the lookup rules is simply that derived members hide base members with the same name or signature. Such single-inheritance lookups are never ambiguous. The ambiguities that can possibly arise from member lookups in multiple-inheritance interfaces are described in §13.2.5.
 
-      return null;
+      return members;
     }
 
     #region Private methods
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets members by name.
+    /// Gets accessible members by name in the context of a type.
     /// </summary>
     /// <param name="N">A name.</param>
     /// <param name="T">A type entity.</param>
-    /// <returns>The collection of members named N in T.</returns>
+    /// <param name="accessingEntity">An entity for accessibility checking.</param>
+    /// <returns>The collection of accessible members named N in T.</returns>
     // ----------------------------------------------------------------------------------------------
-    private IEnumerable<MemberEntity> GetMembersByName(string N, TypeEntity T)
+    private IEnumerable<MemberEntity> GetAccessibleMembersByName(string N, TypeEntity T, SemanticEntity accessingEntity)
     {
       var members = new HashSet<MemberEntity>();
 
@@ -98,39 +100,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         // ... then the set is the union of the sets of accessible members named N 
         // in each of the types specified as a primary constraint or secondary constraint (§10.1.5) for T, ...
-        // TODO: check accessibility too
 
         var typeParameter = T as TypeParameterEntity;
 
         if (typeParameter.ClassTypeConstraint != null)
         {
-          members.UnionWith(typeParameter.ClassTypeConstraint.GetMembers<MemberEntity>(N));
+          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleMembers<MemberEntity>(N, accessingEntity));
+          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleInheritedMembers<MemberEntity>(N, accessingEntity));
         }
 
         foreach (var typeEntity in typeParameter.InterfaceTypeConstraints)
         {
-          members.UnionWith(typeEntity.GetMembers<MemberEntity>(N));
+          members.UnionWith(typeEntity.GetAccessibleMembers<MemberEntity>(N, accessingEntity));
         }
 
-        // TODO: should we add members of TypeParameter contraint types?
-        //foreach (var typeEntity in typeParameter.TypeParameterConstraints)
-        //{
-        //  members.UnionWith(typeEntity.GetMembers<MemberEntity>(N));
-        //}
-
         // ... along with the set of accessible members named N in object.
-        //members.UnionWith(_SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object).GetMembers<MemberEntity>(N));
+        members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity));
       }
       else
       {
         // Otherwise, the set consists of all accessible (§3.5) members named N in T, including inherited members ... 
-        // TODO: check accessibility too
-
-        //members.UnionWith(T.GetMembers<MemberEntity>(N));
-        //members.UnionWith(T.GetInheritedMembers<MemberEntity>(N));
+        members.UnionWith(T.GetAccessibleMembers<MemberEntity>(N, accessingEntity));
+        members.UnionWith(T.GetAccessibleInheritedMembers<MemberEntity>(N, accessingEntity));
 
         // ... and the accessible members named N in object. 
-        //members.UnionWith(_SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object).GetMembers<MemberEntity>(N));
+        members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity));
 
         // TODO:
         // If T is a constructed type, the set of members is obtained 
@@ -141,6 +135,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       return members;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the accessible members of object named N.
+    /// </summary>
+    /// <param name="N">A name.</param>
+    /// <param name="accessingEntity">An entity for accessibility checking.</param>
+    /// <returns>The collection of accessible members named N in object.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private IEnumerable<MemberEntity> GetAccessibleMembersOfObject(string N, SemanticEntity accessingEntity)
+    {
+      var objectEntity = _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object);
+      return objectEntity.GetAccessibleMembers<MemberEntity>(N, accessingEntity);
     }
 
     #endregion

@@ -191,7 +191,7 @@ namespace CSharpTreeBuilder.ProjectContent
       var factory = new MetadataImporterSemanticEntityFactory(this, SemanticGraph);
 
       // Load mscorlib entities into the semantic graph
-      factory.CreateEntitiesFromAssembly(typeof(int).Assembly.Location, "global");
+      factory.ImportTypesIntoSemanticGraph(typeof(int).Assembly.Location, "global");
 
       // Load other referenced assemblies into the semantic graph
       foreach (var referencedUnit in ProjectProvider.References)
@@ -201,7 +201,7 @@ namespace CSharpTreeBuilder.ProjectContent
           var referencedAssembly = referencedUnit as ReferencedAssembly;
           var alias = string.IsNullOrEmpty(referencedAssembly.Alias) ? "global" : referencedAssembly.Alias;
 
-          factory.CreateEntitiesFromAssembly(Path.Combine(referencedAssembly.FilePath, referencedAssembly.Name), alias);
+          factory.ImportTypesIntoSemanticGraph(Path.Combine(referencedAssembly.FilePath, referencedAssembly.Name), alias);
         }
       }
 

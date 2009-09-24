@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(FieldEntity entity)
     {
       // Resolve the type of the field
-      if (entity.IsExplicitlyDefined && entity.TypeReference != null)
+      if (entity.IsDeclaredInSource && entity.TypeReference != null)
       {
         entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
 
