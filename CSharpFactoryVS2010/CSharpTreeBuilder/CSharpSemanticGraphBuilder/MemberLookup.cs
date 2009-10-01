@@ -43,13 +43,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a collection of members based on name, type parameter count and a context Type.
+    /// Gets a collection of members in the context of a type based on name and type parameter count.
     /// </summary>
     /// <param name="name">A name.</param>
     /// <param name="typeParameterCount">The number of type parameters.</param>
     /// <param name="contextEntity">A type entity.</param>
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
-    /// <returns></returns>
+    /// <returns>A non-method member, a method group, or an empty collection.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<MemberEntity> Lookup(
       string name, int typeParameterCount, TypeEntity contextEntity, SemanticEntity accessingEntity)
@@ -130,8 +130,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // If T is a constructed type, the set of members is obtained 
         // by substituting type arguments as described in §10.3.2.
 
+
         // Members that include an override modifier are excluded from the set.
-        members.RemoveWhere(x => x.IsOverride);
+        members.RemoveWhere(x => (x is FunctionMemberEntity) && (x as FunctionMemberEntity).IsOverride);
       }
 
       return members;

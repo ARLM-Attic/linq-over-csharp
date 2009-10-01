@@ -435,6 +435,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a method by signature components (name, number of type parameters, parameters).
+    /// </summary>
+    /// <param name="name">The name of the method.</param>
+    /// <param name="typeParameterCount">The number of type parameters of the method.</param>
+    /// <param name="parameterFilters">Any number of parameter filters (ie. type + kind pairs).</param>
+    /// <returns>The found method, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public MethodEntity GetMethod(string name, int typeParameterCount, params ParameterFilter[] parameterFilters)
+    {
+      var parameters = new List<ParameterEntity>();
+      
+      if (parameterFilters != null)
+      {
+        foreach (var parameterFilter in parameterFilters)
+        {
+          var typeReference = new DirectSemanticEntityReference<TypeEntity>(parameterFilter.Type);
+          parameters.Add(new ParameterEntity("irrelevant name", typeReference, parameterFilter.Kind));
+        }
+      }
+      
+      return GetMethod(new Signature(name, typeParameterCount, parameters));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets an explicitly implemented interface member by name.
     /// </summary>
     /// <typeparam name="TEntityType">The type of member to found.</typeparam>

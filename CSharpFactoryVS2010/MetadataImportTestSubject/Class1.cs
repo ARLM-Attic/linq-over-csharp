@@ -1,6 +1,7 @@
 ﻿// The resulting assembly from this project is used as a test subject in metadata import unit tests.
+using N;
 
-public class Class0 : BaseClass, A.B.IInterface1
+public class Class0 : BaseClass, Interface0<Class0>
 {
   public const string a1 = "a1";
   internal static string a2;
@@ -9,27 +10,37 @@ public class Class0 : BaseClass, A.B.IInterface1
   private string a5;
 
   public int P1 { get; set; }
+  // TODO: uncomment if support for explicitly implemented interface members is implemented
+  //int Interface0<Class0>.P1 { get; set; }
+  static int P2 { get; set; }
+  public virtual int P3 { get; private set; }
+  public override int P4 { get { return 0; } }
+  public override sealed int P5 { set { } }
+  public override int P6 { get; set; }
 
-  void A.B.IInterface1.M1() { }
-
-  public void M1(int a, ref int b, out int c)
+  public void M1<T1, T2, T3>(Class0 a, ref Class0 b, out Class0 c)
+    where T1 : PublicClass, A.B.IInterface1, new()
+    where T2 : class
+    where T3 : struct
   {
-    c = 0;
+    c = default(Class0);
   }
 
-  public void M1<T>() where T : PublicClass, A.B.IInterface1, new()
-  { }
-
+  public void M1() { }
+  void Interface0<Class0>.M1() { }
   public override void M2() { }
-  public override void M3() { }
-  public new void M4() { }
+  public override sealed void M3() { }
+  public static void M4() { }
 }
 
 public abstract class BaseClass
 {
+  public virtual int P4 { get { return 0; } }
+  public virtual int P5 { set { } }
+  public abstract int P6 { get; set; }
+
   public virtual void M2() { }
   public abstract void M3();
-  public void M4() { }
 }
 
 namespace A.B
@@ -53,7 +64,6 @@ namespace A.B
 
   public interface IInterface1
   {
-    void M1();
   }
 
   public delegate void Delegate1();
@@ -106,4 +116,10 @@ namespace N
 {
   public class PublicClass { }
   internal class InternalClass { }
+
+  public interface Interface0<T> where T : class, new()
+  {
+    int P1 { get; set; }
+    void M1();
+  }
 }

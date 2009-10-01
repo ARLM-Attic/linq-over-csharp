@@ -30,10 +30,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value specifying whether this type parameter has a constructor constraint (ie. "new()").
+    /// Gets a value specifying whether this type parameter has a default constructor constraint 
+    /// (ie "new()").
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool HasConstructorConstraint { get; set; }
+    public bool HasDefaultConstructorConstraint { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -47,7 +48,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value specifying whether this type parameter has a "struct" constraint.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool HasValueTypeConstraint { get; set; }
+    public bool HasNonNullableValueTypeConstraint { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

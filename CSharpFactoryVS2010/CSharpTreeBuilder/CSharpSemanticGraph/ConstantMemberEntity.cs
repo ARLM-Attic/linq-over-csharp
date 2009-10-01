@@ -64,29 +64,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override bool IsStatic
     {
-      set { throw new InvalidOperationException("Constant members are unalterably static."); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member can be overridden.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsVirtual
-    {
-      get { return false; }
-      set { throw new InvalidOperationException("Constants are unalterably non-virtual."); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member is on override of an inherited member.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsOverride
-    {
-      get { return false; }
-      set { throw new InvalidOperationException("Constants are unalterably non-override."); }
+      set { throw new InvalidOperationException("Constant members are always static."); }
     }
 
     // ----------------------------------------------------------------------------------------------

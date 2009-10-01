@@ -50,8 +50,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return Parent is TypeEntity
-          ? Name 
-          : string.Format("{0}.{1}", (Parent as TypeEntity).FullyQualifiedName, Name);
+          ? string.Format("{0}.{1}", (Parent as TypeEntity).FullyQualifiedName, Name)
+          : Name;
       }
     }
 
@@ -164,20 +164,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get { return _IsStatic; }
       set { _IsStatic = value; }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member can be overridden.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsVirtual { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member is on override of an inherited member.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsOverride { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -79,28 +79,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public VariableInitializer Initializer { get; private set; }
     
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member can be overridden.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsVirtual
-    {
-      get { return false; }
-      set { throw new InvalidOperationException("Fields are unalterably non-virtual."); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member is on override of an inherited member.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsOverride
-    {
-      get { return false; }
-      set { throw new InvalidOperationException("Fields are unalterably non-override."); }
-    }
-
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

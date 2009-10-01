@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
+using CSharpTreeBuilder.Helpers;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
@@ -499,7 +500,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           break;
 
         case (MemberTypes.Method):
-          //memberEntity = CreateMethodEntity(reflectedMember as MethodInfo);
+          memberEntity = CreateMethodEntity(reflectedMember as MethodInfo);
           break;
 
         case (MemberTypes.Event):
@@ -537,7 +538,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Decide whether an enum member, a field or a constant member should be created.
       if (fieldInfo.DeclaringType.IsEnum && fieldInfo.IsStatic)
       {
-        memberEntity = new EnumMemberEntity(name, typeReference);
+        memberEntity = new EnumMemberEntity(isDeclaredInSource, name, typeReference);
       }
       else
       {
@@ -561,19 +562,275 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="propertyInfo">A reflected PropertyInfo object.</param>
     /// <returns>The created member entity, or null.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static MemberEntity CreatePropertyEntity(PropertyInfo propertyInfo)
+    private static PropertyEntity CreatePropertyEntity(PropertyInfo propertyInfo)
     {
-      MemberEntity memberEntity = null;
+      PropertyEntity propertyEntity = null;
 
-      AccessibilityKind? accessibility = null; // GetAccessibility(propertyInfo);
-      bool isStatic = false; // (propertyInfo.GetGetMethod() ?? propertyInfo.GetSetMethod()).IsStatic;
+      AccessibilityKind? accessibility = null;
+      bool isStatic = (propertyInfo.CanRead && propertyInfo.GetGetMethod(true).IsStatic) ||
+                      (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsStatic);
       SemanticEntityReference<TypeEntity> typeReference = new ReflectedTypeBasedTypeEntityReference(propertyInfo.PropertyType);
-      SemanticEntityReference<TypeEntity> interfaceReference = null; // propertyInfo.
-      string name = propertyInfo.Name;
-
-      memberEntity = new PropertyEntity(false, accessibility, isStatic, typeReference, interfaceReference, name, false);
+      string name = RemoveInterfaceName(propertyInfo.Name);
+      string interfaceName = GetInterfaceNameFromMemberName(propertyInfo.Name);
       
-      return memberEntity;
+      // TODO: Create a resolvable interfaceReference. Like TypeNodeBasedTypeEntityReference but without syntax nodes.
+      SemanticEntityReference<TypeEntity> interfaceReference = null;
+
+      propertyEntity = new PropertyEntity(false, accessibility, isStatic, typeReference, interfaceReference, name, false);
+
+      propertyEntity.IsVirtual = IsVirtual(propertyInfo);
+      propertyEntity.IsOverride = IsOverride(propertyInfo);
+      propertyEntity.IsSealed = IsSealed(propertyInfo);
+
+      if (propertyInfo.CanRead)
+      {
+        propertyEntity.GetAccessor = CreateAccessor(propertyInfo.GetGetMethod(true));
+      }
+
+      if (propertyInfo.CanWrite)
+      {
+        propertyEntity.SetAccessor = CreateAccessor(propertyInfo.GetSetMethod(true));
+      }
+
+      return propertyEntity;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an accessor entity from a reflected MethodInfo object.
+    /// </summary>
+    /// <param name="methodInfo">A reflected MethodInfo object.</param>
+    /// <returns>An AccessorEntity object, or null if could not create.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static AccessorEntity CreateAccessor(MethodInfo methodInfo)
+    {
+      var isAbstract = methodInfo.IsAbstract;
+      var accessibility = GetAccessibility(methodInfo);
+
+      // TODO: body
+
+      return new AccessorEntity(accessibility, isAbstract);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a method entity from a reflected MethodInfo object.
+    /// </summary>
+    /// <param name="methodInfo">A reflected MethodInfo object.</param>
+    /// <returns>The created member entity, or null.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static MethodEntity CreateMethodEntity(MethodInfo methodInfo)
+    {
+      MethodEntity methodEntity = null;
+
+      AccessibilityKind? accessibility = GetAccessibility(methodInfo);
+      bool isStatic = methodInfo.IsStatic;
+      SemanticEntityReference<TypeEntity> returnTypeReference = new ReflectedTypeBasedTypeEntityReference(methodInfo.ReturnType);
+      string name = RemoveInterfaceName(methodInfo.Name);
+      string interfaceName = GetInterfaceNameFromMemberName(methodInfo.Name);
+      // TODO: Create a resolvable interfaceReference. Like TypeNodeBasedTypeEntityReference but without syntax nodes.
+      SemanticEntityReference<TypeEntity> interfaceReference = null;
+      var isAbstract = methodInfo.IsAbstract;
+
+      methodEntity = new MethodEntity(false, accessibility, isStatic, false, returnTypeReference, interfaceReference, name, isAbstract);
+
+      methodEntity.IsVirtual = IsVirtual(methodInfo);
+      methodEntity.IsOverride = IsOverride(methodInfo);
+      methodEntity.IsSealed = IsSealed(methodInfo);
+
+      // type parameters
+      foreach (var type in methodInfo.GetGenericArguments())
+      {
+        methodEntity.AddTypeParameter(CreateTypeParameter(type));
+      }
+
+      // parameters
+      foreach (var parameter in methodInfo.GetParameters())
+      {
+        methodEntity.AddParameter(CreateParameter(parameter));
+      }
+
+      // TODO: body
+
+      return methodEntity;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a type parameter from a System.Type object assuming that it represents a type parameter.
+    /// </summary>
+    /// <param name="type">A System.Type object representing a type parameter.</param>
+    /// <returns>A TypeParameterEntity object.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static TypeParameterEntity CreateTypeParameter(Type type)
+    {
+      var typeParameter = new TypeParameterEntity(type.Name);
+      typeParameter.ReflectedMetadata = type;
+
+      var genericParameterAttributes = type.GenericParameterAttributes;
+      var specialConstraints = genericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
+
+      if (specialConstraints.IsSet(GenericParameterAttributes.ReferenceTypeConstraint))
+      {
+        typeParameter.HasReferenceTypeConstraint = true;
+      }
+
+      if (specialConstraints.IsSet(GenericParameterAttributes.NotNullableValueTypeConstraint))
+      {
+        typeParameter.HasNonNullableValueTypeConstraint = true;
+      }
+
+      if (specialConstraints.IsSet(GenericParameterAttributes.DefaultConstructorConstraint))
+      {
+        typeParameter.HasDefaultConstructorConstraint = true;
+      }
+
+      foreach (var constraint in type.GetGenericParameterConstraints())
+      {
+        if (constraint != typeof(System.ValueType))
+        {
+          typeParameter.AddTypeReferenceConstraint(new ReflectedTypeBasedTypeEntityReference(constraint));
+        }
+      }
+
+      return typeParameter;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a parameter entity from a reflected parameter info object.
+    /// </summary>
+    /// <param name="parameterInfo">A reflected parameter info object.</param>
+    /// <returns>A ParameterEntity object.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static ParameterEntity CreateParameter(ParameterInfo parameterInfo)
+    {
+      var typeReference = new ReflectedTypeBasedTypeEntityReference(parameterInfo.ParameterType);
+
+      ParameterKind kind = ParameterKind.Value;
+      if (parameterInfo.IsOut)
+      {
+        kind = ParameterKind.Output;
+      }
+      else if (parameterInfo.ParameterType.IsByRef)
+      {
+        kind = ParameterKind.Reference;
+      }
+
+      var parameterEntity = new ParameterEntity(parameterInfo.Name, typeReference, kind);
+      parameterEntity.ReflectedMetadata = parameterInfo;
+
+      return parameterEntity;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes the interface name from a member name. (Or returns the input string if there's no
+    /// interface name part in it.)
+    /// </summary>
+    /// <param name="name">A member name possibly in InterfaceName.MemberName format.</param>
+    /// <returns>The MemberName part if the input string.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static string RemoveInterfaceName(string name)
+    {
+      var lastDotIndex = name.LastIndexOf('.');
+      return lastDotIndex < 0 ? name : name.Substring(lastDotIndex+1);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Extracts the interface name from a member name, if there's any.
+    /// </summary>
+    /// <param name="name">A member name possibly in InterfaceName.MemberName format.</param>
+    /// <returns>The InterfaceName part of the input string, or null if there's no such part.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static string GetInterfaceNameFromMemberName(string name)
+    {
+      var lastDotIndex = name.LastIndexOf('.');
+      return lastDotIndex < 0 ? null : name.Substring(0, lastDotIndex);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a reflected method is virtual.
+    /// </summary>
+    /// <param name="methodInfo">A reflected method.</param>
+    /// <returns>True if the reflected method is virtual, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool IsVirtual(MethodInfo methodInfo)
+    {
+      var attributes = methodInfo.Attributes;
+      return attributes.IsSet(MethodAttributes.Virtual)
+        && attributes.IsSet(MethodAttributes.NewSlot)
+        && !attributes.IsSet(MethodAttributes.Final);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a reflected method is an override.
+    /// </summary>
+    /// <param name="methodInfo">A reflected method.</param>
+    /// <returns>True if the reflected method is an override, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool IsOverride(MethodInfo methodInfo)
+    {
+      var attributes = methodInfo.Attributes;
+      return attributes.IsSet(MethodAttributes.Virtual)
+        && !attributes.IsSet(MethodAttributes.NewSlot);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a reflected method is sealed.
+    /// </summary>
+    /// <param name="methodInfo">A reflected method.</param>
+    /// <returns>True if the reflected method is sealed, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool IsSealed(MethodInfo methodInfo)
+    {
+      var attributes = methodInfo.Attributes;
+      return attributes.IsSet(MethodAttributes.Virtual)
+        && !attributes.IsSet(MethodAttributes.NewSlot)
+        && attributes.IsSet(MethodAttributes.Final);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a reflected property is virtual.
+    /// </summary>
+    /// <param name="propertyInfo">A reflected property.</param>
+    /// <returns>True if the reflected property is virtual, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool IsVirtual(PropertyInfo propertyInfo)
+    {
+      var accessor = propertyInfo.CanRead ? propertyInfo.GetGetMethod(true) : propertyInfo.GetSetMethod(true);
+      return IsVirtual(accessor);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a reflected property is an override.
+    /// </summary>
+    /// <param name="propertyInfo">A reflected property.</param>
+    /// <returns>True if the reflected property is an override, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool IsOverride(PropertyInfo propertyInfo)
+    {
+      var accessor = propertyInfo.CanRead ? propertyInfo.GetGetMethod(true) : propertyInfo.GetSetMethod(true);
+      return IsOverride(accessor);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether a reflected property is sealed.
+    /// </summary>
+    /// <param name="propertyInfo">A reflected property.</param>
+    /// <returns>True if the reflected property is sealed, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static bool IsSealed(PropertyInfo propertyInfo)
+    {
+      var accessor = propertyInfo.CanRead ? propertyInfo.GetGetMethod(true) : propertyInfo.GetSetMethod(true);
+      return IsSealed(accessor);
     }
 
     #endregion

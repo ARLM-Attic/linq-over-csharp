@@ -72,7 +72,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the reflected metadata (eg. type) that this entity was created from.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public System.Reflection.MemberInfo ReflectedMetadata { get; set; }
+    public object ReflectedMetadata { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

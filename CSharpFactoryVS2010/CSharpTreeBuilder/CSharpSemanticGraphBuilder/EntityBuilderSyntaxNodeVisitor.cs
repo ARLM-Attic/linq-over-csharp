@@ -401,7 +401,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       var parentEntity = GetParentEntity<EnumEntity>(node);
 
       // Create a semantic entity and add to its parent.
-      var enumMemberEntity = new EnumMemberEntity(node.Identifier, parentEntity.UnderlyingTypeReference);
+      var enumMemberEntity = new EnumMemberEntity(true, node.Identifier, parentEntity.UnderlyingTypeReference);
       parentEntity.AddMember(enumMemberEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
@@ -436,6 +436,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       propertyEntity.IsNew = IsNew(node.Modifiers);
       propertyEntity.IsOverride = IsOverride(node.Modifiers);
       propertyEntity.IsVirtual = IsVirtual(node.Modifiers);
+      propertyEntity.IsSealed = IsSealed(node.Modifiers);
 
       parentEntity.AddMember(propertyEntity);
 
@@ -472,6 +473,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       methodEntity.IsNew = IsNew(node.Modifiers);
       methodEntity.IsOverride = IsOverride(node.Modifiers);
       methodEntity.IsVirtual = IsVirtual(node.Modifiers);
+      methodEntity.IsSealed = IsSealed(node.Modifiers);
 
       AddTypeParametersToEntity(methodEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       AddParametersToOverloadableEntity(methodEntity, node.FormalParameters);
@@ -833,9 +835,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           foreach(var constraintTag in constraint.ConstraintTags)
           {
-            typeParameterEntity.HasConstructorConstraint = constraintTag.IsNew;
+            typeParameterEntity.HasDefaultConstructorConstraint = constraintTag.IsNew || constraintTag.IsStruct;
             typeParameterEntity.HasReferenceTypeConstraint = constraintTag.IsClass;
-            typeParameterEntity.HasValueTypeConstraint = constraintTag.IsStruct;
+            typeParameterEntity.HasNonNullableValueTypeConstraint = constraintTag.IsStruct;
 
             if (constraintTag.IsTypeName)
             {

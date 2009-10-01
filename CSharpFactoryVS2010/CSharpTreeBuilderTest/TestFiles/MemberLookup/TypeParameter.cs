@@ -9,7 +9,6 @@
     t.GetType = 1;
     (t as I2).GetType = 1;
   }
-
 }
 
 class B : C

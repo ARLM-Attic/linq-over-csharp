@@ -30,7 +30,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
       factory.ImportTypesIntoSemanticGraph(TestAssemblyPathAndFilename, "global");
 
-      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
+      CheckTestAssemblyImportResult(project.SemanticGraph, "global");
 
       // check namespace A
       project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsDeclaredInSource.ShouldBeFalse();
@@ -40,10 +40,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// <summary>
     /// Checks if MetadataImportTestSubject.dll content exists in the semantic graph.
     /// </summary>
-    /// <param name="rootNamespace">The root namespace that contains the entities to be checked.</param>
+    /// <param name="semanticGraph">The semantic graph to be checked.</param>
+    /// <param name="rootName">The name of the root namespace that contains the entities to be checked.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void CheckTestAssemblyImportResult(RootNamespaceEntity rootNamespace, string rootName)
+    private static void CheckTestAssemblyImportResult(SemanticGraph semanticGraph, string rootName)
     {
+      var rootNamespace = semanticGraph.GetRootNamespaceByName(rootName);
+
       rootNamespace.ShouldNotBeNull();
 
       // public class Class0 : BaseClass
@@ -59,16 +62,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // public const string a1 = "a1";
         {
           var member = entity.GetMember<ConstantMemberEntity>("a1");
+          member.FullyQualifiedName.ShouldEqual("Class0.a1");
           member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
           member.IsDeclaredInSource.ShouldBeFalse();
           member.IsNew.ShouldBeFalse();
-          member.IsOverride.ShouldBeFalse();
           member.IsStatic.ShouldBeTrue();
-          member.IsVirtual.ShouldBeFalse();
           member.Name.ShouldEqual("a1");
           member.Parent.ShouldEqual(entity);
           member.Program.TargetAssemblyName.Name.ShouldEqual(TestAssemblyName);
-          member.ReflectedMetadata.Name.ShouldEqual("a1");
+          (member.ReflectedMetadata as FieldInfo).Name.ShouldEqual("a1");
           member.SyntaxNodes.Count.ShouldEqual(0);
           member.Type.ShouldBeNull();
           member.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
@@ -99,18 +101,208 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // public int P1 { get; set; }
         {
           var member = entity.GetMember<PropertyEntity>("P1");
-          // member.AutoImplementedField.ShouldNotBeNull();
+          member.FullyQualifiedName.ShouldEqual("Class0.P1");
+          member.AutoImplementedField.ShouldBeNull();
           member.DeclaredAccessibility.ShouldBeNull();
           member.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
-          // member.IsAutoImplemented.ShouldBeTrue();
-          //member.GetAccessor.
-          //member.SetAccessor.
+          member.IsAutoImplemented.ShouldBeFalse();
+          member.IsNew.ShouldBeFalse();
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeFalse();
+
+          var getAccessor = member.GetAccessor;
+          getAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
+          getAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
+          getAccessor.IsAbstract.ShouldBeFalse();
+
+          var setAccessor = member.SetAccessor;
+          setAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
+          setAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
+          setAccessor.IsAbstract.ShouldBeFalse();
         }
+
+        // TODO: test explicitly implemented interface members (not yet handled)
+        // int Interface0<Class0>.P1 { get; set; }
+
+        // static int P2 { get; set; }
+        {
+          var member = entity.GetMember<PropertyEntity>("P2");
+          member.IsStatic.ShouldBeTrue();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeFalse();
+        }
+        // public virtual int P3 { get; private set; }
+        {
+          var member = entity.GetMember<PropertyEntity>("P3");
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeTrue();
+          member.IsSealed.ShouldBeFalse();
+
+          var setAccessor = member.SetAccessor;
+          setAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Private);
+          setAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
+          setAccessor.IsAbstract.ShouldBeFalse();
+        }
+        // public override int P4 { get { return 0; } }
+        {
+          var member = entity.GetMember<PropertyEntity>("P4");
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeTrue();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeFalse();
+
+          member.GetAccessor.ShouldNotBeNull();
+          member.SetAccessor.ShouldBeNull();
+        }
+        // public override sealed int P5 { set { } }
+        {
+          var member = entity.GetMember<PropertyEntity>("P5");
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeTrue();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeTrue();
+
+          member.GetAccessor.ShouldBeNull();
+          member.SetAccessor.ShouldNotBeNull();
+        }
+
+        // public void M1<T1, T2, T3>(int a, ref int b, out int c)
+        //   where T1 : PublicClass, A.B.IInterface1, new()
+        //   where T2 : class
+        //   where T3 : struct
+        {
+          var member = (from m in entity.Members
+                        where m.Name == "M1"
+                        && m is MethodEntity
+                        && (m as MethodEntity).OwnTypeParameterCount == 3
+                        select m).Cast<MethodEntity>().FirstOrDefault();
+          member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
+          member.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
+          member.FullyQualifiedName.ShouldEqual("Class0.M1");
+          member.IsAbstract.ShouldBeFalse();
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeFalse();
+          member.IsDeclaredInSource.ShouldBeFalse();
+          member.IsExplicitlyImplemented.ShouldBeFalse();
+          member.IsGeneric.ShouldBeTrue();
+          member.IsNew.ShouldBeFalse();
+          member.IsPartial.ShouldBeFalse();
+          member.Name.ShouldEqual("M1");
+          member.OwnTypeParameterCount.ShouldEqual(3);
+          (member.ReflectedMetadata as MethodInfo).Name.ShouldEqual("M1");
+          member.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+
+          var typeParameters = member.OwnTypeParameters.ToList();
+          {
+            var typeParam = typeParameters.Where(x => x.Name == "T1").FirstOrDefault();
+            typeParam.TypeReferenceConstraints.Count().ShouldEqual(2);
+            typeParam.HasDefaultConstructorConstraint.ShouldBeTrue();
+            typeParam.HasNonNullableValueTypeConstraint.ShouldBeFalse();
+            typeParam.HasReferenceTypeConstraint.ShouldBeFalse();
+            typeParam.DeclaredAccessibility.ShouldBeNull();
+            typeParam.EffectiveAccessibility.ShouldBeNull();
+            typeParam.FullyQualifiedName.ShouldEqual("T1");
+            typeParam.ToString().ShouldEqual("T1");
+            (typeParam.ReflectedMetadata as Type).Name .ShouldEqual("T1");
+          }
+          {
+            var typeParam = typeParameters.Where(x => x.Name == "T2").FirstOrDefault();
+            typeParam.TypeReferenceConstraints.Count().ShouldEqual(0);
+            typeParam.HasDefaultConstructorConstraint.ShouldBeFalse();
+            typeParam.HasNonNullableValueTypeConstraint.ShouldBeFalse();
+            typeParam.HasReferenceTypeConstraint.ShouldBeTrue();
+          }
+          {
+            var typeParam = typeParameters.Where(x => x.Name == "T3").FirstOrDefault();
+            typeParam.TypeReferenceConstraints.Count().ShouldEqual(0);
+            typeParam.HasDefaultConstructorConstraint.ShouldBeTrue();
+            typeParam.HasNonNullableValueTypeConstraint.ShouldBeTrue();
+            typeParam.HasReferenceTypeConstraint.ShouldBeFalse();
+          }
+
+          var parameters = member.Parameters.ToList();
+          {
+            var param = parameters.Where(x => x.Name == "a").FirstOrDefault();
+            param.Name.ShouldEqual("a");
+            param.FullyQualifiedName.ShouldEqual("a");
+            param.Kind.ShouldEqual(ParameterKind.Value);
+            (param.ReflectedMetadata as ParameterInfo).Name.ShouldEqual("a");
+            param.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+          }
+          {
+            var param = parameters.Where(x => x.Name == "b").FirstOrDefault();
+            param.Kind.ShouldEqual(ParameterKind.Reference);
+          }
+          {
+            var param = parameters.Where(x => x.Name == "c").FirstOrDefault();
+            param.Kind.ShouldEqual(ParameterKind.Output);
+          }
+        }
+
+        // public override void M2() { }
+        {
+          var member = entity.GetMethod("M2", 0, null);
+          member.IsAbstract.ShouldBeFalse();
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeTrue();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeFalse();
+        }
+        // public override sealed void M3() { }
+        {
+          var member = entity.GetMethod("M3", 0, null);
+          member.IsAbstract.ShouldBeFalse();
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeTrue();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeTrue();
+        }
+        // public static void M4() { }
+        {
+          var member = entity.GetMethod("M4", 0, null);
+          member.IsAbstract.ShouldBeFalse();
+          member.IsStatic.ShouldBeTrue();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeFalse();
+          member.IsSealed.ShouldBeFalse();
+        }
+
       }
 
       // public abstract class BaseClass
       {
         var entity = rootNamespace.GetSingleChildType<ClassEntity>("BaseClass");
+
+        // public abstract int P6 { get; set; }
+        {
+          var member = entity.GetMember<PropertyEntity>("P6");
+          member.GetAccessor.IsAbstract.ShouldBeTrue();
+          member.SetAccessor.IsAbstract.ShouldBeTrue();
+        }
+        // public virtual void M2() { }
+        {
+          var member = entity.GetMethod("M2", 0, null);
+          member.IsAbstract.ShouldBeFalse();
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeTrue();
+          member.IsSealed.ShouldBeFalse();
+        }
+        // public abstract void M3();
+        {
+          var member = entity.GetMethod("M3", 0, null);
+          member.IsAbstract.ShouldBeTrue();
+          member.IsStatic.ShouldBeFalse();
+          member.IsOverride.ShouldBeFalse();
+          member.IsVirtual.ShouldBeTrue();
+          member.IsSealed.ShouldBeFalse();
+        }
       }
 
       // namespace A
@@ -159,6 +351,24 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         entity.ToString().ShouldEqual(rootName + "::A.B.Enum1");
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
+
+        // EnumValue1,
+        {
+          var member = entity.GetMember<EnumMemberEntity>("EnumValue1");
+          member.DeclaredAccessibility.ShouldBeNull();
+          member.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
+          member.IsDeclaredInSource.ShouldBeFalse();
+          member.IsNew.ShouldBeFalse();
+          member.IsStatic.ShouldBeTrue();
+          member.Name.ShouldEqual("EnumValue1");
+          member.Parent.ShouldEqual(entity);
+          member.Program.TargetAssemblyName.Name.ShouldEqual(TestAssemblyName);
+          (member.ReflectedMetadata as FieldInfo).Name.ShouldEqual("EnumValue1");
+          member.SyntaxNodes.Count.ShouldEqual(0);
+          member.Type.ShouldBeNull();
+          member.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        }
+
       }
       // struct Struct1
       {
@@ -208,21 +418,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var classEntity = rootNamespace.GetSingleChildType<ClassEntity>("PublicClass");
         classEntity.FullyQualifiedName.ShouldEqual("PublicClass");
         classEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
-        classEntity.ReflectedMetadata.Name.ShouldEqual("PublicClass");
+        (classEntity.ReflectedMetadata as Type).Name.ShouldEqual("PublicClass");
 
         // public class PublicNestedClass
         {
           var nestedClass = classEntity.GetSingleChildType<ClassEntity>("PublicNestedClass");
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.PublicNestedClass");
           nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
-          nestedClass.ReflectedMetadata.Name.ShouldEqual("PublicNestedClass");
+          (nestedClass.ReflectedMetadata as Type).Name.ShouldEqual("PublicNestedClass");
         }
         // public class InternalNestedClass
         {
           var nestedClass = classEntity.GetSingleChildType<ClassEntity>("InternalNestedClass");
           nestedClass.FullyQualifiedName.ShouldEqual("PublicClass.InternalNestedClass");
           nestedClass.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
-          nestedClass.ReflectedMetadata.Name.ShouldEqual("InternalNestedClass");
+          (nestedClass.ReflectedMetadata as Type).Name.ShouldEqual("InternalNestedClass");
         }
         // public class ProtectedNestedClass
         {
@@ -296,7 +506,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       factory.ImportTypesIntoSemanticGraph(TestAssemblyPathAndFilename, "global");
 
       // Check resulting semantic graph
-      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
+      CheckTestAssemblyImportResult(project.SemanticGraph, "global");
 
       // check namespace A
       project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsDeclaredInSource.ShouldBeTrue();
@@ -324,10 +534,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(project, project.SemanticGraph));
 
       // Check resulting semantic graph
-      CheckTestAssemblyImportResult(project.SemanticGraph.GlobalNamespace, "global");
+      CheckTestAssemblyImportResult(project.SemanticGraph, "global");
 
       // check namespace A
-      project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].IsDeclaredInSource.ShouldBeTrue();
+      project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").IsDeclaredInSource.ShouldBeTrue();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -414,7 +624,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
       factory.ImportTypesIntoSemanticGraph(TestAssemblyPathAndFilename, "MyAlias");
 
-      CheckTestAssemblyImportResult(project.SemanticGraph.GetRootNamespaceByName("MyAlias"), "MyAlias");
+      CheckTestAssemblyImportResult(project.SemanticGraph, "MyAlias");
 
       project.SemanticGraph.GlobalNamespace.ChildNamespaces.Count.ShouldEqual(0);
       project.SemanticGraph.GlobalNamespace.ChildTypes.Count.ShouldEqual(0);

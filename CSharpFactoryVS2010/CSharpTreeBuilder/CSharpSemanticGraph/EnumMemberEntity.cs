@@ -14,11 +14,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumMemberEntity"/> class.
     /// </summary>
+    /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="name">The name of the member.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumMemberEntity(string name, SemanticEntityReference<TypeEntity> type)
-      : base(true, null, type, name)
+    public EnumMemberEntity(bool isDeclaredInSource, string name, SemanticEntityReference<TypeEntity> type)
+      : base(isDeclaredInSource, null, type, name)
     {
     }
   }

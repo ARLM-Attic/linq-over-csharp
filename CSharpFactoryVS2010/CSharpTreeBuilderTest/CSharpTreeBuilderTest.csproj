@@ -374,11 +374,14 @@
     <None Include="TestFiles\Accessibility\Internal.cs" />
     <None Include="TestFiles\Accessibility\Public.cs" />
     <None Include="TestFiles\Accessibility\Private.cs" />
-    <Compile Include="TestFiles\Accessibility\ProtectedInternalInImportedProgram.cs" />
+    <None Include="TestFiles\Accessibility\ProtectedInternalInImportedProgram.cs" />
     <None Include="TestFiles\Accessibility\ProtectedInternalInSameProgram.cs" />
     <None Include="TestFiles\Accessibility\Protected.cs" />
     <None Include="TestFiles\Accessibility\ProtectedAccessForInstanceMembers.cs" />
+    <None Include="TestFiles\MemberLookup\GenericType.cs" />
     <None Include="TestFiles\MemberLookup\TypeParameter.cs" />
+    <Compile Include="TestFiles\MemberLookup\NestedType.cs" />
+    <None Include="TestFiles\MemberLookup\NonGenericType.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Unresolvable.cs" />

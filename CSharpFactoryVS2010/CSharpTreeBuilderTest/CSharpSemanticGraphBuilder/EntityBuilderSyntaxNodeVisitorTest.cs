@@ -671,9 +671,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         fieldEntity.IsArray.ShouldBeNull();
         fieldEntity.IsNew.ShouldBeFalse();
-        fieldEntity.IsOverride.ShouldBeFalse();
         fieldEntity.IsStatic.ShouldBeFalse();
-        fieldEntity.IsVirtual.ShouldBeFalse();
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
       }
       // A a1, a2;
@@ -804,8 +802,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         constEntity.Name.ShouldEqual("a1");
         constEntity.IsDeclaredInSource.ShouldBeTrue();
         constEntity.IsStatic.ShouldBeTrue();
-        constEntity.IsOverride.ShouldBeFalse();
-        constEntity.IsVirtual.ShouldBeFalse();
         constEntity.IsNew.ShouldBeFalse();
 
         constEntity.Parent.ToString().ShouldEqual("global::A");
@@ -1138,8 +1134,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumMember.IsDeclaredInSource.ShouldBeTrue();
         enumMember.IsStatic.ShouldBeTrue();
         enumMember.IsNew.ShouldBeFalse();
-        enumMember.IsOverride.ShouldBeFalse();
-        enumMember.IsVirtual.ShouldBeFalse();
         enumMember.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
         enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes[0]);
         enumMember.ReflectedMetadata.ShouldBeNull();
@@ -1643,9 +1637,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // where T1 : B, T2, I1, I2, T4, new()
       {
         var typeParameter = classEntity.OwnTypeParameters[i++];
-        typeParameter.HasConstructorConstraint.ShouldBeTrue();
+        typeParameter.HasDefaultConstructorConstraint.ShouldBeTrue();
         typeParameter.HasReferenceTypeConstraint.ShouldBeFalse();
-        typeParameter.HasValueTypeConstraint.ShouldBeFalse();
+        typeParameter.HasNonNullableValueTypeConstraint.ShouldBeFalse();
         typeParameter.TypeReferenceConstraints.Count().ShouldEqual(5);
         typeParameter.ClassTypeConstraint.ShouldBeNull();
         typeParameter.ClassTypeConstraints.Count().ShouldEqual(0);
@@ -1655,9 +1649,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // where T2 : class
       {
         var typeParameter = classEntity.OwnTypeParameters[i++];
-        typeParameter.HasConstructorConstraint.ShouldBeFalse();
+        typeParameter.HasDefaultConstructorConstraint.ShouldBeFalse();
         typeParameter.HasReferenceTypeConstraint.ShouldBeTrue();
-        typeParameter.HasValueTypeConstraint.ShouldBeFalse();
+        typeParameter.HasNonNullableValueTypeConstraint.ShouldBeFalse();
         typeParameter.TypeReferenceConstraints.Count().ShouldEqual(0);
         typeParameter.ClassTypeConstraint.ShouldBeNull();
         typeParameter.ClassTypeConstraints.Count().ShouldEqual(0);
@@ -1667,9 +1661,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // where T3 : struct
       {
         var typeParameter = classEntity.OwnTypeParameters[i++];
-        typeParameter.HasConstructorConstraint.ShouldBeFalse();
+        typeParameter.HasDefaultConstructorConstraint.ShouldBeTrue();
         typeParameter.HasReferenceTypeConstraint.ShouldBeFalse();
-        typeParameter.HasValueTypeConstraint.ShouldBeTrue();
+        typeParameter.HasNonNullableValueTypeConstraint.ShouldBeTrue();
         typeParameter.TypeReferenceConstraints.Count().ShouldEqual(0);
         typeParameter.ClassTypeConstraint.ShouldBeNull();
         typeParameter.ClassTypeConstraints.Count().ShouldEqual(0);
