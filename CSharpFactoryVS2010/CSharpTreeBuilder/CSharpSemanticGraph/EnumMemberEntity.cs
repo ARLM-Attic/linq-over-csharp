@@ -22,5 +22,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(isDeclaredInSource, null, type, name)
     {
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this member is invocable.
+    /// </summary>
+    /// <remarks>A member is invocable if it's a method or event, 
+    /// or if it is a constant, field or property of a delegate type.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsInvocable
+    {
+      get { return false; }
+    }
   }
 }

@@ -60,10 +60,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       TypeEntity T = contextEntity;
 
       // First, a set of accessible members named N is determined:
-      var members = GetAccessibleMembersByName(N, K, T, accessingEntity);
+      var members = GetAccessibleMembersByName(N, T, accessingEntity);
 
-      //•	Next, if K is zero, all nested types whose declarations include type parameters are removed. If K is not zero, all members with a different number of type parameters are removed. Note that when K is zero, methods having type parameters are not removed, since the type inference process (§7.4.2) might be able to infer the type arguments.
-      //•	Next, if the member is invoked, all non-invocable members are removed from the set.
+      // Next, if K is zero, all nested types whose declarations include type parameters are removed. 
+      // If K is not zero, all members with a different number of type parameters are removed. 
+      // Note that when K is zero, methods having type parameters are not removed, 
+      // since the type inference process (§7.4.2) might be able to infer the type arguments.
+
+      // --> Translated to: remove type member with a type parameter count other than K, ...
+      members.RemoveWhere(x => (x is GenericCapableTypeEntity) && ((GenericCapableTypeEntity)x).OwnTypeParameterCount != K);
+      // --> ... and remove methods with a type parameter count other than K, but only if K is not zero.
+      members.RemoveWhere(x => (K != 0) && (x is MethodEntity) && ((MethodEntity)x).OwnTypeParameterCount != K);
+                
+      // Next, if the member is invoked, all non-invocable members are removed from the set.
+
       //•	Next, members that are hidden by other members are removed from the set. For every member S.M in the set, where S is the type in which the member M is declared, the following rules are applied:
       //o	If M is a constant, field, property, event, or enumeration member, then all members declared in a base type of S are removed from the set.
       //o	If M is a type declaration, then all non-types declared in a base type of S are removed from the set, and all type declarations with the same number of type parameters as M declared in a base type of S are removed from the set.
@@ -87,12 +97,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Gets accessible members by name in the context of a type.
     /// </summary>
     /// <param name="N">A name.</param>
-    /// <param name="K">The number of type parameters of N.</param>
     /// <param name="T">A type entity.</param>
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>The collection of accessible members named N in T.</returns>
     // ----------------------------------------------------------------------------------------------
-    private IEnumerable<IMemberEntity> GetAccessibleMembersByName(string N, int K, TypeEntity T, SemanticEntity accessingEntity)
+    private HashSet<IMemberEntity> GetAccessibleMembersByName(string N, TypeEntity T, SemanticEntity accessingEntity)
     {
       var members = new HashSet<IMemberEntity>();
 
@@ -106,26 +115,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         if (typeParameter.ClassTypeConstraint != null)
         {
-          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleMembers<IMemberEntity>(N, accessingEntity).Cast<IMemberEntity>());
-          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleInheritedMembers<IMemberEntity>(N, accessingEntity).Cast<IMemberEntity>());
+          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleMembers<IMemberEntity>(N, accessingEntity));
+          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleInheritedMembers<IMemberEntity>(N, accessingEntity));
         }
 
         foreach (var typeEntity in typeParameter.InterfaceTypeConstraints)
         {
-          members.UnionWith(typeEntity.GetAccessibleMembers<IMemberEntity>(N, accessingEntity).Cast<IMemberEntity>());
+          members.UnionWith(typeEntity.GetAccessibleMembers<IMemberEntity>(N, accessingEntity));
         }
 
         // ... along with the set of accessible members named N in object.
-        members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity).Cast<IMemberEntity>());
+        members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity));
       }
       else
       {
         // Otherwise, the set consists of all accessible (§3.5) members named N in T, including inherited members ... 
-        members.UnionWith(T.GetAccessibleMembers<IMemberEntity>(N, accessingEntity).Cast<IMemberEntity>());
-        members.UnionWith(T.GetAccessibleInheritedMembers<IMemberEntity>(N, accessingEntity).Cast<IMemberEntity>());
+        members.UnionWith(T.GetAccessibleMembers<IMemberEntity>(N, accessingEntity));
+        members.UnionWith(T.GetAccessibleInheritedMembers<IMemberEntity>(N, accessingEntity));
 
         // ... and the accessible members named N in object. 
-        members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity).Cast<IMemberEntity>());
+        members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity));
 
         // TODO:
         // If T is a constructed type, the set of members is obtained 

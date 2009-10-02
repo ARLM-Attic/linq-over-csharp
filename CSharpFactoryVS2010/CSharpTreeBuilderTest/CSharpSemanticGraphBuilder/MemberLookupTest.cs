@@ -30,9 +30,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A", 1);
       var typeParameter = classA.GetOwnTypeParameterByName("T");
-      var field = classA.GetMember<FieldEntity>("a");
+      var field = classA.GetMember<FieldEntity>("t");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
+
+      // Selecting members of T (contextType) that are accessible in class A, named "GetType", with 0 type params.
       var members = memberLookup.Lookup("GetType", 0, typeParameter, field).OrderBy(x => x.ToString()).ToList();
       members.Count.ShouldEqual(5);
       members[0].ToString().ShouldEqual("global::C_GetType");
@@ -81,13 +83,31 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
       var field = classA.GetMember<FieldEntity>("b");
-      var contextType = field.Type;
+      var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
-      var members = memberLookup.Lookup("GetType", 0, contextType, field).OrderBy(x => x.ToString()).ToList();
-      members.Count.ShouldEqual(2);
-      members[0].ToString().ShouldEqual("global::D_GetType()");
-      members[1].ToString().ShouldEqual("global::System.Object_GetType()");
+
+      // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 0 type params.
+      {
+        var members = memberLookup.Lookup("GetType", 0, classB, field).OrderBy(x => x.ToString()).ToList();
+        members.Count.ShouldEqual(4);
+        members[0].ToString().ShouldEqual("global::D_GetType()");
+        members[1].ToString().ShouldEqual("global::D_GetType`1()");
+        members[2].ToString().ShouldEqual("global::D_GetType`2()");
+        members[3].ToString().ShouldEqual("global::System.Object_GetType()");
+      }
+      // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 1 type params.
+      {
+        var members = memberLookup.Lookup("GetType", 1, classB, field).OrderBy(x => x.ToString()).ToList();
+        members.Count.ShouldEqual(1);
+        members[0].ToString().ShouldEqual("global::D_GetType`1()");
+      }
+      // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 2 type params.
+      {
+        var members = memberLookup.Lookup("GetType", 2, classB, field).OrderBy(x => x.ToString()).ToList();
+        members.Count.ShouldEqual(1);
+        members[0].ToString().ShouldEqual("global::D_GetType`2()");
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -104,12 +124,23 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field = classA.GetMember<FieldEntity>("a");
+      var field = classA.GetMember<FieldEntity>("b");
+      var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
-      var members = memberLookup.Lookup("B", 0, classA, field).ToList();
-      members.Count.ShouldEqual(1);
-      members[0].ToString().ShouldEqual("global::A+B");
+      
+      // Selecting members of class B (contextType) that are accessible in class A, named "C", with 0 type params.
+      {
+        var members = memberLookup.Lookup("C", 0, classB, field).ToList();
+        members.Count.ShouldEqual(1);
+        members[0].ToString().ShouldEqual("global::B+C");
+      }
+      // Selecting members of class B (contextType) that are accessible in class A, named "C", with 1 type params.
+      {
+        var members = memberLookup.Lookup("C", 1, classB, field).ToList();
+        members.Count.ShouldEqual(1);
+        members[0].ToString().ShouldEqual("global::B+C`1");
+      }
     }
   }
 }

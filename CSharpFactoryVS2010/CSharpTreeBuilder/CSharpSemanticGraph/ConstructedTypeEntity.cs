@@ -25,7 +25,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       UnderlyingType = underlyingType;
-      _Parent = underlyingType.Parent; 
+      Parent = underlyingType.Parent; 
     }
 
     // ----------------------------------------------------------------------------------------------

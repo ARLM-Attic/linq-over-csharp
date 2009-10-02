@@ -1765,6 +1765,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // int B { get; set; }
       {
         var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+        propertyEntity.IsInvocable.ShouldBeFalse();
 
         // Check property type resolution
         propertyEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
@@ -1779,8 +1780,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.GetMember<PropertyEntity>(propertyEntity.Name).ShouldEqual(propertyEntity);
       }
 
-      // Have to skip a member, the auto-implemented property's backing field.
-      i++;
       i++;
 
       // int I.B { get; set; }
@@ -1798,6 +1797,90 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // Check that the property can be retrieved by name.
         classEntity.GetMember<PropertyEntity>(propertyEntity.Name, propertyEntity.Interface).ShouldEqual(propertyEntity);
+      }
+
+      i++;
+
+      // D DP { get; set; } // D is a delegate, so DP is invocable
+      {
+        var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+        propertyEntity.IsInvocable.ShouldBeTrue();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Field type resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Field()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\Field.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+
+      int i = 0;
+
+      // int a;
+      {
+        var fieldEntity = classEntity.Members.ToList()[i] as FieldEntity;
+        fieldEntity.IsInvocable.ShouldBeFalse();
+
+        // Check member type resolution
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        fieldEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+
+        // Check that the member can be retrieved by name.
+        classEntity.GetMember<FieldEntity>(fieldEntity.Name).ShouldEqual(fieldEntity);
+      }
+
+      i++;
+
+      // D d; // D is a delegate, so "d" is invocable
+      {
+        var fieldEntity = classEntity.Members.ToList()[i] as FieldEntity;
+        fieldEntity.IsInvocable.ShouldBeTrue();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// ConstantMember type resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ConstantMember()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\ConstantMember.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+
+      int i = 0;
+
+      // const int a = 0;
+      {
+        var constantEntity = classEntity.Members.ToList()[i] as ConstantMemberEntity;
+        constantEntity.IsInvocable.ShouldBeFalse();
+
+        // Check member type resolution
+        constantEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        constantEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+
+        // Check that the member can be retrieved by name.
+        classEntity.GetMember<ConstantMemberEntity>(constantEntity.Name).ShouldEqual(constantEntity);
+      }
+
+      i++;
+
+      // const D d = null; // D is a delegate, so "d" is invocable
+      {
+        var constantEntity = classEntity.Members.ToList()[i] as ConstantMemberEntity;
+        constantEntity.IsInvocable.ShouldBeTrue();
       }
     }
 
@@ -2031,6 +2114,57 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var classA = global.GetSingleChildType<ClassEntity>("A");
       var member = classA.GetMember<FieldEntity>("a");
       member.Type.ShouldEqual(global.GetChildNamespace("N").GetSingleChildType<ClassEntity>("Nested"));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0547: 'a': property or indexer cannot have void type
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0547_VoidProperty()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0547_VoidProperty.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0547");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0670: Field cannot have void type
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS0670_VoidField()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS0670_VoidField.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS0670");
+      project.Warnings.Count.ShouldEqual(0);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS1547: Const member cannot be type 'void'
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void CS1547_VoidConst()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\CS1547_VoidConst.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("CS1547");
+      project.Warnings.Count.ShouldEqual(0);
     }
   }
 }

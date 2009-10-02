@@ -17,9 +17,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for SyntaxNodes property.</summary>
     private readonly List<ISyntaxNode> _SyntaxNodes;
 
-    /// <summary>Backing field for Parent property.</summary>
-    protected SemanticEntity _Parent;
-
     /// <summary>Backing field for Program property.</summary>
     private Program _Program;
 
@@ -38,11 +35,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the parent of this entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual SemanticEntity Parent
-    {
-      get { return _Parent; }
-      set { _Parent = value; }
-    }
+    public SemanticEntity Parent { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

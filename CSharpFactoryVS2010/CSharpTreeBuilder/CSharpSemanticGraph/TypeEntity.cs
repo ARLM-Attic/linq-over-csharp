@@ -49,7 +49,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _ReflectedMembersImported = false;
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
       DeclaredAccessibility = accessibility;
-      IsNew = false;
+      (this as IMemberEntity).IsNew = false;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -254,7 +254,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value indicating whether this type intentionally hides an inherited member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsNew { get; set; }
+    bool IMemberEntity.IsNew { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this member is invocable.
+    /// </summary>
+    /// <remarks>Nested types are not invocable.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    bool IMemberEntity.IsInvocable
+    {
+      get { return false; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

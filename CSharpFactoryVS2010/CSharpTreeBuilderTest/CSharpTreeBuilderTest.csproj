@@ -395,8 +395,11 @@
     <None Include="TestFiles\SimpleNameResolution\MethodTypeParameter.cs" />
     <None Include="TestFiles\SimpleNameResolution\CS0103_SimpleNameUndefined.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />
-    <None Include="TestFiles\Orphan\CS0547_VoidProperty.cs" />
+    <None Include="TestFiles\TypeResolution\CS0547_VoidProperty.cs" />
     <None Include="TestFiles\TypeResolution\TypeArgumentCanBeResolvedWithUsingNamespace.cs" />
+    <None Include="TestFiles\TypeResolution\ConstantMember.cs" />
+    <None Include="TestFiles\TypeResolution\CS1547_VoidConst.cs" />
+    <None Include="TestFiles\TypeResolution\Field.cs" />
     <None Include="TestFiles\TypeResolution\Property.cs" />
     <None Include="TestFiles\Orphan\CS0263_PartialClassConflictingBaseTypes.cs" />
     <None Include="TestFiles\Orphan\PartialClassDuplicateBaseTypes.cs" />
@@ -446,7 +449,7 @@
     <None Include="TestFiles\TypeResolution\DeclaredInBaseClass.cs" />
     <None Include="TestFiles\TypeResolution\BuiltInTypes.cs" />
     <None Include="TestFiles\TypeResolution\ArrayType.cs" />
-    <None Include="TestFiles\Orphan\CS0670_VoidField.cs" />
+    <None Include="TestFiles\TypeResolution\CS0670_VoidField.cs" />
     <None Include="TestFiles\TypeResolution\PointerToUnknown.cs" />
     <None Include="TestFiles\TypeResolution\NullableType.cs" />
     <None Include="TestFiles\TypeResolution\PointerToType.cs" />

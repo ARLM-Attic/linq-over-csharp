@@ -53,9 +53,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         // csc.exe uses '<{PropertyName}>k_BackingField' but we don't follow it, 
         // because the uniqueness of the field name gets tricky with explicitly implemented interface members.
-        // We just use a good old GUID, because its name has no significance at all.
+        // We just use a good old GUID, because it's unique, and its name has no significance at all.
         var fieldName = System.Guid.NewGuid().ToString();
         _AutoImplementedField = new FieldEntity(false, AccessibilityKind.Private, isStatic, typeReference, fieldName, null);
+        _AutoImplementedField.Parent = this;
       }
     }
 
@@ -139,25 +140,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the parent entity.
+    /// Gets a value indicating whether this member is invocable.
     /// </summary>
-    /// <remarks>Also set the parent of the backing field.</remarks>
+    /// <remarks>A member is invocable if it's a method or event, 
+    /// or if it is a constant, field or property of a delegate type.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public override SemanticEntity Parent
+    public override bool IsInvocable
     {
-      set
+      get
       {
-        base.Parent = value;
-
-        // If the property is auto-implemented, then the backing field has to be added to the parent type.
-        if (IsAutoImplemented && value is TypeEntity)
-        {
-          var parentType = value as TypeEntity;
-          if (parentType.GetMember<FieldEntity>(_AutoImplementedField.Name) == null)
-          {
-            parentType.AddMember(_AutoImplementedField);
-          }
-        }
+        return (Type != null) && Type.IsDelegateType;
       }
     }
 

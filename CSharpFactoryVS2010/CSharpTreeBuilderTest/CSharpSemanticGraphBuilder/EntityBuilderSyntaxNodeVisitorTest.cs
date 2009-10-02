@@ -185,7 +185,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classA.BaseType.ShouldBeNull();
 
       classA.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
-      classA.IsNew.ShouldBeFalse();
+      (classA as IMemberEntity).IsNew.ShouldBeFalse();
       classA.IsStatic.ShouldBeFalse();
       classA.IsAbstract.ShouldBeFalse();
       classA.IsSealed.ShouldBeFalse();
@@ -241,7 +241,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var classEntity = classATypes[childTypeCount++] as ClassEntity;
         classEntity.Name.ShouldEqual("B7");
-        classEntity.IsNew.ShouldBeTrue();
+        (classEntity as IMemberEntity).IsNew.ShouldBeTrue();
       }
 
 
@@ -672,6 +672,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.IsNew.ShouldBeFalse();
         fieldEntity.IsStatic.ShouldBeFalse();
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
+        fieldEntity.IsInvocable.ShouldBeFalse();
       }
       // A a1, a2;
       {
@@ -802,6 +803,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         constEntity.IsDeclaredInSource.ShouldBeTrue();
         constEntity.IsStatic.ShouldBeTrue();
         constEntity.IsNew.ShouldBeFalse();
+        constEntity.IsInvocable.ShouldBeFalse();
 
         constEntity.Parent.ToString().ShouldEqual("global::A");
         constEntity.SyntaxNodes.Count.ShouldEqual(1);
@@ -1133,6 +1135,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumMember.IsDeclaredInSource.ShouldBeTrue();
         enumMember.IsStatic.ShouldBeTrue();
         enumMember.IsNew.ShouldBeFalse();
+        enumMember.IsInvocable.ShouldBeFalse();
         enumMember.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
         enumMember.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0]);
         enumMember.ReflectedMetadata.ShouldBeNull();
@@ -1167,8 +1170,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // Check the number of properties and auto-created backing fields
         var properties = classEntity.Members.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
         properties.Count.ShouldEqual(6);
-        var fields = classEntity.Members.Where(x => x is FieldEntity).Cast<FieldEntity>().ToList();
-        fields.Count.ShouldEqual(5);
 
         var propertyCounter = 0;
 
@@ -1188,6 +1189,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           property.IsNew.ShouldBeFalse();
           property.IsOverride.ShouldBeFalse();
           property.IsVirtual.ShouldBeFalse();
+          property.IsInvocable.ShouldBeFalse();
 
           property.GetAccessor.ShouldNotBeNull();
           property.GetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.GetAccessor);
@@ -1215,11 +1217,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           property.AutoImplementedField.IsStatic.ShouldBeFalse();
           // The name of the auto-implemented field is a guid, so we just check that it's not null.
           property.AutoImplementedField.Name.ShouldNotBeNull();
-          property.AutoImplementedField.Parent.ShouldEqual(classEntity);
+          property.AutoImplementedField.Parent.ShouldEqual(property);
           property.AutoImplementedField.SyntaxNodes.Count.ShouldEqual(0);
           property.AutoImplementedField.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-
-          classEntity.Members.Contains(property.AutoImplementedField).ShouldBeTrue();
         }
         // static int D { get; set; }
         {
@@ -1255,8 +1255,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // Check the number of properties and auto-created backing fields
         var properties = interfaceEntity.Members.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
         properties.Count.ShouldEqual(1);
-        var fields = interfaceEntity.Members.Where(x => x is FieldEntity).Cast<FieldEntity>().ToList();
-        fields.Count.ShouldEqual(0);
       }
     }
 
@@ -1297,6 +1295,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           method.IsNew.ShouldBeFalse();
           method.IsOverride.ShouldBeFalse();
           method.IsVirtual.ShouldBeFalse();
+          method.IsInvocable.ShouldBeTrue();
 
           method.Parent.ShouldEqual(classEntity);
           method.SyntaxNodes[0].ShouldEqual(classNode.MemberDeclarations[i]);

@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(FieldEntity entity)
     {
       // Resolve the type of the field
-      if (entity.IsDeclaredInSource && entity.TypeReference != null)
+      if (entity.TypeReference != null)
       {
         entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
 
@@ -68,6 +68,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       return true;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a ConstantMemberEntity node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ConstantMemberEntity entity)
+    {
+      // Resolve the type of the field
+      if (entity.TypeReference != null)
+      {
+        entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      }
+
+      if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
+      {
+        var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
+                           ? ((TypeNodeBasedTypeEntityReference)entity.TypeReference).SyntaxNode.StartToken
+                           : null;
+
+        _ErrorHandler.Error("CS1547", errorPoint, "Keyword 'void' cannot be used in this context");
+      }
+
+      return true;
+    }
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Resolves type references in a PropertyEntity node.

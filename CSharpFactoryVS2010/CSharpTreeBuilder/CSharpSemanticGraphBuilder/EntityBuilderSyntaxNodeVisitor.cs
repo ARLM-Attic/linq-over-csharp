@@ -194,7 +194,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
       
       var classEntity = new ClassEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
-      classEntity.IsNew = IsNew(node.Modifiers);
+      (classEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       classEntity.IsStatic = IsStatic(node.Modifiers);
       classEntity.IsAbstract = IsAbstract(node.Modifiers);
       classEntity.IsSealed = IsSealed(node.Modifiers);
@@ -224,7 +224,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
       var structEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
-      structEntity.IsNew = IsNew(node.Modifiers);
+      (structEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       structEntity.Program = _Program;
       AddBaseTypesToTypeEntity(structEntity, node);
       AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
@@ -251,7 +251,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
 
       var interfaceEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
-      interfaceEntity.IsNew = IsNew(node.Modifiers);
+      (interfaceEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       interfaceEntity.Program = _Program;
       AddBaseTypesToTypeEntity(interfaceEntity, node);
       AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
@@ -279,7 +279,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // Build the new entity
       var enumEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
-      enumEntity.IsNew = IsNew(node.Modifiers);
+      (enumEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       enumEntity.Program = _Program;
       childTypeCapableParentEntity.AddChildType(enumEntity);
       AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
@@ -315,7 +315,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // Build the new entity
       var delegateEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
-      delegateEntity.IsNew = IsNew(node.Modifiers);
+      (delegateEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       delegateEntity.Program = _Program;
       AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       childTypeCapableParentEntity.AddChildType(delegateEntity);
