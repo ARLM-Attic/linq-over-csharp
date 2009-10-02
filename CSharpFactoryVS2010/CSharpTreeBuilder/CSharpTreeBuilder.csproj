@@ -285,6 +285,7 @@
     <Compile Include="CSharpSemanticGraph\ArrayInitializerEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstantMemberEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IHasAccessibility.cs" />
+    <Compile Include="CSharpSemanticGraph\IMemberEntity.cs" />
     <Compile Include="CSharpSemanticGraph\LocalVariableDeclarationStatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\LocalVariableEntity.cs" />
     <Compile Include="CSharpSemanticGraph\DefaultValueExpressionEntity.cs" />
@@ -330,7 +331,7 @@
     <Compile Include="CSharpSemanticGraph\GenericCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IHasChildTypes.cs" />
     <Compile Include="CSharpSemanticGraph\IVariableEntity.cs" />
-    <Compile Include="CSharpSemanticGraph\MemberEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\NonTypeMemberEntity.cs" />
     <Compile Include="CSharpSemanticGraph\PointerToTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\DelegateEntity.cs" />
     <Compile Include="CSharpSemanticGraph\InterfaceEntity.cs" />

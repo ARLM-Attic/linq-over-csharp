@@ -75,7 +75,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // Members are in type declaration body.
-      if (entity is MemberEntity)
+      if (entity is NonTypeMemberEntity)
       {
         return true;
       }

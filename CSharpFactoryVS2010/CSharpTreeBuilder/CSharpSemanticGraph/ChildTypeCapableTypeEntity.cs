@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -19,7 +20,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected ChildTypeCapableTypeEntity(AccessibilityKind? accessibility, string name)
       : base(accessibility, name)
     {
-      ChildTypes = new List<TypeEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -27,7 +27,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the list of child types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<TypeEntity> ChildTypes { get; private set;}
+    public IEnumerable<TypeEntity> ChildTypes
+    {
+      get 
+      {
+        return from member in Members 
+               where member is TypeEntity 
+               select member as TypeEntity;
+      }
+    }
  
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -38,9 +46,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddChildType(TypeEntity typeEntity)
     {
-      ChildTypes.Add(typeEntity);
-      typeEntity.Parent = this;
-      _DeclarationSpace.Register(typeEntity);
+      AddMember(typeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -51,9 +57,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveChildType(TypeEntity typeEntity)
     {
-      ChildTypes.Remove(typeEntity);
-      typeEntity.Parent = null;
-      _DeclarationSpace.Unregister(typeEntity);
+      RemoveMember(typeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -123,8 +127,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       base.AcceptVisitor(visitor);
-
-      VisitMutableCollection(ChildTypes, visitor);
     }
 
     #endregion

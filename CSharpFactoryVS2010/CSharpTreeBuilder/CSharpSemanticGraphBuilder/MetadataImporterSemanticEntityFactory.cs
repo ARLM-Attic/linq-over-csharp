@@ -96,7 +96,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       foreach (var reflectedMember in reflectedMembers)
       {
-        MemberEntity memberEntity = CreateMemberEntity(reflectedMember);
+        NonTypeMemberEntity memberEntity = CreateMemberEntity(reflectedMember);
 
         if (memberEntity != null)
         {
@@ -485,9 +485,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="reflectedMember">A reflected member.</param>
     /// <returns>A MemberEntity, or null if could not create.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static MemberEntity CreateMemberEntity(MemberInfo reflectedMember)
+    private static NonTypeMemberEntity CreateMemberEntity(MemberInfo reflectedMember)
     {
-      MemberEntity memberEntity = null;
+      NonTypeMemberEntity memberEntity = null;
 
       switch (reflectedMember.MemberType)
       {
@@ -526,9 +526,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="fieldInfo">A reflected FieldInfo object.</param>
     /// <returns>The created member entity, or null.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static MemberEntity CreateFieldEntity(FieldInfo fieldInfo)
+    private static NonTypeMemberEntity CreateFieldEntity(FieldInfo fieldInfo)
     {
-      MemberEntity memberEntity = null;
+      NonTypeMemberEntity memberEntity = null;
 
       bool isDeclaredInSource = false;
       AccessibilityKind? accessibility = GetAccessibility(fieldInfo);

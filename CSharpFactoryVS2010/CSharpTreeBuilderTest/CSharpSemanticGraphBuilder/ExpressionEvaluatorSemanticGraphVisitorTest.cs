@@ -108,7 +108,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
 
         var simpleName = exp as SimpleNameExpressionEntity;
-        simpleName.Entity.ShouldEqual(members[1]);
+        simpleName.Entity.ShouldEqual(members[1] as FieldEntity);
 
         var variableExpressionResult = simpleName.Result as VariableExpressionResult;
         variableExpressionResult.Variable.ShouldEqual(members[1] as IVariableEntity);

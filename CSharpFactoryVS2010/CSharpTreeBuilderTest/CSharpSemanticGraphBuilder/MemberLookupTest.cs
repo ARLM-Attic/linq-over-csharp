@@ -89,5 +89,27 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       members[0].ToString().ShouldEqual("global::D_GetType()");
       members[1].ToString().ShouldEqual("global::System.Object_GetType()");
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests member lookup when the member is a nested type
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void NestedType()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberLookup\NestedType.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var globalNamespace = project.SemanticGraph.GlobalNamespace;
+      var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
+      var field = classA.GetMember<FieldEntity>("a");
+
+      var memberLookup = new MemberLookup(project, project.SemanticGraph);
+      var members = memberLookup.Lookup("B", 0, classA, field).ToList();
+      members.Count.ShouldEqual(1);
+      members[0].ToString().ShouldEqual("global::A+B");
+    }
   }
 }

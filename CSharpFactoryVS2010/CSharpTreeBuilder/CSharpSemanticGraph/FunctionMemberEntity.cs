@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// These are: methods, constructors, properties, indexers, events, operators, and destructors.
   /// </summary>
   // ================================================================================================
-  public abstract class FunctionMemberEntity : MemberEntity
+  public abstract class FunctionMemberEntity : NonTypeMemberEntity
   {
     /// <summary>Backing field for DeclarationSpace property.</summary>
     protected DeclarationSpace _DeclarationSpace;

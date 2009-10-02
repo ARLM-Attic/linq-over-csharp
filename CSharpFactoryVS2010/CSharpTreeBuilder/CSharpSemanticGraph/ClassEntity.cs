@@ -72,7 +72,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="memberEntity">The member entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void AddMember(MemberEntity memberEntity)
+    public override void AddMember(IMemberEntity memberEntity)
     {
       // Member name and type name cannot be the same.
       if ( memberEntity.Name == Name)

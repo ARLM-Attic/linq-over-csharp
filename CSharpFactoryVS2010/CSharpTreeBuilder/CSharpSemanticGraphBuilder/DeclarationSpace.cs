@@ -131,13 +131,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>An iterate-only collection of entites.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetEntities<TEntityType>(string name)
-      where TEntityType : class, INamedEntity
+      where TEntityType : INamedEntity
     {
       if (_NameTable.ContainsKey(name))
       {
         return from declarationSpaceEntry in _NameTable[name]
                where declarationSpaceEntry.Entity is TEntityType
-               select declarationSpaceEntry.Entity as TEntityType;
+               select (TEntityType)declarationSpaceEntry.Entity;
       }
       return new List<TEntityType>();
     }
@@ -154,14 +154,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>An iterate-only collection of entites.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetEntities<TEntityType>(string name, int typeParameterCount)
-      where TEntityType : class, INamedEntity
+      where TEntityType : INamedEntity
     {
       if (_NameTable.ContainsKey(name))
       {
         return from declarationSpaceEntry in _NameTable[name]
                where declarationSpaceEntry.TypeParameterCount == typeParameterCount
                      && declarationSpaceEntry.Entity is TEntityType
-               select declarationSpaceEntry.Entity as TEntityType;
+               select (TEntityType)declarationSpaceEntry.Entity;
       }
 
       return new List<TEntityType>();
@@ -178,7 +178,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>An iterate-only collection of entites.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetEntities<TEntityType>(Signature signature)
-      where TEntityType : class, IOverloadableEntity
+      where TEntityType : IOverloadableEntity
     {
       if (_NameTable.ContainsKey(signature.Name))
       {
@@ -190,7 +190,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                                                             declarationSpaceEntry.TypeParameterCount,
                                                             declarationSpaceEntry.Parameters))
                      && declarationSpaceEntry.Entity is TEntityType
-               select declarationSpaceEntry.Entity as TEntityType;
+               select (TEntityType)declarationSpaceEntry.Entity;
       }
 
       return new List<TEntityType>();
@@ -208,7 +208,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetSingleEntity<TEntityType>(string name)
-      where TEntityType : class, INamedEntity
+      where TEntityType : INamedEntity
     {
       var entityList = GetEntities<TEntityType>(name).ToList();
       
@@ -219,7 +219,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (entityList.Count == 0)
       {
-        return null;
+        return default(TEntityType);
       }
 
       return entityList[0];
@@ -238,7 +238,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetSingleEntity<TEntityType>(string name, int typeParameterCount)
-      where TEntityType : class, INamedEntity
+      where TEntityType :  INamedEntity
     {
       var entityList = GetEntities<TEntityType>(name, typeParameterCount).ToList();
 
@@ -249,7 +249,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (entityList.Count == 0)
       {
-        return null;
+        return default(TEntityType);
       }
 
       return entityList[0];
@@ -267,7 +267,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>Throws AmbiguousDeclarationsException if there are multiple matching entities.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetSingleEntity<TEntityType>(Signature signature)
-      where TEntityType : class, IOverloadableEntity
+      where TEntityType :  IOverloadableEntity
     {
       var entityList = GetEntities<TEntityType>(signature).ToList();
 
@@ -278,7 +278,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (entityList.Count == 0)
       {
-        return null;
+        return default(TEntityType);
       }
 
       return entityList[0];

@@ -39,7 +39,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // There should be only 1 class, named A
       project.SemanticGraph.GlobalNamespace.GetChildTypes<ClassEntity>("A",1).Count().ShouldEqual(1);
-      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as ClassEntity;
       classEntity.ToString().ShouldEqual("global::A`1");
 
       // Class A should have two syntax nodes
@@ -91,7 +91,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // There should be only 1 struct, named A
       project.SemanticGraph.GlobalNamespace.GetChildTypes<StructEntity>("A", 1).Count().ShouldEqual(1);
-      project.SemanticGraph.GlobalNamespace.ChildTypes[0].ToString().ShouldEqual("global::A`1");
+      project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].ToString().ShouldEqual("global::A`1");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // There should be only 1 interface, named A
       project.SemanticGraph.GlobalNamespace.GetChildTypes<InterfaceEntity>("A", 1).Count().ShouldEqual(1);
-      project.SemanticGraph.GlobalNamespace.ChildTypes[0].ToString().ShouldEqual("global::A`1");
+      project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].ToString().ShouldEqual("global::A`1");
     }
   }
 }

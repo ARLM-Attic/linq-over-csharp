@@ -38,10 +38,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace)).Return(true);
         Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0])).Return(true);
         Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildNamespaces[0])).Return(true);
-        var class1 = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes[0] as ClassEntity;
+        var class1 = project.SemanticGraph.GlobalNamespace.ChildNamespaces[0].ChildTypes.ToList()[0] as ClassEntity;
         Expect.Call(sgVisitorMock.Visit(class1)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(((ClassEntity)project.SemanticGraph.GlobalNamespace.ChildTypes[0]).ChildTypes[0] as ClassEntity)).Return(true);
+        var class2 = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as ClassEntity;
+        Expect.Call(sgVisitorMock.Visit(class2)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(class2.ChildTypes.ToList()[0] as ClassEntity)).Return(true);
       }
       mocks.ReplayAll();
 
@@ -144,9 +145,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       {
         var global = project.SemanticGraph.GlobalNamespace;
         Expect.Call(sgVisitorMock.Visit(global)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0] as EnumEntity)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[0] as EnumMemberEntity)).Return(true);
-        Expect.Call(sgVisitorMock.Visit(global.ChildTypes[0].Members.ToList()[1] as EnumMemberEntity)).Return(true);
+        var enumEntity = global.ChildTypes.ToList()[0] as EnumEntity;
+        Expect.Call(sgVisitorMock.Visit(enumEntity)).Return(true);
+        var members = enumEntity.Members.ToList();
+        Expect.Call(sgVisitorMock.Visit(members[0] as EnumMemberEntity)).Return(true);
+        Expect.Call(sgVisitorMock.Visit(members[1] as EnumMemberEntity)).Return(true);
       }
       mocks.ReplayAll();
 
@@ -178,7 +181,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       {
         var global = project.SemanticGraph.GlobalNamespace;
         Expect.Call(sgVisitorMock.Visit(global)).Return(true);
-        var class1 = global.ChildTypes[0] as ClassEntity;
+        var class1 = global.ChildTypes.ToList()[0] as ClassEntity;
         Expect.Call(sgVisitorMock.Visit(class1)).Return(true);
         var members = class1.Members.ToList();
         var constMember = members[0] as ConstantMemberEntity;

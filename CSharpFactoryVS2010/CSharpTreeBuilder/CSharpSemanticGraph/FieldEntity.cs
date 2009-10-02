@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a field of a type.
   /// </summary>
   // ================================================================================================
-  public sealed class FieldEntity : MemberEntity, IVariableEntity
+  public sealed class FieldEntity : NonTypeMemberEntity, IVariableEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

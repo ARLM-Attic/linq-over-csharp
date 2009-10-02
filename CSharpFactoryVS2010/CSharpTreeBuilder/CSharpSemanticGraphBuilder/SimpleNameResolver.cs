@@ -154,9 +154,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Otherwise, if a member lookup (§7.3) of I in T with K type arguments produces a match:
-        //var members = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext).ToList();
-        //if (members.Count > 0)
+        var members = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext, resolutionContextEntity).ToList();
+        if (members.Count > 0)
         {
+          return members.Cast<SemanticEntity>().FirstOrDefault();
           // - If T is the instance type of the immediately enclosing class or struct type 
           //   and the lookup identifies one or more methods, the result is a method group 
           //   with an associated instance expression of this. 

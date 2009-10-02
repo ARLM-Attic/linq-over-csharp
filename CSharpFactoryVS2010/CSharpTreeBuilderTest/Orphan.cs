@@ -254,7 +254,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"TypeResolution\PartialClassDuplicateBaseTypes.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as ClassEntity;
       var baseTypeRefs = classEntity.BaseTypeReferences.ToList();
       baseTypeRefs.Count.ShouldEqual(1);
       classEntity.BaseType.FullyQualifiedName.ShouldEqual("B");
@@ -272,7 +272,7 @@ namespace CSharpTreeBuilderTest
       project.AddFile(@"TypeResolution\PartialClassDuplicateBaseInterfaces.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes[0] as ClassEntity;
+      var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as ClassEntity;
       classEntity.BaseInterfaces.Count.ShouldEqual(3);
       classEntity.BaseInterfaces[0].FullyQualifiedName.ShouldEqual("I1");
       classEntity.BaseInterfaces[1].FullyQualifiedName.ShouldEqual("I2");

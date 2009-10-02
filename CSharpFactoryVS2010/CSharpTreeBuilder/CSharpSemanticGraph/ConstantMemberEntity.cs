@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a constant member a type.
   /// </summary>
   // ================================================================================================
-  public class ConstantMemberEntity : MemberEntity, IHasExpressions
+  public class ConstantMemberEntity : NonTypeMemberEntity, IHasExpressions
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

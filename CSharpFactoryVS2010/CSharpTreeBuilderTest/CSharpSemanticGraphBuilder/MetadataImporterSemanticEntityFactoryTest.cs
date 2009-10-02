@@ -627,7 +627,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       CheckTestAssemblyImportResult(project.SemanticGraph, "MyAlias");
 
       project.SemanticGraph.GlobalNamespace.ChildNamespaces.Count.ShouldEqual(0);
-      project.SemanticGraph.GlobalNamespace.ChildTypes.Count.ShouldEqual(0);
+      project.SemanticGraph.GlobalNamespace.ChildTypes.Count().ShouldEqual(0);
     }
   }
 }

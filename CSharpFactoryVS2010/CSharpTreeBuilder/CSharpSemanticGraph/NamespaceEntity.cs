@@ -11,14 +11,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public class NamespaceEntity : NamespaceOrTypeEntity, IHasChildTypes
   {
-    /// <summary>A list of extern alias entities.</summary>
+    /// <summary>
+    /// A list of extern alias entities.
+    /// </summary>
     private readonly List<ExternAliasEntity> _ExternAliases;
 
-    /// <summary>A list of using alias entities.</summary>
+    /// <summary>
+    /// A list of using alias entities.
+    /// </summary>
     private readonly List<UsingAliasEntity> _UsingAliases;
 
-    /// <summary>A list of using namespace entities.</summary>
+    /// <summary>
+    /// A list of using namespace entities.
+    /// </summary>
     private readonly List<UsingNamespaceEntity> _UsingNamespaces;
+
+    /// <summary>
+    /// Backing field for ChildEntities property.
+    /// </summary>
+    private readonly List<TypeEntity> _ChildTypes;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,9 +43,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       _ExternAliases = new List<ExternAliasEntity>();
       _UsingAliases = new List<UsingAliasEntity>();
       _UsingNamespaces = new List<UsingNamespaceEntity>();
+      _ChildTypes = new List<TypeEntity>();
 
       ChildNamespaces = new List<NamespaceEntity>();
-      ChildTypes = new List<TypeEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -63,7 +74,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of child namespaces.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<TypeEntity> ChildTypes { get; private set; }
+    public IEnumerable<TypeEntity> ChildTypes
+    {
+      get { return _ChildTypes; }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -101,7 +115,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddChildType(TypeEntity typeEntity)
     {
-      ChildTypes.Add(typeEntity);
+      _ChildTypes.Add(typeEntity);
       typeEntity.Parent = this;
       _DeclarationSpace.Register(typeEntity);
     }
@@ -114,7 +128,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveChildType(TypeEntity typeEntity)
     {
-      ChildTypes.Remove(typeEntity);
+      _ChildTypes.Remove(typeEntity);
       typeEntity.Parent = null;
       _DeclarationSpace.Unregister(typeEntity);
     }

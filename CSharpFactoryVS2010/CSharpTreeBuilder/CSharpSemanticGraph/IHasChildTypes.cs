@@ -30,7 +30,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of child types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    List<TypeEntity> ChildTypes { get; }
+    IEnumerable<TypeEntity> ChildTypes { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

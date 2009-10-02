@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of member references.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override IEnumerable<MemberEntity> Members
+    public override IEnumerable<IMemberEntity> Members
     {
       get { return UnderlyingType.Members; }
     }

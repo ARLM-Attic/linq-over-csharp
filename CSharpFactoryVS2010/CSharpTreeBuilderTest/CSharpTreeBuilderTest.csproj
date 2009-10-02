@@ -380,7 +380,7 @@
     <None Include="TestFiles\Accessibility\ProtectedAccessForInstanceMembers.cs" />
     <None Include="TestFiles\MemberLookup\GenericType.cs" />
     <None Include="TestFiles\MemberLookup\TypeParameter.cs" />
-    <Compile Include="TestFiles\MemberLookup\NestedType.cs" />
+    <None Include="TestFiles\MemberLookup\NestedType.cs" />
     <None Include="TestFiles\MemberLookup\NonGenericType.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />

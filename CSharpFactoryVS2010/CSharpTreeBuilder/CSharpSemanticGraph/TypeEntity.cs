@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This abstract class represents a type entity in the semantic graph.
   /// </summary>
   // ================================================================================================
-  public abstract class TypeEntity : NamespaceOrTypeEntity, IHasAccessibility
+  public abstract class TypeEntity : NamespaceOrTypeEntity, IMemberEntity
   {
     /// <summary>
     /// Backing field for BaseTypeReferences property.
@@ -21,7 +21,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Backing field for Members property.
     /// </summary>
-    private readonly List<MemberEntity> _Members;
+    private readonly List<IMemberEntity> _Members;
 
     /// <summary>
     /// A flag for lazy importing reflected members (expensive operation).
@@ -45,7 +45,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(name)
     {
       _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
-      _Members = new List<MemberEntity>();
+      _Members = new List<IMemberEntity>();
       _ReflectedMembersImported = false;
       _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
       DeclaredAccessibility = accessibility;
@@ -349,10 +349,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets an iterate-only collection of member references.
+    /// Gets an iterate-only collection of members.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual IEnumerable<MemberEntity> Members
+    public virtual IEnumerable<IMemberEntity> Members
     {
       get 
       {
@@ -365,11 +365,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Adds a member. 
-    /// Also sets the member's parent property, and defines member's name in the declaration space.
+    /// Also sets the member's parent property, and defines the member's name in the declaration space.
     /// </summary>
     /// <param name="memberEntity">The member entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public virtual void AddMember(MemberEntity memberEntity)
+    public virtual void AddMember(IMemberEntity memberEntity)
     {
       _Members.Add(memberEntity);
       memberEntity.Parent = this;
@@ -384,6 +384,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Removes a member. 
+    /// </summary>
+    /// <param name="memberEntity">The member entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveMember(IMemberEntity memberEntity)
+    {
+      _Members.Remove(memberEntity);
+      memberEntity.Parent = null;
+      _DeclarationSpace.Unregister(memberEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a member by name.
     /// </summary>
     /// <typeparam name="TEntityType">The type of member to found.</typeparam>
@@ -391,7 +404,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <returns>The found member, or null if not found.</returns>
     /// <remarks>If getting a method then assumes zero type parameters and zero parameters.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public TEntityType GetMember<TEntityType>(string name) where TEntityType : MemberEntity
+    public TEntityType GetMember<TEntityType>(string name)
+      where TEntityType : class, IMemberEntity
     {
       LazyImportReflectedMembers();
 
@@ -412,7 +426,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <returns>A collection of the found members. Can be empty.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetMembers<TEntityType>(string name)
-      where TEntityType : MemberEntity
+      where TEntityType : IMemberEntity
     {
       LazyImportReflectedMembers();
 
@@ -472,7 +486,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetMember<TEntityType>(string name, TypeEntity implementedInterface)
-      where TEntityType : MemberEntity, ICanBeExplicitlyImplementedMember
+      where TEntityType : NonTypeMemberEntity, ICanBeExplicitlyImplementedMember
     {
       if (typeof(TEntityType) == typeof(MethodEntity))
       {
@@ -531,9 +545,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>A collection of accessible members with a given name. Can be empty.</returns>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TEntityType> GetAccessibleMembers<TEntityType>(
-      string name, SemanticEntity accessingEntity)
-      where TEntityType : MemberEntity
+    public IEnumerable<TEntityType> GetAccessibleMembers<TEntityType>(string name, SemanticEntity accessingEntity)
+      where TEntityType : IMemberEntity
     {
       var result = new HashSet<TEntityType>();
 
@@ -559,7 +572,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetAccessibleInheritedMembers<TEntityType>(
       string name, SemanticEntity accessingEntity)
-      where TEntityType : MemberEntity
+      where TEntityType : IMemberEntity
     {
       return (BaseType == null)
         ? new List<TEntityType>()
@@ -736,7 +749,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         foreach (var member in Members)
         {
-          member.AcceptVisitor(visitor);
+          (member as SemanticEntity).AcceptVisitor(visitor);
         }
       }
     }
