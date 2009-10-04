@@ -36,6 +36,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public SemanticEntity Parent { get; set; }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this entity is a (direct or indirect) parent of another entity.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>
+    /// True if this entity is a (direct or indirect) parent of another entity, false otherwise.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsParentOf(SemanticEntity entity)
+    {
+      if (entity == null)
+      {
+        return false;
+      }
+
+      if (entity == this)
+      {
+        return true;
+      }
+
+      return IsParentOf(entity.Parent);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

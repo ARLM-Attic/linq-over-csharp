@@ -49,10 +49,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeParameterCount">The number of type parameters.</param>
     /// <param name="contextEntity">A type entity.</param>
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
+    /// <param name="isInvocation">True, if the member should be in the context of an invocation.</param>
     /// <returns>A collection of type members. Can be empty.</returns>
+    /// <remarks>If the simple-name or member-access occurs as the simple-expression 
+    /// of an invocation-expression (§7.5.5.1), the member is said to be invoked.</remarks>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<IMemberEntity> Lookup(
-      string name, int typeParameterCount, TypeEntity contextEntity, SemanticEntity accessingEntity)
+      string name, int typeParameterCount, TypeEntity contextEntity, SemanticEntity accessingEntity, bool isInvocation)
     {
       // A member lookup of a name N with K type parameters in a type T is processed as follows:
       string N = name;
@@ -71,16 +74,70 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       members.RemoveWhere(x => (x is GenericCapableTypeEntity) && ((GenericCapableTypeEntity)x).OwnTypeParameterCount != K);
       // --> ... and remove methods with a type parameter count other than K, but only if K is not zero.
       members.RemoveWhere(x => (K != 0) && (x is MethodEntity) && ((MethodEntity)x).OwnTypeParameterCount != K);
-                
-      // Next, if the member is invoked, all non-invocable members are removed from the set.
 
-      //•	Next, members that are hidden by other members are removed from the set. For every member S.M in the set, where S is the type in which the member M is declared, the following rules are applied:
-      //o	If M is a constant, field, property, event, or enumeration member, then all members declared in a base type of S are removed from the set.
-      //o	If M is a type declaration, then all non-types declared in a base type of S are removed from the set, and all type declarations with the same number of type parameters as M declared in a base type of S are removed from the set.
-      //o	If M is a method, then all non-method members declared in a base type of S are removed from the set.
-      //•	Next, interface members that are hidden by class members are removed from the set. This step only has an effect if T is a type parameter and T has both an effective base class other than object and a non-empty effective interface set (§10.1.5). For every member S.M in the set, where S is the type in which the member M is declared, the following rules are applied if S is a class declaration other than object:
-      //o	If M is a constant, field, property, event, enumeration member, or type declaration, then all members declared in an interface declaration are removed from the set.
-      //o	If M is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as M declared in an interface declaration are removed from the set.
+      // Next, if the member is invoked, all non-invocable members are removed from the set.
+      if (isInvocation)
+      {
+        members.RemoveWhere(x => !x.IsInvocable);
+      }
+
+      // Next, members that are hidden by other members are removed from the set. 
+      // For every member S.M in the set, where S is the type in which the member M is declared, 
+      // the following rules are applied:
+
+      // If M is a constant, field, property, event, or enumeration member, 
+      // then all members declared in a base type of S are removed from the set.
+      // --> Translated to: remove all members declared in a base class of another member of the listed member-types.
+      members.RemoveWhere(removableMember =>
+        members.Any(descendantMember =>
+          (removableMember.Parent is TypeEntity)
+          && (removableMember.Parent as TypeEntity).IsBaseOf(descendantMember.Parent as TypeEntity)
+          && (descendantMember is ConstantMemberEntity || descendantMember is FieldEntity || descendantMember is PropertyEntity)
+        ));
+
+      // If M is a type declaration, then all non-types declared in a base type of S are removed from the set, 
+      // and all type declarations with the same number of type parameters as M declared in a base type of S are removed from the set.
+      // --> Translated to: remove all non-type members or type members with the same number of type params
+      // --> that are declared in a base class of a nested type member.
+      members.RemoveWhere(removableMember =>
+        (
+          !(removableMember is TypeEntity)
+        ||
+          (K == 0 && !(removableMember is GenericCapableTypeEntity))
+        ||
+          ((removableMember as GenericCapableTypeEntity).OwnTypeParameterCount == K)
+        )
+        &&
+        members.Any(descendantMember =>
+          (removableMember.Parent is TypeEntity)
+          && (removableMember.Parent as TypeEntity).IsBaseOf(descendantMember.Parent as TypeEntity)
+          && (descendantMember is TypeEntity)
+        ));
+      
+      // If M is a method, then all non-method members declared in a base type of S are removed from the set.
+      // --> Translated to: remove all non-methods that are declared in a base class of a method.
+      members.RemoveWhere(removableMember =>
+        !(removableMember is MethodEntity)
+        && members.Any(descendantMember =>
+            (removableMember.Parent is TypeEntity)
+            && (removableMember.Parent as TypeEntity).IsBaseOf(descendantMember.Parent as TypeEntity)
+            && (descendantMember is MethodEntity)
+      ));
+
+      // Next, interface members that are hidden by class members are removed from the set. 
+      // This step only has an effect if T is a type parameter and T has both an effective base class other than object 
+      // and a non-empty effective interface set (§10.1.5). 
+      if (T is TypeParameterEntity
+        && T.BaseType != _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object)
+        && T.BaseInterfaces.Count > 0)
+      {
+        // For every member S.M in the set, where S is the type in which the member M is declared, 
+        // the following rules are applied if S is a class declaration other than object:
+
+        // If M is a constant, field, property, event, enumeration member, or type declaration, then all members declared in an interface declaration are removed from the set.
+        // If M is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as M declared in an interface declaration are removed from the set.
+      }
+
       //•	Finally, having removed hidden members, the result of the lookup is determined:
       //o	If the set consists of a single member that is not a method, then this member is the result of the lookup.
       //o	Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.

@@ -59,20 +59,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
+    [Ignore]
     public void TypeParameterConstraints()
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"TypeResolution\TypeParameterConstraints.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      // class A
-      var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 4);
-
+      var global = project.SemanticGraph.GlobalNamespace;
+      var classA = global.GetSingleChildType<ClassEntity>("A", 4);
+ 
       int i = 0;
 
       // where T1 : B, T2, I1, I2, T4, new()
       {
-        var typeParameter = classEntity.OwnTypeParameters[i++];
+        var typeParameter = classA.OwnTypeParameters[i++];
         typeParameter.ClassTypeConstraint.ToString().ShouldEqual("global::B");
         typeParameter.ClassTypeConstraints.Count().ShouldEqual(1);
 
@@ -83,8 +84,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         var typeParams = typeParameter.TypeParameterConstraints.ToList();
         typeParams.Count().ShouldEqual(2);
-        typeParams[0].ShouldEqual(classEntity.OwnTypeParameters[1]);
-        typeParams[1].ShouldEqual(classEntity.OwnTypeParameters[3]);
+        typeParams[0].ShouldEqual(classA.OwnTypeParameters[1]);
+        typeParams[1].ShouldEqual(classA.OwnTypeParameters[3]);
+
+        typeParameter.BaseType.ToString().ShouldEqual("global::B");
+
+        typeParameter.BaseInterfaces.Count.ShouldEqual(2);
+        var interfaces = typeParameter.BaseInterfaces.OrderBy(x => x.ToString()).ToList();
+        interfaces[0].ToString().ShouldEqual("global::I1");
+        interfaces[1].ToString().ShouldEqual("global::I2`1[global::System.Int32]");
       }
     }
 

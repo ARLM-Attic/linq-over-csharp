@@ -382,6 +382,10 @@
     <None Include="TestFiles\MemberLookup\TypeParameter.cs" />
     <None Include="TestFiles\MemberLookup\NestedType.cs" />
     <None Include="TestFiles\MemberLookup\NonGenericType.cs" />
+    <None Include="TestFiles\MemberLookup\MemberHidesAllBaseMembers.cs" />
+    <None Include="TestFiles\MemberLookup\MethodHidesAllNonMethodMembers.cs" />
+    <None Include="TestFiles\MemberLookup\NestedTypeHidesNonTypeMembers.cs" />
+    <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Unresolvable.cs" />

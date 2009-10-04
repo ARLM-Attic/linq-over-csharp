@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using System.Collections.ObjectModel;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -148,6 +149,45 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
                where typeReference.ResolutionState == ResolutionState.Resolved
                      && typeReference.TargetEntity.IsInterfaceType
                select typeReference.TargetEntity;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the base type entity of this type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity BaseType
+    {
+      get
+      {
+        // The effective base class of a type parameter T is defined as follows:
+        // If T has no primary constraints or type parameter constraints, its effective base class is object.
+        // If T has the value type constraint, its effective base class is System.ValueType.
+        // If T has a class-type constraint C but no type-parameter constraints, its effective base class is C.
+        // If T has no class-type constraint but has one or more type-parameter constraints, its effective base class is the most encompassed type (§6.4.2) in the set of effective base classes of its type-parameter constraints. The consistency rules ensure that such a most encompassed type exists.
+        // If T has both a class-type constraint and one or more type-parameter constraints, its effective base class is the most encompassed type (§6.4.2) in the set consisting of the class-type constraint of T and the effective base classes of its type-parameter constraints. The consistency rules ensure that such a most encompassed type exists.
+        // If T has the reference type constraint but no class-type constraints, its effective base class is object.
+        return null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a read-only collection of base interface entities of this type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override ReadOnlyCollection<InterfaceEntity> BaseInterfaces
+    {
+      get
+      {
+        // The effective interface set of a type parameter T is defined as follows:
+        // If T has no secondary-constraints, its effective interface set is empty.
+        // If T has interface-type constraints but no type-parameter constraints, its effective interface set is its set of interface-type constraints.
+        // If T has no interface-type constraints but has type-parameter constraints, its effective interface set is the union of the effective interface sets of its type-parameter constraints.
+        // If T has both interface-type constraints and type-parameter constraints, its effective interface set is the union of its set of interface-type constraints and the effective interface sets of its type-parameter constraints.
+
+        return null;
       }
     }
 

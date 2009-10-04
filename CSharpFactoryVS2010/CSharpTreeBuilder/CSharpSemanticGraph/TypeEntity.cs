@@ -139,7 +139,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           return parentType.ContainsInFamily(accessingEntity);
 
         case AccessibilityKind.Private:
-          return parentType.Contains(accessingEntity);
+          return parentType.IsParentOf(accessingEntity);
 
         default:
           throw new ApplicationException("Effective accessibility is undefined.");
@@ -348,7 +348,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// It returns the resolved entities, not the references, so it can be successful only if the base type references are already resolved.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public ReadOnlyCollection<InterfaceEntity> BaseInterfaces
+    public virtual ReadOnlyCollection<InterfaceEntity> BaseInterfaces
     {
       get
       {
@@ -635,30 +635,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       _ArrayTypes.Add(arrayType.Rank, arrayType);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this entity contains another entity (directly or indirectly).
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    /// <returns>
-    /// True if this entity contains the parameter entity (directly or indirectly), false otherwise.
-    /// </returns>
-    // ----------------------------------------------------------------------------------------------
-    public bool Contains(SemanticEntity entity)
-    {
-      if (entity == null)
-      {
-        return false;
-      }
-
-      if (entity == this)
-      {
-        return true;
-      }
-
-      return Contains(entity.Parent);
     }
 
     // ----------------------------------------------------------------------------------------------

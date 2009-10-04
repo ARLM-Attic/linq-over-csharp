@@ -146,7 +146,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           return parentType.ContainsInFamily(accessingEntity);
 
         case AccessibilityKind.Private:
-          return parentType.Contains(accessingEntity);
+          return parentType.IsParentOf(accessingEntity);
 
         default:
           throw new ApplicationException("Effective accessibility is undefined.");

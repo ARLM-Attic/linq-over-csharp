@@ -154,7 +154,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Otherwise, if a member lookup (§7.3) of I in T with K type arguments produces a match:
-        var members = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext, resolutionContextEntity).ToList();
+        var members = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext, resolutionContextEntity, false).ToList();
         if (members.Count > 0)
         {
           return members.Cast<SemanticEntity>().FirstOrDefault();
