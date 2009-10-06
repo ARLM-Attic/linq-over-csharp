@@ -16,8 +16,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Initializes a new instance of the <see cref="TypedLiteralExpressionEntity"/> class.
     /// </summary>
     /// <param name="typeEntityReference">A reference to the type of the literal.</param>
+    /// <param name="value">The value of the literal.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypedLiteralExpressionEntity(SemanticEntityReference<TypeEntity> typeEntityReference)
+    public TypedLiteralExpressionEntity(SemanticEntityReference<TypeEntity> typeEntityReference, object value)
     {
       if (typeEntityReference == null)
       {
@@ -25,6 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       TypeReference = typeEntityReference;
+      Value = value;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -46,6 +48,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return TypeReference == null ? null : TypeReference.TargetEntity;
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the value of the literal.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public object Value { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

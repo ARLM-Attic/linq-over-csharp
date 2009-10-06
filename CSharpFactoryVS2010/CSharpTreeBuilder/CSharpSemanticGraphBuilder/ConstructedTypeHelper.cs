@@ -50,7 +50,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the constructed type not exists yet then create it.
       if (arrayType == null)
       {
-        arrayType = new ArrayTypeEntity(underlyingTypeEntity, rank, semanticGraph.SystemArray);
+        arrayType = new ArrayTypeEntity(underlyingTypeEntity, rank);
         underlyingTypeEntity.AddArrayType(arrayType);
       }
 

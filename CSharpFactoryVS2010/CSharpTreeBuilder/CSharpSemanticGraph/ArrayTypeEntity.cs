@@ -9,22 +9,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class ArrayTypeEntity: ConstructedTypeEntity
   {
-    /// <summary>Backing field for BaseType property.</summary>
-    private readonly ClassEntity _BaseType;
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ArrayTypeEntity"/> class.
     /// </summary>
     /// <param name="elementType">The element type.</param>
     /// <param name="rank">The rank of the array.</param>
-    /// <param name="baseType">The base type.</param>
     // ----------------------------------------------------------------------------------------------
-    public ArrayTypeEntity(TypeEntity elementType, int rank, ClassEntity baseType)
+    public ArrayTypeEntity(TypeEntity elementType, int rank)
       : base(elementType)
     {
       Rank = rank;
-      _BaseType = baseType;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -41,7 +36,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeEntity BaseType
     {
-      get { return _BaseType; }
+      get { return SemanticGraph.SystemArray; }
     }
 
     // ----------------------------------------------------------------------------------------------

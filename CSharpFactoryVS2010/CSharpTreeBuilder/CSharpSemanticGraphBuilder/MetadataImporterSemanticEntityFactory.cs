@@ -332,6 +332,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         typeEntity.AddBaseTypeReference(new ReflectedTypeBasedTypeEntityReference(interfaceItem));
       }
 
+      // If it's a built in type, then set its BuiltInTypeValue.
+      typeEntity.BuiltInTypeValue = GetBuiltInTypeValue(type);
+
       return typeEntity;
     }
 
@@ -831,6 +834,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var accessor = propertyInfo.CanRead ? propertyInfo.GetGetMethod(true) : propertyInfo.GetSetMethod(true);
       return IsSealed(accessor);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a BuiltInType enum value for a reflected type.
+    /// </summary>
+    /// <param name="type">A reflected type.</param>
+    /// <returns>A BuiltInType enum value, or null if it's not a built in type.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static BuiltInType? GetBuiltInTypeValue(Type type)
+    {
+      if (type == typeof(bool)) { return BuiltInType.Bool; }
+      if (type == typeof(byte)) { return BuiltInType.Byte; }
+      if (type == typeof(char)) { return BuiltInType.Char; }
+      if (type == typeof(decimal)) { return BuiltInType.Decimal; }
+      if (type == typeof(double)) { return BuiltInType.Double; }
+      if (type == typeof(float)) { return BuiltInType.Float; }
+      if (type == typeof(int)) { return BuiltInType.Int; }
+      if (type == typeof(long)) { return BuiltInType.Long; }
+      if (type == typeof(object)) { return BuiltInType.Object; }
+      if (type == typeof(sbyte)) { return BuiltInType.Sbyte; }
+      if (type == typeof(short)) { return BuiltInType.Short; }
+      if (type == typeof(string)) { return BuiltInType.String; }
+      if (type == typeof(uint)) { return BuiltInType.Uint; }
+      if (type == typeof(ulong)) { return BuiltInType.Ulong; }
+      if (type == typeof(ushort)) { return BuiltInType.Ushort; }
+      if (type == typeof(void)) { return BuiltInType.Void; }
+
+      return null;
     }
 
     #endregion

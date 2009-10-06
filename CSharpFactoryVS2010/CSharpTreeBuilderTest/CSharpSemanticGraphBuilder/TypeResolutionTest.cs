@@ -202,6 +202,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.SByte");
+        typeEntity.BuiltInTypeValue = BuiltInType.Sbyte;
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // byte a2;
       {
@@ -210,6 +216,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Byte");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // short a3;
       {
@@ -218,6 +229,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Int16");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // ushort a4;
       {
@@ -226,6 +242,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.UInt16");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // int a5;
       {
@@ -234,6 +255,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Int32");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // uint a6;
       {
@@ -242,6 +268,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.UInt32");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // long a7;
       {
@@ -250,6 +281,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Int64");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // ulong a8;
       {
@@ -258,6 +294,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.UInt64");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // char a9;
       {
@@ -266,6 +307,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Char");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeTrue();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // float a10;
       {
@@ -274,6 +320,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Single");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeFalse();
+        typeEntity.IsFloatingPointType.ShouldBeTrue();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // double a11;
       {
@@ -282,6 +333,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Double");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeFalse();
+        typeEntity.IsFloatingPointType.ShouldBeTrue();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // bool a12;
       {
@@ -290,6 +346,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Boolean");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeFalse();
+        typeEntity.IsIntegralType.ShouldBeFalse();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // decimal a13;
       {
@@ -298,6 +359,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Decimal");
+        typeEntity.IsSimpleType.ShouldBeTrue();
+        typeEntity.IsNumericType.ShouldBeTrue();
+        typeEntity.IsIntegralType.ShouldBeFalse();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // object a14;
       {
@@ -306,6 +372,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
         typeEntity.ToString().ShouldEqual("global::System.Object");
+        typeEntity.IsSimpleType.ShouldBeFalse();
+        typeEntity.IsNumericType.ShouldBeFalse();
+        typeEntity.IsIntegralType.ShouldBeFalse();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
       // string a15;
       {
@@ -314,6 +385,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
         typeEntity.ToString().ShouldEqual("global::System.String");
+        typeEntity.IsSimpleType.ShouldBeFalse();
+        typeEntity.IsNumericType.ShouldBeFalse();
+        typeEntity.IsIntegralType.ShouldBeFalse();
+        typeEntity.IsFloatingPointType.ShouldBeFalse();
+        typeEntity.IsNullableType.ShouldBeFalse();
       }
 
       // int? a16;
@@ -323,6 +399,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var nullable = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
         nullable.ToString().ShouldEqual("global::System.Nullable`1[global::System.Int32]");
+        nullable.IsSimpleType.ShouldBeFalse();
+        nullable.IsNumericType.ShouldBeFalse();
+        nullable.IsIntegralType.ShouldBeFalse();
+        nullable.IsFloatingPointType.ShouldBeFalse();
+        nullable.IsNullableType.ShouldBeTrue();
       }
 
       // int*[] a17;
@@ -471,6 +552,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         nullable.IsPointerType.ShouldBeFalse();
         nullable.IsReferenceType.ShouldBeFalse();
         nullable.IsValueType.ShouldBeTrue();
+
+        nullable.IsNullableType.ShouldBeTrue();
+        nullable.UnderlyingOfNullableType.ToString().ShouldEqual("global::A2");
+
         var underlyingType = nullable.UnderlyingType as GenericCapableTypeEntity;
         underlyingType.FullyQualifiedName.ShouldEqual("System.Nullable");
         underlyingType.ToString().ShouldEqual("global::System.Nullable`1");
@@ -483,6 +568,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.Name.ShouldEqual("a2");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array = fieldEntity.TypeReference.TargetEntity as ArrayTypeEntity;
+        array.IsNullableType.ShouldBeFalse();
+        array.UnderlyingOfNullableType.ShouldBeNull();
         var nullable = array.UnderlyingType as ConstructedGenericTypeEntity;
         nullable.UnderlyingType.ShouldEqual(project.SemanticGraph.NullableGenericTypeDefinition);
       }
@@ -1154,20 +1241,25 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"TypeResolution\GenericBaseTypes.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      // class A1<T1> : A3<T1, A2<T1>>
+      // class A1<T1> : A3<T1, A2<T1>>, I1<T1>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1", 1);
         classEntity.BaseType.ToString().ShouldEqual("global::A3`2[global::A1`1'T1,global::A2`1[global::A1`1'T1]]");
+        classEntity.BaseInterfaces.Count.ShouldEqual(1);
+        classEntity.BaseInterfaces[0].ToString().ShouldEqual("global::I1`1[global::A1`1[global::A1`1'T1]]");
       }
-      // class A2<T2> : A3<int, long>
+      // class A2<T2> : A3<int, long>, I1<int>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A2", 1);
         classEntity.BaseType.ToString().ShouldEqual("global::A3`2[global::System.Int32,global::System.Int64]");
+        classEntity.BaseInterfaces.Count.ShouldEqual(1);
+        classEntity.BaseInterfaces[0].ToString().ShouldEqual("global::I1`1[global::System.Int32]");
       }
       // class A3<T3, T4>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A3", 2);
         classEntity.BaseType.ToString().ShouldEqual("global::System.Object");
+        classEntity.BaseInterfaces.Count.ShouldEqual(0);
       }
     }
 
@@ -1213,23 +1305,45 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // class A1 // implicitly : System.Object
       {
-        var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
-        var baseTypeRef = classEntity.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
+        entity.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
       }
       // struct A2 // implicitly: System.ValueType
       {
-        var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<StructEntity>("A2");
-        var baseTypeRef = classEntity.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<StructEntity>("A2");
+        entity.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
       }
       // enum A3 // implicitly: System.Enum
       {
-        var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<EnumEntity>("A3");
-        var baseTypeRef = classEntity.BaseType.FullyQualifiedName.ShouldEqual("System.Enum");
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<EnumEntity>("A3");
+        entity.BaseType.FullyQualifiedName.ShouldEqual("System.Enum");
       }
       // delegate void A4(); // implicitly: System.MulticastDelegate
       {
-        var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<DelegateEntity>("A4");
-        var baseTypeRef = classEntity.BaseType.FullyQualifiedName.ShouldEqual("System.MulticastDelegate");
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<DelegateEntity>("A4");
+        entity.BaseType.FullyQualifiedName.ShouldEqual("System.MulticastDelegate");
+      }
+      // class A5<T>
+      {
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<TypeEntity>("A5", 1);
+        entity.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
+      }
+      // struct A6<T>
+      {
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<TypeEntity>("A6", 1);
+        entity.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
+      }
+      // A5<int> a5;
+      {
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A8");
+        var field = entity.GetMember<FieldEntity>("a5");
+        field.Type.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
+      }
+      // A6<int> a6;
+      {
+        var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A8");
+        var field = entity.GetMember<FieldEntity>("a6");
+        field.Type.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
       }
     }
 

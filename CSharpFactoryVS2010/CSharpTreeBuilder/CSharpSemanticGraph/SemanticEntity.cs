@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class SemanticEntity
   {
+    /// <summary>Backing field for SemanticGraph property.</summary>
+    private SemanticGraph _SemanticGraph;
+
     /// <summary>Backing field for SyntaxNodes property.</summary>
     private readonly List<ISyntaxNode> _SyntaxNodes;
 
@@ -81,6 +84,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         }
 
         return Parent.RootNamespace; 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the semantic graph that this entity belongs to.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticGraph SemanticGraph
+    {
+      get
+      {
+        return _SemanticGraph ?? 
+          (RootNamespace == null ? null : RootNamespace.SemanticGraph);
+      }
+      set
+      {
+        _SemanticGraph = value;
       }
     }
 

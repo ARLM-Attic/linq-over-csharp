@@ -61,6 +61,107 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets the BuiltInType value of this type entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public BuiltInType? BuiltInTypeValue { get; set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a built in type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsBuiltInType
+    {
+      get { return BuiltInTypeValue != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an integral type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsIntegralType
+    {
+      get
+      {
+        return 
+          (BuiltInTypeValue == BuiltInType.Sbyte
+          || BuiltInTypeValue == BuiltInType.Byte
+          || BuiltInTypeValue == BuiltInType.Short
+          || BuiltInTypeValue == BuiltInType.Ushort
+          || BuiltInTypeValue == BuiltInType.Int
+          || BuiltInTypeValue == BuiltInType.Uint
+          || BuiltInTypeValue == BuiltInType.Long
+          || BuiltInTypeValue == BuiltInType.Ulong
+          || BuiltInTypeValue == BuiltInType.Char);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a floating point type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsFloatingPointType
+    {
+      get
+      {
+        return (BuiltInTypeValue == BuiltInType.Float || BuiltInTypeValue == BuiltInType.Double);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a numeric type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsNumericType
+    {
+      get
+      {
+        return (BuiltInTypeValue == BuiltInType.Decimal)
+          || IsIntegralType
+          || IsFloatingPointType;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a simple type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsSimpleType
+    {
+      get
+      {
+        return (BuiltInTypeValue == BuiltInType.Bool)
+          || IsNumericType;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a nullable type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsNullableType
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the underlying type of a nullable type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual TypeEntity UnderlyingOfNullableType
+    {
+      get { return null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the declared accessibility of the entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -317,9 +418,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
                          where
                            baseType.ResolutionState == ResolutionState.Resolved &&
                            baseType.TargetEntity.IsClassType
-                         select baseType.TargetEntity).ToArray();
+                         select baseType.TargetEntity).ToList();
+        
+        if (baseTypes.Count == 1)
+        { 
+          return baseTypes[0]; 
+        }
 
-        return baseTypes.Length == 1 ? baseTypes[0] : null;
+        // If the base type is not found, then return the default base type.
+        // Interfaces and System.Object don't have a base type. All other types have.
+        if (!IsInterfaceType && BuiltInTypeValue != BuiltInType.Object)
+        {
+          if (IsEnumType)
+          {
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Enum)) as TypeEntity;
+          }
+          if (IsStructType)
+          {
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.ValueType)) as TypeEntity;
+          }
+          if (IsDelegateType)
+          {
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.MulticastDelegate)) as TypeEntity;
+          }
+          if (IsClassType)
+          {
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Object)) as TypeEntity;
+          }
+        }
+
+        return null;
       }
     }
 
@@ -348,13 +476,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// It returns the resolved entities, not the references, so it can be successful only if the base type references are already resolved.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual ReadOnlyCollection<InterfaceEntity> BaseInterfaces
+    public virtual ReadOnlyCollection<TypeEntity> BaseInterfaces
     {
       get
       {
         return (from baseType in BaseTypeReferences
-                where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
-                select baseType.TargetEntity as InterfaceEntity).ToList().AsReadOnly();
+                where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity.IsInterfaceType
+                select baseType.TargetEntity).ToList().AsReadOnly();
       }
     }
 
@@ -669,9 +797,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value indicating whether this type is a (direct or indirect) base type of another type.
     /// </summary>
     /// <param name="typeEntity">A type entity.</param>
-    /// <returns>
-    /// True if this type is a (direct or indirect) base type of the parameter type, false otherwise.
-    /// </returns>
+    /// <returns>True if this type is a (direct or indirect) base type of the parameter type, 
+    /// false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
     public bool IsBaseOf(TypeEntity typeEntity)
     {
@@ -686,6 +813,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       return this.IsBaseOf(typeEntity.BaseType);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type implements an interface.
+    /// </summary>
+    /// <param name="typeEntity">An interface entity (can be constructed generic type too).</param>
+    /// <returns>True if this type implements the interface entity, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool Implements(TypeEntity typeEntity)
+    {
+      if (typeEntity == null || !typeEntity.IsInterfaceType)
+      {
+        return false;
+      }
+
+      if (BaseInterfaces.Contains(typeEntity))
+      {
+        return true;
+      }
+
+      return (BaseType != null && BaseType.Implements(typeEntity))
+        || (BaseInterfaces != null && BaseInterfaces.Any(x => x.Implements(typeEntity)));
     }
 
     #region Private methods

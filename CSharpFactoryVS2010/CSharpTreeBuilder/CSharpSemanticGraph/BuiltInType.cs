@@ -25,7 +25,9 @@
     Double,
     Object,
     String,
-    Void
+    Void,
+
+    MaxValue = Void
 
 #pragma warning restore 1591
   }

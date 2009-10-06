@@ -91,7 +91,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(ClassEntity entity)
     {
       ResolveBaseTypeReferences(entity);
-      AssignImplicitBaseType(entity);
 
       return true;
     }
@@ -105,7 +104,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(StructEntity entity)
     {
       ResolveBaseTypeReferences(entity);
-      AssignImplicitBaseType(entity);
 
       return true;
     }
@@ -137,8 +135,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
       }
 
-      AssignImplicitBaseType(entity);
-
       return true;
     }
 
@@ -169,8 +165,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
 
-      AssignImplicitBaseType(entity);
-
       return true;
     }
 
@@ -200,45 +194,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           _ErrorHandler.Error("CS0263", null, "Partial declarations of '{0}' must not specify different base classes",
                               entity.FullyQualifiedName);
-        }
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Assigns and resolves implicit base type, if an explicit base type is not present.
-    /// </summary>
-    /// <param name="entity">A type entity.</param>
-    // ----------------------------------------------------------------------------------------------
-    private void AssignImplicitBaseType(TypeEntity entity)
-    {
-      // Interfaces and System.Object don't have a base type. All other types have.
-      if (!entity.IsInterfaceType && entity.ReflectedMetadata != typeof(object) && entity.BaseType == null)
-      {
-        System.Type baseType = null;
-
-        if (entity is EnumEntity)
-        {
-          baseType = typeof (System.Enum);
-        }
-        else if (entity is StructEntity)
-        {
-          baseType = typeof (System.ValueType);
-        }
-        else if (entity is DelegateEntity)
-        {
-          baseType = typeof (System.MulticastDelegate);
-        }
-        else if (entity is ClassEntity)
-        {
-          baseType = typeof (System.Object);
-        }
-
-        if (baseType != null)
-        {
-          var reference = new ReflectedTypeBasedTypeEntityReference(baseType);
-          reference.Resolve(entity, _SemanticGraph, _ErrorHandler);
-          entity.AddBaseTypeReference(reference);
         }
       }
     }

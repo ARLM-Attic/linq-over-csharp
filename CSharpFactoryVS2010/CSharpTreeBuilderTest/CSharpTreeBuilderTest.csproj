@@ -78,6 +78,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityExtensionsTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityReferenceEqualityComparerTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpaceTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\TypeConverterTest.cs" />
     <Compile Include="CSharpSemanticGraph\AccessibilityTest.cs" />
     <Compile Include="CSharpSemanticGraph\SignatureTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
@@ -388,6 +389,10 @@
     <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\TypeConverter\ImplicitReferenceConversion.cs" />
+    <None Include="TestFiles\TypeConverter\NullLiteralConversion.cs" />
+    <None Include="TestFiles\TypeConverter\ImplicitNullableConversion.cs" />
+    <None Include="TestFiles\TypeConverter\ImplicitEnumerationConversion.cs" />
     <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Unresolvable.cs" />
     <None Include="TestFiles\TypeResolution\NestedInaccessibleType_Resolvable.cs" />
     <None Include="TestFiles\TypeResolution\NestedAccessibleType.cs" />

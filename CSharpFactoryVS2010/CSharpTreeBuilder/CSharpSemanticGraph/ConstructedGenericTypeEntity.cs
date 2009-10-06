@@ -58,6 +58,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this is a nullable type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsNullableType
+    {
+      get
+      {
+        return (UnderlyingType == SemanticGraph.NullableGenericTypeDefinition) && (TypeArguments.Count == 1);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the underlying type of a nullable type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity UnderlyingOfNullableType
+    {
+      get
+      {
+        return IsNullableType ? TypeArguments[0] : null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this type is a reference type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

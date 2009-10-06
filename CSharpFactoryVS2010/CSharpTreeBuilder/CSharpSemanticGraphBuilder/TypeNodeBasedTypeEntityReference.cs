@@ -110,66 +110,66 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return null;
       }
 
-      System.Type aliasedType = null;
+      System.Type type = null;
 
       switch (typeNameNode.TypeTags[0].Identifier)
       {
         case "bool":
-          aliasedType = typeof(bool);
+          type = typeof(bool);
           break;
         case "byte":
-          aliasedType = typeof(byte);
+          type = typeof(byte);
           break;
         case "char":
-          aliasedType = typeof(char);
+          type = typeof(char);
           break;
         case "decimal":
-          aliasedType = typeof(decimal);
+          type = typeof(decimal);
           break;
         case "double":
-          aliasedType = typeof(double);
+          type = typeof(double);
           break;
         case "float":
-          aliasedType = typeof(float);
+          type = typeof(float);
           break;
         case "int":
-          aliasedType = typeof(int);
+          type = typeof(int);
           break;
         case "long":
-          aliasedType = typeof(long);
+          type = typeof(long);
           break;
         case "object":
-          aliasedType = typeof(object);
+          type = typeof(object);
           break;
         case "sbyte":
-          aliasedType = typeof(sbyte);
+          type = typeof(sbyte);
           break;
         case "short":
-          aliasedType = typeof(short);
+          type = typeof(short);
           break;
         case "string":
-          aliasedType = typeof(string);
+          type = typeof(string);
           break;
         case "uint":
-          aliasedType = typeof(uint);
+          type = typeof(uint);
           break;
         case "ulong":
-          aliasedType = typeof(ulong);
+          type = typeof(ulong);
           break;
         case "ushort":
-          aliasedType = typeof(ushort);
+          type = typeof(ushort);
           break;
         case "void":
-          aliasedType = typeof(void);
+          type = typeof(void);
           break;
         default:
           // Not a builtin type
           break;
       }
 
-      if (aliasedType != null)
+      if (type != null)
       {
-        return semanticGraph.GetEntityByMetadataObject(aliasedType) as TypeEntity;
+        return semanticGraph.GetEntityByMetadataObject(type) as TypeEntity;
       }
 
       return null;

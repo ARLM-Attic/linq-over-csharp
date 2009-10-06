@@ -53,6 +53,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public void AddRootNamespace(RootNamespaceEntity rootNamespaceEntity)
     {
       _RootNamespaces.Add(rootNamespaceEntity.Name, rootNamespaceEntity);
+      rootNamespaceEntity.SemanticGraph = this;
     }
 
     // ----------------------------------------------------------------------------------------------

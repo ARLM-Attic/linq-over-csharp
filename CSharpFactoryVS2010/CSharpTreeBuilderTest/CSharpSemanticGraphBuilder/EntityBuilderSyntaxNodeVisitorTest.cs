@@ -40,6 +40,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.Parent.ShouldBeNull();
         namespaceEntity.IsDeclaredInSource.ShouldBeFalse();
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(0);
+        namespaceEntity.SemanticGraph.ShouldEqual(project.SemanticGraph);
 
         namespaceEntity.ChildNamespaces.Count.ShouldEqual(2);
         namespaceEntity.ChildNamespaces[0].ToString().ShouldEqual("global::A");
@@ -55,6 +56,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         namespaceEntity.SyntaxNodes.Count.ShouldEqual(2);
         namespaceEntity.SyntaxNodes[0].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0]);
         namespaceEntity.SyntaxNodes[1].ShouldEqual(project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[2]);
+        namespaceEntity.SemanticGraph.ShouldEqual(project.SemanticGraph);
 
         namespaceEntity.ChildNamespaces.Count.ShouldEqual(1);
         namespaceEntity.ChildNamespaces[0].ToString().ShouldEqual("global::A.B");
@@ -1473,6 +1475,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(true);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(bool));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1481,6 +1484,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(2m);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(decimal));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1489,6 +1493,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(3);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(int));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1497,6 +1502,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(4u);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(uint));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1505,6 +1511,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(5L);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(long));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1513,6 +1520,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(6ul);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(ulong));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1521,6 +1529,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual('7');
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(char));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1529,6 +1538,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(8f);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(float));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1537,6 +1547,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual(9d);
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(double));
         expression.Parent.ShouldEqual(initializer);
       }
@@ -1545,6 +1556,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
+        literal.Value.ShouldEqual("10");
         (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(string));
         expression.Parent.ShouldEqual(initializer);
       }

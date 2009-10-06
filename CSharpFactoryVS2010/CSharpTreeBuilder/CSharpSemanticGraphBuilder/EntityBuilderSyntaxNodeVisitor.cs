@@ -505,43 +505,53 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       else if (node is BooleanLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(bool)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(bool)),
+          (node as BooleanLiteralNode).Value);
       }
       else if (node is DecimalLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(decimal)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(decimal)),
+          (node as DecimalLiteralNode).Value);
       }
       else if (node is Int32LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(int)));    
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(int)),
+          (node as Int32LiteralNode).Value);
       }
       else if (node is UInt32LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(uint)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(uint)),
+          (node as UInt32LiteralNode).Value);
       }
       else if (node is Int64LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(long)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(long)),
+          (node as Int64LiteralNode).Value);
       }
       else if (node is UInt64LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(ulong)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(ulong)),
+          (node as UInt64LiteralNode).Value);
       }
       else if (node is CharLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(char)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(char)),
+          (node as CharLiteralNode).Value);
       }
       else if (node is SingleLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(float)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(float)),
+          (node as SingleLiteralNode).Value);
       }
       else if (node is DoubleLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(double)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(double)),
+          (node as DoubleLiteralNode).Value);
       }
       else if (node is StringLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(string)));
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(string)),
+          (node as StringLiteralNode).Value);
       }
 
       var hasExpressions = CastToIHasExpressions(parentEntity);
