@@ -10,6 +10,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class FieldEntity : NonTypeMemberEntity, IVariableEntity
   {
+    #region State
+
+    /// <summary>Gets the reference to the type of the field.</summary>
+    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+
+    /// <summary>Gets the initializer of the variable.</summary>
+    public VariableInitializer Initializer { get; private set; }
+    
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FieldEntity"/> class.
@@ -43,10 +53,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type of the field.
+    /// Initializes a new instance of the <see cref="FieldEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public FieldEntity(FieldEntity source)
+      : base(source)
+    {
+      TypeReference = source.TypeReference;
+      
+      // TODO: clone initializer
+      Initializer = source.Initializer;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new FieldEntity(this);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -71,13 +101,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return Type == null ? null : Type.IsArrayType as bool?;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the initializer of the variable.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public VariableInitializer Initializer { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

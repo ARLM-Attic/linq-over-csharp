@@ -9,6 +9,9 @@
     public class B3<T3>
     { }
 
+    A<A1, A2> a1;
+    A<T1, T2> a2;
+    A<T1, T2> a3;
     A<A1, A2>.B1 b1;
     A<A1, A2>.B2<A3> b2;
     A<A1, A2>.B3<A4> b3;

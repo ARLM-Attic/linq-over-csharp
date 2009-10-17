@@ -9,6 +9,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class DelegateEntity : GenericCapableTypeEntity
   {
+    #region State
+
+    /// <summary>Gets or sets the reference to the return type.</summary>
+    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; set; }
+
+    #endregion
+   
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="DelegateEntity"/> class.
@@ -23,10 +30,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the reference to the return type.
+    /// Initializes a new instance of the <see cref="DelegateEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; set; }
+    public DelegateEntity(DelegateEntity source)
+      : base(source)
+    {
+      ReturnTypeReference = source.ReturnTypeReference;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new DelegateEntity(this);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

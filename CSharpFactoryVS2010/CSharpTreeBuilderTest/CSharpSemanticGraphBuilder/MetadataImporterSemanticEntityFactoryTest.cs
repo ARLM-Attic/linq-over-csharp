@@ -409,8 +409,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         entity.Parent.ShouldEqual(namespaceAB);
         entity.SyntaxNodes.Count.ShouldEqual(0);
         entity.IsGeneric.ShouldBeTrue();
-        entity.OwnTypeParameters[0].ToString().ShouldEqual(rootName + "::A.B.Generic1`2'T1");
-        entity.OwnTypeParameters[1].ToString().ShouldEqual(rootName + "::A.B.Generic1`2'T2");
+        entity.GetOwnTypeParameterByName("T1").ToString().ShouldEqual(rootName + "::A.B.Generic1`2.T1");
+        entity.GetOwnTypeParameterByName("T2").ToString().ShouldEqual(rootName + "::A.B.Generic1`2.T2");
       }
 
       // public class PublicClass
@@ -598,8 +598,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // check System.Nullable`1
       // It's not a reference to be resolved, but a lookup in metadata map, so it is already populated
       project.SemanticGraph.NullableGenericTypeDefinition.ToString().ShouldEqual("global::System.Nullable`1");
-      project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters.Count.ShouldEqual(1);
-      project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameters[0].ToString().ShouldEqual("global::System.Nullable`1'T");
+      project.SemanticGraph.NullableGenericTypeDefinition.AllTypeParameterCount.ShouldEqual(1);
+      project.SemanticGraph.NullableGenericTypeDefinition.GetOwnTypeParameterByName("T").ToString().ShouldEqual("global::System.Nullable`1.T");
       project.SemanticGraph.NullableGenericTypeDefinition.ReflectedMetadata.ShouldEqual(typeof (System.Nullable<>));
 
       // check System.Array

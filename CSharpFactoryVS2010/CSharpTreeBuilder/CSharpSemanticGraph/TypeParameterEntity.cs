@@ -12,10 +12,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class TypeParameterEntity : TypeEntity
   {
-    /// <summary>
-    /// Backing field for TypeReferenceConstraints property.
-    /// </summary>
-    private readonly List<SemanticEntityReference<TypeEntity>> _TypeReferenceConstraints;
+    #region State
+
+    /// <summary>Backing field for TypeReferenceConstraints property.</summary>
+    private readonly List<SemanticEntityReference<TypeEntity>> _TypeReferenceConstraints
+      = new List<SemanticEntityReference<TypeEntity>>();
+
+
+    /// <summary>Gets a value specifying whether this type parameter has a default constructor ("new()") constraint.</summary>
+    public bool HasDefaultConstructorConstraint { get; set; }
+
+    /// <summary>Gets a value specifying whether this type parameter has a "class" constraint.</summary>
+    public bool HasReferenceTypeConstraint { get; set; }
+
+    /// <summary>Gets a value specifying whether this type parameter has a "struct" constraint.</summary>
+    public bool HasNonNullableValueTypeConstraint { get; set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -26,31 +39,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public TypeParameterEntity(string name)
       : base(null, name)
     {
-      _TypeReferenceConstraints = new List<SemanticEntityReference<TypeEntity>>();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value specifying whether this type parameter has a default constructor constraint 
-    /// (ie "new()").
+    /// Initializes a new instance of the <see cref="TypeParameterEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public bool HasDefaultConstructorConstraint { get; set; }
+    public TypeParameterEntity(TypeParameterEntity source)
+      : base(source)
+    {
+      _TypeReferenceConstraints.AddRange(source.TypeReferenceConstraints);
+      HasDefaultConstructorConstraint = source.HasDefaultConstructorConstraint;
+      HasReferenceTypeConstraint = source.HasReferenceTypeConstraint;
+      HasNonNullableValueTypeConstraint = source.HasNonNullableValueTypeConstraint;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value specifying whether this type parameter has a "class" constraint.
+    /// Creates a deep copy of the semantic subtree starting at this entity.
     /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool HasReferenceTypeConstraint { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value specifying whether this type parameter has a "struct" constraint.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool HasNonNullableValueTypeConstraint { get; set; }
-
+    public override object Clone()
+    {
+      return new TypeParameterEntity(this);
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets an iterate-only list of constraints that are specified with type name.
@@ -240,6 +257,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Applies a type parameter map to this type. Replaces all occurrencies of all type parameters 
+    /// found in the map with the corresponding type argument.
+    /// </summary>
+    /// <param name="typeParameterMap">A type parameter map.</param>
+    /// <returns>The type that this type is mapped to.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity ApplyTypeParameterMap(TypeParameterMap typeParameterMap)
+    {
+      return typeParameterMap.ContainsTypeParameter(this)
+        ? typeParameterMap[this]
+        : this;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the string representation of the object.
+    /// </summary>
+    /// <returns>The string representation of the object</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override string ToString()
+    {
+      var typeParameter = (TemplateEntity == null) ? this : TemplateEntity as TypeParameterEntity;
+
+      return (typeParameter.Parent is GenericCapableTypeEntity)
+        ? (typeParameter.Parent as GenericCapableTypeEntity).ToString() + "." + typeParameter.Name
+        : typeParameter.Name;
+    }
 
     #region Visitor methods
 

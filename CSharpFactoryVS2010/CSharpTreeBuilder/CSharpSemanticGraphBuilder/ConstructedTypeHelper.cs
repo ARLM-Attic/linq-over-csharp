@@ -65,23 +65,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeArguments">A list of type arguments.</param>
     /// <returns>A constructed generic entity.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static ConstructedGenericTypeEntity GetConstructedGenericType(
+    public static TypeEntity GetConstructedGenericType(
       GenericCapableTypeEntity genericTypeDefinition, List<TypeEntity> typeArguments)
     {
-      // Check whether this particular constructed generic type was already created.
-      var constructedGenericType = genericTypeDefinition.GetConstructedGenericType(typeArguments);
+      var typeParameterMap = new TypeParameterMap(genericTypeDefinition.AllTypeParameters, typeArguments);
 
-      // If not yet exists then create it
-      if (constructedGenericType == null)
-      {
-        // Create the constructed generic type
-        constructedGenericType = new ConstructedGenericTypeEntity(genericTypeDefinition, typeArguments);
-
-        // Add the constructed type to its type definition
-        genericTypeDefinition.AddConstructedGenericType(constructedGenericType);
-      }
-
-      return constructedGenericType;
+      return (TypeEntity)genericTypeDefinition.GetConstructedEntity(typeParameterMap);
     }
   }
 }

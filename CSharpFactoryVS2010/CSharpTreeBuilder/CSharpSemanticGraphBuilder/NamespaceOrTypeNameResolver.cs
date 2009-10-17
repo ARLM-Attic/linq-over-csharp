@@ -152,7 +152,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // The number of type arguments are not right.
       if (genericCapableTypeEntity != null && genericCapableTypeEntity.IsGeneric
-          && typeArgumentNodes.Count != genericCapableTypeEntity.AllTypeParameters.Count)
+          && typeArgumentNodes.Count != genericCapableTypeEntity.AllTypeParameters.Count())
       {
         // TODO: error CS0305: Using the generic type 'A<T>' requires '1' type arguments
         return null;

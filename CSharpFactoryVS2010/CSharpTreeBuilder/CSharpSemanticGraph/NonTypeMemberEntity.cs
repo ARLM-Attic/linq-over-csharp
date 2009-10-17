@@ -9,6 +9,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class NonTypeMemberEntity : SemanticEntity, IMemberEntity
   {
+    #region State
+
     /// <summary>
     /// Backing field for IsStatic property.
     /// </summary>
@@ -17,6 +19,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// in descendant classes that want to initiliaze this property in the constructor.
     /// </remarks>
     protected bool _IsStatic;
+    
+
+    /// <summary>Gets or sets the name of the member.</summary>
+    public string Name { get; private set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the member is explicitly declared in source code.
+    /// </summary>
+    /// <remarks>
+    /// False for members created by the parser (eg. a backing field for an auto-implemented property)
+    /// and for members created from reflected metadata.
+    /// </remarks>
+    public bool IsDeclaredInSource { get; private set; }
+
+    /// <summary>Gets or sets the declared accessibility of the entity.</summary>
+    public AccessibilityKind? DeclaredAccessibility { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether this member intentionally hides an inherited member.</summary>
+    public bool IsNew { get; set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -35,11 +58,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the name of the member.
+    /// Initializes a new instance of the <see cref="NonTypeMemberEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public string Name { get; private set; }
+    protected NonTypeMemberEntity(NonTypeMemberEntity source)
+      : base(source)
+    {
+      _IsStatic = source._IsStatic;
 
+      Name = source.Name;
+      IsDeclaredInSource = source.IsDeclaredInSource;
+      DeclaredAccessibility = source.DeclaredAccessibility;
+      IsNew = source.IsNew;
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the fully qualified name of the member.
@@ -54,25 +88,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           : Name;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether the member is explicitly declared in source code.
-    /// </summary>
-    /// <remarks>
-    /// False for members created by the parser (eg. a backing field for an auto-implemented property)
-    /// and for members created from reflected metadata.
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsDeclaredInSource { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the declared accessibility of the entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public AccessibilityKind? DeclaredAccessibility { get; set; }
-
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the effective accessibility of the entity.
@@ -164,13 +180,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get { return _IsStatic; }
       set { _IsStatic = value; }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member intentionally hides an inherited member.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsNew { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

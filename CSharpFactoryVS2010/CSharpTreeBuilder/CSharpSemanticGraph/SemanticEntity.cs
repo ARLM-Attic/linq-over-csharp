@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
+using CSharpTreeBuilder.Helpers;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -12,16 +13,43 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This is the abstract base class of all kinds of nodes in the semantic graph (namespace, type, etc.).
   /// </summary>
   // ================================================================================================
-  public abstract class SemanticEntity
+  public abstract class SemanticEntity : ICloneable
   {
+    #region State 
+
     /// <summary>Backing field for SemanticGraph property.</summary>
     private SemanticGraph _SemanticGraph;
 
     /// <summary>Backing field for SyntaxNodes property.</summary>
-    private readonly List<ISyntaxNode> _SyntaxNodes;
+    private readonly List<ISyntaxNode> _SyntaxNodes = new List<ISyntaxNode>();
+
+    /// <summary>
+    /// A dictionary holding all the entities constructed from this entity by deep copying
+    /// and then replacing type parameters with type arguments. 
+    /// The key is a TypeParameterMap object describing all type parameters and the corresponding 
+    /// type arguments.
+    /// </summary>
+    private readonly Dictionary<TypeParameterMap, SemanticEntity> _ConstructedEntities
+      = new Dictionary<TypeParameterMap,SemanticEntity>(new TypeParameterMapEqualityComparer());
 
     /// <summary>Backing field for Program property.</summary>
     private Program _Program;
+
+
+
+    /// <summary>Gets or sets the parent of this entity.</summary>
+    public SemanticEntity Parent { get; set; }
+
+    /// <summary>Gets or sets the reflected metadata (eg. type) that this entity was created from.</summary>
+    public object ReflectedMetadata { get; set; }
+
+    /// <summary>Gets or sets the type parameters and type arguments associated with this entity.</summary>
+    public TypeParameterMap TypeParameterMap { get; private set; }
+
+    /// <summary>Gets or sets the generic template of this entity.</summary>
+    public SemanticEntity TemplateEntity { get; private set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -30,16 +58,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected SemanticEntity()
     {
-      _SyntaxNodes = new List<ISyntaxNode>();
+      TypeParameterMap = new TypeParameterMap();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the parent of this entity.
+    /// Initializes a new instance of the <see cref="SemanticEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity Parent { get; set; }
-    
+    protected SemanticEntity(SemanticEntity source)
+    {
+      _SemanticGraph = source._SemanticGraph;
+      _SyntaxNodes.AddRange(source._SyntaxNodes);
+      // ConstructedEntities should not be copied to the clone.
+      _Program = source._Program;
+
+      Parent = source.Parent;
+      ReflectedMetadata = source.ReflectedMetadata;
+      TypeParameterMap = source.TypeParameterMap;
+      TemplateEntity = source.TemplateEntity;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public virtual object Clone()
+    {
+      throw new InvalidOperationException("Abstract class cannot be cloned.");
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this entity is a (direct or indirect) parent of another entity.
@@ -107,13 +159,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the reflected metadata (eg. type) that this entity was created from.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public object ReflectedMetadata { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets the program that this entity belongs to.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -159,6 +204,39 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public void AddSyntaxNode(ISyntaxNode syntaxNode)
     {
       _SyntaxNodes.Add(syntaxNode);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of the entities constructed from this entity 
+    /// by replacing type parameters with type arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<SemanticEntity> ConstructedEntities
+    {
+      get { return _ConstructedEntities.Values; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a semantic entity by type parameters and type arguments.
+    /// </summary>
+    /// <param name="typeParameterMap">A type parameter map.</param>
+    /// <returns>A constructed semantic entity, or null if not found.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap)
+    {
+      if (_ConstructedEntities.ContainsKey(typeParameterMap))
+      {
+        return _ConstructedEntities[typeParameterMap];
+      }
+
+      var constructedEntity = (SemanticEntity)this.Clone();
+      constructedEntity.TypeParameterMap = typeParameterMap;
+      constructedEntity.TemplateEntity = this;
+      _ConstructedEntities.Add(typeParameterMap, constructedEntity);
+      
+      return constructedEntity;
     }
 
     #region Visitor methods

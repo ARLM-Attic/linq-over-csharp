@@ -9,6 +9,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class ParameterEntity : NonFieldVariableEntity
   {
+    #region State
+
+    /// <summary>Gets the parameter kind (eg. ref, out).</summary>
+    public ParameterKind Kind { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ParameterEntity"/> class.
@@ -25,9 +32,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the parameter kind (eg. ref, out).
+    /// Initializes a new instance of the <see cref="ParameterEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public ParameterKind Kind { get; private set; }
+    public ParameterEntity(ParameterEntity source)
+      : base(source)
+    {
+      Kind = source.Kind;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new ParameterEntity(this);
+    }
   }
 }

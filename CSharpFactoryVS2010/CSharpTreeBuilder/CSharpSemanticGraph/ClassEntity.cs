@@ -9,6 +9,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class ClassEntity : ChildTypeCapableTypeEntity, ICanBePartial
   {
+    #region State
+
+    /// <summary>Gets a value indicating whether this entity is declared as partial. </summary>
+    public bool IsPartial { get; private set; }
+
+    /// <summary>Gets a value indicating whether this class is static (contains only static members).</summary>
+    public bool IsStatic { get; set; }
+
+    /// <summary>Gets a value indicating whether this class is abstract (cannot be instantiated directly).</summary>
+    public bool IsAbstract { get; set; }
+
+    /// <summary>Gets a value indicating whether this class is sealed (no derivation allowed from the class).</summary>
+    public bool IsSealed { get; set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class.
@@ -25,6 +41,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       IsSealed = false;
       IsStatic = false;
     }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class with no partial.
@@ -39,31 +56,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this entity is declared as partial. 
+    /// Initializes a new instance of the <see cref="ClassEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public bool IsPartial { get; private set; }
+    public ClassEntity(ClassEntity source)
+      : base(source)
+    {
+      IsPartial = source.IsPartial;
+      IsAbstract = source.IsAbstract;
+      IsSealed = source.IsSealed;
+      IsStatic = source.IsStatic;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this class is static (contains only static members).
+    /// Creates a deep copy of the semantic subtree starting at this entity.
     /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsStatic { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this class is abstract (cannot be instantiated directly).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsAbstract { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this class is sealed (no derivation allowed from the class).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsSealed { get; set; }
+    public override object Clone()
+    {
+      return new ClassEntity(this);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -102,6 +118,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return true; }
     }
+
 
     #region Visitor methods
 

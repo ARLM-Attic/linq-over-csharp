@@ -227,6 +227,8 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\TypeParameterReplacerSemanticGraphVisitor.cs" />
+    <Compile Include="CSharpSemanticGraph\TypeParameterMapEqualityComparer.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityIsInaccessibleException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookup.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeConverter.cs" />
@@ -277,7 +279,6 @@
     <Compile Include="CSharpSemanticGraph\ClassEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ArrayTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ChildTypeCapableTypeEntity.cs" />
-    <Compile Include="CSharpSemanticGraph\ConstructedGenericTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeBasedNamespaceEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\BlockEntity.cs" />
     <Compile Include="CSharpSemanticGraph\AccessorEntity.cs" />
@@ -292,6 +293,7 @@
     <Compile Include="CSharpSemanticGraph\DefaultValueExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ParameterFilter.cs" />
     <Compile Include="CSharpSemanticGraph\SimpleNameExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\TypeParameterMap.cs" />
     <Compile Include="CSharpSemanticGraph\TypedLiteralExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\LiteralExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\NullLiteralExpressionEntity.cs" />
@@ -353,6 +355,7 @@
     <Compile Include="CSharpSemanticGraph\TypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\TypeParameterEntity.cs" />
     <Compile Include="CSharpSemanticGraph\UsingEntity.cs" />
+    <Compile Include="Helpers\DictionaryExtensions.cs" />
     <Compile Include="Helpers\EnumExtensions.cs" />
     <Compile Include="Helpers\EventArguments.cs" />
     <Compile Include="Helpers\ImmutableChangedException.cs" />

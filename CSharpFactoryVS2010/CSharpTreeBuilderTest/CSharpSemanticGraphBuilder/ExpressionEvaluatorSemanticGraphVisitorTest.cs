@@ -151,10 +151,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
 
         var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
-        defaultValueExpressionEntity.Type.ShouldEqual(classA.OwnTypeParameters[0]);
+        defaultValueExpressionEntity.Type.ShouldEqual(classA.GetOwnTypeParameterByName("T"));
 
         var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
-        valueExpressionResult.Type.ShouldEqual(classA.OwnTypeParameters[0]);
+        valueExpressionResult.Type.ShouldEqual(classA.GetOwnTypeParameterByName("T"));
       }
     }
   }

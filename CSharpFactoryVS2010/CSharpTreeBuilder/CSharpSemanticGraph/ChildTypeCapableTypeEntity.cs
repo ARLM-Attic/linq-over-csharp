@@ -24,6 +24,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="ChildTypeCapableTypeEntity"/> class 
+    /// by deep copying from another instance.
+    /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected ChildTypeCapableTypeEntity(ChildTypeCapableTypeEntity source)
+      : base(source)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the list of child types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

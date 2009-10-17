@@ -6,11 +6,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a constant member a type.
+  /// This class represents a constant member of a type.
   /// </summary>
   // ================================================================================================
   public class ConstantMemberEntity : NonTypeMemberEntity, IHasExpressions
   {
+    #region State
+
+    /// <summary>Gets the reference to the type of the field.</summary>
+    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+
+    /// <summary>Gets the initializer expression of the constant.</summary>
+    public ExpressionEntity InitializerExpression { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstantMemberEntity"/> class.
@@ -34,10 +44,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type of the field.
+    /// Initializes a new instance of the <see cref="ConstantMemberEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public ConstantMemberEntity(ConstantMemberEntity source)
+      : base(source)
+    {
+      TypeReference = source.TypeReference;
+
+      // TODO: clone initializer
+      InitializerExpression = source.InitializerExpression;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new ConstantMemberEntity(this);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -48,13 +78,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return TypeReference == null ? null : TypeReference.TargetEntity; }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the initializer expression of the constant.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionEntity InitializerExpression { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

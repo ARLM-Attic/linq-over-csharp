@@ -10,6 +10,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class PropertyEntity : FunctionMemberWithAccessorsEntity
   {
+    #region State
+
     /// <summary>Backing field for GetAccessor property.</summary>
     private AccessorEntity _GetAccessor;
 
@@ -17,7 +19,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private AccessorEntity _SetAccessor;
 
     /// <summary>Backing field for SetAccessor property.</summary>
-    private readonly FieldEntity _AutoImplementedField;
+    private FieldEntity _AutoImplementedField;
+
+
+    /// <summary>Gets a value indictaing whether this property is auto-implemented.</summary>
+    public bool IsAutoImplemented { get; private set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -55,26 +63,70 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         // because the uniqueness of the field name gets tricky with explicitly implemented interface members.
         // We just use a good old GUID, because it's unique, and its name has no significance at all.
         var fieldName = System.Guid.NewGuid().ToString();
-        _AutoImplementedField = new FieldEntity(false, AccessibilityKind.Private, isStatic, typeReference, fieldName, null);
-        _AutoImplementedField.Parent = this;
+        AutoImplementedField = new FieldEntity(false, AccessibilityKind.Private, isStatic, typeReference, fieldName, null);
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indictaing whether this property is auto-implemented.
+    /// Initializes a new instance of the <see cref="PropertyEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public bool IsAutoImplemented { get; private set; }
+    public PropertyEntity(PropertyEntity source)
+      : base(source)
+    {
+      if (source.GetAccessor != null)
+      {
+        GetAccessor = (AccessorEntity)source.GetAccessor.Clone();
+      }
+      
+      if (source.SetAccessor != null)
+      {
+        SetAccessor = (AccessorEntity)source.SetAccessor.Clone();
+      }
+
+      if (AutoImplementedField != null)
+      {
+        AutoImplementedField = (FieldEntity)source.AutoImplementedField.Clone();
+      }
+
+      IsAutoImplemented = source.IsAutoImplemented;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the auto-implemented field. Null if the property is not auto-implemented.
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new PropertyEntity(this);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the auto-implemented field. Returns null if the property is not auto-implemented.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public FieldEntity AutoImplementedField
     {
-      get { return _AutoImplementedField; }
+      get 
+      { 
+        return _AutoImplementedField; 
+      }
+
+      private set
+      {
+        _AutoImplementedField = value;
+
+        if (_AutoImplementedField != null)
+        {
+          _AutoImplementedField.Parent = this;
+        }
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using CSharpTreeBuilder.Helpers;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -13,15 +14,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class TypeEntity : NamespaceOrTypeEntity, IMemberEntity
   {
-    /// <summary>
-    /// Backing field for BaseTypeReferences property.
-    /// </summary>
-    private List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences;
+    #region State
 
-    /// <summary>
-    /// Backing field for Members property.
-    /// </summary>
-    private readonly List<IMemberEntity> _Members;
+    /// <summary>Backing field for BaseTypeReferences property.</summary>
+    private List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
+
+    /// <summary>Backing field for Members property.</summary>
+    private readonly List<IMemberEntity> _Members = new List<IMemberEntity>();
 
     /// <summary>
     /// A flag for lazy importing reflected members (expensive operation).
@@ -29,10 +28,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     private bool _ReflectedMembersImported;
 
-    /// <summary>
-    /// Stores array types created from this type. The key is the rank of the array.
-    /// </summary>
-    private readonly Dictionary<int, ArrayTypeEntity> _ArrayTypes;
+    /// <summary>Stores array types created from this type. The key is the rank of the array.</summary>
+    private readonly Dictionary<int, ArrayTypeEntity> _ArrayTypes = new Dictionary<int,ArrayTypeEntity>();
+
+    /// <summary>Backing field for IsNew property.</summary>
+    private bool _IsNew;
+
+
+    /// <summary>Gets or sets the factory object needed for lazy importing reflected members.</summary>
+    public MetadataImporterSemanticEntityFactory MetadataImporterFactory { get; set; }
+
+    /// <summary>Gets or sets the BuiltInType value of this type entity.</summary>
+    public BuiltInType? BuiltInTypeValue { get; set; }
+
+    /// <summary>Gets or sets the declared accessibility of the entity.</summary>
+    public AccessibilityKind? DeclaredAccessibility { get; set; }
+
+    /// <summary>Gets or sets the pointer type constructed from this type.</summary>
+    public PointerToTypeEntity PointerType { get; set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -44,27 +59,41 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected TypeEntity(AccessibilityKind? accessibility, string name)
       : base(name)
     {
-      _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
-      _Members = new List<IMemberEntity>();
-      _ReflectedMembersImported = false;
-      _ArrayTypes = new Dictionary<int, ArrayTypeEntity>();
       DeclaredAccessibility = accessibility;
+
+      _ReflectedMembersImported = false;
       (this as IMemberEntity).IsNew = false;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the factory object needed for lazy importing reflected members.
+    /// Initializes a new instance of the <see cref="TypeEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public MetadataImporterSemanticEntityFactory MetadataImporterFactory { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the BuiltInType value of this type entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public BuiltInType? BuiltInTypeValue { get; set; }
+    protected TypeEntity(TypeEntity source)
+      : base(source)
+    {
+      _BaseTypeReferences.AddRange(source._BaseTypeReferences);
+      _ReflectedMembersImported = source._ReflectedMembersImported;
+      _IsNew = source._IsNew;
+      MetadataImporterFactory = source.MetadataImporterFactory;
+      BuiltInTypeValue = source.BuiltInTypeValue;
+      DeclaredAccessibility = source.DeclaredAccessibility;
+      
+      // Source members should be retrieved through the Members property (not the _Members field)
+      // because that also handles lazy importing,
+      // and cloned members should be added through the AddMember method,
+      // because that also handles registering into the declaration space.
+      foreach (var member in source.Members)
+      {
+        AddMember((IMemberEntity)member.Clone());
+      }
+      
+      // ArrayTypes should not be cloned.
+      // PointerType should not be cloned.
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -159,13 +188,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return null; }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the declared accessibility of the entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public AccessibilityKind? DeclaredAccessibility { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -352,10 +374,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this type intentionally hides an inherited member.
+    /// Gets or sets a value indicating whether this type intentionally hides an inherited member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    bool IMemberEntity.IsNew { get; set; }
+    bool IMemberEntity.IsNew 
+    {
+      get { return _IsNew; }
+      set { _IsNew = value; } 
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -721,13 +747,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the pointer type constructed from this type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public PointerToTypeEntity PointerType { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets an array type created from this type with the given rank.
     /// </summary>
     /// <param name="rank">The rank of the array to be retreived.</param>
@@ -836,6 +855,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       return (BaseType != null && BaseType.Implements(typeEntity))
         || (BaseInterfaces != null && BaseInterfaces.Any(x => x.Implements(typeEntity)));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Applies a type parameter map to this type. Replaces all occurrencies of all type parameters 
+    /// found in the map with the corresponding type argument.
+    /// </summary>
+    /// <param name="typeParameterMap">A type parameter map.</param>
+    /// <returns>The type that this type is mapped to.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public virtual TypeEntity ApplyTypeParameterMap(TypeParameterMap typeParameterMap)
+    {
+      return this;
     }
 
     #region Private methods

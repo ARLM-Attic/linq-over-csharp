@@ -9,10 +9,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class AccessorEntity : SemanticEntity, IHasBody, IHasAccessibility
   {
-    /// <summary>
-    /// Backing field for Body property.
-    /// </summary>
+    #region State
+
+    /// <summary>Backing field for Body property.</summary>
     private BlockEntity _Body;
+
+
+    /// <summary>Gets or sets the declared accessibility of the entity.</summary>
+    public AccessibilityKind? DeclaredAccessibility { get; set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -29,6 +35,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         Body = new BlockEntity();
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AccessorEntity"/> class 
+    /// by deep copying from another instance.
+    /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
+    // ----------------------------------------------------------------------------------------------
+    public AccessorEntity(AccessorEntity source)
+      : base(source)
+    {
+      DeclaredAccessibility = source.DeclaredAccessibility;
+
+      if (source.Body != null)
+      {
+        Body = (BlockEntity)source.Body.Clone();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new AccessorEntity(this);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -62,14 +97,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return Body == null; }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the declared accessibility of the entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public AccessibilityKind? DeclaredAccessibility { get; set; }
-
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the effective accessibility of the entity.

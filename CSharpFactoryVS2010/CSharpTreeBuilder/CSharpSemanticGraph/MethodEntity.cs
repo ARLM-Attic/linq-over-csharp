@@ -15,11 +15,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public sealed class MethodEntity : FunctionMemberWithBodyEntity, 
     IOverloadableEntity, ICanBePartial, ICanHaveTypeParameters, ICanBeExplicitlyImplementedMember
   {
-    /// <summary>Backing field for Parameters property.</summary>
-    private readonly List<ParameterEntity> _Parameters;
+    #region State
 
-    /// <summary>Backing field for AllTypeParameters property to disallow direct adding or removing.</summary>
-    private readonly List<TypeParameterEntity> _AllTypeParameters;
+    /// <summary>Backing field for Parameters property.</summary>
+    private readonly List<ParameterEntity> _Parameters = new List<ParameterEntity>();
+
+    /// <summary>Backing field for OwnTypeParameters property to disallow direct adding or removing.</summary>
+    private readonly List<TypeParameterEntity> _OwnTypeParameters = new List<TypeParameterEntity>();
+
+
+    /// <summary>Gets a value indicating whether this method was declared as partial.</summary>
+    public bool IsPartial { get; private set; }
+
+    /// <summary>Gets the reference to the return type.</summary>
+    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the reference to the interface entity whose member is explicitly implemented.
+    /// Null if this member is not an explicitly implemented interface member.
+    /// </summary>
+    /// <remarks>
+    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
+    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
+    /// </remarks>
+    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -49,9 +70,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : 
       base(isDeclaredInSource, accessibility, name, isAbstract)
     {
-      _Parameters = new List<ParameterEntity>();
-      _AllTypeParameters = new List<TypeParameterEntity>();
-
       InterfaceReference = interfaceReference;
       IsPartial = isPartial;
       _IsStatic = isStatic;
@@ -60,17 +78,39 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this method was declared as partial.
+    /// Initializes a new instance of the <see cref="MethodEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public bool IsPartial { get; private set; }
+    public MethodEntity(MethodEntity source)
+      : base(source)
+    {
+      IsPartial = source.IsPartial;
+      ReturnTypeReference = source.ReturnTypeReference;
+      InterfaceReference = source.InterfaceReference;
+
+      foreach (var parameter in source.Parameters)
+      {
+        AddParameter((ParameterEntity)parameter.Clone());
+      }
+
+      foreach (var typeParameter in source.OwnTypeParameters)
+      {
+        AddTypeParameter(typeParameter);
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the return type.
+    /// Creates a deep copy of the semantic subtree starting at this entity.
     /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; private set; }
+    public override object Clone()
+    {
+      return new MethodEntity(this);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -144,30 +184,45 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a read-only list of all type parameters of this method (parent's + own).
-    /// Empty list for non-generic methods.
+    /// Gets a collection of all type parameters of this type (parent's + own).
+    /// Empty list for non-generic types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ReadOnlyCollection<TypeParameterEntity> AllTypeParameters
+    public IEnumerable<TypeParameterEntity> AllTypeParameters
     {
-      get { return _AllTypeParameters.AsReadOnly(); }
+      get
+      {
+        if (Parent is GenericCapableTypeEntity)
+        {
+          return (Parent as GenericCapableTypeEntity).AllTypeParameters.Concat(_OwnTypeParameters);
+        }
+
+        return _OwnTypeParameters;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a read-only collection of the own type parameters of this method (excluding parents' params). 
-    /// Empty list for non-generic methods.
+    /// Gets a collection of the own type parameters of this type (excluding parents' params). 
+    /// Empty list for non-generic types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ReadOnlyCollection<TypeParameterEntity> OwnTypeParameters
+    public IEnumerable<TypeParameterEntity> OwnTypeParameters
     {
       get
       {
-        return (Parent is GenericCapableTypeEntity
-                  ? _AllTypeParameters.Skip((Parent as GenericCapableTypeEntity).AllTypeParameters.Count)
-                  : _AllTypeParameters)
-          .ToList().AsReadOnly();
+        return _OwnTypeParameters;
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of all type parameters.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int AllTypeParameterCount
+    {
+      get { return AllTypeParameters.Count(); }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -177,10 +232,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public int OwnTypeParameterCount
     {
-      get
-      {
-        return OwnTypeParameters.Count;
-      }
+      get { return _OwnTypeParameters.Count; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -202,14 +254,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      _AllTypeParameters.Add(typeParameterEntity);
-
-      // If the type parameter is inherited, then the Parent property is already set, and we leave it as is.
-      if (typeParameterEntity.Parent == null)
-      {
-        typeParameterEntity.Parent = this;
-        _DeclarationSpace.Register(typeParameterEntity);
-      }
+      _OwnTypeParameters.Add(typeParameterEntity);
+      typeParameterEntity.Parent = this;
+      _DeclarationSpace.Register(typeParameterEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -222,7 +269,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       if (typeParameterEntity != null)
       {
-        _AllTypeParameters.Remove(typeParameterEntity);
+        _OwnTypeParameters.Remove(typeParameterEntity);
         _DeclarationSpace.Unregister(typeParameterEntity);
       }
     }
@@ -251,18 +298,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return InterfaceReference != null; 
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the reference to the interface entity whose member is explicitly implemented.
-    /// Null if this member is not an explicitly implemented interface member.
-    /// </summary>
-    /// <remarks>
-    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
-    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

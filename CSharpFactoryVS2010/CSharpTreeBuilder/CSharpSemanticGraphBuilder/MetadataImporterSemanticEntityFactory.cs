@@ -198,11 +198,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (typeEntity is GenericCapableTypeEntity && type.IsGenericTypeDefinition)
         {
           var genericEntity = typeEntity as GenericCapableTypeEntity;
+          
+          var parentTypeParameterCount = (type.DeclaringType == null) 
+            ? 0 
+            : type.DeclaringType.GetGenericArguments().Count();
+
           foreach (var typeParameter in type.GetGenericArguments())
           {
-            var typeParameterEntity = new TypeParameterEntity(typeParameter.Name);
-            genericEntity.AddTypeParameter(typeParameterEntity);
-            MapEntityToReflectedMetadata(typeParameterEntity, typeParameter);
+            // Inherited type parameters need special treatment.
+            var originalDefinitionOfTypeParameter = GetOriginalDefinitionOfReflectedTypeParameter(typeParameter);
+
+            // If the type parameter is not inherited then create an entity for it.
+            if (typeParameter == originalDefinitionOfTypeParameter)
+            {
+              var typeParameterEntity = CreateTypeParameter(typeParameter);
+              genericEntity.AddTypeParameter(typeParameterEntity);
+            }
+            else
+            {
+              // The type parameter is inherited, so lets map this reflected type parameter
+              // to the already created type parameter entity.
+              var typeParameterEntity = _SemanticGraph.GetEntityByMetadataObject(originalDefinitionOfTypeParameter);
+              _SemanticGraph.AddMetadataToEntityMapping(typeParameter, typeParameterEntity);
+            }
           }
         }
 
@@ -212,10 +230,43 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Add the new type entity to the semantic graph.
         parentContextEntity.AddChildType(typeEntity);
         MapEntityToReflectedMetadata(typeEntity, type);
-
-        // Assign this factory to the type entity object to enable lazy importing the members.
-        typeEntity.MetadataImporterFactory = this;
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the original definition of a type parameter, that is, if the specified type parameter
+    /// is inherited from a parent, then it traverses the reflected type hierarchy upwards 
+    /// and finds the first occurrence (the definition) of the type parameter.
+    /// </summary>
+    /// <param name="typeParameter">A reflected type parameter.</param>
+    /// <returns>The first definition of the specified reflected type parameter. 
+    /// The same as the input parameter if the type parameter is not inherited.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private Type GetOriginalDefinitionOfReflectedTypeParameter(Type typeParameter)
+    {
+      // The type that declares this type parameter is the generic type that we start with.
+      var genericType = typeParameter.DeclaringType;
+
+      // If the generic type has no parent (declaring type) then it's not an inherited type parameter.
+      if (genericType == null || genericType.DeclaringType == null)
+      {
+        return typeParameter;
+      }
+
+      var parentTypeParameters = genericType.DeclaringType.GetGenericArguments().ToList();
+      var positionOfThisTypeParameter = typeParameter.GenericParameterPosition;
+
+      // If the parent type is not a generic type definition, or the type parameter is not inherited 
+      // from its parent (detremined based on position) then this is the original definition of the type parameter.
+      if (parentTypeParameters.Count == 0
+        || positionOfThisTypeParameter >= parentTypeParameters.Count)
+      {
+        return typeParameter;
+      }
+
+      // The type parameter is inherited, so lets track down its original definition with a recursive call.
+      return GetOriginalDefinitionOfReflectedTypeParameter(parentTypeParameters[positionOfThisTypeParameter]);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -259,6 +310,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       entity.ReflectedMetadata = metadata;
       _SemanticGraph.AddMetadataToEntityMapping(metadata, entity);
+
+      if (entity is TypeEntity)
+      {
+        // Assign this factory to the type entity object to enable lazy importing the members.
+        (entity as TypeEntity).MetadataImporterFactory = this;
+      }
     }
 
     #endregion
@@ -488,7 +545,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="reflectedMember">A reflected member.</param>
     /// <returns>A MemberEntity, or null if could not create.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static NonTypeMemberEntity CreateMemberEntity(MemberInfo reflectedMember)
+    private NonTypeMemberEntity CreateMemberEntity(MemberInfo reflectedMember)
     {
       NonTypeMemberEntity memberEntity = null;
 
@@ -622,7 +679,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="methodInfo">A reflected MethodInfo object.</param>
     /// <returns>The created member entity, or null.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static MethodEntity CreateMethodEntity(MethodInfo methodInfo)
+    private MethodEntity CreateMethodEntity(MethodInfo methodInfo)
     {
       MethodEntity methodEntity = null;
 
@@ -665,10 +722,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="type">A System.Type object representing a type parameter.</param>
     /// <returns>A TypeParameterEntity object.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeParameterEntity CreateTypeParameter(Type type)
+    private TypeParameterEntity CreateTypeParameter(Type type)
     {
       var typeParameter = new TypeParameterEntity(type.Name);
-      typeParameter.ReflectedMetadata = type;
 
       var genericParameterAttributes = type.GenericParameterAttributes;
       var specialConstraints = genericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
@@ -695,6 +751,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           typeParameter.AddTypeReferenceConstraint(new ReflectedTypeBasedTypeEntityReference(constraint));
         }
       }
+
+      MapEntityToReflectedMetadata(typeParameter, type);
 
       return typeParameter;
     }

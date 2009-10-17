@@ -25,6 +25,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="EnumMemberEntity"/> class 
+    /// by deep copying from another instance.
+    /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
+    // ----------------------------------------------------------------------------------------------
+    public EnumMemberEntity(EnumMemberEntity source)
+      : base(source)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// </summary>
+    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override object Clone()
+    {
+      return new EnumMemberEntity(this);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this member is invocable.
     /// </summary>
     /// <remarks>A member is invocable if it's a method or event, 

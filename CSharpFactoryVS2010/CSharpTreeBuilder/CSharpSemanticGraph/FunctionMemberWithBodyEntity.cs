@@ -7,10 +7,12 @@
   // ================================================================================================
   public abstract class FunctionMemberWithBodyEntity : FunctionMemberEntity, IHasBody
   {
-    /// <summary>
-    /// Backing field for Body property.
-    /// </summary>
+    #region State
+
+    /// <summary>Backing field for Body property.</summary>
     private BlockEntity _Body;
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,6 +34,22 @@
       if (!isAbstract)
       {
         Body = new BlockEntity();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FunctionMemberWithBodyEntity"/> class 
+    /// by deep copying from another instance.
+    /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected FunctionMemberWithBodyEntity(FunctionMemberWithBodyEntity source)
+      : base(source)
+    {
+      if (source.Body != null)
+      {
+        Body = (BlockEntity)source.Body.Clone();
       }
     }
 

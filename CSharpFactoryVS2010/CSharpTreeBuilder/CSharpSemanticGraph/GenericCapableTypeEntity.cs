@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -27,11 +28,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class GenericCapableTypeEntity : TypeEntity, ICanHaveTypeParameters
   {
-    /// <summary>Backing field for AllTypeParameters property to disallow direct adding or removing.</summary>
-    private readonly List<TypeParameterEntity> _AllTypeParameters;
+    #region State
 
-    /// <summary>Backing field for ConstructedGenericTypes property to disallow direct adding or removing.</summary>
-    private readonly List<ConstructedGenericTypeEntity> _ConstructedGenericTypes;
+    /// <summary>Backing field for OwnTypeParameters property to disallow direct adding or removing.</summary>
+    private readonly List<TypeParameterEntity> _OwnTypeParameters = new List<TypeParameterEntity>();
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -43,60 +45,111 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected GenericCapableTypeEntity(AccessibilityKind? accessibility, string name)
       : base(accessibility, name)
     {
-      _AllTypeParameters = new List<TypeParameterEntity>();
-      _ConstructedGenericTypes = new List<ConstructedGenericTypeEntity>();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a read-only list of all type parameters of this type (parent's + own).
-    /// Empty list for non-generic types.
+    /// Initializes a new instance of the <see cref="GenericCapableTypeEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public ReadOnlyCollection<TypeParameterEntity> AllTypeParameters
+    protected GenericCapableTypeEntity(GenericCapableTypeEntity source)
+      : base(source)
     {
-      get { return _AllTypeParameters.AsReadOnly(); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a read-only collection of the own type parameters of this type (excluding parents' params). 
-    /// Empty list for non-generic types.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ReadOnlyCollection<TypeParameterEntity> OwnTypeParameters
-    {
-      get
+      foreach (var typeParameter in source._OwnTypeParameters)
       {
-        return (Parent is GenericCapableTypeEntity
-                  ? _AllTypeParameters.Skip((Parent as GenericCapableTypeEntity).AllTypeParameters.Count)
-                  : _AllTypeParameters)
-          .ToList().AsReadOnly();
+        AddTypeParameter((TypeParameterEntity)typeParameter.Clone());
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the number of type parameters.
+    /// Gets a collection of all type parameters of this type (parent's + own).
+    /// Empty list for non-generic types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TypeParameterEntity> AllTypeParameters
+    {
+      get 
+      { 
+        if (Parent is GenericCapableTypeEntity)
+        {
+          return (Parent as GenericCapableTypeEntity).AllTypeParameters.Concat(_OwnTypeParameters);
+        }
+
+        return _OwnTypeParameters;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of the own type parameters of this type (excluding parents' params). 
+    /// Empty list for non-generic types.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TypeParameterEntity> OwnTypeParameters
+    {
+      get { return _OwnTypeParameters; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of all type parameters.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int AllTypeParameterCount
+    {
+      get { return AllTypeParameters.Count(); }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of own type parameters (not including parents' type parameters).
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public int OwnTypeParameterCount
     {
-      get
-      {
-        return OwnTypeParameters.Count;
-      }
+      get { return _OwnTypeParameters.Count; }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this is a generic type. 
     /// </summary>
-    /// <remarks>It's a generic type if it has any type parameters.</remarks>
+    /// <remarks>It's a generic type if it has any type parameters (inherited or own).</remarks>
     // ----------------------------------------------------------------------------------------------
     public bool IsGeneric
     {
-      get { return _AllTypeParameters.Count > 0; }
+      get { return AllTypeParameters.Count() > 0; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an unbound generic type 
+    /// (ie. a generic type definition with no actual type arguments).
+    /// </summary>
+    /// <remarks>
+    /// An unbound type refers to the entity declared by a type declaration. 
+    /// An unbound generic type is not itself a type, and cannot be used as the type of a variable, 
+    /// argument or return value, or as a base type. The only construct in which 
+    /// an unbound generic type can be referenced is the typeof expression.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsUnbound
+    {
+      get { return TypeParameterMap.TypeArguments.All(typeEntity => typeEntity == null); }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a constructed type
+    /// (ie. a type that includes at least one type argument).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsConstructed
+    {
+      get { return !IsUnbound; }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -107,14 +160,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      _AllTypeParameters.Add(typeParameterEntity);
-
-      // If the type parameter is not inherited from Parent, then add to the declaration space
-      if (typeParameterEntity.Parent == null)
-      {
-        typeParameterEntity.Parent = this;
-        _DeclarationSpace.Register(typeParameterEntity);
-      }
+      _OwnTypeParameters.Add(typeParameterEntity);
+      typeParameterEntity.Parent = this;
+      _DeclarationSpace.Register(typeParameterEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -127,7 +175,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       if (typeParameterEntity != null)
       {
-        _AllTypeParameters.Remove(typeParameterEntity);
+        _OwnTypeParameters.Remove(typeParameterEntity);
         _DeclarationSpace.Unregister(typeParameterEntity);
       }
     }
@@ -146,95 +194,44 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a read-only collection of the types constructed from this generic type definition.
-    /// Empty list for non-generic types.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ReadOnlyCollection<ConstructedGenericTypeEntity> ConstructedGenericTypes
-    {
-      get { return _ConstructedGenericTypes.AsReadOnly(); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds an entity to the list of generic types constructed from this generic type definition.
-    /// </summary>
-    /// <remarks>
-    /// Throws InvalidOperationException for non-generic types.
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public void AddConstructedGenericType(ConstructedGenericTypeEntity constructedGenericTypeEntity)
-    {
-      if (!IsGeneric)
-      {
-        throw new InvalidOperationException(
-          string.Format("AddConstructedGenericType cannot be used on nongeneric type '{0}'", FullyQualifiedName));
-      }
-
-      if (AllTypeParameters.Count != constructedGenericTypeEntity.TypeArguments.Count)
-      {
-        throw new ArgumentException(
-          string.Format("Expected a type with '{0}' type arguments, but received one with '{1}' type arguments.",
-                        AllTypeParameters.Count, constructedGenericTypeEntity.TypeArguments.Count),
-          "constructedGenericTypeEntity");
-      }
-
-      _ConstructedGenericTypes.Add(constructedGenericTypeEntity);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a constructed generic type if it can be found in the ConstructedGenericTypes list.
-    /// </summary>
-    /// <param name="typeArguments">The list of type arguments.</param>
-    /// <returns>A constructed generic type entity if it was found, null otherwise.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public ConstructedGenericTypeEntity GetConstructedGenericType(List<TypeEntity> typeArguments)
-    {
-      // If the number of type arguments don't match the number of type parameters, that's an error.
-      if (typeArguments.Count != AllTypeParameters.Count)
-      {
-        throw new ArgumentException(string.Format("Expected '{0}' type arguments, but received '{1}' type arguments.",
-                                                  AllTypeParameters.Count, typeArguments.Count), "typeArguments");
-      }
-
-      ConstructedGenericTypeEntity foundEntity = null;
-
-      // Brute-force search: look at all cached constructed generic types and try to match all type arguments
-      foreach (var constructedGenericType in ConstructedGenericTypes)
-      {
-        int matchedTypeArguments = 0;
-        foreach (var typeArgument in constructedGenericType.TypeArguments)
-        {
-          // If no match, then stop matching type arguments, and get to the next type
-          if (typeArgument != typeArguments[matchedTypeArguments])
-          {
-            break;
-          }
-          matchedTypeArguments++;
-        }
-
-        // If all type arguments were matched then we have found the entity, so stop the search
-        if (matchedTypeArguments == typeArguments.Count)
-        {
-          foundEntity = constructedGenericType;
-          break;
-        }
-      }
-
-      return foundEntity;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the string representation of the object.
     /// </summary>
+    /// <returns>The string representation of the object</returns>
     // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
-      return OwnTypeParameters.Count == 0
-               ? base.ToString()
-               : string.Format("{0}`{1}", base.ToString(), OwnTypeParameters.Count);
+      var stringBuilder = new StringBuilder(base.ToString());
+
+      if (OwnTypeParameterCount > 0)
+      {
+        stringBuilder.Append('`');
+        stringBuilder.Append(OwnTypeParameterCount.ToString());
+      }
+
+      if (IsConstructed)
+      {
+        stringBuilder.Append('[');
+
+        bool isFirst = true;
+
+        foreach (var typeArgument in TypeParameterMap.TypeArguments)
+        {
+          if (isFirst)
+          {
+            isFirst = false;
+          }
+          else
+          {
+            stringBuilder.Append(',');
+          }
+
+          stringBuilder.Append(typeArgument == null ? "(null)" : typeArgument.ToString());
+        }
+
+        stringBuilder.Append(']');
+      }
+
+      return stringBuilder.ToString();
     }
 
     #region Visitor methods

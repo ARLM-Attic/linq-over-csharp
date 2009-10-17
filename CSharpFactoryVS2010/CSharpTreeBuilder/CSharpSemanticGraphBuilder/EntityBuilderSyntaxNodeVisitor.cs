@@ -818,16 +818,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       TypeParameterNodeCollection typeParameterNodes,
       TypeParameterConstraintNodeCollection typeParameterConstraints)
     {
-      // First add the (inherited) type parameters from the parent type
-      if (parentEntity is GenericCapableTypeEntity)
-      {
-        foreach (var typeParameterEntity in ((GenericCapableTypeEntity) parentEntity).AllTypeParameters)
-        {
-          typeParameterHolder.AddTypeParameter(typeParameterEntity);
-        }
-      }
-
-      // Then add the "own" type parameters
+      // Add the "own" type parameters
       foreach (var typeParameter in typeParameterNodes)
       {
         var typeParameterName = typeParameter.Identifier;

@@ -10,6 +10,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class FunctionMemberWithAccessorsEntity : FunctionMemberEntity, ICanBeExplicitlyImplementedMember
   {
+    #region State
+
+    /// <summary>Gets the reference to the type of the member.</summary>
+    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+
+    /// <summary>
+    /// Gets the reference to the interface entity whose member is explicitly implemented.
+    /// Null if this member is not an explicitly implemented interface member.
+    /// </summary>
+    /// <remarks>
+    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
+    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
+    /// </remarks>
+    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberWithAccessorsEntity"/> class.
@@ -38,11 +55,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the type of the member.
+    /// Initializes a new instance of the <see cref="FunctionMemberWithAccessorsEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
-
+    protected FunctionMemberWithAccessorsEntity(FunctionMemberWithAccessorsEntity source)
+      : base(source)
+    {
+      TypeReference = source.TypeReference;
+      InterfaceReference = source.InterfaceReference;
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the type of the member.
@@ -72,19 +96,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return InterfaceReference != null;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the reference to the interface entity whose member is explicitly implemented.
-    /// Null if this member is not an explicitly implemented interface member.
-    /// </summary>
-    /// <remarks>
-    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
-    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
-
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the interface entity whose member is explicitly implemented.

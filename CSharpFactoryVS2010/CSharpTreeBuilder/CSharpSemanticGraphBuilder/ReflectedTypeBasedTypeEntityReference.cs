@@ -50,10 +50,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       TypeEntity typeEntity = null;
 
-      // If it's not a constructed generic type, then find its corresponding entity
+      // Is it a constructed generic type? If so then the arguments must be resolved too.
       if (type.IsGenericType && !type.IsGenericTypeDefinition)
       {
-        // If it's a constructed generic type, then find its type definition's entity
+        // If it's a constructed generic type, then lets find its type definition's entity.
         var genericTypeDefinition = type.GetGenericTypeDefinition();
         var typeDefinitionEntity = semanticGraph.GetEntityByMetadataObject(genericTypeDefinition);
 
@@ -68,10 +68,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                                                        typeDefinitionEntity.GetType()));
         }
 
-        // Resolve type arguments
+        // Resolve type arguments.
         var argumentEntities = new List<TypeEntity>();
         foreach (var genericArgument in type.GetGenericArguments())
         {
+          // The type argument can be any type so to resolve it we have to call this method recursively.
           var argumentEntity = GetTypeEntityByReflectedType(genericArgument, semanticGraph);
           if (argumentEntity == null)
           {
@@ -81,11 +82,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           argumentEntities.Add(argumentEntity);
         }
 
-        // Get the constructed type
+        // Get the constructed type.
         typeEntity = ConstructedTypeHelper.GetConstructedGenericType(typeDefinitionEntity as GenericCapableTypeEntity, argumentEntities);
       }
       else
       {
+        // If it's not a constructed generic type, then simply find its corresponding entity
         var foundEntity = semanticGraph.GetEntityByMetadataObject(type);
 
         if (foundEntity != null && !(foundEntity is TypeEntity))

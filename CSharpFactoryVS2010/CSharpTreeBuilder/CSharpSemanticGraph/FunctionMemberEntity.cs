@@ -10,8 +10,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class FunctionMemberEntity : NonTypeMemberEntity
   {
+    #region State
+
     /// <summary>Backing field for DeclarationSpace property.</summary>
-    protected DeclarationSpace _DeclarationSpace;
+    protected DeclarationSpace _DeclarationSpace = new LocalVariableDeclarationSpace();
+
+    /// <summary>Gets or sets a value indicating whether this member can be overridden.</summary>
+    public virtual bool IsVirtual { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether this member is on override of an inherited member.</summary>
+    public virtual bool IsOverride { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether this member is sealed, meaning that it cannot be overridden.</summary>
+    public virtual bool IsSealed { get; set; }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -24,29 +37,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected FunctionMemberEntity(bool isDeclaredInSource, AccessibilityKind? accessibility, string name)
       : base(isDeclaredInSource, accessibility, name)
     {
-      _DeclarationSpace = new LocalVariableDeclarationSpace();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets a value indicating whether this member can be overridden.
+    /// Initializes a new instance of the <see cref="FunctionMemberEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public virtual bool IsVirtual { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member is on override of an inherited member.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsOverride { get; set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets a value indicating whether this member is sealed, meaning that it cannot be overridden.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsSealed { get; set; }
-
+    protected FunctionMemberEntity(FunctionMemberEntity source)
+      : base(source)
+    {
+      // DeclarationSpace should not be cloned.
+      IsVirtual = source.IsVirtual;
+      IsOverride = source.IsOverride;
+      IsSealed = source.IsSealed;
+    }
   }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -11,19 +12,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a read-only list of all type parameters of this type (parent's + own).
+    /// Gets a collection of all type parameters of this type (parent's + own).
     /// Empty list for non-generic types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    ReadOnlyCollection<TypeParameterEntity> AllTypeParameters { get; }
+    IEnumerable<TypeParameterEntity> AllTypeParameters { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a read-only collection of the own type parameters of this type (excluding parents' params). 
+    /// Gets a collection of the own type parameters of this type (excluding parents' type params). 
     /// Empty list for non-generic types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    ReadOnlyCollection<TypeParameterEntity> OwnTypeParameters { get; }
+    IEnumerable<TypeParameterEntity> OwnTypeParameters { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of all type parameters.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    int AllTypeParameterCount { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -36,7 +44,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Gets a value indicating whether this is a generic type. 
     /// </summary>
-    /// <remarks>It's a generic type if it has any type parameters.</remarks>
+    /// <remarks>It's a generic type if it has any type parameters (parent's or own).</remarks>
     // ----------------------------------------------------------------------------------------------
     bool IsGeneric { get; }
 

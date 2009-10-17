@@ -553,9 +553,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         childTypes[1].ToString().ShouldEqual("global::N.A`2+B2`1");
         childTypes[2].ToString().ShouldEqual("global::N.A`2+B3`1");
 
-        classEntity.OwnTypeParameters.Count.ShouldEqual(2);
-        classEntity.OwnTypeParameters[0].ToString().ShouldEqual("global::N.A`2'T1");
-        classEntity.OwnTypeParameters[1].ToString().ShouldEqual("global::N.A`2'T2");
+        classEntity.OwnTypeParameterCount.ShouldEqual(2);
+        classEntity.GetOwnTypeParameterByName("T1").ToString().ShouldEqual("global::N.A`2.T1");
+        classEntity.GetOwnTypeParameterByName("T2").ToString().ShouldEqual("global::N.A`2.T2");
 
         classEntity.IsGeneric.ShouldBeTrue();
         classEntity.OwnTypeParameters.ToArray().Count().ShouldEqual(2);
@@ -567,7 +567,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           var typeParam = typeParams[0];
           typeParam.Name.ShouldEqual("T1");
           typeParam.FullyQualifiedName.ShouldEqual("N.A.T1");
-          typeParam.ToString().ShouldEqual("global::N.A`2'T1");
+          typeParam.ToString().ShouldEqual("global::N.A`2.T1");
           typeParam.IsPointerType.ShouldBeFalse();
           typeParam.IsReferenceType.ShouldBeFalse();
           typeParam.IsValueType.ShouldBeFalse();
@@ -596,8 +596,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         ownTypeParams.Length.ShouldEqual(0);
         var typeParams = classEntity.AllTypeParameters.ToArray();
         typeParams.Length.ShouldEqual(2);
-        typeParams[0].ToString().ShouldEqual("global::N.A`2'T1");
-        typeParams[1].ToString().ShouldEqual("global::N.A`2'T2");
+        typeParams[0].ToString().ShouldEqual("global::N.A`2.T1");
+        typeParams[1].ToString().ShouldEqual("global::N.A`2.T2");
       }
       // class B2<T1>
       {
@@ -605,12 +605,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.FullyQualifiedName.ShouldEqual("N.A.B2");
         var ownTypeParams = classEntity.OwnTypeParameters.ToArray();
         ownTypeParams.Length.ShouldEqual(1);
-        ownTypeParams[0].ToString().ShouldEqual("global::N.A`2+B2`1'T1");
+        ownTypeParams[0].ToString().ShouldEqual("global::N.A`2+B2`1.T1");
         var typeParams = classEntity.AllTypeParameters.ToArray();
         typeParams.Length.ShouldEqual(3);
-        typeParams[0].ToString().ShouldEqual("global::N.A`2'T1");
-        typeParams[1].ToString().ShouldEqual("global::N.A`2'T2");
-        typeParams[2].ToString().ShouldEqual("global::N.A`2+B2`1'T1");
+        typeParams[0].ToString().ShouldEqual("global::N.A`2.T1");
+        typeParams[1].ToString().ShouldEqual("global::N.A`2.T2");
+        typeParams[2].ToString().ShouldEqual("global::N.A`2+B2`1.T1");
       }
       // class B3<T3>
       {
@@ -618,12 +618,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classEntity.FullyQualifiedName.ShouldEqual("N.A.B3");
         var ownTypeParams = classEntity.OwnTypeParameters.ToArray();
         ownTypeParams.Length.ShouldEqual(1);
-        ownTypeParams[0].ToString().ShouldEqual("global::N.A`2+B3`1'T3");
+        ownTypeParams[0].ToString().ShouldEqual("global::N.A`2+B3`1.T3");
         var typeParams = classEntity.AllTypeParameters.ToArray();
         typeParams.Length.ShouldEqual(3);
-        typeParams[0].ToString().ShouldEqual("global::N.A`2'T1");
-        typeParams[1].ToString().ShouldEqual("global::N.A`2'T2");
-        typeParams[2].ToString().ShouldEqual("global::N.A`2+B3`1'T3");
+        typeParams[0].ToString().ShouldEqual("global::N.A`2.T1");
+        typeParams[1].ToString().ShouldEqual("global::N.A`2.T2");
+        typeParams[2].ToString().ShouldEqual("global::N.A`2+B3`1.T3");
       }
     }
 
@@ -1303,7 +1303,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           method.SyntaxNodes[0].ShouldEqual(classNode.MemberDeclarations[i]);
           method.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
           method.ReturnType.ShouldBeNull();
-          method.AllTypeParameters.Count.ShouldEqual(0);
+          method.AllTypeParameterCount.ShouldEqual(0);
           method.OwnTypeParameterCount.ShouldEqual(0);
           method.Parameters.Count().ShouldEqual(0);
           method.Signature.ToString().ShouldEqual("A()");
@@ -1326,7 +1326,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           method.SyntaxNodes[0].ShouldEqual(classNode.MemberDeclarations[i]);
           method.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
           method.ReturnType.ShouldBeNull();
-          method.AllTypeParameters.Count.ShouldEqual(2);
+          method.AllTypeParameters.Count().ShouldEqual(2);
           method.OwnTypeParameterCount.ShouldEqual(2);
           method.Parameters.Count().ShouldEqual(3);
           method.Signature.ToString().ShouldEqual("A`2(?, ref ?, out ?)");
@@ -1430,13 +1430,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           method.SyntaxNodes[0].ShouldEqual(classNode.MemberDeclarations[i]);
           method.ReturnTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
           method.ReturnType.ShouldBeNull();
-          method.AllTypeParameters.Count.ShouldEqual(3);
+          method.AllTypeParameters.Count().ShouldEqual(3);
           method.OwnTypeParameterCount.ShouldEqual(2);
           method.Parameters.Count().ShouldEqual(0);
           method.Signature.ToString().ShouldEqual("B`2()");
 
           var typeParameters = method.AllTypeParameters.ToList();
-          typeParameters[0].ToString().ShouldEqual("global::C2`1'T");
+          typeParameters[0].ToString().ShouldEqual("global::C2`1.T");
           typeParameters[1].ToString().ShouldEqual("T1");
           typeParameters[2].ToString().ShouldEqual("T2");
         }
@@ -1642,11 +1642,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // class A
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as ClassEntity;
 
-      int i = 0;
 
       // where T1 : B, T2, I1, I2, T4, new()
       {
-        var typeParameter = classEntity.OwnTypeParameters[i++];
+        var typeParameter = classEntity.GetOwnTypeParameterByName("T1");
         typeParameter.HasDefaultConstructorConstraint.ShouldBeTrue();
         typeParameter.HasReferenceTypeConstraint.ShouldBeFalse();
         typeParameter.HasNonNullableValueTypeConstraint.ShouldBeFalse();
@@ -1658,7 +1657,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // where T2 : class
       {
-        var typeParameter = classEntity.OwnTypeParameters[i++];
+        var typeParameter = classEntity.GetOwnTypeParameterByName("T2");
         typeParameter.HasDefaultConstructorConstraint.ShouldBeFalse();
         typeParameter.HasReferenceTypeConstraint.ShouldBeTrue();
         typeParameter.HasNonNullableValueTypeConstraint.ShouldBeFalse();
@@ -1670,7 +1669,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // where T3 : struct
       {
-        var typeParameter = classEntity.OwnTypeParameters[i++];
+        var typeParameter = classEntity.GetOwnTypeParameterByName("T3");
         typeParameter.HasDefaultConstructorConstraint.ShouldBeTrue();
         typeParameter.HasReferenceTypeConstraint.ShouldBeFalse();
         typeParameter.HasNonNullableValueTypeConstraint.ShouldBeTrue();

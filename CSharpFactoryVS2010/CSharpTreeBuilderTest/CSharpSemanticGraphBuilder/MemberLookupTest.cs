@@ -21,7 +21,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore]
+    [Ignore]  // Under development
     public void TypeParameter()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -61,7 +61,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // Handling of generic classes and methods postponed
+    [Ignore] // Under development
     public void GenericType()
     {
       var project = new CSharpProject(WorkingFolder);

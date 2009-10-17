@@ -5,6 +5,7 @@ using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.CSharpSemanticGraph;
+using System.Collections.Generic;
 
 namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 {
@@ -50,7 +51,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 1);
       var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
       fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      fieldEntity.TypeReference.TargetEntity.ToString().ShouldEqual("global::A`1'T1");
+      fieldEntity.TypeReference.TargetEntity.ToString().ShouldEqual("global::A`1.T1");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
     [Ignore]
+    // TODO: reintroduce when TypeParameterEntity.BaseInterfaces is implemented
     public void TypeParameterConstraints()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -69,11 +71,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var global = project.SemanticGraph.GlobalNamespace;
       var classA = global.GetSingleChildType<ClassEntity>("A", 4);
  
-      int i = 0;
-
       // where T1 : B, T2, I1, I2, T4, new()
       {
-        var typeParameter = classA.OwnTypeParameters[i++];
+        var typeParameter = classA.GetOwnTypeParameterByName("T1");
         typeParameter.ClassTypeConstraint.ToString().ShouldEqual("global::B");
         typeParameter.ClassTypeConstraints.Count().ShouldEqual(1);
 
@@ -84,8 +84,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         var typeParams = typeParameter.TypeParameterConstraints.ToList();
         typeParams.Count().ShouldEqual(2);
-        typeParams[0].ShouldEqual(classA.OwnTypeParameters[1]);
-        typeParams[1].ShouldEqual(classA.OwnTypeParameters[3]);
+        typeParams[0].ShouldEqual(classA.GetOwnTypeParameterByName("T2"));
+        typeParams[1].ShouldEqual(classA.GetOwnTypeParameterByName("T4"));
 
         typeParameter.BaseType.ToString().ShouldEqual("global::B");
 
@@ -397,7 +397,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a16");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var nullable = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+        var nullable = fieldEntity.TypeReference.TargetEntity as StructEntity;
         nullable.ToString().ShouldEqual("global::System.Nullable`1[global::System.Int32]");
         nullable.IsSimpleType.ShouldBeFalse();
         nullable.IsNumericType.ShouldBeFalse();
@@ -543,7 +543,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a1");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var nullable = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+        var nullable = fieldEntity.TypeReference.TargetEntity;
         nullable.Name.ShouldEqual("Nullable");
         nullable.FullyQualifiedName.ShouldEqual("System.Nullable");
         nullable.ToString().ShouldEqual("global::System.Nullable`1[global::A2]");
@@ -556,11 +556,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         nullable.IsNullableType.ShouldBeTrue();
         nullable.UnderlyingOfNullableType.ToString().ShouldEqual("global::A2");
 
-        var underlyingType = nullable.UnderlyingType as GenericCapableTypeEntity;
+        var underlyingType = nullable.TemplateEntity as StructEntity;
         underlyingType.FullyQualifiedName.ShouldEqual("System.Nullable");
         underlyingType.ToString().ShouldEqual("global::System.Nullable`1");
 
-        underlyingType.ConstructedGenericTypes.Contains(nullable).ShouldBeTrue();
+        underlyingType.GetConstructedEntity(new TypeParameterMap(
+          new TypeParameterEntity[] { underlyingType.GetOwnTypeParameterByName("T") },
+          new TypeEntity[] { nullable.UnderlyingOfNullableType }
+          )).ShouldEqual(nullable);
       }
       // A2?[] a2;
       {
@@ -570,8 +573,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var array = fieldEntity.TypeReference.TargetEntity as ArrayTypeEntity;
         array.IsNullableType.ShouldBeFalse();
         array.UnderlyingOfNullableType.ShouldBeNull();
-        var nullable = array.UnderlyingType as ConstructedGenericTypeEntity;
-        nullable.UnderlyingType.ShouldEqual(project.SemanticGraph.NullableGenericTypeDefinition);
+        var nullable = array.UnderlyingType as TypeEntity;
+        nullable.TemplateEntity.ShouldEqual(project.SemanticGraph.NullableGenericTypeDefinition);
       }
     }
 
@@ -696,7 +699,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var field = classA.Members.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.TargetEntity.ToString().ShouldEqual("global::C+E`1[global::System.Int32]");
-        ((ConstructedGenericTypeEntity)field.TypeReference.TargetEntity).UnderlyingType.ToString().ShouldEqual("global::C+E`1");
+        field.TypeReference.TargetEntity.TemplateEntity.ToString().ShouldEqual("global::C+E`1");
       }
       // F.G x3;
       {
@@ -715,7 +718,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var field = classA.Members.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.TargetEntity.ToString().ShouldEqual("global::D+F`1+G`1[global::System.Int32,global::System.Int32]");
-        ((ConstructedGenericTypeEntity)field.TypeReference.TargetEntity).UnderlyingType.ToString().ShouldEqual("global::D+F`1+G`1");
+        field.TypeReference.TargetEntity.TemplateEntity.ToString().ShouldEqual("global::D+F`1+G`1");
       }
     }
 
@@ -752,83 +755,80 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"TypeResolution\ConstructedGenericClass.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var fields = project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").ChildTypes.ToList()[0].Members.ToArray();
+      var classA = project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").GetSingleChildType<ClassEntity>("A",2);
+      var fields = classA.Members.ToArray();
+      var classB1 = classA.GetSingleChildType<ClassEntity>("B1");
+      var classB2 = classA.GetSingleChildType<ClassEntity>("B2",1);
+      var classB3 = classA.GetSingleChildType<ClassEntity>("B3",1);
+
       int i = 0;
 
-      // A<int, long>.B1 b1;
+      // A<A1, A2> a1;
       {
         var fieldEntity = fields[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var typeEntity = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
+        typeEntity.Name.ShouldEqual("A");
+        typeEntity.FullyQualifiedName.ShouldEqual("N.A");
+        typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]");
+        typeEntity.TemplateEntity.ShouldEqual(classA);
+        classA.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
+      }
+      // A<T1, T2> a2;
+      {
+        var fieldEntity = fields[i++] as FieldEntity;
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
+        typeEntity.Name.ShouldEqual("A");
+        typeEntity.FullyQualifiedName.ShouldEqual("N.A");
+        typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A`2.T1,global::N.A`2.T2]");
+        typeEntity.TemplateEntity.ShouldEqual(classA);
+        classA.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
+      }
+      // A<T1, T2> a3;
+      {
+        var fieldEntity = fields[i++] as FieldEntity;
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
+        typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A`2.T1,global::N.A`2.T2]");
+        typeEntity.TemplateEntity.ShouldEqual(classA);
+        // Should not create a new constructed entity because the previous field has the same type.
+        classA.ConstructedEntities.Count().ShouldEqual(2);
+      }
+      // A<A1, A2>.B1 b1;
+      {
+        var fieldEntity = fields[i++] as FieldEntity;
+        fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
         typeEntity.Name.ShouldEqual("B1");
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B1");
         typeEntity.ToString().ShouldEqual("global::N.A`2+B1[global::N.A1,global::N.A2]");
-        typeEntity.BaseTypeReferences.ShouldEqual(typeEntity.UnderlyingType.BaseTypeReferences);
-        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
-        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
-        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").ChildTypes.ToList()[0]);
-        typeEntity.IsPointerType.ShouldBeFalse();
-        typeEntity.IsReferenceType.ShouldBeTrue();
-        typeEntity.IsValueType.ShouldBeFalse();
-
-        typeEntity.TypeArguments[0].ToString().ShouldEqual("global::N.A1");
-        typeEntity.TypeArguments[1].ToString().ShouldEqual("global::N.A2");
-
-        typeEntity.UnderlyingType.ToString().ShouldEqual("global::N.A`2+B1");
-
-        ((ClassEntity)typeEntity.UnderlyingType).ConstructedGenericTypes.Count.ShouldEqual(1);
-        ((ClassEntity)typeEntity.UnderlyingType).ConstructedGenericTypes[0].ShouldEqual(typeEntity);
+        typeEntity.TemplateEntity.ShouldEqual(classB1);
+        classB1.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
       // A<A1, A2>.B2<A3> b2;
       {
         var fieldEntity = fields[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var typeEntity = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
         typeEntity.Name.ShouldEqual("B2");
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B2");
         typeEntity.ToString().ShouldEqual("global::N.A`2+B2`1[global::N.A1,global::N.A2,global::N.A3]");
-        typeEntity.BaseTypeReferences.ShouldEqual(typeEntity.UnderlyingType.BaseTypeReferences);
-        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
-        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
-        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").ChildTypes.ToList()[0]);
-        typeEntity.IsPointerType.ShouldBeFalse();
-        typeEntity.IsReferenceType.ShouldBeTrue();
-        typeEntity.IsValueType.ShouldBeFalse();
-
-        typeEntity.TypeArguments[0].ToString().ShouldEqual("global::N.A1");
-        typeEntity.TypeArguments[1].ToString().ShouldEqual("global::N.A2");
-        typeEntity.TypeArguments[2].ToString().ShouldEqual("global::N.A3");
-
-        typeEntity.UnderlyingType.ToString().ShouldEqual("global::N.A`2+B2`1");
-
-        ((ClassEntity)typeEntity.UnderlyingType).ConstructedGenericTypes.Count.ShouldEqual(1);
-        ((ClassEntity)typeEntity.UnderlyingType).ConstructedGenericTypes[0].ShouldEqual(typeEntity);
+        typeEntity.TemplateEntity.ShouldEqual(classB2);
+        classB2.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
-      //  A<A1, A2>.B3<A4> b3;
+      // A<A1, A2>.B3<A4> b3;
       {
         var fieldEntity = fields[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var typeEntity = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
         typeEntity.Name.ShouldEqual("B3");
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B3");
         typeEntity.ToString().ShouldEqual("global::N.A`2+B3`1[global::N.A1,global::N.A2,global::N.A4]");
-        typeEntity.BaseTypeReferences.ShouldEqual(typeEntity.UnderlyingType.BaseTypeReferences);
-        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
-        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
-        typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").ChildTypes.ToList()[0]);
-        typeEntity.IsPointerType.ShouldBeFalse();
-        typeEntity.IsReferenceType.ShouldBeTrue();
-        typeEntity.IsValueType.ShouldBeFalse();
-
-        typeEntity.TypeArguments[0].ToString().ShouldEqual("global::N.A1");
-        typeEntity.TypeArguments[1].ToString().ShouldEqual("global::N.A2");
-        typeEntity.TypeArguments[2].ToString().ShouldEqual("global::N.A4");
-
-        typeEntity.UnderlyingType.ToString().ShouldEqual("global::N.A`2+B3`1");
-
-        ((ClassEntity)typeEntity.UnderlyingType).ConstructedGenericTypes.Count.ShouldEqual(1);
-        ((ClassEntity)typeEntity.UnderlyingType).ConstructedGenericTypes[0].ShouldEqual(typeEntity);
+        typeEntity.TemplateEntity.ShouldEqual(classB3);
+        classB3.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
+
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -851,19 +851,16 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       {
         var fieldEntity = fields[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var typeEntity = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+        var typeEntity = fieldEntity.TypeReference.TargetEntity as StructEntity;
         typeEntity.Name.ShouldEqual("B");
         typeEntity.FullyQualifiedName.ShouldEqual("B");
         typeEntity.ToString().ShouldEqual("global::B`1[global::System.Int32]");
-        typeEntity.BaseTypeReferences.ShouldEqual(typeEntity.UnderlyingType.BaseTypeReferences);
-        typeEntity.Members.ShouldEqual(typeEntity.UnderlyingType.Members);
-        typeEntity.SyntaxNodes.Count.ShouldEqual(0);
         typeEntity.Parent.ShouldEqual(project.SemanticGraph.GlobalNamespace);
         typeEntity.IsPointerType.ShouldBeFalse();
         typeEntity.IsReferenceType.ShouldBeFalse();
         typeEntity.IsValueType.ShouldBeTrue();
-        typeEntity.TypeArguments[0].ToString().ShouldEqual("global::System.Int32");
-        typeEntity.UnderlyingType.ToString().ShouldEqual("global::B`1");
+        typeEntity.TypeParameterMap.TypeArguments.ToList()[0].ToString().ShouldEqual("global::System.Int32");
+        typeEntity.TemplateEntity.ToString().ShouldEqual("global::B`1");
       }
     }
 
@@ -880,21 +877,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
-      
+
       var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
       fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      var typeEntity = fieldEntity.TypeReference.TargetEntity as ConstructedGenericTypeEntity;
+      var typeEntity = fieldEntity.TypeReference.TargetEntity as ClassEntity;
       typeEntity.ShouldNotBeNull();
       typeEntity.Name.ShouldEqual("A3");
       typeEntity.FullyQualifiedName.ShouldEqual("A2.A3");
       typeEntity.ToString().ShouldEqual("global::A2+A3`1[global::A2+A3`1[global::A4]]");
-      typeEntity.UnderlyingType.ToString().ShouldEqual("global::A2+A3`1");
+      typeEntity.TemplateEntity.ToString().ShouldEqual("global::A2+A3`1");
 
-      var typeArgTypeEntity = typeEntity.TypeArguments[0] as ConstructedGenericTypeEntity;
+      var typeArgTypeEntity = typeEntity.TypeParameterMap.TypeArguments.ToList()[0] as ClassEntity;
       typeArgTypeEntity.ToString().ShouldEqual("global::A2+A3`1[global::A4]");
-      typeArgTypeEntity.UnderlyingType.ToString().ShouldEqual("global::A2+A3`1");
+      typeArgTypeEntity.TemplateEntity.ToString().ShouldEqual("global::A2+A3`1");
 
-      var typeArgTypeEntity2 = typeArgTypeEntity.TypeArguments[0] as ClassEntity;
+      var typeArgTypeEntity2 = typeArgTypeEntity.TypeParameterMap.TypeArguments.ToList()[0] as ClassEntity;
       typeArgTypeEntity2.ToString().ShouldEqual("global::A4");
     }
 
@@ -1241,12 +1238,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"TypeResolution\GenericBaseTypes.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      // class A1<T1> : A3<T1, A2<T1>>, I1<T1>
+      // class A1<T1> : A3<T1, A2<T1>>, I1<A1<T1>>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1", 1);
-        classEntity.BaseType.ToString().ShouldEqual("global::A3`2[global::A1`1'T1,global::A2`1[global::A1`1'T1]]");
+        classEntity.BaseType.ToString().ShouldEqual("global::A3`2[global::A1`1.T1,global::A2`1[global::A1`1.T1]]");
         classEntity.BaseInterfaces.Count.ShouldEqual(1);
-        classEntity.BaseInterfaces[0].ToString().ShouldEqual("global::I1`1[global::A1`1[global::A1`1'T1]]");
+        classEntity.BaseInterfaces[0].ToString().ShouldEqual("global::I1`1[global::A1`1[global::A1`1.T1]]");
       }
       // class A2<T2> : A3<int, long>, I1<int>
       {
@@ -1370,7 +1367,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         .GetChildNamespace("Collections").GetChildNamespace("ObjectModel")
         .GetSingleChildType<TypeEntity>("KeyedCollection", 2);
       keyedCollection.ToString().ShouldEqual("global::System.Collections.ObjectModel.KeyedCollection`2");
-      ((ConstructedGenericTypeEntity)keyedCollection.BaseType).UnderlyingType.ShouldEqual(collection);
+      keyedCollection.BaseType.TemplateEntity.ShouldEqual(collection);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -2038,7 +2035,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // Check parameter type resolution
         var parameters = methodEntity.Parameters.ToList();
         parameters[0].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        (parameters[0].Type as ConstructedGenericTypeEntity).UnderlyingType.ShouldEqual(classEntity);
+        (parameters[0].Type as ClassEntity).TemplateEntity.ShouldEqual(classEntity);
         parameters[1].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         parameters[1].Type.ShouldEqual(classEntity.GetOwnTypeParameterByName("T1"));
         parameters[2].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
@@ -2081,12 +2078,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // Check explicitly implemented interface resolution
         methodEntity.InterfaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        methodEntity.Interface.ToString().ShouldEqual("global::I`2[global::A`2'T1,global::A`2'T2]");
+        methodEntity.Interface.ToString().ShouldEqual("global::I`2[global::A`2.T1,global::A`2.T2]");
 
         // Check parameter type resolution
         var parameters = methodEntity.Parameters.ToList();
         parameters[0].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        (parameters[0].Type as ConstructedGenericTypeEntity).UnderlyingType.ShouldEqual(classEntity);
+        parameters[0].Type.TemplateEntity.ShouldEqual(classEntity);
         parameters[1].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         parameters[1].Type.ShouldEqual(classEntity.GetOwnTypeParameterByName("T1"));
         parameters[2].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
@@ -2112,7 +2109,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // Check explicitly implemented interface resolution
         methodEntity.InterfaceReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        methodEntity.Interface.ToString().ShouldEqual("global::I`2[global::A`2'T1,global::A`2'T2]");
+        methodEntity.Interface.ToString().ShouldEqual("global::I`2[global::A`2.T1,global::A`2.T2]");
 
         // Check parameter type resolution
         methodEntity.Parameters.ToList().Count.ShouldEqual(0);

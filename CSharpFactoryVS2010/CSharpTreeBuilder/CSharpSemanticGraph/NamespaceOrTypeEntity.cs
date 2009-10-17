@@ -10,8 +10,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class NamespaceOrTypeEntity : SemanticEntity, INamedEntity
   {
-    /// <summary>Backing field for DeclarationSpace property.</summary>
-    protected DeclarationSpace _DeclarationSpace;
+    #region State
+
+    /// <summary>The declaration space of this entity.</summary>
+    protected DeclarationSpace _DeclarationSpace = new DeclarationSpace();
+
+    /// <summary>Gets or sets the name of this entity.</summary>
+    public string Name { get; protected set; }
+    
+    #endregion 
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -27,15 +34,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       Name = name;
-      _DeclarationSpace = new DeclarationSpace();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the namespace or type.
+    /// Initializes a new instance of the <see cref="NamespaceOrTypeEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public string Name { get; protected set; }
+    protected NamespaceOrTypeEntity(NamespaceOrTypeEntity source)
+      : base(source)
+    {
+      // Declaration space should not be copied or the new type will refer to the template's members.
+
+      Name = source.Name;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -65,27 +79,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Gets the string representation of the object.
     /// </summary>
+    /// <returns>The string representation of the object</returns>
     // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
       if (Parent == null)
       {
         return Name;
-      }
-
-      if (this is TypeParameterEntity)
-      {
-        // A method's type parameter must not be prefixed with parent's ToString, 
-        // because that would lead to infinite recursion 
-        // Member.ToString() -> Signature.ToString -> Parameter.Type.ToString -> (loop)
-        if (Parent is MethodEntity)
-        {
-          return Name;
-        }
-        else
-        {
-          return Parent + "'" + Name;
-        }
       }
 
       if (Parent is RootNamespaceEntity)

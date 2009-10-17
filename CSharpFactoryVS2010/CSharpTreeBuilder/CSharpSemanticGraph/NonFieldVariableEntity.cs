@@ -10,6 +10,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class NonFieldVariableEntity : SemanticEntity, IVariableEntity, INamedEntity
   {
+    #region State
+
+    /// <summary>Gets the name of the variable.</summary>
+    public string Name { get; private set; }
+
+    /// <summary>Gets the type reference of the variable.</summary>
+    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+
+    /// <summary>Gets the initializer of the variable.</summary>
+    public VariableInitializer Initializer { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NonFieldVariableEntity"/> class.
@@ -39,10 +52,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the name of the variable.
+    /// Initializes a new instance of the <see cref="NonFieldVariableEntity"/> class 
+    /// by deep copying from another instance.
     /// </summary>
+    /// <param name="source">The object whose state will be copied to the new object.</param>
     // ----------------------------------------------------------------------------------------------
-    public string Name { get; private set; }
+    protected NonFieldVariableEntity(NonFieldVariableEntity source)
+      : base(source)
+    {
+      Name = source.Name;
+      TypeReference = source.TypeReference;
+      Initializer = source.Initializer;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -56,13 +77,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return Name;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type reference of the variable.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -87,13 +101,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return Type == null ? null : Type.IsArrayType as bool?;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the initializer of the variable.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public VariableInitializer Initializer { get; private set; }
 
   }
 }
