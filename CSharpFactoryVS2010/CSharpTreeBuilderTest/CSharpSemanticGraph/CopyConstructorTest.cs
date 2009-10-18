@@ -31,7 +31,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       cloneB.AllTypeParameters.Count().ShouldEqual(classB.AllTypeParameters.Count());
       cloneB.BaseInterfaces.Count.ShouldEqual(classB.BaseInterfaces.Count);
-      cloneB.BaseType.ShouldEqual(classB.BaseType);
+      cloneB.BaseClass.ShouldEqual(classB.BaseClass);
       cloneB.BaseTypeCount.ShouldEqual(classB.BaseTypeCount);
       cloneB.BaseTypeReferences.Count().ShouldEqual(classB.BaseTypeReferences.Count());
       cloneB.BuiltInTypeValue.ShouldEqual(classB.BuiltInTypeValue);

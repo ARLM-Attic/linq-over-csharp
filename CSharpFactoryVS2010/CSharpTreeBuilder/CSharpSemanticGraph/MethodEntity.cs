@@ -310,12 +310,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// because it can be a ConstructedGenericType as well (if the interface is a generic).
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity Interface
+    public InterfaceEntity Interface
     {
       get 
       {
         return InterfaceReference != null && InterfaceReference.ResolutionState == ResolutionState.Resolved
-                 ? InterfaceReference.TargetEntity
+                 ? InterfaceReference.TargetEntity as InterfaceEntity
                  : null;
       }
     }

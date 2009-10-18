@@ -184,7 +184,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classA.IsValueType.ShouldBeFalse();
 
       // base class is not yet resolved, so it's null
-      classA.BaseType.ShouldBeNull();
+      classA.BaseClass.ShouldBeNull();
 
       classA.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
       (classA as IMemberEntity).IsNew.ShouldBeFalse();

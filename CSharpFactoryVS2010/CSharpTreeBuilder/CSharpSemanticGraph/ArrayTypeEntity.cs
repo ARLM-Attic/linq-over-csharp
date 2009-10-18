@@ -31,10 +31,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the base type of the type.
+    /// Gets the base class of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override TypeEntity BaseType
+    public override ClassEntity BaseClass
     {
       get { return SemanticGraph.SystemArray; }
     }

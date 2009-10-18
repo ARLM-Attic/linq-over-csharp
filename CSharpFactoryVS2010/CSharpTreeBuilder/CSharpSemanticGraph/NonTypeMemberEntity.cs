@@ -109,19 +109,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
         // If no declared accessibility then the default has to be returned,
         // which is based on the type of the containing type.
-        if (Parent != null && Parent is TypeEntity)
+        if (Parent is ClassEntity || Parent is StructEntity)
         {
-          var parentType = Parent as TypeEntity;
+          return AccessibilityKind.Private;
+        }
 
-          if (parentType.IsClassType || parentType.IsStructType)
-          {
-            return AccessibilityKind.Private;
-          }
-
-          if (parentType.IsInterfaceType || parentType.IsEnumType)
-          {
-            return AccessibilityKind.Public;
-          }
+        if (Parent is InterfaceEntity || Parent is EnumEntity)
+        {
+          return AccessibilityKind.Public;
         }
 
         // If the default accessibility cannot be determined then return null.

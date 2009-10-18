@@ -222,7 +222,7 @@ namespace CSharpTreeBuilderTest
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as ClassEntity;
       var baseTypeRefs = classEntity.BaseTypeReferences.ToList();
       baseTypeRefs.Count.ShouldEqual(1);
-      classEntity.BaseType.FullyQualifiedName.ShouldEqual("B");
+      classEntity.BaseClass.FullyQualifiedName.ShouldEqual("B");
     }
 
     // ----------------------------------------------------------------------------------------------

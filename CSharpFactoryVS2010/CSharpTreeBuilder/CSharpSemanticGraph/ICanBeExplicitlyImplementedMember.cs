@@ -22,10 +22,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the reference to the interface entity whose member is explicitly implemented.
     /// Null if this member is not an explicitly implemented interface member.
     /// </summary>
-    /// <remarks>
-    /// The reference points to a TypeEntity rather then an InterfaceEntity, 
-    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
-    /// </remarks>
     // ----------------------------------------------------------------------------------------------
     SemanticEntityReference<TypeEntity> InterfaceReference { get; }
 
@@ -35,11 +31,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Null if this member is not an explicitly implemented interface member 
     /// or if the reference to the interface entity is not resolved.
     /// </summary>
-    /// <remarks>
-    /// The type is a TypeEntity rather then an InterfaceEntity, 
-    /// because it can be a ConstructedGenericType as well (if the interface is a generic).
-    /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    TypeEntity Interface { get; }
+    InterfaceEntity Interface { get; }
   }
 }

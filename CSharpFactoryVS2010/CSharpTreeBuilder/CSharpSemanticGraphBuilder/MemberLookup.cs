@@ -128,7 +128,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // This step only has an effect if T is a type parameter and T has both an effective base class other than object 
       // and a non-empty effective interface set (§10.1.5). 
       if (T is TypeParameterEntity
-        && T.BaseType != _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object)
+        && T.BaseClass != _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object)
         && T.BaseInterfaces.Count > 0)
       {
         // For every member S.M in the set, where S is the type in which the member M is declared, 

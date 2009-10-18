@@ -111,9 +111,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // to any enum-type and to any nullable-type whose underlying type is an enum-type.
       return IsDecimalIntegerLiteralZero(expression) &&
         (
-          targetType.IsEnumType
+          targetType is EnumEntity
         ||
-          (targetType.IsNullableType && targetType.UnderlyingOfNullableType.IsEnumType)
+          (targetType.IsNullableType && targetType.UnderlyingOfNullableType is EnumEntity)
         );
     }
 
@@ -222,16 +222,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // - From any class-type S to any class-type T, provided S is derived from T.
         // - From any class-type S to any interface-type T, provided S implements T.
-        if (sourceType.IsClassType)
+        if (sourceType is ClassEntity)
         {
-          return (targetType.IsClassType && targetType.IsBaseOf(sourceType))
-            || (targetType.IsInterfaceType && sourceType.Implements(targetType));
+          return (targetType is ClassEntity && targetType.IsBaseOf(sourceType))
+            || (targetType is InterfaceEntity && sourceType.Implements(targetType as InterfaceEntity));
         }
 
         // - From any interface-type S to any interface-type T, provided S is derived from T.
-        if (sourceType.IsInterfaceType)
+        if (sourceType is InterfaceEntity)
         {
-          return (targetType.IsInterfaceType && sourceType.Implements(targetType));
+          return (targetType is InterfaceEntity && sourceType.Implements(targetType as InterfaceEntity));
         }
 
         // - From an array-type S with an element type SE to an array-type T with an element type TE, 
@@ -253,7 +253,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           // - From any array-type to System.Array and the interfaces it implements.
         if (sourceType.IsArrayType && 
           ((targetType == targetType.SemanticGraph.SystemArray)
-          || targetType.SemanticGraph.SystemArray.Implements(targetType)))
+          || (targetType is InterfaceEntity && targetType.SemanticGraph.SystemArray.Implements(targetType as InterfaceEntity))))
         {
           return true;
         }

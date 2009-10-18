@@ -125,7 +125,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return (Type != null) && Type.IsDelegateType;
+        return (Type != null) && Type is DelegateEntity;
       }
     }
 

@@ -422,7 +422,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // The property is auto-implemented it's not an interface member
       // and if both get and set accessors are abstract 
-      var isAutoImplemented = !parentEntity.IsInterfaceType
+      var isAutoImplemented = !(parentEntity is InterfaceEntity)
         && node.GetAccessor != null && !node.GetAccessor.HasBody
         && node.SetAccessor != null && !node.SetAccessor.HasBody;
 

@@ -690,7 +690,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           accessibleTypeEntity = candidateTypeEntity;
         }
 
-        contextType = contextType.BaseType;
+        contextType = contextType.BaseClass;
       }
 
       return accessibleTypeEntity;

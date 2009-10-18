@@ -48,16 +48,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get { return true; }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type is an enum type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsEnumType
-    {
-      get { return true; }
-    }
-
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

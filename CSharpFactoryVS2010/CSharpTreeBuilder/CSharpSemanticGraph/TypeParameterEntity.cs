@@ -105,14 +105,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// but the data model must be able to represent erroneous constraints too.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TypeEntity> ClassTypeConstraints
+    public IEnumerable<ClassEntity> ClassTypeConstraints
     {
       get
       {
         return from typeReference in _TypeReferenceConstraints
                where typeReference.ResolutionState == ResolutionState.Resolved
-                     && typeReference.TargetEntity.IsClassType
-               select typeReference.TargetEntity;
+                     && typeReference.TargetEntity is ClassEntity
+               select typeReference.TargetEntity as ClassEntity;
       }
     }
 
@@ -124,14 +124,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// If none or more than one constraint is a class type constraint the returns null.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity ClassTypeConstraint
+    public ClassEntity ClassTypeConstraint
     {
       get
       {
         var classTypeConstraints = (from typeReference in _TypeReferenceConstraints
                                     where typeReference.ResolutionState == ResolutionState.Resolved
-                                          && typeReference.TargetEntity.IsClassType
-                                    select typeReference.TargetEntity).ToList();
+                                          && typeReference.TargetEntity is ClassEntity
+                                    select typeReference.TargetEntity as ClassEntity).ToList();
 
         return classTypeConstraints.Count == 1 ? classTypeConstraints[0] : null;
       }
@@ -158,23 +158,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only list of constraints that are resolved to an interface type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TypeEntity> InterfaceTypeConstraints
+    public IEnumerable<InterfaceEntity> InterfaceTypeConstraints
     {
       get
       {
         return from typeReference in _TypeReferenceConstraints
                where typeReference.ResolutionState == ResolutionState.Resolved
-                     && typeReference.TargetEntity.IsInterfaceType
-               select typeReference.TargetEntity;
+                     && typeReference.TargetEntity is InterfaceEntity
+               select typeReference.TargetEntity as InterfaceEntity;
       }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the base type entity of this type.
+    /// Gets the base class entity of this type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override TypeEntity BaseType
+    public override ClassEntity BaseClass
     {
       get
       {
@@ -184,13 +184,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         if (ClassTypeConstraint == null && !HasReferenceTypeConstraint && !HasNonNullableValueTypeConstraint
           && TypeParameterConstraints.Count() == 0)
         {
-          return SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object);
+          return SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object) as ClassEntity;
         }
 
         // If T has the value type constraint, its effective base class is System.ValueType.
         if (HasNonNullableValueTypeConstraint)
         {
-          return SemanticGraph.GetEntityByMetadataObject(typeof(System.ValueType)) as TypeEntity;
+          return SemanticGraph.GetEntityByMetadataObject(typeof(System.ValueType)) as ClassEntity;
         }
 
         // If T has a class-type constraint C but no type-parameter constraints, its effective base class is C.
@@ -207,7 +207,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           // The consistency rules ensure that such a most encompassed type exists.
 
           var typeConverter = new TypeConverter();
-          return typeConverter.GetMostEncompassedType(GetBaseClassesOfTypeParameters());
+          return typeConverter.GetMostEncompassedType(GetBaseClassesOfTypeParameters().Cast<TypeEntity>()) as ClassEntity;
         }
 
         // If T has both a class-type constraint and one or more type-parameter constraints, 
@@ -225,13 +225,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           }
 
           var typeConverter = new TypeConverter();
-          return typeConverter.GetMostEncompassedType(baseClasses);
+          return typeConverter.GetMostEncompassedType(baseClasses.Cast<TypeEntity>()) as ClassEntity;
         }
 
         // If T has the reference type constraint but no class-type constraints, its effective base class is object.
         if (HasReferenceTypeConstraint && ClassTypeConstraint == null && !HasNonNullableValueTypeConstraint)
         {
-          return SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object);
+          return SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object) as ClassEntity;
         }
 
         return null;
@@ -243,7 +243,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a read-only collection of base interface entities of this type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public override ReadOnlyCollection<TypeEntity> BaseInterfaces
+    public override ReadOnlyCollection<InterfaceEntity> BaseInterfaces
     {
       get
       {
@@ -311,15 +311,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <returns>The set of base classes of the type-parameter constraints.</returns>
     // ----------------------------------------------------------------------------------------------
-    private HashSet<TypeEntity> GetBaseClassesOfTypeParameters()
+    private HashSet<ClassEntity> GetBaseClassesOfTypeParameters()
     {
-      var baseClassesOfTypeParameters = new HashSet<TypeEntity>();
+      var baseClassesOfTypeParameters = new HashSet<ClassEntity>();
 
       foreach (var typeParameterEntity in TypeParameterConstraints)
       {
-        if (typeParameterEntity.BaseType != null)
+        if (typeParameterEntity.BaseClass != null)
         {
-          baseClassesOfTypeParameters.Add(typeParameterEntity.BaseType);
+          baseClassesOfTypeParameters.Add(typeParameterEntity.BaseClass);
         }
       }
 

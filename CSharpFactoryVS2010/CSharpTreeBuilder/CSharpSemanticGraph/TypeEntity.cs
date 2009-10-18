@@ -301,56 +301,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this type is a class type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsClassType
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type is an interface type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsInterfaceType
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type is a struct type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsStructType
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type is an enum type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsEnumType
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type is a delegate type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual bool IsDelegateType
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a value indicating whether this type is an array type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -428,7 +378,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the base type entity of this type.
+    /// Gets the base class entity of this type.
     /// </summary>
     /// <remarks>
     /// It returns an entity, not a reference, so it can be successful only if the base type references are already resolved.
@@ -436,15 +386,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Always null for interfaces, pointer types, type parameters.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual TypeEntity BaseType
+    public virtual ClassEntity BaseClass
     {
       get
       {
         var baseTypes = (from baseType in BaseTypeReferences
                          where
                            baseType.ResolutionState == ResolutionState.Resolved &&
-                           baseType.TargetEntity.IsClassType
-                         select baseType.TargetEntity).ToList();
+                           baseType.TargetEntity is ClassEntity
+                         select baseType.TargetEntity as ClassEntity).ToList();
         
         if (baseTypes.Count == 1)
         { 
@@ -453,23 +403,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
         // If the base type is not found, then return the default base type.
         // Interfaces and System.Object don't have a base type. All other types have.
-        if (!IsInterfaceType && BuiltInTypeValue != BuiltInType.Object)
+        if (!(this is InterfaceEntity) && BuiltInTypeValue != BuiltInType.Object)
         {
-          if (IsEnumType)
+          if (this is EnumEntity)
           {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Enum)) as TypeEntity;
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Enum)) as ClassEntity;
           }
-          if (IsStructType)
+          if (this is StructEntity)
           {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.ValueType)) as TypeEntity;
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.ValueType)) as ClassEntity;
           }
-          if (IsDelegateType)
+          if (this is DelegateEntity)
           {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.MulticastDelegate)) as TypeEntity;
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.MulticastDelegate)) as ClassEntity;
           }
-          if (IsClassType)
+          if (this is ClassEntity)
           {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Object)) as TypeEntity;
+            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Object)) as ClassEntity;
           }
         }
 
@@ -489,7 +439,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return (from baseType in BaseTypeReferences
                 where
                   baseType.ResolutionState == ResolutionState.Resolved &&
-                  baseType.TargetEntity.IsClassType
+                  baseType.TargetEntity is ClassEntity
                 select baseType.TargetEntity).Count();
       }
     }
@@ -499,16 +449,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a read-only collection of base interface entities of this type.
     /// </summary>
     /// <remarks>
-    /// It returns the resolved entities, not the references, so it can be successful only if the base type references are already resolved.
+    /// It returns the resolved entities, not the references,
+    /// so it can be successful only if the base type references are already resolved.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual ReadOnlyCollection<TypeEntity> BaseInterfaces
+    public virtual ReadOnlyCollection<InterfaceEntity> BaseInterfaces
     {
       get
       {
         return (from baseType in BaseTypeReferences
-                where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity.IsInterfaceType
-                select baseType.TargetEntity).ToList().AsReadOnly();
+                where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
+                select baseType.TargetEntity as InterfaceEntity).ToList().AsReadOnly();
       }
     }
 
@@ -739,10 +690,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       string name, SemanticEntity accessingEntity)
       where TEntityType : IMemberEntity
     {
-      return (BaseType == null)
+      return (BaseClass == null)
         ? new List<TEntityType>()
-        : BaseType.GetAccessibleMembers<TEntityType>(name, accessingEntity)
-          .Union(BaseType.GetAccessibleInheritedMembers<TEntityType>(name, accessingEntity));
+        : BaseClass.GetAccessibleMembers<TEntityType>(name, accessingEntity)
+          .Union(BaseClass.GetAccessibleInheritedMembers<TEntityType>(name, accessingEntity));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -821,29 +772,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public bool IsBaseOf(TypeEntity typeEntity)
     {
-      if (typeEntity == null || typeEntity.BaseType == null)
+      if (typeEntity == null || typeEntity.BaseClass == null)
       {
         return false;
       }
 
-      if (typeEntity.BaseType == this)
+      if (typeEntity.BaseClass == this)
       {
         return true;
       }
 
-      return this.IsBaseOf(typeEntity.BaseType);
+      return this.IsBaseOf(typeEntity.BaseClass);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this type implements an interface.
     /// </summary>
-    /// <param name="typeEntity">An interface entity (can be constructed generic type too).</param>
+    /// <param name="typeEntity">An interface entity.</param>
     /// <returns>True if this type implements the interface entity, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool Implements(TypeEntity typeEntity)
+    public bool Implements(InterfaceEntity typeEntity)
     {
-      if (typeEntity == null || !typeEntity.IsInterfaceType)
+      if (typeEntity == null || !(typeEntity is InterfaceEntity))
       {
         return false;
       }
@@ -853,7 +804,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return true;
       }
 
-      return (BaseType != null && BaseType.Implements(typeEntity))
+      return (BaseClass != null && BaseClass.Implements(typeEntity))
         || (BaseInterfaces != null && BaseInterfaces.Any(x => x.Implements(typeEntity)));
     }
 

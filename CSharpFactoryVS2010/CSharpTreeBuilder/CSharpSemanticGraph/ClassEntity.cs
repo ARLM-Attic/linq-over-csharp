@@ -109,17 +109,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get { return true; }
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this type is a class type.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsClassType
-    {
-      get { return true; }
-    }
-
-
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

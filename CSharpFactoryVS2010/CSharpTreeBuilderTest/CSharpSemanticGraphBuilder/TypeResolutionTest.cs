@@ -87,7 +87,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeParams[0].ShouldEqual(classA.GetOwnTypeParameterByName("T2"));
         typeParams[1].ShouldEqual(classA.GetOwnTypeParameterByName("T4"));
 
-        typeParameter.BaseType.ToString().ShouldEqual("global::B");
+        typeParameter.BaseClass.ToString().ShouldEqual("global::B");
 
         typeParameter.BaseInterfaces.Count.ShouldEqual(2);
         var interfaces = typeParameter.BaseInterfaces.OrderBy(x => x.ToString()).ToList();
@@ -597,7 +597,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array1 = fieldEntity.TypeReference.TargetEntity as ArrayTypeEntity;
-        array1.BaseType.FullyQualifiedName.ShouldEqual("System.Array");
+        array1.BaseClass.FullyQualifiedName.ShouldEqual("System.Array");
         array1.Members.Count().ShouldEqual(0);
         array1.Name.ShouldEqual("A2");
         array1.FullyQualifiedName.ShouldEqual("A2");
@@ -1241,21 +1241,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // class A1<T1> : A3<T1, A2<T1>>, I1<A1<T1>>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1", 1);
-        classEntity.BaseType.ToString().ShouldEqual("global::A3`2[global::A1`1.T1,global::A2`1[global::A1`1.T1]]");
+        classEntity.BaseClass.ToString().ShouldEqual("global::A3`2[global::A1`1.T1,global::A2`1[global::A1`1.T1]]");
         classEntity.BaseInterfaces.Count.ShouldEqual(1);
         classEntity.BaseInterfaces[0].ToString().ShouldEqual("global::I1`1[global::A1`1[global::A1`1.T1]]");
       }
       // class A2<T2> : A3<int, long>, I1<int>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A2", 1);
-        classEntity.BaseType.ToString().ShouldEqual("global::A3`2[global::System.Int32,global::System.Int64]");
+        classEntity.BaseClass.ToString().ShouldEqual("global::A3`2[global::System.Int32,global::System.Int64]");
         classEntity.BaseInterfaces.Count.ShouldEqual(1);
         classEntity.BaseInterfaces[0].ToString().ShouldEqual("global::I1`1[global::System.Int32]");
       }
       // class A3<T3, T4>
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A3", 2);
-        classEntity.BaseType.ToString().ShouldEqual("global::System.Object");
+        classEntity.BaseClass.ToString().ShouldEqual("global::System.Object");
         classEntity.BaseInterfaces.Count.ShouldEqual(0);
       }
     }
@@ -1303,44 +1303,44 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // class A1 // implicitly : System.Object
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
-        entity.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
+        entity.BaseClass.FullyQualifiedName.ShouldEqual("System.Object");
       }
       // struct A2 // implicitly: System.ValueType
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<StructEntity>("A2");
-        entity.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
+        entity.BaseClass.FullyQualifiedName.ShouldEqual("System.ValueType");
       }
       // enum A3 // implicitly: System.Enum
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<EnumEntity>("A3");
-        entity.BaseType.FullyQualifiedName.ShouldEqual("System.Enum");
+        entity.BaseClass.FullyQualifiedName.ShouldEqual("System.Enum");
       }
       // delegate void A4(); // implicitly: System.MulticastDelegate
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<DelegateEntity>("A4");
-        entity.BaseType.FullyQualifiedName.ShouldEqual("System.MulticastDelegate");
+        entity.BaseClass.FullyQualifiedName.ShouldEqual("System.MulticastDelegate");
       }
       // class A5<T>
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<TypeEntity>("A5", 1);
-        entity.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
+        entity.BaseClass.FullyQualifiedName.ShouldEqual("System.Object");
       }
       // struct A6<T>
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<TypeEntity>("A6", 1);
-        entity.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
+        entity.BaseClass.FullyQualifiedName.ShouldEqual("System.ValueType");
       }
       // A5<int> a5;
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A8");
         var field = entity.GetMember<FieldEntity>("a5");
-        field.Type.BaseType.FullyQualifiedName.ShouldEqual("System.Object");
+        field.Type.BaseClass.FullyQualifiedName.ShouldEqual("System.Object");
       }
       // A6<int> a6;
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A8");
         var field = entity.GetMember<FieldEntity>("a6");
-        field.Type.BaseType.FullyQualifiedName.ShouldEqual("System.ValueType");
+        field.Type.BaseClass.FullyQualifiedName.ShouldEqual("System.ValueType");
       }
     }
 
@@ -1367,7 +1367,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         .GetChildNamespace("Collections").GetChildNamespace("ObjectModel")
         .GetSingleChildType<TypeEntity>("KeyedCollection", 2);
       keyedCollection.ToString().ShouldEqual("global::System.Collections.ObjectModel.KeyedCollection`2");
-      keyedCollection.BaseType.TemplateEntity.ShouldEqual(collection);
+      keyedCollection.BaseClass.TemplateEntity.ShouldEqual(collection);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -1735,7 +1735,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       usingAliasE.AliasedNamespace.ShouldEqual(namespaceA);
       usingAliasE.AliasedType.ShouldBeNull();
 
-      classD.BaseType.ShouldEqual(classB);
+      classD.BaseClass.ShouldEqual(classB);
     }
 
     // ----------------------------------------------------------------------------------------------
