@@ -5,6 +5,7 @@ using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.Helpers;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -13,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This is the abstract base class of all kinds of nodes in the semantic graph (namespace, type, etc.).
   /// </summary>
   // ================================================================================================
-  public abstract class SemanticEntity : ICloneable
+  public abstract class SemanticEntity : ISemanticEntity
   {
     #region State 
 
@@ -34,8 +35,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     /// <summary>Backing field for Program property.</summary>
     private Program _Program;
-
-
+    
+    /// <summary>Backing field for TypeParameterMap property.</summary>
+    protected TypeParameterMap _TypeParameterMap;
+    
 
     /// <summary>Gets or sets the parent of this entity.</summary>
     public SemanticEntity Parent { get; set; }
@@ -43,11 +46,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Gets or sets the reflected metadata (eg. type) that this entity was created from.</summary>
     public object ReflectedMetadata { get; set; }
 
-    /// <summary>Gets or sets the type parameters and type arguments associated with this entity.</summary>
-    public TypeParameterMap TypeParameterMap { get; private set; }
-
     /// <summary>Gets or sets the generic template of this entity.</summary>
     public SemanticEntity TemplateEntity { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether a constructed entity's type parameters are already resolved.
+    /// Undefined for non-constructed entities.
+    /// </summary>
+    public bool TypeParametersResolved { get; private set; }
 
     #endregion
 
@@ -58,39 +64,102 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected SemanticEntity()
     {
-      TypeParameterMap = new TypeParameterMap();
+      _TypeParameterMap = new TypeParameterMap();
+      TypeParametersResolved = false;
     }
+
+    #region Constructed entities
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SemanticEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected SemanticEntity(SemanticEntity source)
+    protected SemanticEntity(SemanticEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
     {
-      _SemanticGraph = source._SemanticGraph;
-      _SyntaxNodes.AddRange(source._SyntaxNodes);
+      _SemanticGraph = template._SemanticGraph;
+      _SyntaxNodes.AddRange(template._SyntaxNodes);
       // ConstructedEntities should not be copied to the clone.
-      _Program = source._Program;
+      _Program = template._Program;
+      _TypeParameterMap = typeParameterMap;
 
-      Parent = source.Parent;
-      ReflectedMetadata = source.ReflectedMetadata;
-      TypeParameterMap = source.TypeParameterMap;
-      TemplateEntity = source.TemplateEntity;
+      Parent = template.Parent;
+      ReflectedMetadata = template.ReflectedMetadata;
+      TemplateEntity = template;
+      TypeParametersResolved = false;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// Creates a new constructed entity.
     /// </summary>
-    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
+    /// false to defer it to a later phase.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public virtual object Clone()
+    protected virtual SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
     {
-      throw new InvalidOperationException("Abstract class cannot be cloned.");
+      throw new ApplicationException("Abstract SemanticEntity cannot be constructed.");
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type parameters to actual type arguments in this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual void ResolveTypeParameters()
+    {
+      if (TypeParametersResolved)
+      {
+        return;
+      }
+
+      TypeParametersResolved = true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns a semantic entity constructed from this entity by replacing type parameters 
+    /// with type arguments. Gets the entity from cache or creates a new one.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
+    /// false to defer it to a later phase.</param>
+    /// <returns>
+    /// A semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    {
+      SemanticEntity constructedEntity;
+
+      if (_ConstructedEntities.ContainsKey(typeParameterMap))
+      {
+        constructedEntity = _ConstructedEntities[typeParameterMap];
+      }
+      else
+      {
+        constructedEntity = ConstructNew(typeParameterMap, resolveTypeParameters);
+
+        if (resolveTypeParameters)
+        {
+          constructedEntity.ResolveTypeParameters();
+        }
+
+        _ConstructedEntities.Add(typeParameterMap, constructedEntity);
+      }
+
+      return constructedEntity;
+    }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -208,6 +277,54 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets the type parameters and type arguments associated with this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual TypeParameterMap TypeParameterMap 
+    {
+      get 
+      { 
+        return _TypeParameterMap; 
+      }
+      private set 
+      { 
+        _TypeParameterMap = value; 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a constructed entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsConstructed
+    {
+      get
+      {
+        return TemplateEntity != null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the original generic template of this entity (the first in the chain of template entities).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public SemanticEntity OriginalTemplateEntity
+    {
+      get
+      {
+        if (!IsConstructed)
+        {
+          return null;
+        }
+
+        return TemplateEntity.IsConstructed ? TemplateEntity.OriginalTemplateEntity : TemplateEntity;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a collection of the entities constructed from this entity 
     /// by replacing type parameters with type arguments.
     /// </summary>
@@ -215,28 +332,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public IEnumerable<SemanticEntity> ConstructedEntities
     {
       get { return _ConstructedEntities.Values; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a semantic entity by type parameters and type arguments.
-    /// </summary>
-    /// <param name="typeParameterMap">A type parameter map.</param>
-    /// <returns>A constructed semantic entity, or null if not found.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap)
-    {
-      if (_ConstructedEntities.ContainsKey(typeParameterMap))
-      {
-        return _ConstructedEntities[typeParameterMap];
-      }
-
-      var constructedEntity = (SemanticEntity)this.Clone();
-      constructedEntity.TypeParameterMap = typeParameterMap;
-      constructedEntity.TemplateEntity = this;
-      _ConstructedEntities.Add(typeParameterMap, constructedEntity);
-      
-      return constructedEntity;
     }
 
     #region Visitor methods

@@ -54,32 +54,43 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
     }
 
+        #region Constructed entities
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    public ClassEntity(ClassEntity source)
-      : base(source)
+    private ClassEntity(ClassEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      IsPartial = source.IsPartial;
-      IsAbstract = source.IsAbstract;
-      IsSealed = source.IsSealed;
-      IsStatic = source.IsStatic;
+      IsPartial = template.IsPartial;
+      IsAbstract = template.IsAbstract;
+      IsSealed = template.IsSealed;
+      IsStatic = template.IsStatic;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// Creates a new constructed entity.
     /// </summary>
-    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
+    /// false to defer it to a later phase.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public override object Clone()
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
     {
-      return new ClassEntity(this);
+      return new ClassEntity(this, typeParameterMap, resolveTypeParameters);
     }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

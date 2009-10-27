@@ -102,6 +102,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a type parameter and a type argument to the map.
+    /// </summary>
+    /// <param name="typeParameter">A type parameter entity.</param>
+    /// <param name="typeArgument">A type entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddMapping(TypeParameterEntity typeParameter, TypeEntity typeArgument)
+    {
+      if (ContainsTypeParameter(typeParameter))
+      {
+        throw new ApplicationException(string.Format("Type parameter '{0}' already exists in the map.", typeParameter));
+      }
+      else
+      {
+        _Map.Add(typeParameter, typeArgument);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the collection of type parameters in the map.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -163,5 +182,65 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the number of mappings in the map.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public int Count
+    {
+      get
+      {
+        return _Map.Count;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this map is empty (no type parameters).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsEmpty
+    {
+      get
+      {
+        return _Map.Keys.Count == 0;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Combines this map with another one by resolving type parameters in this map to their 
+    /// corresponding type argument defined in the parameter map.
+    /// </summary>
+    /// <param name="typeParameterMap">A type parameter map.</param>
+    /// <returns>A new map created from this map and the parameter.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterMap Combine(TypeParameterMap typeParameterMap)
+    {
+      var newMap = new TypeParameterMap();
+
+      foreach(var keyValuePair in _Map)
+      {
+        var newValue = keyValuePair.Value;
+
+        if (newValue == null && typeParameterMap.ContainsTypeParameter(keyValuePair.Key))
+        {
+          newValue = typeParameterMap[keyValuePair.Key];
+        }
+        else
+        {
+          var typeParameter = newValue as TypeParameterEntity;
+          if (typeParameter != null && typeParameterMap.ContainsTypeParameter(typeParameter))
+          {
+            newValue = typeParameterMap[typeParameter];
+          }
+        }
+
+        newMap.AddMapping(keyValuePair.Key, newValue);
+      }
+
+      return newMap;
+    }
   }
 }

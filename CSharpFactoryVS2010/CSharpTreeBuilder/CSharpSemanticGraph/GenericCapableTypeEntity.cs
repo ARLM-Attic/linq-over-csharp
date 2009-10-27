@@ -50,17 +50,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="GenericCapableTypeEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected GenericCapableTypeEntity(GenericCapableTypeEntity source)
-      : base(source)
+    protected GenericCapableTypeEntity(GenericCapableTypeEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      foreach (var typeParameter in source._OwnTypeParameters)
-      {
-        AddTypeParameter((TypeParameterEntity)typeParameter.Clone());
-      }
+      // Note that TypeParameters of the TemplateEntity are NOT added to the constructed type.
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -72,7 +71,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public IEnumerable<TypeParameterEntity> AllTypeParameters
     {
       get 
-      { 
+      {
+        if (IsConstructed)
+        {
+          throw new InvalidOperationException("Constructed types don't have type parameters.");
+        }
+
         if (Parent is GenericCapableTypeEntity)
         {
           return (Parent as GenericCapableTypeEntity).AllTypeParameters.Concat(_OwnTypeParameters);
@@ -90,7 +94,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TypeParameterEntity> OwnTypeParameters
     {
-      get { return _OwnTypeParameters; }
+      get 
+      {
+        if (IsConstructed)
+        {
+          throw new InvalidOperationException("Constructed types don't have type parameters.");
+        }
+
+        return _OwnTypeParameters; 
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -100,7 +112,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public int AllTypeParameterCount
     {
-      get { return AllTypeParameters.Count(); }
+      get 
+      {
+        if (IsConstructed)
+        {
+          return (OriginalTemplateEntity as GenericCapableTypeEntity).AllTypeParameterCount;
+        }
+
+        return AllTypeParameters.Count(); 
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -110,46 +130,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public int OwnTypeParameterCount
     {
-      get { return _OwnTypeParameters.Count; }
-    }
+      get 
+      {
+        if (IsConstructed)
+        {
+          return (OriginalTemplateEntity as GenericCapableTypeEntity).OwnTypeParameterCount;
+        }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is a generic type. 
-    /// </summary>
-    /// <remarks>It's a generic type if it has any type parameters (inherited or own).</remarks>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsGeneric
-    {
-      get { return AllTypeParameters.Count() > 0; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is an unbound generic type 
-    /// (ie. a generic type definition with no actual type arguments).
-    /// </summary>
-    /// <remarks>
-    /// An unbound type refers to the entity declared by a type declaration. 
-    /// An unbound generic type is not itself a type, and cannot be used as the type of a variable, 
-    /// argument or return value, or as a base type. The only construct in which 
-    /// an unbound generic type can be referenced is the typeof expression.
-    /// </remarks>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsUnbound
-    {
-      get { return TypeParameterMap.TypeArguments.All(typeEntity => typeEntity == null); }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is a constructed type
-    /// (ie. a type that includes at least one type argument).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public bool IsConstructed
-    {
-      get { return !IsUnbound; }
+        return _OwnTypeParameters.Count; 
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -160,6 +149,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
+      if (IsConstructed)
+      {
+        throw new InvalidOperationException("Constructed types don't have type parameters.");
+      }
+
       _OwnTypeParameters.Add(typeParameterEntity);
       typeParameterEntity.Parent = this;
       _DeclarationSpace.Register(typeParameterEntity);
@@ -173,6 +167,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
     {
+      if (IsConstructed)
+      {
+        throw new InvalidOperationException("Constructed types don't have type parameters.");
+      }
+
       if (typeParameterEntity != null)
       {
         _OwnTypeParameters.Remove(typeParameterEntity);
@@ -189,7 +188,42 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
+      if (IsConstructed)
+      {
+        throw new InvalidOperationException("Constructed types don't have type parameters.");
+      }
+
       return _DeclarationSpace.GetSingleEntity<TypeParameterEntity>(name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is a generic type (ie. has type parameters).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsGeneric
+    {
+      get
+      {
+        return IsConstructed 
+          ? (TemplateEntity as GenericCapableTypeEntity).IsGeneric
+          : AllTypeParameterCount > 0;
+      }
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type parameters and type arguments associated with this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeParameterMap TypeParameterMap
+    {
+      get 
+      { 
+        return IsConstructed 
+          ? _TypeParameterMap 
+          : new TypeParameterMap(AllTypeParameters);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -200,21 +234,26 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
-      var stringBuilder = new StringBuilder(base.ToString());
+      var stringBuilder = new StringBuilder();
 
-      if (OwnTypeParameterCount > 0)
+      if (!IsConstructed)
       {
-        stringBuilder.Append('`');
-        stringBuilder.Append(OwnTypeParameterCount.ToString());
+        stringBuilder.Append(base.ToString());
+
+        if (_OwnTypeParameters.Count > 0)
+        {
+          stringBuilder.Append('`');
+          stringBuilder.Append(_OwnTypeParameters.Count);
+        }
       }
-
-      if (IsConstructed)
+      else
       {
+        stringBuilder.Append(OriginalTemplateEntity.ToString());
+
         stringBuilder.Append('[');
 
         bool isFirst = true;
-
-        foreach (var typeArgument in TypeParameterMap.TypeArguments)
+        foreach (var typeParameter in TypeParameterMap.TypeParameters)
         {
           if (isFirst)
           {
@@ -225,7 +264,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
             stringBuilder.Append(',');
           }
 
-          stringBuilder.Append(typeArgument == null ? "(null)" : typeArgument.ToString());
+          var typeArgument = TypeParameterMap[typeParameter];
+          
+          stringBuilder.Append( typeArgument == null ? "(open)" : typeArgument.ToString());
         }
 
         stringBuilder.Append(']');

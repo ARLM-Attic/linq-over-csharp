@@ -25,25 +25,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="BlockEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    public BlockEntity(BlockEntity source)
-      : base(source)
+    private BlockEntity(SemanticEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      _Statements.AddRange(source._Statements.Select(x => x.Clone()).Cast<StatementEntity>());
+      //_Statements.AddRange(source._Statements.Select(x => x.Clone()).Cast<StatementEntity>());
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// Creates a new constructed entity.
     /// </summary>
-    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
+    /// false to defer it to a later phase.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public override object Clone()
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
     {
-      return new BlockEntity(this);
+      return new BlockEntity(this, typeParameterMap, resolveTypeParameters);
     }
 
     // ----------------------------------------------------------------------------------------------

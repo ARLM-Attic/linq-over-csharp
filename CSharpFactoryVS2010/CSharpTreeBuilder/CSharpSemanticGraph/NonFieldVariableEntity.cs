@@ -53,16 +53,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NonFieldVariableEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NonFieldVariableEntity(NonFieldVariableEntity source)
-      : base(source)
+    protected NonFieldVariableEntity(NonFieldVariableEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      Name = source.Name;
-      TypeReference = source.TypeReference;
-      Initializer = source.Initializer;
+      Name = template.Name;
+      TypeReference = template.TypeReference;
+      Initializer = template.Initializer;
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -61,6 +61,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this is an open type
+    /// (ie. is a type that involves type parameters).
+    /// </summary>
+    /// <remarks>
+    /// A type parameter defines an open type.
+    /// An array type is an open type if and only if its element type is an open type.
+    /// A constructed type is an open type if and only if one or more of its type arguments is 
+    /// an open type. A constructed nested type is an open type if and only if one or more of 
+    /// its type arguments or the type arguments of its containing type(s) is an open type.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsOpen
+    {
+      get
+      {
+        return UnderlyingType.IsOpen;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the string representation of the object.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

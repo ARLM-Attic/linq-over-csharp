@@ -40,16 +40,18 @@
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberWithBodyEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected FunctionMemberWithBodyEntity(FunctionMemberWithBodyEntity source)
-      : base(source)
+    protected FunctionMemberWithBodyEntity(FunctionMemberWithBodyEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      if (source.Body != null)
+      if (template.Body != null)
       {
-        Body = (BlockEntity)source.Body.Clone();
+        //Body = (BlockEntity)source.Body.Clone();
       }
     }
 

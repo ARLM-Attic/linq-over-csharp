@@ -43,33 +43,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="TypeParameterEntity"/> class 
-    /// by deep copying from another instance.
-    /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterEntity(TypeParameterEntity source)
-      : base(source)
-    {
-      _TypeReferenceConstraints.AddRange(source.TypeReferenceConstraints);
-      HasDefaultConstructorConstraint = source.HasDefaultConstructorConstraint;
-      HasReferenceTypeConstraint = source.HasReferenceTypeConstraint;
-      HasNonNullableValueTypeConstraint = source.HasNonNullableValueTypeConstraint;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a deep copy of the semantic subtree starting at this entity.
-    /// </summary>
-    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public override object Clone()
-    {
-      return new TypeParameterEntity(this);
-    }
-    
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets an iterate-only list of constraints that are specified with type name.
     /// </summary>
     /// <remarks>
@@ -171,6 +144,38 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this is an unbound generic type 
+    /// (ie. a generic type definition with no actual type arguments).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsUnbound
+    {
+      get { return false; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an open type
+    /// (ie. is a type that involves type parameters).
+    /// </summary>
+    /// <remarks>
+    /// A type parameter defines an open type.
+    /// An array type is an open type if and only if its element type is an open type.
+    /// A constructed type is an open type if and only if one or more of its type arguments is 
+    /// an open type. A constructed nested type is an open type if and only if one or more of 
+    /// its type arguments or the type arguments of its containing type(s) is an open type.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsOpen
+    {
+      get
+      {
+        return true;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the base class entity of this type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -259,32 +264,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Applies a type parameter map to this type. Replaces all occurrencies of all type parameters 
-    /// found in the map with the corresponding type argument.
-    /// </summary>
-    /// <param name="typeParameterMap">A type parameter map.</param>
-    /// <returns>The type that this type is mapped to.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public override TypeEntity ApplyTypeParameterMap(TypeParameterMap typeParameterMap)
-    {
-      return typeParameterMap.ContainsTypeParameter(this)
-        ? typeParameterMap[this]
-        : this;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets the string representation of the object.
     /// </summary>
     /// <returns>The string representation of the object</returns>
     // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
-      var typeParameter = (TemplateEntity == null) ? this : TemplateEntity as TypeParameterEntity;
-
-      return (typeParameter.Parent is GenericCapableTypeEntity)
-        ? (typeParameter.Parent as GenericCapableTypeEntity).ToString() + "." + typeParameter.Name
-        : typeParameter.Name;
+      return (Parent is TypeEntity) && (Parent as TypeEntity).IsUnbound
+        ? Parent.ToString() + "." + Name
+        : Name;
     }
 
     #region Visitor methods

@@ -8,15 +8,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// (either a nested type or a "normal" member like a field or a method).
   /// </summary>
   // ================================================================================================
-  public interface IMemberEntity : INamedEntity, IHasAccessibility, ICloneable
+  public interface IMemberEntity : ISemanticEntity, INamedEntity, IHasAccessibility
   {
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the parent of this entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    SemanticEntity Parent { get; set; }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this type intentionally hides an inherited member.
@@ -32,6 +25,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// or if it is a constant, field or property of a delegate type.</remarks>
     // ----------------------------------------------------------------------------------------------
     bool IsInvocable { get; }
-
   }
 }

@@ -80,7 +80,6 @@
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpaceTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeConverterTest.cs" />
     <Compile Include="CSharpSemanticGraph\AccessibilityTest.cs" />
-    <Compile Include="CSharpSemanticGraph\CopyConstructorTest.cs" />
     <Compile Include="CSharpSemanticGraph\SignatureTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphTest.cs" />
@@ -388,7 +387,6 @@
     <None Include="TestFiles\MemberLookup\MethodHidesAllNonMethodMembers.cs" />
     <None Include="TestFiles\MemberLookup\NestedTypeHidesNonTypeMembers.cs" />
     <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
-    <Compile Include="TestFiles\CopyConstructor\ClassEntity.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\TypeConverter\ImplicitReferenceConversion.cs" />
@@ -465,7 +463,8 @@
     <None Include="TestFiles\TypeResolution\NullableType.cs" />
     <None Include="TestFiles\TypeResolution\PointerToType.cs" />
     <None Include="TestFiles\TypeResolution\GenericTypeArgument.cs" />
-    <Compile Include="TestFiles\TypeResolution\ConstructedGenericClass.cs" />
+    <Compile Include="TestFiles\TypeResolution\ConstructedClassMembers.cs" />
+    <None Include="TestFiles\TypeResolution\ConstructedGenericClass.cs" />
     <None Include="TestFiles\TypeResolution\TypeParameter.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\VisitNamespaceOrTypeEntity.cs" />
     <None Include="TestFiles\TypeResolution\CS0246_TypeNameCouldNotBeFound.cs" />

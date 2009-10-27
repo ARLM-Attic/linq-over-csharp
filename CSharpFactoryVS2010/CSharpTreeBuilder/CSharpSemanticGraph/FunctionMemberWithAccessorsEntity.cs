@@ -52,15 +52,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FunctionMemberWithAccessorsEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected FunctionMemberWithAccessorsEntity(FunctionMemberWithAccessorsEntity source)
-      : base(source)
+    protected FunctionMemberWithAccessorsEntity(FunctionMemberWithAccessorsEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      TypeReference = source.TypeReference;
-      InterfaceReference = source.InterfaceReference;
+      TypeReference = template.TypeReference;
+      InterfaceReference = template.InterfaceReference;
     }
     
     // ----------------------------------------------------------------------------------------------

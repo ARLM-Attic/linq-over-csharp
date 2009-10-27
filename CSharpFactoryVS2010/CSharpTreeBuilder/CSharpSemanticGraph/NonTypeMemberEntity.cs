@@ -59,19 +59,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="NonTypeMemberEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NonTypeMemberEntity(NonTypeMemberEntity source)
-      : base(source)
+    protected NonTypeMemberEntity(NonTypeMemberEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      _IsStatic = source._IsStatic;
+      _IsStatic = template._IsStatic;
 
-      Name = source.Name;
-      IsDeclaredInSource = source.IsDeclaredInSource;
-      DeclaredAccessibility = source.DeclaredAccessibility;
-      IsNew = source.IsNew;
+      Name = template.Name;
+      IsDeclaredInSource = template.IsDeclaredInSource;
+      DeclaredAccessibility = template.DeclaredAccessibility;
+      IsNew = template.IsNew;
     }
     
     // ----------------------------------------------------------------------------------------------

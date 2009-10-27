@@ -12,7 +12,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     #region State
 
-    /// <summary>Gets the reference to the type of the field.</summary>
+    /// <summary>The type of the field.</summary>
+    private TypeEntity _Type;
+
+    /// <summary>Gets or sets the reference to the type of the field.</summary>
     public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
 
     /// <summary>Gets the initializer of the variable.</summary>
@@ -54,38 +57,57 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="FieldEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    public FieldEntity(FieldEntity source)
-      : base(source)
+    private FieldEntity(FieldEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      TypeReference = source.TypeReference;
+      TypeReference = template.TypeReference;
       
       // TODO: clone initializer
-      Initializer = source.Initializer;
+      Initializer = template.Initializer;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Creates a deep copy of the semantic subtree starting at this entity.
+    /// Creates a new constructed entity.
     /// </summary>
-    /// <returns>The deep clone of this entity and its semantic subtree.</returns>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
+    /// false to defer it to a later phase.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public override object Clone()
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
     {
-      return new FieldEntity(this);
+      return new FieldEntity(this, typeParameterMap, resolveTypeParameters);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the type of the field.
+    /// Gets or sets the type of the field.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity Type
     {
-      get { return TypeReference == null ? null : TypeReference.TargetEntity; }
+      get 
+      { 
+        return _Type != null 
+          ? _Type 
+          : TypeReference != null 
+            ? TypeReference.TargetEntity
+            : null; 
+      }
+
+      set
+      {
+        _Type = value;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

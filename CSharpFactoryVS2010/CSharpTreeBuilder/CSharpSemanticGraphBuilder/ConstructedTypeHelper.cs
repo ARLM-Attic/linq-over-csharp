@@ -70,7 +70,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var typeParameterMap = new TypeParameterMap(genericTypeDefinition.AllTypeParameters, typeArguments);
 
-      return (TypeEntity)genericTypeDefinition.GetConstructedEntity(typeParameterMap);
+      return (TypeEntity)genericTypeDefinition.GetConstructedEntity(typeParameterMap, false);
     }
   }
 }

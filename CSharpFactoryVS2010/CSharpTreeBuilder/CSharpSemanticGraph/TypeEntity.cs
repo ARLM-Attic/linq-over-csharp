@@ -34,6 +34,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for IsNew property.</summary>
     private bool _IsNew;
 
+    /// <summary>Backing field for BaseClass property.</summary>
+    private ClassEntity _BaseClass;
+
 
     /// <summary>Gets or sets the factory object needed for lazy importing reflected members.</summary>
     public MetadataImporterSemanticEntityFactory MetadataImporterFactory { get; set; }
@@ -65,35 +68,49 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       (this as IMemberEntity).IsNew = false;
     }
 
+    #region Constructed entities
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeEntity"/> class 
-    /// by deep copying from another instance.
+    /// by constructing it from a template instance.
     /// </summary>
-    /// <param name="source">The object whose state will be copied to the new object.</param>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected TypeEntity(TypeEntity source)
-      : base(source)
+    protected TypeEntity(TypeEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+      : base(template, typeParameterMap, resolveTypeParameters)
     {
-      _BaseTypeReferences.AddRange(source._BaseTypeReferences);
-      _ReflectedMembersImported = source._ReflectedMembersImported;
-      _IsNew = source._IsNew;
-      MetadataImporterFactory = source.MetadataImporterFactory;
-      BuiltInTypeValue = source.BuiltInTypeValue;
-      DeclaredAccessibility = source.DeclaredAccessibility;
+      if (template.BaseClass != null)
+      {
+        BaseClass = (ClassEntity)template.BaseClass.GetConstructedEntity(
+          template.BaseClass.TypeParameterMap.Combine(typeParameterMap),
+          resolveTypeParameters);
+      }
+
+      _ReflectedMembersImported = template._ReflectedMembersImported;
+      _IsNew = template._IsNew;
+      MetadataImporterFactory = template.MetadataImporterFactory;
+      BuiltInTypeValue = template.BuiltInTypeValue;
+      DeclaredAccessibility = template.DeclaredAccessibility;
       
       // Source members should be retrieved through the Members property (not the _Members field)
       // because that also handles lazy importing,
       // and cloned members should be added through the AddMember method,
       // because that also handles registering into the declaration space.
-      foreach (var member in source.Members)
+      foreach (var member in template.Members)
       {
-        AddMember((IMemberEntity)member.Clone());
+        AddMember((IMemberEntity)member.GetConstructedEntity(
+          member.TypeParameterMap.Combine(typeParameterMap), 
+          resolveTypeParameters));
       }
       
       // ArrayTypes should not be cloned.
       // PointerType should not be cloned.
     }
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -346,6 +363,60 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets a value indicating whether this is a generic type (ie. has type parameters).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsGeneric
+    {
+      get 
+      { 
+        return TypeParameterMap.TypeParameters.Count() > 0; 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an unbound generic type 
+    /// (ie. a generic type definition with no actual type arguments).
+    /// </summary>
+    /// <remarks>
+    /// An unbound type refers to the entity declared by a type declaration. 
+    /// An unbound generic type is not itself a type, and cannot be used as the type of a variable, 
+    /// argument or return value, or as a base type. The only construct in which 
+    /// an unbound generic type can be referenced is the typeof expression.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsUnbound
+    {
+      get 
+      { 
+        return !IsConstructed; 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an open type
+    /// (ie. is a type that involves type parameters).
+    /// </summary>
+    /// <remarks>
+    /// A type parameter defines an open type.
+    /// An array type is an open type if and only if its element type is an open type.
+    /// A constructed type is an open type if and only if one or more of its type arguments is 
+    /// an open type. A constructed nested type is an open type if and only if one or more of 
+    /// its type arguments or the type arguments of its containing type(s) is an open type.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public virtual bool IsOpen
+    {
+      get 
+      { 
+        return IsConstructed && TypeParameterMap.TypeArguments.Any(type => type.IsOpen); 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets an iterate-only collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -390,6 +461,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
+        if (_BaseClass != null)
+        {
+          return _BaseClass;
+        }
+
         var baseTypes = (from baseType in BaseTypeReferences
                          where
                            baseType.ResolutionState == ResolutionState.Resolved &&
@@ -424,6 +500,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         }
 
         return null;
+      }
+
+      set
+      {
+        _BaseClass = value;
       }
     }
 
@@ -806,19 +887,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       return (BaseClass != null && BaseClass.Implements(typeEntity))
         || (BaseInterfaces != null && BaseInterfaces.Any(x => x.Implements(typeEntity)));
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Applies a type parameter map to this type. Replaces all occurrencies of all type parameters 
-    /// found in the map with the corresponding type argument.
-    /// </summary>
-    /// <param name="typeParameterMap">A type parameter map.</param>
-    /// <returns>The type that this type is mapped to.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public virtual TypeEntity ApplyTypeParameterMap(TypeParameterMap typeParameterMap)
-    {
-      return this;
     }
 
     #region Private methods
