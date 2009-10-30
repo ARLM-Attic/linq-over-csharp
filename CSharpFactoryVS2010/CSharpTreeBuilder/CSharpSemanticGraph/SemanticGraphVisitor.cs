@@ -4,6 +4,10 @@
   /// <summary>
   /// This is the abstract base class of SemanticGraph visitor classes.
   /// </summary>
+  /// <remarks>
+  /// Preorder, depth-first traversal. 
+  /// All base classes are visited from the most-derived to the less derived.
+  /// </remarks>
   // ================================================================================================
   public abstract class SemanticGraphVisitor
   {
@@ -16,6 +20,8 @@
     public virtual void Visit(ExternAliasEntity entity) { }
     public virtual void Visit(UsingNamespaceEntity entity) { }
     public virtual void Visit(UsingAliasEntity entity) { }
+
+    public virtual void Visit(TypeEntity entity) { }
 
     public virtual void Visit(EnumEntity entity) { }
     public virtual void Visit(ClassEntity entity) { }
@@ -31,6 +37,8 @@
 
     public virtual void Visit(ScalarInitializerEntity entity) { }
     public virtual void Visit(ArrayInitializerEntity entity) { }
+
+    public virtual void Visit(ExpressionEntity entity) { }
 
     public virtual void Visit(NullLiteralExpressionEntity entity) { }
     public virtual void Visit(TypedLiteralExpressionEntity entity) { }

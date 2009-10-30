@@ -35,12 +35,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Visit(ScalarInitializerEntity entity)
+    public override void Visit(ExpressionEntity entity)
     {
-      if (entity.Expression != null)
-      {
-        entity.Expression.Evaluate(_SemanticGraph, _ErrorHandler);
-      }
+      entity.Evaluate(_SemanticGraph, _ErrorHandler);
     }
   }
 }
