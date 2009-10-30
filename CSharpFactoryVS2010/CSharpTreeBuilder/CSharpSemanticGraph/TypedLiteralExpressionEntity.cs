@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a literal expression entity that has a type (ie. all but null literal).
   /// </summary>
   // ================================================================================================
-  public class TypedLiteralExpressionEntity : LiteralExpressionEntity
+  public sealed class TypedLiteralExpressionEntity : LiteralExpressionEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

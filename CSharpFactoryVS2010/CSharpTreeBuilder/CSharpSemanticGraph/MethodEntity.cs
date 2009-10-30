@@ -411,6 +411,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      foreach (var parameter in Parameters)
+      {
+        parameter.AcceptVisitor(visitor);
+      }
     }
 
     #endregion
