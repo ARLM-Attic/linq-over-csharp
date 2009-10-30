@@ -30,9 +30,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the underlying type that this type build upon.
+    /// Gets the underlying type that this type builds upon.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity UnderlyingType { get; private set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

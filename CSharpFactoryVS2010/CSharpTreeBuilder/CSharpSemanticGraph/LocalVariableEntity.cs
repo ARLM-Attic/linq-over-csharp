@@ -29,5 +29,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public bool IsConstant { get; private set; }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

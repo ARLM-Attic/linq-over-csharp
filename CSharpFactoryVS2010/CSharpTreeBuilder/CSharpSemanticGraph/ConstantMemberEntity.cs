@@ -49,10 +49,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected ConstantMemberEntity(ConstantMemberEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected ConstantMemberEntity(ConstantMemberEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       TypeReference = template.TypeReference;
 
@@ -65,15 +64,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Creates a new constructed entity.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
-    /// false to defer it to a later phase.</param>
     /// <returns>
     /// A new semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
     {
-      return new ConstantMemberEntity(this, typeParameterMap, resolveTypeParameters);
+      return new ConstantMemberEntity(this, typeParameterMap);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -83,7 +80,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeEntity Type
     {
-      get { return TypeReference == null ? null : TypeReference.TargetEntity; }
+      get
+      {
+        return TypeReference != null && TypeReference.TargetEntity != null
+          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+          : null;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -146,9 +148,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      if (!visitor.Visit(this)) { return; }
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
 
-      if (InitializerExpression!=null)
+      if (InitializerExpression != null)
       {
         InitializerExpression.AcceptVisitor(visitor);
       }

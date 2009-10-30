@@ -54,7 +54,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
     }
 
-        #region Constructed entities
+    #region Constructed entities
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -63,10 +63,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    private ClassEntity(ClassEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    private ClassEntity(ClassEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       IsPartial = template.IsPartial;
       IsAbstract = template.IsAbstract;
@@ -79,35 +78,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Creates a new constructed entity.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
-    /// false to defer it to a later phase.</param>
     /// <returns>
     /// A new semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
     {
-      return new ClassEntity(this, typeParameterMap, resolveTypeParameters);
+      return new ClassEntity(this, typeParameterMap);
     }
 
     #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a member. 
-    /// Also sets the member's parent property, and defines member's name in the declaration space.
+    /// Runs before adding a member.
     /// </summary>
     /// <param name="memberEntity">The member entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void AddMember(IMemberEntity memberEntity)
+    protected override void BeforeAddMember(IMemberEntity memberEntity)
     {
       // Member name and type name cannot be the same.
-      if ( memberEntity.Name == Name)
+      if (memberEntity.Name == Name)
       {
         throw new TypeNameMemberNameConflictException(Name);
       }
-
-      base.AddMember(memberEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -130,8 +124,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      if (!visitor.Visit(this)) { return; }
-
+      visitor.Visit(this);
       base.AcceptVisitor(visitor);
     }
 

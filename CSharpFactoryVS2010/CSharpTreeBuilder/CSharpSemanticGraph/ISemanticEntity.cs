@@ -1,11 +1,7 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
-using CSharpTreeBuilder.Helpers;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -83,13 +79,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// with type arguments.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
-    /// false to defer it to a later phase.</param>
     /// <returns>
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap, bool resolveTypeParameters);
+    SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -97,14 +91,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     bool IsConstructed { get; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether a constructed entity's type parameters are already resolved.
-    /// Undefined for non-constructed entities.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    bool TypeParametersResolved { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

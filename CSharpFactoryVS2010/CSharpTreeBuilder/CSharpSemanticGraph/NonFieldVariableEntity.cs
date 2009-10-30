@@ -57,13 +57,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected NonFieldVariableEntity(NonFieldVariableEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected NonFieldVariableEntity(NonFieldVariableEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       Name = template.Name;
       TypeReference = template.TypeReference;
+
+      // TODO: initializer should be cloned
       Initializer = template.Initializer;
     }
 
@@ -87,7 +88,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeEntity Type
     {
-      get { return TypeReference == null ? null : TypeReference.TargetEntity; }
+      get
+      {
+        return TypeReference != null && TypeReference.TargetEntity != null
+          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+          : null;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -104,5 +110,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
     }
 
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

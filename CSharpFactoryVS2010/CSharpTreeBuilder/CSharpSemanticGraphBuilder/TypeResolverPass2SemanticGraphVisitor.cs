@@ -32,14 +32,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(TypeParameterEntity entity)
+    public override void Visit(TypeParameterEntity entity)
     {
       foreach (var typeReference in entity.TypeReferenceConstraints)
       {
         typeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
       }
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -48,7 +46,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(FieldEntity entity)
+    public override void Visit(FieldEntity entity)
     {
       // Resolve the type of the field
       if (entity.TypeReference != null)
@@ -64,8 +62,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           _ErrorHandler.Error("CS0670", errorPoint, "Field cannot have void type");
         }
       }
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -74,7 +70,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(ConstantMemberEntity entity)
+    public override void Visit(ConstantMemberEntity entity)
     {
       // Resolve the type of the field
       if (entity.TypeReference != null)
@@ -90,8 +86,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         _ErrorHandler.Error("CS1547", errorPoint, "Keyword 'void' cannot be used in this context");
       }
-
-      return true;
     }
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -99,7 +93,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(PropertyEntity entity)
+    public override void Visit(PropertyEntity entity)
     {
       // Resolve the type of the property
       if (entity.TypeReference != null)
@@ -122,8 +116,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         entity.InterfaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
       }
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -132,7 +124,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(MethodEntity entity)
+    public override void Visit(MethodEntity entity)
     {
       // Resolve the return type
       if (entity.ReturnTypeReference != null)
@@ -157,8 +149,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           parameter.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
         }
       }
-
-      return true;
     }
   }
 }

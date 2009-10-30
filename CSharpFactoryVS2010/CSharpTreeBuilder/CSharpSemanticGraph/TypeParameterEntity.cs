@@ -264,6 +264,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Returns the result of mapping this type with a type parameter map.
+    /// </summary>
+    /// <param name="typeParameterMap">A map of type parameters and corresponding type arguments.</param>
+    /// <returns>A TypeEntity, the result of the mapping.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
+    {
+      return (typeParameterMap.ContainsTypeParameter(this))
+        ? (typeParameterMap[this] ?? this)
+        : this;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the string representation of the object.
     /// </summary>
     /// <returns>The string representation of the object</returns>
@@ -286,6 +300,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
       visitor.Visit(this);
+      base.AcceptVisitor(visitor);
     }
 
     #endregion

@@ -46,15 +46,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected FunctionMemberEntity(FunctionMemberEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected FunctionMemberEntity(FunctionMemberEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       // DeclarationSpace should not be cloned.
       IsVirtual = template.IsVirtual;
       IsOverride = template.IsOverride;
       IsSealed = template.IsSealed;
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

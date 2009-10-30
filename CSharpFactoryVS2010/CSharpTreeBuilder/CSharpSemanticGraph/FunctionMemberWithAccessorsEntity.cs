@@ -56,10 +56,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected FunctionMemberWithAccessorsEntity(FunctionMemberWithAccessorsEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected FunctionMemberWithAccessorsEntity(FunctionMemberWithAccessorsEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       TypeReference = template.TypeReference;
       InterfaceReference = template.InterfaceReference;
@@ -72,7 +71,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeEntity Type
     {
-      get { return TypeReference == null ? null : TypeReference.TargetEntity; }
+      get
+      {
+        return TypeReference != null && TypeReference.TargetEntity != null
+          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+          : null;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -104,12 +108,28 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public InterfaceEntity Interface
     {
-      get
+      get 
       {
-        return InterfaceReference != null && InterfaceReference.ResolutionState == ResolutionState.Resolved
-                 ? InterfaceReference.TargetEntity as InterfaceEntity
-                 : null;
+        return InterfaceReference != null && InterfaceReference.TargetEntity != null
+          ? InterfaceReference.TargetEntity.GetMappedType(TypeParameterMap) as InterfaceEntity
+          : null;
       }
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

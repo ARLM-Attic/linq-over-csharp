@@ -44,14 +44,13 @@
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected FunctionMemberWithBodyEntity(FunctionMemberWithBodyEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected FunctionMemberWithBodyEntity(FunctionMemberWithBodyEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       if (template.Body != null)
       {
-        //Body = (BlockEntity)source.Body.Clone();
+        Body = (BlockEntity)template.Body.GetConstructedEntity(typeParameterMap);
       }
     }
 
@@ -86,5 +85,21 @@
     {
       get { return Body == null; }
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

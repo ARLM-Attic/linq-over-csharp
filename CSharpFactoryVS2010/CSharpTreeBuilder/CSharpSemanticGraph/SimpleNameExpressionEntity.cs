@@ -43,6 +43,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
+        // TODO: if TypeEntity then return TargetEntity.GetMappedType(TypeParameterMap) ???
+
         return EntityReference == null ? null : EntityReference.TargetEntity;
       }
     }
@@ -86,7 +88,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      if (!visitor.Visit(this)) { return; }
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
     }
 
     #endregion

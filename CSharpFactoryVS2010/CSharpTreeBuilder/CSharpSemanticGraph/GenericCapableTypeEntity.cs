@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -54,10 +55,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected GenericCapableTypeEntity(GenericCapableTypeEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected GenericCapableTypeEntity(GenericCapableTypeEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       // Note that TypeParameters of the TemplateEntity are NOT added to the constructed type.
     }
@@ -116,7 +116,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         if (IsConstructed)
         {
-          return (OriginalTemplateEntity as GenericCapableTypeEntity).AllTypeParameterCount;
+          return (TemplateEntity as GenericCapableTypeEntity).AllTypeParameterCount;
         }
 
         return AllTypeParameters.Count(); 
@@ -134,7 +134,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         if (IsConstructed)
         {
-          return (OriginalTemplateEntity as GenericCapableTypeEntity).OwnTypeParameterCount;
+          return (TemplateEntity as GenericCapableTypeEntity).OwnTypeParameterCount;
         }
 
         return _OwnTypeParameters.Count; 
@@ -218,12 +218,41 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeParameterMap TypeParameterMap
     {
-      get 
-      { 
-        return IsConstructed 
-          ? _TypeParameterMap 
-          : new TypeParameterMap(AllTypeParameters);
+      get
+      {
+        if (IsConstructed)
+        {
+          return base.TypeParameterMap;
+        }
+
+        var parentTypeParameterMap = (Parent == null ? TypeParameterMap.Empty : Parent.TypeParameterMap);
+
+        return new TypeParameterMap(parentTypeParameterMap, OwnTypeParameters);
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns the result of mapping this type with a type parameter map.
+    /// </summary>
+    /// <param name="typeParameterMap">A map of type parameters and corresponding type arguments.</param>
+    /// <returns>A TypeEntity, the result of the mapping.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
+    {
+      if (IsConstructed)
+      {
+        var mappedTypeArguments = new List<TypeEntity>();
+
+        foreach (var typeArgument in TypeParameterMap.TypeArguments)
+        {
+          mappedTypeArguments.Add(typeArgument.GetMappedType(typeParameterMap));
+        }
+
+        return ConstructedTypeHelper.GetConstructedGenericType(TemplateEntity as GenericCapableTypeEntity, mappedTypeArguments);
+      }
+
+      return this;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -248,7 +277,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
       else
       {
-        stringBuilder.Append(OriginalTemplateEntity.ToString());
+        stringBuilder.Append(TemplateEntity.ToString());
 
         stringBuilder.Append('[');
 
@@ -285,12 +314,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+
       foreach (var typeParameter in OwnTypeParameters)
       {
         typeParameter.AcceptVisitor(visitor);
       }
-
-      base.AcceptVisitor(visitor);
     }
 
     #endregion

@@ -16,11 +16,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">An entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(ClassEntity entity)
+    public override void Visit(ClassEntity entity)
     {
       FindAndMergePartialTypes(entity);
-      
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -29,11 +27,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">An entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(StructEntity entity)
+    public override void Visit(StructEntity entity)
     {
       FindAndMergePartialTypes(entity);
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -42,11 +38,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">An entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(InterfaceEntity entity)
+    public override void Visit(InterfaceEntity entity)
     {
       FindAndMergePartialTypes(entity);
-
-      return true;
     }
 
     #region Private methods

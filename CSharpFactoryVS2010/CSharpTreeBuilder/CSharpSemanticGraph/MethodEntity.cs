@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -83,10 +81,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    private MethodEntity(MethodEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    private MethodEntity(MethodEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
       IsPartial = template.IsPartial;
       ReturnTypeReference = template.ReturnTypeReference;
@@ -94,13 +91,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       foreach (var parameter in template.Parameters)
       {
-        //AddParameter((ParameterEntity)parameter.Clone());
+        AddParameter((ParameterEntity) parameter.GetConstructedEntity(typeParameterMap));
       }
 
-      foreach (var typeParameter in template.OwnTypeParameters)
-      {
-        AddTypeParameter(typeParameter);
-      }
+      // Note that TypeParameters of the TemplateEntity are NOT added to the constructed method.
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -108,15 +102,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Creates a new constructed entity.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
-    /// false to defer it to a later phase.</param>
     /// <returns>
     /// A new semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
     {
-      return new MethodEntity(this, typeParameterMap, resolveTypeParameters);
+      return new MethodEntity(this, typeParameterMap);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -128,7 +120,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return ReturnTypeReference == null ? null : ReturnTypeReference.TargetEntity;
+        return ReturnTypeReference != null && ReturnTypeReference.TargetEntity != null
+          ? ReturnTypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+          : null;
       }
     }
 
@@ -199,6 +193,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
+        if (IsConstructed)
+        {
+          throw new InvalidOperationException("Constructed methods don't have type parameters.");
+        }
+
         if (Parent is GenericCapableTypeEntity)
         {
           return (Parent as GenericCapableTypeEntity).AllTypeParameters.Concat(_OwnTypeParameters);
@@ -218,6 +217,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
+        if (IsConstructed)
+        {
+          throw new InvalidOperationException("Constructed methods don't have type parameters.");
+        }
+
         return _OwnTypeParameters;
       }
     }
@@ -229,7 +233,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public int AllTypeParameterCount
     {
-      get { return AllTypeParameters.Count(); }
+      get
+      {
+        if (IsConstructed)
+        {
+          return (TemplateEntity as MethodEntity).AllTypeParameterCount;
+        }
+
+        return AllTypeParameters.Count();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -239,7 +251,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public int OwnTypeParameterCount
     {
-      get { return _OwnTypeParameters.Count; }
+      get
+      {
+        if (IsConstructed)
+        {
+          return (TemplateEntity as MethodEntity).OwnTypeParameterCount;
+        }
+
+        return _OwnTypeParameters.Count;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -250,7 +270,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public bool IsGeneric
     {
-      get { return AllTypeParameters.Count() > 0; }
+      get
+      {
+        return IsConstructed
+          ? (TemplateEntity as GenericCapableTypeEntity).IsGeneric
+          : AllTypeParameterCount > 0;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -261,6 +286,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
+      if (IsConstructed)
+      {
+        throw new InvalidOperationException("Constructed methods don't have type parameters.");
+      }
+
       _OwnTypeParameters.Add(typeParameterEntity);
       typeParameterEntity.Parent = this;
       _DeclarationSpace.Register(typeParameterEntity);
@@ -274,6 +304,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
     {
+      if (IsConstructed)
+      {
+        throw new InvalidOperationException("Constructed methods don't have type parameters.");
+      }
+
       if (typeParameterEntity != null)
       {
         _OwnTypeParameters.Remove(typeParameterEntity);
@@ -290,7 +325,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
+      if (IsConstructed)
+      {
+        throw new InvalidOperationException("Constructed methods don't have type parameters.");
+      }
+
       return _DeclarationSpace.GetSingleEntity<TypeParameterEntity>(name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the type parameters and type arguments associated with this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeParameterMap TypeParameterMap
+    {
+      get
+      {
+        if (IsConstructed)
+        {
+          return base.TypeParameterMap;
+        }
+
+        var parentTypeParameterMap = (Parent == null ? TypeParameterMap.Empty : Parent.TypeParameterMap);
+
+        return new TypeParameterMap(parentTypeParameterMap, OwnTypeParameters);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -319,11 +379,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public InterfaceEntity Interface
     {
-      get 
+      get
       {
-        return InterfaceReference != null && InterfaceReference.ResolutionState == ResolutionState.Resolved
-                 ? InterfaceReference.TargetEntity as InterfaceEntity
-                 : null;
+        return InterfaceReference != null && InterfaceReference.TargetEntity != null
+          ? InterfaceReference.TargetEntity.GetMappedType(TypeParameterMap) as InterfaceEntity
+          : null;
       }
     }
 
@@ -349,7 +409,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      if (!visitor.Visit(this)) { return; }
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
     }
 
     #endregion

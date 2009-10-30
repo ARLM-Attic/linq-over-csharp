@@ -12,7 +12,7 @@
     /// Initializes a new instance of the <see cref="StatementEntity"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public StatementEntity()
+    protected StatementEntity()
     {
     }
 
@@ -23,11 +23,26 @@
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected StatementEntity(SemanticEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected StatementEntity(SemanticEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

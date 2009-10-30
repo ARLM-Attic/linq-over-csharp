@@ -88,7 +88,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the AST node has rank specifier(s), then create array type(s).
       foreach (var rankSpecifier in typeNode.RankSpecifiers)
       {
-        typeEntity = ConstructedTypeHelper.GetConstructedArrayType(typeEntity, rankSpecifier.Rank, semanticGraph);
+        typeEntity = ConstructedTypeHelper.GetConstructedArrayType(typeEntity, rankSpecifier.Rank);
       }
 
       return typeEntity;

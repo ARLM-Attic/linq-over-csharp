@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using System.Reflection;
+using CSharpTreeBuilder.CSharpSemanticGraph;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
-using CSharpTreeBuilder.ProjectContent;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
-using CSharpTreeBuilder.CSharpSemanticGraph;
-using System.Collections.Generic;
 
 namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 {
@@ -537,6 +536,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
+      var structA2 = project.SemanticGraph.GlobalNamespace.GetSingleChildType<StructEntity>("A2");
 
       // A2? a1;
       {
@@ -560,10 +560,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         underlyingType.FullyQualifiedName.ShouldEqual("System.Nullable");
         underlyingType.ToString().ShouldEqual("global::System.Nullable`1");
 
-        underlyingType.GetConstructedEntity(new TypeParameterMap(
-          new TypeParameterEntity[] { underlyingType.GetOwnTypeParameterByName("T") },
-          new TypeEntity[] { nullable.UnderlyingOfNullableType }
-          ), false).ShouldEqual(nullable);
+        underlyingType.GetConstructedEntity(
+          new TypeParameterMap(underlyingType.TypeParameterMap, new TypeEntity[] {structA2} )
+          ).ShouldEqual(nullable);
       }
       // A2?[] a2;
       {
@@ -573,8 +572,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var array = fieldEntity.TypeReference.TargetEntity as ArrayTypeEntity;
         array.IsNullableType.ShouldBeFalse();
         array.UnderlyingOfNullableType.ShouldBeNull();
-        var nullable = array.UnderlyingType as TypeEntity;
+        var nullable = array.UnderlyingType;
         nullable.TemplateEntity.ShouldEqual(project.SemanticGraph.NullableGenericTypeDefinition);
+        nullable.ShouldEqual(classEntity.GetMember<FieldEntity>("a1").Type);
       }
     }
 
@@ -745,6 +745,26 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Resolving a constructed generic class in mscorlib.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ConstructedGenericClassInMscorlib()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      InvokeParser(project).ShouldBeTrue();
+
+      var comparer = project.SemanticGraph.GlobalNamespace.GetChildNamespace("System").GetChildNamespace("Collections").
+        GetChildNamespace("Generic").GetSingleChildType<ClassEntity>("Comparer", 1);
+      var icomparer = comparer.BaseInterfaces.Where(x => x.Name == "IComparer" && x.AllTypeParameterCount == 1).First();
+      icomparer.ToString().ShouldEqual("global::System.Collections.Generic.IComparer`1[global::System.Collections.Generic.Comparer`1.T]");
+      icomparer.IsOpen.ShouldBeTrue();
+      icomparer.IsConstructed.ShouldBeTrue();
+      icomparer.IsUnbound.ShouldBeFalse();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Resolving a constructed generic class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -755,11 +775,54 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"TypeResolution\ConstructedGenericClass.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classA = project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").GetSingleChildType<ClassEntity>("A",2);
+      var classA = project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").GetSingleChildType<ClassEntity>("A", 2);
       var fields = classA.Members.ToArray();
       var classB1 = classA.GetSingleChildType<ClassEntity>("B1");
-      var classB2 = classA.GetSingleChildType<ClassEntity>("B2",1);
-      var classB3 = classA.GetSingleChildType<ClassEntity>("B3",1);
+      var classB2 = classA.GetSingleChildType<ClassEntity>("B2", 1);
+      var classB3 = classA.GetSingleChildType<ClassEntity>("B3", 1);
+
+      // public class B1
+      {
+        var typeParameterMap = classB1.TypeParameterMap;
+        typeParameterMap.IsEmpty.ShouldBeFalse();
+        typeParameterMap.Count.ShouldEqual(2);
+        var typeParameters = typeParameterMap.TypeParameters.ToList();
+        typeParameters[0].ToString().ShouldEqual("global::N.A`2.T1");
+        typeParameters[1].ToString().ShouldEqual("global::N.A`2.T2");
+        var typeArguments = typeParameterMap.TypeArguments.ToList();
+        typeArguments[0].ShouldBeNull();
+        typeArguments[1].ShouldBeNull();
+      }
+
+      // public class B2<T1>
+      {
+        var typeParameterMap = classB2.TypeParameterMap;
+        typeParameterMap.IsEmpty.ShouldBeFalse();
+        typeParameterMap.Count.ShouldEqual(3);
+        var typeParameters = typeParameterMap.TypeParameters.ToList();
+        typeParameters[0].ToString().ShouldEqual("global::N.A`2.T1");
+        typeParameters[1].ToString().ShouldEqual("global::N.A`2.T2");
+        typeParameters[2].ToString().ShouldEqual("global::N.A`2+B2`1.T1");
+        var typeArguments = typeParameterMap.TypeArguments.ToList();
+        typeArguments[0].ShouldBeNull();
+        typeArguments[1].ShouldBeNull();
+        typeArguments[2].ShouldBeNull();
+      }
+
+      // public class B3<T3>
+      {
+        var typeParameterMap = classB3.TypeParameterMap;
+        typeParameterMap.IsEmpty.ShouldBeFalse();
+        typeParameterMap.Count.ShouldEqual(3);
+        var typeParameters = typeParameterMap.TypeParameters.ToList();
+        typeParameters[0].ToString().ShouldEqual("global::N.A`2.T1");
+        typeParameters[1].ToString().ShouldEqual("global::N.A`2.T2");
+        typeParameters[2].ToString().ShouldEqual("global::N.A`2+B3`1.T3");
+        var typeArguments = typeParameterMap.TypeArguments.ToList();
+        typeArguments[0].ShouldBeNull();
+        typeArguments[1].ShouldBeNull();
+        typeArguments[2].ShouldBeNull();
+      }
 
       int i = 0;
 
@@ -772,7 +835,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A");
         typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]");
         typeEntity.TemplateEntity.ShouldEqual(classA);
-        classA.GetConstructedEntity(typeEntity.TypeParameterMap, false).ShouldEqual(typeEntity);
+        classA.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
       // A<T1, T2> a2;
       {
@@ -783,7 +846,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A");
         typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A`2.T1,global::N.A`2.T2]");
         typeEntity.TemplateEntity.ShouldEqual(classA);
-        classA.GetConstructedEntity(typeEntity.TypeParameterMap, false).ShouldEqual(typeEntity);
+        classA.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
       // A<T1, T2> a3;
       {
@@ -804,7 +867,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B1");
         typeEntity.ToString().ShouldEqual("global::N.A`2+B1[global::N.A1,global::N.A2]");
         typeEntity.TemplateEntity.ShouldEqual(classB1);
-        classB1.GetConstructedEntity(typeEntity.TypeParameterMap, false).ShouldEqual(typeEntity);
+        classB1.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
       // A<A1, A2>.B2<A3> b2;
       {
@@ -815,7 +878,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B2");
         typeEntity.ToString().ShouldEqual("global::N.A`2+B2`1[global::N.A1,global::N.A2,global::N.A3]");
         typeEntity.TemplateEntity.ShouldEqual(classB2);
-        classB2.GetConstructedEntity(typeEntity.TypeParameterMap, false).ShouldEqual(typeEntity);
+        classB2.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
       // A<A1, A2>.B3<A4> b3;
       {
@@ -826,9 +889,35 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B3");
         typeEntity.ToString().ShouldEqual("global::N.A`2+B3`1[global::N.A1,global::N.A2,global::N.A4]");
         typeEntity.TemplateEntity.ShouldEqual(classB3);
-        classB3.GetConstructedEntity(typeEntity.TypeParameterMap, false).ShouldEqual(typeEntity);
+        classB3.GetConstructedEntity(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
 
+      // A<A1, A2> a1; --> public class B1
+      {
+        var type = (classA.GetMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B1");
+        type.ToString().ShouldEqual("global::N.A`2+B1[global::N.A1,global::N.A2]");
+        type.IsOpen.ShouldBeFalse();
+        type.IsConstructed.ShouldBeTrue();
+        type.IsUnbound.ShouldBeFalse();
+      }
+
+      // A<A1, A2> a1; --> public class B2<T1>
+      {
+        var type = (classA.GetMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B2", 1);
+        type.ToString().ShouldEqual("global::N.A`2+B2`1[global::N.A1,global::N.A2,(open)]");
+        type.IsOpen.ShouldBeTrue();
+        type.IsConstructed.ShouldBeTrue();
+        type.IsUnbound.ShouldBeFalse();
+      }
+
+      // A<A1, A2> a1; --> A<A1, A2>.B2<A3> b2;
+      {
+        var type = classA.GetMember<FieldEntity>("a1").Type.GetMember<FieldEntity>("b2").Type;
+        type.ToString().ShouldEqual("global::N.A`2+B2`1[global::N.A1,global::N.A2,global::N.A3]");
+        type.IsOpen.ShouldBeFalse();
+        type.IsConstructed.ShouldBeTrue();
+        type.IsUnbound.ShouldBeFalse();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -2044,6 +2133,20 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         parameters[3].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T3"));
 
         classEntity.GetMethod(methodEntity.Signature).ShouldEqual(methodEntity);
+
+        // Check TypeParameterMap
+        var typeParameterMap = methodEntity.TypeParameterMap;
+        typeParameterMap.Count.ShouldEqual(4);
+        var typeParameters = typeParameterMap.TypeParameters.ToList();
+        typeParameters[0].ToString().ShouldEqual("global::A`2.T1");
+        typeParameters[1].ToString().ShouldEqual("global::A`2.T2");
+        typeParameters[2].ToString().ShouldEqual("T2");
+        typeParameters[3].ToString().ShouldEqual("T3");
+        var typeArguments = typeParameterMap.TypeArguments.ToList();
+        typeArguments[0].ShouldBeNull();
+        typeArguments[1].ShouldBeNull();
+        typeArguments[2].ShouldBeNull();
+        typeArguments[3].ShouldBeNull();
       }
 
       i++;
@@ -2314,7 +2417,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         baseClass.TypeParameterMap.Count.ShouldEqual(1);
         baseClass.TypeParameterMap.TypeParameters.First().ToString().ShouldEqual("global::B`1.T");
         baseClass.TypeParameterMap.TypeArguments.First().ToString().ShouldEqual("global::System.Int32");
-        
+
         var typeArguments = type.TypeParameterMap.TypeArguments.ToList();
         typeArguments[0].BuiltInTypeValue.ShouldEqual(BuiltInType.Int);
         typeArguments[1].BuiltInTypeValue.ShouldEqual(BuiltInType.Long);
@@ -2322,34 +2425,123 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // T1 a1;
       {
-        var field = classA.GetMember<FieldEntity>("a1");
-        field.TemplateEntity.ShouldBeNull();
+        var member = classA.GetMember<FieldEntity>("a1");
+        member.TemplateEntity.ShouldBeNull();
 
-        var type = field.Type as TypeParameterEntity;
+        var type = member.Type as TypeParameterEntity;
         type.ToString().ShouldEqual("global::A`2.T1");
         type.IsGeneric.ShouldBeFalse();
         type.IsUnbound.ShouldBeFalse();
         type.IsConstructed.ShouldBeFalse();
         type.TemplateEntity.ShouldBeNull();
-        type.TypeParameterMap.IsEmpty.ShouldBeTrue();
       }
 
-      //// A<int, long> a0 --> T1 a1 (int a1)
-      //{
-      //  var field = (classA.GetMember<FieldEntity>("a0").Type as ClassEntity).GetMember<FieldEntity>("a1");
-      //  var typeParameterMap = field.TypeParameterMap;
-      //  var typeParameters = typeParameterMap.TypeParameters.ToList();
-      //  typeParameters.Count.ShouldEqual(2);
-      //  typeParameters[0].ToString().ShouldEqual("global::A`2.T1");
-      //  typeParameters[1].ToString().ShouldEqual("global::A`2.T2");
-      //  var typeArguments = typeParameterMap.TypeArguments.ToList();
-      //  typeArguments.Count.ShouldEqual(2);
-      //  typeArguments[0].BuiltInTypeValue.ShouldEqual(BuiltInType.Int);
-      //  typeArguments[1].BuiltInTypeValue.ShouldEqual(BuiltInType.Long);
+      // B<T2> a2 { get; set; }
+      {
+        var member = classA.GetMember<PropertyEntity>("a2");
+        member.Type.ToString().ShouldEqual("global::B`1[global::A`2.T2]");
+      }
 
-      //  var type = field.Type;
-      //  type.ToString().ShouldEqual("global::System.Int32");
-      //}
+      // T1? a3;
+      {
+        var member = classA.GetMember<FieldEntity>("a3");
+        member.Type.ToString().ShouldEqual("global::System.Nullable`1[global::A`2.T1]");
+      }
+
+      // A<int, T2> M1(T1[] p1, A<int, B<T2>> p2) 
+      {
+        var member = classA.GetMember<MethodEntity>("M1");
+        member.ReturnType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::A`2.T2]");
+        var parameters = member.Parameters.ToList();
+        {
+          var paramType = parameters[0].Type as ArrayTypeEntity;
+          paramType.ToString().ShouldEqual("global::A`2.T1[]");
+          paramType.UnderlyingType.ToString().ShouldEqual("global::A`2.T1");
+          paramType.Rank.ShouldEqual(1);
+          paramType.IsOpen.ShouldBeTrue();
+          paramType.IsUnbound.ShouldBeTrue();
+          paramType.IsConstructed.ShouldBeFalse();
+        }
+        {
+          var paramType = parameters[1].Type as ClassEntity;
+          paramType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::B`1[global::A`2.T2]]");
+          paramType.IsOpen.ShouldBeTrue();
+          paramType.IsUnbound.ShouldBeFalse();
+          paramType.IsConstructed.ShouldBeTrue();
+        }
+      }
+
+      // A<int, long> a0 --> T1 a1;
+      {
+        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<FieldEntity>("a1");
+        member.Type.ToString().ShouldEqual("global::System.Int32");
+      }
+
+      // A<int, long> a0 --> B<T2> a2 { get; set; }
+      {
+        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<PropertyEntity>("a2");
+        member.Type.ToString().ShouldEqual("global::B`1[global::System.Int64]");
+      }
+
+      // A<int, long> a0 --> T1? a3;
+      {
+        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<FieldEntity>("a3");
+        member.Type.IsNullableType.ShouldBeTrue();
+        member.Type.UnderlyingOfNullableType.ToString().ShouldEqual("global::System.Int32");
+        member.Type.ToString().ShouldEqual("global::System.Nullable`1[global::System.Int32]");
+      }
+
+      // A<int, long> a0 --> A<int, T2> M1(T1[] p1, A<int, B<T2>> p2) 
+      {
+        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<MethodEntity>("M1");
+        member.ReturnType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::System.Int64]");
+        var parameters = member.Parameters.ToList();
+        {
+          var paramType = parameters[0].Type as ArrayTypeEntity;
+          paramType.ToString().ShouldEqual("global::System.Int32[]");
+          paramType.UnderlyingType.ToString().ShouldEqual("global::System.Int32");
+          paramType.Rank.ShouldEqual(1);
+          paramType.IsOpen.ShouldBeFalse();
+          paramType.IsConstructed.ShouldBeFalse();
+        }
+        {
+          var paramType = parameters[1].Type as ClassEntity;
+          paramType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::B`1[global::System.Int64]]");
+          paramType.IsOpen.ShouldBeFalse();
+          paramType.IsUnbound.ShouldBeFalse();
+          paramType.IsConstructed.ShouldBeTrue();
+        }
+      }
+
+      var classA2 = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A2", 2);
+
+      // A2<T2, T1> a1;
+      {
+        var field = classA2.GetMember<FieldEntity>("a1");
+        var type = field.Type as ClassEntity;
+        type.TemplateEntity.ToString().ShouldEqual("global::A2`2");
+        type.ToString().ShouldEqual("global::A2`2[global::A2`2.T2,global::A2`2.T1]");
+      }
+
+      // A2<byte, char> a2;
+      {
+        var field = classA2.GetMember<FieldEntity>("a2");
+        var type = field.Type as ClassEntity;
+        type.TemplateEntity.ToString().ShouldEqual("global::A2`2");
+        type.ToString().ShouldEqual("global::A2`2[global::System.Byte,global::System.Char]");
+      }
+
+      // A2<T2, T1> a1 --> A2<T2, T1> a1;
+      {
+        var member = classA2.GetMember<FieldEntity>("a1").Type.GetMember<FieldEntity>("a1");
+        member.Type.ToString().ShouldEqual("global::A2`2[global::A2`2.T1,global::A2`2.T2]");
+      }
+
+      // A2<byte, char> a2 --> A2<T2, T1> a1;
+      {
+        var member = classA2.GetMember<FieldEntity>("a2").Type.GetMember<FieldEntity>("a1");
+        member.Type.ToString().ShouldEqual("global::A2`2[global::System.Char,global::System.Byte]");
+      }
     }
   }
 }

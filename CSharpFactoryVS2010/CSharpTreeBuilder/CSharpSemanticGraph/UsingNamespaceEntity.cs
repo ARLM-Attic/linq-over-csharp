@@ -67,7 +67,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      if (!visitor.Visit(this)) { return; }
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
     }
 
     #endregion

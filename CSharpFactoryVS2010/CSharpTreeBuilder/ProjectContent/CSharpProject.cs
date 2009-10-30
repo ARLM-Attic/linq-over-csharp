@@ -215,9 +215,6 @@ namespace CSharpTreeBuilder.ProjectContent
       SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(this, SemanticGraph));
       SemanticGraph.AcceptVisitor(new TypeResolverPass2SemanticGraphVisitor(this, SemanticGraph));
 
-      // Resolve type parameters in constructed entities
-      SemanticGraph.AcceptVisitor(new TypeParameterResolverSemanticGraphVisitor());
-
       // Evaluate expressions in the semantic graph.
       SemanticGraph.AcceptVisitor(new ExpressionEvaluatorSemanticGraphVisitor(this, SemanticGraph));
 

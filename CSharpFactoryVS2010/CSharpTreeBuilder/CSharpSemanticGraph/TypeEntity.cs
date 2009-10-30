@@ -34,9 +34,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for IsNew property.</summary>
     private bool _IsNew;
 
-    /// <summary>Backing field for BaseClass property.</summary>
-    private ClassEntity _BaseClass;
-
 
     /// <summary>Gets or sets the factory object needed for lazy importing reflected members.</summary>
     public MetadataImporterSemanticEntityFactory MetadataImporterFactory { get; set; }
@@ -77,18 +74,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected TypeEntity(TypeEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
-      : base(template, typeParameterMap, resolveTypeParameters)
+    protected TypeEntity(TypeEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
     {
-      if (template.BaseClass != null)
-      {
-        BaseClass = (ClassEntity)template.BaseClass.GetConstructedEntity(
-          template.BaseClass.TypeParameterMap.Combine(typeParameterMap),
-          resolveTypeParameters);
-      }
-
+      _BaseTypeReferences.AddRange(template._BaseTypeReferences);
       _ReflectedMembersImported = template._ReflectedMembersImported;
       _IsNew = template._IsNew;
       MetadataImporterFactory = template.MetadataImporterFactory;
@@ -101,9 +91,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       // because that also handles registering into the declaration space.
       foreach (var member in template.Members)
       {
-        AddMember((IMemberEntity)member.GetConstructedEntity(
-          member.TypeParameterMap.Combine(typeParameterMap), 
-          resolveTypeParameters));
+        // The template member can introduce new type parameters, 
+        // so we have to combine the template member's TypeParameterMap with the current typeParameterMap's arguments.
+        var newTypeParameterMap = new TypeParameterMap(member.TypeParameterMap, typeParameterMap.TypeArguments);
+       
+        AddMember((IMemberEntity)member.GetConstructedEntity(newTypeParameterMap));
       }
       
       // ArrayTypes should not be cloned.
@@ -369,8 +361,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual bool IsGeneric
     {
       get 
-      { 
-        return TypeParameterMap.TypeParameters.Count() > 0; 
+      {
+        return false;
       }
     }
 
@@ -411,7 +403,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       { 
-        return IsConstructed && TypeParameterMap.TypeArguments.Any(type => type.IsOpen); 
+        return IsConstructed && TypeParameterMap.TypeArguments.Any(type => type == null || type.IsOpen); 
       }
     }
 
@@ -461,10 +453,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (_BaseClass != null)
-        {
-          return _BaseClass;
-        }
+        ClassEntity baseClass = null;
 
         var baseTypes = (from baseType in BaseTypeReferences
                          where
@@ -474,37 +463,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         
         if (baseTypes.Count == 1)
         { 
-          return baseTypes[0]; 
+          baseClass = baseTypes[0]; 
         }
-
-        // If the base type is not found, then return the default base type.
-        // Interfaces and System.Object don't have a base type. All other types have.
-        if (!(this is InterfaceEntity) && BuiltInTypeValue != BuiltInType.Object)
+        else
         {
-          if (this is EnumEntity)
+          // If the base type is not found, then return the default base type.
+          // Interfaces and System.Object don't have a base type. All other types have.
+          if (!(this is InterfaceEntity) && BuiltInTypeValue != BuiltInType.Object)
           {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Enum)) as ClassEntity;
-          }
-          if (this is StructEntity)
-          {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.ValueType)) as ClassEntity;
-          }
-          if (this is DelegateEntity)
-          {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.MulticastDelegate)) as ClassEntity;
-          }
-          if (this is ClassEntity)
-          {
-            return SemanticGraph.GetEntityByMetadataObject(typeof(System.Object)) as ClassEntity;
+            if (this is EnumEntity)
+            {
+              baseClass = SemanticGraph.GetEntityByMetadataObject(typeof (System.Enum)) as ClassEntity;
+            }
+            else if (this is StructEntity)
+            {
+              baseClass = SemanticGraph.GetEntityByMetadataObject(typeof (System.ValueType)) as ClassEntity;
+            }
+            else if (this is DelegateEntity)
+            {
+              baseClass = SemanticGraph.GetEntityByMetadataObject(typeof (System.MulticastDelegate)) as ClassEntity;
+            }
+            else if (this is ClassEntity)
+            {
+              baseClass = SemanticGraph.GetEntityByMetadataObject(typeof (System.Object)) as ClassEntity;
+            }
           }
         }
 
-        return null;
-      }
-
-      set
-      {
-        _BaseClass = value;
+        return baseClass == null ? null : baseClass.GetMappedType(TypeParameterMap) as ClassEntity;
       }
     }
 
@@ -540,7 +526,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return (from baseType in BaseTypeReferences
                 where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
-                select baseType.TargetEntity as InterfaceEntity).ToList().AsReadOnly();
+                select baseType.TargetEntity.GetMappedType(TypeParameterMap) as InterfaceEntity).ToList().AsReadOnly();
       }
     }
 
@@ -566,8 +552,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="memberEntity">The member entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public virtual void AddMember(IMemberEntity memberEntity)
+    public void AddMember(IMemberEntity memberEntity)
     {
+      BeforeAddMember(memberEntity);
+
       _Members.Add(memberEntity);
       memberEntity.Parent = this;
 
@@ -577,6 +565,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         _DeclarationSpace.Register(memberEntity);
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Runs before adding a member.
+    /// </summary>
+    /// <param name="memberEntity">The member entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected virtual void BeforeAddMember(IMemberEntity memberEntity)
+    {
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -599,17 +597,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <typeparam name="TEntityType">The type of member to found.</typeparam>
     /// <param name="name">The name of the member to found.</param>
     /// <returns>The found member, or null if not found.</returns>
-    /// <remarks>If getting a method then assumes zero type parameters and zero parameters.</remarks>
     // ----------------------------------------------------------------------------------------------
     public TEntityType GetMember<TEntityType>(string name)
       where TEntityType : class, IMemberEntity
     {
       LazyImportReflectedMembers();
-
-      if (typeof(TEntityType) == typeof(MethodEntity))
-      {
-        return GetMethod(new Signature(name, 0, null)) as TEntityType;
-      }
 
       return _DeclarationSpace.GetSingleEntity<TEntityType>(name);
     }
@@ -889,6 +881,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         || (BaseInterfaces != null && BaseInterfaces.Any(x => x.Implements(typeEntity)));
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Returns the result of mapping this type with a type parameter map.
+    /// </summary>
+    /// <param name="typeParameterMap">A map of type parameters and corresponding type arguments.</param>
+    /// <returns>A TypeEntity, the result of the mapping.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public virtual TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
+    {
+      return this;
+    }
+
     #region Private methods
 
     // ----------------------------------------------------------------------------------------------
@@ -932,6 +936,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(SemanticGraphVisitor visitor)
     {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+
       // Visit members only if those are not subject of lazy importing.
       if (_ReflectedMembersImported || ReflectedMetadata == null)
       {

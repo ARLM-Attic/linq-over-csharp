@@ -25,5 +25,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="errorHandler">An error handler object.</param>
     // ----------------------------------------------------------------------------------------------
     public abstract void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler);
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -82,6 +83,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Returns the result of mapping this type with a type parameter map.
+    /// </summary>
+    /// <param name="typeParameterMap">A map of type parameters and corresponding type arguments.</param>
+    /// <returns>A TypeEntity, the result of the mapping.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
+    {
+      return ConstructedTypeHelper.GetConstructedArrayType(UnderlyingType.GetMappedType(typeParameterMap), Rank);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the string representation of the object.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -93,5 +106,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         stringBuilder.Append(']');
         return stringBuilder.ToString();
     }
+
+    #region Visitor methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AcceptVisitor(SemanticGraphVisitor visitor)
+    {
+      visitor.Visit(this);
+      base.AcceptVisitor(visitor);
+    }
+
+    #endregion
   }
 }

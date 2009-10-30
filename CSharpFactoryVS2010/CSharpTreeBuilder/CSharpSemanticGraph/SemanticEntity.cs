@@ -49,12 +49,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Gets or sets the generic template of this entity.</summary>
     public SemanticEntity TemplateEntity { get; private set; }
 
-    /// <summary>
-    /// Gets a value indicating whether a constructed entity's type parameters are already resolved.
-    /// Undefined for non-constructed entities.
-    /// </summary>
-    public bool TypeParametersResolved { get; private set; }
-
     #endregion
 
     // ----------------------------------------------------------------------------------------------
@@ -65,7 +59,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected SemanticEntity()
     {
       _TypeParameterMap = new TypeParameterMap();
-      TypeParametersResolved = false;
     }
 
     #region Constructed entities
@@ -77,9 +70,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters immediately, false to defer it.</param>
     // ----------------------------------------------------------------------------------------------
-    protected SemanticEntity(SemanticEntity template, TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    protected SemanticEntity(SemanticEntity template, TypeParameterMap typeParameterMap)
     {
       _SemanticGraph = template._SemanticGraph;
       _SyntaxNodes.AddRange(template._SyntaxNodes);
@@ -90,7 +82,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       Parent = template.Parent;
       ReflectedMetadata = template.ReflectedMetadata;
       TemplateEntity = template;
-      TypeParametersResolved = false;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -98,30 +89,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Creates a new constructed entity.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
-    /// false to defer it to a later phase.</param>
     /// <returns>
     /// A new semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    protected virtual SemanticEntity ConstructNew(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    protected virtual SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
     {
       throw new ApplicationException("Abstract SemanticEntity cannot be constructed.");
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves type parameters to actual type arguments in this entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public virtual void ResolveTypeParameters()
-    {
-      if (TypeParametersResolved)
-      {
-        return;
-      }
-
-      TypeParametersResolved = true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -130,13 +104,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// with type arguments. Gets the entity from cache or creates a new one.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <param name="resolveTypeParameters">True to resolve type parameters during construction, 
-    /// false to defer it to a later phase.</param>
     /// <returns>
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap, bool resolveTypeParameters)
+    public SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap)
     {
       SemanticEntity constructedEntity;
 
@@ -146,12 +118,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
       else
       {
-        constructedEntity = ConstructNew(typeParameterMap, resolveTypeParameters);
-
-        if (resolveTypeParameters)
-        {
-          constructedEntity.ResolveTypeParameters();
-        }
+        constructedEntity = ConstructNew(typeParameterMap);
 
         _ConstructedEntities.Add(typeParameterMap, constructedEntity);
       }
@@ -283,9 +250,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual TypeParameterMap TypeParameterMap 
     {
       get 
-      { 
-        return _TypeParameterMap; 
+      {
+        if (!_TypeParameterMap.IsEmpty)
+        {
+          return _TypeParameterMap;
+        }
+
+        if (Parent != null && !Parent.TypeParameterMap.IsEmpty)
+        {
+          return Parent.TypeParameterMap;
+        }
+
+        return TypeParameterMap.Empty;
       }
+
       private set 
       { 
         _TypeParameterMap = value; 
@@ -302,24 +280,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return TemplateEntity != null;
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the original generic template of this entity (the first in the chain of template entities).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SemanticEntity OriginalTemplateEntity
-    {
-      get
-      {
-        if (!IsConstructed)
-        {
-          return null;
-        }
-
-        return TemplateEntity.IsConstructed ? TemplateEntity.OriginalTemplateEntity : TemplateEntity;
       }
     }
 
@@ -344,7 +304,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public virtual void AcceptVisitor(SemanticGraphVisitor visitor)
     {
-      throw new ApplicationException(string.Format("SemanticEntity.AcceptVisitor called on type: {0}", GetType()));
+      visitor.Visit(this);
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -34,7 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(ExternAliasEntity entity)
+    public override void Visit(ExternAliasEntity entity)
     {
       if (entity.Parent == null)
       {
@@ -42,8 +42,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       entity.RootNamespaceReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
-      
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -52,7 +50,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(UsingNamespaceEntity entity)
+    public override void Visit(UsingNamespaceEntity entity)
     {
       if (entity.Parent == null)
       {
@@ -60,8 +58,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       entity.NamespaceReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -70,7 +66,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(UsingAliasEntity entity)
+    public override void Visit(UsingAliasEntity entity)
     {
       if (entity.Parent == null)
       {
@@ -78,8 +74,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       entity.NamespaceOrTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
-    
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -88,11 +82,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(ClassEntity entity)
+    public override void Visit(ClassEntity entity)
     {
       ResolveBaseTypeReferences(entity);
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -101,11 +93,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(StructEntity entity)
+    public override void Visit(StructEntity entity)
     {
       ResolveBaseTypeReferences(entity);
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -114,11 +104,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(InterfaceEntity entity)
+    public override void Visit(InterfaceEntity entity)
     {
       ResolveBaseTypeReferences(entity);
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -127,15 +115,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(DelegateEntity entity)
+    public override void Visit(DelegateEntity entity)
     {
       // Resolve return type
       if (entity.ReturnTypeReference != null)
       {
         entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
       }
-
-      return true;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -144,7 +130,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override bool Visit(EnumEntity entity)
+    public override void Visit(EnumEntity entity)
     {
       // Resolve underlying type
       if (entity.UnderlyingTypeReference != null)
@@ -164,8 +150,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           }
         }
       }
-
-      return true;
     }
 
     #region Private methods

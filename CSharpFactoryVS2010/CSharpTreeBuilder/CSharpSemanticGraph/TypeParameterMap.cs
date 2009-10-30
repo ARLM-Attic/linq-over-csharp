@@ -16,42 +16,43 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// A dictionary holding all type parameters as keys and type arguments as values.
     /// Values can be null.
     /// </summary>
-    private Dictionary<TypeParameterEntity, TypeEntity> _Map;
+    private Dictionary<TypeParameterEntity, TypeEntity> _Map = new Dictionary<TypeParameterEntity, TypeEntity>();
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SemanticEntity"/> class.
+    /// Initializes a new instance of the <see cref="SemanticEntity"/> class, with an empty map.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterMap(): this(null, null)
+    public TypeParameterMap()
     {
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
-    /// with the specified type parameters.
+    /// Initializes a new instance of the <see cref="SemanticEntity"/> class
+    /// by copying data from another map.
     /// </summary>
-    /// <param name="typeParameters">A collection of type parameters to add to the map.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterMap(IEnumerable<TypeParameterEntity> typeParameters)
-      : this(typeParameters, null)
-    { 
+    public TypeParameterMap(TypeParameterMap source)
+    {
+      foreach (var keyValuePair in source._Map)
+      {
+        _Map.Add(keyValuePair.Key, keyValuePair.Value);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
-    /// with the specified type parameters and corresponding type arguments.
+    /// from an existing map and a collection of type parameters.
     /// </summary>
-    /// <param name="typeParameters">A collection of type parameters to add to the map.</param>
-    /// <param name="typeArguments">A collection of type arguments to add to the map.</param>
+    /// <param name="sourceMap">An existing map.</param>
+    /// <param name="typeParameters">A collection of type parameters.</param>
     // ----------------------------------------------------------------------------------------------
-    public TypeParameterMap(IEnumerable<TypeParameterEntity> typeParameters, IEnumerable<TypeEntity> typeArguments)
+    public TypeParameterMap(TypeParameterMap sourceMap, IEnumerable<TypeParameterEntity> typeParameters)
+      : this(sourceMap)
     {
-      _Map = new Dictionary<TypeParameterEntity, TypeEntity>();
-
-      // Add the specified type parameters to the map, with null as value (no corresponding type argument).
+      // Add the specified type parameters to the map, with null value (ie. no corresponding type argument).
       if (typeParameters != null)
       {
         foreach (var typeParameter in typeParameters)
@@ -59,26 +60,53 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           AddTypeParameter(typeParameter);
         }
       }
+    }
 
-      // Add the specified type arguments to the map
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
+    /// from an existing map and a collection of type arguments that will replace null values in the map.
+    /// </summary>
+    /// <param name="sourceMap">An existing map.</param>
+    /// <param name="typeArguments">A collection of type arguments.</param>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterMap(TypeParameterMap sourceMap, IEnumerable<TypeEntity> typeArguments)
+      : this(sourceMap)
+    {
       if (typeArguments != null)
       {
         var typeParameterList = _Map.Keys.ToList();
         int i = 0;
-        
+
         foreach (var typeArgument in typeArguments)
         {
-          if (i < typeParameterList.Count)
+          while (i < typeParameterList.Count && _Map[typeParameterList[i]] != null)
           {
-            this[typeParameterList[i]] = typeArgument;
+            i++;
           }
-          else
+
+          if (i == typeParameterList.Count)
           {
-            throw new ApplicationException("Too many type arguments.");
+            throw new ApplicationException("Null slot not found for type argument.");
           }
+
+          _Map[typeParameterList[i]] = typeArgument;
 
           i++;
         }
+      }
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an empty type parameter map (a new instance).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public static TypeParameterMap Empty
+    {
+      get
+      {
+        return new TypeParameterMap();
       }
     }
 
@@ -206,41 +234,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return _Map.Keys.Count == 0;
       }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Combines this map with another one by resolving type parameters in this map to their 
-    /// corresponding type argument defined in the parameter map.
-    /// </summary>
-    /// <param name="typeParameterMap">A type parameter map.</param>
-    /// <returns>A new map created from this map and the parameter.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterMap Combine(TypeParameterMap typeParameterMap)
-    {
-      var newMap = new TypeParameterMap();
-
-      foreach(var keyValuePair in _Map)
-      {
-        var newValue = keyValuePair.Value;
-
-        if (newValue == null && typeParameterMap.ContainsTypeParameter(keyValuePair.Key))
-        {
-          newValue = typeParameterMap[keyValuePair.Key];
-        }
-        else
-        {
-          var typeParameter = newValue as TypeParameterEntity;
-          if (typeParameter != null && typeParameterMap.ContainsTypeParameter(typeParameter))
-          {
-            newValue = typeParameterMap[typeParameter];
-          }
-        }
-
-        newMap.AddMapping(keyValuePair.Key, newValue);
-      }
-
-      return newMap;
     }
   }
 }
