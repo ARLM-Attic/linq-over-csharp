@@ -527,6 +527,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       
       // First the import
       var factory = new MetadataImporterSemanticEntityFactory(project, project.SemanticGraph);
+      factory.ImportTypesIntoSemanticGraph(typeof(int).Assembly.Location, "global");
       factory.ImportTypesIntoSemanticGraph(TestAssemblyPathAndFilename, "global");
       
       // Then the entity builder and resolver

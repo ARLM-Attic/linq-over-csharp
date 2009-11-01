@@ -1,0 +1,54 @@
+<#@ template language="C#" hostspecific="True" debug="True" #>
+<#@ output extension="cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.IO" #>
+//
+// WARNING! This file is generated, do not modify it manually!
+//
+// Generated on: <#WriteLine(DateTime.Now.ToString());#>
+//
+// The template file is SemanticGraphVisitor.tt 
+//
+
+// disable warnings about missing XML comments
+#pragma warning disable 1591 
+
+namespace CSharpTreeBuilder.CSharpSemanticGraph
+{
+  // ================================================================================================
+  /// <summary>
+  /// This is the abstract base class of SemanticGraph visitor classes.
+  /// </summary>
+  /// <remarks>
+  /// Preorder, depth-first traversal. 
+  /// All base classes are visited from the most-derived to the less derived.
+  /// </remarks>
+  // ================================================================================================
+  public abstract class SemanticGraphVisitor
+  {
+<#
+	List<string> entityNameList = new List<string>();
+
+	string locDrive = Environment.GetEnvironmentVariable("LOCDrive") ?? @"D:\";
+    if (!locDrive.EndsWith(@"\")) { locDrive += @"\"; }
+	string locPath = Environment.GetEnvironmentVariable("LOCPath") ?? @"Work\LINQOverCSharp\CSharpFactoryVS2010";
+    string workingDir =  Path.Combine(Path.Combine(locDrive, locPath), @"CSharpTreeBuilder\CSharpSemanticGraph");
+	//Debug.WriteLine(workingDir);
+	string[] filenameList = Directory.GetFiles(workingDir, "*Entity.cs", SearchOption.TopDirectoryOnly);
+
+	foreach (string filename in filenameList)
+	{
+		int pathEndIndex = filename.LastIndexOf('\\');
+		if (pathEndIndex >= 0)
+		{
+			string entityName = filename.Substring(pathEndIndex + 1, filename.Length - pathEndIndex - 4);
+			//Debug.WriteLine(entityName);
+			WriteLine("    public virtual void Visit({0} entity) {{ }}", entityName);
+		}
+	}
+#>
+  }
+}
+#pragma warning restore 1591

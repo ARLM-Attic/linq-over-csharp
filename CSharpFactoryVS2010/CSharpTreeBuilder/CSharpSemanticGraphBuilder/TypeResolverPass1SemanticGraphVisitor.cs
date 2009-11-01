@@ -78,36 +78,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resolves type references in a ClassEntity node.
+    /// Resolves type references in a TypeEntity node.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Visit(ClassEntity entity)
+    public override void Visit(TypeEntity entity)
     {
       ResolveBaseTypeReferences(entity);
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves type references in a StructEntity node.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void Visit(StructEntity entity)
-    {
-      ResolveBaseTypeReferences(entity);
-    }
+    //// ----------------------------------------------------------------------------------------------
+    ///// <summary>
+    ///// Resolves type references in a StructEntity node.
+    ///// </summary>
+    ///// <param name="entity">A semantic entity.</param>
+    //// ----------------------------------------------------------------------------------------------
+    //public override void Visit(StructEntity entity)
+    //{
+    //  ResolveBaseTypeReferences(entity);
+    //}
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves type references in a InterfaceEntity node.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    // ----------------------------------------------------------------------------------------------
-    public override void Visit(InterfaceEntity entity)
-    {
-      ResolveBaseTypeReferences(entity);
-    }
+    //// ----------------------------------------------------------------------------------------------
+    ///// <summary>
+    ///// Resolves type references in a InterfaceEntity node.
+    ///// </summary>
+    ///// <param name="entity">A semantic entity.</param>
+    //// ----------------------------------------------------------------------------------------------
+    //public override void Visit(InterfaceEntity entity)
+    //{
+    //  ResolveBaseTypeReferences(entity);
+    //}
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -117,6 +117,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(DelegateEntity entity)
     {
+      //ResolveBaseTypeReferences(entity);
+
       // Resolve return type
       if (entity.ReturnTypeReference != null)
       {
@@ -132,6 +134,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(EnumEntity entity)
     {
+      //ResolveBaseTypeReferences(entity);
+
       // Resolve underlying type
       if (entity.UnderlyingTypeReference != null)
       {

@@ -228,6 +228,12 @@
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
     <Compile Include="CSharpSemanticGraph\ISemanticEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\SemanticGraphVisitor.cs">
+      <DependentUpon>SemanticGraphVisitor.tt</DependentUpon>
+      <SubType>Code</SubType>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Include="CSharpSemanticGraph\TypeParameterMapEqualityComparer.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityIsInaccessibleException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookup.cs" />
@@ -349,7 +355,6 @@
     <Compile Include="CSharpSemanticGraph\SemanticEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityReference.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraph.cs" />
-    <Compile Include="CSharpSemanticGraph\SemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraph\StructEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ConstructedTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\TypeEntity.cs" />
@@ -569,6 +574,10 @@
     </None>
     <None Include="CSharpAst\CodeGenHelper\CodeGenHelper.cs">
       <LastGenOutput>CodeGenHelper.cs</LastGenOutput>
+    </None>
+    <None Include="CSharpSemanticGraph\SemanticGraphVisitor.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>SemanticGraphVisitor.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

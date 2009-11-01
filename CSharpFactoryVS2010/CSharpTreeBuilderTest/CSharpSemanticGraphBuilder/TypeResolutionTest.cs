@@ -2543,5 +2543,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         member.Type.ToString().ShouldEqual("global::A2`2[global::System.Char,global::System.Byte]");
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests the resolution of type references in semantic entities imported from mscorlib.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void MscorlibTypeReferenceResolution()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      InvokeParser(project).ShouldBeTrue();
+
+      project.SemanticGraph.AcceptVisitor(new UnresolvedTypeFinderSemanticGraphVisitor());
+    }
   }
 }

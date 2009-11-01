@@ -79,6 +79,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityReferenceEqualityComparerTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpaceTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeConverterTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\UnresolvedTypeFinderSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraph\AccessibilityTest.cs" />
     <Compile Include="CSharpSemanticGraph\SignatureTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
