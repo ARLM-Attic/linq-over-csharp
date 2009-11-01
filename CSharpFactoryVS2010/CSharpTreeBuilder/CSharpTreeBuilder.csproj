@@ -567,13 +567,9 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>BlankSyntaxNodeVisitor.cs</LastGenOutput>
     </None>
-    <None Include="CSharpAst\CodeGenHelper\generate_SyntaxNode_filelist.cmd" />
     <None Include="CSharpAst\ISyntaxNodeVisitor.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ISyntaxNodeVisitor.cs</LastGenOutput>
-    </None>
-    <None Include="CSharpAst\CodeGenHelper\CodeGenHelper.cs">
-      <LastGenOutput>CodeGenHelper.cs</LastGenOutput>
     </None>
     <None Include="CSharpSemanticGraph\SemanticGraphVisitor.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -586,8 +582,7 @@
   <ItemGroup>
     <Content Include="CSharpAstBuilder\SymbolTable.Exceptions.txt" />
     <Content Include="CSharpAstBuilder\Generated\SymbolTable.Generated.txt" />
-    <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_filelist.txt" />
-    <Content Include="CSharpAst\CodeGenHelper\SyntaxNode_ignore.txt" />
+    <Content Include="CSharpAst\SyntaxNode_ignore.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

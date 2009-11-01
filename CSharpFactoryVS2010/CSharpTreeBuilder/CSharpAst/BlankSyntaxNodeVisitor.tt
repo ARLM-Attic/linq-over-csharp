@@ -3,7 +3,6 @@
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
-<#@ include file="CodeGenHelper\CodeGenHelper.cs" #>
 //
 // WARNING! This file is generated, do not modify it manually!
 //
@@ -27,9 +26,34 @@ namespace CSharpTreeBuilder.Ast
   public class BlankSyntaxNodeVisitor : ISyntaxNodeVisitor
   {
 <#
-	foreach (string element in CodeGenHelper.GetTypeNameList().Keys)
+	string locDrive = Environment.GetEnvironmentVariable("LOCDrive") ?? @"C:\";
+    if (!locDrive.EndsWith(@"\")) { locDrive += @"\"; }
+	string locPath = Environment.GetEnvironmentVariable("LOCPath") ?? @"Work\LINQOverCSharp\CSharpFactoryVS2010";
+    string workingDir =  Path.Combine(Path.Combine(locDrive, locPath), @"CSharpTreeBuilder\CSharpAst");
+	
+	string[] filenameList = Directory.GetFiles(workingDir, "*Node.cs", SearchOption.AllDirectories);
+
+	List<string> ignoredTypeNames = new List<string>();
+	using (StreamReader streamReader = new StreamReader(Path.Combine(workingDir, @"SyntaxNode_ignore.txt")))
 	{
-		WriteLine("    public virtual bool Visit({0} node) {{ return true; }}", element);
+		while (!streamReader.EndOfStream)
+		{
+			ignoredTypeNames.Add(streamReader.ReadLine().Trim());
+		}
+	}
+
+	foreach (string filename in filenameList)
+	{
+		int pathEndIndex = filename.LastIndexOf('\\');
+		if (pathEndIndex >= 0)
+		{
+			string typeName = filename.Substring(pathEndIndex + 1, filename.Length - pathEndIndex - 4);
+			if (!ignoredTypeNames.Contains(typeName))
+			{
+				//Debug.WriteLine(typeName);
+				WriteLine("    public virtual bool Visit({0} node) {{ return true; }}", typeName);
+			}
+		}
 	}
 #>
   }
