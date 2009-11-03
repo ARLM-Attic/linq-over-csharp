@@ -59,8 +59,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore]
-    // TODO: reintroduce when TypeParameterEntity.BaseInterfaces is implemented
     public void TypeParameterConstraints()
     {
       var project = new CSharpProject(WorkingFolder);

@@ -45,7 +45,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <returns>The resolved semantic entity, or null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity Resolve(SimpleNameNode simpleName, SemanticEntity resolutionContextEntity)
+    public ISemanticEntity Resolve(SimpleNameNode simpleName, SemanticEntity resolutionContextEntity)
     {
       // A simple-name consists of an identifier, optionally followed by a type argument list:
       //   simple-name:
@@ -129,7 +129,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The context of the resolution.</param>
     /// <returns>A semantic entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    private SemanticEntity ResolveAtTypeDeclarationLevel(SimpleNameNode simpleName, SemanticEntity resolutionContextEntity)
+    private ISemanticEntity ResolveAtTypeDeclarationLevel(SimpleNameNode simpleName, SemanticEntity resolutionContextEntity)
     {
       // Otherwise, for each instance type T (§10.3.1), 
       // starting with the instance type of the immediately enclosing type declaration and 
@@ -154,10 +154,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Otherwise, if a member lookup (§7.3) of I in T with K type arguments produces a match:
-        var members = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext, resolutionContextEntity, false).ToList();
-        if (members.Count > 0)
+        var memberLookupResult = _MemberLookup.Lookup(simpleName.Identifier, simpleName.Arguments.Count, typeContext, resolutionContextEntity, false);
+        if (!memberLookupResult.IsEmpty)
         {
-          return members.Cast<SemanticEntity>().FirstOrDefault();
+          return memberLookupResult.SingleMember;
           // - If T is the instance type of the immediately enclosing class or struct type 
           //   and the lookup identifies one or more methods, the result is a method group 
           //   with an associated instance expression of this. 

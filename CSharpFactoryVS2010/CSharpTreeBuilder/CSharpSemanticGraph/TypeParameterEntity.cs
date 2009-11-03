@@ -252,13 +252,48 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        // The effective interface set of a type parameter T is defined as follows:
-        // If T has no secondary-constraints, its effective interface set is empty.
-        // If T has interface-type constraints but no type-parameter constraints, its effective interface set is its set of interface-type constraints.
-        // If T has no interface-type constraints but has type-parameter constraints, its effective interface set is the union of the effective interface sets of its type-parameter constraints.
-        // If T has both interface-type constraints and type-parameter constraints, its effective interface set is the union of its set of interface-type constraints and the effective interface sets of its type-parameter constraints.
+        // Spec: The effective interface set of a type parameter T is defined as follows:
+        // - If T has no secondary-constraints, its effective interface set is empty.
+        // - If T has interface-type constraints but no type-parameter constraints,
+        //   its effective interface set is its set of interface-type constraints.
+        // - If T has no interface-type constraints but has type-parameter constraints, 
+        //   its effective interface set is the union of the effective interface sets of its type-parameter constraints.
+        // - If T has both interface-type constraints and type-parameter constraints, 
+        //   its effective interface set is the union of its set of interface-type constraints 
+        //   and the effective interface sets of its type-parameter constraints.
 
-        return null;
+        var result = InterfaceTypeConstraints;
+
+        foreach (var typeParameterConstraint in TypeParameterConstraints)
+        {
+          result = result.Union(typeParameterConstraint.BaseInterfaces);
+        }
+
+        return result.ToList().AsReadOnly();
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this type parameter is known to be a reference type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsKnownToBeAReferenceType
+    {
+      get
+      {
+        // Spec: A type parameter is known to be a reference type if it has the reference type constraint ...
+        if (HasReferenceTypeConstraint)
+        {
+          return true;
+        }
+
+        // Caching the base class object because the BaseClass property getter involves lots of logic.
+        var baseClass = BaseClass;
+
+        // Spec: ... or its effective base class is not object or System.ValueType.
+        return baseClass.BuiltInTypeValue != BuiltInType.Object 
+          && baseClass != SemanticGraph.GetEntityByMetadataObject(typeof (System.ValueType));
       }
     }
 

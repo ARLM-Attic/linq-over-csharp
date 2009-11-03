@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// <typeparam name="TSyntaxNode">The type of the syntax node, must be a subclass of ISyntaxNode.</typeparam>
   // ================================================================================================
   public abstract class SyntaxNodeBasedSemanticEntityReference<TTargetEntity, TSyntaxNode> : SemanticEntityReference<TTargetEntity>
-    where TTargetEntity : SemanticEntity
+    where TTargetEntity : class, ISemanticEntity
     where TSyntaxNode : ISyntaxNode
   {
     // ----------------------------------------------------------------------------------------------

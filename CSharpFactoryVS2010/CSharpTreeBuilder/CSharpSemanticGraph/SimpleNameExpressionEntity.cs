@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="entityReference">A reference to a semantic entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameExpressionEntity(SemanticEntityReference<SemanticEntity> entityReference)
+    public SimpleNameExpressionEntity(SemanticEntityReference<ISemanticEntity> entityReference)
     {
       if (entityReference == null)
       {
@@ -32,14 +32,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to an entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<SemanticEntity> EntityReference { get; private set; }
+    public SemanticEntityReference<ISemanticEntity> EntityReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the entity denoted by this simple name.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity Entity
+    public ISemanticEntity Entity
     {
       get
       {

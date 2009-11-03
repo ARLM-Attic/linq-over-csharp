@@ -9,7 +9,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// </summary>
   /// <typeparam name="TTargetEntity">The type of the target entity, must be a subclass of SemanticEntity.</typeparam>
   // ================================================================================================
-  public abstract class SemanticEntityReference<TTargetEntity> where TTargetEntity : SemanticEntity
+  public abstract class SemanticEntityReference<TTargetEntity> where TTargetEntity : class, ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

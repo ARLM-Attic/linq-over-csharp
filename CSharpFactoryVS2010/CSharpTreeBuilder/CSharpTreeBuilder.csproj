@@ -227,6 +227,8 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MemberLookupResult.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MethodGroup.cs" />
     <Compile Include="CSharpSemanticGraph\ISemanticEntity.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphVisitor.cs">
       <DependentUpon>SemanticGraphVisitor.tt</DependentUpon>

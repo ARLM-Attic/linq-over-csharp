@@ -78,6 +78,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeEntities">A collection of type entities.</param>
     /// <returns>The most encompassed type from the collection. 
     /// Null if the collection is empty or the most encompassed type is ambigous.</returns>
+    /// <remarks>
+    /// The most encompassed type in a set of types is the one type that is encompassed 
+    /// by all other types in the set. If no single type is encompassed by all other types, 
+    /// then the set has no most encompassed type. 
+    /// In more intuitive terms, the most encompassed type is the “smallest” type in the set
+    /// — the one type that can be implicitly converted to each of the other types.
+    /// </remarks>
     // ----------------------------------------------------------------------------------------------
     public TypeEntity GetMostEncompassedType(IEnumerable<TypeEntity> typeEntities)
     {

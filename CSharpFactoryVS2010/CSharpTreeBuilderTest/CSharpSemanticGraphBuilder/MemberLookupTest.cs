@@ -21,7 +21,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore]  // Under development
     public void TypeParameter()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -37,21 +36,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       // Selecting members of T (contextType) that are accessible in class A, named "GetType", with 0 type params.
       {
-        var members = memberLookup.Lookup("GetType", 0, typeParameter, field, false).OrderBy(x => x.ToString()).ToList();
-        members.Count.ShouldEqual(4);
-        members[0].ToString().ShouldEqual("global::C_GetType");
-        members[1].ToString().ShouldEqual("global::I1_GetType()");
-        members[2].ToString().ShouldEqual("global::I1_GetType(global::System.Int32)");
-        members[3].ToString().ShouldEqual("global::I2_GetType");
-      }
-
-      // Select only invocable members.
-      {
-        var members = memberLookup.Lookup("GetType", 0, typeParameter, field, true).OrderBy(x => x.ToString()).ToList();
-        members.Count.ShouldEqual(3);
-        members[0].ToString().ShouldEqual("global::I1_GetType()");
-        members[1].ToString().ShouldEqual("global::I1_GetType(global::System.Int32)");
-        members[2].ToString().ShouldEqual("global::System.Object_GetType()");
+        var memberLookupResult = memberLookup.Lookup("GetType", 0, typeParameter, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(3);
+        methods[0].ToString().ShouldEqual("global::C_GetType()");
+        methods[1].ToString().ShouldEqual("global::I1_GetType(global::System.Int32)");
+        methods[2].ToString().ShouldEqual("global::System.Object_GetType()");
       }
     }
 
@@ -61,7 +51,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // Under development
     public void GenericType()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -74,9 +63,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var contextType = field.Type;
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
-      var members = memberLookup.Lookup("GetType", 0, contextType, field, false).OrderBy(x => x.ToString()).ToList();
-      members.Count.ShouldEqual(2);
-      // TODO: check the found members
+
+      // Selecting members of class B<int> (contextType) that are accessible in class A, named "GetType", with 0 type params.
+      {
+        var memberLookupResult = memberLookup.Lookup("GetType", 0, contextType, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(2);
+        methods[0].ToString().ShouldEqual("global::D`1[global::System.Int32]_GetType()");
+        methods[1].ToString().ShouldEqual("global::System.Object_GetType()");
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -100,24 +95,27 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 0 type params.
       {
-        var members = memberLookup.Lookup("GetType", 0, classB, field, false).OrderBy(x => x.ToString()).ToList();
-        members.Count.ShouldEqual(4);
-        members[0].ToString().ShouldEqual("global::D_GetType()");
-        members[1].ToString().ShouldEqual("global::D_GetType`1()");
-        members[2].ToString().ShouldEqual("global::D_GetType`2()");
-        members[3].ToString().ShouldEqual("global::System.Object_GetType()");
+        var memberLookupResult = memberLookup.Lookup("GetType", 0, classB, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(4);
+        methods[0].ToString().ShouldEqual("global::D_GetType()");
+        methods[1].ToString().ShouldEqual("global::D_GetType`1()");
+        methods[2].ToString().ShouldEqual("global::D_GetType`2()");
+        methods[3].ToString().ShouldEqual("global::System.Object_GetType()");
       }
       // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 1 type params.
       {
-        var members = memberLookup.Lookup("GetType", 1, classB, field, false).OrderBy(x => x.ToString()).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::D_GetType`1()");
+        var memberLookupResult = memberLookup.Lookup("GetType", 1, classB, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(1);
+        methods[0].ToString().ShouldEqual("global::D_GetType`1()");
       }
       // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 2 type params.
       {
-        var members = memberLookup.Lookup("GetType", 2, classB, field, false).OrderBy(x => x.ToString()).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::D_GetType`2()");
+        var memberLookupResult = memberLookup.Lookup("GetType", 2, classB, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(1);
+        methods[0].ToString().ShouldEqual("global::D_GetType`2()");
       }
     }
 
@@ -142,20 +140,18 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       
       // Selecting members of class B (contextType) that are accessible in class A, named "C", with 0 type params.
       {
-        var members = memberLookup.Lookup("C", 0, classB, field, false).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::B+C");
+        var memberLookupResult = memberLookup.Lookup("C", 0, classB, field, false);
+        memberLookupResult.SingleMember.ToString().ShouldEqual("global::B+C");
       }
       // Selecting members of class B (contextType) that are accessible in class A, named "C", with 1 type params.
       {
-        var members = memberLookup.Lookup("C", 1, classB, field, false).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::B+C`1");
+        var memberLookupResult = memberLookup.Lookup("C", 1, classB, field, false);
+        memberLookupResult.SingleMember.ToString().ShouldEqual("global::B+C`1");
       }
       // Selecting invocable members only.
       {
-        var members = memberLookup.Lookup("C", 1, classB, field, true).ToList();
-        members.Count.ShouldEqual(0);
+        var memberLookupResult = memberLookup.Lookup("C", 1, classB, field, true);
+        memberLookupResult.IsEmpty.ShouldBeTrue();
       }
     }
 
@@ -181,9 +177,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       // Selecting members of class S (contextType) that are accessible in class S, named "M", with 0 type params.
       {
-        var members = memberLookup.Lookup("M", 0, classS, field, false).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::S_M");
+        var memberLookupResult = memberLookup.Lookup("M", 0, classS, field, false);
+        memberLookupResult.SingleMember.ToString().ShouldEqual("global::S_M");
       }
     }
 
@@ -210,15 +205,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       // Selecting members of class S (contextType) that are accessible in class S, named "M", with 0 type params.
       {
-        var members = memberLookup.Lookup("M", 0, classS, field, false).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::S+M");
+        var memberLookupResult = memberLookup.Lookup("M", 0, classS, field, false);
+        memberLookupResult.SingleMember.ToString().ShouldEqual("global::S+M");
       }
       // Selecting members of class S (contextType) that are accessible in class S, named "M2", with 1 type params.
       {
-        var members = memberLookup.Lookup("M2", 1, classS, field, false).ToList();
-        members.Count.ShouldEqual(1);
-        members[0].ToString().ShouldEqual("global::S+M2`1");
+        var memberLookupResult = memberLookup.Lookup("M2", 1, classS, field, false);
+        memberLookupResult.SingleMember.ToString().ShouldEqual("global::S+M2`1");
       }
     }
 
@@ -243,11 +236,63 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       // Selecting members of class S (contextType) that are accessible in class S, named "M", with 0 type params.
       {
-        var members = memberLookup.Lookup("M", 0, classS, field, false).OrderBy(x => x.ToString()).ToList();
-        members.Count.ShouldEqual(2);
-        members[0].ToString().ShouldEqual("global::Base0_M()");
-        members[1].ToString().ShouldEqual("global::S_M()");
+        var memberLookupResult = memberLookup.Lookup("M", 0, classS, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(2);
+        methods[0].ToString().ShouldEqual("global::Base0_M()");
+        methods[1].ToString().ShouldEqual("global::S_M()");
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests that class members hide interface members
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ClassMemberHidesInterfaceMembers()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberLookup\ClassMemberHidesInterfaceMembers.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var globalNamespace = project.SemanticGraph.GlobalNamespace;
+      var classA = globalNamespace.GetSingleChildType<ClassEntity>("A", 1);
+      var typeParameter = classA.GetOwnTypeParameterByName("T");
+      var field = classA.GetMember<FieldEntity>("t");
+
+      var memberLookup = new MemberLookup(project, project.SemanticGraph);
+
+      // Selecting members of T (contextType) that are accessible in class A, named "M1", with 0 type params.
+      {
+        var memberLookupResult = memberLookup.Lookup("M1", 0, typeParameter, field, false);
+        memberLookupResult.SingleMember.ToString().ShouldEqual("global::Base_M1");
+      }
+
+      // Selecting members of T (contextType) that are accessible in class A, named "M2", with 0 type params.
+      {
+        var memberLookupResult = memberLookup.Lookup("M2", 0, typeParameter, field, false);
+        var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
+        methods.Count.ShouldEqual(2);
+        methods[0].ToString().ShouldEqual("global::Base_M2()");
+        methods[1].ToString().ShouldEqual("global::I3_M2(global::System.Int32)");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tests that different type of member with same name cause ambiguity in multiple inheritence.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore] // csc.exe signals warning but the spec demands an error.
+    public void AmbiguityInMultipleInheritance()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberLookup\AmbiguityInMultipleInheritance.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      project.Errors.Count.ShouldEqual(1);
     }
   }
 }

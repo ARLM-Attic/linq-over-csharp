@@ -81,6 +81,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\TypeConverterTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\UnresolvedTypeFinderSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraph\AccessibilityTest.cs" />
+    <Compile Include="CSharpSemanticGraph\TypeParameterEntityTest.cs" />
     <Compile Include="CSharpSemanticGraph\SignatureTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphTest.cs" />
@@ -380,6 +381,7 @@
     <None Include="TestFiles\Accessibility\ProtectedInternalInSameProgram.cs" />
     <None Include="TestFiles\Accessibility\Protected.cs" />
     <None Include="TestFiles\Accessibility\ProtectedAccessForInstanceMembers.cs" />
+    <None Include="TestFiles\MemberLookup\AmbiguityInMultipleInheritance.cs" />
     <None Include="TestFiles\MemberLookup\GenericType.cs" />
     <None Include="TestFiles\MemberLookup\TypeParameter.cs" />
     <None Include="TestFiles\MemberLookup\NestedType.cs" />
@@ -401,7 +403,10 @@
     <None Include="TestFiles\TypeResolution\CS0122_ClassInaccessible_Qualified.cs" />
     <None Include="TestFiles\TypeResolution\UsingAlias.cs" />
     <None Include="TestFiles\SemanticGraphVisitor\VisitClassMembers.cs" />
-    <Compile Include="TestFiles\TypeResolution\TypeParameterConstraints.cs" />
+    <None Include="TestFiles\TypeParameterEntity\KnownToBeAReferenceType.cs" />
+    <None Include="TestFiles\TypeParameterEntity\EffectiveInterfaceSet.cs" />
+    <None Include="TestFiles\TypeParameterEntity\EffectiveBaseClass.cs" />
+    <None Include="TestFiles\TypeResolution\TypeParameterConstraints.cs" />
     <None Include="TestFiles\SimpleNameResolution\MethodTypeParameter.cs" />
     <None Include="TestFiles\SimpleNameResolution\CS0103_SimpleNameUndefined.cs" />
     <None Include="TestFiles\TypeResolution\Method.cs" />

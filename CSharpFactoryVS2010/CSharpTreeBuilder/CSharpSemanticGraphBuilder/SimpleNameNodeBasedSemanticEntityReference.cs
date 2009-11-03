@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// </summary>
   // ================================================================================================
   public sealed class SimpleNameNodeBasedSemanticEntityReference
-    : SyntaxNodeBasedSemanticEntityReference<SemanticEntity, SimpleNameNode>
+    : SyntaxNodeBasedSemanticEntityReference<ISemanticEntity, SimpleNameNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override SemanticEntity GetResolvedEntity(
+    protected override ISemanticEntity GetResolvedEntity(
       SemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
       var simpleNameResolver = new SimpleNameResolver(errorHandler, semanticGraph);

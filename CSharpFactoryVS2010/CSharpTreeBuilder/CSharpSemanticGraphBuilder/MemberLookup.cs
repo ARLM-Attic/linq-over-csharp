@@ -54,7 +54,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>If the simple-name or member-access occurs as the simple-expression 
     /// of an invocation-expression (§7.5.5.1), the member is said to be invoked.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<IMemberEntity> Lookup(
+    public MemberLookupResult Lookup(
       string name, int typeParameterCount, TypeEntity contextEntity, SemanticEntity accessingEntity, bool isInvocation)
     {
       // A member lookup of a name N with K type parameters in a type T is processed as follows:
@@ -128,23 +128,75 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // This step only has an effect if T is a type parameter and T has both an effective base class other than object 
       // and a non-empty effective interface set (§10.1.5). 
       if (T is TypeParameterEntity
-        && T.BaseClass != _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object)
+        && T.BaseClass.BuiltInTypeValue != BuiltInType.Object
         && T.BaseInterfaces.Count > 0)
       {
-        // For every member S.M in the set, where S is the type in which the member M is declared, 
-        // the following rules are applied if S is a class declaration other than object:
+        // Comparer for method signature comparison
+        var signatureComparer = new SignatureEqualityComparerForCompleteMatching();
 
-        // If M is a constant, field, property, event, enumeration member, or type declaration, then all members declared in an interface declaration are removed from the set.
-        // If M is a method, then all non-method members declared in an interface declaration are removed from the set, and all methods with the same signature as M declared in an interface declaration are removed from the set.
+        // Creating a copy of the member-set for iteration. Iterating on members would make it un
+        var iteratorSet = members.ToList();
+
+        // Spec: For every member S.M in the set, where S is the type in which the member M is declared, ...
+        foreach (var M in iteratorSet)
+        {
+          // If M is not yet removed from the set then let's see if it hides other members.
+          if (members.Contains(M))
+          {
+            var S = M.Parent as ClassEntity;
+
+            // Spec: ... the following rules are applied if S is a class declaration other than object:
+            if (S != null && S.BuiltInTypeValue != BuiltInType.Object)
+            {
+              // If M is a constant, field, property, event, enumeration member, or type declaration, 
+              if (M is ConstantMemberEntity || M is FieldEntity || M is PropertyEntity // TODO: || M is EventEntity
+                || M is TypeEntity) // Enum member is also a ConstantMemberEntity so no need to check it separately
+              {
+                // then all members declared in an interface declaration are removed from the set.
+                members.RemoveWhere(removableMember =>
+                                    removableMember.Parent is InterfaceEntity
+                                    && removableMember.Name == M.Name);
+              }
+
+              // If M is a method, 
+              if (M is MethodEntity)
+              {
+                // then all non-method members declared in an interface declaration are removed from the set, 
+                members.RemoveWhere(removableMember =>
+                                    !(removableMember is MethodEntity)
+                                    && removableMember.Parent is InterfaceEntity
+                                    && removableMember.Name == M.Name);
+
+                // and all methods with the same signature as M declared in an interface declaration are removed from the set.
+                members.RemoveWhere(removableMember =>
+                                    removableMember is MethodEntity
+                                    && removableMember.Parent is InterfaceEntity
+                                    && signatureComparer.Equals((removableMember as MethodEntity).Signature, (M as MethodEntity).Signature));
+              }
+            }
+          }
+        }
       }
 
-      //•	Finally, having removed hidden members, the result of the lookup is determined:
-      //o	If the set consists of a single member that is not a method, then this member is the result of the lookup.
-      //o	Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
-      //o	Otherwise, the lookup is ambiguous, and a compile-time error occurs.
-      //For member lookups in types other than type parameters and interfaces, and member lookups in interfaces that are strictly single-inheritance (each interface in the inheritance chain has exactly zero or one direct base interface), the effect of the lookup rules is simply that derived members hide base members with the same name or signature. Such single-inheritance lookups are never ambiguous. The ambiguities that can possibly arise from member lookups in multiple-inheritance interfaces are described in §13.2.5.
+      // Finally, having removed hidden members, the result of the lookup is determined:
+      // - If the set consists of a single member that is not a method, then this member is the result of the lookup.
+      // - Otherwise, if the set contains only methods, then this group of methods is the result of the lookup.
+      // - Otherwise, the lookup is ambiguous, and a compile-time error occurs.
+      // TODO: detect ambiguity and signal error 
+      // (csc.exe signals warning CS0467, see test case MemberLookupTest.).
 
-      return members;
+      return new MemberLookupResult(members);
+      
+      // Note:
+      // Spec: For member lookups in types other than type parameters and interfaces, 
+      // and member lookups in interfaces that are strictly single-inheritance 
+      // (each interface in the inheritance chain has exactly zero or one direct base interface), 
+      // the effect of the lookup rules is simply that derived members hide base members with the same name or signature. 
+      // Such single-inheritance lookups are never ambiguous. 
+      // The ambiguities that can possibly arise from member lookups in multiple-inheritance interfaces are described in §13.2.5.
+
+      // TODO:
+      // Methods hidden by a "new" method are not excluded from the resulting method group. Is this the correct behaviour?
     }
 
     #region Private methods
@@ -193,10 +245,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // ... and the accessible members named N in object. 
         members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity));
 
-        // TODO:
         // If T is a constructed type, the set of members is obtained 
         // by substituting type arguments as described in §10.3.2.
-
+        // --> This is handled by the entity objects.
 
         // Members that include an override modifier are excluded from the set.
         members.RemoveWhere(x => (x is FunctionMemberEntity) && (x as FunctionMemberEntity).IsOverride);

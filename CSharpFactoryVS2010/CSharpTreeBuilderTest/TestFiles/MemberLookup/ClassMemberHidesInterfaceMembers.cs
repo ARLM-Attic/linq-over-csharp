@@ -10,18 +10,47 @@
 
 class Base
 {
-  public int M = 0;
+  // Hides I1.M1, I2.M1, I3.M1
+  public int M1 = 0;
+  // Hides I1.M2, I2.M2, but not I3.M2 (different signature)
+  public void M2()
+  {
+  }
 }
 
 interface I1
 {
-  int M { get; set; }
+  // Hidden by Base.M1
+  int M1 { get; set; }
+  // Hidden by Base.M2
+  void M2();
 }
 
-class A<T> where T : Base, I1
+interface I2
 {
+  // Hidden by Base.M1
+  void M1();
+  // Hidden by Base.M2
+  int M2 { get; set; }
+}
+
+interface I3
+{
+  // Hidden by Base.M1
+  void M1(int a);
+  // Visible
+  void M2(int a);
+}
+
+class A<T> where T : Base, I1, I2, I3
+{
+  // Selecting members of T (contextType) that are accessible in class A, named "M1", "M2"
+  T t;
+
   void Test(T t)
   {
-    t.M = 0;
+    t.M1 = 0;
+    t.M2();
+    t.M2(1);
   }
 }
