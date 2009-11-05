@@ -1193,17 +1193,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           property.IsVirtual.ShouldBeFalse();
           property.IsInvocable.ShouldBeFalse();
 
-          property.GetAccessor.ShouldNotBeNull();
-          property.GetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.GetAccessor);
-          property.GetAccessor.Parent.ShouldEqual(property);
-          property.GetAccessor.DeclaredAccessibility.ShouldBeNull();
-          property.GetAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
+          var getAccessor = property.GetAccessor;
+          getAccessor.Name.ShouldEqual("get_B");
+          getAccessor.FullyQualifiedName.ShouldEqual("A.get_B");
+          getAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.GetAccessor);
+          getAccessor.Parent.ShouldEqual(property);
+          getAccessor.DeclaredAccessibility.ShouldBeNull();
+          getAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
 
-          property.SetAccessor.ShouldNotBeNull();
-          property.SetAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.SetAccessor);
-          property.SetAccessor.Parent.ShouldEqual(property);
-          property.SetAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Private);
-          property.SetAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
+          var setAccessor = property.SetAccessor;
+          setAccessor.Name.ShouldEqual("set_B");
+          setAccessor.FullyQualifiedName.ShouldEqual("A.set_B");
+          setAccessor.SyntaxNodes[0].ShouldEqual(propertyNode.SetAccessor);
+          setAccessor.Parent.ShouldEqual(property);
+          setAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Private);
+          setAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
 
           var accessors = property.Accessors.ToList();
           accessors.Count.ShouldEqual(2);
@@ -1587,7 +1591,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var simpleName = expression as SimpleNameExpressionEntity;
-        simpleName.EntityReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
+        simpleName.SimpleNameNode.ShouldNotBeNull();
         expression.Parent.ShouldEqual(initializer);
       }
     }

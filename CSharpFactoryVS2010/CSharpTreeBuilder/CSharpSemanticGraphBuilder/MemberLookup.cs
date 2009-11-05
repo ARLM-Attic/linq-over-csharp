@@ -55,7 +55,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// of an invocation-expression (§7.5.5.1), the member is said to be invoked.</remarks>
     // ----------------------------------------------------------------------------------------------
     public MemberLookupResult Lookup(
-      string name, int typeParameterCount, TypeEntity contextEntity, SemanticEntity accessingEntity, bool isInvocation)
+      string name, int typeParameterCount, TypeEntity contextEntity, ISemanticEntity accessingEntity, bool isInvocation)
     {
       // A member lookup of a name N with K type parameters in a type T is processed as follows:
       string N = name;
@@ -210,7 +210,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>The collection of accessible members named N in T.</returns>
     // ----------------------------------------------------------------------------------------------
-    private HashSet<IMemberEntity> GetAccessibleMembersByName(string N, TypeEntity T, SemanticEntity accessingEntity)
+    private HashSet<IMemberEntity> GetAccessibleMembersByName(string N, TypeEntity T, ISemanticEntity accessingEntity)
     {
       var members = new HashSet<IMemberEntity>();
 
@@ -264,7 +264,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>The collection of accessible members named N in object.</returns>
     // ----------------------------------------------------------------------------------------------
-    private IEnumerable<IMemberEntity> GetAccessibleMembersOfObject(string N, SemanticEntity accessingEntity)
+    private IEnumerable<IMemberEntity> GetAccessibleMembersOfObject(string N, ISemanticEntity accessingEntity)
     {
       var objectEntity = _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object);
       return objectEntity.GetAccessibleMembers<NonTypeMemberEntity>(N, accessingEntity).Cast<IMemberEntity>();

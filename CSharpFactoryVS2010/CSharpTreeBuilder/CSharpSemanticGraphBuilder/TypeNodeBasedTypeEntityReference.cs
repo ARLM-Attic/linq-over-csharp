@@ -34,7 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
     protected override TypeEntity GetResolvedEntity(
-      SemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
       return GetTypeEntityByTypeNode(SyntaxNode, context, semanticGraph, errorHandler);
     }
@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>A TypeEntity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeEntity GetTypeEntityByTypeNode(TypeNode typeNode, SemanticEntity resolutionContextEntity,
+    private static TypeEntity GetTypeEntityByTypeNode(TypeNode typeNode, ISemanticEntity resolutionContextEntity,
       SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
       // First, try to resolve as built-in type.

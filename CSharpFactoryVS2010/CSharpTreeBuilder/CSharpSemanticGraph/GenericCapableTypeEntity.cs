@@ -225,7 +225,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           return base.TypeParameterMap;
         }
 
-        var parentTypeParameterMap = (Parent == null ? TypeParameterMap.Empty : Parent.TypeParameterMap);
+        var parentTypeParameterMap = TypeParameterMap.Empty;
+
+        if (Parent != null && Parent is IGenericSupportingSemanticEntity)
+        {
+          parentTypeParameterMap = (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;  
+        }
 
         return new TypeParameterMap(parentTypeParameterMap, OwnTypeParameters);
       }

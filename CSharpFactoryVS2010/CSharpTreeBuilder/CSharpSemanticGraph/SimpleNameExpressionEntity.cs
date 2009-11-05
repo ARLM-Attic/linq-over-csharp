@@ -1,4 +1,5 @@
 ﻿using System;
+using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -15,39 +16,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="SimpleNameExpressionEntity"/> class.
     /// </summary>
-    /// <param name="entityReference">A reference to a semantic entity.</param>
+    /// <param name="simpleNameNode">A simple name AST node.</param>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameExpressionEntity(SemanticEntityReference<ISemanticEntity> entityReference)
+    public SimpleNameExpressionEntity(SimpleNameNode simpleNameNode)
     {
-      if (entityReference == null)
+      if (simpleNameNode == null)
       {
-        throw new ArgumentNullException("entityReference");
+        throw new ArgumentNullException("simpleNameNode");
       }
 
-      EntityReference = entityReference;
+      SimpleNameNode = simpleNameNode;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to an entity.
+    /// Gets the simple name AST node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<ISemanticEntity> EntityReference { get; private set; }
+    public SimpleNameNode SimpleNameNode { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the entity denoted by this simple name.
+    /// Gets the result of the simple name resolution.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ISemanticEntity Entity
-    {
-      get
-      {
-        // TODO: if TypeEntity then return TargetEntity.GetMappedType(TypeParameterMap) ???
-
-        return EntityReference == null ? null : EntityReference.TargetEntity;
-      }
-    }
+    public SimpleNameResult SimpleNameResult { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -58,20 +51,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
-      // First resolve the entity reference
-
-      if (EntityReference != null)
+      // First resolve the simple name
+      
+      if (SimpleNameNode != null)
       {
-        EntityReference.Resolve(this, semanticGraph, errorHandler);
+        var simpleNameResolver = new SimpleNameResolver(errorHandler, semanticGraph);
+        SimpleNameResult = simpleNameResolver.Resolve(SimpleNameNode, this);
       }
       
       // Then determine the expression result
-      
-      if (Entity != null)
+
+      if (SimpleNameResult != null)
       {
-        if (Entity is IVariableEntity)
+        if (SimpleNameResult.SingleEntity is IVariableEntity)
         {
-          Result = new VariableExpressionResult(Entity as IVariableEntity);
+          ExpressionResult = new VariableExpressionResult(SimpleNameResult.SingleEntity as IVariableEntity);
         }
 
         // TODO

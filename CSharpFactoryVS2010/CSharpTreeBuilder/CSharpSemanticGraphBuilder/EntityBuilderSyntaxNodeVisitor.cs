@@ -443,8 +443,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       AssociateSyntaxNodeWithSemanticEntity(node, propertyEntity);
 
       // Create the accessors and add to the entity
-      propertyEntity.GetAccessor = CreateAccessor(node.GetAccessor);
-      propertyEntity.SetAccessor = CreateAccessor(node.SetAccessor);
+      propertyEntity.GetAccessor = CreateAccessor(AccessorKind.Get, node.GetAccessor);
+      propertyEntity.SetAccessor = CreateAccessor(AccessorKind.Set, node.SetAccessor);
 
       return true;
     }
@@ -573,7 +573,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var parentEntity = GetParentEntity<SemanticEntity>(node);
 
-      var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeBasedSemanticEntityReference(node));
+      var simpleNameEntity = new SimpleNameExpressionEntity(node);
       
       var hasExpressions = CastToIHasExpressions(parentEntity);
       hasExpressions.AddExpression(simpleNameEntity);
@@ -887,10 +887,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>
     /// Creates an accessor entity from an accessor AST node.
     /// </summary>
+    /// <param name="accessorKind">The kind of the accessor.</param>
     /// <param name="node">An accessor AST node.</param>
     /// <returns>An accessor entity, or null if the AST node was null.</returns>
     // ----------------------------------------------------------------------------------------------
-    private AccessorEntity CreateAccessor(AccessorNode node)
+    private AccessorEntity CreateAccessor(AccessorKind accessorKind, AccessorNode node)
     {
       if (node == null)
       {
@@ -898,7 +899,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       var accessibility = GetAccessibility(node.Modifiers);
 
-      var accessor = new AccessorEntity(accessibility, !node.HasBody);
+      var accessor = new AccessorEntity(accessorKind, accessibility, !node.HasBody);
       AssociateSyntaxNodeWithSemanticEntity(node, accessor);
 
       return accessor;

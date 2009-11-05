@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -17,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the parent of this entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntity Parent { get; set; }
+    ISemanticEntity Parent { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -28,7 +27,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// True if this entity is a (direct or indirect) parent of another entity, false otherwise.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    bool IsParentOf(SemanticEntity entity);
+    bool IsParentOf(ISemanticEntity entity);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -42,14 +41,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the semantic graph that this entity belongs to.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticGraph SemanticGraph { get; set; }
+    SemanticGraph SemanticGraph { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the program that this entity belongs to.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    Program Program { get; set; }
+    Program Program { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -60,60 +59,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a syntax node to the SyntaxNodes collection.
-    /// </summary>
-    /// <param name="syntaxNode">A syntax node.</param>
-    // ----------------------------------------------------------------------------------------------
-    void AddSyntaxNode(ISyntaxNode syntaxNode);
-    
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets or sets the reflected metadata (eg. type) that this entity was created from. Can be null.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    object ReflectedMetadata { get; set; }
-    
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Returns a semantic entity constructed from this entity by replacing type parameters 
-    /// with type arguments.
-    /// </summary>
-    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
-    /// <returns>
-    /// A semantic entity constructed from this entity using the specified type parameter map.
-    /// </returns>
-    // ----------------------------------------------------------------------------------------------
-    SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap);
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a value indicating whether this is a constructed entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    bool IsConstructed { get; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the generic template of this entity. 
-    /// Null if this entity was not constructed from another entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    SemanticEntity TemplateEntity { get; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the type parameters and type arguments associated with this entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    TypeParameterMap TypeParameterMap { get; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a collection of the entities constructed from this entity 
-    /// by replacing type parameters with type arguments.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    IEnumerable<SemanticEntity> ConstructedEntities { get; }
+    object ReflectedMetadata { get;  }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -122,6 +71,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="visitor">A visitor object</param>
     // ----------------------------------------------------------------------------------------------
     void AcceptVisitor(SemanticGraphVisitor visitor);
-
   }
 }

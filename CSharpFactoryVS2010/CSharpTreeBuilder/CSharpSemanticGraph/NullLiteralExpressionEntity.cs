@@ -19,7 +19,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
-      Result = new NullExpressionResult();
+      ExpressionResult = new NullExpressionResult();
     }
 
     #region Visitor methods

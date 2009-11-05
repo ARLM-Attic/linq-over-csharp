@@ -43,7 +43,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     // ----------------------------------------------------------------------------------------------
-    public void Resolve(SemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    public void Resolve(ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
       // If already resolved then bail out.
       if (ResolutionState == ResolutionState.Resolved)
@@ -74,7 +74,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
     protected abstract TTargetEntity GetResolvedEntity(
-      SemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler);
+      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

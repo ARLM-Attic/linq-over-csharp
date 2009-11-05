@@ -245,7 +245,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="accessingEntity">The accessing entity.</param>
     /// <returns>True if the parameter entity can access this entity, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsAccessibleBy(SemanticEntity accessingEntity)
+    public bool IsAccessibleBy(ISemanticEntity accessingEntity)
     {
       // First check the accessibility of the parent type (if any)
       var parentType = Parent as TypeEntity;
@@ -353,6 +353,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get { return false; }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an instance member.
+    /// </summary>
+    /// <remarks>Nested types are not instance members.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    bool IMemberEntity.IsInstanceMember
+    {
+      get { return false; }
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this is a generic type (ie. has type parameters).
@@ -734,7 +745,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>A collection of accessible members with a given name. Can be empty.</returns>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TEntityType> GetAccessibleMembers<TEntityType>(string name, SemanticEntity accessingEntity)
+    public IEnumerable<TEntityType> GetAccessibleMembers<TEntityType>(string name, ISemanticEntity accessingEntity)
       where TEntityType : IMemberEntity
     {
       var result = new HashSet<TEntityType>();
@@ -760,7 +771,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <returns>A collection of accessible inherited members with a given name. Can be empty.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetAccessibleInheritedMembers<TEntityType>(
-      string name, SemanticEntity accessingEntity)
+      string name, ISemanticEntity accessingEntity)
       where TEntityType : IMemberEntity
     {
       return (BaseClass == null)
@@ -819,7 +830,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// (directly or indirectly), false otherwise.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public bool ContainsInFamily(SemanticEntity entity)
+    public bool ContainsInFamily(ISemanticEntity entity)
     {
       if (entity == null)
       {

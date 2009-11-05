@@ -40,8 +40,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return false;
       }
 
-      var sourceType = expression.Result is TypedExpressionResult
-        ? (expression.Result as TypedExpressionResult).Type
+      var sourceType = expression.ExpressionResult is TypedExpressionResult
+        ? (expression.ExpressionResult as TypedExpressionResult).Type
         : null;
 
       return ImplicitConversionExists(sourceType, targetType)

@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="entity">A semantic entity.</param>
     /// <returns>A TSemanticEntityType, or null if none found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static TSemanticEntityType GetEnclosing<TSemanticEntityType>(this SemanticEntity entity)
+    public static TSemanticEntityType GetEnclosing<TSemanticEntityType>(this ISemanticEntity entity)
       where TSemanticEntityType : SemanticEntity
     {
       if (entity == null)
@@ -41,7 +41,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="entity">A semantic entity.</param>
     /// <returns>True if the entity is in a generic method declaration, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static MethodEntity GetEnclosingGenericMethodDeclaration(this SemanticEntity entity)
+    public static MethodEntity GetEnclosingGenericMethodDeclaration(this ISemanticEntity entity)
     {
       // If reached the root or a namespace or type entity then it's not in a generic method declaration.
       if (entity == null || entity is NamespaceOrTypeEntity)
@@ -66,7 +66,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="entity">A semantic entity.</param>
     /// <returns>True if the entity is in the body of a type declaration, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static bool IsInTypeDeclarationBody(this SemanticEntity entity)
+    public static bool IsInTypeDeclarationBody(this ISemanticEntity entity)
     {
       // If reached the root or a namespace or type entity then it's not in type declaration body.
       if (entity == null || entity is NamespaceOrTypeEntity)

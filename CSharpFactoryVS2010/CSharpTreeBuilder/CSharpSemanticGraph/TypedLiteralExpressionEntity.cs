@@ -78,7 +78,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       if (Type != null)
       {
-        Result = new ValueExpressionResult(Type);
+        ExpressionResult = new ValueExpressionResult(Type);
       }
     }
 

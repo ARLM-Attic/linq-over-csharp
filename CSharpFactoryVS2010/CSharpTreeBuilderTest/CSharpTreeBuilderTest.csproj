@@ -392,6 +392,9 @@
     <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\SimpleNameResolution\ResolvedToType.cs" />
+    <None Include="TestFiles\SimpleNameResolution\CS0120_StaticMemberExpected.cs" />
+    <None Include="TestFiles\SimpleNameResolution\StaticMember.cs" />
     <None Include="TestFiles\TypeConverter\ImplicitReferenceConversion.cs" />
     <None Include="TestFiles\TypeConverter\NullLiteralConversion.cs" />
     <None Include="TestFiles\TypeConverter\ImplicitNullableConversion.cs" />

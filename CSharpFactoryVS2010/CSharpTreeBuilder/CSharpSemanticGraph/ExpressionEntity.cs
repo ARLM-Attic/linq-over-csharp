@@ -15,7 +15,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the result obtained by evaluating this expression. Null if not yet evaluated.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionResult Result { get; protected set; }
+    public ExpressionResult ExpressionResult { get; protected set; }
     
     // ----------------------------------------------------------------------------------------------
     /// <summary>

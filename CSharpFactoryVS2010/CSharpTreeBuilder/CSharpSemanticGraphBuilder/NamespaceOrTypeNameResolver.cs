@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpAstBuilder;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -12,13 +13,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// This class implements the namespace and type name resolution logic described in the spec §3.8.
   /// </summary>
   // ================================================================================================
-  public sealed class NamespaceOrTypeNameResolver
+  public class NamespaceOrTypeNameResolver
   {
     /// <summary>Error handler object for error and warning reporting.</summary>
-    private readonly ICompilationErrorHandler _ErrorHandler;
+    protected readonly ICompilationErrorHandler _ErrorHandler;
 
     /// <summary>The semantic graph that is the context of the type resolution.</summary>
-    private readonly SemanticGraph _SemanticGraph;
+    protected readonly SemanticGraph _SemanticGraph;
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -42,7 +43,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <returns>The resolved type entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity ResolveToTypeEntity(NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
+    public TypeEntity ResolveToTypeEntity(NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
     {
       // Following resolution as described below, ... 
       NamespaceOrTypeEntity namespaceOrTypeEntity = ResolveToNamespaceOrTypeEntity(namespaceOrTypeName, resolutionContextEntity);
@@ -74,7 +75,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <returns>The resolved namespace entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceEntity ResolveToNamespaceEntity(NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
+    public NamespaceEntity ResolveToNamespaceEntity(NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
     {
       // No type arguments (§4.4.1) can be present in a namespace-name (only types can have type arguments).
       if (namespaceOrTypeName.TypeTags.Any(typeTag => typeTag.Arguments.Count > 0))
@@ -120,7 +121,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
     public NamespaceOrTypeEntity ResolveToNamespaceOrTypeEntity(
-      NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
+      NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
     {
       if (namespaceOrTypeName.TypeTags.Count < 1)
       {
@@ -176,11 +177,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>A namespace or type entity.</returns>
     // ----------------------------------------------------------------------------------------------
     private NamespaceOrTypeEntity ResolveNamespaceOrTypeNodeButNotTheTypeArguments(
-      NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
+      NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
     {
       NamespaceOrTypeEntity foundEntity = null;
       TypeTagNodeCollection typeTagsToBeResolved = namespaceOrTypeName.TypeTags;
-      SemanticEntity accessingEntity = resolutionContextEntity;
+      ISemanticEntity accessingEntity = resolutionContextEntity;
 
       // If the namespace-or-type-name is a qualified-alias-member its meaning is as described in §9.7.
       if (namespaceOrTypeName.HasQualifier)
@@ -193,7 +194,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
         catch (Exception e)
         {
-          TranslateExceptionToError(e, _ErrorHandler, namespaceOrTypeName);
+          TranslateExceptionToError(e, namespaceOrTypeName.StartToken);
         }
 
         // If the qualified-alias-member part of the name could not be resolved, then we can't continue the resolution.
@@ -231,7 +232,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       catch (Exception e)
       {
-        TranslateExceptionToError(e, _ErrorHandler, namespaceOrTypeName);
+        TranslateExceptionToError(e, namespaceOrTypeName.StartToken);
       }
 
       return foundEntity;
@@ -272,7 +273,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>A constructed generic type entity.</returns>
     // ----------------------------------------------------------------------------------------------
     private TypeEntity ResolveToConstructedGenericType(
-      GenericCapableTypeEntity underlyingTypeEntity, TypeNodeCollection typeArgumentNodes, SemanticEntity resolutionContextEntity)
+      GenericCapableTypeEntity underlyingTypeEntity, TypeNodeCollection typeArgumentNodes, ISemanticEntity resolutionContextEntity)
     {
       // Resolve all type arguments
       var typeArguments = new List<TypeEntity>();
@@ -306,43 +307,42 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// can be reported to an ICompilationErrorHandler.
     /// </summary>
     /// <param name="e">An exception object.</param>
-    /// <param name="errorHandler">An error handler object.</param>
-    /// <param name="namespaceOrTypeName">The namespace-or-type-name that caused to error.</param>
+    /// <param name="errorToken">The token where the error occured.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void TranslateExceptionToError(Exception e, ICompilationErrorHandler errorHandler, NamespaceOrTypeNameNode namespaceOrTypeName)
+    protected virtual void TranslateExceptionToError(Exception e, Token errorToken)
     {
       if (e is NamespaceOrTypeNameNotResolvedException)
       {
-        errorHandler.Error("CS0246", namespaceOrTypeName.StartToken,
+        _ErrorHandler.Error("CS0246", errorToken,
                            "The type or namespace name '{0}' could not be found (are you missing a using directive or an assembly reference?)",
-                           namespaceOrTypeName.ToString());
+                           (e as NamespaceOrTypeNameNotResolvedException).NamespaceOrTypeName);
       }
       else if (e is AliasNameConflictException)
       {
-        errorHandler.Error("CS0576", namespaceOrTypeName.StartToken,
+        _ErrorHandler.Error("CS0576", errorToken,
                            "Namespace '{0}' contains a definition conflicting with alias '{1}'",
                            (e as AliasNameConflictException).NamespaceName,
                            (e as AliasNameConflictException).AliasName);
       }
       else if (e is AmbigousReferenceException)
       {
-        errorHandler.Error("CS0104", namespaceOrTypeName.StartToken,
+        _ErrorHandler.Error("CS0104", errorToken,
                            "'{0}' is an ambiguous reference between '{1}' and '{2}'",
-                           namespaceOrTypeName.ToString(),
+                           (e as AmbigousReferenceException).NamespaceOrTypeName,
                            (e as AmbigousReferenceException).FullyQualifiedName1,
                            (e as AmbigousReferenceException).FullyQualifiedName2);
       }
       else if (e is QualifierRefersToType)
       {
-        errorHandler.Error("CS0431", namespaceOrTypeName.StartToken,
+        _ErrorHandler.Error("CS0431", errorToken,
                            "Cannot use alias '{0}' with '::' since the alias references a type. Use '.' instead.",
                            (e as QualifierRefersToType).Qualifier);
       }
       else if (e is EntityIsInaccessibleException)
       {
-        errorHandler.Error("CS0122", namespaceOrTypeName.StartToken,
+        _ErrorHandler.Error("CS0122", errorToken,
                            "'{0}' is inaccessible due to its protection level",
-                           ((e as EntityIsInaccessibleException).InaccessibleEntity as INamedEntity).FullyQualifiedName);
+                           (e as EntityIsInaccessibleException).InaccessibleEntity.FullyQualifiedName);
       }
       else
       {
@@ -368,7 +368,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
     private static NamespaceOrTypeEntity ResolveTypeTags(
-      TypeTagNodeCollection typeTags, SemanticEntity resolutionContextEntity, SemanticEntity accessingEntity)
+      TypeTagNodeCollection typeTags, ISemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
     {
       NamespaceOrTypeEntity foundEntity = null;
 
@@ -387,7 +387,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // If the resolution of N is not successful, a compile-time error occurs. 
         if (handleEntity == null)
         {
-          throw new NamespaceOrTypeNameNotResolvedException();
+          throw new NamespaceOrTypeNameNotResolvedException(typeTags.ToString());
         }
 
         // Otherwise, N.I or N.I<A1, ..., AK> is resolved as follows:
@@ -448,7 +448,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Otherwise, N.I is an invalid namespace-or-type-name, and a compile-time error occurs.
-        throw new NamespaceOrTypeNameNotResolvedException();
+        throw new NamespaceOrTypeNameNotResolvedException(typeTags.ToString());
       }
 
       return foundEntity;
@@ -469,7 +469,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
     private static NamespaceOrTypeEntity ResolveSingleTypeTag(
-      TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity, SemanticEntity accessingEntity)
+      TypeTagNode typeTagNode, ISemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
     {
       // If K is zero ...
       if (!typeTagNode.HasTypeArguments)
@@ -500,8 +500,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // ... and the declaration of T includes a type parameter with name I, ...
           var foundTypeParameterEntity = (typeContext is GenericCapableTypeEntity)
-            ? (typeContext as GenericCapableTypeEntity).GetOwnTypeParameterByName(typeTagNode.Identifier)
-            : null;
+                                           ? (typeContext as GenericCapableTypeEntity).GetOwnTypeParameterByName(typeTagNode.Identifier)
+                                           : null;
 
           if (foundTypeParameterEntity != null)
           {
@@ -530,6 +530,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         typeContext = typeContext.Parent.GetEnclosing<TypeEntity>();
       }
 
+      // If not yet resolved then try top resolve in the enclosing namespaces.
+      return ResolveSingleTypeTagInNamespaces(typeTagNode, resolutionContextEntity, accessingEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Applies the resolution logic of a single-tag namespace-or-type-name.
+    ///  - I
+    ///  - I{A1, ..., AK}
+    /// where I is a single identifier, and {A1, ..., AK} is an optional type-argument-list.
+    /// And the name is not a qualified-alias-member.
+    /// </summary>
+    /// <param name="typeTagNode">A single-tag namespace-or-type-name.</param>
+    /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
+    /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
+    /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    protected static NamespaceOrTypeEntity ResolveSingleTypeTagInNamespaces(
+      TypeTagNode typeTagNode, ISemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
+    {
       // If the previous steps were unsuccessful then, for each namespace N, 
       // starting with the namespace in which the namespace-or-type-name occurs, 
       // continuing with each enclosing namespace (if any), 
@@ -564,10 +585,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // Otherwise, if N contains an accessible type having name I and K type parameters, then:
 
         // (First we try to find a type with name I and K type parameters, and we'll check the accessibility later.)
-        var foundTypeEntity = (namespaceContext is IHasChildTypes)
-          ? (namespaceContext as IHasChildTypes).GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions)
-          : null;
-
+        var foundTypeEntity = namespaceContext.GetSingleChildType<TypeEntity>(typeTagNode.Identifier, typeTagNode.GenericDimensions);
         if (foundTypeEntity != null)
         {
           // (Checking whether the found entity is indeed accessible.)
@@ -632,7 +650,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (typeEntities.Count > 1)
         {
           // ... then the namespace-or-type-name is ambiguous and an error occurs.
-          throw new AmbigousReferenceException(typeEntities[0].FullyQualifiedName, typeEntities[1].FullyQualifiedName);
+          throw new AmbigousReferenceException(typeTagNode.ToString(), typeEntities[0].FullyQualifiedName, typeEntities[1].FullyQualifiedName);
         }
 
         // "... continuing with each enclosing namespace (if any), ..."
@@ -640,7 +658,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // Otherwise, the namespace-or-type-name is undefined and a compile-time error occurs. (CS0246)
-      throw new NamespaceOrTypeNameNotResolvedException();
+      throw new NamespaceOrTypeNameNotResolvedException(typeTagNode.ToString());
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -653,7 +671,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>A TypeEntity with the name and number of type parameters defined in typeTagNode, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
     private static TypeEntity FindNestedAccessibleTypeInTypeOrBaseTypes(
-      TypeTagNode typeTagNode, TypeEntity contextType, SemanticEntity accessingEntity)
+      TypeTagNode typeTagNode, TypeEntity contextType, ISemanticEntity accessingEntity)
     {
       // Spec: If there is more than one such type, the type declared within the more derived type is selected. 
       
@@ -745,7 +763,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>A NamespaceOrTypeEntity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
     private static NamespaceOrTypeEntity ResolveQualifiedAliasMember(
-      string qualifier, TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity, RootNamespaceEntity globalNamespace)
+      string qualifier, TypeTagNode typeTagNode, ISemanticEntity resolutionContextEntity, RootNamespaceEntity globalNamespace)
     {
       // A qualified-alias-member has one of two forms:
       // - N::I{A1, ..., AK}, where N and I represent identifiers, and {A1, ..., AK} is a type argument list. (K is always at least one.)
@@ -779,7 +797,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
 
         // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
-        throw new NamespaceOrTypeNameNotResolvedException();
+        throw new NamespaceOrTypeNameNotResolvedException(qualifier + "::" + typeTagNode.ToString());
       }
 
       var sourcePoint = typeTagNode.SourcePoint;
@@ -839,7 +857,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           }
 
           // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
-          throw new NamespaceOrTypeNameNotResolvedException();
+          throw new NamespaceOrTypeNameNotResolvedException(qualifier + "::" + typeTagNode.ToString());
         }
 
         // "... continuing with each enclosing namespace declaration (if any), ..."
@@ -847,7 +865,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
-      throw new NamespaceOrTypeNameNotResolvedException();
+      throw new NamespaceOrTypeNameNotResolvedException(qualifier + "::" + typeTagNode.ToString());
 
       // _Note that using the namespace alias qualifier with an alias that references a type causes a compile-time error. 
       // Also _note that if the identifier N is global, then lookup is performed in the global namespace, 

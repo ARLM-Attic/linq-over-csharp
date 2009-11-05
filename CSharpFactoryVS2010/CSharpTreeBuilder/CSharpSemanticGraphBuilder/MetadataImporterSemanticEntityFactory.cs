@@ -644,12 +644,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (propertyInfo.CanRead)
       {
-        propertyEntity.GetAccessor = CreateAccessor(propertyInfo.GetGetMethod(true));
+        propertyEntity.GetAccessor = CreateAccessor(AccessorKind.Get, propertyInfo.GetGetMethod(true));
       }
 
       if (propertyInfo.CanWrite)
       {
-        propertyEntity.SetAccessor = CreateAccessor(propertyInfo.GetSetMethod(true));
+        propertyEntity.SetAccessor = CreateAccessor(AccessorKind.Set, propertyInfo.GetSetMethod(true));
       }
 
       return propertyEntity;
@@ -659,17 +659,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <summary>
     /// Creates an accessor entity from a reflected MethodInfo object.
     /// </summary>
+    /// <param name="accessorKind">The kind of the accessor.</param>
     /// <param name="methodInfo">A reflected MethodInfo object.</param>
     /// <returns>An AccessorEntity object, or null if could not create.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static AccessorEntity CreateAccessor(MethodInfo methodInfo)
+    private static AccessorEntity CreateAccessor(AccessorKind accessorKind,MethodInfo methodInfo)
     {
       var isAbstract = methodInfo.IsAbstract;
       var accessibility = GetAccessibility(methodInfo);
 
       // TODO: body
 
-      return new AccessorEntity(accessibility, isAbstract);
+      return new AccessorEntity(accessorKind, accessibility, isAbstract);
     }
 
     // ----------------------------------------------------------------------------------------------

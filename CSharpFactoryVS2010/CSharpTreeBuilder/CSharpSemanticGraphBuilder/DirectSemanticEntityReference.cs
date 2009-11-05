@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// <typeparam name="TTargetEntity">The type of the target entity, must be a subclass of SemanticEntity.</typeparam>
   // ================================================================================================
   public sealed class DirectSemanticEntityReference<TTargetEntity> : SemanticEntityReference<TTargetEntity>
-    where TTargetEntity : SemanticEntity
+    where TTargetEntity : class, ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>Always null.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override TTargetEntity GetResolvedEntity(SemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    protected override TTargetEntity GetResolvedEntity(ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
       return null;
     }

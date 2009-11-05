@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
     protected override RootNamespaceEntity GetResolvedEntity(
-      SemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
     {
       if (SyntaxNode.Identifier == semanticGraph.GlobalNamespace.Name)
       {

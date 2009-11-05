@@ -11,14 +11,23 @@
     /// <summary>
     /// Initializes a new instance of the <see cref="AmbigousReferenceException"/> class.
     /// </summary>
+    /// <param name="namespaceOrTypeName">The name of the namespace or type that caused the error.</param>
     /// <param name="fullyQualifiedName1">The fully qualified name of the first entity found.</param>
     /// <param name="fullyQualifiedName2">The fully qualified name of the second entity found.</param>
     // ----------------------------------------------------------------------------------------------
-    public AmbigousReferenceException(string fullyQualifiedName1, string fullyQualifiedName2)
+    public AmbigousReferenceException(string namespaceOrTypeName, string fullyQualifiedName1, string fullyQualifiedName2)
     {
+      NamespaceOrTypeName = namespaceOrTypeName;
       FullyQualifiedName1 = fullyQualifiedName1;
       FullyQualifiedName2 = fullyQualifiedName2;
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the namespace or type.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string NamespaceOrTypeName { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

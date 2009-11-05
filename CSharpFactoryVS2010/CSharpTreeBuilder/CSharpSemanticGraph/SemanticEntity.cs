@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.ProjectContent;
-using CSharpTreeBuilder.Helpers;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -14,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This is the abstract base class of all kinds of nodes in the semantic graph (namespace, type, etc.).
   /// </summary>
   // ================================================================================================
-  public abstract class SemanticEntity : ISemanticEntity
+  public abstract class SemanticEntity : IGenericSupportingSemanticEntity
   {
     #region State 
 
@@ -30,8 +28,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// The key is a TypeParameterMap object describing all type parameters and the corresponding 
     /// type arguments.
     /// </summary>
-    private readonly Dictionary<TypeParameterMap, SemanticEntity> _ConstructedEntities
-      = new Dictionary<TypeParameterMap,SemanticEntity>(new TypeParameterMapEqualityComparer());
+    private readonly Dictionary<TypeParameterMap, ISemanticEntity> _ConstructedEntities
+      = new Dictionary<TypeParameterMap,ISemanticEntity>(new TypeParameterMapEqualityComparer());
 
     /// <summary>Backing field for Program property.</summary>
     private Program _Program;
@@ -41,13 +39,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     
 
     /// <summary>Gets or sets the parent of this entity.</summary>
-    public SemanticEntity Parent { get; set; }
+    public ISemanticEntity Parent { get; set; }
 
     /// <summary>Gets or sets the reflected metadata (eg. type) that this entity was created from.</summary>
     public object ReflectedMetadata { get; set; }
 
     /// <summary>Gets or sets the generic template of this entity.</summary>
-    public SemanticEntity TemplateEntity { get; private set; }
+    public ISemanticEntity TemplateEntity { get; private set; }
 
     #endregion
 
@@ -108,9 +106,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap)
+    public ISemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap)
     {
-      SemanticEntity constructedEntity;
+      ISemanticEntity constructedEntity;
 
       if (_ConstructedEntities.ContainsKey(typeParameterMap))
       {
@@ -137,7 +135,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// True if this entity is a (direct or indirect) parent of another entity, false otherwise.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsParentOf(SemanticEntity entity)
+    public bool IsParentOf(ISemanticEntity entity)
     {
       if (entity == null)
       {
@@ -256,9 +254,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           return _TypeParameterMap;
         }
 
-        if (Parent != null && !Parent.TypeParameterMap.IsEmpty)
+        if (Parent != null && Parent is IGenericSupportingSemanticEntity)
         {
-          return Parent.TypeParameterMap;
+          var parentTypeParameterMap = (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;
+          if (!parentTypeParameterMap.IsEmpty)
+          {
+            return parentTypeParameterMap;
+          }
         }
 
         return TypeParameterMap.Empty;
@@ -289,7 +291,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// by replacing type parameters with type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<SemanticEntity> ConstructedEntities
+    public IEnumerable<ISemanticEntity> ConstructedEntities
     {
       get { return _ConstructedEntities.Values; }
     }

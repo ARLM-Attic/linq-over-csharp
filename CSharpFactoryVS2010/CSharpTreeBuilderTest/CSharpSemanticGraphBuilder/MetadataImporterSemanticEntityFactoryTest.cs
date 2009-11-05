@@ -113,11 +113,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           member.IsSealed.ShouldBeFalse();
 
           var getAccessor = member.GetAccessor;
+          getAccessor.Name.ShouldEqual("get_P1");
+          getAccessor.FullyQualifiedName.ShouldEqual("Class0.get_P1");
           getAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
           getAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
           getAccessor.IsAbstract.ShouldBeFalse();
 
           var setAccessor = member.SetAccessor;
+          setAccessor.Name.ShouldEqual("set_P1");
+          setAccessor.FullyQualifiedName.ShouldEqual("Class0.set_P1");
           setAccessor.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
           setAccessor.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
           setAccessor.IsAbstract.ShouldBeFalse();

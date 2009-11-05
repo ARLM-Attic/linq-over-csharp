@@ -281,7 +281,11 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public void Terminate(Token token)
     {
-      if (token == null) throw new ArgumentNullException("token");
+      if (token == null)
+      {
+        throw new ArgumentNullException("token");
+      }
+    
       TerminatingToken = token;
       TerminatingSymbol = new CSharpSymbolReference(token.TokenizedStreamPosition);
     }

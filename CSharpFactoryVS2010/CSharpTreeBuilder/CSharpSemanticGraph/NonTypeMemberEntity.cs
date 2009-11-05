@@ -132,7 +132,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="accessingEntity">The accessing entity.</param>
     /// <returns>True if the accessing entity can access this entity, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsAccessibleBy(SemanticEntity accessingEntity)
+    public bool IsAccessibleBy(ISemanticEntity accessingEntity)
     {
       // First check the accessibility of the parent type.
       var parentType = Parent as TypeEntity;
@@ -187,6 +187,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual bool IsInvocable 
     {
       get { return false; } 
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an instance member.
+    /// </summary>
+    /// <remarks>
+    /// The members of a class are either static members or instance members. 
+    /// Static members belong to classes, and instance members belong to objects (instances of classes).
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsInstanceMember
+    {
+      get { return !IsStatic; }
     }
 
     // ----------------------------------------------------------------------------------------------

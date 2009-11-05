@@ -5,7 +5,7 @@
   /// This interface defines the behaviour of an entity that has accessibility modifiers.
   /// </summary>
   // ================================================================================================
-  public interface IHasAccessibility
+  public interface IHasAccessibility : INamedEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -32,6 +32,6 @@
     /// <param name="entity">The accessing entity.</param>
     /// <returns>True if the accessing entity can access this entity, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    bool IsAccessibleBy(SemanticEntity entity);
+    bool IsAccessibleBy(ISemanticEntity entity);
   }
 }

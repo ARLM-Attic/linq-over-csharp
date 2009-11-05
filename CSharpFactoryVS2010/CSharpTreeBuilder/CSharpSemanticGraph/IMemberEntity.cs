@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CSharpTreeBuilder.CSharpSemanticGraph
+﻿namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
@@ -8,7 +6,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// (either a nested type or a "normal" member like a field or a method).
   /// </summary>
   // ================================================================================================
-  public interface IMemberEntity : ISemanticEntity, INamedEntity, IHasAccessibility
+  public interface IMemberEntity : IGenericSupportingSemanticEntity, INamedEntity, IHasAccessibility
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -25,5 +23,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// or if it is a constant, field or property of a delegate type.</remarks>
     // ----------------------------------------------------------------------------------------------
     bool IsInvocable { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an instance member.
+    /// </summary>
+    /// <remarks>
+    /// The members of a class are either static members or instance members. 
+    /// Static members belong to classes, and instance members belong to objects (instances of classes).
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    bool IsInstanceMember { get; }
   }
 }

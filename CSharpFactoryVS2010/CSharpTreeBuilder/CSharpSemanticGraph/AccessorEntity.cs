@@ -14,6 +14,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for Body property.</summary>
     private BlockEntity _Body;
 
+    /// <summary>Gets or sets the accessor kind.</summary>
+    public AccessorKind AccessorKind { get; private set; }
 
     /// <summary>Gets or sets the declared accessibility of the entity.</summary>
     public AccessibilityKind? DeclaredAccessibility { get; set; }
@@ -24,11 +26,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="AccessorEntity"/> class.
     /// </summary>
+    /// <param name="accessorKind">The kind of the accessor.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="isAbstract">True if the accessor has no body, false otherwise.</param>
     // ----------------------------------------------------------------------------------------------
-    public AccessorEntity(AccessibilityKind? accessibility, bool isAbstract)
+    public AccessorEntity(AccessorKind accessorKind, AccessibilityKind? accessibility, bool isAbstract)
     {
+      AccessorKind = accessorKind;
       DeclaredAccessibility = accessibility;
 
       if (!isAbstract)
@@ -133,7 +137,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="accessingEntity">The accessing entity.</param>
     /// <returns>True if the accessing entity can access this entity, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsAccessibleBy(SemanticEntity accessingEntity)
+    public bool IsAccessibleBy(ISemanticEntity accessingEntity)
     {
       // First check the accessibility of the parent type.
       var parentMember = Parent as FunctionMemberWithAccessorsEntity;
@@ -171,6 +175,66 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         default:
           throw new ApplicationException("Effective accessibility is undefined.");
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of the entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Name 
+    {
+      get
+      {
+        return Parent is INamedEntity
+                 ? GetAccessorKindName(AccessorKind) + "_" + (Parent as INamedEntity).Name
+                 : null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the fully qualified name of the member.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string FullyQualifiedName
+    {
+      get
+      {
+        return Parent != null && Parent.Parent is TypeEntity
+          ? string.Format("{0}.{1}", (Parent.Parent as TypeEntity).FullyQualifiedName, Name)
+          : Name;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the name of an accessor kind 
+    /// </summary>
+    /// <param name="accessorKind">An accessor kind.</param>
+    /// <returns>The name of the accessor kind.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static string GetAccessorKindName(AccessorKind accessorKind)
+    {
+      string name = null;
+
+      switch(accessorKind)
+      {
+        case AccessorKind.Get:
+          name = "get";
+          break;
+        case AccessorKind.Set:
+          name = "set";
+          break;
+        case AccessorKind.Add:
+          name = "add";
+          break;
+        case AccessorKind.Remove:
+          name = "remove";
+          break;
+      }
+
+      return name;
     }
 
     #region Visitor methods

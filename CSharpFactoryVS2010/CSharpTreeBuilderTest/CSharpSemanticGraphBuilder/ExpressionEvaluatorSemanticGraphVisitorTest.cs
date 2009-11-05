@@ -34,57 +34,57 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // object a0 = null;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        exp.Result.GetType().ShouldEqual(typeof (NullExpressionResult));
+        exp.ExpressionResult.GetType().ShouldEqual(typeof (NullExpressionResult));
       }
       // bool a1 = true;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Boolean");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Boolean");
       }
       // decimal a2 = 2m;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Decimal");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Decimal");
       }
       // int a3 = 3;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
       }
       // uint a4 = 4u;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.UInt32");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.UInt32");
       }
       // long a5 = 5l;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Int64");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Int64");
       }
       // ulong a6 = 6ul;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.UInt64");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.UInt64");
       }
       // char a7 = '7';
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Char");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Char");
       }
       // float a8 = 8f;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Single");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Single");
       }
       // double a9 = 9d;
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Double");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.Double");
       }
       // string a10 = "10";
       {
         var exp = ((members[i++] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
-        (exp.Result as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.String");
+        (exp.ExpressionResult as ValueExpressionResult).Type.ToString().ShouldEqual("global::System.String");
       }
     }
 
@@ -94,23 +94,22 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // TODO: remove ignore when simple name resolution is implemented
     public void SimpleName()
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\SimpleName.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").Members.ToList();
+      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A",1).Members.ToList();
 
       // static int a = b;
       {
         var exp = ((members[0] as FieldEntity).Initializer as ScalarInitializerEntity).Expression;
 
         var simpleName = exp as SimpleNameExpressionEntity;
-        simpleName.Entity.ShouldEqual(members[1] as FieldEntity);
+        simpleName.SimpleNameResult.SingleEntity.ShouldEqual(members[1] as FieldEntity);
 
-        var variableExpressionResult = simpleName.Result as VariableExpressionResult;
+        var variableExpressionResult = simpleName.ExpressionResult as VariableExpressionResult;
         variableExpressionResult.Variable.ShouldEqual(members[1] as IVariableEntity);
         variableExpressionResult.Type.ShouldEqual((members[1] as FieldEntity).Type);
       }
@@ -142,7 +141,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
         defaultValueExpressionEntity.Type.ShouldEqual(classB);
 
-        var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
+        var valueExpressionResult = defaultValueExpressionEntity.ExpressionResult as ValueExpressionResult;
         valueExpressionResult.Type.ShouldEqual(classB);
       }
 
@@ -153,7 +152,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var defaultValueExpressionEntity = exp as DefaultValueExpressionEntity;
         defaultValueExpressionEntity.Type.ShouldEqual(classA.GetOwnTypeParameterByName("T"));
 
-        var valueExpressionResult = defaultValueExpressionEntity.Result as ValueExpressionResult;
+        var valueExpressionResult = defaultValueExpressionEntity.ExpressionResult as ValueExpressionResult;
         valueExpressionResult.Type.ShouldEqual(classA.GetOwnTypeParameterByName("T"));
       }
     }
