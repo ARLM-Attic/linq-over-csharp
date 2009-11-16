@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -16,22 +17,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private const string GLOBAL_NAMESPACE_NAME = "global";
 
     /// <summary>A dictionary of root namespace entities. The key is the name of the root namespace.</summary>
-    private readonly Dictionary<string, RootNamespaceEntity> _RootNamespaces;
+    private readonly Dictionary<string, RootNamespaceEntity> _RootNamespaces
+       = new Dictionary<string, RootNamespaceEntity>();
 
     /// <summary>A cache that maps metadata objects to semantic entities.</summary>
-    private readonly Dictionary<System.Reflection.MemberInfo, SemanticEntity> _MetadataToEntityMap;
+    private readonly Dictionary<System.Reflection.MemberInfo, SemanticEntity> _MetadataToEntityMap
+      = new Dictionary<System.Reflection.MemberInfo, SemanticEntity>();
+
+    /// <summary>Error handler object.</summary>
+    private ICompilationErrorHandler _ErrorHandler;
+
+
+    /// <summary>Gets or sets the build state of the graph.</summary>
+    public SemanticGraphBuildState BuildState { get; set; }
+
+    /// <summary>Gets the type resolver object (for type resolution pass1).</summary>
+    public TypeResolverPass1SemanticGraphVisitor TypeResolverPass1SemanticGraphVisitor { get; private set; }
+
+    /// <summary>Gets the type resolver object (for type resolution pass2).</summary>
+    public TypeResolverPass2SemanticGraphVisitor TypeResolverPass2SemanticGraphVisitor { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SemanticGraph"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticGraph()
+    public SemanticGraph(ICompilationErrorHandler errorHandler)
     {
-      _RootNamespaces = new Dictionary<string, RootNamespaceEntity>();
-      AddRootNamespace(new RootNamespaceEntity(GLOBAL_NAMESPACE_NAME));
+      _ErrorHandler = errorHandler;
 
-      _MetadataToEntityMap = new Dictionary<System.Reflection.MemberInfo, SemanticEntity>();
+      BuildState = SemanticGraphBuildState.Created;
+      TypeResolverPass1SemanticGraphVisitor = new TypeResolverPass1SemanticGraphVisitor(errorHandler, this);
+      TypeResolverPass2SemanticGraphVisitor = new TypeResolverPass2SemanticGraphVisitor(errorHandler, this);
+
+      AddRootNamespace(new RootNamespaceEntity(GLOBAL_NAMESPACE_NAME));
     }
 
     // ----------------------------------------------------------------------------------------------

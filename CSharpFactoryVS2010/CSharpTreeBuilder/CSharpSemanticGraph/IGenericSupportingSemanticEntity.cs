@@ -11,30 +11,38 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   { 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Returns a semantic entity constructed from this entity by replacing type parameters 
-    /// with type arguments.
+    /// Returns a semantic entity cloned from this entity using as a generic template.
     /// </summary>
     /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
     /// <returns>
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    ISemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap);
+    IGenericSupportingSemanticEntity GetGenericClone(TypeParameterMap typeParameterMap);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is a constructed entity.
+    /// Gets a value indicating whether this entity was cloned from a generic template.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    bool IsConstructed { get; }
+    bool HasGenericTemplate { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the generic template of this entity. 
+    /// Gets the direct generic template of this entity. 
     /// Null if this entity was not constructed from another entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    ISemanticEntity TemplateEntity { get; }
+    IGenericSupportingSemanticEntity DirectGenericTemplate { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the first generic template in the chain of template->clone relationships,
+    /// where none of the type parameters were bound.
+    /// Null if this entity was not constructed from another entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    IGenericSupportingSemanticEntity UnboundGenericTemplate { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -45,10 +53,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a collection of the entities constructed from this entity 
+    /// Gets a collection of the entities cloned from this generic template entity 
     /// by replacing type parameters with type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    IEnumerable<ISemanticEntity> ConstructedEntities { get; }
+    IEnumerable<IGenericSupportingSemanticEntity> GenericCloneEntities { get; }
   }
 }

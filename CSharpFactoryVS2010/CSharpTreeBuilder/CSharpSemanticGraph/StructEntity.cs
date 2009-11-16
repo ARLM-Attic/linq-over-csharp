@@ -105,7 +105,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       { 
-        return IsConstructed && TemplateEntity == SemanticGraph.NullableGenericTypeDefinition; 
+        return HasGenericTemplate && DirectGenericTemplate == SemanticGraph.NullableGenericTypeDefinition; 
       }
     }
 

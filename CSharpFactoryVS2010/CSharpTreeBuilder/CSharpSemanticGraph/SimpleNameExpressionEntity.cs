@@ -46,16 +46,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Evaluates this expression.
     /// </summary>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An error handler object.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
       // First resolve the simple name
       
       if (SimpleNameNode != null)
       {
-        var simpleNameResolver = new SimpleNameResolver(errorHandler, semanticGraph);
+        var simpleNameResolver = new SimpleNameResolver(errorHandler, SemanticGraph);
         SimpleNameResult = simpleNameResolver.Resolve(SimpleNameNode, this);
       }
       
@@ -63,9 +62,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       if (SimpleNameResult != null)
       {
-        if (SimpleNameResult.SingleEntity is IVariableEntity)
+        if (SimpleNameResult.IsMethodGroup)
+        {
+          ExpressionResult = new MethodGroupExpressionResult(SimpleNameResult.MethodGroup);
+        }
+
+        // TODO: separate variable and value result
+
+        else if (SimpleNameResult.SingleEntity is IVariableEntity)
         {
           ExpressionResult = new VariableExpressionResult(SimpleNameResult.SingleEntity as IVariableEntity);
+        }
+        else if (SimpleNameResult.SingleEntity is TypeEntity)
+        {
+          ExpressionResult = new TypeExpressionResult(SimpleNameResult.SingleEntity as TypeEntity);
+        }
+        else if (SimpleNameResult.SingleEntity is NamespaceEntity)
+        {
+          ExpressionResult = new NamespaceExpressionResult(SimpleNameResult.SingleEntity as NamespaceEntity);
         }
 
         // TODO

@@ -80,17 +80,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       if (template.GetAccessor != null)
       {
-        GetAccessor = (AccessorEntity)template.GetAccessor.GetConstructedEntity(typeParameterMap);
+        GetAccessor = (AccessorEntity)template.GetAccessor.GetGenericClone(typeParameterMap);
       }
 
       if (template.SetAccessor != null)
       {
-        SetAccessor = (AccessorEntity)template.SetAccessor.GetConstructedEntity(typeParameterMap);
+        SetAccessor = (AccessorEntity)template.SetAccessor.GetGenericClone(typeParameterMap);
       }
 
       if (template.AutoImplementedField != null)
       {
-        AutoImplementedField = (FieldEntity)template.AutoImplementedField.GetConstructedEntity(typeParameterMap);
+        AutoImplementedField = (FieldEntity)template.AutoImplementedField.GetGenericClone(typeParameterMap);
       }
 
       IsAutoImplemented = template.IsAutoImplemented;

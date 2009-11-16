@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private BlockEntity(BlockEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      _Statements.AddRange(template._Statements.Select(x => x.GetConstructedEntity(typeParameterMap)).Cast<StatementEntity>());
+      _Statements.AddRange(template._Statements.Select(x => x.GetGenericClone(typeParameterMap)).Cast<StatementEntity>());
     }
 
     // ----------------------------------------------------------------------------------------------

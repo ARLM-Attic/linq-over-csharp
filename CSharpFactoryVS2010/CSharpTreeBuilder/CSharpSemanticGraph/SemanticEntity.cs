@@ -28,8 +28,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// The key is a TypeParameterMap object describing all type parameters and the corresponding 
     /// type arguments.
     /// </summary>
-    private readonly Dictionary<TypeParameterMap, ISemanticEntity> _ConstructedEntities
-      = new Dictionary<TypeParameterMap,ISemanticEntity>(new TypeParameterMapEqualityComparer());
+    private readonly Dictionary<TypeParameterMap, IGenericSupportingSemanticEntity> _ConstructedEntities
+      = new Dictionary<TypeParameterMap, IGenericSupportingSemanticEntity>(new TypeParameterMapEqualityComparer());
 
     /// <summary>Backing field for Program property.</summary>
     private Program _Program;
@@ -45,7 +45,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public object ReflectedMetadata { get; set; }
 
     /// <summary>Gets or sets the generic template of this entity.</summary>
-    public ISemanticEntity TemplateEntity { get; private set; }
+    public IGenericSupportingSemanticEntity DirectGenericTemplate { get; private set; }
 
     #endregion
 
@@ -79,7 +79,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       Parent = template.Parent;
       ReflectedMetadata = template.ReflectedMetadata;
-      TemplateEntity = template;
+      DirectGenericTemplate = template;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -106,9 +106,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public ISemanticEntity GetConstructedEntity(TypeParameterMap typeParameterMap)
+    public IGenericSupportingSemanticEntity GetGenericClone(TypeParameterMap typeParameterMap)
     {
-      ISemanticEntity constructedEntity;
+      IGenericSupportingSemanticEntity constructedEntity;
 
       if (_ConstructedEntities.ContainsKey(typeParameterMap))
       {
@@ -256,11 +256,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
         if (Parent != null && Parent is IGenericSupportingSemanticEntity)
         {
-          var parentTypeParameterMap = (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;
-          if (!parentTypeParameterMap.IsEmpty)
-          {
-            return parentTypeParameterMap;
-          }
+          return (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;
         }
 
         return TypeParameterMap.Empty;
@@ -277,21 +273,37 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value indicating whether this is a constructed entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool IsConstructed
+    public bool HasGenericTemplate
     {
       get
       {
-        return TemplateEntity != null;
+        return DirectGenericTemplate != null;
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the first generic template in the chain of template->clone relationships,
+    /// where none of the type parameters were bound.
+    /// Null if this entity was not constructed from another entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public IGenericSupportingSemanticEntity UnboundGenericTemplate
+    {
+      get
+      {
+        return HasGenericTemplate && DirectGenericTemplate.DirectGenericTemplate != null
+                 ? DirectGenericTemplate.UnboundGenericTemplate
+                 : DirectGenericTemplate;
+      }
+    }
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a collection of the entities constructed from this entity 
     /// by replacing type parameters with type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<ISemanticEntity> ConstructedEntities
+    public IEnumerable<IGenericSupportingSemanticEntity> GenericCloneEntities
     {
       get { return _ConstructedEntities.Values; }
     }

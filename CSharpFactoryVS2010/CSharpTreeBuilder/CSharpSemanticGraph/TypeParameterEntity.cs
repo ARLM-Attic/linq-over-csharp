@@ -144,17 +144,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this is an unbound generic type 
-    /// (ie. a generic type definition with no actual type arguments).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public override bool IsUnbound
-    {
-      get { return false; }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a value indicating whether this is an open type
     /// (ie. is a type that involves type parameters).
     /// </summary>
@@ -306,9 +295,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
     {
-      return (typeParameterMap.ContainsTypeParameter(this))
-        ? (typeParameterMap[this] ?? this)
-        : this;
+      return typeParameterMap == null || !typeParameterMap.ContainsTypeParameter(this)
+               ? this
+               : typeParameterMap[this] ?? this;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -319,7 +308,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override string ToString()
     {
-      return (Parent is TypeEntity) && (Parent as TypeEntity).IsUnbound
+      return (Parent is TypeEntity) && (Parent as TypeEntity).IsUnboundGeneric
         ? Parent.ToString() + "." + Name
         : Name;
     }

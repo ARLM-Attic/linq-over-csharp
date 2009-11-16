@@ -62,16 +62,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Evaluates this expression.
     /// </summary>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An error handler object.</param>
     // ----------------------------------------------------------------------------------------------
-    public override void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
       // First resolve the type of the literal.
 
       if (TypeReference != null)
       {
-        TypeReference.Resolve(this, semanticGraph, errorHandler);
+        TypeReference.Resolve(this, errorHandler);
       }
 
       // Then obtain the result of the expression.

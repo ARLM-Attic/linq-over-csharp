@@ -68,6 +68,7 @@
     <Compile Include="Ast\StructDeclarations.cs" />
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\ConstructedGenericTypeTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookupTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitorTest.cs" />
@@ -390,6 +391,8 @@
     <None Include="TestFiles\MemberLookup\MethodHidesAllNonMethodMembers.cs" />
     <None Include="TestFiles\MemberLookup\NestedTypeHidesNonTypeMembers.cs" />
     <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
+    <None Include="TestFiles\ConstructedGenericType\EmbeddedType.cs" />
+    <None Include="TestFiles\ConstructedGenericType\Simple.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToType.cs" />

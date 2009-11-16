@@ -36,7 +36,7 @@ namespace CSharpTreeBuilder.ProjectContent
       SyntaxTree = new CSharpSyntaxTree();
       Errors = new CompilationMessageCollection();
       Warnings = new CompilationMessageCollection();
-      SemanticGraph = new SemanticGraph();
+      SemanticGraph = new SemanticGraph(this);
       ConditionalSymbols = new List<string>();
 
       // --- Set up the default error handling parameters
@@ -192,6 +192,7 @@ namespace CSharpTreeBuilder.ProjectContent
 
       // Load mscorlib entities into the semantic graph
       factory.ImportTypesIntoSemanticGraph(typeof(int).Assembly.Location, "global");
+      SemanticGraph.BuildState = SemanticGraphBuildState.MscorlibImported;
 
       // Load other referenced assemblies into the semantic graph
       foreach (var referencedUnit in ProjectProvider.References)
@@ -204,19 +205,26 @@ namespace CSharpTreeBuilder.ProjectContent
           factory.ImportTypesIntoSemanticGraph(Path.Combine(referencedAssembly.FilePath, referencedAssembly.Name), alias);
         }
       }
+      SemanticGraph.BuildState = SemanticGraphBuildState.ReferencedUnitsImported;
 
       // Create entities from ASTs
       SyntaxTree.AcceptVisitor(new EntityBuilderSyntaxNodeVisitor(this));
+      SemanticGraph.BuildState = SemanticGraphBuildState.SyntaxTreesImported;
 
       // Merge partial type entities.
       SemanticGraph.AcceptVisitor(new PartialTypeMergingSemanticGraphVisitor());
+      SemanticGraph.BuildState = SemanticGraphBuildState.PartialTypesMerged;
 
       // Resolve type references in 2 passes (1. type declarations, 2. type bodies)
       SemanticGraph.AcceptVisitor(new TypeResolverPass1SemanticGraphVisitor(this, SemanticGraph));
+      SemanticGraph.BuildState = SemanticGraphBuildState.TypeDeclarationsResolved;
+
       SemanticGraph.AcceptVisitor(new TypeResolverPass2SemanticGraphVisitor(this, SemanticGraph));
+      SemanticGraph.BuildState = SemanticGraphBuildState.TypeBodiesResolved;
 
       // Evaluate expressions in the semantic graph.
       SemanticGraph.AcceptVisitor(new ExpressionEvaluatorSemanticGraphVisitor(this, SemanticGraph));
+      SemanticGraph.BuildState = SemanticGraphBuildState.ExpressionsEvaluated;
 
       // TODO: continue
     }

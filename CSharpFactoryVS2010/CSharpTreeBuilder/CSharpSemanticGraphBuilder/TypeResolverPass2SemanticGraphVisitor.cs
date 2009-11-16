@@ -36,7 +36,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       foreach (var typeReference in entity.TypeReferenceConstraints)
       {
-        typeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        typeReference.Resolve(entity, _ErrorHandler);
       }
     }
 
@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the type of the field
       if (entity.TypeReference != null)
       {
-        entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        entity.TypeReference.Resolve(entity, _ErrorHandler);
 
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
@@ -75,7 +75,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the type of the field
       if (entity.TypeReference != null)
       {
-        entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        entity.TypeReference.Resolve(entity, _ErrorHandler);
       }
 
       if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
@@ -98,7 +98,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the type of the property
       if (entity.TypeReference != null)
       {
-        entity.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        entity.TypeReference.Resolve(entity, _ErrorHandler);
 
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
@@ -114,7 +114,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the interface reference for explicitly implemented members
       if (entity.InterfaceReference != null)
       {
-        entity.InterfaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+        entity.InterfaceReference.Resolve(entity.Parent as SemanticEntity, _ErrorHandler);
       }
     }
 
@@ -130,14 +130,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       if (entity.ReturnTypeReference != null)
       {
         // Note that the resolution context is the method, because it can be the method's type parameter too
-        entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        entity.ReturnTypeReference.Resolve(entity, _ErrorHandler);
       }
 
       // Resolve the interface reference for explicitly implemented members
       if (entity.InterfaceReference != null)
       {
         // Note that the resolution context is not the method, but its parent
-        entity.InterfaceReference.Resolve(entity.Parent, _SemanticGraph, _ErrorHandler);
+        entity.InterfaceReference.Resolve(entity.Parent as SemanticEntity, _ErrorHandler);
       }
 
       // Resolve parameter types
@@ -146,7 +146,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (parameter.TypeReference != null)
         {
           // Note that the resolution context is the method, because it can be the method's type parameter too
-          parameter.TypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+          parameter.TypeReference.Resolve(entity, _ErrorHandler);
         }
       }
     }

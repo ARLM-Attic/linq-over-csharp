@@ -21,10 +21,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Evaluates this expression.
     /// </summary>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An error handler object.</param>
     // ----------------------------------------------------------------------------------------------
-    public abstract void Evaluate(SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler);
+    public abstract void Evaluate(ICompilationErrorHandler errorHandler);
 
     #region Visitor methods
 

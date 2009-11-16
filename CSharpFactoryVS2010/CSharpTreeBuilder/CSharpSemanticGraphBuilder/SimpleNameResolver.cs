@@ -50,6 +50,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // and <A1, ..., AK> is an optional type-argument-list. When no type-argument-list is specified, consider K to be zero. 
         // The simple-name is evaluated [and classified as follows]:
 
+        // First lets resolve all type arguments.
+        var typeArguments = ResolveTypeArguments(simpleNameNode.Arguments, simpleNameEntity);
+
         // (Try to resolve to a local variable, parameter or constant.) 
 
         // TODO:
@@ -78,7 +81,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         var typeTagNode = new TypeTagNode(simpleNameNode.IdentifierToken,
                                           simpleNameNode.Arguments.Count > 0 ? simpleNameNode.Arguments : null);
-        var namespaceOrTypeEntity = ResolveSingleTypeTagInNamespaces(typeTagNode, simpleNameEntity, simpleNameEntity);
+        var namespaceOrTypeEntity = ResolveSingleTypeTagInNamespaces(typeTagNode, simpleNameEntity, simpleNameEntity, typeArguments);
         if (namespaceOrTypeEntity != null)
         {
           return new SimpleNameResult(namespaceOrTypeEntity);

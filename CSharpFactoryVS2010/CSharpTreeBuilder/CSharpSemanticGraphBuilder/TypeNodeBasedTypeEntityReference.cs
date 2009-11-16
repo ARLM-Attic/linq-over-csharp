@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
@@ -29,14 +30,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Implements the resolution logic.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override TypeEntity GetResolvedEntity(
-      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    protected override TypeEntity GetResolvedEntity(SemanticEntity context, ICompilationErrorHandler errorHandler)
     {
-      return GetTypeEntityByTypeNode(SyntaxNode, context, semanticGraph, errorHandler);
+      return GetTypeEntityByTypeNode(SyntaxNode, context, errorHandler);
     }
 
     #region Private methods
@@ -47,13 +46,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// </summary>
     /// <param name="typeNode">A type AST node.</param>
     /// <param name="resolutionContextEntity">The entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>A TypeEntity, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeEntity GetTypeEntityByTypeNode(TypeNode typeNode, ISemanticEntity resolutionContextEntity,
-      SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    private static TypeEntity GetTypeEntityByTypeNode(TypeNode typeNode, SemanticEntity resolutionContextEntity,
+      ICompilationErrorHandler errorHandler)
     {
+      var semanticGraph = resolutionContextEntity.SemanticGraph;
+
       // First, try to resolve as built-in type.
       TypeEntity typeEntity = ResolveBuiltInTypeName(typeNode.TypeName, semanticGraph);
 
@@ -75,8 +75,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the AST node has a nullable type indicating token, then create nullable type.
       if (typeNode.NullableToken != null)
       {
-        typeEntity = ConstructedTypeHelper.GetConstructedGenericType(semanticGraph.NullableGenericTypeDefinition, 
-          new List<TypeEntity>() {typeEntity});
+        var typeParameterMap = new TypeParameterMap(semanticGraph.NullableGenericTypeDefinition.OwnTypeParameters, new[] {typeEntity});
+        typeEntity = semanticGraph.NullableGenericTypeDefinition.GetGenericClone(typeParameterMap) as TypeEntity;
       }
 
       // If the AST node has pointer token(s), then create pointer type(s).

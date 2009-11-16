@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
@@ -54,21 +56,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       return arrayType;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a contructed generic type given its type definition entity and the type arguments.
-    /// </summary>
-    /// <param name="genericTypeDefinition">The generic type definition entity.</param>
-    /// <param name="typeArguments">A list of type arguments.</param>
-    /// <returns>A constructed generic entity.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public static TypeEntity GetConstructedGenericType(GenericCapableTypeEntity genericTypeDefinition, List<TypeEntity> typeArguments)
-    {
-      var typeParameterMap = new TypeParameterMap(genericTypeDefinition.TypeParameterMap, typeArguments);
-
-      return (TypeEntity)genericTypeDefinition.GetConstructedEntity(typeParameterMap);
     }
   }
 }

@@ -50,7 +50,7 @@
     {
       if (template.Body != null)
       {
-        Body = (BlockEntity)template.Body.GetConstructedEntity(typeParameterMap);
+        Body = (BlockEntity)template.Body.GetGenericClone(typeParameterMap);
       }
     }
 

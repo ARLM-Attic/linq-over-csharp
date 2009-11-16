@@ -40,10 +40,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Tries to resolve this reference, and sets ResolutionState and TargetEntity accordingly.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     // ----------------------------------------------------------------------------------------------
-    public void Resolve(ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    public void Resolve(SemanticEntity context, ICompilationErrorHandler errorHandler)
     {
       // If already resolved then bail out.
       if (ResolutionState == ResolutionState.Resolved)
@@ -51,7 +50,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return;
       }
 
-      var resolvedEntity = GetResolvedEntity(context, semanticGraph, errorHandler);
+      var resolvedEntity = GetResolvedEntity(context, errorHandler);
 
       // Set the reference to the correct state
       if (resolvedEntity != null)
@@ -69,12 +68,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Implements the resolution logic.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected abstract TTargetEntity GetResolvedEntity(
-      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler);
+    protected abstract TTargetEntity GetResolvedEntity(SemanticEntity context, ICompilationErrorHandler errorHandler);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

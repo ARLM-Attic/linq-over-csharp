@@ -554,7 +554,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void CS0006_MetadataFileNotFound()
     {
       var project = new CSharpProject(WorkingFolder);
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.ImportTypesIntoSemanticGraph(@"c:\nosuchfile.dll", "global");
 
@@ -571,7 +571,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void CS0009_IncorrectFormat()
     {
       var project = new CSharpProject(WorkingFolder);
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var factory = new MetadataImporterSemanticEntityFactory(project, semanticGraph);
       factory.ImportTypesIntoSemanticGraph(Path.Combine(Environment.SystemDirectory, @"ntdll.dll"), "global");
 

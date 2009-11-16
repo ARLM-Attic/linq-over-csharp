@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -72,7 +70,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
           throw new InvalidOperationException("Constructed types don't have type parameters.");
         }
@@ -96,9 +94,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
-          throw new InvalidOperationException("Constructed types don't have type parameters.");
+          return (DirectGenericTemplate as GenericCapableTypeEntity).OwnTypeParameters;
         }
 
         return _OwnTypeParameters; 
@@ -114,9 +112,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
-          return (TemplateEntity as GenericCapableTypeEntity).AllTypeParameterCount;
+          return (DirectGenericTemplate as GenericCapableTypeEntity).AllTypeParameterCount;
         }
 
         return AllTypeParameters.Count(); 
@@ -132,9 +130,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
-          return (TemplateEntity as GenericCapableTypeEntity).OwnTypeParameterCount;
+          return (DirectGenericTemplate as GenericCapableTypeEntity).OwnTypeParameterCount;
         }
 
         return _OwnTypeParameters.Count; 
@@ -149,7 +147,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (IsConstructed)
+      if (HasGenericTemplate)
       {
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
@@ -167,7 +165,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (IsConstructed)
+      if (HasGenericTemplate)
       {
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
@@ -188,7 +186,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
-      if (IsConstructed)
+      if (HasGenericTemplate)
       {
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
@@ -205,12 +203,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return IsConstructed 
-          ? (TemplateEntity as GenericCapableTypeEntity).IsGeneric
+        return HasGenericTemplate 
+          ? (DirectGenericTemplate as GenericCapableTypeEntity).IsGeneric
           : AllTypeParameterCount > 0;
       }
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an unbound generic type 
+    /// (ie. a generic type definition with no actual type arguments).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsUnboundGeneric
+    {
+      get 
+      {
+        return IsGeneric && DirectGenericTemplate == null;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this is an open type
+    /// (ie. is a type that involves type parameters).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override bool IsOpen
+    {
+      get
+      {
+        return TypeParameterMap.TypeArguments.Any(typeArgument => typeArgument == null || typeArgument.IsOpen);
+      }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the type parameters and type arguments associated with this entity.
@@ -220,19 +246,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
           return base.TypeParameterMap;
         }
 
-        var parentTypeParameterMap = TypeParameterMap.Empty;
+        var thisTypeParameterMap = new TypeParameterMap(OwnTypeParameters);
 
-        if (Parent != null && Parent is IGenericSupportingSemanticEntity)
+        if (Parent != null && Parent is GenericCapableTypeEntity)
         {
-          parentTypeParameterMap = (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;  
+          thisTypeParameterMap = (Parent as GenericCapableTypeEntity).TypeParameterMap.Extend(thisTypeParameterMap);  
         }
 
-        return new TypeParameterMap(parentTypeParameterMap, OwnTypeParameters);
+        return thisTypeParameterMap;
       }
     }
 
@@ -245,19 +271,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
     {
-      if (IsConstructed)
-      {
-        var mappedTypeArguments = new List<TypeEntity>();
-
-        foreach (var typeArgument in TypeParameterMap.TypeArguments)
-        {
-          mappedTypeArguments.Add(typeArgument.GetMappedType(typeParameterMap));
-        }
-
-        return ConstructedTypeHelper.GetConstructedGenericType(TemplateEntity as GenericCapableTypeEntity, mappedTypeArguments);
-      }
-
-      return this;
+      return HasGenericTemplate 
+        ? DirectGenericTemplate.GetGenericClone(TypeParameterMap.MapTypeArguments(typeParameterMap)) as TypeEntity
+        : this;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -270,40 +286,55 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       var stringBuilder = new StringBuilder();
 
-      if (!IsConstructed)
+      if (Parent != null)
       {
-        stringBuilder.Append(base.ToString());
-
-        if (_OwnTypeParameters.Count > 0)
-        {
-          stringBuilder.Append('`');
-          stringBuilder.Append(_OwnTypeParameters.Count);
-        }
+        stringBuilder.Append(Parent.ToString());
       }
-      else
+
+      if (Parent is RootNamespaceEntity)
       {
-        stringBuilder.Append(TemplateEntity.ToString());
+        stringBuilder.Append("::");
+      }
+      else if (Parent is NamespaceEntity)
+      {
+        stringBuilder.Append('.');
+      }
+      else if (Parent is TypeEntity)
+      {
+        stringBuilder.Append('+');
+      }
 
-        stringBuilder.Append('[');
+      stringBuilder.Append(Name);
 
-        bool isFirst = true;
-        foreach (var typeParameter in TypeParameterMap.TypeParameters)
+      if (OwnTypeParameterCount > 0)
+      {
+        stringBuilder.Append('`');
+        stringBuilder.Append(OwnTypeParameterCount);
+
+        // Show the type arguments only for bound types.
+        if (!IsUnboundGeneric)
         {
-          if (isFirst)
+          stringBuilder.Append('[');
+
+          bool isFirst = true;
+          foreach (var typeParameter in OwnTypeParameters)
           {
-            isFirst = false;
-          }
-          else
-          {
-            stringBuilder.Append(',');
+            if (isFirst)
+            {
+              isFirst = false;
+            }
+            else
+            {
+              stringBuilder.Append(',');
+            }
+
+            var typeArgument = TypeParameterMap[typeParameter];
+
+            stringBuilder.Append(typeArgument == null ? "null" : typeArgument.ToString());
           }
 
-          var typeArgument = TypeParameterMap[typeParameter];
-          
-          stringBuilder.Append( typeArgument == null ? "(open)" : typeArgument.ToString());
+          stringBuilder.Append(']');
         }
-
-        stringBuilder.Append(']');
       }
 
       return stringBuilder.ToString();

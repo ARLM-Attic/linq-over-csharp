@@ -23,7 +23,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     [TestMethod]
     public void GlobalNamespace()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       semanticGraph.GlobalNamespace.FullyQualifiedName.ShouldEqual("global");
       semanticGraph.GlobalNamespace.ChildNamespaces.Count.ShouldEqual(0);
       semanticGraph.GlobalNamespace.ChildTypes.Count().ShouldEqual(0);
@@ -41,7 +41,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     [TestMethod]
     public void RootNamespaces()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       semanticGraph.RootNamespaces.Count().ShouldEqual(1);
       semanticGraph.RootNamespaces.ToArray()[0].ShouldEqual(semanticGraph.GlobalNamespace);
     }
@@ -54,7 +54,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     [TestMethod]
     public void NullableGenericTypeDefinition()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       // mscorlib is not yet imported, so this is null 
       semanticGraph.NullableGenericTypeDefinition.ShouldBeNull();
     }
@@ -67,7 +67,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     [TestMethod]
     public void SystemArray()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       // mscorlib is not yet imported, so this is null 
       semanticGraph.SystemArray.ShouldBeNull();
     }

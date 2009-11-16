@@ -91,7 +91,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       foreach (var parameter in template.Parameters)
       {
-        AddParameter((ParameterEntity) parameter.GetConstructedEntity(typeParameterMap));
+        AddParameter((ParameterEntity) parameter.GetGenericClone(typeParameterMap));
       }
 
       // Note that TypeParameters of the TemplateEntity are NOT added to the constructed method.
@@ -193,7 +193,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
           throw new InvalidOperationException("Constructed methods don't have type parameters.");
         }
@@ -217,7 +217,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
           throw new InvalidOperationException("Constructed methods don't have type parameters.");
         }
@@ -235,9 +235,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
-          return (TemplateEntity as MethodEntity).AllTypeParameterCount;
+          return (DirectGenericTemplate as MethodEntity).AllTypeParameterCount;
         }
 
         return AllTypeParameters.Count();
@@ -253,9 +253,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
-          return (TemplateEntity as MethodEntity).OwnTypeParameterCount;
+          return (DirectGenericTemplate as MethodEntity).OwnTypeParameterCount;
         }
 
         return _OwnTypeParameters.Count;
@@ -272,8 +272,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return IsConstructed
-          ? (TemplateEntity as GenericCapableTypeEntity).IsGeneric
+        return HasGenericTemplate
+          ? (DirectGenericTemplate as GenericCapableTypeEntity).IsGeneric
           : AllTypeParameterCount > 0;
       }
     }
@@ -286,7 +286,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (IsConstructed)
+      if (HasGenericTemplate)
       {
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
@@ -304,7 +304,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (IsConstructed)
+      if (HasGenericTemplate)
       {
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
@@ -325,7 +325,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
-      if (IsConstructed)
+      if (HasGenericTemplate)
       {
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
@@ -342,19 +342,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (IsConstructed)
+        if (HasGenericTemplate)
         {
           return base.TypeParameterMap;
         }
 
-        var parentTypeParameterMap = TypeParameterMap.Empty;
+        var thisTypeParameterMap = new TypeParameterMap(OwnTypeParameters);
 
-        if (Parent != null && Parent is IGenericSupportingSemanticEntity)
+        if (Parent != null && Parent is GenericCapableTypeEntity)
         {
-          parentTypeParameterMap = (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;
+          thisTypeParameterMap = (Parent as GenericCapableTypeEntity).TypeParameterMap.Extend(thisTypeParameterMap);
         }
 
-        return new TypeParameterMap(parentTypeParameterMap, OwnTypeParameters);
+        return thisTypeParameterMap;
       }
     }
 

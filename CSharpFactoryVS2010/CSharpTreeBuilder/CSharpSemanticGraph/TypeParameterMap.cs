@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +30,42 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
+    /// with a collection of type parameters and null arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterMap(IEnumerable<TypeParameterEntity> typeParameters)
+    {
+      foreach (var typeParameter in typeParameters)
+      {
+        _Map.Add(typeParameter, null);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
+    /// with a collection of type parameters and the corresponding type arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterMap(IEnumerable<TypeParameterEntity> typeParameters, IEnumerable<TypeEntity> typeArguments)
+    {
+      if (typeParameters.Count() != typeArguments.Count())
+      {
+        throw new ArgumentException("Mismatch in type parameter and type argument count");
+      }
+
+      var typeArgumentList = typeArguments.ToList();
+      int i = 0;
+      foreach (var typeParameter in typeParameters)
+      {
+        _Map.Add(typeParameter, typeArgumentList[i]);
+        i++;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Initializes a new instance of the <see cref="SemanticEntity"/> class
     /// by copying data from another map.
     /// </summary>
@@ -38,62 +75,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       foreach (var keyValuePair in source._Map)
       {
         _Map.Add(keyValuePair.Key, keyValuePair.Value);
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
-    /// from an existing map and a collection of type parameters.
-    /// </summary>
-    /// <param name="sourceMap">An existing map.</param>
-    /// <param name="typeParameters">A collection of type parameters.</param>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterMap(TypeParameterMap sourceMap, IEnumerable<TypeParameterEntity> typeParameters)
-      : this(sourceMap)
-    {
-      // Add the specified type parameters to the map, with null value (ie. no corresponding type argument).
-      if (typeParameters != null)
-      {
-        foreach (var typeParameter in typeParameters)
-        {
-          AddTypeParameter(typeParameter);
-        }
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SemanticEntity"/> class,
-    /// from an existing map and a collection of type arguments that will replace null values in the map.
-    /// </summary>
-    /// <param name="sourceMap">An existing map.</param>
-    /// <param name="typeArguments">A collection of type arguments.</param>
-    // ----------------------------------------------------------------------------------------------
-    public TypeParameterMap(TypeParameterMap sourceMap, IEnumerable<TypeEntity> typeArguments)
-      : this(sourceMap)
-    {
-      if (typeArguments != null)
-      {
-        var typeParameterList = _Map.Keys.ToList();
-        int i = 0;
-
-        foreach (var typeArgument in typeArguments)
-        {
-          while (i < typeParameterList.Count && _Map[typeParameterList[i]] != null)
-          {
-            i++;
-          }
-
-          if (i == typeParameterList.Count)
-          {
-            throw new ApplicationException("Null slot not found for type argument.");
-          }
-
-          _Map[typeParameterList[i]] = typeArgument;
-
-          i++;
-        }
       }
     }
     
@@ -107,24 +88,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return new TypeParameterMap();
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds a type parameter to the map, with null as type argument.
-    /// </summary>
-    /// <param name="typeParameter">A type parameter entity.</param>
-    // ----------------------------------------------------------------------------------------------
-    public void AddTypeParameter(TypeParameterEntity typeParameter)
-    {
-      if (ContainsTypeParameter(typeParameter))
-      {
-        throw new ApplicationException(string.Format("Type parameter '{0}' already exists in the map.", typeParameter));
-      }
-      else
-      {
-        _Map.Add(typeParameter, null);
       }
     }
 
@@ -234,6 +197,58 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return _Map.Keys.Count == 0;
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Maps the type arguments in this map using another map, and returns a newly created map as result.
+    /// using the other map.
+    /// </summary>
+    /// <param name="otherMap">A type parameter map.</param>
+    /// <returns>A new type parameter map created by mapping the type arguments of this map 
+    /// using the parameter map.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterMap MapTypeArguments(TypeParameterMap otherMap)
+    {
+      var resultingTypeParameterMap = new TypeParameterMap();
+
+      foreach (var keyValuePair in this._Map)
+      {
+        // Unbound type parameters are represented with null as arument, so they need special treatment
+        var mappedTypeArgument = keyValuePair.Value == null
+                                   ? keyValuePair.Key.GetMappedType(otherMap)
+                                   : keyValuePair.Value.GetMappedType(otherMap);
+
+        resultingTypeParameterMap.AddMapping(keyValuePair.Key, mappedTypeArgument);
+      }
+
+      return resultingTypeParameterMap;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Extends this map with another map and returns a new map.
+    /// </summary>
+    /// <param name="otherMap">A type parameter map.</param>
+    /// <returns>A new type parameter map created by extending this map with the parameter map.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TypeParameterMap Extend(TypeParameterMap otherMap)
+    {
+      var resultingTypeParameterMap = new TypeParameterMap(this);
+
+      foreach(var keyValuePair in otherMap._Map)
+      {
+        if (ContainsTypeParameter(keyValuePair.Key) && this[keyValuePair.Key] != keyValuePair.Value)
+        {
+          throw new ApplicationException(
+            string.Format("Conflicting type argument at type parameter '{0}'. The arguments are: '{1}' and '{2}'",
+                          keyValuePair.Key, this[keyValuePair.Key], keyValuePair.Value));
+        }
+
+        resultingTypeParameterMap.AddMapping(keyValuePair.Key, keyValuePair.Value);
+      }
+
+      return resultingTypeParameterMap;
     }
   }
 }

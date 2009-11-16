@@ -37,7 +37,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override void Visit(ExpressionEntity entity)
     {
-      entity.Evaluate(_SemanticGraph, _ErrorHandler);
+      entity.Evaluate(_ErrorHandler);
     }
   }
 }

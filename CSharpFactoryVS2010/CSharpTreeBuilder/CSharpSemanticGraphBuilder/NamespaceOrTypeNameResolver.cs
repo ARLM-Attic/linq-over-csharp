@@ -43,7 +43,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <returns>The resolved type entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity ResolveToTypeEntity(NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
+    public TypeEntity ResolveToTypeEntity(NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
     {
       // Following resolution as described below, ... 
       NamespaceOrTypeEntity namespaceOrTypeEntity = ResolveToNamespaceOrTypeEntity(namespaceOrTypeName, resolutionContextEntity);
@@ -75,7 +75,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <returns>The resolved namespace entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceEntity ResolveToNamespaceEntity(NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
+    public NamespaceEntity ResolveToNamespaceEntity(NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
     {
       // No type arguments (§4.4.1) can be present in a namespace-name (only types can have type arguments).
       if (namespaceOrTypeName.TypeTags.Any(typeTag => typeTag.Arguments.Count > 0))
@@ -121,63 +121,68 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     // ----------------------------------------------------------------------------------------------
     public NamespaceOrTypeEntity ResolveToNamespaceOrTypeEntity(
-      NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
+      NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
     {
       if (namespaceOrTypeName.TypeTags.Count < 1)
       {
         throw new ArgumentException("Namespace-or-type-name must have at least 1 type tag.", "namespaceOrTypeName");
       }
 
-      // Resolve the underlying type.
-      var foundEntity = ResolveNamespaceOrTypeNodeButNotTheTypeArguments(namespaceOrTypeName, resolutionContextEntity);
+      return ResolveNamespaceOrTypeNode(namespaceOrTypeName, resolutionContextEntity);
+    }
 
-      // We have to collect all type arguments, because constructed generic types need their parents's type arguments as well.
-      var typeArgumentNodes = GetTypeArgumentNodesFromTypeOrNamespaceNode(namespaceOrTypeName);
-
-      var genericCapableTypeEntity = foundEntity as GenericCapableTypeEntity;
-
-      // If no type arguments in the syntax node and the found entity is not a generic, then we are finished.
-      if (typeArgumentNodes.Count == 0
-          && (genericCapableTypeEntity == null || !genericCapableTypeEntity.IsGeneric))
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a constructed type entity based an a type entity and a collection of type arguments.
+    /// The type argument list can be empty in which case the type entity itself is returned.
+    /// </summary>
+    /// <param name="typeEntity">A type entity (the template of the consturcted type).</param>
+    /// <param name="typeArguments">A collection of type arguments. Can be empty.</param>
+    /// <returns>
+    /// The parameter type entity (if there are no type arguments), or a constructed type entity.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected TypeEntity GetConstructedTypeEntity(TypeEntity typeEntity, List<TypeEntity> typeArguments)
+    {
+      if (typeArguments.Count == 0)
       {
-        return foundEntity;
+        return typeEntity;
       }
 
-      // Unnecessary type arguments.
-      if ((genericCapableTypeEntity == null || !genericCapableTypeEntity.IsGeneric)
-        && typeArgumentNodes.Count > 0)
+      var genericCapableTypeEntity = typeEntity as GenericCapableTypeEntity;
+      
+      // Check for unnecessary type arguments.
+      if (genericCapableTypeEntity == null || !genericCapableTypeEntity.IsGeneric)
       {
         // TODO: error CS0308: The non-generic type 'A' cannot be used with type arguments
         return null;
       }
 
-      // The number of type arguments are not right.
-      if (genericCapableTypeEntity != null && genericCapableTypeEntity.IsGeneric
-          && typeArgumentNodes.Count != genericCapableTypeEntity.AllTypeParameters.Count())
+      // Check if the number of type arguments are not right.
+      if (genericCapableTypeEntity.IsGeneric && typeArguments.Count != genericCapableTypeEntity.OwnTypeParameterCount)
       {
         // TODO: error CS0305: Using the generic type 'A<T>' requires '1' type arguments
         return null;
       }
 
-      // The underlying type is a generic, and the number of type arguments are right.
-      foundEntity = ResolveToConstructedGenericType(genericCapableTypeEntity, typeArgumentNodes,
-                                                    resolutionContextEntity);
+      var newTypeParameterMap = new TypeParameterMap(genericCapableTypeEntity.OwnTypeParameters, typeArguments);
+      var fullTypeParameterMap = genericCapableTypeEntity.TypeParameterMap.MapTypeArguments(newTypeParameterMap);
 
-      return foundEntity;
+      return genericCapableTypeEntity.GetGenericClone(fullTypeParameterMap) as TypeEntity;
     }
 
     #region Private methods
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Resolve a namespace-or-type-name AST node, but not the type arguments involved.
+    /// Resolve a namespace-or-type-name AST node.
     /// </summary>
     /// <param name="namespaceOrTypeName">A namespace-or-type-name AST node.</param>
     /// <param name="resolutionContextEntity">The context of the resolution.</param>
     /// <returns>A namespace or type entity.</returns>
     // ----------------------------------------------------------------------------------------------
-    private NamespaceOrTypeEntity ResolveNamespaceOrTypeNodeButNotTheTypeArguments(
-      NamespaceOrTypeNameNode namespaceOrTypeName, ISemanticEntity resolutionContextEntity)
+    private NamespaceOrTypeEntity ResolveNamespaceOrTypeNode(
+      NamespaceOrTypeNameNode namespaceOrTypeName, SemanticEntity resolutionContextEntity)
     {
       NamespaceOrTypeEntity foundEntity = null;
       TypeTagNodeCollection typeTagsToBeResolved = namespaceOrTypeName.TypeTags;
@@ -240,65 +245,33 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Extracts the list of type arguments from a namespace-or-type-name AST node.
+    /// Resolves type argument AST nodes and return a list of type entities.
     /// </summary>
-    /// <param name="namespaceOrTypeNameNode">A namespace-or-type-name node</param>
-    /// <returns>The list of type arguments.</returns>
-    // ----------------------------------------------------------------------------------------------
-    private static TypeNodeCollection GetTypeArgumentNodesFromTypeOrNamespaceNode(NamespaceOrTypeNameNode namespaceOrTypeNameNode)
-    {
-      var typeArgumentNodes = new TypeNodeCollection();
-
-      foreach (var typeTag in namespaceOrTypeNameNode.TypeTags)
-      {
-        if (typeTag.HasTypeArguments)
-        {
-          foreach (var argument in typeTag.Arguments)
-          {
-            typeArgumentNodes.Add(argument);
-          }
-        }
-      }
-
-      return typeArgumentNodes;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Resolves type argument AST nodes, and creates a constructed generic type.
-    /// </summary>
-    /// <param name="underlyingTypeEntity">An already resolved generic capable type entity.</param>
     /// <param name="typeArgumentNodes">A collection if type argument AST nodes.</param>
     /// <param name="resolutionContextEntity">The context of the resolution.</param>
-    /// <returns>A constructed generic type entity.</returns>
+    /// <returns>A collection of type entities.</returns>
     // ----------------------------------------------------------------------------------------------
-    private TypeEntity ResolveToConstructedGenericType(
-      GenericCapableTypeEntity underlyingTypeEntity, TypeNodeCollection typeArgumentNodes, ISemanticEntity resolutionContextEntity)
+    protected List<TypeEntity> ResolveTypeArguments(TypeNodeCollection typeArgumentNodes, SemanticEntity resolutionContextEntity)
     {
-      // Resolve all type arguments
       var typeArguments = new List<TypeEntity>();
-      foreach (var typeArgumentSyntaxNode in typeArgumentNodes)
-      {
-        var typeArgumentRef = new TypeNodeBasedTypeEntityReference(typeArgumentSyntaxNode);
-        typeArgumentRef.Resolve(resolutionContextEntity, _SemanticGraph, _ErrorHandler);
 
-        if (typeArgumentRef.ResolutionState != ResolutionState.Resolved)
+      if (typeArgumentNodes != null)
+      {
+        foreach (var typeArgumentSyntaxNode in typeArgumentNodes)
         {
-          // No need to signal error here, because the resolution has already signaled it, just bail out.
-          return null;
+          var typeArgumentRef = new TypeNodeBasedTypeEntityReference(typeArgumentSyntaxNode);
+          typeArgumentRef.Resolve(resolutionContextEntity, _ErrorHandler);
+
+          if (typeArgumentRef.ResolutionState != ResolutionState.Resolved)
+          {
+            // No need to signal error here, because the resolution has already signaled it, just bail out.
+            return null;
+          }
+          typeArguments.Add(typeArgumentRef.TargetEntity);
         }
-        typeArguments.Add(typeArgumentRef.TargetEntity);
       }
 
-      // Create the constructed type
-      var resultTypeEntity = ConstructedTypeHelper.GetConstructedGenericType(underlyingTypeEntity, typeArguments);
-
-      if (resultTypeEntity == null)
-      {
-        throw new ApplicationException("GetConstructedGenericType returned null.");
-      }
-
-      return resultTypeEntity;
+      return typeArguments;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -367,8 +340,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
-    private static NamespaceOrTypeEntity ResolveTypeTags(
-      TypeTagNodeCollection typeTags, ISemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
+    private NamespaceOrTypeEntity ResolveTypeTags(
+      TypeTagNodeCollection typeTags, SemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
     {
       NamespaceOrTypeEntity foundEntity = null;
 
@@ -383,6 +356,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         // N is first resolved as a namespace-or-type-name.  
         var handleEntity = ResolveTypeTags(typeTags.GetCopyWithoutLastTag(), resolutionContextEntity, accessingEntity);
         var lastTypeTag = typeTags[typeTags.Count - 1];
+
+        // Resolve all type argument nodes.
+        var typeArguments = ResolveTypeArguments(lastTypeTag.Arguments, resolutionContextEntity);
 
         // If the resolution of N is not successful, a compile-time error occurs. 
         if (handleEntity == null)
@@ -426,9 +402,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             }
 
             // ... then the namespace-or-type-name refers to that type constructed with the given type arguments.
-            //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-            //  --> Here we just return the resolved generic type definition entity.
-            return foundTypeEntity;
+            return GetConstructedTypeEntity(foundTypeEntity, typeArguments);
           }
         }
 
@@ -441,9 +415,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           if (foundNestesTypeEntity != null)
           {
             // ... then the namespace-or-type-name refers to that type constructed with the given type arguments. 
-            //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-            //  --> Here we just return the resolved generic type definition entity.
-            return foundNestesTypeEntity;
+            return GetConstructedTypeEntity(foundNestesTypeEntity, typeArguments);
           }
         }
 
@@ -468,8 +440,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
-    private static NamespaceOrTypeEntity ResolveSingleTypeTag(
-      TypeTagNode typeTagNode, ISemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
+    private NamespaceOrTypeEntity ResolveSingleTypeTag(
+      TypeTagNode typeTagNode, SemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
     {
       // If K is zero ...
       if (!typeTagNode.HasTypeArguments)
@@ -487,6 +459,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           }
         }
       }
+
+      // Resolve all type argument nodes.
+      var typeArguments = ResolveTypeArguments(typeTagNode.Arguments, resolutionContextEntity);
 
       // Otherwise, if the namespace-or-type-name appears within a type declaration, 
       // then for each instance type T (§10.3.1), starting with the instance type of that type declaration
@@ -520,9 +495,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           if (foundNestesTypeEntity != null)
           {
             // ... then the namespace-or-type-name refers to that type constructed with the given type arguments. 
-            //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-            //  --> Here we just return the resolved generic type definition entity.
-            return foundNestesTypeEntity;
+            return GetConstructedTypeEntity(foundNestesTypeEntity, typeArguments);
           }
         }
 
@@ -531,7 +504,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // If not yet resolved then try top resolve in the enclosing namespaces.
-      return ResolveSingleTypeTagInNamespaces(typeTagNode, resolutionContextEntity, accessingEntity);
+      return ResolveSingleTypeTagInNamespaces(typeTagNode, resolutionContextEntity, accessingEntity, typeArguments);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -545,11 +518,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="typeTagNode">A single-tag namespace-or-type-name.</param>
     /// <param name="resolutionContextEntity">The semantic entity that is the context of the resolution.</param>
     /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
+    /// <param name="typeArguments">The collection of already resolved type arguments.</param>
     /// <returns>The resolved namespace or type entity. Null if couldn't be resolved.</returns>
     /// <remarks>If an error occurs then a NamespaceOrTypeNameResolverException is raised.</remarks>
     // ----------------------------------------------------------------------------------------------
-    protected static NamespaceOrTypeEntity ResolveSingleTypeTagInNamespaces(
-      TypeTagNode typeTagNode, ISemanticEntity resolutionContextEntity, ISemanticEntity accessingEntity)
+    protected NamespaceOrTypeEntity ResolveSingleTypeTagInNamespaces(
+      TypeTagNode typeTagNode, 
+      ISemanticEntity resolutionContextEntity, 
+      ISemanticEntity accessingEntity,
+      List<TypeEntity> typeArguments)
     {
       // If the previous steps were unsuccessful then, for each namespace N, 
       // starting with the namespace in which the namespace-or-type-name occurs, 
@@ -608,9 +585,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           }
 
           // Otherwise, the namespace-or-type-name refers to the type constructed with the given type arguments.
-          //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-          //  --> Here we just return the resolved generic type definition entity.
-          return foundTypeEntity;
+          return GetConstructedTypeEntity(foundTypeEntity, typeArguments);
         }
 
         // Otherwise, if the location where the namespace-or-type-name occurs is enclosed by a namespace declaration for N:
@@ -641,9 +616,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (typeEntities.Count == 1)
         {
           // ... then the namespace-or-type-name refers to that type constructed with the given type arguments.
-          //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-          //  --> Here we just return the resolved generic type definition entity.
-          return typeEntities[0];
+          return GetConstructedTypeEntity(typeEntities[0], typeArguments);
         }
         
         // ...  contain more than one type ...
@@ -670,7 +643,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <returns>A TypeEntity with the name and number of type parameters defined in typeTagNode, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static TypeEntity FindNestedAccessibleTypeInTypeOrBaseTypes(
+    private TypeEntity FindNestedAccessibleTypeInTypeOrBaseTypes(
       TypeTagNode typeTagNode, TypeEntity contextType, ISemanticEntity accessingEntity)
     {
       // Spec: If there is more than one such type, the type declared within the more derived type is selected. 
@@ -723,7 +696,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="namespaceContext">The namespace whose imported namespaces will be searched.</param>
     /// <returns>A (possibly empty) list of type entities found.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static IList<TypeEntity> FindTypeInImportedNamespaces(TypeTagNode typeTagNode, NamespaceEntity namespaceContext)
+    private IList<TypeEntity> FindTypeInImportedNamespaces(TypeTagNode typeTagNode, NamespaceEntity namespaceContext)
     {
       var typeEntities = new List<TypeEntity>();
 
@@ -762,13 +735,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="globalNamespace">The global root namespace.</param>
     /// <returns>A NamespaceOrTypeEntity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static NamespaceOrTypeEntity ResolveQualifiedAliasMember(
-      string qualifier, TypeTagNode typeTagNode, ISemanticEntity resolutionContextEntity, RootNamespaceEntity globalNamespace)
+    private NamespaceOrTypeEntity ResolveQualifiedAliasMember(
+      string qualifier, 
+      TypeTagNode typeTagNode, 
+      SemanticEntity resolutionContextEntity, 
+      RootNamespaceEntity globalNamespace)
     {
       // A qualified-alias-member has one of two forms:
       // - N::I{A1, ..., AK}, where N and I represent identifiers, and {A1, ..., AK} is a type argument list. (K is always at least one.)
       // - N::I, where N and I represent identifiers. (In this case, K is considered to be zero.)
       // Using this notation, the meaning of a qualified-alias-member is determined as follows:
+
+      // Resolve all type argument nodes.
+      var typeArguments = ResolveTypeArguments(typeTagNode.Arguments, resolutionContextEntity);
 
       // If N is the identifier global, then the global namespace is searched for I:
       if (qualifier == globalNamespace.Name)
@@ -791,9 +770,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // ... then the qualified-alias-member refers to that type.
           // ... then the qualified-alias-member refers to that type constructed with the given type arguments. 
-          //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-          //  --> Here we just return the resolved generic type definition entity.
-          return typeEntity;
+          return GetConstructedTypeEntity(typeEntity, typeArguments); ;
         }
 
         // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.
@@ -851,9 +828,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           {
             // ... then the qualified-alias-member refers to that type.
             // ... then the qualified-alias-member refers to that type constructed with the given type arguments.
-            //  --> Constructed generic type creation is handled in TypeNodeBasedTypeEntityReference class.
-            //  --> Here we just return the resolved generic type definition entity.
-            return childTypeEntity;
+            return GetConstructedTypeEntity(childTypeEntity, typeArguments); ;
           }
 
           // Otherwise, the qualified-alias-member is undefined and a compile-time error occurs.

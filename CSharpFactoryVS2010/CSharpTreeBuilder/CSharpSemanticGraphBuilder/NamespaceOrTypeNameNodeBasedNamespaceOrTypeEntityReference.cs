@@ -29,14 +29,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Implements the resolution logic.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override NamespaceOrTypeEntity GetResolvedEntity(
-      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    protected override NamespaceOrTypeEntity GetResolvedEntity(SemanticEntity context, ICompilationErrorHandler errorHandler)
     {
-      var namespaceOrTypeNameResolver = new NamespaceOrTypeNameResolver(errorHandler, semanticGraph);
+      var namespaceOrTypeNameResolver = new NamespaceOrTypeNameResolver(errorHandler, context.SemanticGraph);
       return namespaceOrTypeNameResolver.ResolveToNamespaceOrTypeEntity(SyntaxNode, context);
     }
   }

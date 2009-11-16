@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// This class creates semantic entities from metadata read from referenced assemblies.
   /// </summary>
   // ================================================================================================
-  public class MetadataImporterSemanticEntityFactory
+  public sealed class MetadataImporterSemanticEntityFactory
   {
     /// <summary>
     /// Error handler object used for reporting compilation messages.
@@ -199,10 +199,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           var genericEntity = typeEntity as GenericCapableTypeEntity;
           
-          var parentTypeParameterCount = (type.DeclaringType == null) 
-            ? 0 
-            : type.DeclaringType.GetGenericArguments().Count();
-
           foreach (var typeParameter in type.GetGenericArguments())
           {
             // Inherited type parameters need special treatment.
@@ -243,7 +239,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The first definition of the specified reflected type parameter. 
     /// The same as the input parameter if the type parameter is not inherited.</returns>
     // ----------------------------------------------------------------------------------------------
-    private Type GetOriginalDefinitionOfReflectedTypeParameter(Type typeParameter)
+    private static Type GetOriginalDefinitionOfReflectedTypeParameter(Type typeParameter)
     {
       // The type that declares this type parameter is the generic type that we start with.
       var genericType = typeParameter.DeclaringType;

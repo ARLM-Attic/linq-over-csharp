@@ -92,10 +92,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       foreach (var member in template.Members)
       {
         // The template member can introduce new type parameters, 
-        // so we have to combine the template member's TypeParameterMap with the current typeParameterMap's arguments.
-        var newTypeParameterMap = new TypeParameterMap(member.TypeParameterMap, typeParameterMap.TypeArguments);
-       
-        AddMember((IMemberEntity)member.GetConstructedEntity(newTypeParameterMap));
+        // so we have to combine the template member's TypeParameterMap with the current typeParameterMap.
+        var newTypeParameterMap = member.TypeParameterMap.MapTypeArguments(typeParameterMap);
+
+        AddMember((IMemberEntity)member.GetGenericClone(newTypeParameterMap));
       }
       
       // ArrayTypes should not be cloned.
@@ -389,11 +389,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// an unbound generic type can be referenced is the typeof expression.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public virtual bool IsUnbound
+    public virtual bool IsUnboundGeneric
     {
       get 
-      { 
-        return !IsConstructed; 
+      {
+        return false;
       }
     }
 
@@ -413,8 +413,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual bool IsOpen
     {
       get 
-      { 
-        return IsConstructed && TypeParameterMap.TypeArguments.Any(type => type == null || type.IsOpen); 
+      {
+        return false;
       }
     }
 
@@ -933,6 +933,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       MetadataImporterFactory.ImportMembersIntoSemanticGraph(ReflectedMetadata as Type, this);
 
       _ReflectedMembersImported = true;
+
+      if (SemanticGraph.BuildState >= SemanticGraphBuildState.TypeBodiesResolved)
+      {
+        AcceptVisitor(SemanticGraph.TypeResolverPass2SemanticGraphVisitor);
+      }
     }
 
     #endregion

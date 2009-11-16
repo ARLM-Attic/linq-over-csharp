@@ -23,7 +23,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void GetEnclosingType_ForNamespace()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var ns = new NamespaceEntity("A");
       semanticGraph.GlobalNamespace.AddChildNamespace(ns);
 
@@ -38,7 +38,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void GetEnclosingType_ForType()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
 
@@ -53,7 +53,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void GetEnclosingType_ForField()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
       var field = new FieldEntity(true, null, false, null, "Field", null);
@@ -70,7 +70,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void IsInTypeDeclarationBody_ForNamespace()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var ns = new NamespaceEntity("A");
       semanticGraph.GlobalNamespace.AddChildNamespace(ns);
 
@@ -85,7 +85,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void IsInTypeDeclarationBody_ForUsingNamespace()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var ns = new NamespaceEntity("A");
       semanticGraph.GlobalNamespace.AddChildNamespace(ns);
       var usingNamespace = new UsingNamespaceEntity(SourceRegion.GetDummy(), NamespaceOrTypeNameNode.CreateFromDottedName("a"));
@@ -102,7 +102,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void IsInTypeDeclarationBody_ForType()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
 
@@ -117,7 +117,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void IsInTypeDeclarationBody_ForField()
     {
-      var semanticGraph = new SemanticGraph();
+      var semanticGraph = new SemanticGraph(null);
       var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
       var field = new FieldEntity(true, null, false, null, "Field", null);

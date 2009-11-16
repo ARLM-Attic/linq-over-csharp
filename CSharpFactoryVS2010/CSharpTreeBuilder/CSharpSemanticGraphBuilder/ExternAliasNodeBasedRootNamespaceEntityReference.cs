@@ -28,20 +28,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Implements the resolution logic.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override RootNamespaceEntity GetResolvedEntity(
-      ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    protected override RootNamespaceEntity GetResolvedEntity(SemanticEntity context, ICompilationErrorHandler errorHandler)
     {
-      if (SyntaxNode.Identifier == semanticGraph.GlobalNamespace.Name)
+      if (SyntaxNode.Identifier == context.SemanticGraph.GlobalNamespace.Name)
       {
         errorHandler.Error("CS1681", SyntaxNode.IdentifierToken, "You cannot redefine the global extern alias");
         return null;
       }
 
-      var rootNamespace = semanticGraph.GetRootNamespaceByName(SyntaxNode.Identifier);
+      var rootNamespace = context.SemanticGraph.GetRootNamespaceByName(SyntaxNode.Identifier);
       if (rootNamespace != null)
       {
         return rootNamespace;
@@ -51,9 +49,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
                          "The extern alias '{0}' was not specified in a /reference option", SyntaxNode.Identifier);
       return null;
     }
-
-    #region Private methods
-
-    #endregion
   }
 }

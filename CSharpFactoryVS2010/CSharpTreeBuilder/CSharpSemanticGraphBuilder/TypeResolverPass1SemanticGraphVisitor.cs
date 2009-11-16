@@ -41,7 +41,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException("UsingNamespaceEntity.Parent should not be null.");
       }
 
-      entity.RootNamespaceReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      entity.RootNamespaceReference.Resolve(entity, _ErrorHandler);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException("UsingNamespaceEntity.Parent should not be null.");
       }
 
-      entity.NamespaceReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      entity.NamespaceReference.Resolve(entity, _ErrorHandler);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         throw new ApplicationException("UsingAliasEntity.Parent should not be null.");
       }
 
-      entity.NamespaceOrTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+      entity.NamespaceOrTypeReference.Resolve(entity, _ErrorHandler);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve return type
       if (entity.ReturnTypeReference != null)
       {
-        entity.ReturnTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        entity.ReturnTypeReference.Resolve(entity, _ErrorHandler);
       }
     }
 
@@ -139,7 +139,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve underlying type
       if (entity.UnderlyingTypeReference != null)
       {
-        entity.UnderlyingTypeReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        entity.UnderlyingTypeReference.Resolve(entity, _ErrorHandler);
 
         // Check the underlying type if it is legal
         if (entity.UnderlyingType != null)
@@ -169,7 +169,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve all base type references
       foreach (var typeEntityReference in entity.BaseTypeReferences)
       {
-        typeEntityReference.Resolve(entity, _SemanticGraph, _ErrorHandler);
+        typeEntityReference.Resolve(entity, _ErrorHandler);
       }
 
       // If it's a partial type then there may be duplicates in the base type list that has to be eliminated

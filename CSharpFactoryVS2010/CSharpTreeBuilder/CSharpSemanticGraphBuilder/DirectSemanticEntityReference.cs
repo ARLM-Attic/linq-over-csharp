@@ -28,11 +28,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Dummy implementation, because this kind of reference don't need resolution.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
     /// <param name="errorHandler">An object for error and warning reporting.</param>
     /// <returns>Always null.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override TTargetEntity GetResolvedEntity(ISemanticEntity context, SemanticGraph semanticGraph, ICompilationErrorHandler errorHandler)
+    protected override TTargetEntity GetResolvedEntity(SemanticEntity context, ICompilationErrorHandler errorHandler)
     {
       return null;
     }

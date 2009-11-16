@@ -227,6 +227,10 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MethodGroupExpressionResult.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\NamespaceExpressionResult.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SemanticGraphBuildState.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\TypeExpressionResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\StaticMemberExpectedException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookupResult.cs" />
