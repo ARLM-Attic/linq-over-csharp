@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Null if this member is not an explicitly implemented interface member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntityReference<TypeEntity> InterfaceReference { get; }
+    Resolver<TypeEntity> InterfaceReference { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

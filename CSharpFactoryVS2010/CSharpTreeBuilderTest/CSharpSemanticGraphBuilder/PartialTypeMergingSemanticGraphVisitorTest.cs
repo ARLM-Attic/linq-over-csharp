@@ -56,11 +56,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // Base type references should be merged
       var baseTypeRefs = classEntity.BaseTypeReferences.ToList();
       baseTypeRefs.Count.ShouldEqual(5);
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[0]).SyntaxNode.TypeName.ToString().ShouldEqual("B");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[1]).SyntaxNode.TypeName.ToString().ShouldEqual("I1");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[2]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[3]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
-      ((TypeNodeBasedTypeEntityReference)baseTypeRefs[4]).SyntaxNode.TypeName.ToString().ShouldEqual("I3");
+      ((TypeNodeToTypeEntityResolver)baseTypeRefs[0]).SyntaxNode.TypeName.ToString().ShouldEqual("B");
+      ((TypeNodeToTypeEntityResolver)baseTypeRefs[1]).SyntaxNode.TypeName.ToString().ShouldEqual("I1");
+      ((TypeNodeToTypeEntityResolver)baseTypeRefs[2]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
+      ((TypeNodeToTypeEntityResolver)baseTypeRefs[3]).SyntaxNode.TypeName.ToString().ShouldEqual("I2");
+      ((TypeNodeToTypeEntityResolver)baseTypeRefs[4]).SyntaxNode.TypeName.ToString().ShouldEqual("I3");
 
       // Members should be merged
       var members = classEntity.Members.ToList();

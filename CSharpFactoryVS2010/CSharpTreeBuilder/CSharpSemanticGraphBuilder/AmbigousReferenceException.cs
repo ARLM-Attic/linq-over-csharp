@@ -5,7 +5,7 @@
   /// This exception is raised when a namespace-or-type-name is found in more than one imported namespaces.
   /// </summary>
   // ================================================================================================
-  public sealed class AmbigousReferenceException : NamespaceOrTypeNameResolverException
+  public sealed class AmbigousReferenceException : NamespaceOrTypeNameNodeResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

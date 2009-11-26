@@ -16,31 +16,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>
     /// Initializes a new instance of the <see cref="SimpleNameExpressionEntity"/> class.
     /// </summary>
-    /// <param name="simpleNameNode">A simple name AST node.</param>
+    /// <param name="simpleNameResolver">A simple name resolver object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameExpressionEntity(SimpleNameNode simpleNameNode)
+    public SimpleNameExpressionEntity(SimpleNameNodeToExpressionResultResolver simpleNameResolver)
     {
-      if (simpleNameNode == null)
+      if (simpleNameResolver == null)
       {
-        throw new ArgumentNullException("simpleNameNode");
+        throw new ArgumentNullException("simpleNameResolver");
       }
 
-      SimpleNameNode = simpleNameNode;
+      SimpleNameResolver = simpleNameResolver;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the simple name AST node.
+    /// Gets or sets the simple name resolver object.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameNode SimpleNameNode { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the result of the simple name resolution.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SimpleNameResult SimpleNameResult { get; private set; }
+    public SimpleNameNodeToExpressionResultResolver SimpleNameResolver { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -51,39 +44,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
       // First resolve the simple name
-      
-      if (SimpleNameNode != null)
+
+      if (SimpleNameResolver != null)
       {
-        var simpleNameResolver = new SimpleNameResolver(errorHandler, SemanticGraph);
-        SimpleNameResult = simpleNameResolver.Resolve(SimpleNameNode, this);
+        ExpressionResult = SimpleNameResolver.Resolve(this, errorHandler);
       }
       
-      // Then determine the expression result
-
-      if (SimpleNameResult != null)
-      {
-        if (SimpleNameResult.IsMethodGroup)
-        {
-          ExpressionResult = new MethodGroupExpressionResult(SimpleNameResult.MethodGroup);
-        }
-
-        // TODO: separate variable and value result
-
-        else if (SimpleNameResult.SingleEntity is IVariableEntity)
-        {
-          ExpressionResult = new VariableExpressionResult(SimpleNameResult.SingleEntity as IVariableEntity);
-        }
-        else if (SimpleNameResult.SingleEntity is TypeEntity)
-        {
-          ExpressionResult = new TypeExpressionResult(SimpleNameResult.SingleEntity as TypeEntity);
-        }
-        else if (SimpleNameResult.SingleEntity is NamespaceEntity)
-        {
-          ExpressionResult = new NamespaceExpressionResult(SimpleNameResult.SingleEntity as NamespaceEntity);
-        }
-
-        // TODO
-      }
+      // TODO
     }
 
     #region Visitor methods

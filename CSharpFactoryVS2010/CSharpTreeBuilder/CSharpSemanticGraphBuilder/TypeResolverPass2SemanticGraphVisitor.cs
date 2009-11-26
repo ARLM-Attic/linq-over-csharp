@@ -55,8 +55,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
-          var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
-                             ? ((TypeNodeBasedTypeEntityReference)entity.TypeReference).SyntaxNode.StartToken
+          var errorPoint = entity.TypeReference is TypeNodeToTypeEntityResolver
+                             ? ((TypeNodeToTypeEntityResolver)entity.TypeReference).SyntaxNode.StartToken
                              : null;
 
           _ErrorHandler.Error("CS0670", errorPoint, "Field cannot have void type");
@@ -80,8 +80,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
       {
-        var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
-                           ? ((TypeNodeBasedTypeEntityReference)entity.TypeReference).SyntaxNode.StartToken
+        var errorPoint = entity.TypeReference is TypeNodeToTypeEntityResolver
+                           ? ((TypeNodeToTypeEntityResolver)entity.TypeReference).SyntaxNode.StartToken
                            : null;
 
         _ErrorHandler.Error("CS1547", errorPoint, "Keyword 'void' cannot be used in this context");
@@ -102,8 +102,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
-          var errorPoint = entity.TypeReference is TypeNodeBasedTypeEntityReference
-                             ? ((TypeNodeBasedTypeEntityReference)entity.TypeReference).SyntaxNode.StartToken
+          var errorPoint = entity.TypeReference is TypeNodeToTypeEntityResolver
+                             ? ((TypeNodeToTypeEntityResolver)entity.TypeReference).SyntaxNode.StartToken
                              : null;
 
           _ErrorHandler.Error("CS0547", errorPoint, "'{0}': property or indexer cannot have void type", entity.Name);

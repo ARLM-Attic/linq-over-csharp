@@ -58,11 +58,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // public A<int> b;
       var fieldB = classB.GetMember<FieldEntity>("b");
-      fieldB.TypeReference.TargetEntity.ToString().ShouldEqual("global::A`1[global::System.Int32]");
+      fieldB.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::System.Int32]");
 
       // Constructed type: A<int>
       var constructedA = fieldB.Type;
-      constructedA.ShouldEqual(fieldB.TypeReference.TargetEntity);
+      constructedA.ShouldEqual(fieldB.TypeReference.Target);
       constructedA.IsGeneric.ShouldBeTrue();
       constructedA.IsUnboundGeneric.ShouldBeFalse();
       constructedA.IsOpen.ShouldBeFalse();
@@ -83,14 +83,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         tpmComparer.Equals(field.TypeParameterMap, constructedA.TypeParameterMap).ShouldBeTrue();
         field.TypeParameterMap.ShouldNotEqual(constructedA.TypeParameterMap);
         // The type of the field is resolved to T1 ...
-        field.TypeReference.TargetEntity.ToString().ShouldEqual("global::A`1.T1");
+        field.TypeReference.Target.ToString().ShouldEqual("global::A`1.T1");
         // ... but it returns the mapped type parameter: T1 -> int
         field.Type.ToString().ShouldEqual("global::System.Int32");
       }
       // A<int> --> public T1[] a2;
       {
         var field = constructedA.GetMember<FieldEntity>("a2");
-        var templateType = field.TypeReference.TargetEntity;
+        var templateType = field.TypeReference.Target;
         templateType.ToString().ShouldEqual("global::A`1.T1[]");
         templateType.IsGeneric.ShouldBeFalse();
         templateType.IsUnboundGeneric.ShouldBeFalse();
@@ -106,7 +106,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // A<int> --> public A<T1> a3;
       {
         var field = constructedA.GetMember<FieldEntity>("a3");
-        var templateType = field.TypeReference.TargetEntity;
+        var templateType = field.TypeReference.Target;
         templateType.ToString().ShouldEqual("global::A`1[global::A`1.T1]");
         templateType.IsGeneric.ShouldBeTrue();
         templateType.IsUnboundGeneric.ShouldBeFalse();
@@ -126,14 +126,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // A<int> --> public A<T1[]> a4;
       {
         var field = constructedA.GetMember<FieldEntity>("a4");
-        field.TypeReference.TargetEntity.ToString().ShouldEqual("global::A`1[global::A`1.T1[]]");
+        field.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::A`1.T1[]]");
         field.Type.ToString().ShouldEqual("global::A`1[global::System.Int32[]]");
       }
       // A<int> --> public A<A<T1>> a5;
       {
         var field = constructedA.GetMember<FieldEntity>("a5");
-        field.TypeReference.TargetEntity.ToString().ShouldEqual("global::A`1[global::A`1[global::A`1.T1]]");
-        field.TypeReference.TargetEntity.IsOpen.ShouldBeTrue();
+        field.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::A`1[global::A`1.T1]]");
+        field.TypeReference.Target.IsOpen.ShouldBeTrue();
         field.Type.ToString().ShouldEqual("global::A`1[global::A`1[global::System.Int32]]");
         field.Type.IsOpen.ShouldBeFalse();
       }

@@ -69,7 +69,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var typeParameterEntity = new TypeParameterEntity("A");
       var classEntity = new ClassEntity(null, "A");
       classEntity.AddTypeParameter(typeParameterEntity);
-      var typeRef = new DirectSemanticEntityReference<TypeEntity>(classEntity);
+      var typeRef = new DummyResolver<TypeEntity>(classEntity);
       var methodEntity = new MethodEntity(true, null, false, false, typeRef, null, "A", true);
       var parameterEntity = new ParameterEntity("a", typeRef, ParameterKind.Value);
       methodEntity.AddTypeParameter(typeParameterEntity);
@@ -128,7 +128,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var declarationSpace = new DeclarationSpace();
 
-      var typeRef = new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "A"));
+      var typeRef = new DummyResolver<TypeEntity>(new ClassEntity(null, "A"));
       var methodEntity = new MethodEntity(true, null, false, false, typeRef, null, "A", true);
       methodEntity.AddTypeParameter(new TypeParameterEntity("T"));
       methodEntity.AddParameter(new ParameterEntity("a", typeRef, ParameterKind.Reference));

@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Gets or sets the reference to the type of the field.</summary>
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public Resolver<TypeEntity> TypeReference { get; private set; }
 
     /// <summary>Gets the initializer of the variable.</summary>
     public VariableInitializer Initializer { get; private set; }
@@ -35,7 +35,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       bool isStatic,
-      SemanticEntityReference<TypeEntity> type,
+      Resolver<TypeEntity> type,
       string name, 
       VariableInitializer initializer)
       : 
@@ -91,8 +91,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        return TypeReference != null && TypeReference.TargetEntity != null
-          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return TypeReference != null && TypeReference.Target != null
+          ? TypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }

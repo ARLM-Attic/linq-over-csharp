@@ -273,7 +273,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         classD.ChildTypes.Count().ShouldEqual(0);
 
         classD.BaseTypeReferences.Count().ShouldEqual(1);
-        ((TypeNodeBasedTypeEntityReference)classD.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("A");
+        ((TypeNodeToTypeEntityResolver)classD.BaseTypeReferences.ToArray()[0]).SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("A");
       }
 
       var classCounter = 1;
@@ -350,7 +350,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         
         enumEntity.BaseTypeReferences.ToList().Count.ShouldEqual(0);
         enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeNodeBasedTypeEntityReference)enumEntity.UnderlyingTypeReference).SyntaxNode.ShouldEqual(
+        ((TypeNodeToTypeEntityResolver)enumEntity.UnderlyingTypeReference).SyntaxNode.ShouldEqual(
           ((EnumDeclarationNode)project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0]).EnumBase);
       }
 
@@ -360,7 +360,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         enumEntity.Name.ShouldEqual("C");
 
         enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((ReflectedTypeBasedTypeEntityReference)enumEntity.UnderlyingTypeReference).Metadata.ShouldEqual(typeof(int));
+        ((ReflectedTypeToTypeEntityResolver)enumEntity.UnderlyingTypeReference).Metadata.ShouldEqual(typeof(int));
       }
     }
 
@@ -410,7 +410,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var baseTypes = structEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+        ((TypeNodeToTypeEntityResolver)baseTypes[0]).SyntaxNode.ShouldEqual(
           project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
       }
     }
@@ -461,7 +461,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var baseTypes = interfaceEntity.BaseTypeReferences.ToArray();
         baseTypes.Length.ShouldEqual(1);
         baseTypes[0].ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
-        ((TypeNodeBasedTypeEntityReference)baseTypes[0]).SyntaxNode.ShouldEqual(
+        ((TypeNodeToTypeEntityResolver)baseTypes[0]).SyntaxNode.ShouldEqual(
           project.SyntaxTree.CompilationUnitNodes[0].NamespaceDeclarations[0].TypeDeclarations[0].BaseTypes[0]);
       }
     }
@@ -1480,7 +1480,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(true);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(bool));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(bool));
         expression.Parent.ShouldEqual(initializer);
       }
       // decimal a2 = 2m;
@@ -1489,7 +1489,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(2m);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(decimal));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(decimal));
         expression.Parent.ShouldEqual(initializer);
       }
       // int a3 = 3;
@@ -1498,7 +1498,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(3);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(int));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(int));
         expression.Parent.ShouldEqual(initializer);
       }
       // uint a4 = 4u;
@@ -1507,7 +1507,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(4u);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(uint));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(uint));
         expression.Parent.ShouldEqual(initializer);
       }
       // long a5 = 5l;
@@ -1516,7 +1516,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(5L);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(long));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(long));
         expression.Parent.ShouldEqual(initializer);
       }
       // ulong a6 = 6ul;
@@ -1525,7 +1525,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(6ul);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(ulong));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(ulong));
         expression.Parent.ShouldEqual(initializer);
       }
       // char a7 = '7';
@@ -1534,7 +1534,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual('7');
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(char));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(char));
         expression.Parent.ShouldEqual(initializer);
       }
       // float a8 = 8f;
@@ -1543,7 +1543,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(8f);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(float));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(float));
         expression.Parent.ShouldEqual(initializer);
       }
       // double a9 = 9d;
@@ -1552,7 +1552,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual(9d);
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(double));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(double));
         expression.Parent.ShouldEqual(initializer);
       }
       // string a10 = "10";
@@ -1561,7 +1561,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var literal = expression as TypedLiteralExpressionEntity;
         literal.Value.ShouldEqual("10");
-        (literal.TypeReference as ReflectedTypeBasedTypeEntityReference).Metadata.ShouldEqual(typeof(string));
+        (literal.TypeReference as ReflectedTypeToTypeEntityResolver).Metadata.ShouldEqual(typeof(string));
         expression.Parent.ShouldEqual(initializer);
       }
     }
@@ -1591,7 +1591,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var simpleName = expression as SimpleNameExpressionEntity;
-        simpleName.SimpleNameNode.ShouldNotBeNull();
+        simpleName.SimpleNameResolver.ShouldNotBeNull();
+        simpleName.ExpressionResult.ShouldBeNull();
         expression.Parent.ShouldEqual(initializer);
       }
     }
@@ -1621,7 +1622,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var initializer = (members[i++] as FieldEntity).Initializer as ScalarInitializerEntity;
         var expression = initializer.Expression;
         var defaultValueExpressionEntity = expression as DefaultValueExpressionEntity;
-        var typeReference = defaultValueExpressionEntity.TypeReference as TypeNodeBasedTypeEntityReference;
+        var typeReference = defaultValueExpressionEntity.TypeReference as TypeNodeToTypeEntityResolver;
         typeReference.SyntaxNode.ToString().ShouldEqual("A");
         defaultValueExpressionEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.NotYetResolved);
         expression.Parent.ShouldEqual(initializer);

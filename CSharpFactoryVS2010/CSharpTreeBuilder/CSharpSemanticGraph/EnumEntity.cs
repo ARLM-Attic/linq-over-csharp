@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the reference to the underlying type of the enum.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> UnderlyingTypeReference { get; set; }
+    public Resolver<TypeEntity> UnderlyingTypeReference { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -37,8 +37,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return UnderlyingTypeReference != null && UnderlyingTypeReference.TargetEntity != null
-          ? UnderlyingTypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return UnderlyingTypeReference != null && UnderlyingTypeReference.Target != null
+          ? UnderlyingTypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }

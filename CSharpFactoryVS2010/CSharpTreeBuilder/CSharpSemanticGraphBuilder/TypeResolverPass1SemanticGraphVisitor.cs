@@ -146,8 +146,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           if (!CanBeEnumBase(entity.UnderlyingType))
           {
-            var errorPoint = entity.UnderlyingTypeReference is TypeNodeBasedTypeEntityReference
-                               ? ((TypeNodeBasedTypeEntityReference) entity.UnderlyingTypeReference).SyntaxNode.StartToken
+            var errorPoint = entity.UnderlyingTypeReference is TypeNodeToTypeEntityResolver
+                               ? ((TypeNodeToTypeEntityResolver) entity.UnderlyingTypeReference).SyntaxNode.StartToken
                                : null;
 
             _ErrorHandler.Error("CS1008", errorPoint, "Type byte, sbyte, short, ushort, int, uint, long, or ulong expect");

@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="name">The name of the member.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
     // ----------------------------------------------------------------------------------------------
-    public EnumMemberEntity(bool isDeclaredInSource, string name, SemanticEntityReference<TypeEntity> type)
+    public EnumMemberEntity(bool isDeclaredInSource, string name, Resolver<TypeEntity> type)
       : base(isDeclaredInSource, null, type, name)
     {
     }

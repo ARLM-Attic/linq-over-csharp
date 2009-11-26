@@ -46,8 +46,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       bool isStatic,
-      SemanticEntityReference<TypeEntity> typeReference,
-      SemanticEntityReference<TypeEntity> interfaceReference,
+      Resolver<TypeEntity> typeReference,
+      Resolver<TypeEntity> interfaceReference,
       string name, 
       bool isAutoImplemented)
       : 

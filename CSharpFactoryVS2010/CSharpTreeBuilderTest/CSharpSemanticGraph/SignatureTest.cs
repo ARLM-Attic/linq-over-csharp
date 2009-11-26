@@ -24,9 +24,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
     public void FullSignature()
     {
       var signature = new Signature("M", 1, new List<ParameterEntity>() 
-      { new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "A")), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "B")), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "C")), ParameterKind.Output)
+      { new ParameterEntity("a", new DummyResolver<TypeEntity>(new ClassEntity(null, "A")), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(new ClassEntity(null, "B")), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(new ClassEntity(null, "C")), ParameterKind.Output)
       });
       signature.Name.ShouldEqual("M");
       signature.TypeParameterCount.ShouldEqual(1);

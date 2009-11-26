@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="typeReference">A reference to a type entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public DefaultValueExpressionEntity(SemanticEntityReference<TypeEntity> typeReference)
+    public DefaultValueExpressionEntity(Resolver<TypeEntity> typeReference)
     {
       if (typeReference == null)
       {
@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to a type entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public Resolver<TypeEntity> TypeReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -43,8 +43,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.TargetEntity != null
-          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return TypeReference != null && TypeReference.Target != null
+          ? TypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }

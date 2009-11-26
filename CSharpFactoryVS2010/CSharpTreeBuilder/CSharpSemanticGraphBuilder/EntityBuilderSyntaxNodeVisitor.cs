@@ -287,12 +287,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Set the underlying type reference.
       if (node.EnumBase != null)
       {
-        enumEntity.UnderlyingTypeReference = new TypeNodeBasedTypeEntityReference(node.EnumBase);
+        enumEntity.UnderlyingTypeReference = new TypeNodeToTypeEntityResolver(node.EnumBase);
       }
       else
       {
         // If no explicit enum-base then int is assumed.
-        enumEntity.UnderlyingTypeReference = new ReflectedTypeBasedTypeEntityReference(typeof (int));
+        enumEntity.UnderlyingTypeReference = new ReflectedTypeToTypeEntityResolver(typeof (int));
       }
 
       return true;
@@ -324,7 +324,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Set the return type.
       if (node.Type != null)
       {
-        delegateEntity.ReturnTypeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+        delegateEntity.ReturnTypeReference = new TypeNodeToTypeEntityResolver(node.Type);
       }
       else
       {
@@ -349,7 +349,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       foreach (var fieldTag in node.FieldTags)
       {
         // Create a semantic entity and add to its parent.
-        var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+        var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
         var initializer = CreateInitializer(fieldTag.Initializer);
         var fieldEntity = new FieldEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
                                           typeReference, fieldTag.Identifier, initializer);
@@ -377,7 +377,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       foreach (var constTag in node.ConstTags)
       {
         // Create a semantic entity and add to its parent.
-        var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+        var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
         var constantEntity = new ConstantMemberEntity(true, GetAccessibility(node.Modifiers), typeReference,
                                                       constTag.Identifier);
         constantEntity.IsNew = IsNew(node.Modifiers);
@@ -428,9 +428,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // Create a semantic entity and add to its parent.
       var interfaceReference = node.InterfaceType != null
-                                 ? new NamespaceOrTypeNameNodeBasedTypeEntityReference(node.InterfaceType)
+                                 ? new NamespaceOrTypeNameNodeToTypeEntityResolver(node.InterfaceType)
                                  : null;
-      var typeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+      var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
       var propertyEntity = new PropertyEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
                                               typeReference, interfaceReference, node.Name, isAutoImplemented);
       propertyEntity.IsNew = IsNew(node.Modifiers);
@@ -462,10 +462,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       var parentEntity = GetParentEntity<TypeEntity>(node);
 
       var interfaceReference = node.InterfaceType != null
-                                 ? new NamespaceOrTypeNameNodeBasedTypeEntityReference(node.InterfaceType)
+                                 ? new NamespaceOrTypeNameNodeToTypeEntityResolver(node.InterfaceType)
                                  : null;
       var isAbstract = (node.Body == null);
-      var returnTypeReference = new TypeNodeBasedTypeEntityReference(node.Type);
+      var returnTypeReference = new TypeNodeToTypeEntityResolver(node.Type);
 
       var methodEntity = new MethodEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
                                           node.IsPartial, returnTypeReference, interfaceReference, node.Name, isAbstract);
@@ -505,52 +505,52 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
       else if (node is BooleanLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(bool)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(bool)),
           (node as BooleanLiteralNode).Value);
       }
       else if (node is DecimalLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(decimal)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(decimal)),
           (node as DecimalLiteralNode).Value);
       }
       else if (node is Int32LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(int)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(int)),
           (node as Int32LiteralNode).Value);
       }
       else if (node is UInt32LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(uint)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(uint)),
           (node as UInt32LiteralNode).Value);
       }
       else if (node is Int64LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(long)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(long)),
           (node as Int64LiteralNode).Value);
       }
       else if (node is UInt64LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(ulong)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(ulong)),
           (node as UInt64LiteralNode).Value);
       }
       else if (node is CharLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(char)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(char)),
           (node as CharLiteralNode).Value);
       }
       else if (node is SingleLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(float)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(float)),
           (node as SingleLiteralNode).Value);
       }
       else if (node is DoubleLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(double)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(double)),
           (node as DoubleLiteralNode).Value);
       }
       else if (node is StringLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeBasedTypeEntityReference(typeof(string)),
+        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(string)),
           (node as StringLiteralNode).Value);
       }
 
@@ -573,7 +573,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var parentEntity = GetParentEntity<SemanticEntity>(node);
 
-      var simpleNameEntity = new SimpleNameExpressionEntity(node);
+      var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeToExpressionResultResolver(node));
       
       var hasExpressions = CastToIHasExpressions(parentEntity);
       hasExpressions.AddExpression(simpleNameEntity);
@@ -594,7 +594,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var parentEntity = GetParentEntity<SemanticEntity>(node);
 
-      var defaultValueEntity = new DefaultValueExpressionEntity(new TypeNodeBasedTypeEntityReference(node.Type));
+      var defaultValueEntity = new DefaultValueExpressionEntity(new TypeNodeToTypeEntityResolver(node.Type));
 
       var hasExpressions = CastToIHasExpressions(parentEntity);
       hasExpressions.AddExpression(defaultValueEntity);
@@ -799,7 +799,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       foreach (var baseType in typeNode.BaseTypes)
       {
-        typeEntity.AddBaseTypeReference(new TypeNodeBasedTypeEntityReference(baseType));
+        typeEntity.AddBaseTypeReference(new TypeNodeToTypeEntityResolver(baseType));
       }
     }
 
@@ -842,7 +842,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
             if (constraintTag.IsTypeName)
             {
-              typeParameterEntity.AddTypeReferenceConstraint(new TypeNodeBasedTypeEntityReference(constraintTag.Type));
+              typeParameterEntity.AddTypeReferenceConstraint(new TypeNodeToTypeEntityResolver(constraintTag.Type));
             }
           }
         }
@@ -861,7 +861,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       foreach (var parameter in parameterNodes)
       {
-        var typeReference = new TypeNodeBasedTypeEntityReference(parameter.Type);
+        var typeReference = new TypeNodeToTypeEntityResolver(parameter.Type);
 
         var parameterKind = ParameterKind.Value;
         switch (parameter.Modifier)

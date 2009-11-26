@@ -5,7 +5,7 @@
   /// This exception is raised when an alias name conflicts with a name declared in a namespace.
   /// </summary>
   // ================================================================================================
-  public sealed class AliasNameConflictException : NamespaceOrTypeNameResolverException
+  public sealed class AliasNameConflictException : NamespaceOrTypeNameNodeResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

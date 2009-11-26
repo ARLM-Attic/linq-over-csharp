@@ -24,8 +24,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var signature = new Signature("M",1,new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "A")), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(new ClassEntity(null, "B")), ParameterKind.Reference)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(new ClassEntity(null, "A")), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(new ClassEntity(null, "B")), ParameterKind.Reference)
       });
       var comparer = new SignatureEqualityComparerForDeclarationSpace();
       comparer.Equals(signature, signature).ShouldBeTrue();
@@ -41,8 +41,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     {
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new ReflectedTypeBasedTypeEntityReference(typeof(int)), ParameterKind.Value),
-        new ParameterEntity("b", new ReflectedTypeBasedTypeEntityReference(typeof(long)), ParameterKind.Reference)
+        new ParameterEntity("a", new ReflectedTypeToTypeEntityResolver(typeof(int)), ParameterKind.Value),
+        new ParameterEntity("b", new ReflectedTypeToTypeEntityResolver(typeof(long)), ParameterKind.Reference)
       });
       var comparer = new SignatureEqualityComparerForDeclarationSpace();
       comparer.Equals(signature, signature).ShouldBeFalse();
@@ -62,16 +62,16 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Output)
       });
 
       var signature2 = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Output)
       });
 
       var comparer = new SignatureEqualityComparerForDeclarationSpace();
@@ -135,7 +135,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
       });
 
       var signature2 = new Signature("M", 1, new List<ParameterEntity>()); 
@@ -158,16 +158,16 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Output)
       });
 
       var signature2 = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Output),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Reference)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Output),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Reference)
       });
 
       var comparer = new SignatureEqualityComparerForDeclarationSpace();
@@ -186,12 +186,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value)
       });
 
       var signature2 = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Output)
       });
 
       var comparer = new SignatureEqualityComparerForDeclarationSpace();

@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="type">The type of the variable (a type entity reference).</param>
     /// <param name="isConstant">A value indicating whether this is a constant.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableEntity(string name, SemanticEntityReference<TypeEntity> type, bool isConstant)
+    public LocalVariableEntity(string name, Resolver<TypeEntity> type, bool isConstant)
       : base (name, type, null)
     {
       IsConstant = isConstant;

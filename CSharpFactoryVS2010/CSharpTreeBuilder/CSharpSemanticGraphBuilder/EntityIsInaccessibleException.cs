@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// that is inaccessible due to its protection level.
   /// </summary>
   // ================================================================================================
-  public sealed class EntityIsInaccessibleException : NamespaceOrTypeNameResolverException
+  public sealed class EntityIsInaccessibleException : NamespaceOrTypeNameNodeResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Gets or sets the reference to the return type.</summary>
-    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; set; }
+    public Resolver<TypeEntity> ReturnTypeReference { get; set; }
 
     #endregion
    
@@ -65,8 +65,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return ReturnTypeReference != null && ReturnTypeReference.TargetEntity != null
-          ? ReturnTypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return ReturnTypeReference != null && ReturnTypeReference.Target != null
+          ? ReturnTypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }

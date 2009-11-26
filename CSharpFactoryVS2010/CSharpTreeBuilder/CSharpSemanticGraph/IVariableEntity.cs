@@ -20,7 +20,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the type reference of the variable.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    SemanticEntityReference<TypeEntity> TypeReference { get; }
+    Resolver<TypeEntity> TypeReference { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

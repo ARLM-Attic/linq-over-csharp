@@ -5,7 +5,7 @@
   /// This exception is raised when a qualifier references a type instead of a namespace.
   /// </summary>
   // ================================================================================================
-  public sealed class QualifierRefersToType : NamespaceOrTypeNameResolverException
+  public sealed class QualifierRefersToType : NamespaceOrTypeNameNodeResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

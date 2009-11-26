@@ -23,7 +23,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void Reflective()
     {
-      var reference = new DirectSemanticEntityReference<NamespaceEntity>(new NamespaceEntity("A"));
+      var reference = new DummyResolver<NamespaceEntity>(new NamespaceEntity("A"));
       var comparer = new SemanticEntityReferenceEqualityComparer<NamespaceEntity>();
       comparer.Equals(reference, reference).ShouldBeTrue();
     }
@@ -36,8 +36,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void DifferentTargetEntities()
     {
-      var reference1 = new DirectSemanticEntityReference<NamespaceEntity>(new NamespaceEntity("A"));
-      var reference2 = new DirectSemanticEntityReference<NamespaceEntity>(new NamespaceEntity("B"));
+      var reference1 = new DummyResolver<NamespaceEntity>(new NamespaceEntity("A"));
+      var reference2 = new DummyResolver<NamespaceEntity>(new NamespaceEntity("B"));
       var comparer = new SemanticEntityReferenceEqualityComparer<NamespaceEntity>();
       comparer.Equals(reference1, reference2).ShouldBeFalse();
     }
@@ -51,8 +51,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     public void SameTargetEntities()
     {
       var namespaceEntity = new NamespaceEntity("A");
-      var reference1 = new DirectSemanticEntityReference<NamespaceEntity>(namespaceEntity);
-      var reference2 = new DirectSemanticEntityReference<NamespaceEntity>(namespaceEntity);
+      var reference1 = new DummyResolver<NamespaceEntity>(namespaceEntity);
+      var reference2 = new DummyResolver<NamespaceEntity>(namespaceEntity);
       var comparer = new SemanticEntityReferenceEqualityComparer<NamespaceEntity>();
       comparer.Equals(reference1, reference2).ShouldBeTrue();
     }
@@ -65,7 +65,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     [TestMethod]
     public void NullTargetEntities()
     {
-      var reference = new DirectSemanticEntityReference<NamespaceEntity>(null);
+      var reference = new DummyResolver<NamespaceEntity>(null);
       var comparer = new SemanticEntityReferenceEqualityComparer<NamespaceEntity>();
       comparer.Equals(reference, reference).ShouldBeFalse();
     }

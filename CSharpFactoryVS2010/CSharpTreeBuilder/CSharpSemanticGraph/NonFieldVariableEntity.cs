@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public string Name { get; private set; }
 
     /// <summary>Gets the type reference of the variable.</summary>
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public Resolver<TypeEntity> TypeReference { get; private set; }
 
     /// <summary>Gets the initializer of the variable.</summary>
     public VariableInitializer Initializer { get; private set; }
@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     protected NonFieldVariableEntity(
       string name, 
-      SemanticEntityReference<TypeEntity> typeReference, 
+      Resolver<TypeEntity> typeReference, 
       VariableInitializer initializer)
     {
       if (name == null)
@@ -90,8 +90,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.TargetEntity != null
-          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return TypeReference != null && TypeReference.Target != null
+          ? TypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }

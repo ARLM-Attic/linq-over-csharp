@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// This exception is raised when a static member was expected but an instance member was detected.
   /// </summary>
   // ================================================================================================
-  public sealed class StaticMemberExpectedException : NamespaceOrTypeNameResolverException
+  public sealed class StaticMemberExpectedException : NamespaceOrTypeNameNodeResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

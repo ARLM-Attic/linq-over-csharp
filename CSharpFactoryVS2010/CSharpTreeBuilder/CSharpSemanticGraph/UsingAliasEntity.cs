@@ -32,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       Alias = alias;
-      NamespaceOrTypeReference = new NamespaceOrTypeNameNodeBasedNamespaceOrTypeEntityReference(namespaceorTypeName);
+      NamespaceOrTypeReference = new NamespaceOrTypeNameNodeToNamespaceOrTypeEntityResolver(namespaceorTypeName);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to the aliased namespace or type entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeNameNodeBasedNamespaceOrTypeEntityReference NamespaceOrTypeReference { get; private set; }
+    public NamespaceOrTypeNameNodeToNamespaceOrTypeEntityResolver NamespaceOrTypeReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -58,7 +58,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return NamespaceOrTypeReference.TargetEntity as NamespaceEntity;
+        return NamespaceOrTypeReference.Target as NamespaceEntity;
       }
     }
 
@@ -71,7 +71,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return NamespaceOrTypeReference.TargetEntity as TypeEntity;
+        return NamespaceOrTypeReference.Target as TypeEntity;
       }
     }
 

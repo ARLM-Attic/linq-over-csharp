@@ -17,7 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Backing field for BaseTypeReferences property.</summary>
-    private List<SemanticEntityReference<TypeEntity>> _BaseTypeReferences = new List<SemanticEntityReference<TypeEntity>>();
+    private List<Resolver<TypeEntity>> _BaseTypeReferences = new List<Resolver<TypeEntity>>();
 
     /// <summary>Backing field for Members property.</summary>
     private readonly List<IMemberEntity> _Members = new List<IMemberEntity>();
@@ -423,7 +423,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of base types.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual IEnumerable<SemanticEntityReference<TypeEntity>> BaseTypeReferences
+    public virtual IEnumerable<Resolver<TypeEntity>> BaseTypeReferences
     {
       get { return _BaseTypeReferences; }
     }
@@ -434,7 +434,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="typeEntityReference">A type entity reference.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddBaseTypeReference(SemanticEntityReference<TypeEntity> typeEntityReference)
+    public void AddBaseTypeReference(Resolver<TypeEntity> typeEntityReference)
     {
       _BaseTypeReferences.Add(typeEntityReference);
     }
@@ -469,8 +469,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         var baseTypes = (from baseType in BaseTypeReferences
                          where
                            baseType.ResolutionState == ResolutionState.Resolved &&
-                           baseType.TargetEntity is ClassEntity
-                         select baseType.TargetEntity as ClassEntity).ToList();
+                           baseType.Target is ClassEntity
+                         select baseType.Target as ClassEntity).ToList();
         
         if (baseTypes.Count == 1)
         { 
@@ -517,8 +517,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return (from baseType in BaseTypeReferences
                 where
                   baseType.ResolutionState == ResolutionState.Resolved &&
-                  baseType.TargetEntity is ClassEntity
-                select baseType.TargetEntity).Count();
+                  baseType.Target is ClassEntity
+                select baseType.Target).Count();
       }
     }
 
@@ -536,8 +536,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return (from baseType in BaseTypeReferences
-                where baseType.ResolutionState == ResolutionState.Resolved && baseType.TargetEntity is InterfaceEntity
-                select baseType.TargetEntity.GetMappedType(TypeParameterMap) as InterfaceEntity).ToList().AsReadOnly();
+                where baseType.ResolutionState == ResolutionState.Resolved && baseType.Target is InterfaceEntity
+                select baseType.Target.GetMappedType(TypeParameterMap) as InterfaceEntity).ToList().AsReadOnly();
       }
     }
 
@@ -664,7 +664,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         foreach (var parameterFilter in parameterFilters)
         {
-          var typeReference = new DirectSemanticEntityReference<TypeEntity>(parameterFilter.Type);
+          var typeReference = new DummyResolver<TypeEntity>(parameterFilter.Type);
           parameters.Add(new ParameterEntity("irrelevant name", typeReference, parameterFilter.Kind));
         }
       }

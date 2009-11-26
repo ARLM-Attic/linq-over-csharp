@@ -85,8 +85,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       for (int i = 0; i < xList.Count; i++)
       {
         if (xList[i].TypeReference == null || yList[i].TypeReference == null
-          || xList[i].TypeReference.TargetEntity == null || yList[i].TypeReference.TargetEntity == null
-          || xList[i].TypeReference.TargetEntity != yList[i].TypeReference.TargetEntity
+          || xList[i].TypeReference.Target == null || yList[i].TypeReference.Target == null
+          || xList[i].TypeReference.Target != yList[i].TypeReference.Target
           || 
             (
               (xList[i].Kind == ParameterKind.Output ? ParameterKind.Reference : xList[i].Kind) 

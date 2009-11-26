@@ -82,7 +82,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
     #region Private methods
 
-    private static void CheckReference<T>(SemanticEntityReference<T> reference)
+    private static void CheckReference<T>(Resolver<T> reference)
       where T : SemanticEntity
     {
       if (reference != null)

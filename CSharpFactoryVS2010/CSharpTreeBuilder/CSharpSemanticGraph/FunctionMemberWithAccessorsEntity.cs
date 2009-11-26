@@ -13,13 +13,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Gets the reference to the type of the member.</summary>
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public Resolver<TypeEntity> TypeReference { get; private set; }
 
     /// <summary>
     /// Gets the reference to the interface entity whose member is explicitly implemented.
     /// Null if this member is not an explicitly implemented interface member.
     /// </summary>
-    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
+    public Resolver<TypeEntity> InterfaceReference { get; private set; }
 
     #endregion
 
@@ -39,8 +39,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected FunctionMemberWithAccessorsEntity(
       bool isDeclaredInSource,
       AccessibilityKind? accessibility,
-      SemanticEntityReference<TypeEntity> typeReference,
-      SemanticEntityReference<TypeEntity> interfaceReference,
+      Resolver<TypeEntity> typeReference,
+      Resolver<TypeEntity> interfaceReference,
       string name)
       :
       base(isDeclaredInSource, accessibility, name)
@@ -73,8 +73,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.TargetEntity != null
-          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return TypeReference != null && TypeReference.Target != null
+          ? TypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }
@@ -110,8 +110,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        return InterfaceReference != null && InterfaceReference.TargetEntity != null
-          ? InterfaceReference.TargetEntity.GetMappedType(TypeParameterMap) as InterfaceEntity
+        return InterfaceReference != null && InterfaceReference.Target != null
+          ? InterfaceReference.Target.GetMappedType(TypeParameterMap) as InterfaceEntity
           : null;
       }
     }

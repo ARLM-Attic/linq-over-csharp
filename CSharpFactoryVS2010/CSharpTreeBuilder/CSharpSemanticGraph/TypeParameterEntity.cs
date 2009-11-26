@@ -15,8 +15,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Backing field for TypeReferenceConstraints property.</summary>
-    private readonly List<SemanticEntityReference<TypeEntity>> _TypeReferenceConstraints
-      = new List<SemanticEntityReference<TypeEntity>>();
+    private readonly List<Resolver<TypeEntity>> _TypeReferenceConstraints
+      = new List<Resolver<TypeEntity>>();
 
 
     /// <summary>Gets a value specifying whether this type parameter has a default constructor ("new()") constraint.</summary>
@@ -50,7 +50,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// class types, interface types and type parameters.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<SemanticEntityReference<TypeEntity>> TypeReferenceConstraints
+    public IEnumerable<Resolver<TypeEntity>> TypeReferenceConstraints
     {
       get { return _TypeReferenceConstraints; }
     }
@@ -61,7 +61,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="typeReference">A type reference.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddTypeReferenceConstraint(SemanticEntityReference<TypeEntity> typeReference)
+    public void AddTypeReferenceConstraint(Resolver<TypeEntity> typeReference)
     {
       if (typeReference != null)
       {
@@ -84,8 +84,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return from typeReference in _TypeReferenceConstraints
                where typeReference.ResolutionState == ResolutionState.Resolved
-                     && typeReference.TargetEntity is ClassEntity
-               select typeReference.TargetEntity as ClassEntity;
+                     && typeReference.Target is ClassEntity
+               select typeReference.Target as ClassEntity;
       }
     }
 
@@ -103,8 +103,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         var classTypeConstraints = (from typeReference in _TypeReferenceConstraints
                                     where typeReference.ResolutionState == ResolutionState.Resolved
-                                          && typeReference.TargetEntity is ClassEntity
-                                    select typeReference.TargetEntity as ClassEntity).ToList();
+                                          && typeReference.Target is ClassEntity
+                                    select typeReference.Target as ClassEntity).ToList();
 
         return classTypeConstraints.Count == 1 ? classTypeConstraints[0] : null;
       }
@@ -121,8 +121,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return from typeReference in _TypeReferenceConstraints
                where typeReference.ResolutionState == ResolutionState.Resolved
-                     && typeReference.TargetEntity is TypeParameterEntity
-               select typeReference.TargetEntity as TypeParameterEntity;
+                     && typeReference.Target is TypeParameterEntity
+               select typeReference.Target as TypeParameterEntity;
       }
     }
 
@@ -137,8 +137,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return from typeReference in _TypeReferenceConstraints
                where typeReference.ResolutionState == ResolutionState.Resolved
-                     && typeReference.TargetEntity is InterfaceEntity
-               select typeReference.TargetEntity as InterfaceEntity;
+                     && typeReference.Target is InterfaceEntity
+               select typeReference.Target as InterfaceEntity;
       }
     }
 

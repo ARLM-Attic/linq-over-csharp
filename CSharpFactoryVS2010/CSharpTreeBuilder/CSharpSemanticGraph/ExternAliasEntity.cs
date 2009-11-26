@@ -30,7 +30,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
 
       LexicalScope = lexicalScope;
-      RootNamespaceReference = new ExternAliasNodeBasedRootNamespaceEntityReference(externAliasNode);
+      RootNamespaceReference = new ExternAliasNodeToRootNamespaceEntityResolver(externAliasNode);
       Alias = externAliasNode.Identifier;
     }
 
@@ -53,7 +53,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to a namespace entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExternAliasNodeBasedRootNamespaceEntityReference RootNamespaceReference { get; private set; }
+    public ExternAliasNodeToRootNamespaceEntityResolver RootNamespaceReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -64,7 +64,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return RootNamespaceReference.TargetEntity;
+        return RootNamespaceReference.Target;
       }
     }
 

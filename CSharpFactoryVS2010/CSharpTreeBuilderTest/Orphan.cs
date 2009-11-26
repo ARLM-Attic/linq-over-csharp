@@ -186,7 +186,7 @@ namespace CSharpTreeBuilderTest
         var parameters = method.Parameters.ToList();
         parameters.Count.ShouldEqual(1);
         parameters[0].Name.ShouldEqual("a");
-        var typeref = parameters[0].TypeReference as TypeNodeBasedTypeEntityReference;
+        var typeref = parameters[0].TypeReference as TypeNodeToTypeEntityResolver;
         typeref.SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("T1");
       }
 
@@ -202,7 +202,7 @@ namespace CSharpTreeBuilderTest
         var parameters = method.Parameters.ToList();
         parameters.Count.ShouldEqual(1);
         parameters[0].Name.ShouldEqual("b");
-        var typeref = parameters[0].TypeReference as TypeNodeBasedTypeEntityReference;
+        var typeref = parameters[0].TypeReference as TypeNodeToTypeEntityResolver;
         typeref.SyntaxNode.TypeName.TypeTags[0].Identifier.ShouldEqual("T2");
       }
     }

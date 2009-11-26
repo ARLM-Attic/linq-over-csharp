@@ -28,16 +28,16 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Output)
       });
 
       var signature2 = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Output)
       });
 
       var comparer = new SignatureEqualityComparerForCompleteMatching();
@@ -58,16 +58,16 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var signature = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Reference),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Output)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Reference),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Output)
       });
 
       var signature2 = new Signature("M", 1, new List<ParameterEntity> 
       {
-        new ParameterEntity("a", new DirectSemanticEntityReference<TypeEntity>(type1), ParameterKind.Value),
-        new ParameterEntity("b", new DirectSemanticEntityReference<TypeEntity>(type2), ParameterKind.Output),
-        new ParameterEntity("c", new DirectSemanticEntityReference<TypeEntity>(type3), ParameterKind.Reference)
+        new ParameterEntity("a", new DummyResolver<TypeEntity>(type1), ParameterKind.Value),
+        new ParameterEntity("b", new DummyResolver<TypeEntity>(type2), ParameterKind.Output),
+        new ParameterEntity("c", new DummyResolver<TypeEntity>(type3), ParameterKind.Reference)
       });
 
       var comparer = new SignatureEqualityComparerForCompleteMatching();

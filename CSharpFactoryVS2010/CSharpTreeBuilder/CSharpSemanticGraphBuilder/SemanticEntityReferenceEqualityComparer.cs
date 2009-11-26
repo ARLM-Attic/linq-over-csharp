@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// Reference to null target entity does not equal to any other reference.
   /// </summary>
   // ================================================================================================
-  public sealed class SemanticEntityReferenceEqualityComparer<TTargetType> : IEqualityComparer<SemanticEntityReference<TTargetType>>
+  public sealed class SemanticEntityReferenceEqualityComparer<TTargetType> : IEqualityComparer<Resolver<TTargetType>>
     where TTargetType : SemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
@@ -22,9 +22,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="y">A semantic entity reference.</param>
     /// <returns>True if the two semantic entity references point to the same entity.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool Equals(SemanticEntityReference<TTargetType> x, SemanticEntityReference<TTargetType> y)
+    public bool Equals(Resolver<TTargetType> x, Resolver<TTargetType> y)
     {
-      return (x.TargetEntity == null || y.TargetEntity == null) ? false : x.TargetEntity == y.TargetEntity;
+      return (x.Target == null || y.Target == null) ? false : x.Target == y.Target;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -34,9 +34,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="obj">A semantic entity reference.</param>
     /// <returns>The hash code of the TargetEntity.</returns>
     // ----------------------------------------------------------------------------------------------
-    public int GetHashCode(SemanticEntityReference<TTargetType> obj)
+    public int GetHashCode(Resolver<TTargetType> obj)
     {
-      return obj.TargetEntity == null ? 0 : obj.TargetEntity.GetHashCode();
+      return obj.Target == null ? 0 : obj.Target.GetHashCode();
     }
   }
 }

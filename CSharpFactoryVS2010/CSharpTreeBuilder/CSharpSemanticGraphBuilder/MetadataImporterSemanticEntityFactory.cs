@@ -378,11 +378,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Populate base type and base interfaces
       if (type.BaseType != null)
       {
-        typeEntity.AddBaseTypeReference(new ReflectedTypeBasedTypeEntityReference(type.BaseType));
+        typeEntity.AddBaseTypeReference(new ReflectedTypeToTypeEntityResolver(type.BaseType));
       }
       foreach (var interfaceItem in type.GetInterfaces())
       {
-        typeEntity.AddBaseTypeReference(new ReflectedTypeBasedTypeEntityReference(interfaceItem));
+        typeEntity.AddBaseTypeReference(new ReflectedTypeToTypeEntityResolver(interfaceItem));
       }
 
       // If it's a built in type, then set its BuiltInTypeValue.
@@ -588,7 +588,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       bool isDeclaredInSource = false;
       AccessibilityKind? accessibility = GetAccessibility(fieldInfo);
-      SemanticEntityReference<TypeEntity> typeReference = new ReflectedTypeBasedTypeEntityReference(fieldInfo.FieldType);
+      Resolver<TypeEntity> typeReference = new ReflectedTypeToTypeEntityResolver(fieldInfo.FieldType);
       string name = fieldInfo.Name;
 
       // Decide whether an enum member, a field or a constant member should be created.
@@ -625,12 +625,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       AccessibilityKind? accessibility = null;
       bool isStatic = (propertyInfo.CanRead && propertyInfo.GetGetMethod(true).IsStatic) ||
                       (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsStatic);
-      SemanticEntityReference<TypeEntity> typeReference = new ReflectedTypeBasedTypeEntityReference(propertyInfo.PropertyType);
+      Resolver<TypeEntity> typeReference = new ReflectedTypeToTypeEntityResolver(propertyInfo.PropertyType);
       string name = RemoveInterfaceName(propertyInfo.Name);
       string interfaceName = GetInterfaceNameFromMemberName(propertyInfo.Name);
       
       // TODO: Create a resolvable interfaceReference. Like TypeNodeBasedTypeEntityReference but without syntax nodes.
-      SemanticEntityReference<TypeEntity> interfaceReference = null;
+      Resolver<TypeEntity> interfaceReference = null;
 
       propertyEntity = new PropertyEntity(false, accessibility, isStatic, typeReference, interfaceReference, name, false);
 
@@ -682,11 +682,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       AccessibilityKind? accessibility = GetAccessibility(methodInfo);
       bool isStatic = methodInfo.IsStatic;
-      SemanticEntityReference<TypeEntity> returnTypeReference = new ReflectedTypeBasedTypeEntityReference(methodInfo.ReturnType);
+      Resolver<TypeEntity> returnTypeReference = new ReflectedTypeToTypeEntityResolver(methodInfo.ReturnType);
       string name = RemoveInterfaceName(methodInfo.Name);
       string interfaceName = GetInterfaceNameFromMemberName(methodInfo.Name);
       // TODO: Create a resolvable interfaceReference. Like TypeNodeBasedTypeEntityReference but without syntax nodes.
-      SemanticEntityReference<TypeEntity> interfaceReference = null;
+      Resolver<TypeEntity> interfaceReference = null;
       var isAbstract = methodInfo.IsAbstract;
 
       methodEntity = new MethodEntity(false, accessibility, isStatic, false, returnTypeReference, interfaceReference, name, isAbstract);
@@ -745,7 +745,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         if (constraint != typeof(System.ValueType))
         {
-          typeParameter.AddTypeReferenceConstraint(new ReflectedTypeBasedTypeEntityReference(constraint));
+          typeParameter.AddTypeReferenceConstraint(new ReflectedTypeToTypeEntityResolver(constraint));
         }
       }
 
@@ -763,7 +763,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private static ParameterEntity CreateParameter(ParameterInfo parameterInfo)
     {
-      var typeReference = new ReflectedTypeBasedTypeEntityReference(parameterInfo.ParameterType);
+      var typeReference = new ReflectedTypeToTypeEntityResolver(parameterInfo.ParameterType);
 
       ParameterKind kind = ParameterKind.Value;
       if (parameterInfo.IsOut)

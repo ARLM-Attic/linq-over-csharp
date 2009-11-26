@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new ArgumentNullException("namespaceOrTypeName");
       }
 
-      NamespaceReference = new NamespaceOrTypeNameNodeBasedNamespaceEntityReference(namespaceOrTypeName);
+      NamespaceReference = new NamespaceOrTypeNameNodeToNamespaceEntityResolver(namespaceOrTypeName);
       NamespaceName = namespaceOrTypeName.TypeTags.ToString();
     }
 
@@ -42,7 +42,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets the reference to the imported namespace entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeNameNodeBasedNamespaceEntityReference NamespaceReference { get; private set; }
+    public NamespaceOrTypeNameNodeToNamespaceEntityResolver NamespaceReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -53,7 +53,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return NamespaceReference.TargetEntity;
+        return NamespaceReference.Target;
       }
     }
 

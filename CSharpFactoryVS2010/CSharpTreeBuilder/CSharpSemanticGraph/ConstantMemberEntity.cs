@@ -14,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Gets the reference to the type of the field.</summary>
-    public SemanticEntityReference<TypeEntity> TypeReference { get; private set; }
+    public Resolver<TypeEntity> TypeReference { get; private set; }
 
     /// <summary>Gets the initializer expression of the constant.</summary>
     public ExpressionEntity InitializerExpression { get; private set; }
@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public ConstantMemberEntity(
       bool isDeclaredInSource, 
       AccessibilityKind? accessibility, 
-      SemanticEntityReference<TypeEntity> type,
+      Resolver<TypeEntity> type,
       string name)
       : 
       base(isDeclaredInSource, accessibility, name)
@@ -82,8 +82,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.TargetEntity != null
-          ? TypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return TypeReference != null && TypeReference.Target != null
+          ? TypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }

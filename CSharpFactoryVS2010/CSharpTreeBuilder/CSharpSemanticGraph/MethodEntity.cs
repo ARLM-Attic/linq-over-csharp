@@ -26,7 +26,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public bool IsPartial { get; private set; }
 
     /// <summary>Gets the reference to the return type.</summary>
-    public SemanticEntityReference<TypeEntity> ReturnTypeReference { get; private set; }
+    public Resolver<TypeEntity> ReturnTypeReference { get; private set; }
 
     /// <summary>
     /// Gets or sets the reference to the interface entity whose member is explicitly implemented.
@@ -36,7 +36,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// The reference points to a TypeEntity rather then an InterfaceEntity, 
     /// because it can be a ConstructedGenericType as well (if the interface is a generic).
     /// </remarks>
-    public SemanticEntityReference<TypeEntity> InterfaceReference { get; private set; }
+    public Resolver<TypeEntity> InterfaceReference { get; private set; }
 
     #endregion
 
@@ -61,8 +61,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       AccessibilityKind? accessibility,
       bool isStatic, 
       bool isPartial, 
-      SemanticEntityReference<TypeEntity> returnTypeReference,
-      SemanticEntityReference<TypeEntity> interfaceReference,
+      Resolver<TypeEntity> returnTypeReference,
+      Resolver<TypeEntity> interfaceReference,
       string name, 
       bool isAbstract)
       : 
@@ -120,8 +120,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return ReturnTypeReference != null && ReturnTypeReference.TargetEntity != null
-          ? ReturnTypeReference.TargetEntity.GetMappedType(TypeParameterMap)
+        return ReturnTypeReference != null && ReturnTypeReference.Target != null
+          ? ReturnTypeReference.Target.GetMappedType(TypeParameterMap)
           : null;
       }
     }
@@ -386,8 +386,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return InterfaceReference != null && InterfaceReference.TargetEntity != null
-          ? InterfaceReference.TargetEntity.GetMappedType(TypeParameterMap) as InterfaceEntity
+        return InterfaceReference != null && InterfaceReference.Target != null
+          ? InterfaceReference.Target.GetMappedType(TypeParameterMap) as InterfaceEntity
           : null;
       }
     }
