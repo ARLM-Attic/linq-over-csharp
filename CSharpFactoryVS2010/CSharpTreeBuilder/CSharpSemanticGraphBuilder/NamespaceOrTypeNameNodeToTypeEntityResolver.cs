@@ -55,7 +55,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     protected override TypeEntity GetResolvedEntity(ISemanticEntity context, ICompilationErrorHandler errorHandler)
     {
       // Following resolution as described below, ... 
-      NamespaceOrTypeEntity namespaceOrTypeEntity = ResolveNamespaceOrTypeNode(SyntaxNode, context, errorHandler);
+      NamespaceOrTypeEntity namespaceOrTypeEntity = 
+        NamespaceOrTypeNameResolutionAlgorithm.ResolveNamespaceOrTypeNode(SyntaxNode, context, errorHandler);
 
       // (If the resolution produced a null, then an error was already signaled, so just bail out.)
       if (namespaceOrTypeEntity == null)

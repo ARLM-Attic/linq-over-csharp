@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     protected override NamespaceOrTypeEntity GetResolvedEntity(ISemanticEntity context, ICompilationErrorHandler errorHandler)
     {
-      return ResolveNamespaceOrTypeNode(SyntaxNode, context, errorHandler);
+      return NamespaceOrTypeNameResolutionAlgorithm.ResolveNamespaceOrTypeNode(SyntaxNode, context, errorHandler);
     }
   }
 }

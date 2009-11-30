@@ -69,6 +69,7 @@
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ConstructedGenericTypeTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MemberAccessResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookupTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitorTest.cs" />
@@ -393,8 +394,13 @@
     <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
     <None Include="TestFiles\ConstructedGenericType\EmbeddedType.cs" />
     <None Include="TestFiles\ConstructedGenericType\Simple.cs" />
+    <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess.cs" />
+    <None Include="TestFiles\MemberAccessResolution\QualifiedAliasMemberAccess.cs" />
+    <None Include="TestFiles\MemberAccessResolution\CS0120_ObjectReferenceRequired.cs" />
+    <None Include="TestFiles\MemberAccessResolution\PredefinedTypeMemberAccess.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\SimpleNameResolution\ResolvedToNamespace.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToType.cs" />
     <None Include="TestFiles\SimpleNameResolution\CS0120_StaticMemberExpected.cs" />
     <None Include="TestFiles\SimpleNameResolution\StaticMember.cs" />

@@ -227,6 +227,11 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolutionAlgorithm.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\ObjectReferenceRequiredException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\QualifiedAliasMemberNodeResolver.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\PropertyAccessExpressionResult.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\MemberAccessNodeResolver.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameUndefinedException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeNameExpectedException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceNameExpectedTypeNameFoundException.cs" />
@@ -241,6 +246,10 @@
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookupResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MethodGroup.cs" />
     <Compile Include="CSharpSemanticGraph\AccessorKind.cs" />
+    <Compile Include="CSharpSemanticGraph\PredefinedTypeMemberAccessExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\QualifiedAliasMemberAccessExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\PrimaryMemberAccessExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\MemberAccessExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ThisAccessExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\IGenericSupportingSemanticEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ISemanticEntity.cs" />
@@ -255,7 +264,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookup.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeConverter.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\VariableExpressionResult.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\SimpleNameNodeToExpressionResultResolver.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\SimpleNameNodeResolver.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NullExpressionResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ExpressionEvaluatorSemanticGraphVisitor.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ValueExpressionResult.cs" />

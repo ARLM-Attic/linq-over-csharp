@@ -1,5 +1,4 @@
 ﻿using System;
-using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -10,7 +9,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a simple name expression entity.
   /// </summary>
   // ================================================================================================
-  public class SimpleNameExpressionEntity : ExpressionEntity
+  public sealed class SimpleNameExpressionEntity : ExpressionEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -18,7 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="simpleNameResolver">A simple name resolver object.</param>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameExpressionEntity(SimpleNameNodeToExpressionResultResolver simpleNameResolver)
+    public SimpleNameExpressionEntity(SimpleNameNodeResolver simpleNameResolver)
     {
       if (simpleNameResolver == null)
       {
@@ -33,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the simple name resolver object.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameNodeToExpressionResultResolver SimpleNameResolver { get; private set; }
+    public SimpleNameNodeResolver SimpleNameResolver { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -43,14 +42,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
-      // First resolve the simple name
-
       if (SimpleNameResolver != null)
       {
         ExpressionResult = SimpleNameResolver.Resolve(this, errorHandler);
       }
-      
-      // TODO
     }
 
     #region Visitor methods

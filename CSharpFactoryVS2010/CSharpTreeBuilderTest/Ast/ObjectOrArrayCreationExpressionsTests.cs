@@ -198,13 +198,13 @@ namespace CSharpTreeBuilderTest
       var memberDeclarator2 = exp1.Declarators[1] as MemberAccessMemberDeclaratorNode;
       var memberAccess2 = memberDeclarator2.MemberAccess as PrimaryExpressionMemberAccessNode;
       ((SimpleNameNode) memberAccess2.PrimaryExpression).Identifier.ShouldEqual("AnonymousObjectCreationExpression");
-      memberAccess2.MemberName.Identifier.ShouldEqual("xs1");
+      memberAccess2.Identifier.ShouldEqual("xs1");
 
       var memberDeclarator3 = exp1.Declarators[2] as MemberAccessMemberDeclaratorNode;
       var memberAccess3 = memberDeclarator3.MemberAccess as QualifiedAliasMemberAccessNode;
       memberAccess3.QualifiedAliasMember.Qualifier.ShouldEqual("global");
       memberAccess3.QualifiedAliasMember.Identifier.ShouldEqual("AnonymousObjectCreationExpression");
-      memberAccess3.MemberName.Identifier.ShouldEqual("xs2");
+      memberAccess3.Identifier.ShouldEqual("xs2");
 
       var memberDeclarator4 = exp1.Declarators[3] as IdentifierMemberDeclaratorNode;
       memberDeclarator4.Identifier.ShouldEqual("A");

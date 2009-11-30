@@ -1,10 +1,8 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using CSharpTreeBuilder.CSharpSemanticGraph;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
-using CSharpTreeBuilder.ProjectContent;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
-using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 {
@@ -32,6 +30,29 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors[0].Code.ShouldEqual("CS0103");
       project.Warnings.Count.ShouldEqual(0);
     }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of a simple name to a namespace entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void ResolvedToNamespace()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SimpleNameResolution\ResolvedToNamespace.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      // private static int a1 = N1.C1.c1;
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var field_a1 = class_A.GetMember<FieldEntity>("a1");
+      var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+      var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
+      var simleName_N1 = memberAccess_C1.ChildExpression as SimpleNameExpressionEntity;
+
+      var namespaceEntity = (simleName_N1.ExpressionResult as NamespaceExpressionResult).Namespace;
+      namespaceEntity.ToString().ShouldEqual("global::N1");
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -39,18 +60,17 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // commented out because SimpleNameResult was eliminated
     public void StaticMember()
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SimpleNameResolution\StaticMember.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classA = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var fieldB = classA.GetMember<FieldEntity>("b");
-      var fieldC = classA.GetMember<FieldEntity>("c");
-      var simpleNameC = (fieldB.Initializer as ScalarInitializerEntity).Expression as SimpleNameExpressionEntity;
-      //simpleNameC.SimpleNameResult.SingleEntity.ShouldEqual(fieldC);
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var field_b = class_A.GetMember<FieldEntity>("b");
+      var field_c = class_A.GetMember<FieldEntity>("c");
+      var simpleName_c = (field_b.Initializer as ScalarInitializerEntity).Expression as SimpleNameExpressionEntity;
+      (simpleName_c.ExpressionResult as VariableExpressionResult).Variable.ShouldEqual(field_c);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -76,16 +96,18 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // Continue after PrimaryExpressionMemberAccessExpressionEntity is done.
     public void ResolvedToType()
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SimpleNameResolution\ResolvedToType.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classA = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var fieldA = classA.GetMember<FieldEntity>("a");
-      // TODO: continue
+      // static int a = A.b;
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var field_A = class_A.GetMember<FieldEntity>("a");
+      var memberAccess_b = (field_A.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+      var simpleName_A = memberAccess_b.ChildExpression as SimpleNameExpressionEntity;
+      (simpleName_A.ExpressionResult as TypeExpressionResult).Type.ToString().ShouldEqual("global::A");
     }
 
     // ----------------------------------------------------------------------------------------------

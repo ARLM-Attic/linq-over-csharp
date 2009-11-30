@@ -44,7 +44,10 @@ namespace CSharpTreeBuilder.Ast
       {
         Arguments = new TypeNodeCollection();
       }
-      Terminate(argumentListNode == null ? IdentifierToken : argumentListNode.TerminatingToken);
+      Terminate(
+        argumentListNode == null || argumentListNode.Count == 0
+          ? IdentifierToken
+          : argumentListNode.TerminatingToken);
     }
 
     // ----------------------------------------------------------------------------------------------

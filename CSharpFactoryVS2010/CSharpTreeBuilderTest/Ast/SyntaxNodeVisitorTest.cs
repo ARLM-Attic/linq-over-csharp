@@ -1397,7 +1397,6 @@ namespace CSharpTreeBuilderTest.Ast
           var exp = elemInit.NonAssignmentExpression as PrimaryExpressionMemberAccessNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)exp.PrimaryExpression)).Return(true);
-          Expect.Call(visitorMock.Visit(exp.MemberName)).Return(true);
         }
         // pointer-member-access (inside an invocation-expression)
         {
@@ -1408,7 +1407,6 @@ namespace CSharpTreeBuilderTest.Ast
           var pointerAccess = exp.PrimaryExpression as PointerMemberAccessNode;
           Expect.Call(visitorMock.Visit(pointerAccess)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)pointerAccess.PrimaryExpression)).Return(true);
-          Expect.Call(visitorMock.Visit(pointerAccess.MemberName)).Return(true);
         }
         // predefined-type-member-access
         {
@@ -1418,7 +1416,6 @@ namespace CSharpTreeBuilderTest.Ast
           Expect.Call(visitorMock.Visit(exp)).Return(true);
           Expect.Call(visitorMock.Visit(exp.TypeName)).Return(true);
           Expect.Call(visitorMock.Visit(exp.TypeName.TypeTags[0])).Return(true);
-          Expect.Call(visitorMock.Visit(exp.MemberName)).Return(true);
         }
         // qualified-alias-member-access
         {
@@ -1427,7 +1424,6 @@ namespace CSharpTreeBuilderTest.Ast
           var exp = elemInit.NonAssignmentExpression as QualifiedAliasMemberAccessNode;
           Expect.Call(visitorMock.Visit(exp)).Return(true);
           Expect.Call(visitorMock.Visit(exp.QualifiedAliasMember)).Return(true);
-          Expect.Call(visitorMock.Visit(exp.MemberName)).Return(true);
         }
         // invocation-expression
         {
@@ -1550,7 +1546,6 @@ namespace CSharpTreeBuilderTest.Ast
           var memberAccess = memberAccessMemberDeclarator.MemberAccess as PrimaryExpressionMemberAccessNode;
           Expect.Call(visitorMock.Visit(memberAccess)).Return(true);
           Expect.Call(visitorMock.Visit((SimpleNameNode)memberAccess.PrimaryExpression)).Return(true);
-          Expect.Call(visitorMock.Visit(memberAccess.MemberName)).Return(true);
           var baseMemberAccessMemberDeclarator = exp.Declarators[2] as BaseMemberAccessMemberDeclaratorNode;
           Expect.Call(visitorMock.Visit(baseMemberAccessMemberDeclarator)).Return(true);
           Expect.Call(visitorMock.Visit(baseMemberAccessMemberDeclarator.BaseMemberAccess)).Return(true);

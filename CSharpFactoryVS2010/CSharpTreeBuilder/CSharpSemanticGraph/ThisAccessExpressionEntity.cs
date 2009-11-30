@@ -1,6 +1,4 @@
-﻿using System;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
-using CSharpTreeBuilder.ProjectContent;
+﻿using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -13,15 +11,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ThisAccessExpressionEntity"/> class.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ThisAccessExpressionEntity()
-    {
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Evaluates this expression.
     /// </summary>
     /// <param name="errorHandler">An error handler object.</param>
@@ -29,7 +18,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void Evaluate(ICompilationErrorHandler errorHandler)
     {      
       // TODO
-      
     }
 
     #region Visitor methods

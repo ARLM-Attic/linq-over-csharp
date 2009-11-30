@@ -56,7 +56,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var semanticGraph = new SemanticGraph(null);
       var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
-      var field = new FieldEntity(true, null, false, null, "Field", null);
+      var field = new FieldEntity(true, null, false, false, null, "Field", null);
       type.AddMember(field);
 
       field.GetEnclosing<TypeEntity>().ShouldEqual(type);
@@ -120,7 +120,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var semanticGraph = new SemanticGraph(null);
       var type = new ClassEntity(null, "Class");
       semanticGraph.GlobalNamespace.AddChildType(type);
-      var field = new FieldEntity(true, null, false, null, "Field", null);
+      var field = new FieldEntity(true, null, false, false, null, "Field", null);
       type.AddMember(field);
 
       field.IsInTypeDeclarationBody().ShouldBeTrue();

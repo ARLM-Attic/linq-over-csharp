@@ -1,7 +1,7 @@
 //
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 11. 01. 17:38:55
+// Generated on: 2009. 11. 30. 15:02:11
 //
 // The template file is SemanticGraphVisitor.tt 
 //
@@ -41,6 +41,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void Visit(FunctionMemberWithAccessorsEntity entity) { }
     public virtual void Visit(FunctionMemberWithBodyEntity entity) { }
     public virtual void Visit(GenericCapableTypeEntity entity) { }
+    public virtual void Visit(IGenericSupportingSemanticEntity entity) { }
     public virtual void Visit(IMemberEntity entity) { }
     public virtual void Visit(INamedEntity entity) { }
     public virtual void Visit(InterfaceEntity entity) { }
@@ -50,6 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void Visit(LiteralExpressionEntity entity) { }
     public virtual void Visit(LocalVariableDeclarationStatementEntity entity) { }
     public virtual void Visit(LocalVariableEntity entity) { }
+    public virtual void Visit(MemberAccessExpressionEntity entity) { }
     public virtual void Visit(MethodEntity entity) { }
     public virtual void Visit(NamespaceEntity entity) { }
     public virtual void Visit(NamespaceOrTypeEntity entity) { }
@@ -58,13 +60,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void Visit(NullLiteralExpressionEntity entity) { }
     public virtual void Visit(ParameterEntity entity) { }
     public virtual void Visit(PointerToTypeEntity entity) { }
+    public virtual void Visit(PredefinedTypeMemberAccessExpressionEntity entity) { }
+    public virtual void Visit(PrimaryMemberAccessExpressionEntity entity) { }
     public virtual void Visit(PropertyEntity entity) { }
+    public virtual void Visit(QualifiedAliasMemberAccessExpressionEntity entity) { }
     public virtual void Visit(RootNamespaceEntity entity) { }
     public virtual void Visit(ScalarInitializerEntity entity) { }
     public virtual void Visit(SemanticEntity entity) { }
     public virtual void Visit(SimpleNameExpressionEntity entity) { }
     public virtual void Visit(StatementEntity entity) { }
     public virtual void Visit(StructEntity entity) { }
+    public virtual void Visit(ThisAccessExpressionEntity entity) { }
     public virtual void Visit(TypedLiteralExpressionEntity entity) { }
     public virtual void Visit(TypeEntity entity) { }
     public virtual void Visit(TypeParameterEntity entity) { }

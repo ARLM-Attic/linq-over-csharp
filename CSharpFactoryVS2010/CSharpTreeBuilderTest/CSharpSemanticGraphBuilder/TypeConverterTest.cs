@@ -110,7 +110,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // Re-introduce after SimpleName resolution is integrated with member-access resolution.
     public void ImplicitNullableConversion()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -196,7 +195,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // Re-introduce after SimpleName resolution is integrated with member-access resolution.
     public void ImplicitReferenceConversion()
     {
       var project = new CSharpProject(WorkingFolder);

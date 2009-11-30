@@ -73,7 +73,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         }
       }
 
-      return resolvedEntity;
+      return Target;
     }
 
     // ----------------------------------------------------------------------------------------------

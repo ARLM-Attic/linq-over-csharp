@@ -16,22 +16,23 @@ namespace CSharpTreeBuilder.Ast
     /// </summary>
     /// <param name="start">Token providing information about the element.</param>
     /// <param name="qualifiedAliasMember">The node representing a qualified alias member.</param>
-    /// <param name="simpleNameNode">The node representing the member name.</param>
     // ----------------------------------------------------------------------------------------------
-    public QualifiedAliasMemberAccessNode(Token start, QualifiedAliasMemberNode qualifiedAliasMember, SimpleNameNode simpleNameNode)
+    public QualifiedAliasMemberAccessNode(Token start, QualifiedAliasMemberNode qualifiedAliasMember)
       : base(start)
     {
+      if (start == null)
+      {
+        throw new ArgumentNullException("start");
+      }
       if (qualifiedAliasMember == null)
       {
         throw new ArgumentNullException("qualifiedAliasMember");
       }
-      if (simpleNameNode == null)
-      {
-        throw new ArgumentNullException("simpleNameNode");
-      }
       
       QualifiedAliasMember = qualifiedAliasMember;
-      MemberName = simpleNameNode;
+      QualifiedAliasMember.ParentNode = this;
+
+      IdentifierToken = start;
     }
 
     // ----------------------------------------------------------------------------------------------

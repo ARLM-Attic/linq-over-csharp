@@ -12,6 +12,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     #region State
 
+    /// <summary>Gets a value indicating whether this field is readonly.</summary>
+    public bool IsReadOnly { get; private set; }
+
     /// <summary>Gets or sets the reference to the type of the field.</summary>
     public Resolver<TypeEntity> TypeReference { get; private set; }
 
@@ -27,6 +30,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="isDeclaredInSource">True if the member is explicitly declared in source code, false otherwise.</param>
     /// <param name="accessibility">The declared accessibility of the member. Can be null.</param>
     /// <param name="isStatic">True, if the field is static, false otherwise.</param>
+    /// <param name="isReadOnly">True, if the field is readonly, false otherwise.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
     /// <param name="name">The name of the member.</param>
     /// <param name="initializer">The initializer of the field.</param>
@@ -35,6 +39,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       bool isDeclaredInSource,
       AccessibilityKind? accessibility,
       bool isStatic,
+      bool isReadOnly,
       Resolver<TypeEntity> type,
       string name, 
       VariableInitializer initializer)
@@ -42,6 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       base(isDeclaredInSource, accessibility, name)
     {
       _IsStatic = isStatic;
+      IsReadOnly = isReadOnly;
       TypeReference = type;
       Initializer = initializer;
 
@@ -62,6 +68,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private FieldEntity(FieldEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
+      IsReadOnly = template.IsReadOnly;
       TypeReference = template.TypeReference;
       
       // TODO: clone initializer

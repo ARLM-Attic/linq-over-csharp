@@ -435,8 +435,10 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
       var expr = initializer.Expression as PrimaryExpressionMemberAccessNode;
-      expr.MemberName.Identifier.ShouldEqual("Length");
-      ((StringLiteralNode) expr.PrimaryExpression).Value.ShouldEqual("a");
+      expr.Identifier.ShouldEqual("Length");
+      var embeddedExpression = (StringLiteralNode) expr.PrimaryExpression;
+      embeddedExpression.Value.ShouldEqual("a");
+      embeddedExpression.ParentNode.ShouldEqual(expr);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -457,7 +459,7 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
       var expr = initializer.Expression as PredefinedTypeMemberAccessNode;
-      expr.MemberName.Identifier.ShouldEqual("FalseString");
+      expr.Identifier.ShouldEqual("FalseString");
       expr.TypeName.TypeTags[0].Identifier.ShouldEqual("bool");
     }
 
@@ -479,7 +481,7 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
       var expr = initializer.Expression as QualifiedAliasMemberAccessNode;
-      expr.MemberName.Identifier.ShouldEqual("FalseString");
+      expr.Identifier.ShouldEqual("FalseString");
       expr.QualifiedAliasMember.Qualifier.ShouldEqual("myAlias");
       expr.QualifiedAliasMember.Identifier.ShouldEqual("Boolean");
     }
@@ -502,10 +504,10 @@ namespace CSharpTreeBuilderTest.Ast
       var initializer = varDecl.Declaration.VariableTags[0].Initializer as ExpressionInitializerNode;
 
       var expr = initializer.Expression as PrimaryExpressionMemberAccessNode;
-      expr.MemberName.Identifier.ShouldEqual("Length");
+      expr.Identifier.ShouldEqual("Length");
 
       var embeddedExpr = expr.PrimaryExpression as QualifiedAliasMemberAccessNode;
-      embeddedExpr.MemberName.Identifier.ShouldEqual("FalseString");
+      embeddedExpr.Identifier.ShouldEqual("FalseString");
       embeddedExpr.QualifiedAliasMember.Qualifier.ShouldEqual("myAlias");
       embeddedExpr.QualifiedAliasMember.Identifier.ShouldEqual("Boolean");
     }
@@ -531,7 +533,7 @@ namespace CSharpTreeBuilderTest.Ast
       var expression = exprStatement.Expression as AssignmentExpressionNode;
       var pointerExpr = expression.LeftOperand as PointerMemberAccessNode;
       ((SimpleNameNode)pointerExpr.PrimaryExpression).Identifier.ShouldEqual("p");
-      pointerExpr.MemberName.Identifier.ShouldEqual("x");
+      pointerExpr.Identifier.ShouldEqual("x");
     }
 
     // ----------------------------------------------------------------------------------------------

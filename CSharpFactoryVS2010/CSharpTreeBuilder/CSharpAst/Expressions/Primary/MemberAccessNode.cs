@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.Ast
   /// This type is intended to be the base class of all member access expressions.
   /// </summary>
   // ================================================================================================
-  public abstract class MemberAccessNode : PrimaryExpressionNodeBase
+  public abstract class MemberAccessNode : PrimaryExpressionNodeBase, IIdentifierSupport, ITypeArguments
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -23,14 +23,58 @@ namespace CSharpTreeBuilder.Ast
     protected MemberAccessNode(Token start)
       : base(start)
     {
+      Arguments = new TypeNodeCollection();
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the member name.
+    /// Gets or sets the identifier token.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public SimpleNameNode MemberName { get; internal set; }
+    public Token IdentifierToken { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the identifier name.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Identifier
+    {
+      get { return IdentifierToken == null ? string.Empty : IdentifierToken.Value; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has identifier.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has identifier; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasIdentifier
+    {
+      get { return IdentifierToken != null; }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the node providing type arguments.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public TypeNodeCollection Arguments { get; internal set; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether this instance has type arguments.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance has type arguments; otherwise, <c>false</c>.
+    /// </value>
+    // ----------------------------------------------------------------------------------------------
+    public bool HasTypeArguments
+    {
+      get { return Arguments != null && Arguments.Count > 0; }
+    }
 
     #region Visitor methods
 
@@ -42,9 +86,9 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public override void AcceptVisitor(ISyntaxNodeVisitor visitor)
     {
-      if (MemberName != null)
+      foreach (var argument in Arguments)
       {
-        MemberName.AcceptVisitor(visitor);
+        argument.AcceptVisitor(visitor);
       }
     }
 

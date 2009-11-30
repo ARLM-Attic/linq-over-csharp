@@ -74,7 +74,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     public bool HasTypeArguments
     {
-      get { return Arguments != null; }
+      get { return Arguments != null && Arguments.Count > 0; }
     }
 
     #region Visitor methods

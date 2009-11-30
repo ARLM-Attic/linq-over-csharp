@@ -3939,24 +3939,36 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			}
 			case 128: {
 				Get();
-				SimpleNameNode snNode;
 				var pointerNode = new PointerMemberAccessNode(t, exprNode);
 				SetCommentOwner(pointerNode);
+				pointerNode.SeparatorToken = t;
 				
-				SimpleName(out snNode);
-				pointerNode.MemberName = snNode;
+				Expect(1);
+				pointerNode.IdentifierToken = t;
+				TypeNodeCollection argList;
+				
+				if (IsGeneric()) {
+					TypeArgumentList(out argList);
+					pointerNode.Arguments = argList; 
+				}
 				exprNode = pointerNode;
 				
 				break;
 			}
 			case 90: {
 				Get();
-				SimpleNameNode snNode;
 				var maNode = new PrimaryExpressionMemberAccessNode(t, exprNode);
 				SetCommentOwner(maNode);
+				maNode.SeparatorToken = t;
 				
-				SimpleName(out snNode);
-				maNode.MemberName = snNode;
+				Expect(1);
+				maNode.IdentifierToken = t;
+				TypeNodeCollection argList;
+				
+				if (IsGeneric()) {
+					TypeArgumentList(out argList);
+					maNode.Arguments = argList; 
+				}
 				exprNode = maNode;
 				
 				break;
@@ -4102,17 +4114,15 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		SetCommentOwner(predefMemAccessNode);
 		
 		Expect(90);
-		SimpleNameNode nameNode = new SimpleNameNode(t);
-		predefMemAccessNode.MemberName = nameNode;
-		nameNode.SeparatorToken = t; 
+		predefMemAccessNode.SeparatorToken = t; 
 		
 		Expect(1);
-		nameNode.IdentifierToken = t;
+		predefMemAccessNode.IdentifierToken = t;
 		TypeNodeCollection argList;
 		
 		if (IsGeneric()) {
 			TypeArgumentList(out argList);
-			nameNode.Arguments = argList; 
+			predefMemAccessNode.Arguments = argList; 
 		}
 		exprNode = predefMemAccessNode;
 		Terminate(exprNode);
@@ -4143,12 +4153,8 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 		Token separatorToken = t;
 		
 		Expect(1);
-		SimpleNameNode simpleNameNode = new SimpleNameNode(t);
-		simpleNameNode.SeparatorToken = separatorToken;
-		Terminate(simpleNameNode);
-		
-		    exprNode = new QualifiedAliasMemberAccessNode(t, qam, simpleNameNode); 
-		    SetCommentOwner(exprNode);
+		exprNode = new QualifiedAliasMemberAccessNode(t, qam); 
+		SetCommentOwner(exprNode);
 		
 		    Terminate(exprNode); 
 		  

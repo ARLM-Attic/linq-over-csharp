@@ -352,7 +352,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
         var initializer = CreateInitializer(fieldTag.Initializer);
         var fieldEntity = new FieldEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
-                                          typeReference, fieldTag.Identifier, initializer);
+                                          IsReadOnly(node.Modifiers), typeReference, fieldTag.Identifier, initializer);
         fieldEntity.IsNew = IsNew(node.Modifiers);
         parentEntity.AddMember(fieldEntity);
 
@@ -573,12 +573,79 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var parentEntity = GetParentEntity<SemanticEntity>(node);
 
-      var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeToExpressionResultResolver(node));
+      var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeResolver(node));
       
       var hasExpressions = CastToIHasExpressions(parentEntity);
       hasExpressions.AddExpression(simpleNameEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, simpleNameEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(PrimaryExpressionMemberAccessNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var expressionEntity = new PrimaryMemberAccessExpressionEntity(new MemberAccessNodeResolver(node));
+
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(expressionEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(QualifiedAliasMemberAccessNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var expressionEntity = new QualifiedAliasMemberAccessExpressionEntity(
+        new QualifiedAliasMemberNodeResolver(node.QualifiedAliasMember),
+        new MemberAccessNodeResolver(node));
+
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(expressionEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(PredefinedTypeMemberAccessNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var expressionEntity = new PredefinedTypeMemberAccessExpressionEntity(
+        node.TypeName.TypeTags[0].Identifier,
+        new MemberAccessNodeResolver(node));
+
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(expressionEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
 
       return true;
     }
@@ -985,6 +1052,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public bool IsStatic(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Static));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indicating whether the "readonly" modifier appears in the modifier list.
+    /// </summary>
+    /// <param name="modifiers">A collection of modifier AST nodes.</param>
+    /// <returns>True if the "readonly" modifier appears in the modifier list, false otherwise.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsReadOnly(ModifierNodeCollection modifiers)
+    {
+      return (modifiers != null && modifiers.Contains(ModifierType.Readonly));
     }
 
     // ----------------------------------------------------------------------------------------------
