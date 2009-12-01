@@ -70,7 +70,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return null;
       }
 
-      return ResolveMemberAccess(E, I, A, K, errorHandler);
+      return ResolveMemberAccess(E, I, A, K, context, errorHandler);
     }
     
     // ----------------------------------------------------------------------------------------------
@@ -86,11 +86,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var errorToken = SyntaxNode.StartToken;
 
-      if (e is ObjectReferenceRequiredException)
+      if (e is InvalidMemberReferenceException)
       {
-        errorHandler.Error("CS0120", errorToken,
-                           "An object reference is required for the non-static field, method, or property '{0}'",
-                           (e as ObjectReferenceRequiredException).MemberName );
+        errorHandler.Error("InvalidMemberReference", errorToken,
+                           "Invalid member reference: '{0}'",
+                           (e as InvalidMemberReferenceException).MemberName );
       }
       else
       {
@@ -106,11 +106,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="I">The name of the accessed member.</param>
     /// <param name="A">A collection of type arguments belonging to I.</param>
     /// <param name="K">The number of type arguments.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <param name="errorHandler">An error handler object.</param>
     /// <returns>An ExpressionResult object representing the result of the member access.</returns>
     // ----------------------------------------------------------------------------------------------
-    public static ExpressionResult ResolveMemberAccess(ExpressionResult E, string I, IEnumerable<TypeEntity> A, int K,
-          ICompilationErrorHandler errorHandler)
+    public static ExpressionResult ResolveMemberAccess(
+      ExpressionResult E, 
+      string I, 
+      IEnumerable<TypeEntity> A, 
+      int K,
+      ISemanticEntity accessingEntity,
+      ICompilationErrorHandler errorHandler)
     {
       // A member-access is either of the form E.I or of the form E.I<A1, ..., AK>, 
       // where E is a primary-expression, I is a single identifier and <A1, ..., AK> is an optional type-argument-list. 
@@ -125,29 +131,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Try to resolve to a non-nested type entity.
       if (expressionResult == null)
       {
-        expressionResult = ResolveToNonNestedType(E, I, A, K);
+        expressionResult = ResolveToNonNestedType(E, I, A, K, accessingEntity);
       }
 
       // Try to resolve to a type member.
       if (expressionResult == null)
       {
-        expressionResult = ResolveToTypeMember(E, I, A, K, errorHandler);
+        expressionResult = ResolveToTypeMember(E, I, A, K, accessingEntity, errorHandler);
       }
 
-      //•	If E is a property access, indexer access, variable, or value, the type of which is T, and a member lookup (§7.3) of I in T with K type arguments produces a match, then E.I is evaluated and classified as follows:
-      //o	First, if E is a property or indexer access, then the value of the property or indexer access is obtained (§7.1.1) and E is reclassified as a value.
-      //o	If I identifies one or more methods, then the result is a method group with an associated instance expression of E. If a type argument list was specified, it is used in calling a generic method (§7.5.5.1).
-      //o	If I identifies an instance property, then the result is a property access with an associated instance expression of E. 
-      //o	If T is a class-type and I identifies an instance field of that class-type:
-      //•	If the value of E is null, then a System.NullReferenceException is thrown.
-      //•	Otherwise, if the field is readonly and the reference occurs outside an instance constructor of the class in which the field is declared, then the result is a value, namely the value of the field I in the object referenced by E.
-      //•	Otherwise, the result is a variable, namely the field I in the object referenced by E.
-      //o	If T is a struct-type and I identifies an instance field of that struct-type:
-      //•	If E is a value, or if the field is readonly and the reference occurs outside an instance constructor of the struct in which the field is declared, then the result is a value, namely the value of the field I in the struct instance given by E.
-      //•	Otherwise, the result is a variable, namely the field I in the struct instance given by E.
-      //o	If I identifies an instance event:
-      //•	If the reference occurs within the class or struct in which the event is declared, and the event was declared without event-accessor-declarations (§10.8), then E.I is processed exactly as if I was an instance field.
-      //•	Otherwise, the result is an event access with an associated instance expression of E.
+      // Try to resolve to an instance member.
+      if (expressionResult == null)
+      {
+        expressionResult = ResolveToInstanceMember(E, I, A, K, accessingEntity, errorHandler);
+      }
+
+      // TODO:
       //•	Otherwise, an attempt is made to process E.I as an extension method invocation (§7.5.5.2). If this fails, E.I is an invalid member reference, and a compile-time error occurs.
 
       return expressionResult;
@@ -190,16 +189,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="I">The member name.</param>
     /// <param name="A">A collection of type argument entities.</param>
     /// <param name="K">The number of type arguments of the member name.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <returns>A type expression result or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static ExpressionResult ResolveToNonNestedType(ExpressionResult E, string I, IEnumerable<TypeEntity> A, int K)
+    private static ExpressionResult ResolveToNonNestedType(
+      ExpressionResult E, 
+      string I, 
+      IEnumerable<TypeEntity> A, 
+      int K, 
+      ISemanticEntity accessingEntity)
     {
       // Otherwise, if E is a namespace ... 
       if (E is NamespaceExpressionResult)
       {
         // ... and E contains an accessible type having name I and K type parameters, 
         var parentNamespace = (E as NamespaceExpressionResult).Namespace;
-        var childType = parentNamespace.GetSingleChildType<TypeEntity>(I, K);
+        var childType = parentNamespace.GetAccessibleSingleChildType<TypeEntity>(I, K, accessingEntity);
         if (childType != null)
         {
           // then the result is that type constructed with the given type arguments.
@@ -219,10 +224,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="I">The member name.</param>
     /// <param name="A">A collection of type argument entities.</param>
     /// <param name="K">The number of type arguments of the member name.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
     /// <param name="errorHandler">Error handler object.</param>
     /// <returns>An expression result or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    private static ExpressionResult ResolveToTypeMember(ExpressionResult E, string I, IEnumerable<TypeEntity> A, int K,
+    private static ExpressionResult ResolveToTypeMember(
+      ExpressionResult E, 
+      string I, 
+      IEnumerable<TypeEntity> A, 
+      int K,
+      ISemanticEntity accessingEntity,
       ICompilationErrorHandler errorHandler)
     {
       // If E is a predefined-type or a primary-expression classified as a type, 
@@ -235,7 +246,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // and if a member lookup (§7.3) of I in E with K type parameters produces a match, 
           var memberLookup = new MemberLookup(errorHandler, typeEntity.SemanticGraph);
-          var memberLookupResult = memberLookup.Lookup(I, K, typeEntity, typeEntity, false);
+          var memberLookupResult = memberLookup.Lookup(I, K, typeEntity, accessingEntity, false);
+
           if (memberLookupResult != null)
           {
             // then E.I is evaluated and classified as follows:
@@ -300,8 +312,129 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             // --> This case is already handled above, because an EnumMemberEntity is a subclass of ConstantMemberEntity.
 
             // Otherwise, E.I is an invalid member reference, and a compile-time error occurs.
-            throw new ObjectReferenceRequiredException(typeEntity.ToString() + "." + I);
+            throw new InvalidMemberReferenceException(typeEntity.ToString() + "." + I);
+
+            // Note: csc.exe reports different errors for the following cases:
+            //  - error CS0120: An object reference is required for the non-static field, method, or property 'string.Length.get'
+            //  - error CS0122: 'B.b' is inaccessible due to its protection level
+            // But we cannot make this distinction here because accessibility checking is handled inside MemberLookup. 
           }
+        }
+      }
+
+      return null;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tries to resolve the member access expression to an instance member entity.
+    /// </summary>
+    /// <param name="E">The child expression.</param>
+    /// <param name="I">The member name.</param>
+    /// <param name="A">A collection of type argument entities.</param>
+    /// <param name="K">The number of type arguments of the member name.</param>
+    /// <param name="accessingEntity">The accessing entity for accessibility checking.</param>
+    /// <param name="errorHandler">Error handler object.</param>
+    /// <returns>An expression result or null if could not resolve.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static ExpressionResult ResolveToInstanceMember(
+      ExpressionResult E, 
+      string I, 
+      IEnumerable<TypeEntity> A, 
+      int K,
+      ISemanticEntity accessingEntity,
+      ICompilationErrorHandler errorHandler)
+    {
+      // If E is a property access, indexer access, variable, or value, 
+      if (E is PropertyAccessExpressionResult
+        || E is VariableExpressionResult
+        || E is ValueExpressionResult) // TODO: || E is IndexerAccessExpressionResult
+      {
+        // the type of which is T, 
+        // (The ExpressionResults in the if condition are all TypedExpressionResult subclasses.)
+        var T = (E as TypedExpressionResult).Type;
+
+        // and a member lookup (§7.3) of I in T with K type arguments produces a match, 
+        var memberLookup = new MemberLookup(errorHandler, T.SemanticGraph);
+        var memberLookupResult = memberLookup.Lookup(I, K, T, accessingEntity, false);
+
+        if (memberLookupResult != null)
+        {
+          // then E.I is evaluated and classified as follows:
+          
+          // First, if E is a property or indexer access, 
+          if (E is PropertyAccessExpressionResult) // TODO: || E is IndexerAccessExpressionResult)
+          {
+            // then the value of the property or indexer access is obtained (§7.1.1) and E is reclassified as a value.
+            E = new ValueExpressionResult(T);
+          }
+
+          // If I identifies one or more methods, 
+          if (memberLookupResult.IsMethodGroup)
+          {
+            // then the result is a method group with an associated instance expression of E. 
+            return new MethodGroupExpressionResult(memberLookupResult.MethodGroup, E);
+
+            // If a type argument list was specified, it is used in calling a generic method (§7.5.5.1).
+            // TODO: do we care here about method calls?
+          }
+
+          // If I identifies an instance property, 
+          if (memberLookupResult.SingleMember is PropertyEntity
+            && !(memberLookupResult.SingleMember as PropertyEntity).IsStatic)
+          {
+            // then the result is a property access with an associated instance expression of E. 
+            return new PropertyAccessExpressionResult(memberLookupResult.SingleMember as PropertyEntity, E);
+          }
+
+          // If T is a class-type and I identifies an instance field of that class-type:
+          if (T is ClassEntity
+            && memberLookupResult.SingleMember is FieldEntity
+            && !(memberLookupResult.SingleMember as FieldEntity).IsStatic)
+          {
+            // If the value of E is null, then a System.NullReferenceException is thrown.
+            // Note: we don't care about the value here.
+
+            // Otherwise, if the field is readonly 
+            // TODO: and the reference occurs outside an instance constructor of the class in which the field is declared, 
+            if ((memberLookupResult.SingleMember as FieldEntity).IsReadOnly)
+            {
+              // then the result is a value, namely the value of the field I in the object referenced by E.
+              return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type);
+            }
+            else
+            {
+              // Otherwise, the result is a variable, namely the field I in the object referenced by E.
+              return new VariableExpressionResult(memberLookupResult.SingleMember as FieldEntity);
+            }
+
+          }
+
+          // If T is a struct-type and I identifies an instance field of that struct-type:
+          if (T is StructEntity
+            && memberLookupResult.SingleMember is FieldEntity
+            && !(memberLookupResult.SingleMember as FieldEntity).IsStatic)
+          {
+            // If E is a value, 
+            // or if the field is readonly 
+            // TODO: and the reference occurs outside an instance constructor of the struct in which the field is declared,
+            if (E is ValueExpressionResult
+              || (memberLookupResult.SingleMember as FieldEntity).IsReadOnly)
+            {
+              // then the result is a value, namely the value of the field I in the struct instance given by E.
+              return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type);
+            }
+            else
+            {
+              // Otherwise, the result is a variable, namely the field I in the struct instance given by E.
+              return new VariableExpressionResult(memberLookupResult.SingleMember as FieldEntity);
+            }
+          }
+
+          // TODO:
+          //o	If I identifies an instance event:
+          //•	If the reference occurs within the class or struct in which the event is declared, and the event was declared without event-accessor-declarations (§10.8), then E.I is processed exactly as if I was an instance field.
+          //•	Otherwise, the result is an event access with an associated instance expression of E.
         }
       }
 

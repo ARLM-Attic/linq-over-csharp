@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
@@ -18,14 +16,40 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Test the resolution of a primary member access to a namespace.
+    /// Test the resolution of a primary member access in the context of a static field.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void PrimaryMemberAccess()
+    public void PrimaryMemberAccess_Static()
     {
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"MemberAccessResolution\PrimaryMemberAccess.cs");
+      project.AddFile(@"MemberAccessResolution\PrimaryMemberAccess_Static.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var field_a1 = class_A.GetMember<FieldEntity>("a1");
+      var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+      var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
+      var memberAccess_N2 = memberAccess_C1.ChildExpression as PrimaryMemberAccessExpressionEntity;
+      var simpleName_N1 = memberAccess_N2.ChildExpression as SimpleNameExpressionEntity;
+
+      (simpleName_N1.ExpressionResult as NamespaceExpressionResult).Namespace.ToString().ShouldEqual("global::N1");
+      (memberAccess_N2.ExpressionResult as NamespaceExpressionResult).Namespace.ToString().ShouldEqual("global::N1.N2");
+      (memberAccess_C1.ExpressionResult as TypeExpressionResult).Type.ToString().ShouldEqual("global::N1.N2.C1");
+      (memberAccess_c1.ExpressionResult as VariableExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
+      (memberAccess_c1.ExpressionResult as VariableExpressionResult).Variable.ToString().ShouldEqual("global::N1.N2.C1_c1");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of a primary member access in the context of an instance field.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void PrimaryMemberAccess_Instance()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberAccessResolution\PrimaryMemberAccess_Instance.cs");
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
@@ -98,6 +122,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         (memberAccess_c1.ExpressionResult as VariableExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
         (memberAccess_c1.ExpressionResult as VariableExpressionResult).Variable.ToString().ShouldEqual("global::N1.N2.C1_c1");
       }
+      //  private static int a5 = global::E<int, long>.e;
+      {
+        var field_a5 = class_A.GetMember<FieldEntity>("a5");
+        var memberAccess_e = (field_a5.Initializer as ScalarInitializerEntity).Expression as QualifiedAliasMemberAccessExpressionEntity;
+
+        (memberAccess_e.ExpressionResult as VariableExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
+        (memberAccess_e.ExpressionResult as VariableExpressionResult).Variable.ToString().ShouldEqual("global::E`2[global::System.Int32,global::System.Int64]_e");
+      }
     }
     
     // ----------------------------------------------------------------------------------------------
@@ -130,14 +162,47 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    public void CS0120_ObjectReferenceRequired()
+    public void InvalidMemberReference_CS0120_ObjectReferenceRequired()
     {
       var project = new CSharpProject(WorkingFolder);
-      project.AddFile(@"MemberAccessResolution\CS0120_ObjectReferenceRequired.cs");
+      project.AddFile(@"MemberAccessResolution\InvalidMemberReference_CS0120_ObjectReferenceRequired.cs");
       InvokeParser(project).ShouldBeFalse();
 
       project.Errors.Count.ShouldEqual(1);
-      project.Errors[0].Code.ShouldEqual("CS0120");
+      project.Errors[0].Code.ShouldEqual("InvalidMemberReference");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0122: 'B.b' is inaccessible due to its protection level
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void InvalidMemberReference_CS0122_InaccessibleField()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleField.cs");
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("InvalidMemberReference");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// error CS0122: inaccessible class via qualified alias member
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void InvalidMemberReference_CS0122_InaccessibleClass()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleClass.cs");
+      project.AddAssemblyReference(TestAssemblyPathAndFilename);
+      InvokeParser(project).ShouldBeFalse();
+
+      project.Errors.Count.ShouldEqual(1);
+      project.Errors[0].Code.ShouldEqual("InvalidMemberReference");
     }
   }
 }

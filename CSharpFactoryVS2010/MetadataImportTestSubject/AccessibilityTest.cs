@@ -25,6 +25,8 @@
 
 internal class InternalClass
 {
+  public static int publicNestedMember;
+
   public class PublicNestedInInternalClass
   { }
 }

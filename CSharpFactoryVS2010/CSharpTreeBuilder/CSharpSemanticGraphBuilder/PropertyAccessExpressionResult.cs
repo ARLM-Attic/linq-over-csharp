@@ -16,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="propertyEntity">The property entity associated with this expression.</param>
     /// <param name="instanceExpression">The instance expression associated with this entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public PropertyAccessExpressionResult(PropertyEntity propertyEntity, ExpressionEntity instanceExpression)
+    public PropertyAccessExpressionResult(PropertyEntity propertyEntity, ExpressionResult instanceExpression)
     {
       PropertyEntity = propertyEntity;
       InstanceExpression = instanceExpression;
@@ -34,7 +34,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Gets the instance expression associated with this expression result.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionEntity InstanceExpression { get; private set; }
+    public ExpressionResult InstanceExpression { get; private set; }
 
   }
 }

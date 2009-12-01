@@ -1,6 +1,4 @@
-﻿using CSharpTreeBuilder.CSharpSemanticGraph;
-
-namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
+﻿namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
   // ================================================================================================
   /// <summary>
@@ -14,6 +12,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Gets the instance expression associated with this expression result.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    ExpressionEntity InstanceExpression { get; }
+    ExpressionResult InstanceExpression { get; }
   }
 }

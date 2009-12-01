@@ -2,18 +2,18 @@
 {
   // ================================================================================================
   /// <summary>
-  /// This exceptions is thrown when an instance member is referenced without an object instance.
+  /// This exceptions is thrown when member access resolution encounters an invalid member reference.
   /// </summary>
   // ================================================================================================
-  public sealed class ObjectReferenceRequiredException : ResolverException
+  public sealed class InvalidMemberReferenceException : ResolverException
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="ObjectReferenceRequiredException"/> class.
+    /// Initializes a new instance of the <see cref="InvalidMemberReferenceException"/> class.
     /// </summary>
     /// <param name="memberName">The fully qualifed name of the member.</param>
     // ----------------------------------------------------------------------------------------------
-    public ObjectReferenceRequiredException(string memberName)
+    public InvalidMemberReferenceException(string memberName)
     {
       MemberName = memberName;
     }

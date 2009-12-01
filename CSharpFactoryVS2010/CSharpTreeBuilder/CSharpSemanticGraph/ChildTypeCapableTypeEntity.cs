@@ -75,19 +75,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a collection of child type entities by type and name.
-    /// </summary>
-    /// <param name="name">The name of the type.</param>
-    /// <returns>A collection of child type entities, possibly empty.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TEntityType> GetChildTypes<TEntityType>(string name)
-      where TEntityType : TypeEntity
-    {
-      return GetChildTypes<TEntityType>(name, 0);
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a collection of child type entities by type, name and number of type parameters.
     /// </summary>
     /// <param name="name">The name of the type.</param>
@@ -102,7 +89,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a child type entity by type and name.
+    /// Gets a child type entity by type and name, with zero type arguments.
     /// </summary>
     /// <param name="name">The name of the type.</param>
     /// <returns>The found type, or null if not found.</returns>
@@ -127,6 +114,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       where TEntityType : TypeEntity
     {
       return _DeclarationSpace.GetSingleEntity<TEntityType>(name, typeParameterCount);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an accessible child type entity by type, name and number of type parameters.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of the entity to be found.</typeparam>
+    /// <param name="name">The name of the type.</param>
+    /// <param name="typeParameterCount">The number of type parameters.</param>
+    /// <param name="accessingEntity">An entity for accessibility checking.</param>
+    /// <returns>The found type, or null if not found.</returns>
+    /// <remarks>Throws AmbiguousDeclarationsException if more than one type was found.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetAccessibleSingleChildType<TEntityType>(string name, int typeParameterCount, ISemanticEntity accessingEntity)
+      where TEntityType : TypeEntity
+    {
+      var typeEntity = GetSingleChildType<TEntityType>(name, typeParameterCount);
+
+      return typeEntity != null && typeEntity.IsAccessibleBy(accessingEntity) ? typeEntity : null;
     }
 
     #region Visitor methods

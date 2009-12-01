@@ -1,6 +1,4 @@
-﻿using CSharpTreeBuilder.CSharpSemanticGraph;
-
-namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
+﻿namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
   // ================================================================================================
   /// <summary>
@@ -16,7 +14,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="methodGroup">The method group associated with this expression.</param>
     /// <param name="instanceExpression">The instance expression associated with this entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public MethodGroupExpressionResult(MethodGroup methodGroup, ExpressionEntity instanceExpression)
+    public MethodGroupExpressionResult(MethodGroup methodGroup, ExpressionResult instanceExpression)
     {
       MethodGroup = methodGroup;
       InstanceExpression = instanceExpression;
@@ -34,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Gets the instance expression associated with this expression result.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionEntity InstanceExpression { get; private set; }
+    public ExpressionResult InstanceExpression { get; private set; }
 
   }
 }

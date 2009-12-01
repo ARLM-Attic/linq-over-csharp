@@ -394,10 +394,13 @@
     <None Include="TestFiles\MemberLookup\ClassMemberHidesInterfaceMembers.cs" />
     <None Include="TestFiles\ConstructedGenericType\EmbeddedType.cs" />
     <None Include="TestFiles\ConstructedGenericType\Simple.cs" />
-    <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess.cs" />
+    <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_Static.cs" />
     <None Include="TestFiles\MemberAccessResolution\QualifiedAliasMemberAccess.cs" />
-    <None Include="TestFiles\MemberAccessResolution\CS0120_ObjectReferenceRequired.cs" />
+    <None Include="TestFiles\MemberAccessResolution\InvalidMemberReference_CS0120_ObjectReferenceRequired.cs" />
     <None Include="TestFiles\MemberAccessResolution\PredefinedTypeMemberAccess.cs" />
+    <None Include="TestFiles\MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleField.cs" />
+    <None Include="TestFiles\MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleClass.cs" />
+    <Compile Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_Instance.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToNamespace.cs" />

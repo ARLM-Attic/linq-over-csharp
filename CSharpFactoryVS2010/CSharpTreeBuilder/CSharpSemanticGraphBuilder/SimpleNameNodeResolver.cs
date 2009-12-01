@@ -225,7 +225,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           if (T == immediatelyEnclosingType && memberLookupResult.IsMethodGroup)
           {
             // the result is a method group with an associated instance expression of this. 
-            return new MethodGroupExpressionResult(memberLookupResult.MethodGroup, new ThisAccessExpressionEntity());
+            return new MethodGroupExpressionResult(memberLookupResult.MethodGroup, new ValueExpressionResult(T));
 
             // If a type argument list was specified, it is used in calling a generic method (§7.5.5.1).
           }
@@ -244,8 +244,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               // This can only happen when K is zero.
               if (K == 0)
               {
-                // TODO: integrate with MemberAccess
-                return null;
+                return MemberAccessNodeResolver.ResolveMemberAccess(new TypeExpressionResult(T), I, A, K, context, errorHandler);
               }
 
               throw new ApplicationException(
@@ -261,7 +260,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             throw new StaticMemberExpectedException(memberLookupResult.SingleMember);
           }
 
-          return MemberAccessNodeResolver.ResolveMemberAccess(new TypeExpressionResult(T), I, A, K,errorHandler);
+          return MemberAccessNodeResolver.ResolveMemberAccess(new TypeExpressionResult(T), I, A, K, context, errorHandler);
         }
 
         // "... and continuing with the instance type of each enclosing class or struct declaration (if any):"

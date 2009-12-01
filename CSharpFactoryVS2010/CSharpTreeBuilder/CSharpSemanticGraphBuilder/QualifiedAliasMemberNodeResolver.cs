@@ -54,6 +54,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       return expressionResult;
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Translates an exception thrown during namespace-or-type-name resolution to an error that
+    /// can be reported to an ICompilationErrorHandler.
+    /// </summary>
+    /// <param name="e">An exception object.</param>
+    /// <param name="errorHandler">The object used for error reporting.</param>
+    /// <remarks>If can't translate the exception then delegates it to its base.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    protected override void TranslateExceptionToError(ResolverException e, ICompilationErrorHandler errorHandler)
+    {
+      var errorToken = SyntaxNode.StartToken;
+
+      if (e is NamespaceOrTypeNameNotResolvedException)
+      {
+        errorHandler.Error("CS0246", errorToken,
+                           "The type or namespace name '{0}' could not be found (are you missing a using directive or an assembly reference?)",
+                           (e as NamespaceOrTypeNameNotResolvedException).NamespaceOrTypeName);
+      }
+      else if (e is QualifierRefersToType)
+      {
+        errorHandler.Error("CS0431", errorToken,
+                           "Cannot use alias '{0}' with '::' since the alias references a type. Use '.' instead.",
+                           (e as QualifierRefersToType).Qualifier);
+      }
+      else
+      {
+        base.TranslateExceptionToError(e, errorHandler);
+      }
+    }
   }
 }

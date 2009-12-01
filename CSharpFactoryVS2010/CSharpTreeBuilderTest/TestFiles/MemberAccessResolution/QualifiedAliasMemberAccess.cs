@@ -1,6 +1,15 @@
 ﻿using N1_Alias = N1;
 using N2_Alias = N1.N2;
 
+class A
+{
+  private static int a1 = global::N1.N2.C1.c1;
+  private static int a2 = N1_Alias::N2.N3.D1.d1;
+  private static int a3 = N1_Alias::N2.C1.c1;
+  private static int a4 = N2_Alias::C1.c1;
+  private static int a5 = global::E<int, long>.e;
+}
+
 namespace N1
 {
   namespace N2
@@ -20,10 +29,7 @@ namespace N1
   }
 }
 
-class A
+class E<T1, T2>
 {
-  private static int a1 = global::N1.N2.C1.c1;
-  private static int a2 = N1_Alias::N2.N3.D1.d1;
-  private static int a3 = N1_Alias::N2.C1.c1;
-  private static int a4 = N2_Alias::C1.c1;
+  public static T1 e;
 }

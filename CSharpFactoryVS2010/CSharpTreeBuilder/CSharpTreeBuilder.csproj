@@ -228,7 +228,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolutionAlgorithm.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\ObjectReferenceRequiredException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\InvalidMemberReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\QualifiedAliasMemberNodeResolver.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\PropertyAccessExpressionResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberAccessNodeResolver.cs" />
