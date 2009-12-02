@@ -24,7 +24,7 @@
     /// <param name="template">The template for the new instance.</param>
     /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    protected StatementEntity(SemanticEntity template, TypeParameterMap typeParameterMap)
+    protected StatementEntity(StatementEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
     }

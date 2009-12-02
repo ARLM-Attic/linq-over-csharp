@@ -678,18 +678,129 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="node">An AST node.</param>
     /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
     // ----------------------------------------------------------------------------------------------
+    public override bool Visit(InvocationExpressionNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var entity = new InvocationExpressionEntity();
+
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(AssignmentExpressionNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var entity = new AssignmentExpressionEntity();
+
+      var hasExpressions = CastToIHasExpressions(parentEntity);
+      hasExpressions.AddExpression(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ArgumentNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var parameterKind = node.IsRef
+                            ? ParameterKind.Reference
+                            : node.IsOut
+                                ? ParameterKind.Output
+                                : ParameterKind.Value;
+
+      var entity = new ArgumentEntity(parameterKind);
+
+      var hasArguments = CastToIHasArguments(parentEntity);
+      hasArguments.AddArgument(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
     public override bool Visit(BlockStatementNode node)
     {
-      //var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
 
-      //var blockEntity = new BlockEntity();
+      var blockEntity = new BlockStatementEntity();
 
-      //var hasBody = CastToIHasBody(parentEntity);
-      //hasBody.Body = blockEntity;
+      var hasBody = CastToIHasBody(parentEntity);
+      hasBody.Body = blockEntity;
 
-      //AssociateSyntaxNodeWithSemanticEntity(node, blockEntity);
+      AssociateSyntaxNodeWithSemanticEntity(node, blockEntity);
 
-      return false; // for testing only
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ExpressionStatementNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var entity = new ExpressionStatementEntity();
+
+      var hasStatements = CastToIHasStatements(parentEntity);
+      hasStatements.AddStatement(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ReturnStatementNode node)
+    {
+      var parentEntity = GetParentEntity<SemanticEntity>(node);
+
+      var entity = new ReturnStatementEntity();
+
+      var hasStatements = CastToIHasStatements(parentEntity);
+      hasStatements.AddStatement(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
     }
 
     #region Private methods
@@ -798,6 +909,44 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           string.Format("Expected a type that has expressions, but found '{0}'.", entity.GetType()));
       }
       return hasExpressions;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks whether a semantic entity implements the IHasArguments interface.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>An IHasArguments interface.</returns>
+    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    private static IHasArguments CastToIHasArguments(SemanticEntity entity)
+    {
+      var hasArguments = entity as IHasArguments;
+      if (hasArguments == null)
+      {
+        throw new ApplicationException(
+          string.Format("Expected a type that has arguments, but found '{0}'.", entity.GetType()));
+      }
+      return hasArguments;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Checks whether a semantic entity implements the IHasStatements interface.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    /// <returns>An IHasStatements interface.</returns>
+    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
+    // ----------------------------------------------------------------------------------------------
+    private static IHasStatements CastToIHasStatements(SemanticEntity entity)
+    {
+      var hasStatements = entity as IHasStatements;
+      if (hasStatements == null)
+      {
+        throw new ApplicationException(
+          string.Format("Expected a type that has statements, but found '{0}'.", entity.GetType()));
+      }
+      return hasStatements;
     }
 
     // ----------------------------------------------------------------------------------------------

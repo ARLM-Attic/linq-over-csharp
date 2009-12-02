@@ -312,6 +312,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         sgVisitorMock.Visit(p2 as ParameterEntity);
         sgVisitorMock.Visit(p2 as NonFieldVariableEntity);
         sgVisitorMock.Visit(p2 as SemanticEntity);
+
+        var body = M.Body;
+        sgVisitorMock.Visit(body as BlockStatementEntity);
+        sgVisitorMock.Visit(body as DeclarationSpaceDefiningStatementEntity);
+        sgVisitorMock.Visit(body as StatementEntity);
+        sgVisitorMock.Visit(body as SemanticEntity);
       }
       mocks.ReplayAll();
 

@@ -108,7 +108,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public void AddExpression(ExpressionEntity expressionEntity)
     {
       InitializerExpression = expressionEntity;
-      expressionEntity.Parent = this;
+
+      if (expressionEntity != null)
+      {
+        expressionEntity.Parent = this;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -120,7 +124,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return new List<ExpressionEntity> {InitializerExpression};
+        return InitializerExpression == null
+          ? new List<ExpressionEntity>()
+          : new List<ExpressionEntity> { InitializerExpression };
       }
     }
 

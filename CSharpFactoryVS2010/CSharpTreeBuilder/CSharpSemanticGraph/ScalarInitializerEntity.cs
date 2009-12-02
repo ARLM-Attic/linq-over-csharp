@@ -42,7 +42,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return new List<ExpressionEntity> { Expression };
+        return Expression == null
+          ? new List<ExpressionEntity>()
+          : new List<ExpressionEntity> { Expression };
       }
     }
 

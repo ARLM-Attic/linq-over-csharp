@@ -90,6 +90,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      if (ChildExpression != null)
+      {
+        ChildExpression.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

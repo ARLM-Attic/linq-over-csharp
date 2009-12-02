@@ -16,6 +16,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public abstract class BinaryExpressionNodeBase : ExpressionNode
   {
+    /// <summary>Backing field for the left operand of the binary operator.</summary>
+    private ExpressionNode _LeftOperand;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="BinaryExpressionNodeBase"/> class.
@@ -32,7 +35,21 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the left operand of the binary operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode LeftOperand { get; internal set; }
+    public ExpressionNode LeftOperand
+    {
+      get
+      {
+        return _LeftOperand;
+      }
+      internal set
+      {
+        _LeftOperand = value;
+        if (_LeftOperand != null)
+        {
+          _LeftOperand.ParentNode = this;
+        }
+      }
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

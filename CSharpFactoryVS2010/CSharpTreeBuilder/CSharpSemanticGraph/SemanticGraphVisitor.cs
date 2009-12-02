@@ -1,7 +1,7 @@
 //
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 11. 30. 15:02:11
+// Generated on: 2009. 12. 02. 14:47:21
 //
 // The template file is SemanticGraphVisitor.tt 
 //
@@ -23,18 +23,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   public abstract class SemanticGraphVisitor
   {
     public virtual void Visit(AccessorEntity entity) { }
+    public virtual void Visit(ArgumentEntity entity) { }
     public virtual void Visit(ArrayInitializerEntity entity) { }
     public virtual void Visit(ArrayTypeEntity entity) { }
-    public virtual void Visit(BlockEntity entity) { }
+    public virtual void Visit(AssignmentExpressionEntity entity) { }
+    public virtual void Visit(BlockStatementEntity entity) { }
     public virtual void Visit(ChildTypeCapableTypeEntity entity) { }
     public virtual void Visit(ClassEntity entity) { }
     public virtual void Visit(ConstantMemberEntity entity) { }
     public virtual void Visit(ConstructedTypeEntity entity) { }
+    public virtual void Visit(DeclarationSpaceDefiningStatementEntity entity) { }
     public virtual void Visit(DefaultValueExpressionEntity entity) { }
     public virtual void Visit(DelegateEntity entity) { }
     public virtual void Visit(EnumEntity entity) { }
     public virtual void Visit(EnumMemberEntity entity) { }
     public virtual void Visit(ExpressionEntity entity) { }
+    public virtual void Visit(ExpressionStatementEntity entity) { }
     public virtual void Visit(ExternAliasEntity entity) { }
     public virtual void Visit(FieldEntity entity) { }
     public virtual void Visit(FunctionMemberEntity entity) { }
@@ -45,6 +49,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void Visit(IMemberEntity entity) { }
     public virtual void Visit(INamedEntity entity) { }
     public virtual void Visit(InterfaceEntity entity) { }
+    public virtual void Visit(InvocationExpressionEntity entity) { }
     public virtual void Visit(IOverloadableEntity entity) { }
     public virtual void Visit(ISemanticEntity entity) { }
     public virtual void Visit(IVariableEntity entity) { }
@@ -64,6 +69,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void Visit(PrimaryMemberAccessExpressionEntity entity) { }
     public virtual void Visit(PropertyEntity entity) { }
     public virtual void Visit(QualifiedAliasMemberAccessExpressionEntity entity) { }
+    public virtual void Visit(ReturnStatementEntity entity) { }
     public virtual void Visit(RootNamespaceEntity entity) { }
     public virtual void Visit(ScalarInitializerEntity entity) { }
     public virtual void Visit(SemanticEntity entity) { }

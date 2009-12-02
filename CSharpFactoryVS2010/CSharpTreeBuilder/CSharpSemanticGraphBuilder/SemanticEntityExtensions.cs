@@ -19,16 +19,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>A TSemanticEntityType, or null if none found.</returns>
     // ----------------------------------------------------------------------------------------------
     public static TSemanticEntityType GetEnclosing<TSemanticEntityType>(this ISemanticEntity entity)
-      where TSemanticEntityType : SemanticEntity
+      where TSemanticEntityType : ISemanticEntity
     {
       if (entity == null)
       {
-        return null;
+        return default(TSemanticEntityType);
       }
 
       if (entity is TSemanticEntityType)
       {
-        return entity as TSemanticEntityType;
+        return (TSemanticEntityType)entity;
       }
 
       return GetEnclosing<TSemanticEntityType>(entity.Parent);

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SoftwareApproach.TestingExtensions;
 using CSharpTreeBuilder.ProjectContent;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
@@ -53,16 +54,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field_a1 = class_A.GetMember<FieldEntity>("a1");
-      var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
-      var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
-      var memberAccess_N2 = memberAccess_C1.ChildExpression as PrimaryMemberAccessExpressionEntity;
-      var simpleName_N1 = memberAccess_N2.ChildExpression as SimpleNameExpressionEntity;
-
-      (simpleName_N1.ExpressionResult as NamespaceExpressionResult).Namespace.ToString().ShouldEqual("global::N1");
-      (memberAccess_N2.ExpressionResult as NamespaceExpressionResult).Namespace.ToString().ShouldEqual("global::N1.N2");
-      (memberAccess_C1.ExpressionResult as TypeExpressionResult).Type.ToString().ShouldEqual("global::N1.N2.C1");
-      (memberAccess_c1.ExpressionResult as VariableExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
+      var method_M = class_A.GetMember<MethodEntity>("M");
+      var statement = method_M.Body.Statements.ToList()[0] as ExpressionStatementEntity;
+      var assignment = statement.Expression as AssignmentExpressionEntity;
+      var memberAccess_c1 = assignment.RightExpression as MemberAccessExpressionEntity;
       (memberAccess_c1.ExpressionResult as VariableExpressionResult).Variable.ToString().ShouldEqual("global::N1.N2.C1_c1");
     }
 

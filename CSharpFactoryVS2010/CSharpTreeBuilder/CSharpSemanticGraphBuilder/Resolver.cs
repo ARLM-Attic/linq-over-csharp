@@ -50,7 +50,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       TTargetType resolvedEntity = null;
 
       // If the entity is not yet resolved then attempt the resolution.
-      if (ResolutionState != ResolutionState.Resolved)
+      if (ResolutionState == ResolutionState.NotYetResolved)
       {
         try
         {

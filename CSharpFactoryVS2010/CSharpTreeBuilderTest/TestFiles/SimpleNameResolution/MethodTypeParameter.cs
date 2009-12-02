@@ -2,6 +2,6 @@
 {
   void M<T>()
   {
-    var a = default(T);
+    // How to test resolution of T as a SimpleName ???
   }
 }

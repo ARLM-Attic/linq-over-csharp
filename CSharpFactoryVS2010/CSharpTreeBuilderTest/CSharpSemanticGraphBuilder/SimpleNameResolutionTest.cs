@@ -1,4 +1,5 @@
-﻿using CSharpTreeBuilder.CSharpSemanticGraph;
+﻿using System.Linq;
+using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.ProjectContent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -48,9 +49,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var field_a1 = class_A.GetMember<FieldEntity>("a1");
       var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
       var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
-      var simleName_N1 = memberAccess_C1.ChildExpression as SimpleNameExpressionEntity;
+      var simpleName_N1 = memberAccess_C1.ChildExpression as SimpleNameExpressionEntity;
 
-      var namespaceEntity = (simleName_N1.ExpressionResult as NamespaceExpressionResult).Namespace;
+      var namespaceEntity = (simpleName_N1.ExpressionResult as NamespaceExpressionResult).Namespace;
       namespaceEntity.ToString().ShouldEqual("global::N1");
     }
 
@@ -116,15 +117,16 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore]  // Completing this test requires method body and local variable semantic entity handling.
+    [Ignore] // How to test this ???
     public void MethodTypeParameter()
     {
       var project = new CSharpProject(WorkingFolder);
       project.AddFile(@"SimpleNameResolution\MethodTypeParameter.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var classA = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var methodM = classA.GetMethod("M", 1, null);
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var method_M = class_A.GetMember<MethodEntity>("M");
+      // TODO: cont
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -133,10 +135,18 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore]  // Completing this test requires method body and local variable semantic entity handling.
     public void InstanceMember()
     {
-      // TODO
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SimpleNameResolution\InstanceMember.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var method_M = class_A.GetMember<MethodEntity>("M");
+      var statement = method_M.Body.Statements.ToList()[0] as ExpressionStatementEntity;
+      var assignment = statement.Expression as AssignmentExpressionEntity;
+      var simpleName_a = assignment.LeftExpression as SimpleNameExpressionEntity;
+      (simpleName_a.ExpressionResult as VariableExpressionResult).Variable.ToString().ShouldEqual("global::A_a");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -145,10 +155,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore]  // Completing this test requires method body and invocation semantic entity handling.
     public void MethodGroup()
     {
-      // TODO
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SimpleNameResolution\MethodGroup.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var method_M1 = class_A.GetMember<MethodEntity>("M1");
+      var statement = method_M1.Body.Statements.ToList()[0] as ExpressionStatementEntity;
+      var invocation = statement.Expression as InvocationExpressionEntity;
+      var simpleName_a = invocation.ChildExpression as SimpleNameExpressionEntity;
+      var result = simpleName_a.ExpressionResult as MethodGroupExpressionResult;
+      var methods = result.MethodGroup.Methods.ToList();
+      methods.Count.ShouldEqual(1);
+      methods[0].ToString().ShouldEqual("global::A_M2()");
     }
   }
 }

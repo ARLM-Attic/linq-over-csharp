@@ -58,12 +58,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // (Try to resolve to a local variable, parameter or constant.) 
 
-      // TODO:
-      // If K is zero and the simple-name appears within a block and if the block’s (or an enclosing block’s) 
-      // local variable declaration space (§3.3) contains a local variable, parameter or constant with name I, 
-      // then the simple-name refers to that local variable, parameter or constant 
-      // [and is classified as a variable or value].
-
+      var expressionResult = ResolveAtLocalDeclarationSpace(SyntaxNode, context);
+      if (expressionResult != null)
+      {
+        return expressionResult;
+      }
+      
       // (Try to resolve to a method type parameter.)
 
       var typeParameterEntity = ResolveToMethodTypeParameter(SyntaxNode, context);
@@ -74,7 +74,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       // (Try to lookup in type declarations as a type parameter or type member.)
 
-      var expressionResult = ResolveAtTypeDeclarationLevel(SyntaxNode, context, errorHandler);
+      expressionResult = ResolveAtTypeDeclarationLevel(SyntaxNode, context, errorHandler);
       if (expressionResult != null)
       {
         return expressionResult;
@@ -141,6 +141,43 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     }
 
     #region Private methods
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Tries to resolve a simple name to a method type parameter.
+    /// </summary>
+    /// <param name="simpleNameNode">The simple name to resolve.</param>
+    /// <param name="context">The resolution context entity.</param>
+    /// <returns>A type parameter entity, or null if could not resolve.</returns>
+    // ----------------------------------------------------------------------------------------------
+    private static ExpressionResult ResolveAtLocalDeclarationSpace(
+      SimpleNameNode simpleNameNode,
+      ISemanticEntity context)
+    {
+      // If K is zero ...
+      if (!simpleNameNode.HasTypeArguments)
+      {
+        // and the simple-name appears within a block [or any IDefinesLocalVariableDeclarationSpace entity]
+        var enclosingBlock = context.GetEnclosing<IDefinesLocalVariableDeclarationSpace>();
+
+        while (enclosingBlock != null)
+        {
+          // ... and if the block’s (or an enclosing block’s) local variable declaration space (§3.3) 
+          // contains a local variable, parameter or constant with name I, 
+          var namedEntity = enclosingBlock.GetDeclaredEntityByName(simpleNameNode.Identifier);
+          if (namedEntity != null && namedEntity is IVariableEntity)
+          {
+            // then the simple-name refers to that local variable, parameter or constant 
+            // and is classified as a variable or value.
+            return new ValueExpressionResult((namedEntity as IVariableEntity).Type);
+          }
+
+          enclosingBlock = enclosingBlock.Parent.GetEnclosing<IDefinesLocalVariableDeclarationSpace>();
+        }
+      }
+
+      return null;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -244,7 +281,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               // This can only happen when K is zero.
               if (K == 0)
               {
-                return MemberAccessNodeResolver.ResolveMemberAccess(new TypeExpressionResult(T), I, A, K, context, errorHandler);
+                // Create a temporal this access entity and evaluate it, just to be able to use it in ResolveMemberAccess call.
+                var thisAccessEntity = new ThisAccessExpressionEntity {Parent = context};
+                thisAccessEntity.Evaluate(errorHandler);
+
+                return MemberAccessNodeResolver.ResolveMemberAccess(thisAccessEntity.ExpressionResult, I, A, K, context, errorHandler);
               }
 
               throw new ApplicationException(

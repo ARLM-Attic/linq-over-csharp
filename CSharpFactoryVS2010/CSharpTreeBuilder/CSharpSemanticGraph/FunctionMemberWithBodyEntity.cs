@@ -10,7 +10,7 @@
     #region State
 
     /// <summary>Backing field for Body property.</summary>
-    private BlockEntity _Body;
+    private BlockStatementEntity _Body;
 
     #endregion
 
@@ -33,7 +33,7 @@
     {
       if (!isAbstract)
       {
-        Body = new BlockEntity();
+        Body = new BlockStatementEntity();
       }
     }
 
@@ -50,7 +50,7 @@
     {
       if (template.Body != null)
       {
-        Body = (BlockEntity)template.Body.GetGenericClone(typeParameterMap);
+        Body = (BlockStatementEntity)template.Body.GetGenericClone(typeParameterMap);
       }
     }
 
@@ -59,7 +59,7 @@
     /// Gets or sets the body of the function member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockEntity Body
+    public BlockStatementEntity Body
     {
       get
       {

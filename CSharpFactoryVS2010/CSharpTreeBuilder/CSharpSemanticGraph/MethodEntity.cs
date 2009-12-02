@@ -421,6 +421,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         parameter.AcceptVisitor(visitor);
       }
+
+      if (Body != null)
+      {
+        Body.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

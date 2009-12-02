@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Backing field for Body property.</summary>
-    private BlockEntity _Body;
+    private BlockStatementEntity _Body;
 
     /// <summary>Gets or sets the accessor kind.</summary>
     public AccessorKind AccessorKind { get; private set; }
@@ -37,7 +37,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       if (!isAbstract)
       {
-        Body = new BlockEntity();
+        Body = new BlockStatementEntity();
       }
     }
 
@@ -56,7 +56,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       if (template.Body != null)
       {
-        Body = (BlockEntity)template.Body.GetGenericClone(typeParameterMap);
+        Body = (BlockStatementEntity)template.Body.GetGenericClone(typeParameterMap);
       }
     }
 
@@ -79,7 +79,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the body of the accessor.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public BlockEntity Body
+    public BlockStatementEntity Body
     {
       get
       {

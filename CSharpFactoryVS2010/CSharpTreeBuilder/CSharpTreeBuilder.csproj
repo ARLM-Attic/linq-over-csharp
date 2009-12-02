@@ -227,6 +227,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\IDefinesLocalVariableDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolutionAlgorithm.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\InvalidMemberReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\QualifiedAliasMemberNodeResolver.cs" />
@@ -246,6 +247,14 @@
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookupResult.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MethodGroup.cs" />
     <Compile Include="CSharpSemanticGraph\AccessorKind.cs" />
+    <Compile Include="CSharpSemanticGraph\AssignmentExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\ArgumentEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IHasArguments.cs" />
+    <Compile Include="CSharpSemanticGraph\ReturnStatementEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\InvocationExpressionEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IHasStatements.cs" />
+    <Compile Include="CSharpSemanticGraph\ExpressionStatementEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\DeclarationSpaceDefiningStatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\PredefinedTypeMemberAccessExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\QualifiedAliasMemberAccessExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\PrimaryMemberAccessExpressionEntity.cs" />
@@ -310,7 +319,7 @@
     <Compile Include="CSharpSemanticGraph\ArrayTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ChildTypeCapableTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameNodeToNamespaceEntityResolver.cs" />
-    <Compile Include="CSharpSemanticGraph\BlockEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\BlockStatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\AccessorEntity.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SignatureEqualityComparerForDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\DeclarationSpace.cs" />

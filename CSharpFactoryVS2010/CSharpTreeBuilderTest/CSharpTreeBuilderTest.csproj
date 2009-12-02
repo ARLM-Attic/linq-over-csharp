@@ -400,9 +400,11 @@
     <None Include="TestFiles\MemberAccessResolution\PredefinedTypeMemberAccess.cs" />
     <None Include="TestFiles\MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleField.cs" />
     <None Include="TestFiles\MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleClass.cs" />
-    <Compile Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_Instance.cs" />
+    <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_Instance.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <Compile Include="TestFiles\SimpleNameResolution\MethodGroup.cs" />
+    <None Include="TestFiles\SimpleNameResolution\InstanceMember.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToNamespace.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToType.cs" />
     <None Include="TestFiles\SimpleNameResolution\CS0120_StaticMemberExpected.cs" />

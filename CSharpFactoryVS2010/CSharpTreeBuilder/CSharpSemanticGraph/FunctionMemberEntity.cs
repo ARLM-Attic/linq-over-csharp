@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// These are: methods, constructors, properties, indexers, events, operators, and destructors.
   /// </summary>
   // ================================================================================================
-  public abstract class FunctionMemberEntity : NonTypeMemberEntity
+  public abstract class FunctionMemberEntity : NonTypeMemberEntity, IDefinesLocalVariableDeclarationSpace
   {
     #region State
 
@@ -54,6 +54,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       IsVirtual = template.IsVirtual;
       IsOverride = template.IsOverride;
       IsSealed = template.IsSealed;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an entity from the declaration space by name.
+    /// </summary>
+    /// <param name="name">The name of the declared entity.</param>
+    /// <returns>The entity declared with the supplied name or null if no such declaration.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public INamedEntity GetDeclaredEntityByName(string name)
+    {
+      return _DeclarationSpace.GetSingleEntity<INamedEntity>(name);
     }
 
     #region Visitor methods

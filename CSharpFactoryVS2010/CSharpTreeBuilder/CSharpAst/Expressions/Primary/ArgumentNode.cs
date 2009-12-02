@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class ArgumentNode : SyntaxNode<ISyntaxNode>
   {
+    /// <summary>Backing field for Expression property.</summary>
+    private ExpressionNode _Expression;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ArgumentNode"/> class.
@@ -64,10 +67,24 @@ namespace CSharpTreeBuilder.Ast
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the expression between parentheses.
+    /// Gets the expression.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode Expression { get; internal set; }
+    public ExpressionNode Expression
+    {
+      get
+      {
+        return _Expression;
+      }
+      internal set
+      {
+        _Expression = value;
+        if (_Expression != null)
+        {
+          _Expression.ParentNode = this;
+        }
+      }
+    }
 
     #region Visitor methods
 

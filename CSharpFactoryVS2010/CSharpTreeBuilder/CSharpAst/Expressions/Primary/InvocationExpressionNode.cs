@@ -36,6 +36,7 @@ namespace CSharpTreeBuilder.Ast
       }
 
       PrimaryExpression = expressionNode as PrimaryExpressionNodeBase;
+      PrimaryExpression.ParentNode = this;
 
       Arguments = new ArgumentNodeCollection {ParentNode = this};
     }

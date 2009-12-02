@@ -14,6 +14,9 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public class AssignmentExpressionNode : BinaryExpressionNodeBase
   {
+    /// <summary>Backing field for the right operand of the binary operator.</summary>
+    private ExpressionNode _RigthOperand;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="AssignmentExpressionNode"/> class.
@@ -49,7 +52,21 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the right operand of the binary operator.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionNode RightOperand { get; internal set; }
+    public ExpressionNode RightOperand
+    {
+      get
+      {
+        return _RigthOperand;
+      }
+      internal set
+      {
+        _RigthOperand = value;
+        if (_RigthOperand != null)
+        {
+          _RigthOperand.ParentNode = this;
+        }
+      }
+    }
 
     #region Visitor methods
 
