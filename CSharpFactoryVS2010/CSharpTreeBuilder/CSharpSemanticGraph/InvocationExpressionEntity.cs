@@ -22,6 +22,51 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="InvocationExpressionEntity"/> class.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public InvocationExpressionEntity()
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InvocationExpressionEntity"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    private InvocationExpressionEntity(InvocationExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      foreach(var argument in template.Arguments)
+      {
+        _Arguments.Add((ArgumentEntity)argument.GetGenericClone(typeParameterMap));
+      }
+
+      if (template.ChildExpression != null)
+      {
+        ChildExpression = (ExpressionEntity)template.ChildExpression.GetGenericClone(typeParameterMap);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new constructed entity.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new InvocationExpressionEntity(this, typeParameterMap);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Adds a child expression. 
     /// </summary>
     /// <param name="expressionEntity">An expression entity.</param>

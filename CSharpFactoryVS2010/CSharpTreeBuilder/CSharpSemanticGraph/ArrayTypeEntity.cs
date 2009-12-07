@@ -10,6 +10,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class ArrayTypeEntity: ConstructedTypeEntity
   {
+    #region State
+
+    /// <summary>Gets the rank of the array (the number of array dimensions).</summary>
+    public int Rank { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ArrayTypeEntity"/> class.
@@ -22,13 +29,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       Rank = rank;
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the rank of the array (the number of array dimensions).
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public int Rank { get; private set; }
+    
+    // Constructed types are not generic-cloned so no copy constructor here.
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

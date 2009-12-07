@@ -11,6 +11,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class TypedLiteralExpressionEntity : LiteralExpressionEntity
   {
+    #region State
+
+    /// <summary>Gets the reference to the type of the literal.</summary>
+    public Resolver<TypeEntity> TypeReference { get; private set; }
+
+    /// <summary>Gets the value of the literal.</summary>
+    public object Value { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypedLiteralExpressionEntity"/> class.
@@ -31,10 +41,33 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to the type of the literal.
+    /// Initializes a new instance of the <see cref="TypedLiteralExpressionEntity"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public Resolver<TypeEntity> TypeReference { get; private set; }
+    private TypedLiteralExpressionEntity(TypedLiteralExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      TypeReference = template.TypeReference;
+      Value = template.Value;
+
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new constructed entity.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new TypedLiteralExpressionEntity(this, typeParameterMap);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -46,17 +79,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return TypeReference != null && TypeReference.Target != null
-          ? TypeReference.Target.GetMappedType(TypeParameterMap)
+          ? TypeReference.Target
           : null;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the value of the literal.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public object Value { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

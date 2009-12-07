@@ -10,6 +10,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class ConstructedTypeEntity : TypeEntity
   {
+    #region State
+
+    /// <summary>Gets the underlying type that this type builds upon.</summary>
+    public TypeEntity UnderlyingType { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ConstructedTypeEntity"/> class.
@@ -28,12 +35,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       Parent = underlyingType.Parent; 
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the underlying type that this type builds upon.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public TypeEntity UnderlyingType { get; private set; }
+    // Constructed types are not generic-cloned so no copy constructor here.
 
     #region Visitor methods
 

@@ -70,9 +70,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       IsReadOnly = template.IsReadOnly;
       TypeReference = template.TypeReference;
-      
-      // TODO: clone initializer
-      Initializer = template.Initializer;
+
+      if (template.Initializer != null)
+      {
+        Initializer = (VariableInitializer)template.Initializer.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

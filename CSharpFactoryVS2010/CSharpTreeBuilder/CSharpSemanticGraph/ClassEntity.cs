@@ -54,8 +54,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
     }
 
-    #region Constructed entities
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ClassEntity"/> class 
@@ -86,8 +84,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       return new ClassEntity(this, typeParameterMap);
     }
-
-    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

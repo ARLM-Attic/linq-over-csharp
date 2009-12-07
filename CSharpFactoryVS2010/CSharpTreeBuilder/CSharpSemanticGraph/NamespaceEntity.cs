@@ -11,25 +11,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public class NamespaceEntity : NamespaceOrTypeEntity, IHasChildTypes
   {
-    /// <summary>
-    /// A list of extern alias entities.
-    /// </summary>
+    #region State
+
+    /// <summary>A list of extern alias entities.</summary>
     private readonly List<ExternAliasEntity> _ExternAliases;
 
-    /// <summary>
-    /// A list of using alias entities.
-    /// </summary>
+    /// <summary>A list of using alias entities.</summary>
     private readonly List<UsingAliasEntity> _UsingAliases;
 
-    /// <summary>
-    /// A list of using namespace entities.
-    /// </summary>
+    /// <summary>A list of using namespace entities.</summary>
     private readonly List<UsingNamespaceEntity> _UsingNamespaces;
 
-    /// <summary>
-    /// Backing field for ChildEntities property.
-    /// </summary>
+    /// <summary>Backing field for ChildEntities property.</summary>
     private readonly List<TypeEntity> _ChildTypes;
+
+    /// <summary>Gets an iterate-only collection of child namespaces.</summary>
+    public List<NamespaceEntity> ChildNamespaces { get; private set; }
+
+    #endregion 
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -48,6 +47,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       ChildNamespaces = new List<NamespaceEntity>();
     }
 
+    // This type of entity cannot be affected by type arguments, so no generic clone support here.
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a value indicating whether this namespace is explicitly declared in source code 
@@ -61,13 +62,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         return SyntaxNodes.Count > 0;
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets an iterate-only collection of child namespaces.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public List<NamespaceEntity> ChildNamespaces { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -392,6 +386,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         childNamespace.AcceptVisitor(visitor);
       }
 
+      // Child types need special treatment because partial type merging can delete type entities.
       VisitMutableCollection(ChildTypes, visitor);
     }
 

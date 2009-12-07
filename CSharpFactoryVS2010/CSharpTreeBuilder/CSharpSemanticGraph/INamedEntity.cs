@@ -5,7 +5,7 @@
   /// This interface is implemented by semantic entities that have a name.
   /// </summary>
   // ================================================================================================
-  public interface INamedEntity
+  public interface INamedEntity : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -55,8 +55,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       TypeReference = template.TypeReference;
 
-      // TODO: clone initializer
-      InitializerExpression = template.InitializerExpression;
+      if (template.InitializerExpression != null)
+      {
+        InitializerExpression = (ExpressionEntity) template.InitializerExpression.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

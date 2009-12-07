@@ -30,6 +30,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       NamespaceName = namespaceOrTypeName.TypeTags.ToString();
     }
 
+    // Note that this type of entity cannot be affected by type arguments, so no generic clone support here.
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the name of the imported namespace (eg. "A.B").

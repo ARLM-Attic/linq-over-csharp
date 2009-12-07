@@ -24,6 +24,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       LexicalScope = lexicalScope;
     }
 
+    // Note that this type of entity cannot be affected by type arguments, so no generic clone support here.
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the region of program text where this object has effect on.

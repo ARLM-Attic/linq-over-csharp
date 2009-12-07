@@ -11,6 +11,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class PrimaryMemberAccessExpressionEntity : MemberAccessExpressionEntity, IHasExpressions
   {
+    #region State
+
+    /// <summary>Gets or sets the child expression object.</summary>
+    public ExpressionEntity ChildExpression { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="PrimaryMemberAccessExpressionEntity"/> class.
@@ -20,6 +27,37 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public PrimaryMemberAccessExpressionEntity(MemberAccessNodeResolver resolver)
       : base (resolver)
     {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PrimaryMemberAccessExpressionEntity"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    private PrimaryMemberAccessExpressionEntity(PrimaryMemberAccessExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      if (template.ChildExpression != null)
+      {
+        ChildExpression = (ExpressionEntity)template.ChildExpression.GetGenericClone(typeParameterMap);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new constructed entity.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new PrimaryMemberAccessExpressionEntity(this, typeParameterMap);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -52,14 +90,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           : new[] {ChildExpression};
       }
     }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the child expression object.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExpressionEntity ChildExpression { get; private set; }
-
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Evaluates this expression.

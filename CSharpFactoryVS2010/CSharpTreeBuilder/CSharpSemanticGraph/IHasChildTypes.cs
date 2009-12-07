@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This interface is implemented by semantic entities that can have child types.
   /// </summary>
   // ================================================================================================
-  public interface IHasChildTypes
+  public interface IHasChildTypes : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

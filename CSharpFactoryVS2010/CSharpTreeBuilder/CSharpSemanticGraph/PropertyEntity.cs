@@ -21,10 +21,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for SetAccessor property.</summary>
     private FieldEntity _AutoImplementedField;
 
-
-    /// <summary>Gets a value indictaing whether this property is auto-implemented.</summary>
-    public bool IsAutoImplemented { get; private set; }
-
     #endregion
 
     // ----------------------------------------------------------------------------------------------
@@ -54,7 +50,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       base(isDeclaredInSource, accessibility, typeReference, interfaceReference, name)
     {
       _IsStatic = isStatic;
-      IsAutoImplemented = isAutoImplemented;
       
       // If the property is auto-implemented then create the backing field.
       if (isAutoImplemented)
@@ -92,8 +87,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         AutoImplementedField = (FieldEntity)template.AutoImplementedField.GetGenericClone(typeParameterMap);
       }
-
-      IsAutoImplemented = template.IsAutoImplemented;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -133,6 +126,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       }
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a value indictaing whether this property is auto-implemented.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public bool IsAutoImplemented
+    {
+      get { return AutoImplementedField != null; }
+    }
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets or sets the get accessor.
@@ -221,6 +224,21 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      if (AutoImplementedField != null)
+      {
+        AutoImplementedField.AcceptVisitor(visitor);  
+      }
+
+      if (GetAccessor != null)
+      {
+        GetAccessor.AcceptVisitor(visitor);
+      }
+
+      if (SetAccessor != null)
+      {
+        SetAccessor.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

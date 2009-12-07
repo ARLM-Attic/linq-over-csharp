@@ -16,13 +16,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected DeclarationSpace _DeclarationSpace = new LocalVariableDeclarationSpace();
 
     /// <summary>Gets or sets a value indicating whether this member can be overridden.</summary>
-    public virtual bool IsVirtual { get; set; }
+    public bool IsVirtual { get; set; }
 
     /// <summary>Gets or sets a value indicating whether this member is on override of an inherited member.</summary>
-    public virtual bool IsOverride { get; set; }
+    public bool IsOverride { get; set; }
 
     /// <summary>Gets or sets a value indicating whether this member is sealed, meaning that it cannot be overridden.</summary>
-    public virtual bool IsSealed { get; set; }
+    public bool IsSealed { get; set; }
 
     #endregion
 

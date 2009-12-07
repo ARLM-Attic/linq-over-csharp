@@ -5,7 +5,7 @@
   /// This interface is implemented by semantic entities that has a body (which is a block statement).
   /// </summary>
   // ================================================================================================
-  public interface IHasBody
+  public interface IHasBody : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

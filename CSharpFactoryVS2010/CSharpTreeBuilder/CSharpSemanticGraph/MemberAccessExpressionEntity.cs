@@ -11,6 +11,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class MemberAccessExpressionEntity : ExpressionEntity
   {
+    #region State
+
+    /// <summary>Gets or sets the MemberAccessNodeResolver object.</summary>
+    public MemberAccessNodeResolver MemberAccessNodeResolver { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MemberAccessExpressionEntity"/> class.
@@ -29,10 +36,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the MemberAccessNodeResolver object.
+    /// Initializes a new instance of the <see cref="MemberAccessExpressionEntity"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public MemberAccessNodeResolver MemberAccessNodeResolver { get; private set; }
+    protected MemberAccessExpressionEntity(MemberAccessExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      // TODO: do we have to clone resolvers?
+      MemberAccessNodeResolver = template.MemberAccessNodeResolver;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This interface is implemented by semantic entities that can have arguments as child entities.
   /// </summary>
   // ================================================================================================
-  public interface IHasArguments
+  public interface IHasArguments : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This interface is implemented by semantic entities that can have expressions as child entities.
   /// </summary>
   // ================================================================================================
-  public interface IHasExpressions
+  public interface IHasExpressions : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

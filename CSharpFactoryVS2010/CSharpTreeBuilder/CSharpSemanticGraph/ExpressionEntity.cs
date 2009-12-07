@@ -10,12 +10,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class ExpressionEntity : SemanticEntity
   {
+    #region State
+
+    /// <summary>Gets or sets the result obtained by evaluating this expression. Null if not yet evaluated.</summary>
+    public ExpressionResult ExpressionResult { get; protected set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the result obtained by evaluating this expression. Null if not yet evaluated.
+    /// Initializes a new instance of the <see cref="ExpressionEntity"/> class.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public ExpressionResult ExpressionResult { get; protected set; }
+    protected ExpressionEntity()
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ExpressionEntity"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected ExpressionEntity(ExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      // ExpressionResult should not be cloned.
+    }
     
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -10,6 +10,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class ChildTypeCapableTypeEntity : GenericCapableTypeEntity, IHasChildTypes
   {
+    // Child types are stored as members, so no special state here.
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ChildTypeCapableTypeEntity"/> class.
@@ -33,6 +35,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected ChildTypeCapableTypeEntity(ChildTypeCapableTypeEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
+      // Child types are stored and cloned as members, so no special cloneing needed here.
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -147,6 +150,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      // Child types are stored and visited as members, so no special visiting is needed here.
     }
 
     #endregion

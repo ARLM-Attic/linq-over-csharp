@@ -1,5 +1,5 @@
-﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
-using System;
+﻿using System;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -64,8 +64,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       Name = template.Name;
       TypeReference = template.TypeReference;
 
-      // TODO: initializer should be cloned
-      Initializer = template.Initializer;
+      if (template.Initializer != null)
+      {
+        Initializer = (VariableInitializer)template.Initializer.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -122,6 +124,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      if (Initializer != null)
+      {
+        Initializer.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

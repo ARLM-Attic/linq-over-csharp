@@ -1,5 +1,4 @@
 ﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
-using System;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {

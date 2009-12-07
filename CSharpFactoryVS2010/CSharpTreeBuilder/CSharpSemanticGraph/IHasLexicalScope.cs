@@ -5,7 +5,7 @@
   /// This interface defines the behavior of objects that have a lexical scope.
   /// </summary>
   // ================================================================================================
-  public interface IHasLexicalScope
+  public interface IHasLexicalScope : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

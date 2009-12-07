@@ -8,7 +8,7 @@
   /// A partial entity means that it has to merged from multiple declaration segments.
   /// </remarks>
   // ================================================================================================
-  public interface ICanBePartial
+  public interface ICanBePartial : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
-using CSharpTreeBuilder.Helpers;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -65,8 +64,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       (this as IMemberEntity).IsNew = false;
     }
 
-    #region Constructed entities
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="TypeEntity"/> class 
@@ -101,8 +98,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       // ArrayTypes should not be cloned.
       // PointerType should not be cloned.
     }
-
-    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -960,7 +955,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         foreach (var member in Members)
         {
-          (member as SemanticEntity).AcceptVisitor(visitor);
+          member.AcceptVisitor(visitor);
         }
       }
     }

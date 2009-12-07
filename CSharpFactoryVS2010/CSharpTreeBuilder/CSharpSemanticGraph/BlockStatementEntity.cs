@@ -10,8 +10,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class BlockStatementEntity : DeclarationSpaceDefiningStatementEntity, IHasStatements
   {
+    #region State
+
     /// <summary>Backing field for Statements property.</summary>
     private readonly List<StatementEntity> _Statements = new List<StatementEntity>();
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

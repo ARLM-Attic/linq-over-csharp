@@ -52,6 +52,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private AccessorEntity(AccessorEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
+      AccessorKind = template.AccessorKind;
       DeclaredAccessibility = template.DeclaredAccessibility;
 
       if (template.Body != null)
@@ -249,6 +250,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      if (Body != null)
+      {
+        Body.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

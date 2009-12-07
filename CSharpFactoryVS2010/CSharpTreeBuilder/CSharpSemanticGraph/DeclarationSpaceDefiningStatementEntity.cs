@@ -9,9 +9,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class DeclarationSpaceDefiningStatementEntity : StatementEntity, IDefinesLocalVariableDeclarationSpace
   {
+    #region State
+
     /// <summary>The statement's local variable declaration space.</summary>
-    private readonly LocalVariableDeclarationSpace _DeclarationSpace = 
-      new LocalVariableDeclarationSpace();
+    private readonly LocalVariableDeclarationSpace _DeclarationSpace = new LocalVariableDeclarationSpace();
+
+    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -33,6 +36,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected DeclarationSpaceDefiningStatementEntity(DeclarationSpaceDefiningStatementEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
+      // Declaration spaces are intentionally not cloned.
     }
 
     // ----------------------------------------------------------------------------------------------

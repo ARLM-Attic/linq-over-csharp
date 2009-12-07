@@ -81,7 +81,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the body of the function member.
+    /// Gets the accessors of this function member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     public abstract IEnumerable<AccessorEntity> Accessors { get; }

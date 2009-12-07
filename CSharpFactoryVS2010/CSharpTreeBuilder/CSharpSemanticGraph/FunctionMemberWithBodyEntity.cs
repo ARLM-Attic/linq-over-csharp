@@ -98,6 +98,11 @@
     {
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
+
+      if (Body != null)
+      {
+        Body.AcceptVisitor(visitor);
+      }
     }
 
     #endregion

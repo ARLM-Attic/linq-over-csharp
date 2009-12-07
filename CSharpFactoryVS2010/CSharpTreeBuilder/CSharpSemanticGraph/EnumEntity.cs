@@ -9,6 +9,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class EnumEntity : TypeEntity
   {
+    #region State
+
+    /// <summary>Gets or sets the reference to the underlying type of the enum.</summary>
+    public Resolver<TypeEntity> UnderlyingTypeReference { get; set; }
+
+    #endregion 
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumEntity"/> class.
@@ -23,10 +30,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the reference to the underlying type of the enum.
+    /// Initializes a new instance of the <see cref="EnumEntity"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public Resolver<TypeEntity> UnderlyingTypeReference { get; set; }
+    private EnumEntity(EnumEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      UnderlyingTypeReference = template.UnderlyingTypeReference;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new constructed entity.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new EnumEntity(this, typeParameterMap);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

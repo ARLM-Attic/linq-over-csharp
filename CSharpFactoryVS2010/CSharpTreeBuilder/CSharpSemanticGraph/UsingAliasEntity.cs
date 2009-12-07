@@ -11,6 +11,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class UsingAliasEntity : UsingEntity
   {
+    #region State
+
+    /// <summary>Gets the alias name.</summary>
+    public string Alias { get; private set; }
+
+    /// <summary>Gets the reference to the aliased namespace or type entity.</summary>
+    public NamespaceOrTypeNameNodeToNamespaceOrTypeEntityResolver NamespaceOrTypeReference { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="UsingAliasEntity"/> class.
@@ -35,20 +45,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       NamespaceOrTypeReference = new NamespaceOrTypeNameNodeToNamespaceOrTypeEntityResolver(namespaceorTypeName);
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the alias name.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string Alias { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the reference to the aliased namespace or type entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeNameNodeToNamespaceOrTypeEntityResolver NamespaceOrTypeReference { get; private set; }
-
+    // Note that this type of entity cannot be affected by type arguments, so no generic clone support here.
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the aliased namespace entity. Null if not yet resolved, or the entity is not a namespace.

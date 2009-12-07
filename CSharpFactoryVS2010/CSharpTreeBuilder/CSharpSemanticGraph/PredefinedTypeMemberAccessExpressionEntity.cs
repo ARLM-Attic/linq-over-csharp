@@ -11,6 +11,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class PredefinedTypeMemberAccessExpressionEntity : MemberAccessExpressionEntity
   {
+    #region State
+
+    /// <summary>Gets the identifier representing a predefined type.</summary>
+    public string PredefinedTypeName { get; private set; }
+
+    /// <summary>Gets the predefined type entity.</summary>
+    /// <remarks>Propagated by the Evaluate method.</remarks>
+    public TypeEntity PredefinedTypeEntity { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="PredefinedTypeMemberAccessExpressionEntity"/> class.
@@ -27,25 +38,38 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         throw new ArgumentNullException("predefinedTypeName");
       }
+
       PredefinedTypeName = predefinedTypeName;
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the identifier representing a predefined type.
+    /// Initializes a new instance of the <see cref="PredefinedTypeMemberAccessExpressionEntity"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public string PredefinedTypeName { get; private set; }
+    private PredefinedTypeMemberAccessExpressionEntity(PredefinedTypeMemberAccessExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      PredefinedTypeName = template.PredefinedTypeName;
+      PredefinedTypeEntity = template.PredefinedTypeEntity;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the predefined type.
+    /// Creates a new constructed entity.
     /// </summary>
-    /// <remarks>
-    /// Propagated by the Evaluate method.
-    /// </remarks>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity PredefinedTypeEntity { get; private set; }
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new PredefinedTypeMemberAccessExpressionEntity(this, typeParameterMap);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -56,7 +80,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
       // First resolve the qualified alias member.
-      PredefinedTypeEntity = NamespaceOrTypeNameResolutionAlgorithm.ResolveBuiltInTypeName(PredefinedTypeName, SemanticGraph);
+      if (PredefinedTypeEntity == null)
+      {
+        PredefinedTypeEntity = NamespaceOrTypeNameResolutionAlgorithm.ResolveBuiltInTypeName(PredefinedTypeName, SemanticGraph);
+      }
 
       // Then evaluate this expression.
       base.Evaluate(errorHandler);

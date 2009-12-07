@@ -11,6 +11,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class ExternAliasEntity : SemanticEntity, IHasLexicalScope
   {
+    #region State
+
+    /// <summary>Gets the region of program text that is affected by this object.</summary>
+    public SourceRegion LexicalScope { get; private set; }
+
+    /// <summary>Gets the alias name.</summary>
+    public string Alias { get; private set; }
+
+    /// <summary>Gets the reference to a namespace entity.</summary>
+    public ExternAliasNodeToRootNamespaceEntityResolver RootNamespaceReference { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="ExternAliasEntity"/> class.
@@ -34,26 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       Alias = externAliasNode.Identifier;
     }
 
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the region of program text where this object has effect on.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SourceRegion LexicalScope { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the alias name.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string Alias { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the reference to a namespace entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public ExternAliasNodeToRootNamespaceEntityResolver RootNamespaceReference { get; private set; }
+    // This type of entity cannot be affected by type arguments, so no generic clone support here.
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -6,7 +6,7 @@
   /// (either a nested type or a "normal" member like a field or a method).
   /// </summary>
   // ================================================================================================
-  public interface IMemberEntity : IGenericSupportingSemanticEntity, INamedEntity, IHasAccessibility
+  public interface IMemberEntity : IGenericSupportingSemanticEntity, IHasAccessibility
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

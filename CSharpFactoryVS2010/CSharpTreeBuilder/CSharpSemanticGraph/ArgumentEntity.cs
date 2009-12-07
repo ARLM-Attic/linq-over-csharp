@@ -41,6 +41,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(template, typeParameterMap)
     {
       Kind = template.Kind;
+      
+      if (Expression != null)
+      {
+        Expression = (ExpressionEntity) template.Expression.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

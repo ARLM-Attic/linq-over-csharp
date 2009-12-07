@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// interface member.
   /// </summary>
   // ================================================================================================
-  public interface ICanBeExplicitlyImplementedMember
+  public interface ICanBeExplicitlyImplementedMember : IMemberEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

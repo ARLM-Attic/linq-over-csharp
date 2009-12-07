@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -8,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This interface is implemented by semantic entities that can have type parameters.
   /// </summary>
   // ================================================================================================
-  public interface ICanHaveTypeParameters
+  public interface ICanHaveTypeParameters : ISemanticEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

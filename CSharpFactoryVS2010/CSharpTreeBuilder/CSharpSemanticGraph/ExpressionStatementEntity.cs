@@ -37,6 +37,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private ExpressionStatementEntity(ExpressionStatementEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
+      if (template.Expression != null)
+      {
+        Expression = (ExpressionEntity) template.Expression.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

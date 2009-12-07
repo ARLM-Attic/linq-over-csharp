@@ -53,10 +53,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         entity.TypeReference.Resolve(entity, _ErrorHandler);
 
-        if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
+        if (!(entity.Parent is PropertyEntity) &&
+          entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
         {
           var errorPoint = entity.TypeReference is TypeNodeToTypeEntityResolver
-                             ? ((TypeNodeToTypeEntityResolver)entity.TypeReference).SyntaxNode.StartToken
+                             ? ((TypeNodeToTypeEntityResolver) entity.TypeReference).SyntaxNode.StartToken
                              : null;
 
           _ErrorHandler.Error("CS0670", errorPoint, "Field cannot have void type");

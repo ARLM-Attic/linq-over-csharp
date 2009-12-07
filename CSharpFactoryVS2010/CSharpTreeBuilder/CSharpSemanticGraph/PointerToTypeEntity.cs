@@ -1,5 +1,4 @@
-﻿using System.Text;
-using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
+﻿using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -20,6 +19,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(underlyingType)
     {
     }
+
+    // Constructed types are not generic-cloned so no copy constructor here.
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

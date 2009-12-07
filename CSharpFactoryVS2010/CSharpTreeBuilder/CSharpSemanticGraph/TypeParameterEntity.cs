@@ -41,6 +41,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
     }
 
+    // Note that type parameters are not clones, so no copy constructor support here.
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets an iterate-only list of constraints that are specified with type name.

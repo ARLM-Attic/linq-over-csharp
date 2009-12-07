@@ -11,6 +11,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class DefaultValueExpressionEntity : ExpressionEntity
   {
+    #region State
+
+    /// <summary>Gets the reference to a type entity.</summary>
+    public Resolver<TypeEntity> TypeReference { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="DefaultValueExpressionEntity"/> class.
@@ -29,10 +36,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the reference to a type entity.
+    /// Initializes a new instance of the <see cref="DefaultValueExpressionEntity"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public Resolver<TypeEntity> TypeReference { get; private set; }
+    private DefaultValueExpressionEntity(DefaultValueExpressionEntity template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      TypeReference = template.TypeReference;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new constructed entity.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new semantic entity constructed from this entity using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new DefaultValueExpressionEntity(this, typeParameterMap);
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

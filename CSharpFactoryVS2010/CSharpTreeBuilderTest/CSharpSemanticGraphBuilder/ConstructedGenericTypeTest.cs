@@ -269,5 +269,44 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test argument generic cloning.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void Argument()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"ConstructedGenericType\Argument.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 2);
+      var method_D = class_A.GetMember<MethodEntity>("D");
+      var statement = method_D.Body.Statements.ToList()[0] as ExpressionStatementEntity;
+      var invocation = statement.Expression as InvocationExpressionEntity;
+      var memberAccess_M = invocation.ChildExpression as PrimaryMemberAccessExpressionEntity;
+      {
+        var result = memberAccess_M.ExpressionResult as MethodGroupExpressionResult;
+        var instanceExpResult = result.InstanceExpression as VariableExpressionResult;
+        instanceExpResult.Variable.ToString().ShouldEqual("global::B`2[global::System.Int32,global::System.Int64]_a");
+        instanceExpResult.Type.ToString().ShouldEqual("global::A`2[global::System.Int64,global::System.Int32]");
+        var methods = result.MethodGroup.Methods.ToList();
+        methods[0].ToString().ShouldEqual("global::A`2[global::System.Int64,global::System.Int32]_M(global::System.Int64, global::System.Int32)");
+      }
+      var memberAccess_a = memberAccess_M.ChildExpression as PrimaryMemberAccessExpressionEntity;
+      {
+        var result = memberAccess_a.ExpressionResult as VariableExpressionResult;
+        result.Variable.ToString().ShouldEqual("global::B`2[global::System.Int32,global::System.Int64]_a");
+        result.Type.ToString().ShouldEqual("global::A`2[global::System.Int64,global::System.Int32]");
+      }
+      var simpleName_b = memberAccess_a.ChildExpression as SimpleNameExpressionEntity;
+      {
+        var result = simpleName_b.ExpressionResult as VariableExpressionResult;
+        result.Variable.ToString().ShouldEqual("global::A`2_b");
+        result.Type.ToString().ShouldEqual("global::B`2[global::System.Int32,global::System.Int64]");
+      }
+    }
   }
 }
