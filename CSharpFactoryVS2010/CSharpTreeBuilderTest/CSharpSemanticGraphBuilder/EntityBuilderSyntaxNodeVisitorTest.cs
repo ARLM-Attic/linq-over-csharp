@@ -572,7 +572,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           typeParam.IsReferenceType.ShouldBeFalse();
           typeParam.IsValueType.ShouldBeFalse();
           typeParam.BaseTypeReferences.Count().ShouldEqual(0);
-          typeParam.Members.Count().ShouldEqual(0);
+          typeParam.OwnMembers.Count().ShouldEqual(0);
           typeParam.Parent.ShouldEqual(classEntity);
           typeParam.SyntaxNodes.Count.ShouldEqual(1);
           typeParam.SyntaxNodes[0].ShouldEqual(
@@ -646,7 +646,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0];
         classEntity.FullyQualifiedName.ShouldEqual("A");
 
-        var memberArray = classEntity.Members.ToArray();
+        var memberArray = classEntity.OwnMembers.ToArray();
         memberArray.Length.ShouldEqual(9);
         memberArray[0].Name.ShouldEqual("a1");
         memberArray[1].Name.ShouldEqual("a2");
@@ -661,7 +661,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       
       // A a1, a2;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[0] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[0] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a1");
         fieldEntity.IsDeclaredInSource.ShouldBeTrue();
         fieldEntity.Parent.ToString().ShouldEqual("global::A");
@@ -678,7 +678,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // A a1, a2;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[1] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[1] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a2");
         fieldEntity.Parent.ToString().ShouldEqual("global::A");
         fieldEntity.SyntaxNodes.Count.ShouldEqual(1);
@@ -687,43 +687,43 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // static A a3;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[2] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[2] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a3");
         fieldEntity.IsStatic.ShouldBeTrue();
       }
       // new A a4;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[3] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[3] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a4");
         fieldEntity.IsNew.ShouldBeTrue();
       }
       // private A a5;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[4] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[4] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a5");
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Private);
       }
       // protected A a6;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[5] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[5] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a6");
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Family);
       }
       // internal int a7;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[6] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[6] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a7");
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Assembly);
       }
       // protected internal A a8;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[7] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[7] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a8");
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
       }
       // public int a9;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[8] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[8] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a9");
         fieldEntity.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
       }
@@ -733,13 +733,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var structEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[1] as StructEntity;
         structEntity.FullyQualifiedName.ShouldEqual("S");
 
-        var memberArray = structEntity.Members.ToArray();
+        var memberArray = structEntity.OwnMembers.ToArray();
         memberArray.Length.ShouldEqual(1);
         memberArray[0].Name.ShouldEqual("s1");
       }
       // A s1;
       {
-        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[1].Members.ToArray()[0] as FieldEntity;
+        var fieldEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[1].OwnMembers.ToArray()[0] as FieldEntity;
         fieldEntity.Name.ShouldEqual("s1");
         fieldEntity.IsDeclaredInSource.ShouldBeTrue();
         fieldEntity.IsStatic.ShouldBeFalse();
@@ -789,7 +789,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0];
         classEntity.FullyQualifiedName.ShouldEqual("A");
 
-        var memberArray = classEntity.Members.ToArray();
+        var memberArray = classEntity.OwnMembers.ToArray();
         memberArray.Length.ShouldEqual(3);
         memberArray[0].Name.ShouldEqual("a1");
         memberArray[1].Name.ShouldEqual("a2");
@@ -800,7 +800,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // const int a1 = 1, a2 = 2;
       {
-        var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[0] as ConstantMemberEntity;
+        var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[0] as ConstantMemberEntity;
         constEntity.Name.ShouldEqual("a1");
         constEntity.IsDeclaredInSource.ShouldBeTrue();
         constEntity.IsStatic.ShouldBeTrue();
@@ -815,7 +815,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
 
       {
-        var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[1] as ConstantMemberEntity;
+        var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[1] as ConstantMemberEntity;
         constEntity.Name.ShouldEqual("a2");
         constEntity.Parent.ToString().ShouldEqual("global::A");
         constEntity.SyntaxNodes.Count.ShouldEqual(1);
@@ -824,7 +824,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // new const int b = 4;
       {
-        var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].Members.ToArray()[2] as ConstantMemberEntity;
+        var constEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0].OwnMembers.ToArray()[2] as ConstantMemberEntity;
         constEntity.Name.ShouldEqual("b");
         constEntity.IsNew.ShouldBeTrue();
       }
@@ -1127,12 +1127,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var enumDeclarationNode = project.SyntaxTree.CompilationUnitNodes[0].TypeDeclarations[0] as EnumDeclarationNode;
 
       var enumEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0] as EnumEntity;
-      var members = enumEntity.Members.ToList();
+      var members = enumEntity.OwnMembers.ToList();
       members.Count.ShouldEqual(2);
 
       int i = 0;
       {
-        var enumMember = enumEntity.Members.ToList()[i] as EnumMemberEntity;
+        var enumMember = enumEntity.OwnMembers.ToList()[i] as EnumMemberEntity;
         enumMember.Name.ShouldEqual(enumDeclarationNode.Values[i].Identifier);
         enumMember.IsDeclaredInSource.ShouldBeTrue();
         enumMember.IsStatic.ShouldBeTrue();
@@ -1170,7 +1170,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var propertyNode = classNode.MemberDeclarations[0] as PropertyDeclarationNode;
 
         // Check the number of properties and auto-created backing fields
-        var properties = classEntity.Members.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
+        var properties = classEntity.OwnMembers.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
         properties.Count.ShouldEqual(6);
 
         var propertyCounter = 0;
@@ -1259,7 +1259,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var interfaceEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<InterfaceEntity>("I");
 
         // Check the number of properties and auto-created backing fields
-        var properties = interfaceEntity.Members.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
+        var properties = interfaceEntity.OwnMembers.Where(x => x is PropertyEntity).Cast<PropertyEntity>().ToList();
         properties.Count.ShouldEqual(1);
       }
     }
@@ -1290,7 +1290,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         //  void A() { }
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A");
           
           method.IsAbstract.ShouldBeFalse();
@@ -1319,7 +1319,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         //  void A<T1, T2>(long a, ref string b, out float c) 
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A");
           method.IsAbstract.ShouldBeFalse();
           method.IsDeclaredInSource.ShouldBeTrue();
@@ -1372,7 +1372,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // static void A2() { }
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A2");
           method.IsStatic.ShouldBeTrue();
         }
@@ -1381,7 +1381,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // public abstract void A3();
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A3");
           method.IsAbstract.ShouldBeTrue();
         }
@@ -1389,7 +1389,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         i++;
         // public virtual void A4() {}
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A4");
           method.IsVirtual.ShouldBeTrue();
         }
@@ -1397,7 +1397,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         i++;
         // public override void A5() {}
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A5");
           method.IsOverride.ShouldBeTrue();
         }
@@ -1405,7 +1405,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         i++;
         // public new void A6() {}
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("A6");
           method.IsNew.ShouldBeTrue();
         }
@@ -1423,7 +1423,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         //  void B<T1, T2>() {}
         {
-          var method = classEntity.Members.ToList()[i] as MethodEntity;
+          var method = classEntity.OwnMembers.ToList()[i] as MethodEntity;
           method.Name.ShouldEqual("B");
           method.IsAbstract.ShouldBeFalse();
           method.IsDeclaredInSource.ShouldBeTrue();
@@ -1463,7 +1463,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // class A
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0];
-      var members = classEntity.Members.ToList();
+      var members = classEntity.OwnMembers.ToList();
 
       int i = 0;
 
@@ -1582,7 +1582,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // class A
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0];
-      var members = classEntity.Members.ToList();
+      var members = classEntity.OwnMembers.ToList();
 
       int i = 0;
 
@@ -1592,7 +1592,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var expression = initializer.Expression;
         var simpleName = expression as SimpleNameExpressionEntity;
         simpleName.SimpleNameResolver.ShouldNotBeNull();
-        simpleName.ExpressionResult.ShouldBeNull();
         expression.Parent.ShouldEqual(initializer);
       }
     }
@@ -1613,7 +1612,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // class A
       var classEntity = project.SemanticGraph.GlobalNamespace.ChildTypes.ToList()[0];
-      var members = classEntity.Members.ToList();
+      var members = classEntity.OwnMembers.ToList();
 
       int i = 0;
 

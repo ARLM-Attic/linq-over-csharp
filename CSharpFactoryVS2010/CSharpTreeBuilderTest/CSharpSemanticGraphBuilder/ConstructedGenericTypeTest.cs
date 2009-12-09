@@ -57,7 +57,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classB.UnboundGenericTemplate.ShouldBeNull();
 
       // public A<int> b;
-      var fieldB = classB.GetMember<FieldEntity>("b");
+      var fieldB = classB.GetOwnMember<FieldEntity>("b");
       fieldB.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::System.Int32]");
 
       // Constructed type: A<int>
@@ -78,7 +78,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<int> --> public T1 a1;
       {
-        var field = constructedA.GetMember<FieldEntity>("a1");
+        var field = constructedA.GetOwnMember<FieldEntity>("a1");
         // The field inherits the TPM of the constructed class, but it's not the same TPM object.
         tpmComparer.Equals(field.TypeParameterMap, constructedA.TypeParameterMap).ShouldBeTrue();
         field.TypeParameterMap.ShouldNotEqual(constructedA.TypeParameterMap);
@@ -89,7 +89,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // A<int> --> public T1[] a2;
       {
-        var field = constructedA.GetMember<FieldEntity>("a2");
+        var field = constructedA.GetOwnMember<FieldEntity>("a2");
         var templateType = field.TypeReference.Target;
         templateType.ToString().ShouldEqual("global::A`1.T1[]");
         templateType.IsGeneric.ShouldBeFalse();
@@ -105,7 +105,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // A<int> --> public A<T1> a3;
       {
-        var field = constructedA.GetMember<FieldEntity>("a3");
+        var field = constructedA.GetOwnMember<FieldEntity>("a3");
         var templateType = field.TypeReference.Target;
         templateType.ToString().ShouldEqual("global::A`1[global::A`1.T1]");
         templateType.IsGeneric.ShouldBeTrue();
@@ -125,13 +125,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // A<int> --> public A<T1[]> a4;
       {
-        var field = constructedA.GetMember<FieldEntity>("a4");
+        var field = constructedA.GetOwnMember<FieldEntity>("a4");
         field.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::A`1.T1[]]");
         field.Type.ToString().ShouldEqual("global::A`1[global::System.Int32[]]");
       }
       // A<int> --> public A<A<T1>> a5;
       {
-        var field = constructedA.GetMember<FieldEntity>("a5");
+        var field = constructedA.GetOwnMember<FieldEntity>("a5");
         field.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::A`1[global::A`1.T1]]");
         field.TypeReference.Target.IsOpen.ShouldBeTrue();
         field.Type.ToString().ShouldEqual("global::A`1[global::A`1[global::System.Int32]]");
@@ -226,7 +226,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
 
       // public A.B<int>.C.D<long> x1;
-      var fieldX1 = classX.GetMember<FieldEntity>("x1");
+      var fieldX1 = classX.GetOwnMember<FieldEntity>("x1");
       {
         var type = fieldX1.Type;
         type.ToString().ShouldEqual("global::A+B`1[global::System.Int32]+C+D`1[global::System.Int64]");
@@ -248,7 +248,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
 
       // public A.B<int>.C.D<T3> x2;
-      var fieldX2 = classX.GetMember<FieldEntity>("x2");
+      var fieldX2 = classX.GetOwnMember<FieldEntity>("x2");
       {
         var type = fieldX2.Type;
         type.ToString().ShouldEqual("global::A+B`1[global::System.Int32]+C+D`1[global::X`1.T3]");
@@ -283,7 +283,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 2);
-      var method_D = class_A.GetMember<MethodEntity>("D");
+      var method_D = class_A.GetOwnMember<MethodEntity>("D");
       var statement = method_D.Body.Statements.ToList()[0] as ExpressionStatementEntity;
       var invocation = statement.Expression as InvocationExpressionEntity;
       var memberAccess_M = invocation.ChildExpression as PrimaryMemberAccessExpressionEntity;

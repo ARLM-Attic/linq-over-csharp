@@ -63,7 +63,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       ((TypeNodeToTypeEntityResolver)baseTypeRefs[4]).SyntaxNode.TypeName.ToString().ShouldEqual("I3");
 
       // Members should be merged
-      var members = classEntity.Members.ToList();
+      var members = classEntity.OwnMembers.ToList();
       members[0].Name.ShouldEqual("a1");
       members[1].Name.ShouldEqual("a2");
     }

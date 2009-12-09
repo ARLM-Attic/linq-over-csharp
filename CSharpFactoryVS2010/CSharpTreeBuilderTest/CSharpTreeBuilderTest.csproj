@@ -404,6 +404,7 @@
     <None Include="TestFiles\ConstructedGenericType\Argument.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <Compile Include="TestFiles\SimpleNameResolution\TypeParameterUsage.cs" />
     <None Include="TestFiles\SimpleNameResolution\MethodGroup.cs" />
     <None Include="TestFiles\SimpleNameResolution\InstanceMember.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToNamespace.cs" />

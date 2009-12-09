@@ -89,7 +89,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // Merge members
-      foreach (var member in sourceTypeEntity.Members)
+      foreach (var member in sourceTypeEntity.OwnMembers)
       {
         targetTypeEntity.AddMember(member);
       }

@@ -76,28 +76,28 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // E e1 = 0;     // success
       {
-        var field = classA.GetMember<FieldEntity>("e1");
+        var field = classA.GetOwnMember<FieldEntity>("e1");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // E? e2 = 0;    // success
       {
-        var field = classA.GetMember<FieldEntity>("e2");
+        var field = classA.GetOwnMember<FieldEntity>("e2");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // X<E> e3 = 0;  // fails, not enum, or nullable enum
       {
-        var field = classA.GetMember<FieldEntity>("e3");
+        var field = classA.GetOwnMember<FieldEntity>("e3");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
       }
       // E e4 = 1;     // fails, not decimal zero
       {
-        var field = classA.GetMember<FieldEntity>("e4");
+        var field = classA.GetOwnMember<FieldEntity>("e4");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
@@ -122,28 +122,28 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // static int? i1 = 1;
       {
-        var field = classA.GetMember<FieldEntity>("i1");
+        var field = classA.GetOwnMember<FieldEntity>("i1");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       //  static float? i2 = 2;
       {
-        var field = classA.GetMember<FieldEntity>("i2");
+        var field = classA.GetOwnMember<FieldEntity>("i2");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static double? i3 = i2;
       {
-        var field = classA.GetMember<FieldEntity>("i3");
+        var field = classA.GetOwnMember<FieldEntity>("i3");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static float? i4 = i3;  // fails
       {
-        var field = classA.GetMember<FieldEntity>("i4");
+        var field = classA.GetOwnMember<FieldEntity>("i4");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
@@ -168,21 +168,21 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // static int? i1 = null;
       {
-        var field = classA.GetMember<FieldEntity>("i1");
+        var field = classA.GetOwnMember<FieldEntity>("i1");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static int i2 = null; // fails
       {
-        var field = classA.GetMember<FieldEntity>("i2");
+        var field = classA.GetOwnMember<FieldEntity>("i2");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
       }
       // static A i3 = null;
       {
-        var field = classA.GetMember<FieldEntity>("i3");
+        var field = classA.GetOwnMember<FieldEntity>("i3");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
@@ -207,56 +207,56 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // static object i1 = a;   // From any reference-type to object.
       {
-        var field = classA.GetMember<FieldEntity>("i1");
+        var field = classA.GetOwnMember<FieldEntity>("i1");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static Base1 i2 = a;     // From any class-type S to any class-type T, provided S is derived from T.
       {
-        var field = classA.GetMember<FieldEntity>("i2");
+        var field = classA.GetOwnMember<FieldEntity>("i2");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static Base2 i3 = a;     // From any class-type S to any class-type T, provided S is derived from T. (indirectly)
       {
-        var field = classA.GetMember<FieldEntity>("i3");
+        var field = classA.GetOwnMember<FieldEntity>("i3");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static NonBase i4 = a;  // Fails
       {
-        var field = classA.GetMember<FieldEntity>("i4");
+        var field = classA.GetOwnMember<FieldEntity>("i4");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
       }
       // static I1 i3 = a;       // From any class-type S to any interface-type T, provided S implements T.
       {
-        var field = classA.GetMember<FieldEntity>("i5");
+        var field = classA.GetOwnMember<FieldEntity>("i5");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static I2 i4 = a;       // From any class-type S to any interface-type T, provided S implements T. (indirectly)
       {
-        var field = classA.GetMember<FieldEntity>("i6");
+        var field = classA.GetOwnMember<FieldEntity>("i6");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static I2 i5 = i3;      // From any interface-type S to any interface-type T, provided S is derived from T.
       {
-        var field = classA.GetMember<FieldEntity>("i7");
+        var field = classA.GetOwnMember<FieldEntity>("i7");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static INotImplemented i8 = a;  // Fails
       {
-        var field = classA.GetMember<FieldEntity>("i8");
+        var field = classA.GetOwnMember<FieldEntity>("i8");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
@@ -264,42 +264,42 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // static A[] arr3 = arr1;      // Success
       {
-        var field = classA.GetMember<FieldEntity>("arr3");
+        var field = classA.GetOwnMember<FieldEntity>("arr3");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static Base1[] arr4 = arr1;  // Success
       {
-        var field = classA.GetMember<FieldEntity>("arr4");
+        var field = classA.GetOwnMember<FieldEntity>("arr4");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static Base2[] arr5 = arr1;  // Success
       {
-        var field = classA.GetMember<FieldEntity>("arr5");
+        var field = classA.GetOwnMember<FieldEntity>("arr5");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static A[] arr6 = arr2;      // Fails, rank mismatch
       {
-        var field = classA.GetMember<FieldEntity>("arr6");
+        var field = classA.GetOwnMember<FieldEntity>("arr6");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeFalse();
       }
       //  static System.Array arr7 = arr2;  // Success
       {
-        var field = classA.GetMember<FieldEntity>("arr7");
+        var field = classA.GetOwnMember<FieldEntity>("arr7");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();
       }
       // static System.ICloneable arr8 = arr2; // Success
       {
-        var field = classA.GetMember<FieldEntity>("arr8");
+        var field = classA.GetOwnMember<FieldEntity>("arr8");
         var type = field.Type;
         var expression = (field.Initializer as ScalarInitializerEntity).Expression;
         typeConverter.ImplicitConversionExists(expression, type).ShouldBeTrue();

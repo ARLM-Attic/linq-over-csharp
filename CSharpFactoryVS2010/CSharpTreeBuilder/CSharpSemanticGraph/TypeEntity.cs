@@ -18,8 +18,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Backing field for BaseTypeReferences property.</summary>
     private List<Resolver<TypeEntity>> _BaseTypeReferences = new List<Resolver<TypeEntity>>();
 
-    /// <summary>Backing field for Members property.</summary>
-    private readonly List<IMemberEntity> _Members = new List<IMemberEntity>();
+    /// <summary>Backing field for OwnMembers property.</summary>
+    private readonly List<IMemberEntity> _OwnMembers = new List<IMemberEntity>();
 
     /// <summary>
     /// A flag for lazy importing reflected members (expensive operation).
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       // because that also handles lazy importing,
       // and cloned members should be added through the AddMember method,
       // because that also handles registering into the declaration space.
-      foreach (var member in template.Members)
+      foreach (var member in template.OwnMembers)
       {
         // The template member can introduce new type parameters, 
         // so we have to combine the template member's TypeParameterMap with the current typeParameterMap.
@@ -538,16 +538,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets an iterate-only collection of members.
+    /// Gets an iterate-only collection of own members.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public virtual IEnumerable<IMemberEntity> Members
+    public virtual IEnumerable<IMemberEntity> OwnMembers
     {
       get 
       {
         LazyImportReflectedMembers();
 
-        return _Members; 
+        return _OwnMembers; 
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an iterate-only collection of members (both own and inherited).
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public virtual IEnumerable<IMemberEntity> Members
+    {
+      get
+      {
+        return BaseClass != null
+          ? _OwnMembers.Union(BaseClass.Members)
+          : _OwnMembers;
       }
     }
 
@@ -562,7 +577,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       BeforeAddMember(memberEntity);
 
-      _Members.Add(memberEntity);
+      _OwnMembers.Add(memberEntity);
       memberEntity.Parent = this;
 
       // Register into the declaration space only if it's not an explicitly implemented interface member
@@ -591,25 +606,41 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveMember(IMemberEntity memberEntity)
     {
-      _Members.Remove(memberEntity);
+      _OwnMembers.Remove(memberEntity);
       memberEntity.Parent = null;
       _DeclarationSpace.Unregister(memberEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a member by name.
+    /// Gets an own member by name.
     /// </summary>
     /// <typeparam name="TEntityType">The type of member to found.</typeparam>
     /// <param name="name">The name of the member to found.</param>
     /// <returns>The found member, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public TEntityType GetMember<TEntityType>(string name)
+    public TEntityType GetOwnMember<TEntityType>(string name)
       where TEntityType : class, IMemberEntity
     {
       LazyImportReflectedMembers();
 
       return _DeclarationSpace.GetSingleEntity<TEntityType>(name);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a collection of own members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <returns>A collection of the found members. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerable<TEntityType> GetOwnMembers<TEntityType>(string name)
+      where TEntityType : IMemberEntity
+    {
+      LazyImportReflectedMembers();
+
+      return _DeclarationSpace.GetEntities<TEntityType>(name);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -623,19 +654,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public IEnumerable<TEntityType> GetMembers<TEntityType>(string name)
       where TEntityType : IMemberEntity
     {
-      LazyImportReflectedMembers();
-
-      return _DeclarationSpace.GetEntities<TEntityType>(name);
+      return BaseClass == null
+               ? GetOwnMembers<TEntityType>(name)
+               : GetOwnMembers<TEntityType>(name).Union(BaseClass.GetMembers<TEntityType>(name));
     }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a method by signature.
+    /// Gets a collection of members by name.
+    /// </summary>
+    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
+    /// <param name="name">The name of the members to found.</param>
+    /// <returns>A collection of the found members. Can be empty.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public TEntityType GetMember<TEntityType>(string name)
+      where TEntityType : IMemberEntity
+    {
+      var memberList = GetMembers<TEntityType>(name);
+
+      if (memberList.Count() > 1)
+      {
+        throw new AmbiguousDeclarationsException(memberList.Cast<INamedEntity>());
+      }
+
+      return memberList.FirstOrDefault();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an own method by signature.
     /// </summary>
     /// <param name="signature">A signature.</param>
     /// <returns>The found method, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public MethodEntity GetMethod(Signature signature)
+    public MethodEntity GetOwnMethod(Signature signature)
     {
       LazyImportReflectedMembers();
       
@@ -644,14 +696,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a method by signature components (name, number of type parameters, parameters).
+    /// Gets an own method by signature components (name, number of type parameters, parameters).
     /// </summary>
     /// <param name="name">The name of the method.</param>
     /// <param name="typeParameterCount">The number of type parameters of the method.</param>
     /// <param name="parameterFilters">Any number of parameter filters (ie. type + kind pairs).</param>
     /// <returns>The found method, or null if not found.</returns>
     // ----------------------------------------------------------------------------------------------
-    public MethodEntity GetMethod(string name, int typeParameterCount, params ParameterFilter[] parameterFilters)
+    public MethodEntity GetOwnMethod(string name, int typeParameterCount, params ParameterFilter[] parameterFilters)
     {
       var parameters = new List<ParameterEntity>();
       
@@ -664,7 +716,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         }
       }
       
-      return GetMethod(new Signature(name, typeParameterCount, parameters));
+      return GetOwnMethod(new Signature(name, typeParameterCount, parameters));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -680,15 +732,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// If getting a method then assumes zero type parameters and zero parameters.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public TEntityType GetMember<TEntityType>(string name, TypeEntity implementedInterface)
+    public TEntityType GetExplicitlyImplementedMember<TEntityType>(string name, TypeEntity implementedInterface)
       where TEntityType : NonTypeMemberEntity, ICanBeExplicitlyImplementedMember
     {
       if (typeof(TEntityType) == typeof(MethodEntity))
       {
-        return GetMethod(new Signature(name, 0, null), implementedInterface) as TEntityType;
+        return GetExplicitlyImplementedMethod(new Signature(name, 0, null), implementedInterface) as TEntityType;
       }
 
-      var members = (from member in Members
+      var members = (from member in OwnMembers
                      where (member is TEntityType)
                            && (member as TEntityType).Interface == implementedInterface
                            && member.Name == name
@@ -713,11 +765,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Throws AmbiguousDeclarationsException if there are more then one matching entities.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public MethodEntity GetMethod(Signature signature, TypeEntity implementedInterface)
+    public MethodEntity GetExplicitlyImplementedMethod(Signature signature, TypeEntity implementedInterface)
     {
       var comparer = new SignatureEqualityComparerForCompleteMatching();
 
-      var methods = (from member in Members
+      var methods = (from member in OwnMembers
                      where (member is MethodEntity)
                            && (member as MethodEntity).Interface == implementedInterface
                            && comparer.Equals((member as MethodEntity).Signature, signature)
@@ -738,41 +790,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <typeparam name="TEntityType">The type of members to found.</typeparam>
     /// <param name="name">The name of the members to found.</param>
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
-    /// <returns>A collection of accessible members with a given name. Can be empty.</returns>
+    /// <returns>A collection of accessible inherited members with a given name. Can be empty.</returns>
     // ----------------------------------------------------------------------------------------------
     public IEnumerable<TEntityType> GetAccessibleMembers<TEntityType>(string name, ISemanticEntity accessingEntity)
       where TEntityType : IMemberEntity
     {
-      var result = new HashSet<TEntityType>();
-
-      foreach (var entity in GetMembers<TEntityType>(name))
-      {
-        if (entity.IsAccessibleBy(accessingEntity))
-        {
-          result.Add(entity);
-        }
-      }
-
-      return result;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets a collection of accessible inherited members by name.
-    /// </summary>
-    /// <typeparam name="TEntityType">The type of members to found.</typeparam>
-    /// <param name="name">The name of the members to found.</param>
-    /// <param name="accessingEntity">An entity for accessibility checking.</param>
-    /// <returns>A collection of accessible inherited members with a given name. Can be empty.</returns>
-    // ----------------------------------------------------------------------------------------------
-    public IEnumerable<TEntityType> GetAccessibleInheritedMembers<TEntityType>(
-      string name, ISemanticEntity accessingEntity)
-      where TEntityType : IMemberEntity
-    {
-      return (BaseClass == null)
-        ? new List<TEntityType>()
-        : BaseClass.GetAccessibleMembers<TEntityType>(name, accessingEntity)
-          .Union(BaseClass.GetAccessibleInheritedMembers<TEntityType>(name, accessingEntity));
+      return GetMembers<TEntityType>(name).Where(x => x.IsAccessibleBy(accessingEntity));
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -953,7 +976,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       // Visit members only if those are not subject of lazy importing.
       if (_ReflectedMembersImported || ReflectedMetadata == null)
       {
-        foreach (var member in Members)
+        foreach (var member in OwnMembers)
         {
           member.AcceptVisitor(visitor);
         }

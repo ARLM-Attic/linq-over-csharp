@@ -28,7 +28,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field_a1 = class_A.GetMember<FieldEntity>("a1");
+      var field_a1 = class_A.GetOwnMember<FieldEntity>("a1");
       var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
       var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
       var memberAccess_N2 = memberAccess_C1.ChildExpression as PrimaryMemberAccessExpressionEntity;
@@ -54,7 +54,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var method_M = class_A.GetMember<MethodEntity>("M");
+      var method_M = class_A.GetOwnMember<MethodEntity>("M");
       var statement = method_M.Body.Statements.ToList()[0] as ExpressionStatementEntity;
       var assignment = statement.Expression as AssignmentExpressionEntity;
       var memberAccess_c1 = assignment.RightExpression as MemberAccessExpressionEntity;
@@ -77,7 +77,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       //  private static int a1 = global::N1.N2.C1.c1;
       {
-        var field_a1 = class_A.GetMember<FieldEntity>("a1");
+        var field_a1 = class_A.GetOwnMember<FieldEntity>("a1");
         var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
         var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
         var memberAccess_N2 = memberAccess_C1.ChildExpression as QualifiedAliasMemberAccessExpressionEntity;
@@ -89,7 +89,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       //  private static int a2 = N1_Alias::N2.N3.D1.d1;
       {
-        var field_a2 = class_A.GetMember<FieldEntity>("a2");
+        var field_a2 = class_A.GetOwnMember<FieldEntity>("a2");
         var memberAccess_d1 = (field_a2.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
         var memberAccess_D1 = memberAccess_d1.ChildExpression as PrimaryMemberAccessExpressionEntity;
         var memberAccess_N3 = memberAccess_D1.ChildExpression as QualifiedAliasMemberAccessExpressionEntity;
@@ -101,7 +101,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       //  private static int a3 = N1_Alias::N2.C1.c1;
       {
-        var field_a3 = class_A.GetMember<FieldEntity>("a3");
+        var field_a3 = class_A.GetOwnMember<FieldEntity>("a3");
         var memberAccess_c1 = (field_a3.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
         var memberAccess_C1 = memberAccess_c1.ChildExpression as QualifiedAliasMemberAccessExpressionEntity;
 
@@ -111,7 +111,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       //  private static int a4 = N2_Alias::C1.c1;
       {
-        var field_a4 = class_A.GetMember<FieldEntity>("a4");
+        var field_a4 = class_A.GetOwnMember<FieldEntity>("a4");
         var memberAccess_c1 = (field_a4.Initializer as ScalarInitializerEntity).Expression as QualifiedAliasMemberAccessExpressionEntity;
 
         (memberAccess_c1.ExpressionResult as VariableExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
@@ -119,7 +119,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       //  private static int a5 = global::E<int, long>.e;
       {
-        var field_a5 = class_A.GetMember<FieldEntity>("a5");
+        var field_a5 = class_A.GetOwnMember<FieldEntity>("a5");
         var memberAccess_e = (field_a5.Initializer as ScalarInitializerEntity).Expression as QualifiedAliasMemberAccessExpressionEntity;
 
         (memberAccess_e.ExpressionResult as VariableExpressionResult).Type.ToString().ShouldEqual("global::System.Int32");
@@ -143,7 +143,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       //  static int a = int.MaxValue;
       {
-        var field_a = class_A.GetMember<FieldEntity>("a");
+        var field_a = class_A.GetOwnMember<FieldEntity>("a");
         var memberAccess = (field_a.Initializer as ScalarInitializerEntity).Expression as PredefinedTypeMemberAccessExpressionEntity;
 
         memberAccess.PredefinedTypeEntity.ToString().ShouldEqual("global::System.Int32");

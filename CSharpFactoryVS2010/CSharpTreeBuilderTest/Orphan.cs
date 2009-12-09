@@ -175,7 +175,7 @@ namespace CSharpTreeBuilderTest
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
       {
-        var method = classEntity.Members.ToList()[0] as MethodEntity;
+        var method = classEntity.OwnMembers.ToList()[0] as MethodEntity;
         method.IsPartial.ShouldBeTrue();
         method.IsAbstract.ShouldBeTrue();
 
@@ -191,7 +191,7 @@ namespace CSharpTreeBuilderTest
       }
 
       {
-        var method = classEntity.Members.ToList()[1] as MethodEntity;
+        var method = classEntity.OwnMembers.ToList()[1] as MethodEntity;
         method.IsPartial.ShouldBeTrue();
         method.IsAbstract.ShouldBeFalse();
 

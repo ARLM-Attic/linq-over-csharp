@@ -48,7 +48,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 1);
-      var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
+      var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
       fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::A`1.T1");
     }
@@ -194,7 +194,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // sbyte a1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a1");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -208,7 +208,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // byte a2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a2");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -221,7 +221,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // short a3;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a3");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -234,7 +234,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // ushort a4;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a4");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -247,7 +247,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // int a5;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a5");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -260,7 +260,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // uint a6;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a6");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -273,7 +273,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // long a7;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a7");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -286,7 +286,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // ulong a8;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a8");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -299,7 +299,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // char a9;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a9");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -312,7 +312,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // float a10;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a10");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -325,7 +325,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // double a11;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a11");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -338,7 +338,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // bool a12;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a12");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -351,7 +351,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // decimal a13;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a13");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as StructEntity;
@@ -364,7 +364,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // object a14;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a14");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as ClassEntity;
@@ -377,7 +377,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // string a15;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a15");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var typeEntity = fieldEntity.TypeReference.Target as ClassEntity;
@@ -391,7 +391,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // int? a16;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a16");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var nullable = fieldEntity.TypeReference.Target as StructEntity;
@@ -405,7 +405,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // int*[] a17;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a17");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array = fieldEntity.TypeReference.Target as ArrayTypeEntity;
@@ -460,11 +460,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var underlyingType = project.SemanticGraph.GlobalNamespace.GetSingleChildType<StructEntity>("A2");
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
-      var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
+      var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
       fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       var pointer1 = fieldEntity.TypeReference.Target as PointerToTypeEntity;
       pointer1.BaseTypeReferences.Count().ShouldEqual(0);
-      pointer1.Members.Count().ShouldEqual(0);
+      pointer1.OwnMembers.Count().ShouldEqual(0);
       pointer1.Name.ShouldEqual("A2");
       pointer1.FullyQualifiedName.ShouldEqual("A2");
       pointer1.ToString().ShouldEqual("global::A2**");
@@ -476,7 +476,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var pointer2 = pointer1.UnderlyingType as PointerToTypeEntity;
       pointer2.BaseTypeReferences.Count().ShouldEqual(0);
-      pointer2.Members.Count().ShouldEqual(0);
+      pointer2.OwnMembers.Count().ShouldEqual(0);
       pointer2.Name.ShouldEqual("A2");
       pointer2.FullyQualifiedName.ShouldEqual("A2");
       pointer2.ToString().ShouldEqual("global::A2*");
@@ -502,11 +502,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       {
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
-        var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var pointer1 = fieldEntity.TypeReference.Target as PointerToTypeEntity;
         pointer1.BaseTypeReferences.Count().ShouldEqual(0);
-        pointer1.Members.Count().ShouldEqual(0);
+        pointer1.OwnMembers.Count().ShouldEqual(0);
         pointer1.FullyQualifiedName.ShouldEqual("System.Void");
         pointer1.ToString().ShouldEqual("global::System.Void*");
         pointer1.Name.ShouldEqual("Void");
@@ -538,7 +538,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A2? a1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a1");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var nullable = fieldEntity.TypeReference.Target;
@@ -560,7 +560,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // A2?[] a2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[1] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[1] as FieldEntity;
         fieldEntity.Name.ShouldEqual("a2");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array = fieldEntity.TypeReference.Target as ArrayTypeEntity;
@@ -568,7 +568,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         array.UnderlyingOfNullableType.ShouldBeNull();
         var nullable = array.UnderlyingType;
         nullable.DirectGenericTemplate.ShouldEqual(project.SemanticGraph.NullableGenericTypeDefinition);
-        nullable.ShouldEqual(classEntity.GetMember<FieldEntity>("a1").Type);
+        nullable.ShouldEqual(classEntity.GetOwnMember<FieldEntity>("a1").Type);
       }
     }
 
@@ -588,11 +588,11 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A2[][,] a1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array1 = fieldEntity.TypeReference.Target as ArrayTypeEntity;
         array1.BaseClass.FullyQualifiedName.ShouldEqual("System.Array");
-        array1.Members.Count().ShouldEqual(0);
+        array1.OwnMembers.Count().ShouldEqual(0);
         array1.Name.ShouldEqual("A2");
         array1.FullyQualifiedName.ShouldEqual("A2");
         array1.ToString().ShouldEqual("global::A2[][,]");
@@ -615,7 +615,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // A2**[][,] a2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[1] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[1] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array1 = fieldEntity.TypeReference.Target as ArrayTypeEntity;
         array1.ToString().ShouldEqual("global::A2**[][,]");
@@ -684,32 +684,32 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // E x1;
       {
-        var field = classA.Members.ToArray()[i++] as FieldEntity;
+        var field = classA.OwnMembers.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.Target.ToString().ShouldEqual("global::C+E");
       }
       // E<int> x2;
       {
-        var field = classA.Members.ToArray()[i++] as FieldEntity;
+        var field = classA.OwnMembers.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.Target.ToString().ShouldEqual("global::C+E`1[global::System.Int32]");
         field.TypeReference.Target.DirectGenericTemplate.ToString().ShouldEqual("global::C+E`1");
       }
       // F.G x3;
       {
-        var field = classA.Members.ToArray()[i++] as FieldEntity;
+        var field = classA.OwnMembers.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.Target.ToString().ShouldEqual("global::D+F+G");
       }
       // F<int>.G x4;
       {
-        var field = classA.Members.ToArray()[i++] as FieldEntity;
+        var field = classA.OwnMembers.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.Target.ToString().ShouldEqual("global::D+F`1[global::System.Int32]+G");
       }
       // F<int>.G<int> x5;
       {
-        var field = classA.Members.ToArray()[i++] as FieldEntity;
+        var field = classA.OwnMembers.ToArray()[i++] as FieldEntity;
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.Target.ToString().ShouldEqual("global::D+F`1[global::System.Int32]+G`1[global::System.Int32]");
         field.TypeReference.Target.DirectGenericTemplate.ToString().ShouldEqual("global::D+F`1[global::System.Int32]+G`1[global::D+F`1+G`1.T3]");
@@ -771,7 +771,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classA = project.SemanticGraph.GlobalNamespace.GetChildNamespace("N").GetSingleChildType<ClassEntity>("A", 2);
-      var fields = classA.Members.ToArray();
+      var fields = classA.OwnMembers.ToArray();
       var classB1 = classA.GetSingleChildType<ClassEntity>("B1");
       var classB2 = classA.GetSingleChildType<ClassEntity>("B2", 1);
       var classB3 = classA.GetSingleChildType<ClassEntity>("B3", 1);
@@ -905,7 +905,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<A1, A2> a1; --> public class B1
       {
-        var type = (classA.GetMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B1");
+        var type = (classA.GetOwnMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B1");
         type.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B1");
         type.IsOpen.ShouldBeFalse();
         type.HasGenericTemplate.ShouldBeTrue();
@@ -914,7 +914,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<A1, A2> a1; --> public class B2<T1>
       {
-        var type = (classA.GetMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B2", 1);
+        var type = (classA.GetOwnMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B2", 1);
         type.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B2`1[global::N.A`2+B2`1.T1]");
         type.IsOpen.ShouldBeTrue();
         type.HasGenericTemplate.ShouldBeTrue();
@@ -923,7 +923,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<A1, A2> a1; --> A<A1, A2>.B2<A3> b2;
       {
-        var type = classA.GetMember<FieldEntity>("a1").Type.GetMember<FieldEntity>("b2").Type;
+        var type = classA.GetOwnMember<FieldEntity>("a1").Type.GetOwnMember<FieldEntity>("b2").Type;
         type.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B2`1[global::N.A3]");
         type.IsOpen.ShouldBeFalse();
         type.HasGenericTemplate.ShouldBeTrue();
@@ -944,7 +944,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var structEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<StructEntity>("A");
-      var fields = structEntity.Members.ToArray();
+      var fields = structEntity.OwnMembers.ToArray();
       int i = 0;
 
       // B<int> a;
@@ -978,7 +978,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
 
-      var fieldEntity = classEntity.Members.ToArray()[0] as FieldEntity;
+      var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
       fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       var typeEntity = fieldEntity.TypeReference.Target as ClassEntity;
       typeEntity.ShouldNotBeNull();
@@ -1010,7 +1010,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::A.B+C");
     }
@@ -1030,7 +1030,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::D+C");
     }
@@ -1050,7 +1050,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::A.C");
     }
@@ -1070,7 +1070,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::E");
     }
@@ -1090,7 +1090,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::N.C");
     }
@@ -1110,7 +1110,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::C");
     }
@@ -1130,7 +1130,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::E");
     }
@@ -1150,7 +1150,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(0);
       project.Warnings.Count.ShouldEqual(0);
 
-      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].Members.ToList()[0] as FieldEntity;
+      var field = project.SemanticGraph.GlobalNamespace.GetChildNamespace("A").ChildTypes.ToList()[0].OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::N.C");
     }
@@ -1222,7 +1222,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Warnings.Count.ShouldEqual(0);
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field = classEntity.Members.ToList()[0] as FieldEntity;
+      var field = classEntity.OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::B.C+D");
     }
@@ -1244,7 +1244,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
 
-      var field = classEntity.Members.ToList()[0] as FieldEntity;
+      var field = classEntity.OwnMembers.ToList()[0] as FieldEntity;
       field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
       field.TypeReference.Target.ToString().ShouldEqual("global::B.C`1[global::System.Int32]+D`1[global::System.Int64]");
     }
@@ -1433,13 +1433,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // A5<int> a5;
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A8");
-        var field = entity.GetMember<FieldEntity>("a5");
+        var field = entity.GetOwnMember<FieldEntity>("a5");
         field.Type.BaseClass.FullyQualifiedName.ShouldEqual("System.Object");
       }
       // A6<int> a6;
       {
         var entity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A8");
-        var field = entity.GetMember<FieldEntity>("a6");
+        var field = entity.GetOwnMember<FieldEntity>("a6");
         field.Type.BaseClass.FullyQualifiedName.ShouldEqual("System.ValueType");
       }
     }
@@ -1698,31 +1698,31 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // global::A x1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::A");
       }
       // global::B<int> x2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::B`1[global::System.Int32]");
       }
       // global::C.D x3;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::C.D");
       }
       // global::C.E<int> x4;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::C.E`1[global::System.Int32]");
       }
       // global::C.E<int>.F<long> x5;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::C.E`1[global::System.Int32]+F`1[global::System.Int64]");
       }
@@ -1764,14 +1764,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // MyExternAlias::Class0 x0;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ShouldEqual(
           project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetSingleChildType<ClassEntity>("Class0"));
       }
       // MyExternAlias::A.B.Class1 x1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ShouldEqual(
           project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildNamespace("A")
@@ -1779,7 +1779,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // MyExternAlias::A.B.Generic1<int,long> x2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("MyExternAlias::A.B.Generic1`2[global::System.Int32,global::System.Int64]");
       }
@@ -1791,14 +1791,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // MyExternAlias::Class0 x0;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ShouldEqual(
           project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetSingleChildType<ClassEntity>("Class0"));
       }
       // MyExternAlias::A.B.Class1 x1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ShouldEqual(
           project.SemanticGraph.GetRootNamespaceByName("MyExternAlias").GetChildNamespace("A")
@@ -1806,7 +1806,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       }
       // MyExternAlias::A.B.Generic1<int,long> x2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("MyExternAlias::A.B.Generic1`2[global::System.Int32,global::System.Int64]");
       }
@@ -1856,19 +1856,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // X::Y1 x0;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::Y.Y1");
       }
       // X::V.W.Y2 x1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::Y.V.W.Y2");
       }
       // X::Y3<int,long> x2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::Y.Y3`2[global::System.Int32,global::System.Int64]");
       }
@@ -1879,19 +1879,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // X::Y1 x0;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::Y.Y1");
       }
       // X::V.W.Y2 x1;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::Y.V.W.Y2");
       }
       // X::Y3<int,long> x2;
       {
-        var fieldEntity = classEntity.Members.ToArray()[i++] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToArray()[i++] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         fieldEntity.TypeReference.Target.ToString().ShouldEqual("global::Y.Y3`2[global::System.Int32,global::System.Int64]");
       }
@@ -1913,13 +1913,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var enumEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<EnumEntity>("A");
         enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         enumEntity.UnderlyingTypeReference.Target.FullyQualifiedName.ShouldEqual("System.Int32");
-        (enumEntity.Members.ToList()[0] as EnumMemberEntity).TypeReference.ShouldEqual(enumEntity.UnderlyingTypeReference);
+        (enumEntity.OwnMembers.ToList()[0] as EnumMemberEntity).TypeReference.ShouldEqual(enumEntity.UnderlyingTypeReference);
       }
       {
         var enumEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<EnumEntity>("B");
         enumEntity.UnderlyingTypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         enumEntity.UnderlyingTypeReference.Target.FullyQualifiedName.ShouldEqual("System.Int64");
-        (enumEntity.Members.ToList()[0] as EnumMemberEntity).TypeReference.ShouldEqual(enumEntity.UnderlyingTypeReference);
+        (enumEntity.OwnMembers.ToList()[0] as EnumMemberEntity).TypeReference.ShouldEqual(enumEntity.UnderlyingTypeReference);
       }
     }
 
@@ -1983,7 +1983,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // int B { get; set; }
       {
-        var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+        var propertyEntity = classEntity.OwnMembers.ToList()[i] as PropertyEntity;
         propertyEntity.IsInvocable.ShouldBeFalse();
 
         // Check property type resolution
@@ -1996,14 +1996,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         propertyEntity.Interface.ShouldBeNull();
 
         // Check that the property can be retrieved by name.
-        classEntity.GetMember<PropertyEntity>(propertyEntity.Name).ShouldEqual(propertyEntity);
+        classEntity.GetOwnMember<PropertyEntity>(propertyEntity.Name).ShouldEqual(propertyEntity);
       }
 
       i++;
 
       // int I.B { get; set; }
       {
-        var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+        var propertyEntity = classEntity.OwnMembers.ToList()[i] as PropertyEntity;
 
         // Check property type resolution
         propertyEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
@@ -2015,14 +2015,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         propertyEntity.Interface.ToString().ShouldEqual("global::C.I`1[global::System.Int32]");
 
         // Check that the property can be retrieved by name.
-        classEntity.GetMember<PropertyEntity>(propertyEntity.Name, propertyEntity.Interface).ShouldEqual(propertyEntity);
+        classEntity.GetExplicitlyImplementedMember<PropertyEntity>(propertyEntity.Name, propertyEntity.Interface).ShouldEqual(propertyEntity);
       }
 
       i++;
 
       // D DP { get; set; } // D is a delegate, so DP is invocable
       {
-        var propertyEntity = classEntity.Members.ToList()[i] as PropertyEntity;
+        var propertyEntity = classEntity.OwnMembers.ToList()[i] as PropertyEntity;
         propertyEntity.IsInvocable.ShouldBeTrue();
       }
     }
@@ -2045,7 +2045,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // int a;
       {
-        var fieldEntity = classEntity.Members.ToList()[i] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToList()[i] as FieldEntity;
         fieldEntity.IsInvocable.ShouldBeFalse();
 
         // Check member type resolution
@@ -2053,14 +2053,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
 
         // Check that the member can be retrieved by name.
-        classEntity.GetMember<FieldEntity>(fieldEntity.Name).ShouldEqual(fieldEntity);
+        classEntity.GetOwnMember<FieldEntity>(fieldEntity.Name).ShouldEqual(fieldEntity);
       }
 
       i++;
 
       // D d; // D is a delegate, so "d" is invocable
       {
-        var fieldEntity = classEntity.Members.ToList()[i] as FieldEntity;
+        var fieldEntity = classEntity.OwnMembers.ToList()[i] as FieldEntity;
         fieldEntity.IsInvocable.ShouldBeTrue();
       }
     }
@@ -2083,7 +2083,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // const int a = 0;
       {
-        var constantEntity = classEntity.Members.ToList()[i] as ConstantMemberEntity;
+        var constantEntity = classEntity.OwnMembers.ToList()[i] as ConstantMemberEntity;
         constantEntity.IsInvocable.ShouldBeFalse();
 
         // Check member type resolution
@@ -2091,14 +2091,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         constantEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
 
         // Check that the member can be retrieved by name.
-        classEntity.GetMember<ConstantMemberEntity>(constantEntity.Name).ShouldEqual(constantEntity);
+        classEntity.GetOwnMember<ConstantMemberEntity>(constantEntity.Name).ShouldEqual(constantEntity);
       }
 
       i++;
 
       // const D d = null; // D is a delegate, so "d" is invocable
       {
-        var constantEntity = classEntity.Members.ToList()[i] as ConstantMemberEntity;
+        var constantEntity = classEntity.OwnMembers.ToList()[i] as ConstantMemberEntity;
         constantEntity.IsInvocable.ShouldBeTrue();
       }
     }
@@ -2116,7 +2116,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A",2);
-      var members = classEntity.Members.ToList();
+      var members = classEntity.OwnMembers.ToList();
 
       int i = 0;
 
@@ -2143,7 +2143,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         parameters[3].TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         parameters[3].Type.ShouldEqual(methodEntity.GetOwnTypeParameterByName("T3"));
 
-        classEntity.GetMethod(methodEntity.Signature).ShouldEqual(methodEntity);
+        classEntity.GetOwnMethod(methodEntity.Signature).ShouldEqual(methodEntity);
 
         // Check TypeParameterMap
         var typeParameterMap = methodEntity.TypeParameterMap;
@@ -2177,7 +2177,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // Check parameter type resolution
         methodEntity.Parameters.ToList().Count.ShouldEqual(0);
 
-        classEntity.GetMethod(methodEntity.Signature).ShouldEqual(methodEntity);
+        classEntity.GetOwnMethod(methodEntity.Signature).ShouldEqual(methodEntity);
       }
 
       i++;
@@ -2207,8 +2207,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // Check that explicitly implemented interface members are not registered into the declaration space,
         // but can be retrieved by specifying the interface too.
-        classEntity.GetMethod(methodEntity.Signature).ShouldBeNull();
-        classEntity.GetMethod(methodEntity.Signature, methodEntity.Interface).ShouldEqual(members[2]);
+        classEntity.GetOwnMethod(methodEntity.Signature).ShouldBeNull();
+        classEntity.GetExplicitlyImplementedMethod(methodEntity.Signature, methodEntity.Interface).ShouldEqual(members[2]);
       }
 
       i++;
@@ -2229,8 +2229,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         methodEntity.Parameters.ToList().Count.ShouldEqual(0);
 
         // Without specifying the interface, the method's signature can be confused with void C().
-        classEntity.GetMethod(methodEntity.Signature).ShouldEqual(members[1]);
-        classEntity.GetMethod(methodEntity.Signature, methodEntity.Interface).ShouldEqual(members[3]);
+        classEntity.GetOwnMethod(methodEntity.Signature).ShouldEqual(members[1]);
+        classEntity.GetExplicitlyImplementedMethod(methodEntity.Signature, methodEntity.Interface).ShouldEqual(members[3]);
       }
     }
 
@@ -2305,7 +2305,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var global = project.SemanticGraph.GlobalNamespace;
       var classA = global.GetSingleChildType<ClassEntity>("A");
-      var member = classA.GetMember<FieldEntity>("a");
+      var member = classA.GetOwnMember<FieldEntity>("a");
       member.Type.ShouldEqual(global.GetSingleChildType<ClassEntity>("C").GetSingleChildType<ClassEntity>("Nested"));
     }
 
@@ -2342,7 +2342,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       var global = project.SemanticGraph.GlobalNamespace;
       var classA = global.GetSingleChildType<ClassEntity>("A");
-      var member = classA.GetMember<FieldEntity>("a");
+      var member = classA.GetOwnMember<FieldEntity>("a");
       member.Type.ShouldEqual(global.GetChildNamespace("N").GetSingleChildType<ClassEntity>("Nested"));
     }
 
@@ -2413,7 +2413,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<int, long> a0;
       {
-        var field = classA.GetMember<FieldEntity>("a0");
+        var field = classA.GetOwnMember<FieldEntity>("a0");
         var type = field.Type as ClassEntity;
         type.IsGeneric.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
@@ -2436,7 +2436,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // T1 a1;
       {
-        var member = classA.GetMember<FieldEntity>("a1");
+        var member = classA.GetOwnMember<FieldEntity>("a1");
         member.DirectGenericTemplate.ShouldBeNull();
 
         var type = member.Type as TypeParameterEntity;
@@ -2449,19 +2449,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // B<T2> a2 { get; set; }
       {
-        var member = classA.GetMember<PropertyEntity>("a2");
+        var member = classA.GetOwnMember<PropertyEntity>("a2");
         member.Type.ToString().ShouldEqual("global::B`1[global::A`2.T2]");
       }
 
       // T1? a3;
       {
-        var member = classA.GetMember<FieldEntity>("a3");
+        var member = classA.GetOwnMember<FieldEntity>("a3");
         member.Type.ToString().ShouldEqual("global::System.Nullable`1[global::A`2.T1]");
       }
 
       // A<int, T2> M1(T1[] p1, A<int, B<T2>> p2) 
       {
-        var member = classA.GetMember<MethodEntity>("M1");
+        var member = classA.GetOwnMember<MethodEntity>("M1");
         member.ReturnType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::A`2.T2]");
         var parameters = member.Parameters.ToList();
         {
@@ -2484,19 +2484,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<int, long> a0 --> T1 a1;
       {
-        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<FieldEntity>("a1");
+        var member = classA.GetOwnMember<FieldEntity>("a0").Type.GetOwnMember<FieldEntity>("a1");
         member.Type.ToString().ShouldEqual("global::System.Int32");
       }
 
       // A<int, long> a0 --> B<T2> a2 { get; set; }
       {
-        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<PropertyEntity>("a2");
+        var member = classA.GetOwnMember<FieldEntity>("a0").Type.GetOwnMember<PropertyEntity>("a2");
         member.Type.ToString().ShouldEqual("global::B`1[global::System.Int64]");
       }
 
       // A<int, long> a0 --> T1? a3;
       {
-        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<FieldEntity>("a3");
+        var member = classA.GetOwnMember<FieldEntity>("a0").Type.GetOwnMember<FieldEntity>("a3");
         member.Type.IsNullableType.ShouldBeTrue();
         member.Type.UnderlyingOfNullableType.ToString().ShouldEqual("global::System.Int32");
         member.Type.ToString().ShouldEqual("global::System.Nullable`1[global::System.Int32]");
@@ -2504,7 +2504,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A<int, long> a0 --> A<int, T2> M1(T1[] p1, A<int, B<T2>> p2) 
       {
-        var member = classA.GetMember<FieldEntity>("a0").Type.GetMember<MethodEntity>("M1");
+        var member = classA.GetOwnMember<FieldEntity>("a0").Type.GetOwnMember<MethodEntity>("M1");
         member.ReturnType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::System.Int64]");
         var parameters = member.Parameters.ToList();
         {
@@ -2528,7 +2528,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A2<T2, T1> a1;
       {
-        var field = classA2.GetMember<FieldEntity>("a1");
+        var field = classA2.GetOwnMember<FieldEntity>("a1");
         var type = field.Type as ClassEntity;
         type.DirectGenericTemplate.ToString().ShouldEqual("global::A2`2");
         type.ToString().ShouldEqual("global::A2`2[global::A2`2.T2,global::A2`2.T1]");
@@ -2536,7 +2536,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A2<byte, char> a2;
       {
-        var field = classA2.GetMember<FieldEntity>("a2");
+        var field = classA2.GetOwnMember<FieldEntity>("a2");
         var type = field.Type as ClassEntity;
         type.DirectGenericTemplate.ToString().ShouldEqual("global::A2`2");
         type.ToString().ShouldEqual("global::A2`2[global::System.Byte,global::System.Char]");
@@ -2544,13 +2544,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // A2<T2, T1> a1 --> A2<T2, T1> a1;
       {
-        var member = classA2.GetMember<FieldEntity>("a1").Type.GetMember<FieldEntity>("a1");
+        var member = classA2.GetOwnMember<FieldEntity>("a1").Type.GetOwnMember<FieldEntity>("a1");
         member.Type.ToString().ShouldEqual("global::A2`2[global::A2`2.T1,global::A2`2.T2]");
       }
 
       // A2<byte, char> a2 --> A2<T2, T1> a1;
       {
-        var member = classA2.GetMember<FieldEntity>("a2").Type.GetMember<FieldEntity>("a1");
+        var member = classA2.GetOwnMember<FieldEntity>("a2").Type.GetOwnMember<FieldEntity>("a1");
         member.Type.ToString().ShouldEqual("global::A2`2[global::System.Char,global::System.Byte]");
       }
     }
@@ -2584,39 +2584,39 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var constructedTestClass = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("ConstructedTest", 0);
 
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a1");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a1");
         field.Type.ToString().ShouldEqual("global::NonGeneric+Generic1`2[global::System.Int32,global::System.Int64]+Generic2+Generic3`1[global::System.String]");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a2");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a2");
         field.Type.ToString().ShouldEqual("global::NonGeneric+Generic1`2[global::System.Int32,global::System.Int64]+Generic2");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a3");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a3");
         field.Type.ToString().ShouldEqual("global::NonGeneric+Generic1`2[global::System.Int32,global::System.Int64]");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a4");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a4");
         field.Type.ToString().ShouldEqual("global::NonGeneric+Generic1`2[global::System.Int32,global::System.Int64]+Generic2+Generic3`1[global::System.String][]");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a5");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a5");
         field.Type.ToString().ShouldEqual("global::NonGeneric+Generic1`2[global::System.Int32,global::System.Int64]+Generic2[]");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a6");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a6");
         field.Type.ToString().ShouldEqual("global::NonGeneric+Generic1`2[global::System.Int32,global::System.Int64][]");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a7");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a7");
         field.Type.ToString().ShouldEqual("global::NonGeneric[]");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a8");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a8");
         field.Type.ToString().ShouldEqual("global::System.Int32*");
       }
       {
-        var field = constructedTestClass.GetMember<FieldEntity>("a9");
+        var field = constructedTestClass.GetOwnMember<FieldEntity>("a9");
         field.Type.ToString().ShouldEqual("global::System.Int32*[]");
       }
     }

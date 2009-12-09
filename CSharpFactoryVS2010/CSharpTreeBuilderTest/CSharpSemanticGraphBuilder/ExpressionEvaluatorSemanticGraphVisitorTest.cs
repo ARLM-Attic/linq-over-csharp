@@ -27,7 +27,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\Literal.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").Members.ToList();
+      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A").OwnMembers.ToList();
 
       int i = 0;
 
@@ -100,7 +100,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.AddFile(@"ExpressionEvaluatorSemanticGraphVisitor\SimpleName.cs");
       InvokeParser(project).ShouldBeTrue();
 
-      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 1).Members.ToList();
+      var members = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A", 1).OwnMembers.ToList();
 
       // static int a = b;
       {
@@ -126,7 +126,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var classA = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A",1);
-      var members = classA.Members.ToList();
+      var members = classA.OwnMembers.ToList();
 
       int i = 0;
 

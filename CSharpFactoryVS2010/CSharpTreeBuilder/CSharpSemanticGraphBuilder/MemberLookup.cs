@@ -225,7 +225,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (typeParameter.ClassTypeConstraint != null)
         {
           members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleMembers<IMemberEntity>(N, accessingEntity));
-          members.UnionWith(typeParameter.ClassTypeConstraint.GetAccessibleInheritedMembers<IMemberEntity>(N, accessingEntity));
         }
 
         foreach (var typeEntity in typeParameter.InterfaceTypeConstraints)
@@ -240,7 +239,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       {
         // Otherwise, the set consists of all accessible (§3.5) members named N in T, including inherited members ... 
         members.UnionWith(T.GetAccessibleMembers<IMemberEntity>(N, accessingEntity));
-        members.UnionWith(T.GetAccessibleInheritedMembers<IMemberEntity>(N, accessingEntity));
 
         // ... and the accessible members named N in object. 
         members.UnionWith(GetAccessibleMembersOfObject(N, accessingEntity));

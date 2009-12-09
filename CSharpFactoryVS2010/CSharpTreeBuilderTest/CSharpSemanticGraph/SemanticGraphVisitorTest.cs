@@ -226,13 +226,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         sgVisitorMock.Visit(enumE as NamespaceOrTypeEntity);
         sgVisitorMock.Visit(enumE as SemanticEntity);
 
-        var e1 = enumE.GetMember<EnumMemberEntity>("E1");
+        var e1 = enumE.GetOwnMember<EnumMemberEntity>("E1");
         sgVisitorMock.Visit(e1 as EnumMemberEntity);
         sgVisitorMock.Visit(e1 as ConstantMemberEntity);
         sgVisitorMock.Visit(e1 as NonTypeMemberEntity);
         sgVisitorMock.Visit(e1 as SemanticEntity);
 
-        var e2 = enumE.GetMember<EnumMemberEntity>("E2");
+        var e2 = enumE.GetOwnMember<EnumMemberEntity>("E2");
         sgVisitorMock.Visit(e2 as EnumMemberEntity);
         sgVisitorMock.Visit(e2 as ConstantMemberEntity);
         sgVisitorMock.Visit(e2 as NonTypeMemberEntity);
@@ -280,7 +280,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         sgVisitorMock.Visit(class1 as NamespaceOrTypeEntity);
         sgVisitorMock.Visit(class1 as SemanticEntity);
 
-        var a = class1.GetMember<ConstantMemberEntity>("a");
+        var a = class1.GetOwnMember<ConstantMemberEntity>("a");
         sgVisitorMock.Visit(a as ConstantMemberEntity);
         sgVisitorMock.Visit(a as NonTypeMemberEntity);
         sgVisitorMock.Visit(a as SemanticEntity);
@@ -291,12 +291,12 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
         sgVisitorMock.Visit(a_init as ExpressionEntity);
         sgVisitorMock.Visit(a_init as SemanticEntity);
 
-        var b = class1.GetMember<FieldEntity>("b");
+        var b = class1.GetOwnMember<FieldEntity>("b");
         sgVisitorMock.Visit(b as FieldEntity);
         sgVisitorMock.Visit(b as NonTypeMemberEntity);
         sgVisitorMock.Visit(b as SemanticEntity);
 
-        var M = class1.GetMember<MethodEntity>("M");
+        var M = class1.GetOwnMember<MethodEntity>("M");
         sgVisitorMock.Visit(M as MethodEntity);
         sgVisitorMock.Visit(M as FunctionMemberWithBodyEntity);
         sgVisitorMock.Visit(M as FunctionMemberEntity);

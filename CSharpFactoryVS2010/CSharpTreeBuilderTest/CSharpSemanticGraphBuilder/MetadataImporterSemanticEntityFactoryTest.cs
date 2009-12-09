@@ -61,7 +61,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // public const string a1 = "a1";
         {
-          var member = entity.GetMember<ConstantMemberEntity>("a1");
+          var member = entity.GetOwnMember<ConstantMemberEntity>("a1");
           member.FullyQualifiedName.ShouldEqual("Class0.a1");
           member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Public);
           member.IsDeclaredInSource.ShouldBeFalse();
@@ -77,30 +77,30 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // internal static string a2;
         {
-          var member = entity.GetMember<FieldEntity>("a2");
+          var member = entity.GetOwnMember<FieldEntity>("a2");
           member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Assembly);
           member.IsStatic.ShouldBeTrue();
         }
         // protected string a3;
         {
-          var member = entity.GetMember<FieldEntity>("a3");
+          var member = entity.GetOwnMember<FieldEntity>("a3");
           member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Family);
           member.IsStatic.ShouldBeFalse();
         }
         // protected internal string a4;
         {
-          var member = entity.GetMember<FieldEntity>("a4");
+          var member = entity.GetOwnMember<FieldEntity>("a4");
           member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.FamilyOrAssembly);
         }
         // private string a5;
         {
-          var member = entity.GetMember<FieldEntity>("a5");
+          var member = entity.GetOwnMember<FieldEntity>("a5");
           member.DeclaredAccessibility.ShouldEqual(AccessibilityKind.Private);
         }
 
         // public int P1 { get; set; }
         {
-          var member = entity.GetMember<PropertyEntity>("P1");
+          var member = entity.GetOwnMember<PropertyEntity>("P1");
           member.FullyQualifiedName.ShouldEqual("Class0.P1");
           member.AutoImplementedField.ShouldBeNull();
           member.DeclaredAccessibility.ShouldBeNull();
@@ -132,7 +132,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // static int P2 { get; set; }
         {
-          var member = entity.GetMember<PropertyEntity>("P2");
+          var member = entity.GetOwnMember<PropertyEntity>("P2");
           member.IsStatic.ShouldBeTrue();
           member.IsOverride.ShouldBeFalse();
           member.IsVirtual.ShouldBeFalse();
@@ -140,7 +140,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // public virtual int P3 { get; private set; }
         {
-          var member = entity.GetMember<PropertyEntity>("P3");
+          var member = entity.GetOwnMember<PropertyEntity>("P3");
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeFalse();
           member.IsVirtual.ShouldBeTrue();
@@ -153,7 +153,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // public override int P4 { get { return 0; } }
         {
-          var member = entity.GetMember<PropertyEntity>("P4");
+          var member = entity.GetOwnMember<PropertyEntity>("P4");
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeTrue();
           member.IsVirtual.ShouldBeFalse();
@@ -164,7 +164,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // public override sealed int P5 { set { } }
         {
-          var member = entity.GetMember<PropertyEntity>("P5");
+          var member = entity.GetOwnMember<PropertyEntity>("P5");
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeTrue();
           member.IsVirtual.ShouldBeFalse();
@@ -179,7 +179,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         //   where T2 : class
         //   where T3 : struct
         {
-          var member = (from m in entity.Members
+          var member = (from m in entity.OwnMembers
                         where m.Name == "M1"
                         && m is MethodEntity
                         && (m as MethodEntity).OwnTypeParameterCount == 3
@@ -251,7 +251,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // public override void M2() { }
         {
-          var member = entity.GetMethod("M2", 0, null);
+          var member = entity.GetOwnMethod("M2", 0, null);
           member.IsAbstract.ShouldBeFalse();
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeTrue();
@@ -260,7 +260,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // public override sealed void M3() { }
         {
-          var member = entity.GetMethod("M3", 0, null);
+          var member = entity.GetOwnMethod("M3", 0, null);
           member.IsAbstract.ShouldBeFalse();
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeTrue();
@@ -269,7 +269,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // public static void M4() { }
         {
-          var member = entity.GetMethod("M4", 0, null);
+          var member = entity.GetOwnMethod("M4", 0, null);
           member.IsAbstract.ShouldBeFalse();
           member.IsStatic.ShouldBeTrue();
           member.IsOverride.ShouldBeFalse();
@@ -285,13 +285,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // public abstract int P6 { get; set; }
         {
-          var member = entity.GetMember<PropertyEntity>("P6");
+          var member = entity.GetOwnMember<PropertyEntity>("P6");
           member.GetAccessor.IsAbstract.ShouldBeTrue();
           member.SetAccessor.IsAbstract.ShouldBeTrue();
         }
         // public virtual void M2() { }
         {
-          var member = entity.GetMethod("M2", 0, null);
+          var member = entity.GetOwnMethod("M2", 0, null);
           member.IsAbstract.ShouldBeFalse();
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeFalse();
@@ -300,7 +300,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         }
         // public abstract void M3();
         {
-          var member = entity.GetMethod("M3", 0, null);
+          var member = entity.GetOwnMethod("M3", 0, null);
           member.IsAbstract.ShouldBeTrue();
           member.IsStatic.ShouldBeFalse();
           member.IsOverride.ShouldBeFalse();
@@ -358,7 +358,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
         // EnumValue1,
         {
-          var member = entity.GetMember<EnumMemberEntity>("EnumValue1");
+          var member = entity.GetOwnMember<EnumMemberEntity>("EnumValue1");
           member.DeclaredAccessibility.ShouldBeNull();
           member.EffectiveAccessibility.ShouldEqual(AccessibilityKind.Public);
           member.IsDeclaredInSource.ShouldBeFalse();

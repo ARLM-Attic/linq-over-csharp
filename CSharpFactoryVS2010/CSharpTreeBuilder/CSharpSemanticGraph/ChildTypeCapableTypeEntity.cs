@@ -47,7 +47,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        return from member in Members 
+        return from member in OwnMembers 
                where member is TypeEntity 
                select member as TypeEntity;
       }

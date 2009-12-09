@@ -59,17 +59,17 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var a1 = classA.GetMember<FieldEntity>("a1");
+      var a1 = classA.GetOwnMember<FieldEntity>("a1");
       a1.ShouldNotBeNull();
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
-      var b1 = classB.GetMember<FieldEntity>("b1");
+      var b1 = classB.GetOwnMember<FieldEntity>("b1");
       b1.ShouldNotBeNull();
 
       var publicNestedClass = classA.GetSingleChildType<ClassEntity>("PublicNestedClass");
       publicNestedClass.IsAccessibleBy(a1).ShouldBeTrue();
       publicNestedClass.IsAccessibleBy(b1).ShouldBeTrue();
 
-      var publicMember = classA.GetMember<FieldEntity>("PublicMember");
+      var publicMember = classA.GetOwnMember<FieldEntity>("PublicMember");
       publicMember.IsAccessibleBy(a1).ShouldBeTrue();
       publicMember.IsAccessibleBy(b1).ShouldBeTrue();
     }
@@ -88,17 +88,17 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var a1 = classA.GetMember<FieldEntity>("a1");
+      var a1 = classA.GetOwnMember<FieldEntity>("a1");
       a1.ShouldNotBeNull();
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
-      var b1 = classB.GetMember<FieldEntity>("b1");
+      var b1 = classB.GetOwnMember<FieldEntity>("b1");
       b1.ShouldNotBeNull();
 
       var privateNestedClass = classA.GetSingleChildType<ClassEntity>("PrivateNestedClass");
       privateNestedClass.IsAccessibleBy(a1).ShouldBeTrue();
       privateNestedClass.IsAccessibleBy(b1).ShouldBeFalse();
 
-      var privateMember = classA.GetMember<FieldEntity>("PrivateMember");
+      var privateMember = classA.GetOwnMember<FieldEntity>("PrivateMember");
       privateMember.IsAccessibleBy(a1).ShouldBeTrue();
       privateMember.IsAccessibleBy(b1).ShouldBeFalse();
     }
@@ -117,19 +117,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var a1 = classA.GetMember<FieldEntity>("a1");
+      var a1 = classA.GetOwnMember<FieldEntity>("a1");
       a1.ShouldNotBeNull();
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
-      var b1 = classB.GetMember<FieldEntity>("b1");
+      var b1 = classB.GetOwnMember<FieldEntity>("b1");
       b1.ShouldNotBeNull();
       var classC = globalNamespace.GetSingleChildType<ClassEntity>("C");
-      var c1 = classC.GetMember<FieldEntity>("c1");
+      var c1 = classC.GetOwnMember<FieldEntity>("c1");
       c1.ShouldNotBeNull();
       var classD = globalNamespace.GetSingleChildType<ClassEntity>("D");
-      var d1 = classD.GetMember<FieldEntity>("d1");
+      var d1 = classD.GetOwnMember<FieldEntity>("d1");
       d1.ShouldNotBeNull();
 
-      var protectedMember = classA.GetMember<FieldEntity>("ProtectedMember");
+      var protectedMember = classA.GetOwnMember<FieldEntity>("ProtectedMember");
       protectedMember.IsAccessibleBy(a1).ShouldBeTrue();
       protectedMember.IsAccessibleBy(b1).ShouldBeTrue();
       protectedMember.IsAccessibleBy(c1).ShouldBeTrue();
@@ -190,10 +190,10 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
-      var b1 = classB.GetMember<FieldEntity>("b1");
+      var b1 = classB.GetOwnMember<FieldEntity>("b1");
       b1.ShouldNotBeNull();
 
-      var protectedInternalMember = classA.GetMember<FieldEntity>("ProtectedInternalMember");
+      var protectedInternalMember = classA.GetOwnMember<FieldEntity>("ProtectedInternalMember");
       protectedInternalMember.IsAccessibleBy(b1).ShouldBeTrue();
 
       var protectedInternalNestedClass = classA.GetSingleChildType<ClassEntity>("ProtectedInternalNestedClass");
@@ -216,13 +216,13 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var publicClass = globalNamespace.GetSingleChildType<ClassEntity>("PublicClass");
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var a1 = classA.GetMember<FieldEntity>("a1");
+      var a1 = classA.GetOwnMember<FieldEntity>("a1");
       a1.ShouldNotBeNull();
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
-      var b1 = classB.GetMember<FieldEntity>("b1");
+      var b1 = classB.GetOwnMember<FieldEntity>("b1");
       b1.ShouldNotBeNull();
 
-      var protectedInternalMember = publicClass.GetMember<FieldEntity>("protectedInternalNestedMember");
+      var protectedInternalMember = publicClass.GetOwnMember<FieldEntity>("protectedInternalNestedMember");
       protectedInternalMember.IsAccessibleBy(a1).ShouldBeFalse();
       protectedInternalMember.IsAccessibleBy(b1).ShouldBeTrue();
 
@@ -230,7 +230,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       protectedInternalNestedClass.IsAccessibleBy(a1).ShouldBeFalse();
       protectedInternalNestedClass.IsAccessibleBy(b1).ShouldBeTrue();
 
-      var internalMember = publicClass.GetMember<FieldEntity>("internalNestedMember");
+      var internalMember = publicClass.GetOwnMember<FieldEntity>("internalNestedMember");
       internalMember.IsAccessibleBy(a1).ShouldBeFalse();
       internalMember.IsAccessibleBy(b1).ShouldBeFalse();
 

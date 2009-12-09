@@ -30,7 +30,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A", 1);
       var typeParameter = classA.GetOwnTypeParameterByName("T");
-      var field = classA.GetMember<FieldEntity>("t");
+      var field = classA.GetOwnMember<FieldEntity>("t");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
 
@@ -59,7 +59,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field = classA.GetMember<FieldEntity>("b");
+      var field = classA.GetOwnMember<FieldEntity>("b");
       var contextType = field.Type;
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
@@ -88,7 +88,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field = classA.GetMember<FieldEntity>("b");
+      var field = classA.GetOwnMember<FieldEntity>("b");
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
@@ -133,7 +133,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field = classA.GetMember<FieldEntity>("b");
+      var field = classA.GetOwnMember<FieldEntity>("b");
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
@@ -171,7 +171,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classS = globalNamespace.GetSingleChildType<ClassEntity>("S");
-      var field = classS.GetMember<ConstantMemberEntity>("test");
+      var field = classS.GetOwnMember<ConstantMemberEntity>("test");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
 
@@ -199,7 +199,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classS = globalNamespace.GetSingleChildType<ClassEntity>("S");
-      var field = classS.GetMember<ConstantMemberEntity>("test");
+      var field = classS.GetOwnMember<ConstantMemberEntity>("test");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
 
@@ -230,7 +230,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
 
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classS = globalNamespace.GetSingleChildType<ClassEntity>("S");
-      var field = classS.GetMember<ConstantMemberEntity>("test");
+      var field = classS.GetOwnMember<ConstantMemberEntity>("test");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
 
@@ -259,7 +259,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var globalNamespace = project.SemanticGraph.GlobalNamespace;
       var classA = globalNamespace.GetSingleChildType<ClassEntity>("A", 1);
       var typeParameter = classA.GetOwnTypeParameterByName("T");
-      var field = classA.GetMember<FieldEntity>("t");
+      var field = classA.GetOwnMember<FieldEntity>("t");
 
       var memberLookup = new MemberLookup(project, project.SemanticGraph);
 

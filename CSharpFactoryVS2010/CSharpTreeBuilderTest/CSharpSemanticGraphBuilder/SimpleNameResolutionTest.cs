@@ -46,7 +46,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // private static int a1 = N1.C1.c1;
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field_a1 = class_A.GetMember<FieldEntity>("a1");
+      var field_a1 = class_A.GetOwnMember<FieldEntity>("a1");
       var memberAccess_c1 = (field_a1.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
       var memberAccess_C1 = memberAccess_c1.ChildExpression as PrimaryMemberAccessExpressionEntity;
       var simpleName_N1 = memberAccess_C1.ChildExpression as SimpleNameExpressionEntity;
@@ -68,8 +68,8 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field_b = class_A.GetMember<FieldEntity>("b");
-      var field_c = class_A.GetMember<FieldEntity>("c");
+      var field_b = class_A.GetOwnMember<FieldEntity>("b");
+      var field_c = class_A.GetOwnMember<FieldEntity>("c");
       var simpleName_c = (field_b.Initializer as ScalarInitializerEntity).Expression as SimpleNameExpressionEntity;
       (simpleName_c.ExpressionResult as VariableExpressionResult).Variable.ShouldEqual(field_c);
     }
@@ -105,7 +105,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       // static int a = A.b;
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var field_A = class_A.GetMember<FieldEntity>("a");
+      var field_A = class_A.GetOwnMember<FieldEntity>("a");
       var memberAccess_b = (field_A.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
       var simpleName_A = memberAccess_b.ChildExpression as SimpleNameExpressionEntity;
       (simpleName_A.ExpressionResult as TypeExpressionResult).Type.ToString().ShouldEqual("global::A");
@@ -125,7 +125,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var method_M = class_A.GetMember<MethodEntity>("M");
+      var method_M = class_A.GetOwnMember<MethodEntity>("M");
       // TODO: cont
     }
 
@@ -142,7 +142,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var method_M = class_A.GetMember<MethodEntity>("M");
+      var method_M = class_A.GetOwnMember<MethodEntity>("M");
       var statement = method_M.Body.Statements.ToList()[0] as ExpressionStatementEntity;
       var assignment = statement.Expression as AssignmentExpressionEntity;
       var simpleName_a = assignment.LeftExpression as SimpleNameExpressionEntity;
@@ -162,7 +162,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       InvokeParser(project).ShouldBeTrue();
 
       var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
-      var method_M1 = class_A.GetMember<MethodEntity>("M1");
+      var method_M1 = class_A.GetOwnMember<MethodEntity>("M1");
       var statement = method_M1.Body.Statements.ToList()[0] as ExpressionStatementEntity;
       var invocation = statement.Expression as InvocationExpressionEntity;
       var simpleName_a = invocation.ChildExpression as SimpleNameExpressionEntity;
@@ -170,6 +170,48 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var methods = result.MethodGroup.Methods.ToList();
       methods.Count.ShouldEqual(1);
       methods[0].ToString().ShouldEqual("global::A_M2()");
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of a simple name with a type parameter in it.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore] //MemberAccessResolver not evaluated on contruced expressions. Fix this.
+    public void TypeParameterUsage()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SimpleNameResolution\TypeParameterUsage.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      // public static T2 b = A<T2>.t;
+      {
+        var class_B = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("B",1);
+        var field_b = class_B.GetMember<FieldEntity>("b");
+        field_b.Type.ToString().ShouldEqual("global::B`1.T2");
+        var memberAccess_t = (field_b.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+        var result_t = memberAccess_t.ExpressionResult as VariableExpressionResult;
+        result_t.Type.ToString().ShouldEqual("global::B`1.T2");
+        result_t.Variable.ToString().ShouldEqual("global::A`1[global::B`1.T2]_t");
+        var simpleName_A_T2 = memberAccess_t.ChildExpression as SimpleNameExpressionEntity;
+        var result_A_T2 = simpleName_A_T2.ExpressionResult as TypeExpressionResult;
+        result_A_T2.Type.ToString().ShouldEqual("global::A`1[global::B`1.T2]");
+      }
+
+      // class C: B<int>
+      {
+        var class_C = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("C");
+        var field_b = class_C.GetMember<FieldEntity>("b");
+        field_b.Type.ToString().ShouldEqual("global::System.Int32");
+        var memberAccess_t = (field_b.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+        var result_t = memberAccess_t.ExpressionResult as VariableExpressionResult;
+        result_t.Type.ToString().ShouldEqual("global::System.Int32");
+        result_t.Variable.ToString().ShouldEqual("global::A`1[global::System.Int32]_t");
+        var simpleName_A_int = memberAccess_t.ChildExpression as SimpleNameExpressionEntity;
+        var result_A_int = simpleName_A_int.ExpressionResult as TypeExpressionResult;
+        result_A_int.Type.ToString().ShouldEqual("global::A`1[global::System.Int32]");
+      }
     }
   }
 }

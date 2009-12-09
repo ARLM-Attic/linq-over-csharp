@@ -71,9 +71,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
-      if (SimpleNameResolver != null)
+      // If the expression was cloned from a generic template, then the result is 
+      // the result of the generic template expression. 
+      // Type results must also be mapped using the TypeParameterMap.
+      if (HasGenericTemplate)
       {
-        ExpressionResult = SimpleNameResolver.Resolve(this, errorHandler);
+        var templateExpressionResult = (UnboundGenericTemplate as ExpressionEntity).ExpressionResult;
+        if (templateExpressionResult is TypeExpressionResult)
+        {
+          var mappedType = (templateExpressionResult as TypeExpressionResult).Type.GetMappedType(TypeParameterMap);
+          ExpressionResult = new TypeExpressionResult(mappedType);
+        }
+      }
+      else
+      {
+        if (SimpleNameResolver != null)
+        {
+          ExpressionResult = SimpleNameResolver.Resolve(this, errorHandler);
+        }
       }
     }
 

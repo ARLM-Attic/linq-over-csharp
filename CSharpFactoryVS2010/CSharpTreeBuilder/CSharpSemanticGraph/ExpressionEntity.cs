@@ -12,8 +12,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     #region State
 
-    /// <summary>Gets or sets the result obtained by evaluating this expression. Null if not yet evaluated.</summary>
-    public ExpressionResult ExpressionResult { get; protected set; }
+    /// <summary>Backing field for ExpressionResult property.</summary>
+    private ExpressionResult _ExpressionResult;
 
     #endregion
 
@@ -37,9 +37,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected ExpressionEntity(ExpressionEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      // ExpressionResult should not be cloned.
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the result of evaluating the expression. Null if not yet evaluated.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public ExpressionResult ExpressionResult
+    {
+      get
+      {
+        if (_ExpressionResult == null)
+        {
+          // TODO: errorHandler object is needed here! (instead of null)
+          Evaluate(null);
+        }
+
+        return _ExpressionResult;
+      }
+
+      protected set
+      {
+        _ExpressionResult = value;
+      }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Evaluates this expression.
