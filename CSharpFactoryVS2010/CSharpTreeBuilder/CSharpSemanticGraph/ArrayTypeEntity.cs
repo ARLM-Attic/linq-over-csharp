@@ -34,6 +34,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets an array type given its underlying type.
+    /// </summary>
+    /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int[]')</param>
+    /// <param name="rank">The rank of the array.</param>
+    /// <returns>An array type entity with the given underlying type.</returns>
+    /// <remarks>
+    /// If the constructed type already exists, then retrieves it, otherwise creates it.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public static ArrayTypeEntity GetConstructedArrayType(TypeEntity underlyingTypeEntity, int rank)
+    {
+      var arrayType = underlyingTypeEntity.GetArrayTypeByRank(rank);
+
+      // If the constructed type doesn't exist yet then create it.
+      if (arrayType == null)
+      {
+        arrayType = new ArrayTypeEntity(underlyingTypeEntity, rank);
+        underlyingTypeEntity.AddArrayType(arrayType);
+      }
+
+      return arrayType;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the base class of the type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
@@ -92,7 +117,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
     {
-      return ConstructedTypeHelper.GetConstructedArrayType(UnderlyingType.GetMappedType(typeParameterMap), Rank);
+      return GetConstructedArrayType(UnderlyingType.GetMappedType(typeParameterMap), Rank);
     }
 
     // ----------------------------------------------------------------------------------------------

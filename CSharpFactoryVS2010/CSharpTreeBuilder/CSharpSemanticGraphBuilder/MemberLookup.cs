@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using CSharpTreeBuilder.CSharpSemanticGraph;
-using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
@@ -20,27 +17,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// and all other members have zero type parameters.
   /// </remarks>
   // ================================================================================================
-  public sealed class MemberLookup
+  public static class MemberLookup
   {
-    /// <summary>Error handler object for error and warning reporting.</summary>
-    private readonly ICompilationErrorHandler _ErrorHandler;
-
-    /// <summary>The semantic graph.</summary>
-    private readonly SemanticGraph _SemanticGraph;
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MemberLookup"/> class.
-    /// </summary>
-    /// <param name="errorHandler">Error handler object for error and warning reporting.</param>
-    /// <param name="semanticGraph">The semantic graph.</param>
-    // ----------------------------------------------------------------------------------------------
-    public MemberLookup(ICompilationErrorHandler errorHandler, SemanticGraph semanticGraph)
-    {
-      _ErrorHandler = errorHandler;
-      _SemanticGraph = semanticGraph;
-    }
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a collection of type members in the context of a type based on name and type parameter count.
@@ -54,7 +32,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <remarks>If the simple-name or member-access occurs as the simple-expression 
     /// of an invocation-expression (§7.5.5.1), the member is said to be invoked.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public MemberLookupResult Lookup(
+    public static MemberLookupResult Lookup(
       string name, int typeParameterCount, TypeEntity contextEntity, ISemanticEntity accessingEntity, bool isInvocation)
     {
       // A member lookup of a name N with K type parameters in a type T is processed as follows:
@@ -210,7 +188,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>The collection of accessible members named N in T.</returns>
     // ----------------------------------------------------------------------------------------------
-    private HashSet<IMemberEntity> GetAccessibleMembersByName(string N, TypeEntity T, ISemanticEntity accessingEntity)
+    private static HashSet<IMemberEntity> GetAccessibleMembersByName(string N, TypeEntity T, ISemanticEntity accessingEntity)
     {
       var members = new HashSet<IMemberEntity>();
 
@@ -262,9 +240,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="accessingEntity">An entity for accessibility checking.</param>
     /// <returns>The collection of accessible members named N in object.</returns>
     // ----------------------------------------------------------------------------------------------
-    private IEnumerable<IMemberEntity> GetAccessibleMembersOfObject(string N, ISemanticEntity accessingEntity)
+    private static IEnumerable<IMemberEntity> GetAccessibleMembersOfObject(string N, ISemanticEntity accessingEntity)
     {
-      var objectEntity = _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object);
+      var objectEntity = accessingEntity.SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Object);
       return objectEntity.GetAccessibleMembers<NonTypeMemberEntity>(N, accessingEntity).Cast<IMemberEntity>();
     }
 

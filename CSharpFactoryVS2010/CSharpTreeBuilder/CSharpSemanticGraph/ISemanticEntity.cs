@@ -9,25 +9,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This interface defines of behavior of all semantic entities.
   /// </summary>
   // ================================================================================================
-  public interface ISemanticEntity
+  public interface ISemanticEntity: IGenericCloneSupport
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets or sets the parent of this entity.
+    /// Gets or sets the parent of this node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     ISemanticEntity Parent { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets a value indicating whether this entity is a (direct or indirect) parent of another entity.
+    /// Gets a value indicating whether this node is a (direct or indirect) parent of another node.
     /// </summary>
-    /// <param name="entity">A semantic entity.</param>
+    /// <param name="node">A semantic node.</param>
     /// <returns>
-    /// True if this entity is a (direct or indirect) parent of another entity, false otherwise.
+    /// True if this node is a (direct or indirect) parent of another node, false otherwise.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    bool IsParentOf(ISemanticEntity entity);
+    bool IsParentOf(ISemanticEntity node);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the semantic graph that this node belongs to.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    SemanticGraph SemanticGraph { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Accepts a visitor object, according to the Visitor pattern.
+    /// </summary>
+    /// <param name="visitor">A visitor object</param>
+    // ----------------------------------------------------------------------------------------------
+    void AcceptVisitor(SemanticGraphVisitor visitor);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -35,13 +50,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     RootNamespaceEntity RootNamespace { get; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets or sets the semantic graph that this entity belongs to.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    SemanticGraph SemanticGraph { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -63,13 +71,5 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     object ReflectedMetadata { get;  }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Accepts a visitor object, according to the Visitor pattern.
-    /// </summary>
-    /// <param name="visitor">A visitor object</param>
-    // ----------------------------------------------------------------------------------------------
-    void AcceptVisitor(SemanticGraphVisitor visitor);
   }
 }

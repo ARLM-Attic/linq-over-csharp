@@ -12,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This is the abstract base class of all kinds of nodes in the semantic graph (namespace, type, etc.).
   /// </summary>
   // ================================================================================================
-  public abstract class SemanticEntity : IGenericSupportingSemanticEntity
+  public abstract class SemanticEntity : ISemanticEntity
   {
     #region State 
 
@@ -28,8 +28,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// The key is a TypeParameterMap object describing all type parameters and the corresponding 
     /// type arguments.
     /// </summary>
-    private readonly Dictionary<TypeParameterMap, IGenericSupportingSemanticEntity> _ConstructedEntities
-      = new Dictionary<TypeParameterMap, IGenericSupportingSemanticEntity>(new TypeParameterMapEqualityComparer());
+    private readonly Dictionary<TypeParameterMap, IGenericCloneSupport> _GenericClones
+      = new Dictionary<TypeParameterMap, IGenericCloneSupport>(new TypeParameterMapEqualityComparer());
 
     /// <summary>Backing field for Program property.</summary>
     private Program _Program;
@@ -45,7 +45,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public object ReflectedMetadata { get; set; }
 
     /// <summary>Gets or sets the generic template of this entity.</summary>
-    public IGenericSupportingSemanticEntity DirectGenericTemplate { get; private set; }
+    public IGenericCloneSupport DirectGenericTemplate { get; private set; }
 
     #endregion
 
@@ -58,8 +58,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       _TypeParameterMap = new TypeParameterMap();
     }
-
-    #region Constructed entities
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -106,25 +104,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    public IGenericSupportingSemanticEntity GetGenericClone(TypeParameterMap typeParameterMap)
+    public IGenericCloneSupport GetGenericClone(TypeParameterMap typeParameterMap)
     {
-      IGenericSupportingSemanticEntity constructedEntity;
+      IGenericCloneSupport constructedEntity;
 
-      if (_ConstructedEntities.ContainsKey(typeParameterMap))
+      if (_GenericClones.ContainsKey(typeParameterMap))
       {
-        constructedEntity = _ConstructedEntities[typeParameterMap];
+        constructedEntity = _GenericClones[typeParameterMap];
       }
       else
       {
         constructedEntity = ConstructNew(typeParameterMap);
 
-        _ConstructedEntities.Add(typeParameterMap, constructedEntity);
+        _GenericClones.Add(typeParameterMap, constructedEntity);
       }
 
       return constructedEntity;
     }
-
-    #endregion
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -254,17 +250,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           return _TypeParameterMap;
         }
 
-        if (Parent != null && Parent is IGenericSupportingSemanticEntity)
+        if (Parent != null)
         {
-          return (Parent as IGenericSupportingSemanticEntity).TypeParameterMap;
+          return Parent.TypeParameterMap;
         }
 
         return TypeParameterMap.Empty;
-      }
-
-      private set 
-      { 
-        _TypeParameterMap = value; 
       }
     }
 
@@ -288,12 +279,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Null if this entity was not constructed from another entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IGenericSupportingSemanticEntity UnboundGenericTemplate
+    public IGenericCloneSupport OriginalGenericTemplate
     {
       get
       {
         return HasGenericTemplate && DirectGenericTemplate.DirectGenericTemplate != null
-                 ? DirectGenericTemplate.UnboundGenericTemplate
+                 ? DirectGenericTemplate.OriginalGenericTemplate
                  : DirectGenericTemplate;
       }
     }
@@ -303,9 +294,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// by replacing type parameters with type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<IGenericSupportingSemanticEntity> GenericCloneEntities
+    public IEnumerable<IGenericCloneSupport> GenericClones
     {
-      get { return _ConstructedEntities.Values; }
+      get { return _GenericClones.Values; }
     }
 
     #region Visitor methods

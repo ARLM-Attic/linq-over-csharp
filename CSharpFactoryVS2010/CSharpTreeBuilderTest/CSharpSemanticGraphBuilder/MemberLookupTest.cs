@@ -32,11 +32,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var typeParameter = classA.GetOwnTypeParameterByName("T");
       var field = classA.GetOwnMember<FieldEntity>("t");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of T (contextType) that are accessible in class A, named "GetType", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("GetType", 0, typeParameter, field, false);
+        var memberLookupResult = MemberLookup.Lookup("GetType", 0, typeParameter, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(3);
         methods[0].ToString().ShouldEqual("global::C_GetType()");
@@ -62,11 +60,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var field = classA.GetOwnMember<FieldEntity>("b");
       var contextType = field.Type;
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of class B<int> (contextType) that are accessible in class A, named "GetType", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("GetType", 0, contextType, field, false);
+        var memberLookupResult = MemberLookup.Lookup("GetType", 0, contextType, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(2);
         methods[0].ToString().ShouldEqual("global::D`1[global::System.Int32]_GetType()");
@@ -91,11 +87,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var field = classA.GetOwnMember<FieldEntity>("b");
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("GetType", 0, classB, field, false);
+        var memberLookupResult = MemberLookup.Lookup("GetType", 0, classB, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(4);
         methods[0].ToString().ShouldEqual("global::D_GetType()");
@@ -105,14 +99,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       }
       // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 1 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("GetType", 1, classB, field, false);
+        var memberLookupResult = MemberLookup.Lookup("GetType", 1, classB, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(1);
         methods[0].ToString().ShouldEqual("global::D_GetType`1()");
       }
       // Selecting members of class B (contextType) that are accessible in class A, named "GetType", with 2 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("GetType", 2, classB, field, false);
+        var memberLookupResult = MemberLookup.Lookup("GetType", 2, classB, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(1);
         methods[0].ToString().ShouldEqual("global::D_GetType`2()");
@@ -136,21 +130,19 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var field = classA.GetOwnMember<FieldEntity>("b");
       var classB = globalNamespace.GetSingleChildType<ClassEntity>("B");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-      
       // Selecting members of class B (contextType) that are accessible in class A, named "C", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("C", 0, classB, field, false);
+        var memberLookupResult = MemberLookup.Lookup("C", 0, classB, field, false);
         memberLookupResult.SingleMember.ToString().ShouldEqual("global::B+C");
       }
       // Selecting members of class B (contextType) that are accessible in class A, named "C", with 1 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("C", 1, classB, field, false);
+        var memberLookupResult = MemberLookup.Lookup("C", 1, classB, field, false);
         memberLookupResult.SingleMember.ToString().ShouldEqual("global::B+C`1");
       }
       // Selecting invocable members only.
       {
-        var memberLookupResult = memberLookup.Lookup("C", 1, classB, field, true);
+        var memberLookupResult = MemberLookup.Lookup("C", 1, classB, field, true);
         memberLookupResult.IsEmpty.ShouldBeTrue();
       }
     }
@@ -173,11 +165,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var classS = globalNamespace.GetSingleChildType<ClassEntity>("S");
       var field = classS.GetOwnMember<ConstantMemberEntity>("test");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of class S (contextType) that are accessible in class S, named "M", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("M", 0, classS, field, false);
+        var memberLookupResult = MemberLookup.Lookup("M", 0, classS, field, false);
         memberLookupResult.SingleMember.ToString().ShouldEqual("global::S_M");
       }
     }
@@ -201,16 +191,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var classS = globalNamespace.GetSingleChildType<ClassEntity>("S");
       var field = classS.GetOwnMember<ConstantMemberEntity>("test");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of class S (contextType) that are accessible in class S, named "M", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("M", 0, classS, field, false);
+        var memberLookupResult = MemberLookup.Lookup("M", 0, classS, field, false);
         memberLookupResult.SingleMember.ToString().ShouldEqual("global::S+M");
       }
       // Selecting members of class S (contextType) that are accessible in class S, named "M2", with 1 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("M2", 1, classS, field, false);
+        var memberLookupResult = MemberLookup.Lookup("M2", 1, classS, field, false);
         memberLookupResult.SingleMember.ToString().ShouldEqual("global::S+M2`1");
       }
     }
@@ -232,11 +220,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var classS = globalNamespace.GetSingleChildType<ClassEntity>("S");
       var field = classS.GetOwnMember<ConstantMemberEntity>("test");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of class S (contextType) that are accessible in class S, named "M", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("M", 0, classS, field, false);
+        var memberLookupResult = MemberLookup.Lookup("M", 0, classS, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(2);
         methods[0].ToString().ShouldEqual("global::Base0_M()");
@@ -261,17 +247,15 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraph
       var typeParameter = classA.GetOwnTypeParameterByName("T");
       var field = classA.GetOwnMember<FieldEntity>("t");
 
-      var memberLookup = new MemberLookup(project, project.SemanticGraph);
-
       // Selecting members of T (contextType) that are accessible in class A, named "M1", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("M1", 0, typeParameter, field, false);
+        var memberLookupResult = MemberLookup.Lookup("M1", 0, typeParameter, field, false);
         memberLookupResult.SingleMember.ToString().ShouldEqual("global::Base_M1");
       }
 
       // Selecting members of T (contextType) that are accessible in class A, named "M2", with 0 type params.
       {
-        var memberLookupResult = memberLookup.Lookup("M2", 0, typeParameter, field, false);
+        var memberLookupResult = MemberLookup.Lookup("M2", 0, typeParameter, field, false);
         var methods = memberLookupResult.MethodGroup.Methods.OrderBy(x => x.ToString()).ToList();
         methods.Count.ShouldEqual(2);
         methods[0].ToString().ShouldEqual("global::Base_M2()");

@@ -76,7 +76,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       // Type results must also be mapped using the TypeParameterMap.
       if (HasGenericTemplate)
       {
-        var templateExpressionResult = (UnboundGenericTemplate as ExpressionEntity).ExpressionResult;
+        var templateExpressionResult = (OriginalGenericTemplate as ExpressionEntity).ExpressionResult;
         if (templateExpressionResult is TypeExpressionResult)
         {
           var mappedType = (templateExpressionResult as TypeExpressionResult).Type.GetMappedType(TypeParameterMap);

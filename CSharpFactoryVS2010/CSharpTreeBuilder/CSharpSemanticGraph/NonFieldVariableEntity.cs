@@ -8,7 +8,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This abstract class represents a variable that is not a field (eg. parameter, array element).
   /// </summary>
   // ================================================================================================
-  public abstract class NonFieldVariableEntity : SemanticEntity, IVariableEntity, INamedEntity
+  public abstract class NonFieldVariableEntity : SemanticEntity, IVariableEntity
   {
     #region State
 

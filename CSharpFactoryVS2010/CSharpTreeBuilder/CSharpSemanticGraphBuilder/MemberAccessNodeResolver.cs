@@ -245,8 +245,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (!(typeEntity is TypeParameterEntity))
         {
           // and if a member lookup (§7.3) of I in E with K type parameters produces a match, 
-          var memberLookup = new MemberLookup(errorHandler, typeEntity.SemanticGraph);
-          var memberLookupResult = memberLookup.Lookup(I, K, typeEntity, accessingEntity, false);
+          var memberLookupResult = MemberLookup.Lookup(I, K, typeEntity, accessingEntity, false);
 
           if (memberLookupResult != null)
           {
@@ -355,8 +354,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var T = (E as TypedExpressionResult).Type;
 
         // and a member lookup (§7.3) of I in T with K type arguments produces a match, 
-        var memberLookup = new MemberLookup(errorHandler, T.SemanticGraph);
-        var memberLookupResult = memberLookup.Lookup(I, K, T, accessingEntity, false);
+        var memberLookupResult = MemberLookup.Lookup(I, K, T, accessingEntity, false);
 
         if (memberLookupResult != null)
         {

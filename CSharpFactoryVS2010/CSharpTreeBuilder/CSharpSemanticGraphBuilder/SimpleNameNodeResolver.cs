@@ -252,8 +252,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var I = simpleNameNode.Identifier;
         var A = NamespaceOrTypeNameResolutionAlgorithm.ResolveTypeArguments(simpleNameNode.Arguments, context, errorHandler);
         var K = simpleNameNode.Arguments.Count;
-        var memberLookup = new MemberLookup(errorHandler, context.SemanticGraph);
-        var memberLookupResult = memberLookup.Lookup(I, K, T, context, false);
+        var memberLookupResult = MemberLookup.Lookup(I, K, T, context, false);
 
         if (!memberLookupResult.IsEmpty)
         {

@@ -260,7 +260,7 @@
     <Compile Include="CSharpSemanticGraph\PrimaryMemberAccessExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\MemberAccessExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ThisAccessExpressionEntity.cs" />
-    <Compile Include="CSharpSemanticGraph\IGenericSupportingSemanticEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IGenericCloneSupport.cs" />
     <Compile Include="CSharpSemanticGraph\ISemanticEntity.cs" />
     <Compile Include="CSharpSemanticGraph\SemanticGraphVisitor.cs">
       <DependentUpon>SemanticGraphVisitor.tt</DependentUpon>
@@ -294,7 +294,6 @@
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityExtensions.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SemanticEntityReferenceEqualityComparer.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverPass2SemanticGraphVisitor.cs" />
-    <Compile Include="CSharpSemanticGraphBuilder\ConstructedTypeHelper.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\TypeResolverSemanticGraphVisitorBase.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\EntityBuilderSyntaxNodeVisitor.cs" />
     <Compile Include="CSharpCst\CompilationModel\CompilationEntity.cs" />
@@ -374,7 +373,7 @@
     <Compile Include="CSharpSemanticGraph\IHasChildTypes.cs" />
     <Compile Include="CSharpSemanticGraph\IVariableEntity.cs" />
     <Compile Include="CSharpSemanticGraph\NonTypeMemberEntity.cs" />
-    <Compile Include="CSharpSemanticGraph\PointerToTypeEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\PointerTypeEntity.cs" />
     <Compile Include="CSharpSemanticGraph\DelegateEntity.cs" />
     <Compile Include="CSharpSemanticGraph\InterfaceEntity.cs" />
     <Compile Include="CSharpSemanticGraph\EnumEntity.cs" />

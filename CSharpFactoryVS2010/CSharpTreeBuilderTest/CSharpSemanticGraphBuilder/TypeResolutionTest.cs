@@ -409,7 +409,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         fieldEntity.Name.ShouldEqual("a17");
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         var array = fieldEntity.TypeReference.Target as ArrayTypeEntity;
-        var pointer = array.UnderlyingType as PointerToTypeEntity;
+        var pointer = array.UnderlyingType as PointerTypeEntity;
         var typeEntity = pointer.UnderlyingType as StructEntity;
         typeEntity.ToString().ShouldEqual("global::System.Int32");
       }
@@ -462,7 +462,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
       var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
       fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-      var pointer1 = fieldEntity.TypeReference.Target as PointerToTypeEntity;
+      var pointer1 = fieldEntity.TypeReference.Target as PointerTypeEntity;
       pointer1.BaseTypeReferences.Count().ShouldEqual(0);
       pointer1.OwnMembers.Count().ShouldEqual(0);
       pointer1.Name.ShouldEqual("A2");
@@ -474,7 +474,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       pointer1.IsReferenceType.ShouldBeFalse();
       pointer1.IsValueType.ShouldBeFalse();
 
-      var pointer2 = pointer1.UnderlyingType as PointerToTypeEntity;
+      var pointer2 = pointer1.UnderlyingType as PointerTypeEntity;
       pointer2.BaseTypeReferences.Count().ShouldEqual(0);
       pointer2.OwnMembers.Count().ShouldEqual(0);
       pointer2.Name.ShouldEqual("A2");
@@ -504,7 +504,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var classEntity = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A1");
         var fieldEntity = classEntity.OwnMembers.ToArray()[0] as FieldEntity;
         fieldEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        var pointer1 = fieldEntity.TypeReference.Target as PointerToTypeEntity;
+        var pointer1 = fieldEntity.TypeReference.Target as PointerTypeEntity;
         pointer1.BaseTypeReferences.Count().ShouldEqual(0);
         pointer1.OwnMembers.Count().ShouldEqual(0);
         pointer1.FullyQualifiedName.ShouldEqual("System.Void");
@@ -621,9 +621,9 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         array1.ToString().ShouldEqual("global::A2**[][,]");
         var array2 = array1.UnderlyingType as ArrayTypeEntity;
         array2.ToString().ShouldEqual("global::A2**[]");
-        var pointer1 = array2.UnderlyingType as PointerToTypeEntity;
+        var pointer1 = array2.UnderlyingType as PointerTypeEntity;
         pointer1.ToString().ShouldEqual("global::A2**");
-        var pointer2 = pointer1.UnderlyingType as PointerToTypeEntity;
+        var pointer2 = pointer1.UnderlyingType as PointerTypeEntity;
         pointer2.ToString().ShouldEqual("global::A2*");
         var structEntity = pointer2.UnderlyingType as StructEntity;
         structEntity.ToString().ShouldEqual("global::A2");
@@ -713,7 +713,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         field.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
         field.TypeReference.Target.ToString().ShouldEqual("global::D+F`1[global::System.Int32]+G`1[global::System.Int32]");
         field.TypeReference.Target.DirectGenericTemplate.ToString().ShouldEqual("global::D+F`1[global::System.Int32]+G`1[global::D+F`1+G`1.T3]");
-        field.TypeReference.Target.UnboundGenericTemplate.ToString().ShouldEqual("global::D+F`1+G`1");
+        field.TypeReference.Target.OriginalGenericTemplate.ToString().ShouldEqual("global::D+F`1+G`1");
       }
     }
 
@@ -867,7 +867,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A`2.T1,global::N.A`2.T2]");
         typeEntity.DirectGenericTemplate.ShouldEqual(classA);
         // Should not create a new constructed entity because the previous field has the same type.
-        classA.GenericCloneEntities.Count().ShouldEqual(2);
+        classA.GenericClones.Count().ShouldEqual(2);
       }
       // A<A1, A2>.B1 b1;
       {
@@ -889,7 +889,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B2");
         typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B2`1[global::N.A3]");
         typeEntity.DirectGenericTemplate.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B2`1[global::N.A`2+B2`1.T1]");
-        typeEntity.UnboundGenericTemplate.ToString().ShouldEqual("global::N.A`2+B2`1");
+        typeEntity.OriginalGenericTemplate.ToString().ShouldEqual("global::N.A`2+B2`1");
       }
       // A<A1, A2>.B3<A4> b3;
       {
@@ -900,7 +900,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.FullyQualifiedName.ShouldEqual("N.A.B3");
         typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B3`1[global::N.A4]");
         typeEntity.DirectGenericTemplate.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B3`1[global::N.A`2+B3`1.T3]");
-        typeEntity.UnboundGenericTemplate.ToString().ShouldEqual("global::N.A`2+B3`1");
+        typeEntity.OriginalGenericTemplate.ToString().ShouldEqual("global::N.A`2+B3`1");
       }
 
       // A<A1, A2> a1; --> public class B1

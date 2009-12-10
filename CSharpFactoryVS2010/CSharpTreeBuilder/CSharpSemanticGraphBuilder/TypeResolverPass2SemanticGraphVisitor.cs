@@ -115,7 +115,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Resolve the interface reference for explicitly implemented members
       if (entity.InterfaceReference != null)
       {
-        entity.InterfaceReference.Resolve(entity.Parent as SemanticEntity, _ErrorHandler);
+        entity.InterfaceReference.Resolve(entity.Parent, _ErrorHandler);
       }
     }
 
@@ -138,7 +138,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       if (entity.InterfaceReference != null)
       {
         // Note that the resolution context is not the method, but its parent
-        entity.InterfaceReference.Resolve(entity.Parent as SemanticEntity, _ErrorHandler);
+        entity.InterfaceReference.Resolve(entity.Parent, _ErrorHandler);
       }
 
       // Resolve parameter types

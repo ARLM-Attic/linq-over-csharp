@@ -13,7 +13,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// including fields, array elements, local variables, and parameters.
   /// </remarks>
   // ================================================================================================
-  public interface IVariableEntity : ISemanticEntity
+  public interface IVariableEntity : INamedEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

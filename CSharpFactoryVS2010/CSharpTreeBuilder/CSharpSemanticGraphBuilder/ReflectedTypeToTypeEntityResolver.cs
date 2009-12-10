@@ -225,7 +225,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           string.Format("Could not resolve underlying type of array '{0}'.", type.Name));
       }
 
-      return ConstructedTypeHelper.GetConstructedArrayType(underlyingTypeEntity, type.GetArrayRank());
+      return ArrayTypeEntity.GetConstructedArrayType(underlyingTypeEntity, type.GetArrayRank());
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           string.Format("Could not resolve underlying type of pointer '{0}'.", type.Name));
       }
 
-      return ConstructedTypeHelper.GetConstructedPointerType(underlyingTypeEntity);
+      return PointerTypeEntity.GetConstructedPointerType(underlyingTypeEntity);
     }
 
     // ----------------------------------------------------------------------------------------------

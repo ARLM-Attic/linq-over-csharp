@@ -475,13 +475,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // If the AST node has pointer token(s), then create pointer type(s).
       foreach (var pointerToken in typeNode.PointerTokens)
       {
-        typeEntity = ConstructedTypeHelper.GetConstructedPointerType(typeEntity);
+        typeEntity = PointerTypeEntity.GetConstructedPointerType(typeEntity);
       }
 
       // If the AST node has rank specifier(s), then create array type(s).
       foreach (var rankSpecifier in typeNode.RankSpecifiers)
       {
-        typeEntity = ConstructedTypeHelper.GetConstructedArrayType(typeEntity, rankSpecifier.Rank);
+        typeEntity = ArrayTypeEntity.GetConstructedArrayType(typeEntity, rankSpecifier.Rank);
       }
 
       return typeEntity;

@@ -7,20 +7,41 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a pointer to a type.
   /// </summary>
   // ================================================================================================
-  public sealed class PointerToTypeEntity : ConstructedTypeEntity
+  public sealed class PointerTypeEntity : ConstructedTypeEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Initializes a new instance of the <see cref="PointerToTypeEntity"/> class.
+    /// Initializes a new instance of the <see cref="PointerTypeEntity"/> class.
     /// </summary>
     /// <param name="underlyingType">The referent type.</param>
     // ----------------------------------------------------------------------------------------------
-    public PointerToTypeEntity(TypeEntity underlyingType)
+    public PointerTypeEntity(TypeEntity underlyingType)
       : base(underlyingType)
     {
     }
 
     // Constructed types are not generic-cloned so no copy constructor here.
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a pointer type given its underlying type.
+    /// </summary>
+    /// <param name="underlyingTypeEntity">The underlying type (eg. 'int' for 'int*')</param>
+    /// <returns>A pointer type entity with the given underlying type.</returns>
+    /// <remarks>
+    /// If the constructed type already exists, then retrieves it, otherwise creates it.
+    /// </remarks>
+    // ----------------------------------------------------------------------------------------------
+    public static PointerTypeEntity GetConstructedPointerType(TypeEntity underlyingTypeEntity)
+    {
+      // If the constructed type not exists yet then create it.
+      if (underlyingTypeEntity.PointerType == null)
+      {
+        underlyingTypeEntity.PointerType = new PointerTypeEntity(underlyingTypeEntity);
+      }
+
+      return underlyingTypeEntity.PointerType;
+    }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -41,7 +62,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
     {
-      return ConstructedTypeHelper.GetConstructedPointerType(UnderlyingType.GetMappedType(typeParameterMap));
+      return GetConstructedPointerType(UnderlyingType.GetMappedType(typeParameterMap));
     }
 
     // ----------------------------------------------------------------------------------------------

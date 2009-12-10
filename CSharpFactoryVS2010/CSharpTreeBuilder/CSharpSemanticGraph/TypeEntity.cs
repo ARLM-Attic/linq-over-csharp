@@ -44,7 +44,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public AccessibilityKind? DeclaredAccessibility { get; set; }
 
     /// <summary>Gets or sets the pointer type constructed from this type.</summary>
-    public PointerToTypeEntity PointerType { get; set; }
+    public PointerTypeEntity PointerType { get; set; }
 
     #endregion
 

@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This interface defines of behavior of a semantic entity that supports generic type parameters.
   /// </summary>
   // ================================================================================================
-  public interface IGenericSupportingSemanticEntity : ISemanticEntity
+  public interface IGenericCloneSupport
   { 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// A semantic entity constructed from this entity using the specified type parameter map.
     /// </returns>
     // ----------------------------------------------------------------------------------------------
-    IGenericSupportingSemanticEntity GetGenericClone(TypeParameterMap typeParameterMap);
+    IGenericCloneSupport GetGenericClone(TypeParameterMap typeParameterMap);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Null if this entity was not constructed from another entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    IGenericSupportingSemanticEntity DirectGenericTemplate { get; }
+    IGenericCloneSupport DirectGenericTemplate { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -42,7 +42,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Null if this entity was not constructed from another entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    IGenericSupportingSemanticEntity UnboundGenericTemplate { get; }
+    IGenericCloneSupport OriginalGenericTemplate { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -57,6 +57,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// by replacing type parameters with type arguments.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    IEnumerable<IGenericSupportingSemanticEntity> GenericCloneEntities { get; }
+    IEnumerable<IGenericCloneSupport> GenericClones { get; }
   }
 }

@@ -37,7 +37,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classA.IsOpen.ShouldBeTrue();
       classA.HasGenericTemplate.ShouldBeFalse();
       classA.DirectGenericTemplate.ShouldBeNull();
-      classA.UnboundGenericTemplate.ShouldBeNull();
+      classA.OriginalGenericTemplate.ShouldBeNull();
       {
         var typeParameterMap = classA.TypeParameterMap;
         typeParameterMap.Count.ShouldEqual(1);
@@ -54,7 +54,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classB.IsOpen.ShouldBeFalse();
       classB.HasGenericTemplate.ShouldBeFalse();
       classB.DirectGenericTemplate.ShouldBeNull();
-      classB.UnboundGenericTemplate.ShouldBeNull();
+      classB.OriginalGenericTemplate.ShouldBeNull();
 
       // public A<int> b;
       var fieldB = classB.GetOwnMember<FieldEntity>("b");
@@ -68,7 +68,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       constructedA.IsOpen.ShouldBeFalse();
       constructedA.HasGenericTemplate.ShouldBeTrue();
       constructedA.DirectGenericTemplate.ShouldEqual(classA);
-      constructedA.UnboundGenericTemplate.ShouldEqual(classA);
+      constructedA.OriginalGenericTemplate.ShouldEqual(classA);
       {
         var typeParameterMap = constructedA.TypeParameterMap;
         typeParameterMap.Count.ShouldEqual(1);
@@ -113,7 +113,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         templateType.IsOpen.ShouldBeTrue();
         templateType.HasGenericTemplate.ShouldBeTrue();
         templateType.DirectGenericTemplate.ShouldEqual(classA);
-        templateType.UnboundGenericTemplate.ShouldEqual(classA);
+        templateType.OriginalGenericTemplate.ShouldEqual(classA);
         var resolvedType = field.Type;
         resolvedType.ToString().ShouldEqual("global::A`1[global::System.Int32]");
         resolvedType.IsGeneric.ShouldBeTrue();
@@ -121,7 +121,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         resolvedType.IsOpen.ShouldBeFalse();
         resolvedType.HasGenericTemplate.ShouldBeTrue();
         resolvedType.DirectGenericTemplate.ShouldEqual(classA);
-        resolvedType.UnboundGenericTemplate.ShouldEqual(classA);
+        resolvedType.OriginalGenericTemplate.ShouldEqual(classA);
       }
       // A<int> --> public A<T1[]> a4;
       {
@@ -160,7 +160,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classA.IsOpen.ShouldBeFalse();
       classA.HasGenericTemplate.ShouldBeFalse();
       classA.DirectGenericTemplate.ShouldBeNull();
-      classA.UnboundGenericTemplate.ShouldBeNull();
+      classA.OriginalGenericTemplate.ShouldBeNull();
       classA.TypeParameterMap.IsEmpty.ShouldBeTrue();
 
       // declaration of: public class B<T1>
@@ -234,7 +234,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         type.IsUnboundGeneric.ShouldBeFalse();
         type.IsOpen.ShouldBeFalse();
         type.HasGenericTemplate.ShouldBeTrue();
-        type.UnboundGenericTemplate.ShouldEqual(classD);
+        type.OriginalGenericTemplate.ShouldEqual(classD);
         {
           var typeParameterMap = type.TypeParameterMap;
           typeParameterMap.Count.ShouldEqual(2);
@@ -256,7 +256,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         type.IsUnboundGeneric.ShouldBeFalse();
         type.IsOpen.ShouldBeTrue();
         type.HasGenericTemplate.ShouldBeTrue();
-        type.UnboundGenericTemplate.ShouldEqual(classD);
+        type.OriginalGenericTemplate.ShouldEqual(classD);
         {
           var typeParameterMap = type.TypeParameterMap;
           typeParameterMap.Count.ShouldEqual(2);
