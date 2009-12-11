@@ -25,6 +25,33 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="ExternAliasNodeToRootNamespaceEntityResolver"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    private ExternAliasNodeToRootNamespaceEntityResolver(ExternAliasNodeToRootNamespaceEntityResolver template, TypeParameterMap typeParameterMap)
+      :base(template, typeParameterMap)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new resolver.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new resolver constructed from this resolver using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override Resolver<RootNamespaceEntity> ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new ExternAliasNodeToRootNamespaceEntityResolver(this, typeParameterMap);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Implements the resolution logic.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>

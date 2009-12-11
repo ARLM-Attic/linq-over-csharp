@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using CSharpTreeBuilder.Ast;
+﻿using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -19,7 +16,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// </remarks>
   // ================================================================================================
   public abstract class NamespaceOrTypeNameNodeResolver<TTargetType> : SyntaxNodeResolver<TTargetType, NamespaceOrTypeNameNode>
-    where TTargetType: class
+    where TTargetType: NamespaceOrTypeEntity
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -29,6 +26,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     protected NamespaceOrTypeNameNodeResolver(NamespaceOrTypeNameNode syntaxNode)
       : base(syntaxNode)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NamespaceOrTypeNameNodeResolver{TTargetType}"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    protected NamespaceOrTypeNameNodeResolver(NamespaceOrTypeNameNodeResolver<TTargetType> template, TypeParameterMap typeParameterMap)
+      :base(template, typeParameterMap)
     {
     }
 
@@ -81,6 +91,49 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       else
       {
         base.TranslateExceptionToError(e, errorHandler);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the target object. Null if not resolved.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override TTargetType Target
+    {
+      get
+      {
+        // If this resolver is a clone, and it's template is resolved to a TypeEntity then it has to be type-parameter-mapped.
+        if (IsGenericClone)
+        {
+          var templateTarget = (OriginalGenericTemplate as NamespaceOrTypeNameNodeResolver<TTargetType>)._Target;
+
+          if (templateTarget is TypeEntity)
+          {
+            return (templateTarget as TypeEntity).GetMappedType(TypeParameterMap) as TTargetType;
+          }
+        }
+
+        return _Target;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the state of the resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public override ResolutionState ResolutionState
+    {
+      get
+      {
+        // If this resolver is a clone, then it's resolution state is the same as the template's resolution state.
+        if (IsGenericClone)
+        {
+          return (OriginalGenericTemplate as NamespaceOrTypeNameNodeResolver<TTargetType>)._ResolutionState;
+        }
+        
+        return _ResolutionState;
       }
     }
   }

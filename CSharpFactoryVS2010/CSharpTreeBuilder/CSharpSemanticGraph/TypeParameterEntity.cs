@@ -15,10 +15,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     #region State
 
     /// <summary>Backing field for TypeReferenceConstraints property.</summary>
-    private readonly List<Resolver<TypeEntity>> _TypeReferenceConstraints
-      = new List<Resolver<TypeEntity>>();
-
-
+    private readonly List<Resolver<TypeEntity>> _TypeReferenceConstraints = new List<Resolver<TypeEntity>>();
+    
     /// <summary>Gets a value specifying whether this type parameter has a default constructor ("new()") constraint.</summary>
     public bool HasDefaultConstructorConstraint { get; set; }
 
@@ -41,7 +39,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
     }
 
-    // Note that type parameters are not clones, so no copy constructor support here.
+    // Note that type parameters are not cloned, so no copy constructor support here.
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

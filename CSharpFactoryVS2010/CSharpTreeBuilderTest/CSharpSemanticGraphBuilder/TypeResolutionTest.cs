@@ -754,7 +754,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       var icomparer = comparer.BaseInterfaces.Where(x => x.Name == "IComparer" && x.AllTypeParameterCount == 1).First();
       icomparer.ToString().ShouldEqual("global::System.Collections.Generic.IComparer`1[global::System.Collections.Generic.Comparer`1.T]");
       icomparer.IsOpen.ShouldBeTrue();
-      icomparer.HasGenericTemplate.ShouldBeTrue();
+      icomparer.IsGenericClone.ShouldBeTrue();
       icomparer.IsUnboundGeneric.ShouldBeFalse();
     }
 
@@ -779,7 +779,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // public class B1
       {
         classB1.ToString().ShouldEqual("global::N.A`2+B1");
-        classB1.HasGenericTemplate.ShouldBeFalse();
+        classB1.IsGenericClone.ShouldBeFalse();
         classB1.DirectGenericTemplate.ShouldBeNull();
         classB1.IsGeneric.ShouldBeTrue();
         classB1.IsUnboundGeneric.ShouldBeTrue();
@@ -799,7 +799,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       // public class B2<T1>
       {
         classB2.ToString().ShouldEqual("global::N.A`2+B2`1");
-        classB2.HasGenericTemplate.ShouldBeFalse();
+        classB2.IsGenericClone.ShouldBeFalse();
         classB2.DirectGenericTemplate.ShouldBeNull();
         classB2.IsGeneric.ShouldBeTrue();
         classB2.IsUnboundGeneric.ShouldBeTrue();
@@ -844,7 +844,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         typeEntity.Name.ShouldEqual("A");
         typeEntity.FullyQualifiedName.ShouldEqual("N.A");
         typeEntity.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]");
-        typeEntity.HasGenericTemplate.ShouldBeTrue();
+        typeEntity.IsGenericClone.ShouldBeTrue();
         typeEntity.DirectGenericTemplate.ShouldEqual(classA);
         classA.GetGenericClone(typeEntity.TypeParameterMap).ShouldEqual(typeEntity);
       }
@@ -908,7 +908,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var type = (classA.GetOwnMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B1");
         type.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B1");
         type.IsOpen.ShouldBeFalse();
-        type.HasGenericTemplate.ShouldBeTrue();
+        type.IsGenericClone.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
       }
 
@@ -917,7 +917,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var type = (classA.GetOwnMember<FieldEntity>("a1").Type as ClassEntity).GetSingleChildType<ClassEntity>("B2", 1);
         type.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B2`1[global::N.A`2+B2`1.T1]");
         type.IsOpen.ShouldBeTrue();
-        type.HasGenericTemplate.ShouldBeTrue();
+        type.IsGenericClone.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
       }
 
@@ -926,7 +926,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var type = classA.GetOwnMember<FieldEntity>("a1").Type.GetOwnMember<FieldEntity>("b2").Type;
         type.ToString().ShouldEqual("global::N.A`2[global::N.A1,global::N.A2]+B2`1[global::N.A3]");
         type.IsOpen.ShouldBeFalse();
-        type.HasGenericTemplate.ShouldBeTrue();
+        type.IsGenericClone.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
       }
     }
@@ -2417,7 +2417,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         var type = field.Type as ClassEntity;
         type.IsGeneric.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
-        type.HasGenericTemplate.ShouldBeTrue();
+        type.IsGenericClone.ShouldBeTrue();
 
         type.DirectGenericTemplate.ToString().ShouldEqual("global::A`2");
         type.ToString().ShouldEqual("global::A`2[global::System.Int32,global::System.Int64]");
@@ -2443,7 +2443,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         type.ToString().ShouldEqual("global::A`2.T1");
         type.IsGeneric.ShouldBeFalse();
         type.IsUnboundGeneric.ShouldBeFalse();
-        type.HasGenericTemplate.ShouldBeFalse();
+        type.IsGenericClone.ShouldBeFalse();
         type.DirectGenericTemplate.ShouldBeNull();
       }
 
@@ -2471,14 +2471,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           paramType.Rank.ShouldEqual(1);
           paramType.IsOpen.ShouldBeTrue();
           paramType.IsUnboundGeneric.ShouldBeFalse();
-          paramType.HasGenericTemplate.ShouldBeFalse();
+          paramType.IsGenericClone.ShouldBeFalse();
         }
         {
           var paramType = parameters[1].Type as ClassEntity;
           paramType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::B`1[global::A`2.T2]]");
           paramType.IsOpen.ShouldBeTrue();
           paramType.IsUnboundGeneric.ShouldBeFalse();
-          paramType.HasGenericTemplate.ShouldBeTrue();
+          paramType.IsGenericClone.ShouldBeTrue();
         }
       }
 
@@ -2513,14 +2513,14 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
           paramType.UnderlyingType.ToString().ShouldEqual("global::System.Int32");
           paramType.Rank.ShouldEqual(1);
           paramType.IsOpen.ShouldBeFalse();
-          paramType.HasGenericTemplate.ShouldBeFalse();
+          paramType.IsGenericClone.ShouldBeFalse();
         }
         {
           var paramType = parameters[1].Type as ClassEntity;
           paramType.ToString().ShouldEqual("global::A`2[global::System.Int32,global::B`1[global::System.Int64]]");
           paramType.IsOpen.ShouldBeFalse();
           paramType.IsUnboundGeneric.ShouldBeFalse();
-          paramType.HasGenericTemplate.ShouldBeTrue();
+          paramType.IsGenericClone.ShouldBeTrue();
         }
       }
 

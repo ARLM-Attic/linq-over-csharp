@@ -50,7 +50,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private TypedLiteralExpressionEntity(TypedLiteralExpressionEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      TypeReference = template.TypeReference;
+      if (template.TypeReference != null)
+      {
+        TypeReference = (Resolver<TypeEntity>)template.TypeReference.GetGenericClone(typeParameterMap);
+      }
+
       Value = template.Value;
 
     }

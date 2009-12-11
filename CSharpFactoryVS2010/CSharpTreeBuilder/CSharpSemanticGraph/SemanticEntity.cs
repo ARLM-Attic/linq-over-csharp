@@ -264,7 +264,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets a value indicating whether this is a constructed entity.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public bool HasGenericTemplate
+    public bool IsGenericClone
     {
       get
       {
@@ -283,11 +283,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return HasGenericTemplate && DirectGenericTemplate.DirectGenericTemplate != null
+        return IsGenericClone && DirectGenericTemplate.DirectGenericTemplate != null
                  ? DirectGenericTemplate.OriginalGenericTemplate
                  : DirectGenericTemplate;
       }
     }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets a collection of the entities constructed from this entity 

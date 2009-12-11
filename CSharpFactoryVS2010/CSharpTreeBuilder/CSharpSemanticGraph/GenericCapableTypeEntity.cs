@@ -70,7 +70,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           throw new InvalidOperationException("Constructed types don't have type parameters.");
         }
@@ -94,7 +94,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return (DirectGenericTemplate as GenericCapableTypeEntity).OwnTypeParameters;
         }
@@ -112,7 +112,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return (DirectGenericTemplate as GenericCapableTypeEntity).AllTypeParameterCount;
         }
@@ -130,7 +130,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return (DirectGenericTemplate as GenericCapableTypeEntity).OwnTypeParameterCount;
         }
@@ -147,7 +147,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (HasGenericTemplate)
+      if (IsGenericClone)
       {
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
@@ -165,7 +165,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (HasGenericTemplate)
+      if (IsGenericClone)
       {
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
@@ -186,7 +186,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
-      if (HasGenericTemplate)
+      if (IsGenericClone)
       {
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
@@ -203,7 +203,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return HasGenericTemplate 
+        return IsGenericClone 
           ? (DirectGenericTemplate as GenericCapableTypeEntity).IsGeneric
           : AllTypeParameterCount > 0;
       }
@@ -246,7 +246,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return base.TypeParameterMap;
         }
@@ -271,7 +271,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override TypeEntity GetMappedType(TypeParameterMap typeParameterMap)
     {
-      return HasGenericTemplate 
+      return IsGenericClone 
         ? DirectGenericTemplate.GetGenericClone(TypeParameterMap.MapTypeArguments(typeParameterMap)) as TypeEntity
         : this;
     }

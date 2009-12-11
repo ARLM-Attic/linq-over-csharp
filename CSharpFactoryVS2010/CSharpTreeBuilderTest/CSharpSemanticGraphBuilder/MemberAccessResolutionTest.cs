@@ -199,5 +199,85 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       project.Errors.Count.ShouldEqual(1);
       project.Errors[0].Code.ShouldEqual("InvalidMemberReference");
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of a simple name with a type parameter in it.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void PrimaryMemberAccess_WithTypeParameter()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberAccessResolution\PrimaryMemberAccess_WithTypeParameter.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      // public static T2 b = A<T2>.t;
+      {
+        var class_B = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("B", 1);
+        var field_b = class_B.GetMember<FieldEntity>("b");
+        field_b.Type.ToString().ShouldEqual("global::B`1.T2");
+        var memberAccess_t = (field_b.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+        var result_t = memberAccess_t.ExpressionResult as VariableExpressionResult;
+        result_t.Type.ToString().ShouldEqual("global::B`1.T2");
+        result_t.Variable.ToString().ShouldEqual("global::A`1[global::B`1.T2]_t");
+        var simpleName_A_T2 = memberAccess_t.ChildExpression as SimpleNameExpressionEntity;
+        var result_A_T2 = simpleName_A_T2.ExpressionResult as TypeExpressionResult;
+        result_A_T2.Type.ToString().ShouldEqual("global::A`1[global::B`1.T2]");
+      }
+
+      // class C: B<int>
+      {
+        var class_C = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("C");
+        var field_b = class_C.GetMember<FieldEntity>("b");
+        field_b.Type.ToString().ShouldEqual("global::System.Int32");
+        var memberAccess_t = (field_b.Initializer as ScalarInitializerEntity).Expression as PrimaryMemberAccessExpressionEntity;
+        var result_t = memberAccess_t.ExpressionResult as VariableExpressionResult;
+        result_t.Type.ToString().ShouldEqual("global::System.Int32");
+        result_t.Variable.ToString().ShouldEqual("global::A`1[global::System.Int32]_t");
+        var simpleName_A_int = memberAccess_t.ChildExpression as SimpleNameExpressionEntity;
+        var result_A_int = simpleName_A_int.ExpressionResult as TypeExpressionResult;
+        result_A_int.Type.ToString().ShouldEqual("global::A`1[global::System.Int32]");
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of a qualified alias member access expresssionwith a type parameter in it.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void QualifiedAliasMemberAccess_WithTypeParameter()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"MemberAccessResolution\QualifiedAliasMemberAccess_WithTypeParameter.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      // public static T2 b = global::A<T2>.t;
+      {
+        var class_B = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("B", 1);
+        var field_b = class_B.GetMember<FieldEntity>("b");
+        field_b.Type.ToString().ShouldEqual("global::B`1.T2");
+        var memberAccess_t = (field_b.Initializer as ScalarInitializerEntity).Expression as QualifiedAliasMemberAccessExpressionEntity;
+        var result_qualifiedAliasMember = memberAccess_t.QualifiedAliasMemberNodeResolver.Target as TypeExpressionResult;
+        result_qualifiedAliasMember.Type.ToString().ShouldEqual("global::A`1[global::B`1.T2]");
+        var result_t = memberAccess_t.ExpressionResult as VariableExpressionResult;
+        result_t.Type.ToString().ShouldEqual("global::B`1.T2");
+        result_t.Variable.ToString().ShouldEqual("global::A`1[global::B`1.T2]_t");
+      }
+
+      // class C: B<int>
+      {
+        var class_C = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("C");
+        var field_b = class_C.GetMember<FieldEntity>("b");
+        field_b.Type.ToString().ShouldEqual("global::System.Int32");
+        var memberAccess_t = (field_b.Initializer as ScalarInitializerEntity).Expression as QualifiedAliasMemberAccessExpressionEntity;
+        var result_qualifiedAliasMember = memberAccess_t.QualifiedAliasMemberNodeResolver.Target as TypeExpressionResult;
+        result_qualifiedAliasMember.Type.ToString().ShouldEqual("global::A`1[global::System.Int32]");
+        var result_t = memberAccess_t.ExpressionResult as VariableExpressionResult;
+        result_t.Type.ToString().ShouldEqual("global::System.Int32");
+        result_t.Variable.ToString().ShouldEqual("global::A`1[global::System.Int32]_t");
+      }
+    }
   }
 }

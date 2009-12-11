@@ -105,7 +105,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       { 
-        return HasGenericTemplate && DirectGenericTemplate == SemanticGraph.NullableGenericTypeDefinition; 
+        return IsGenericClone && DirectGenericTemplate == SemanticGraph.NullableGenericTypeDefinition; 
       }
     }
 
@@ -119,7 +119,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get 
       { 
         return IsNullableType 
-          ? TypeParameterMap.TypeArguments.FirstOrDefault().GetMappedType(TypeParameterMap)
+          ? TypeParameterMap.TypeArguments.FirstOrDefault()
           : null; 
       }
     }

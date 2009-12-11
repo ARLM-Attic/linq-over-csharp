@@ -39,7 +39,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private DelegateEntity(DelegateEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      ReturnTypeReference = template.ReturnTypeReference;
+      if (template.ReturnTypeReference != null)
+      {
+        ReturnTypeReference = (Resolver<TypeEntity>)template.ReturnTypeReference.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -65,9 +68,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return ReturnTypeReference != null && ReturnTypeReference.Target != null
-          ? ReturnTypeReference.Target.GetMappedType(TypeParameterMap)
-          : null;
+        return ReturnTypeReference != null ? ReturnTypeReference.Target : null;
       }
     }
 

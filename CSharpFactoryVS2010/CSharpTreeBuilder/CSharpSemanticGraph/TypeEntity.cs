@@ -75,7 +75,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected TypeEntity(TypeEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      _BaseTypeReferences.AddRange(template._BaseTypeReferences);
+      foreach (var baseTypeReference in template._BaseTypeReferences)
+      {
+        _BaseTypeReferences.Add((Resolver<TypeEntity>)baseTypeReference.GetGenericClone(typeParameterMap)); 
+      }
+
       _ReflectedMembersImported = template._ReflectedMembersImported;
       _IsNew = template._IsNew;
       MetadataImporterFactory = template.MetadataImporterFactory;
@@ -496,7 +500,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           }
         }
 
-        return baseClass == null ? null : baseClass.GetMappedType(TypeParameterMap) as ClassEntity;
+        return baseClass;
       }
     }
 
@@ -532,7 +536,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       {
         return (from baseType in BaseTypeReferences
                 where baseType.ResolutionState == ResolutionState.Resolved && baseType.Target is InterfaceEntity
-                select baseType.Target.GetMappedType(TypeParameterMap) as InterfaceEntity).ToList().AsReadOnly();
+                select baseType.Target as InterfaceEntity).ToList().AsReadOnly();
       }
     }
 

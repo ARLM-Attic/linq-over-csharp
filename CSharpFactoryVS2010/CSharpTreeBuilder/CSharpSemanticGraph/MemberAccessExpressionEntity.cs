@@ -45,8 +45,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected MemberAccessExpressionEntity(MemberAccessExpressionEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      // TODO: do we have to clone resolvers?
-      MemberAccessNodeResolver = template.MemberAccessNodeResolver;
+      if (template.MemberAccessNodeResolver != null)
+      {
+        MemberAccessNodeResolver = (MemberAccessNodeResolver)template.MemberAccessNodeResolver.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

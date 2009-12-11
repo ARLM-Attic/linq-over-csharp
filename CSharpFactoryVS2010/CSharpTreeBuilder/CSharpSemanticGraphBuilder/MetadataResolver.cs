@@ -1,4 +1,6 @@
-﻿namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
+﻿using CSharpTreeBuilder.CSharpSemanticGraph;
+
+namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
   // ================================================================================================
   /// <summary>
@@ -11,6 +13,13 @@
     where TTargetType : class
     where TMetadataType : System.Reflection.MemberInfo
   {
+    #region State
+
+    /// <summary>Gets the source object to be resolved.</summary>
+    public TMetadataType Metadata { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="MetadataResolver{TTargetType,TMetadataType}"/> class.
@@ -24,9 +33,16 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the source object to be resolved.
+    /// Initializes a new instance of the <see cref="MetadataResolver{TTargetType,TMetadataType}"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public TMetadataType Metadata { get; private set; }
+    protected MetadataResolver(MetadataResolver<TTargetType, TMetadataType> template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      Metadata = template.Metadata;
+    }
   }
 }

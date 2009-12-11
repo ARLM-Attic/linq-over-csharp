@@ -39,7 +39,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private EnumEntity(EnumEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      UnderlyingTypeReference = template.UnderlyingTypeReference;
+      if (template.UnderlyingTypeReference != null)
+      {
+        UnderlyingTypeReference = (Resolver<TypeEntity>)template.UnderlyingTypeReference.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -65,9 +68,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return UnderlyingTypeReference != null && UnderlyingTypeReference.Target != null
-          ? UnderlyingTypeReference.Target.GetMappedType(TypeParameterMap)
-          : null;
+        return UnderlyingTypeReference != null ? UnderlyingTypeReference.Target : null;
       }
     }
     

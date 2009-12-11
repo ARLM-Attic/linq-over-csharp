@@ -38,6 +38,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override void Visit(ExpressionEntity entity)
     {
       entity.Evaluate(_ErrorHandler);
+
+      foreach(var clone in entity.GenericClones)
+      {
+        (clone as ExpressionEntity).Evaluate(_ErrorHandler);
+      }
     }
   }
 }

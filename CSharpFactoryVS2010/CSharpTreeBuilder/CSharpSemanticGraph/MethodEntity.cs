@@ -86,8 +86,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(template, typeParameterMap)
     {
       IsPartial = template.IsPartial;
-      ReturnTypeReference = template.ReturnTypeReference;
-      InterfaceReference = template.InterfaceReference;
+
+      if (template.ReturnTypeReference != null)
+      {
+        ReturnTypeReference = (Resolver<TypeEntity>)template.ReturnTypeReference.GetGenericClone(typeParameterMap);
+      }
+
+      if (template.InterfaceReference != null)
+      {
+        InterfaceReference = (Resolver<TypeEntity>)template.InterfaceReference.GetGenericClone(typeParameterMap);
+      }
 
       foreach (var parameter in template.Parameters)
       {
@@ -120,9 +128,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return ReturnTypeReference != null && ReturnTypeReference.Target != null
-          ? ReturnTypeReference.Target.GetMappedType(TypeParameterMap)
-          : null;
+        return ReturnTypeReference != null ? ReturnTypeReference.Target : null;
       }
     }
 
@@ -193,7 +199,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           throw new InvalidOperationException("Constructed methods don't have type parameters.");
         }
@@ -217,7 +223,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           throw new InvalidOperationException("Constructed methods don't have type parameters.");
         }
@@ -235,7 +241,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return (DirectGenericTemplate as MethodEntity).AllTypeParameterCount;
         }
@@ -253,7 +259,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return (DirectGenericTemplate as MethodEntity).OwnTypeParameterCount;
         }
@@ -272,7 +278,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return HasGenericTemplate
+        return IsGenericClone
           ? (DirectGenericTemplate as GenericCapableTypeEntity).IsGeneric
           : AllTypeParameterCount > 0;
       }
@@ -286,7 +292,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (HasGenericTemplate)
+      if (IsGenericClone)
       {
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
@@ -304,7 +310,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void RemoveTypeParameter(TypeParameterEntity typeParameterEntity)
     {
-      if (HasGenericTemplate)
+      if (IsGenericClone)
       {
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
@@ -325,7 +331,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public TypeParameterEntity GetOwnTypeParameterByName(string name)
     {
-      if (HasGenericTemplate)
+      if (IsGenericClone)
       {
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
@@ -342,7 +348,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        if (HasGenericTemplate)
+        if (IsGenericClone)
         {
           return base.TypeParameterMap;
         }
@@ -386,9 +392,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return InterfaceReference != null && InterfaceReference.Target != null
-          ? InterfaceReference.Target.GetMappedType(TypeParameterMap) as InterfaceEntity
-          : null;
+        return InterfaceReference != null ? InterfaceReference.Target as InterfaceEntity : null;
       }
     }
 

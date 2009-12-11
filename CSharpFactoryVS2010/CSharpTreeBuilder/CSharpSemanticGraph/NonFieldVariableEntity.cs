@@ -62,7 +62,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       : base(template, typeParameterMap)
     {
       Name = template.Name;
-      TypeReference = template.TypeReference;
+
+      if (template.TypeReference != null)
+      {
+        TypeReference = (Resolver<TypeEntity>)template.TypeReference.GetGenericClone(typeParameterMap);
+      }
 
       if (template.Initializer != null)
       {
@@ -92,9 +96,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.Target != null
-          ? TypeReference.Target.GetMappedType(TypeParameterMap)
-          : null;
+        return TypeReference != null ? TypeReference.Target : null;
       }
     }
 

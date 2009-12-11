@@ -1,4 +1,5 @@
 ﻿using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
@@ -13,6 +14,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     where TTargetType : class
     where TSyntaxNodeType : ISyntaxNode
   {
+    #region State
+
+    /// <summary>Gets the syntax node to be resolved.</summary>
+    public TSyntaxNodeType SyntaxNode { get; protected set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="SyntaxNodeResolver{TTargetEntity,TSyntaxNode}"/> class.
@@ -26,9 +34,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the syntax node to be resolved.
+    /// Initializes a new instance of the <see cref="SyntaxNodeResolver{TTargetEntity,TSyntaxNode}"/> class 
+    /// by constructing it from a template instance.
     /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
     // ----------------------------------------------------------------------------------------------
-    public TSyntaxNodeType SyntaxNode { get; protected set; }
+    protected SyntaxNodeResolver(SyntaxNodeResolver<TTargetType, TSyntaxNodeType> template, TypeParameterMap typeParameterMap)
+      : base(template, typeParameterMap)
+    {
+      SyntaxNode = template.SyntaxNode;
+    }
   }
 }

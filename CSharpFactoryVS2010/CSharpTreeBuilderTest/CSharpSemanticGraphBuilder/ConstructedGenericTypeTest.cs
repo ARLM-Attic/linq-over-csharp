@@ -35,7 +35,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classA.IsGeneric.ShouldBeTrue();
       classA.IsUnboundGeneric.ShouldBeTrue();
       classA.IsOpen.ShouldBeTrue();
-      classA.HasGenericTemplate.ShouldBeFalse();
+      classA.IsGenericClone.ShouldBeFalse();
       classA.DirectGenericTemplate.ShouldBeNull();
       classA.OriginalGenericTemplate.ShouldBeNull();
       {
@@ -52,7 +52,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classB.IsGeneric.ShouldBeFalse();
       classB.IsUnboundGeneric.ShouldBeFalse();
       classB.IsOpen.ShouldBeFalse();
-      classB.HasGenericTemplate.ShouldBeFalse();
+      classB.IsGenericClone.ShouldBeFalse();
       classB.DirectGenericTemplate.ShouldBeNull();
       classB.OriginalGenericTemplate.ShouldBeNull();
 
@@ -66,7 +66,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       constructedA.IsGeneric.ShouldBeTrue();
       constructedA.IsUnboundGeneric.ShouldBeFalse();
       constructedA.IsOpen.ShouldBeFalse();
-      constructedA.HasGenericTemplate.ShouldBeTrue();
+      constructedA.IsGenericClone.ShouldBeTrue();
       constructedA.DirectGenericTemplate.ShouldEqual(classA);
       constructedA.OriginalGenericTemplate.ShouldEqual(classA);
       {
@@ -82,58 +82,44 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         // The field inherits the TPM of the constructed class, but it's not the same TPM object.
         tpmComparer.Equals(field.TypeParameterMap, constructedA.TypeParameterMap).ShouldBeTrue();
         field.TypeParameterMap.ShouldNotEqual(constructedA.TypeParameterMap);
-        // The type of the field is resolved to T1 ...
-        field.TypeReference.Target.ToString().ShouldEqual("global::A`1.T1");
-        // ... but it returns the mapped type parameter: T1 -> int
-        field.Type.ToString().ShouldEqual("global::System.Int32");
+
+        // The type resolver object is a clone.
+        field.TypeReference.IsGenericClone.ShouldBeTrue();
+        // The template of the clone is resolved to "global::A`1.T1"
+        (field.TypeReference.OriginalGenericTemplate as Resolver<TypeEntity>).Target.ToString().ShouldEqual("global::A`1.T1");
+        // But this cloned type reference is mapped with the T1 -> int mapping.
+        field.TypeReference.Target.ToString().ShouldEqual("global::System.Int32");
       }
       // A<int> --> public T1[] a2;
       {
         var field = constructedA.GetOwnMember<FieldEntity>("a2");
-        var templateType = field.TypeReference.Target;
-        templateType.ToString().ShouldEqual("global::A`1.T1[]");
-        templateType.IsGeneric.ShouldBeFalse();
-        templateType.IsUnboundGeneric.ShouldBeFalse();
-        templateType.IsOpen.ShouldBeTrue();
-        templateType.HasGenericTemplate.ShouldBeFalse();
         var resolvedType = field.Type;
         resolvedType.ToString().ShouldEqual("global::System.Int32[]");
         resolvedType.IsGeneric.ShouldBeFalse();
         resolvedType.IsUnboundGeneric.ShouldBeFalse();
         resolvedType.IsOpen.ShouldBeFalse();
-        resolvedType.HasGenericTemplate.ShouldBeFalse();
+        resolvedType.IsGenericClone.ShouldBeFalse();
       }
       // A<int> --> public A<T1> a3;
       {
         var field = constructedA.GetOwnMember<FieldEntity>("a3");
-        var templateType = field.TypeReference.Target;
-        templateType.ToString().ShouldEqual("global::A`1[global::A`1.T1]");
-        templateType.IsGeneric.ShouldBeTrue();
-        templateType.IsUnboundGeneric.ShouldBeFalse();
-        templateType.IsOpen.ShouldBeTrue();
-        templateType.HasGenericTemplate.ShouldBeTrue();
-        templateType.DirectGenericTemplate.ShouldEqual(classA);
-        templateType.OriginalGenericTemplate.ShouldEqual(classA);
         var resolvedType = field.Type;
         resolvedType.ToString().ShouldEqual("global::A`1[global::System.Int32]");
         resolvedType.IsGeneric.ShouldBeTrue();
         resolvedType.IsUnboundGeneric.ShouldBeFalse();
         resolvedType.IsOpen.ShouldBeFalse();
-        resolvedType.HasGenericTemplate.ShouldBeTrue();
+        resolvedType.IsGenericClone.ShouldBeTrue();
         resolvedType.DirectGenericTemplate.ShouldEqual(classA);
         resolvedType.OriginalGenericTemplate.ShouldEqual(classA);
       }
       // A<int> --> public A<T1[]> a4;
       {
         var field = constructedA.GetOwnMember<FieldEntity>("a4");
-        field.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::A`1.T1[]]");
         field.Type.ToString().ShouldEqual("global::A`1[global::System.Int32[]]");
       }
       // A<int> --> public A<A<T1>> a5;
       {
         var field = constructedA.GetOwnMember<FieldEntity>("a5");
-        field.TypeReference.Target.ToString().ShouldEqual("global::A`1[global::A`1[global::A`1.T1]]");
-        field.TypeReference.Target.IsOpen.ShouldBeTrue();
         field.Type.ToString().ShouldEqual("global::A`1[global::A`1[global::System.Int32]]");
         field.Type.IsOpen.ShouldBeFalse();
       }
@@ -158,7 +144,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classA.IsGeneric.ShouldBeFalse();
       classA.IsUnboundGeneric.ShouldBeFalse();
       classA.IsOpen.ShouldBeFalse();
-      classA.HasGenericTemplate.ShouldBeFalse();
+      classA.IsGenericClone.ShouldBeFalse();
       classA.DirectGenericTemplate.ShouldBeNull();
       classA.OriginalGenericTemplate.ShouldBeNull();
       classA.TypeParameterMap.IsEmpty.ShouldBeTrue();
@@ -168,7 +154,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classB.IsGeneric.ShouldBeTrue();
       classB.IsUnboundGeneric.ShouldBeTrue();
       classB.IsOpen.ShouldBeTrue();
-      classB.HasGenericTemplate.ShouldBeFalse();
+      classB.IsGenericClone.ShouldBeFalse();
       {
         var typeParameterMap = classB.TypeParameterMap;
         typeParameterMap.Count.ShouldEqual(1);
@@ -183,7 +169,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classC.IsGeneric.ShouldBeTrue();
       classC.IsUnboundGeneric.ShouldBeTrue();
       classC.IsOpen.ShouldBeTrue();
-      classC.HasGenericTemplate.ShouldBeFalse();
+      classC.IsGenericClone.ShouldBeFalse();
       {
         var typeParameterMap = classC.TypeParameterMap;
         typeParameterMap.Count.ShouldEqual(1);
@@ -198,7 +184,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classD.IsGeneric.ShouldBeTrue();
       classD.IsUnboundGeneric.ShouldBeTrue();
       classD.IsOpen.ShouldBeTrue();
-      classD.HasGenericTemplate.ShouldBeFalse();
+      classD.IsGenericClone.ShouldBeFalse();
       {
         var typeParameterMap = classD.TypeParameterMap;
         typeParameterMap.Count.ShouldEqual(2);
@@ -215,7 +201,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       classX.IsGeneric.ShouldBeTrue();
       classX.IsUnboundGeneric.ShouldBeTrue();
       classX.IsOpen.ShouldBeTrue();
-      classX.HasGenericTemplate.ShouldBeFalse();
+      classX.IsGenericClone.ShouldBeFalse();
       {
         var typeParameterMap = classX.TypeParameterMap;
         typeParameterMap.Count.ShouldEqual(1);
@@ -233,7 +219,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         type.IsGeneric.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
         type.IsOpen.ShouldBeFalse();
-        type.HasGenericTemplate.ShouldBeTrue();
+        type.IsGenericClone.ShouldBeTrue();
         type.OriginalGenericTemplate.ShouldEqual(classD);
         {
           var typeParameterMap = type.TypeParameterMap;
@@ -255,7 +241,7 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         type.IsGeneric.ShouldBeTrue();
         type.IsUnboundGeneric.ShouldBeFalse();
         type.IsOpen.ShouldBeTrue();
-        type.HasGenericTemplate.ShouldBeTrue();
+        type.IsGenericClone.ShouldBeTrue();
         type.OriginalGenericTemplate.ShouldEqual(classD);
         {
           var typeParameterMap = type.TypeParameterMap;

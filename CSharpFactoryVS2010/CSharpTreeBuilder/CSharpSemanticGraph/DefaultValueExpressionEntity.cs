@@ -45,7 +45,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private DefaultValueExpressionEntity(DefaultValueExpressionEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      TypeReference = template.TypeReference;
+      if (template.TypeReference != null)
+      {
+        TypeReference = (Resolver<TypeEntity>)template.TypeReference.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -71,9 +74,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.Target != null
-          ? TypeReference.Target.GetMappedType(TypeParameterMap)
-          : null;
+        return TypeReference != null ? TypeReference.Target : null;
       }
     }
 

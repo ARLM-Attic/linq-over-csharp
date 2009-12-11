@@ -60,8 +60,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected FunctionMemberWithAccessorsEntity(FunctionMemberWithAccessorsEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      TypeReference = template.TypeReference;
-      InterfaceReference = template.InterfaceReference;
+      if (template.TypeReference != null)
+      {
+        TypeReference = (Resolver<TypeEntity>)template.TypeReference.GetGenericClone(typeParameterMap);
+      }
+
+      if (template.InterfaceReference != null)
+      {
+        InterfaceReference = (Resolver<TypeEntity>)template.InterfaceReference.GetGenericClone(typeParameterMap);
+      }
     }
     
     // ----------------------------------------------------------------------------------------------
@@ -73,9 +80,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get
       {
-        return TypeReference != null && TypeReference.Target != null
-          ? TypeReference.Target.GetMappedType(TypeParameterMap)
-          : null;
+        return TypeReference != null ? TypeReference.Target : null;
       }
     }
 
@@ -110,9 +115,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get 
       {
-        return InterfaceReference != null && InterfaceReference.Target != null
-          ? InterfaceReference.Target.GetMappedType(TypeParameterMap) as InterfaceEntity
-          : null;
+        return InterfaceReference != null ? InterfaceReference.Target as InterfaceEntity : null;
       }
     }
 

@@ -402,9 +402,10 @@
     <None Include="TestFiles\MemberAccessResolution\InvalidMemberReference_CS0122_InaccessibleClass.cs" />
     <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_Instance.cs" />
     <None Include="TestFiles\ConstructedGenericType\Argument.cs" />
+    <None Include="TestFiles\MemberAccessResolution\QualifiedAliasMemberAccess_WithTypeParameter.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
-    <Compile Include="TestFiles\SimpleNameResolution\TypeParameterUsage.cs" />
+    <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_WithTypeParameter.cs" />
     <None Include="TestFiles\SimpleNameResolution\MethodGroup.cs" />
     <None Include="TestFiles\SimpleNameResolution\InstanceMember.cs" />
     <None Include="TestFiles\SimpleNameResolution\ResolvedToNamespace.cs" />

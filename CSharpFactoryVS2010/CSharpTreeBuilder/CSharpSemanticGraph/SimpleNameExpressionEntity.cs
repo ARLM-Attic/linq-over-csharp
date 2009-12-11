@@ -45,8 +45,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private SimpleNameExpressionEntity(SimpleNameExpressionEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      // TODO: do we have to clone resolvers?
-      SimpleNameResolver = template.SimpleNameResolver;
+      if (template.SimpleNameResolver != null)
+      {
+        SimpleNameResolver = (SimpleNameNodeResolver)template.SimpleNameResolver.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -71,24 +73,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public override void Evaluate(ICompilationErrorHandler errorHandler)
     {
-      // If the expression was cloned from a generic template, then the result is 
-      // the result of the generic template expression. 
-      // Type results must also be mapped using the TypeParameterMap.
-      if (HasGenericTemplate)
+      if (SimpleNameResolver != null)
       {
-        var templateExpressionResult = (OriginalGenericTemplate as ExpressionEntity).ExpressionResult;
-        if (templateExpressionResult is TypeExpressionResult)
-        {
-          var mappedType = (templateExpressionResult as TypeExpressionResult).Type.GetMappedType(TypeParameterMap);
-          ExpressionResult = new TypeExpressionResult(mappedType);
-        }
-      }
-      else
-      {
-        if (SimpleNameResolver != null)
-        {
-          ExpressionResult = SimpleNameResolver.Resolve(this, errorHandler);
-        }
+        ExpressionResult = SimpleNameResolver.Resolve(this, errorHandler);
       }
     }
 

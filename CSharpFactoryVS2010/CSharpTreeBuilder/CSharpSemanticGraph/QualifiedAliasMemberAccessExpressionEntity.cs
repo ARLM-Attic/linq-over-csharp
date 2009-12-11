@@ -43,7 +43,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private QualifiedAliasMemberAccessExpressionEntity(QualifiedAliasMemberAccessExpressionEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      QualifiedAliasMemberNodeResolver = template.QualifiedAliasMemberNodeResolver;
+      if (template.QualifiedAliasMemberNodeResolver != null)
+      {
+        QualifiedAliasMemberNodeResolver =
+          (QualifiedAliasMemberNodeResolver)template.QualifiedAliasMemberNodeResolver.GetGenericClone(typeParameterMap);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CSharpTreeBuilder.Ast;
+﻿using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 using CSharpTreeBuilder.ProjectContent;
 
@@ -14,7 +12,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// This class implements the member access resolution logic, as described in the spec §7.5.4
   /// </remarks>
   // ================================================================================================
-  public sealed class QualifiedAliasMemberNodeResolver : SyntaxNodeResolver<ExpressionResult, QualifiedAliasMemberNode>
+  public sealed class QualifiedAliasMemberNodeResolver : SyntaxNodeToExpressionResultResolver<QualifiedAliasMemberNode>
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -29,13 +27,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="QualifiedAliasMemberNodeResolver"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    private QualifiedAliasMemberNodeResolver(QualifiedAliasMemberNodeResolver template, TypeParameterMap typeParameterMap)
+      :base(template, typeParameterMap)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new resolver.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new resolver constructed from this resolver using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override Resolver<ExpressionResult> ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new QualifiedAliasMemberNodeResolver(this, typeParameterMap);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Implements the resolution logic.
     /// </summary>
     /// <param name="context">A semantic entity that is the context of the resolution.</param>
     /// <param name="errorHandler">The object used for error reporting.</param>
     /// <returns>The resolved entity, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
-    protected override ExpressionResult GetResolvedEntity(ISemanticEntity context, ICompilationErrorHandler errorHandler)
+    protected override ExpressionResult InternalGetResolvedEntity(ISemanticEntity context, ICompilationErrorHandler errorHandler)
     {
       ExpressionResult expressionResult = null;
 

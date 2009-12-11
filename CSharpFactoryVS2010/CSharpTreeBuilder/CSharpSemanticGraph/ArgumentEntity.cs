@@ -42,7 +42,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       Kind = template.Kind;
       
-      if (Expression != null)
+      if (template.Expression != null)
       {
         Expression = (ExpressionEntity) template.Expression.GetGenericClone(typeParameterMap);
       }

@@ -26,6 +26,33 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="NamespaceOrTypeNameNodeToNamespaceEntityResolver"/> class 
+    /// by constructing it from a template instance.
+    /// </summary>
+    /// <param name="template">The template for the new instance.</param>
+    /// <param name="typeParameterMap">The type parameter map of the new instance.</param>
+    // ----------------------------------------------------------------------------------------------
+    private NamespaceOrTypeNameNodeToNamespaceEntityResolver(NamespaceOrTypeNameNodeToNamespaceEntityResolver template, TypeParameterMap typeParameterMap)
+      :base(template, typeParameterMap)
+    {
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a new resolver.
+    /// </summary>
+    /// <param name="typeParameterMap">A collection of type parameters and associated type arguments.</param>
+    /// <returns>
+    /// A new resolver constructed from this resolver using the specified type parameter map.
+    /// </returns>
+    // ----------------------------------------------------------------------------------------------
+    protected override Resolver<NamespaceEntity> ConstructNew(TypeParameterMap typeParameterMap)
+    {
+      return new NamespaceOrTypeNameNodeToNamespaceEntityResolver(this, typeParameterMap);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Translates an exception thrown during namespace-or-type-name resolution to an error that
     /// can be reported to an ICompilationErrorHandler.
     /// </summary>
@@ -64,6 +91,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     protected override NamespaceEntity GetResolvedEntity(ISemanticEntity context, ICompilationErrorHandler errorHandler)
     {
+      if (IsGenericClone)
+      {
+        throw new ApplicationException("GetResolvedEntity called on generic clone object.");
+      }
+
       // No type arguments (§4.4.1) can be present in a namespace-name (only types can have type arguments).
       if (SyntaxNode.TypeTags.Any(typeTag => typeTag.Arguments.Count > 0))
       {
@@ -71,7 +103,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       }
 
       // Following resolution as described below, ...
-      NamespaceOrTypeEntity namespaceOrTypeEntity = 
+      NamespaceOrTypeEntity namespaceOrTypeEntity =
         NamespaceOrTypeNameResolutionAlgorithm.ResolveNamespaceOrTypeNode(SyntaxNode, context, errorHandler);
 
       // (If the resolution produced a null, then an error was already signaled, so just bail out.)
