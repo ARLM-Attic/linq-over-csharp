@@ -250,6 +250,10 @@
     <Compile Include="CSharpSemanticGraph\AccessorKind.cs" />
     <Compile Include="CSharpSemanticGraph\AssignmentExpressionEntity.cs" />
     <Compile Include="CSharpSemanticGraph\ArgumentEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IHasLocalConstants.cs" />
+    <Compile Include="CSharpSemanticGraph\LocalConstantDeclarationStatementEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\LocalConstantEntity.cs" />
+    <Compile Include="CSharpSemanticGraph\IHasLocalVariables.cs" />
     <Compile Include="CSharpSemanticGraph\IHasArguments.cs" />
     <Compile Include="CSharpSemanticGraph\ReturnStatementEntity.cs" />
     <Compile Include="CSharpSemanticGraph\InvocationExpressionEntity.cs" />

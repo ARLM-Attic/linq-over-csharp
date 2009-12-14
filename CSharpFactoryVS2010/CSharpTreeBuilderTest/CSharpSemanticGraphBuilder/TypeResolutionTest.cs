@@ -2620,5 +2620,93 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
         field.Type.ToString().ShouldEqual("global::System.Int32*[]");
       }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Local variable type resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void LocalVariable()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\LocalVariable.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var method_M = class_A.GetMember<MethodEntity>("M");
+      var declaration = method_M.Body.Statements.ToList()[0] as LocalVariableDeclarationStatementEntity;
+
+      int i = 0;
+
+      // a1
+      {
+        var variable = declaration.LocalVariables.ToList()[i];
+
+        variable.Name.ShouldEqual("a1");
+        variable.FullyQualifiedName.ShouldEqual("a1");
+        variable.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        variable.Type.ToString().ShouldEqual("global::System.Int32");
+        variable.Initializer.ShouldBeNull();
+      }
+      i++;
+
+      // a2 = 2
+      {
+        var variable = declaration.LocalVariables.ToList()[i];
+
+        variable.Name.ShouldEqual("a2");
+        variable.FullyQualifiedName.ShouldEqual("a2");
+        variable.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        variable.Type.ToString().ShouldEqual("global::System.Int32");
+        variable.Initializer.ShouldNotBeNull();
+      }
+      i++;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Local constant type resolution.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    [Ignore] // Problem with EntityBuilderSyntaxNodeVisitor
+    public void LocalConstant()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"TypeResolution\LocalConstant.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var method_M = class_A.GetMember<MethodEntity>("M");
+      var declaration = method_M.Body.Statements.ToList()[0] as LocalConstantDeclarationStatementEntity;
+
+      int i = 0;
+
+      // a1 = 1
+      {
+        var variable = declaration.LocalConstants.ToList()[i];
+
+        variable.Name.ShouldEqual("a1");
+        variable.FullyQualifiedName.ShouldEqual("a1");
+        variable.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        variable.Type.ToString().ShouldEqual("global::System.Int32");
+        variable.Initializer.ShouldNotBeNull();
+      }
+      i++;
+
+      // a2 = 2
+      {
+        var variable = declaration.LocalConstants.ToList()[i];
+
+        variable.Name.ShouldEqual("a2");
+        variable.FullyQualifiedName.ShouldEqual("a2");
+        variable.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+        variable.Type.ToString().ShouldEqual("global::System.Int32");
+        variable.Initializer.ShouldNotBeNull();
+      }
+      i++;
+    }
+
   }
 }

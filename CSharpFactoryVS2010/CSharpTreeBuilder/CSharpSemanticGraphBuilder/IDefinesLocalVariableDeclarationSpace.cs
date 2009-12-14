@@ -17,5 +17,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The entity declared with the supplied name or null if no such declaration.</returns>
     // ----------------------------------------------------------------------------------------------
     INamedEntity GetDeclaredEntityByName(string name);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a declaration of an entity.
+    /// </summary>
+    /// <param name="namedEntity">A named entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    void AddDeclaration(INamedEntity namedEntity);
   }
 }

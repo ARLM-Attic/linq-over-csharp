@@ -171,11 +171,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Tries to resolve a simple name to a method type parameter.
+    /// Tries to resolve a simple name in a local declaration space.
     /// </summary>
     /// <param name="simpleNameNode">The simple name to resolve.</param>
     /// <param name="context">The resolution context entity.</param>
-    /// <returns>A type parameter entity, or null if could not resolve.</returns>
+    /// <returns>An expression result, or null if could not resolve.</returns>
     // ----------------------------------------------------------------------------------------------
     private static ExpressionResult ResolveAtLocalDeclarationSpace(
       SimpleNameNode simpleNameNode,
@@ -196,7 +196,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           {
             // then the simple-name refers to that local variable, parameter or constant 
             // and is classified as a variable or value.
-            return new ValueExpressionResult((namedEntity as IVariableEntity).Type);
+            if (namedEntity is LocalConstantEntity)
+            {
+              return new ValueExpressionResult((namedEntity as IVariableEntity).Type);
+            }
+
+            return new VariableExpressionResult(namedEntity as IVariableEntity);
           }
 
           enclosingBlock = enclosingBlock.Parent.GetEnclosing<IDefinesLocalVariableDeclarationSpace>();

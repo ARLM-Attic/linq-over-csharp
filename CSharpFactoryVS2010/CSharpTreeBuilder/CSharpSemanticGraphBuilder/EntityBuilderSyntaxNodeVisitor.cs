@@ -51,7 +51,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(NamespaceDeclarationNode node)
     {
-      NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetParentEntity<NamespaceEntity>(node);
 
       // Looping through every tag in the namespace name
       foreach (var nameTag in node.NameTags)
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(ExternAliasNode node)
     {
       // Determine the parent entity of the to-be-created extern alias entity.
-      NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetParentEntity<NamespaceEntity>(node);
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
@@ -120,7 +120,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(UsingNamespaceNode node)
     {
       // Determine the parent entity of the to-be-created using entity.
-      NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetParentEntity<NamespaceEntity>(node);
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
@@ -154,7 +154,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(UsingAliasNode node)
     {
       // Determine the parent entity of the to-be-created using entity.
-      NamespaceEntity parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetParentEntity<NamespaceEntity>(node);
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
@@ -187,21 +187,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ClassDeclarationNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      var parentEntity = GetParentEntity<IHasChildTypes>(node);
 
-      // Cast the parent to a child-type-capable entity.
-      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
-      
       var classEntity = new ClassEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+
       (classEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       classEntity.IsStatic = IsStatic(node.Modifiers);
       classEntity.IsAbstract = IsAbstract(node.Modifiers);
       classEntity.IsSealed = IsSealed(node.Modifiers);
       classEntity.Program = _Program;
+      
       AddBaseTypesToTypeEntity(classEntity, node);
       AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      childTypeCapableParentEntity.AddChildType(classEntity);
+      
+      parentEntity.AddChildType(classEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, classEntity);
 
@@ -217,18 +216,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(StructDeclarationNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
-
-      // Cast the parent to a child-type-capable entity.
-      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
+      var parentEntity = GetParentEntity<IHasChildTypes>(node);
 
       var structEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+
       (structEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       structEntity.Program = _Program;
+      
       AddBaseTypesToTypeEntity(structEntity, node);
       AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      childTypeCapableParentEntity.AddChildType(structEntity);
+      
+      parentEntity.AddChildType(structEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, structEntity);
 
@@ -244,18 +242,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(InterfaceDeclarationNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
-
-      // Cast the parent to a child-type-capable entity.
-      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
+      var parentEntity = GetParentEntity<IHasChildTypes>(node);
 
       var interfaceEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+
       (interfaceEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       interfaceEntity.Program = _Program;
+      
       AddBaseTypesToTypeEntity(interfaceEntity, node);
       AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      childTypeCapableParentEntity.AddChildType(interfaceEntity);
+      
+      parentEntity.AddChildType(interfaceEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, interfaceEntity);
 
@@ -271,17 +268,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(EnumDeclarationNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
-
-      // Cast the parent to a child-type-capable entity.
-      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
+      var parentEntity = GetParentEntity<IHasChildTypes>(node);
 
       // Build the new entity
       var enumEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
+
       (enumEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       enumEntity.Program = _Program;
-      childTypeCapableParentEntity.AddChildType(enumEntity);
+      
+      parentEntity.AddChildType(enumEntity);
+      
       AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
 
       // Set the underlying type reference.
@@ -307,18 +303,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(DelegateDeclarationNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<NamespaceOrTypeEntity>(node);
+      var parentEntity = GetParentEntity<IHasChildTypes>(node);
 
-      // Cast the parent to a child-type-capable entity.
-      IHasChildTypes childTypeCapableParentEntity = CastToChildTypeCapableEntity(parentEntity);
-
-      // Build the new entity
       var delegateEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
+
       (delegateEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       delegateEntity.Program = _Program;
+      
       AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      childTypeCapableParentEntity.AddChildType(delegateEntity);
+      
+      parentEntity.AddChildType(delegateEntity);
+      
       AssociateSyntaxNodeWithSemanticEntity(node, delegateEntity);
 
       // Set the return type.
@@ -376,7 +371,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Looping through every tag in the field declaration
       foreach (var constTag in node.ConstTags)
       {
-        // Create a semantic entity and add to its parent.
         var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
         var constantEntity = new ConstantMemberEntity(true, GetAccessibility(node.Modifiers), typeReference,
                                                       constTag.Identifier);
@@ -487,6 +481,61 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Creates a local variable entity.
+    /// </summary>
+    /// <param name="node">A syntax node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(LocalVariableTagNode node)
+    {
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<IHasLocalVariables>(node);
+
+      var localVariableNode = node.ParentNode as LocalVariableNode;
+      var typeResolver = new TypeNodeToTypeEntityResolver(localVariableNode.Type);
+      var initializer = CreateInitializer(node.Initializer);
+
+      var localVariableEntity = new LocalVariableEntity(node.Identifier, typeResolver, initializer);
+      parentEntity.AddLocalVariable(localVariableEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, localVariableEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates a local constant entity.
+    /// </summary>
+    /// <param name="node">A syntax node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ConstTagNode node)
+    {
+      // Get the parent entity of the to-be created entity
+      var parentEntity = GetParentEntity<IHasLocalConstants>(node);
+
+      // ConstTagNode can appear as a child of a ConstDeclarionNode as well,
+      // so if we don't find an IHasLocalConstants parent, that's not a problem.
+      if (parentEntity == null)
+      {
+        return true;
+      }
+
+      var localConstantNode = node.ParentNode as ConstStatementNode;
+      var typeResolver = new TypeNodeToTypeEntityResolver(localConstantNode.Type);
+      var initializer = new ScalarInitializerEntity();
+
+      var localVariableEntity = new LocalConstantEntity(node.Identifier, typeResolver, initializer);
+      parentEntity.AddLocalConstant(localVariableEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, localVariableEntity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Creates a literal entity from a literal AST node.
     /// </summary>
     /// <param name="node">A literal AST node.</param>
@@ -495,7 +544,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(LiteralNode node)
     {
       // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       LiteralExpressionEntity literal = null;
 
@@ -554,8 +603,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           (node as StringLiteralNode).Value);
       }
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(literal);
+      parentEntity.AddExpression(literal);
 
       AssociateSyntaxNodeWithSemanticEntity(node, literal);
 
@@ -571,12 +619,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(SimpleNameNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeResolver(node));
       
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(simpleNameEntity);
+      parentEntity.AddExpression(simpleNameEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, simpleNameEntity);
 
@@ -592,12 +639,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(PrimaryExpressionMemberAccessNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var expressionEntity = new PrimaryMemberAccessExpressionEntity(new MemberAccessNodeResolver(node));
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(expressionEntity);
+      parentEntity.AddExpression(expressionEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
 
@@ -613,14 +659,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(QualifiedAliasMemberAccessNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var expressionEntity = new QualifiedAliasMemberAccessExpressionEntity(
         new QualifiedAliasMemberNodeResolver(node.QualifiedAliasMember),
         new MemberAccessNodeResolver(node));
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(expressionEntity);
+      parentEntity.AddExpression(expressionEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
 
@@ -636,14 +681,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(PredefinedTypeMemberAccessNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var expressionEntity = new PredefinedTypeMemberAccessExpressionEntity(
         node.TypeName.TypeTags[0].Identifier,
         new MemberAccessNodeResolver(node));
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(expressionEntity);
+      parentEntity.AddExpression(expressionEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
 
@@ -659,12 +703,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(DefaultValueExpressionNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var defaultValueEntity = new DefaultValueExpressionEntity(new TypeNodeToTypeEntityResolver(node.Type));
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(defaultValueEntity);
+      parentEntity.AddExpression(defaultValueEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, defaultValueEntity);
 
@@ -680,12 +723,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(InvocationExpressionNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var entity = new InvocationExpressionEntity();
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(entity);
+      parentEntity.AddExpression(entity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, entity);
 
@@ -701,12 +743,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(AssignmentExpressionNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasExpressions>(node);
 
       var entity = new AssignmentExpressionEntity();
 
-      var hasExpressions = CastToIHasExpressions(parentEntity);
-      hasExpressions.AddExpression(entity);
+      parentEntity.AddExpression(entity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, entity);
 
@@ -722,7 +763,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ArgumentNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasArguments>(node);
 
       var parameterKind = node.IsRef
                             ? ParameterKind.Reference
@@ -732,8 +773,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
       var entity = new ArgumentEntity(parameterKind);
 
-      var hasArguments = CastToIHasArguments(parentEntity);
-      hasArguments.AddArgument(entity);
+      parentEntity.AddArgument(entity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, entity);
 
@@ -749,12 +789,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(BlockStatementNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasBody>(node);
 
       var blockEntity = new BlockStatementEntity();
 
-      var hasBody = CastToIHasBody(parentEntity);
-      hasBody.Body = blockEntity;
+      parentEntity.Body = blockEntity;
 
       AssociateSyntaxNodeWithSemanticEntity(node, blockEntity);
 
@@ -770,12 +809,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ExpressionStatementNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasStatements>(node);
 
       var entity = new ExpressionStatementEntity();
 
-      var hasStatements = CastToIHasStatements(parentEntity);
-      hasStatements.AddStatement(entity);
+      parentEntity.AddStatement(entity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, entity);
 
@@ -791,12 +829,50 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ReturnStatementNode node)
     {
-      var parentEntity = GetParentEntity<SemanticEntity>(node);
+      var parentEntity = GetParentEntity<IHasStatements>(node);
 
       var entity = new ReturnStatementEntity();
 
-      var hasStatements = CastToIHasStatements(parentEntity);
-      hasStatements.AddStatement(entity);
+      parentEntity.AddStatement(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(VariableDeclarationStatementNode node)
+    {
+      var parentEntity = GetParentEntity<IHasStatements>(node);
+
+      var entity = new LocalVariableDeclarationStatementEntity();
+      
+      parentEntity.AddStatement(entity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, entity);
+
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ConstStatementNode node)
+    {
+      var parentEntity = GetParentEntity<IHasStatements>(node);
+
+      var entity = new LocalConstantDeclarationStatementEntity();
+      parentEntity.AddStatement(entity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, entity);
 
@@ -804,7 +880,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     }
 
     #region Private methods
-
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the entity that belongs to the parent of a syntax node.
@@ -813,159 +889,61 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>The parent entity</returns>
     // ----------------------------------------------------------------------------------------------
     private TExpectedEntityType GetParentEntity<TExpectedEntityType>(ISyntaxNode node)
-      where TExpectedEntityType : SemanticEntity
+      where TExpectedEntityType : class, ISemanticEntity
     {
       if (node == null)
       {
         throw new ArgumentNullException("node");
       }
 
-      var parentNode = node.Parent;
+      var currentNode = node.Parent;
+      ISemanticEntity candidateEntity = null;
+      TExpectedEntityType foundEntity = null;
 
-      // Find the first parent that is either a CompilationUnitNode or has semantic entities associated
-      while (parentNode != null 
-        && !(parentNode is CompilationUnitNode)
-        && (parentNode.SemanticEntities == null || parentNode.SemanticEntities.Count == 0))
+      while (foundEntity == null && currentNode != null)
       {
-        parentNode = parentNode.Parent;
+        if (currentNode.SemanticEntities != null)
+        {
+          var semanticEntityCount = currentNode.SemanticEntities.Count;
+
+          // If we are at the compilation unit level, then the entity will be created under the "global" namespace.
+          if (currentNode is CompilationUnitNode)
+          {
+            candidateEntity = _SemanticGraph.GlobalNamespace;
+          }
+
+          // If the parent node is a NamespaceDeclarationNode, then it can have several entities associated with it
+          // (eg. namespace A.B.C where A, B, C are all distinct semantic entities), 
+          // then the parent entity is the last in the list.
+          else if (currentNode is NamespaceDeclarationNode && semanticEntityCount >= 1)
+          {
+            candidateEntity = currentNode.SemanticEntities[semanticEntityCount - 1];
+          }
+
+          // If the parent node has only 1 semantic entity associated, then this will be the parent entity.
+          else if (semanticEntityCount == 1)
+          {
+            candidateEntity = currentNode.SemanticEntities[0];
+          }
+
+          // If the parent node has more than 1 semantic entites, that's an unexpected ambiguity. 
+          else if (semanticEntityCount > 1)
+          {
+            throw new ApplicationException(
+              string.Format("Unexpected number of semantic entities ('{0}') on node of type: '{1}'",
+                            semanticEntityCount, currentNode.GetType()));
+          }
+
+          if (candidateEntity is TExpectedEntityType)
+          {
+            foundEntity = candidateEntity as TExpectedEntityType;
+          }
+        }
+
+        currentNode = currentNode.Parent;
       }
 
-      if (parentNode == null)
-      {
-        throw new ApplicationException("No parent node found.");
-      }
-
-      if (parentNode.SemanticEntities == null)
-      {
-        throw new ApplicationException("SemanticEntites should not be null.");
-      }
-
-      // If we are at the compilation unit level, then the entity will be created under the "global" namespace.
-      if (parentNode is CompilationUnitNode)
-      {
-        return _SemanticGraph.GlobalNamespace as TExpectedEntityType;
-      }
-
-      // If the parent node has only 1 semantic entity associated, then this will be the parent entity.
-      var semanticEntityCount = parentNode.SemanticEntities.Count;
-      if (semanticEntityCount == 1)
-      {
-        return parentNode.SemanticEntities[0] as TExpectedEntityType;
-      }
-
-      // If the parent node is a NamespaceDeclarationNode, then it can have several entities associated with it
-      // (eg. namespace A.B.C where A, B, C are all distinct semantic entities), 
-      // then the parent entity is the last in the list.
-      if (parentNode is NamespaceDeclarationNode && semanticEntityCount >= 1)
-      {
-        return parentNode.SemanticEntities[semanticEntityCount - 1] as TExpectedEntityType;
-      }
-
-      // If the parent node has more than 1 semantic entites, that's an unexpected ambiguity. 
-      if (semanticEntityCount > 0)
-      {
-        throw new ApplicationException(
-          string.Format("Unexpected number of semantic entities ('{0}') on node of type: '{1}'",
-                        semanticEntityCount, parentNode.GetType()));
-      }
-
-      throw new ApplicationException("The parent node has no semantic entity associated.");
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks whether a namespace-or-type entity can have child types, and returns an IHasChildTypes
-    /// interface is possible.
-    /// </summary>
-    /// <param name="namespaceOrTypeEntity">A namespace or type entity.</param>
-    /// <returns>An IHasChildTypes interface.</returns>
-    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    private static IHasChildTypes CastToChildTypeCapableEntity(NamespaceOrTypeEntity namespaceOrTypeEntity)
-    {
-      var childTypeCapableEntity = namespaceOrTypeEntity as IHasChildTypes;
-      if (childTypeCapableEntity == null)
-      {
-        // This case is not allowed by the syntax analyzer, but we check anyway to be future-proof...
-        throw new ApplicationException(string.Format("'{0}' cannot have child types.", namespaceOrTypeEntity.GetType()));
-      }
-      return childTypeCapableEntity;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks whether a semantic entity implements the IHasExpressions interface.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    /// <returns>An IHasExpressions interface.</returns>
-    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    private static IHasExpressions CastToIHasExpressions(SemanticEntity entity)
-    {
-      var hasExpressions = entity as IHasExpressions;
-      if (hasExpressions == null)
-      {
-        throw new ApplicationException(
-          string.Format("Expected a type that has expressions, but found '{0}'.", entity.GetType()));
-      }
-      return hasExpressions;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks whether a semantic entity implements the IHasArguments interface.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    /// <returns>An IHasArguments interface.</returns>
-    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    private static IHasArguments CastToIHasArguments(SemanticEntity entity)
-    {
-      var hasArguments = entity as IHasArguments;
-      if (hasArguments == null)
-      {
-        throw new ApplicationException(
-          string.Format("Expected a type that has arguments, but found '{0}'.", entity.GetType()));
-      }
-      return hasArguments;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks whether a semantic entity implements the IHasStatements interface.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    /// <returns>An IHasStatements interface.</returns>
-    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    private static IHasStatements CastToIHasStatements(SemanticEntity entity)
-    {
-      var hasStatements = entity as IHasStatements;
-      if (hasStatements == null)
-      {
-        throw new ApplicationException(
-          string.Format("Expected a type that has statements, but found '{0}'.", entity.GetType()));
-      }
-      return hasStatements;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Checks whether a semantic entity implements the IHasBody interface.
-    /// </summary>
-    /// <param name="entity">A semantic entity.</param>
-    /// <returns>An IHasBody interface.</returns>
-    /// <remarks>Throws an AppicationException if the cast was not successful.</remarks>
-    // ----------------------------------------------------------------------------------------------
-    private static IHasBody CastToIHasBody(SemanticEntity entity)
-    {
-      var hasBody = entity as IHasBody;
-      if (hasBody == null)
-      {
-        throw new ApplicationException(
-          string.Format("Expected a type that has body, but found '{0}'.", entity.GetType()));
-      }
-      return hasBody;
+      return foundEntity;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -1030,7 +1008,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private static void AddTypeParametersToEntity(
       ICanHaveTypeParameters typeParameterHolder, 
-      SemanticEntity parentEntity, 
+      ISemanticEntity parentEntity, 
       TypeParameterNodeCollection typeParameterNodes,
       TypeParameterConstraintNodeCollection typeParameterConstraints)
     {

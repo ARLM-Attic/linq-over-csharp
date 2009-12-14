@@ -405,6 +405,9 @@
     <None Include="TestFiles\MemberAccessResolution\QualifiedAliasMemberAccess_WithTypeParameter.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
+    <None Include="TestFiles\SimpleNameResolution\LocalVariable.cs" />
+    <Compile Include="TestFiles\TypeResolution\LocalConstant.cs" />
+    <None Include="TestFiles\TypeResolution\LocalVariable.cs" />
     <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_WithTypeParameter.cs" />
     <None Include="TestFiles\SimpleNameResolution\MethodGroup.cs" />
     <None Include="TestFiles\SimpleNameResolution\InstanceMember.cs" />

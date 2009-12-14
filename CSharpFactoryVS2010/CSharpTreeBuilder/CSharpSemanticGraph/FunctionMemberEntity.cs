@@ -68,6 +68,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       return _DeclarationSpace.GetSingleEntity<INamedEntity>(name);
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a declaration of an entity.
+    /// </summary>
+    /// <param name="namedEntity">A named entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddDeclaration(INamedEntity namedEntity)
+    {
+      _DeclarationSpace.Register(namedEntity);
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

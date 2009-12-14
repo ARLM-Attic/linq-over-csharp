@@ -19,6 +19,8 @@ namespace CSharpTreeBuilder.Ast
   // ================================================================================================
   public sealed class VariableDeclarationStatementNode : StatementNode
   {
+    private LocalVariableNode _Declaration;
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="VariableDeclarationStatementNode"/> class.
@@ -35,7 +37,21 @@ namespace CSharpTreeBuilder.Ast
     /// Gets or sets the declaration belonging to this statement.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableNode Declaration { get; internal set; }
+    public LocalVariableNode Declaration
+    {
+      get
+      {
+        return _Declaration;
+      }
+      internal set
+      {
+        _Declaration = value;
+        if (_Declaration != null)
+        {
+          _Declaration.ParentNode = this;
+        }
+      }
+    }
 
     #region Visitor methods
 

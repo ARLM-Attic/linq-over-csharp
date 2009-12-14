@@ -1,18 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
   /// <summary>
-  /// This class represents a local variable (or constant) declaration statement entity.
+  /// This class represents a local variable declaration statement entity.
   /// </summary>
   // ================================================================================================
-  public sealed class LocalVariableDeclarationStatementEntity : StatementEntity
+  public sealed class LocalVariableDeclarationStatementEntity : StatementEntity, IHasLocalVariables
   {
     #region State
 
     /// <summary>Backing field for Variables property.</summary>
-    private readonly List<LocalVariableEntity> _Variables = new List<LocalVariableEntity>();
+    private readonly List<LocalVariableEntity> _LocalVariables = new List<LocalVariableEntity>();
 
     #endregion
 
@@ -36,9 +38,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private LocalVariableDeclarationStatementEntity(LocalVariableDeclarationStatementEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      foreach(var variable in template.Variables)
+      foreach(var variable in template.LocalVariables)
       {
-        _Variables.Add((LocalVariableEntity) variable.GetGenericClone(typeParameterMap));
+        _LocalVariables.Add((LocalVariableEntity) variable.GetGenericClone(typeParameterMap));
       }
     }
 
@@ -61,11 +63,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets an iterate-only collection of the variables declared in this statement.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public IEnumerable<LocalVariableEntity> Variables
+    public IEnumerable<LocalVariableEntity> LocalVariables
     {
       get
       {
-        return _Variables;
+        return _LocalVariables;
       }
     }
 
@@ -75,10 +77,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="variableEntity">A local variable entity.</param>
     // ----------------------------------------------------------------------------------------------
-    public void AddVariable(LocalVariableEntity variableEntity)
+    public void AddLocalVariable(LocalVariableEntity variableEntity)
     {
-      _Variables.Add(variableEntity);
-      variableEntity.Parent = this;
+      if (variableEntity != null)
+      {
+        _LocalVariables.Add(variableEntity);
+        variableEntity.Parent = this;
+
+        // Find enclosing block
+        var enclosingBlock = variableEntity.GetEnclosing<IDefinesLocalVariableDeclarationSpace>();
+        if (enclosingBlock == null)
+        {
+          throw new ApplicationException(
+            string.Format("No enclosing block found for variable '{0}'.", variableEntity));
+        }
+
+        enclosingBlock.AddDeclaration(variableEntity);
+      }
     }
 
     #region Visitor methods
@@ -94,7 +109,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       visitor.Visit(this);
       base.AcceptVisitor(visitor);
 
-      foreach (var variable in Variables)
+      foreach (var variable in LocalVariables)
       {
         variable.AcceptVisitor(visitor);
       }

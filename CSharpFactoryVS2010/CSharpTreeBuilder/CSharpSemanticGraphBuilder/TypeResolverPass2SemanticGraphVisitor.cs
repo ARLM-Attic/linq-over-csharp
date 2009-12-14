@@ -5,12 +5,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 {
   // ================================================================================================
   /// <summary>
-  /// This class implements a semantic graph visitor that resolves the following references.
-  /// - Resolves type references in type bodies (members, member bodies).
-  /// - Creates constructed types when needed.
+  /// This class implements a semantic graph visitor that resolves type references in type bodies 
+  /// (members, member bodies).
+  /// </summary>
+  /// <remarks>
   /// Type references in expression are not resolved by this visitor. 
   /// Those are resolved by <see cref="ExpressionEvaluatorSemanticGraphVisitor"/> at a later stage.
-  /// </summary>
+  /// </remarks>
   // ================================================================================================
   public sealed class TypeResolverPass2SemanticGraphVisitor : TypeResolverSemanticGraphVisitorBase
   {
@@ -88,6 +89,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         _ErrorHandler.Error("CS1547", errorPoint, "Keyword 'void' cannot be used in this context");
       }
     }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Resolves type references in a PropertyEntity node.
@@ -148,6 +150,30 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         {
           // Note that the resolution context is the method, because it can be the method's type parameter too
           parameter.TypeReference.Resolve(entity, _ErrorHandler);
+        }
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a local variable node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(LocalVariableEntity entity)
+    {
+      if (entity.TypeReference != null)
+      {
+        entity.TypeReference.Resolve(entity, _ErrorHandler);
+
+        if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
+        {
+          var errorPoint = entity.TypeReference is TypeNodeToTypeEntityResolver
+                             ? ((TypeNodeToTypeEntityResolver)entity.TypeReference).SyntaxNode.StartToken
+                             : null;
+
+          _ErrorHandler.Error("CS0547", errorPoint, "'{0}': property or indexer cannot have void type", entity.Name);
+
         }
       }
     }

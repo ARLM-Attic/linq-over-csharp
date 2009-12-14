@@ -9,26 +9,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class LocalVariableEntity : NonFieldVariableEntity
   {
-    #region State
-
-    /// <summary>Gets a value indicating whether this is a constant.</summary>
-    public bool IsConstant { get; private set; }
-
-    #endregion
-
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalVariableEntity"/> class.
     /// </summary>
     /// <param name="name">The name of the variable.</param>
     /// <param name="type">The type of the variable (a type entity reference).</param>
-    /// <param name="isConstant">A value indicating whether this is a constant.</param>
     /// <param name="initializer">The initializer of the variable. Can be null.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableEntity(string name, Resolver<TypeEntity> type, VariableInitializer initializer, bool isConstant)
+    public LocalVariableEntity(string name, Resolver<TypeEntity> type, VariableInitializer initializer)
       : base (name, type, initializer)
     {
-      IsConstant = isConstant;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -42,7 +33,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     private LocalVariableEntity(LocalVariableEntity template, TypeParameterMap typeParameterMap)
       : base(template, typeParameterMap)
     {
-      IsConstant = template.IsConstant;
     }
 
     // ----------------------------------------------------------------------------------------------

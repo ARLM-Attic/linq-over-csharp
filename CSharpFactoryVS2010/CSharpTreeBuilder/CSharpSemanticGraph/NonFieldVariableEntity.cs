@@ -48,6 +48,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       Name = name;
       TypeReference = typeReference;
       Initializer = initializer;
+
+      if (Initializer != null)
+      {
+        Initializer.Parent = this;
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

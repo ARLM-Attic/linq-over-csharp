@@ -171,5 +171,29 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
       methods.Count.ShouldEqual(1);
       methods[0].ToString().ShouldEqual("global::A_M2()");
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Test the resolution of a simple name to a local variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    [TestMethod]
+    public void LocalVariable()
+    {
+      var project = new CSharpProject(WorkingFolder);
+      project.AddFile(@"SimpleNameResolution\LocalVariable.cs");
+      InvokeParser(project).ShouldBeTrue();
+
+      var class_A = project.SemanticGraph.GlobalNamespace.GetSingleChildType<ClassEntity>("A");
+      var method_M = class_A.GetMember<MethodEntity>("M");
+      var variable_decl_statement = method_M.Body.Statements.ToList()[0] as LocalVariableDeclarationStatementEntity;
+      var variable_a = variable_decl_statement.LocalVariables.ToList()[0];
+      var assignment_statement = method_M.Body.Statements.ToList()[1] as ExpressionStatementEntity;
+      var assignment = assignment_statement.Expression as AssignmentExpressionEntity;
+      var simpleName_a = assignment.LeftExpression as SimpleNameExpressionEntity;
+      var result = simpleName_a.ExpressionResult as VariableExpressionResult;
+      result.Type.ToString().ShouldEqual("global::System.Int32");
+      result.Variable.ShouldEqual(variable_a);
+    }
   }
 }
