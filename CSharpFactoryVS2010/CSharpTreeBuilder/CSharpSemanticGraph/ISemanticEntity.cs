@@ -20,6 +20,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    void AddChild(ISemanticEntity entity);
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this node is a (direct or indirect) parent of another node.
     /// </summary>
     /// <param name="node">A semantic node.</param>
@@ -64,6 +72,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     ReadOnlyCollection<ISyntaxNode> SyntaxNodes { get; }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Associates a syntax node with the entity.
+    /// </summary>
+    /// <param name="node">A syntax node.</param>
+    // ----------------------------------------------------------------------------------------------
+    void AddSyntaxNode(ISyntaxNode node);
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

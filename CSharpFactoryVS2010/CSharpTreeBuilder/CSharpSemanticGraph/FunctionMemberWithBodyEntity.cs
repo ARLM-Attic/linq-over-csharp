@@ -56,6 +56,24 @@
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is BlockStatementEntity)
+      {
+        Body = entity as BlockStatementEntity;
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets or sets the body of the function member.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

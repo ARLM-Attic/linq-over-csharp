@@ -18,8 +18,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Gets the type reference of the variable.</summary>
     public Resolver<TypeEntity> TypeReference { get; private set; }
 
-    /// <summary>Gets the initializer of the variable.</summary>
-    public VariableInitializer Initializer { get; private set; }
+    /// <summary>Backing field for Initializer property.</summary>
+    private VariableInitializer _Initializer;
 
     #endregion
 
@@ -48,11 +48,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       Name = name;
       TypeReference = typeReference;
       Initializer = initializer;
-
-      if (Initializer != null)
-      {
-        Initializer.Parent = this;
-      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -76,6 +71,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       if (template.Initializer != null)
       {
         Initializer = (VariableInitializer)template.Initializer.GetGenericClone(typeParameterMap);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is VariableInitializer)
+      {
+        Initializer = entity as VariableInitializer;
+      }
+      else
+      {
+        base.AddChild(entity);
       }
     }
 
@@ -116,6 +129,27 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       get
       {
         return Type == null ? null : Type.IsArrayType as bool?;
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the initializer of the variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public VariableInitializer Initializer
+    {
+      get
+      {
+        return _Initializer;
+      }
+      protected set
+      {
+        _Initializer = value;
+        if (_Initializer != null)
+        {
+          _Initializer.Parent = this;
+        }
       }
     }
 

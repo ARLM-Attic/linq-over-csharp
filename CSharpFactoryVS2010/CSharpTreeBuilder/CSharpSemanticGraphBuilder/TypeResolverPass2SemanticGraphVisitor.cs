@@ -165,16 +165,20 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       if (entity.TypeReference != null)
       {
         entity.TypeReference.Resolve(entity, _ErrorHandler);
-
-        if (entity.Type == _SemanticGraph.GetTypeEntityByBuiltInType(BuiltInType.Void))
-        {
-          var errorPoint = entity.TypeReference is TypeNodeToTypeEntityResolver
-                             ? ((TypeNodeToTypeEntityResolver)entity.TypeReference).SyntaxNode.StartToken
-                             : null;
-
-          _ErrorHandler.Error("CS0547", errorPoint, "'{0}': property or indexer cannot have void type", entity.Name);
-
-        }
+      }
+    }
+    
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Resolves type references in a local constant node.
+    /// </summary>
+    /// <param name="entity">A semantic entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void Visit(LocalConstantEntity entity)
+    {
+      if (entity.TypeReference != null)
+      {
+        entity.TypeReference.Resolve(entity, _ErrorHandler);
       }
     }
   }

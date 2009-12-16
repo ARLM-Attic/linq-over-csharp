@@ -57,7 +57,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       return new LocalVariableDeclarationStatementEntity(this, typeParameterMap);
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is LocalVariableEntity)
+      {
+        AddLocalVariable(entity as LocalVariableEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets an iterate-only collection of the variables declared in this statement.

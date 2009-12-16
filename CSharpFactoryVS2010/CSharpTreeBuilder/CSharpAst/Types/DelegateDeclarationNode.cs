@@ -28,7 +28,7 @@ namespace CSharpTreeBuilder.Ast
       : base(start, name)
     {
       IdentifierToken = name;
-      FormalParameters = new FormalParameterNodeCollection();
+      FormalParameters = new FormalParameterNodeCollection() { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------

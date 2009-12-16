@@ -2492,7 +2492,7 @@ TypeDeclarationNode typeDecl, out MemberDeclarationNode memNode) {
 			Expression(out exprNode);
 			cmcTag.Expression = exprNode;
 			Terminate(cmcTag);
-			csNode.ConstTags.Add(separator, cmTag);
+			csNode.ConstTags.Add(separator, cmcTag);
 			
 		}
 		Expect(114);

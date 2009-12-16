@@ -62,6 +62,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is TypeParameterEntity)
+      {
+        AddTypeParameter(entity as TypeParameterEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a collection of all type parameters of this type (parent's + own).
     /// Empty list for non-generic types.
     /// </summary>

@@ -105,6 +105,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is IMemberEntity)
+      {
+        AddMember(entity as IMemberEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this is a built in type.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

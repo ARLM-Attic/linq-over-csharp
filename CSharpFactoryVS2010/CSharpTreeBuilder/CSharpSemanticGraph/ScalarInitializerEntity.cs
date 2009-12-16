@@ -28,6 +28,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Initializes a new instance of the <see cref="ScalarInitializerEntity"/> class.
+    /// </summary>
+    /// <param name="expression">The initializer expression.</param>
+    // ----------------------------------------------------------------------------------------------
+    public ScalarInitializerEntity(ExpressionEntity expression)
+    {
+      AddExpression(expression);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Initializes a new instance of the <see cref="ScalarInitializerEntity"/> class 
     /// by constructing it from a template instance.
     /// </summary>
@@ -55,6 +66,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
     {
       return new ScalarInitializerEntity(this, typeParameterMap);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is ExpressionEntity)
+      {
+        AddExpression(entity as ExpressionEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

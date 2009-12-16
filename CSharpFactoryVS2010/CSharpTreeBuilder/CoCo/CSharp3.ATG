@@ -2210,7 +2210,7 @@ ConstStatement<out StatementNode stmtNode>
     (. 
        cmcTag.Expression = exprNode;
        Terminate(cmcTag);
-       csNode.ConstTags.Add(separator, cmTag);
+       csNode.ConstTags.Add(separator, cmcTag);
     .)
   } 
   ";"

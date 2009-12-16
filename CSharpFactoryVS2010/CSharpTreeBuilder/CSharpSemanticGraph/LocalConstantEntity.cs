@@ -16,15 +16,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the constant.</param>
     /// <param name="type">The type of the constant (a type entity reference).</param>
-    /// <param name="initializer">The initializer of the constant.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalConstantEntity(string name, Resolver<TypeEntity> type, VariableInitializer initializer)
-      : base (name, type, initializer)
+    public LocalConstantEntity(string name, Resolver<TypeEntity> type)
+      : base (name, type, null)
     {
-      if (initializer == null)
-      {
-        throw new ArgumentNullException("initializer");
-      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -53,7 +48,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       return new LocalConstantEntity(this, typeParameterMap);
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is ExpressionEntity)
+      {
+        Initializer = new ScalarInitializerEntity(entity as ExpressionEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
     #region Visitor methods
 
     // ----------------------------------------------------------------------------------------------

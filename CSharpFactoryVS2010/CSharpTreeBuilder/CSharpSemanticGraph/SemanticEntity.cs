@@ -124,6 +124,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public virtual void AddChild(ISemanticEntity entity)
+    {
+      throw new ApplicationException(string.Format("Unexpected child entity: '{0}' of type: '{1}'", entity, entity.GetType()));
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this entity is a (direct or indirect) parent of another entity.
     /// </summary>
     /// <param name="entity">A semantic entity.</param>

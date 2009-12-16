@@ -58,6 +58,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is VariableInitializer)
+      {
+        AddVariableInitializer(entity as VariableInitializer);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the collection of variable initializers.
     /// </summary>
     // ----------------------------------------------------------------------------------------------

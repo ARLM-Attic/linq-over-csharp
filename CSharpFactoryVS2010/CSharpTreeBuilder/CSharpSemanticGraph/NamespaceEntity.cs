@@ -51,6 +51,40 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is NamespaceEntity)
+      {
+        AddChildNamespace(entity as NamespaceEntity);
+      }
+      else if (entity is TypeEntity)
+      {
+        AddChildType(entity as TypeEntity);
+      }
+      else if (entity is UsingNamespaceEntity)
+      {
+        AddUsingNamespace(entity as UsingNamespaceEntity);
+      }
+      else if (entity is UsingAliasEntity)
+      {
+        AddUsingAlias(entity as UsingAliasEntity);
+      }
+      else if (entity is ExternAliasEntity)
+      {
+        AddExternAlias(entity as ExternAliasEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets a value indicating whether this namespace is explicitly declared in source code 
     /// (not inferred from assembly metadata).
     /// </summary>

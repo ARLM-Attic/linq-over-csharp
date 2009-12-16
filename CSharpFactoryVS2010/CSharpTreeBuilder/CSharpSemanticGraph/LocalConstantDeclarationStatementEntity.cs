@@ -57,7 +57,25 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       return new LocalConstantDeclarationStatementEntity(this, typeParameterMap);
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is LocalConstantEntity)
+      {
+        AddLocalConstant(entity as LocalConstantEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets an iterate-only collection of the constants declared in this statement.

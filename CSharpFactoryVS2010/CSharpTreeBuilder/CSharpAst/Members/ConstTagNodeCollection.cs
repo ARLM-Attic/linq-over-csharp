@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.Ast
   /// This class declares a collection of const member tags.
   /// </summary>
   // ================================================================================================
-  public sealed class ConstTagNodeCollection : SyntaxNodeCollection<ConstTagNode, ConstStatementNode>
+  public sealed class ConstTagNodeCollection : SyntaxNodeCollection<ConstTagNode, ISyntaxNode>
   {
   }
 }

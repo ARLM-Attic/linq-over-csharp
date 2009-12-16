@@ -67,6 +67,28 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is ExpressionEntity)
+      {
+        AddExpression(entity as ExpressionEntity);
+      }
+      else if (entity is ArgumentEntity)
+      {
+        AddArgument(entity as ArgumentEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Adds a child expression. 
     /// </summary>
     /// <param name="expressionEntity">An expression entity.</param>

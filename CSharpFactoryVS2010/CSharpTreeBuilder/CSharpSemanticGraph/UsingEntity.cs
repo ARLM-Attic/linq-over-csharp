@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
   // ================================================================================================
@@ -8,6 +9,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public abstract class UsingEntity : SemanticEntity, IHasLexicalScope
   {
+    #region State
+
+    /// <summary>Gets the region of program text where this object has effect on.</summary>
+    public SourceRegion LexicalScope { get; private set; }
+
+    #endregion
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="UsingEntity"/> class.
@@ -25,13 +33,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     }
 
     // Note that this type of entity cannot be affected by type arguments, so no generic clone support here.
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the region of program text where this object has effect on.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public SourceRegion LexicalScope { get; private set; }
 
     #region Visitor methods
 

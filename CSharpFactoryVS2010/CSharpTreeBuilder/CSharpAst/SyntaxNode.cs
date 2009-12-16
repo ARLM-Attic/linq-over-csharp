@@ -54,7 +54,7 @@ namespace CSharpTreeBuilder.Ast
     // ----------------------------------------------------------------------------------------------
     protected SyntaxNode(Token start)
     {
-      SemanticEntities = new List<SemanticEntity>();
+      SemanticEntities = new List<ISemanticEntity>();
 
       StartToken = start;
       TerminatingToken = start;
@@ -328,7 +328,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of semantic entities created from this syntax node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<SemanticEntity> SemanticEntities { get; private set; }
+    public List<ISemanticEntity> SemanticEntities { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

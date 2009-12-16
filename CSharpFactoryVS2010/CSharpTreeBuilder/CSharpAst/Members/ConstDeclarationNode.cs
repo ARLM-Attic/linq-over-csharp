@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public ConstDeclarationNode(Token start)
       : base(start)
     {
-      ConstTags = new ConstTagNodeCollection();
+      ConstTags = new ConstTagNodeCollection() {ParentNode = this};
     }
 
     // ----------------------------------------------------------------------------------------------

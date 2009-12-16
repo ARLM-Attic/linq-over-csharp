@@ -11,6 +11,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   // ================================================================================================
   public sealed class UsingNamespaceEntity : UsingEntity
   {
+    #region State
+
+    /// <summary>Gets the name of the imported namespace (eg. "A.B").</summary>
+    public string NamespaceName { get; private set; }
+
+    /// <summary>Gets the reference to the imported namespace entity.</summary>
+    public NamespaceOrTypeNameNodeToNamespaceEntityResolver NamespaceReference { get; private set; }
+
+    #endregion
+    
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Initializes a new instance of the <see cref="UsingNamespaceEntity"/> class.
@@ -31,20 +41,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     }
 
     // Note that this type of entity cannot be affected by type arguments, so no generic clone support here.
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the name of the imported namespace (eg. "A.B").
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public string NamespaceName { get; private set; }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Gets the reference to the imported namespace entity.
-    /// </summary>
-    // ----------------------------------------------------------------------------------------------
-    public NamespaceOrTypeNameNodeToNamespaceEntityResolver NamespaceReference { get; private set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

@@ -1,7 +1,7 @@
 //
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2009. 12. 10. 10:56:25
+// Generated on: 2009. 12. 15. 9:31:45
 //
 // The template file is SemanticGraphVisitor.tt 
 //
@@ -53,6 +53,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     public virtual void Visit(ISemanticEntity entity) { }
     public virtual void Visit(IVariableEntity entity) { }
     public virtual void Visit(LiteralExpressionEntity entity) { }
+    public virtual void Visit(LocalConstantDeclarationStatementEntity entity) { }
+    public virtual void Visit(LocalConstantEntity entity) { }
     public virtual void Visit(LocalVariableDeclarationStatementEntity entity) { }
     public virtual void Visit(LocalVariableEntity entity) { }
     public virtual void Visit(MemberAccessExpressionEntity entity) { }

@@ -312,7 +312,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of semantic entities created from this syntax node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    public List<SemanticEntity> SemanticEntities
+    public List<ISemanticEntity> SemanticEntities
     {
       get { throw new InvalidOperationException("SyntaxNodeCollection.SemanticEntities should not be called."); }
     }

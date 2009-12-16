@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -101,6 +102,46 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     protected override SemanticEntity ConstructNew(TypeParameterMap typeParameterMap)
     {
       return new PropertyEntity(this, typeParameterMap);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds a child entity.
+    /// </summary>
+    /// <param name="entity">A child entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public override void AddChild(ISemanticEntity entity)
+    {
+      if (entity is AccessorEntity)
+      {
+        AddAccessor(entity as AccessorEntity);
+      }
+      else
+      {
+        base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds an accessor.
+    /// </summary>
+    /// <param name="accessor">An accessor entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddAccessor(AccessorEntity accessor)
+    {
+      if (GetAccessor == null)
+      {
+        GetAccessor = accessor;
+      }
+      else if (SetAccessor == null)
+      {
+        SetAccessor = accessor;
+      }
+      else
+      {
+        throw new ApplicationException("Can't add accessor. Both accessors are already set.");
+      }
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -51,19 +51,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(NamespaceDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // Looping through every tag in the namespace name
       foreach (var nameTag in node.NameTags)
       {
         // Find out whether this child namespace already exists
-        var namespaceEntity = parentEntity.GetChildNamespace(nameTag.Identifier);
+        var namespaceEntity = (parentEntity as NamespaceEntity).GetChildNamespace(nameTag.Identifier);
         
         // If no such namespace yet then create it
         if (namespaceEntity == null)
         {
           namespaceEntity = new NamespaceEntity(nameTag.Identifier);
-          parentEntity.AddChildNamespace(namespaceEntity);
+          parentEntity.AddChild(namespaceEntity);
         }
 
         // Associate the syntax node with the found or the newly created namespace entity
@@ -85,15 +85,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ExternAliasNode node)
     {
-      // Determine the parent entity of the to-be-created extern alias entity.
-      var parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
       // Check error CS1537: The using alias 'alias' appeared previously in this namespace
       // _Note: It should say 'extern alias' instead of 'using alias' but that's how csc.exe works.
-      if (parentEntity.IsExternAliasAlreadySpecified(node.Identifier, lexicalScope))
+      if ((parentEntity as NamespaceEntity).IsExternAliasAlreadySpecified(node.Identifier, lexicalScope))
       {
         ErrorDuplicateUsingAlias(node.StartToken, node.Identifier);
         return false;
@@ -102,7 +101,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Create the extern alias entity and add it to the parent namespace (which can be a root namespace as well).
       var externAliasEntity = new ExternAliasEntity(lexicalScope, node);
       externAliasEntity.Program = _Program;
-      parentEntity.AddExternAlias(externAliasEntity);
+      parentEntity.AddChild(externAliasEntity);
 
       // Establish to two-way mapping between the AST node and the new semantic entity
       AssociateSyntaxNodeWithSemanticEntity(node, externAliasEntity);
@@ -119,15 +118,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(UsingNamespaceNode node)
     {
-      // Determine the parent entity of the to-be-created using entity.
-      var parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
       // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
       var namespaceName = node.NamespaceOrTypeName.TypeTags.ToString();
-      if (parentEntity.IsUsingNamespaceAlreadySpecified(namespaceName, lexicalScope))
+      if ((parentEntity as NamespaceEntity).IsUsingNamespaceAlreadySpecified(namespaceName, lexicalScope))
       {
         ErrorDuplicateUsingNamespace(node.StartToken, namespaceName);
         return false;
@@ -136,7 +134,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
       var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
       usingNamespaceEntity.Program = _Program;
-      parentEntity.AddUsingNamespace(usingNamespaceEntity);
+      parentEntity.AddChild(usingNamespaceEntity);
       
       // Establish to two-way mapping between the AST node and the new semantic entity
       AssociateSyntaxNodeWithSemanticEntity(node, usingNamespaceEntity);
@@ -153,15 +151,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(UsingAliasNode node)
     {
-      // Determine the parent entity of the to-be-created using entity.
-      var parentEntity = GetParentEntity<NamespaceEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
       // Check error CS1537: The using alias 'alias' appeared previously in this namespace
-      if (parentEntity.IsUsingAliasAlreadySpecified(node.Alias, lexicalScope)
-        || parentEntity.IsExternAliasAlreadySpecified(node.Alias, lexicalScope))
+      if ((parentEntity as NamespaceEntity).IsUsingAliasAlreadySpecified(node.Alias, lexicalScope)
+        || (parentEntity as NamespaceEntity).IsExternAliasAlreadySpecified(node.Alias, lexicalScope))
       {
         ErrorDuplicateUsingAlias(node.StartToken, node.Alias);
         return false;
@@ -170,7 +167,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
       var usingAliasEntity = new UsingAliasEntity(lexicalScope, node.Alias, node.NamespaceOrTypeName);
       usingAliasEntity.Program = _Program;
-      parentEntity.AddUsingAlias(usingAliasEntity);
+      parentEntity.AddChild(usingAliasEntity);
 
       // Establish to two-way mapping between the AST node and the new semantic entity
       AssociateSyntaxNodeWithSemanticEntity(node, usingAliasEntity);
@@ -187,7 +184,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ClassDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<IHasChildTypes>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       var classEntity = new ClassEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
 
@@ -196,11 +193,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       classEntity.IsAbstract = IsAbstract(node.Modifiers);
       classEntity.IsSealed = IsSealed(node.Modifiers);
       classEntity.Program = _Program;
-      
+
       AddBaseTypesToTypeEntity(classEntity, node);
       AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       
-      parentEntity.AddChildType(classEntity);
+      parentEntity.AddChild(classEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, classEntity);
 
@@ -216,7 +213,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(StructDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<IHasChildTypes>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       var structEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
 
@@ -226,7 +223,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       AddBaseTypesToTypeEntity(structEntity, node);
       AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       
-      parentEntity.AddChildType(structEntity);
+      parentEntity.AddChild(structEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, structEntity);
 
@@ -242,7 +239,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(InterfaceDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<IHasChildTypes>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       var interfaceEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
 
@@ -252,7 +249,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       AddBaseTypesToTypeEntity(interfaceEntity, node);
       AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       
-      parentEntity.AddChildType(interfaceEntity);
+      parentEntity.AddChild(interfaceEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, interfaceEntity);
 
@@ -268,15 +265,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(EnumDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<IHasChildTypes>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
-      // Build the new entity
       var enumEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
 
       (enumEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
       enumEntity.Program = _Program;
       
-      parentEntity.AddChildType(enumEntity);
+      parentEntity.AddChild(enumEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
 
@@ -303,7 +299,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(DelegateDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<IHasChildTypes>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       var delegateEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
 
@@ -312,7 +308,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       
       AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
       
-      parentEntity.AddChildType(delegateEntity);
+      parentEntity.AddChild(delegateEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, delegateEntity);
 
@@ -338,7 +334,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(FieldDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<TypeEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // Looping through every tag in the field declaration
       foreach (var fieldTag in node.FieldTags)
@@ -349,7 +345,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         var fieldEntity = new FieldEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
                                           IsReadOnly(node.Modifiers), typeReference, fieldTag.Identifier, initializer);
         fieldEntity.IsNew = IsNew(node.Modifiers);
-        parentEntity.AddMember(fieldEntity);
+        parentEntity.AddChild(fieldEntity);
 
         AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
       }
@@ -366,20 +362,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ConstDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<TypeEntity>(node);
-
-      // Looping through every tag in the field declaration
-      foreach (var constTag in node.ConstTags)
-      {
-        var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
-        var constantEntity = new ConstantMemberEntity(true, GetAccessibility(node.Modifiers), typeReference,
-                                                      constTag.Identifier);
-        constantEntity.IsNew = IsNew(node.Modifiers);
-        parentEntity.AddMember(constantEntity);
-
-        AssociateSyntaxNodeWithSemanticEntity(constTag, constantEntity);
-      }
-
       return true;
     }
 
@@ -392,11 +374,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(EnumValueNode node)
     {
-      var parentEntity = GetParentEntity<EnumEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // Create a semantic entity and add to its parent.
-      var enumMemberEntity = new EnumMemberEntity(true, node.Identifier, parentEntity.UnderlyingTypeReference);
-      parentEntity.AddMember(enumMemberEntity);
+      var enumMemberEntity = new EnumMemberEntity(true, node.Identifier, (parentEntity as EnumEntity).UnderlyingTypeReference);
+      parentEntity.AddChild(enumMemberEntity);
       
       AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
 
@@ -412,7 +394,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(PropertyDeclarationNode node)
     {
-      var parentEntity = GetParentEntity<TypeEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       // The property is auto-implemented it's not an interface member
       // and if both get and set accessors are abstract 
@@ -432,7 +414,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       propertyEntity.IsVirtual = IsVirtual(node.Modifiers);
       propertyEntity.IsSealed = IsSealed(node.Modifiers);
 
-      parentEntity.AddMember(propertyEntity);
+      parentEntity.AddChild(propertyEntity);
 
       AssociateSyntaxNodeWithSemanticEntity(node, propertyEntity);
 
@@ -452,8 +434,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(MethodDeclarationNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<TypeEntity>(node);
+      var parentEntity = GetSemanticEntity(node.ParentNode);
 
       var interfaceReference = node.InterfaceType != null
                                  ? new NamespaceOrTypeNameNodeToTypeEntityResolver(node.InterfaceType)
@@ -461,21 +442,84 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       var isAbstract = (node.Body == null);
       var returnTypeReference = new TypeNodeToTypeEntityResolver(node.Type);
 
-      var methodEntity = new MethodEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
+      var newEntity = new MethodEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
                                           node.IsPartial, returnTypeReference, interfaceReference, node.Name, isAbstract);
 
-      methodEntity.IsNew = IsNew(node.Modifiers);
-      methodEntity.IsOverride = IsOverride(node.Modifiers);
-      methodEntity.IsVirtual = IsVirtual(node.Modifiers);
-      methodEntity.IsSealed = IsSealed(node.Modifiers);
+      newEntity.IsNew = IsNew(node.Modifiers);
+      newEntity.IsOverride = IsOverride(node.Modifiers);
+      newEntity.IsVirtual = IsVirtual(node.Modifiers);
+      newEntity.IsSealed = IsSealed(node.Modifiers);
 
-      AddTypeParametersToEntity(methodEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      AddParametersToOverloadableEntity(methodEntity, node.FormalParameters);
+      AddParametersToOverloadableEntity(newEntity, node.FormalParameters);
+      AddTypeParametersToEntity(newEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
 
-      parentEntity.AddMember(methodEntity);
-      
-      AssociateSyntaxNodeWithSemanticEntity(node, methodEntity);
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      return true;
+    }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">A syntax node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(FormalParameterNode node)
+    {
+      //var parameterKind = ParameterKind.Value;
+      //switch (node.Modifier)
+      //{
+      //  case (FormalParameterModifier.In):
+      //    parameterKind = ParameterKind.Value;
+      //    break;
+      //  case (FormalParameterModifier.Out):
+      //    parameterKind = ParameterKind.Output;
+      //    break;
+      //  case (FormalParameterModifier.Ref):
+      //    parameterKind = ParameterKind.Reference;
+      //    break;
+      //}
+      //var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
+      //var newEntity = new ParameterEntity(node.Identifier, typeReference, parameterKind);
+
+      //InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">A syntax node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(TypeParameterNode node)
+    {
+      //var typeParameterName = node.Identifier;
+      //var newEntity = new TypeParameterEntity(typeParameterName);
+
+      //// Find the constraints of the type parameter
+      //var constraints = from typeParameterConstraint in (node.ParentNode as TypeOrMemberDeclarationNode).TypeParameterConstraints
+      //                  where typeParameterConstraint.Identifier == typeParameterName
+      //                  select typeParameterConstraint;
+
+      //// Add the constraints to the type parameter entity
+      //foreach (var constraint in constraints)
+      //{
+      //  foreach (var constraintTag in constraint.ConstraintTags)
+      //  {
+      //    newEntity.HasDefaultConstructorConstraint = constraintTag.IsNew || constraintTag.IsStruct;
+      //    newEntity.HasReferenceTypeConstraint = constraintTag.IsClass;
+      //    newEntity.HasNonNullableValueTypeConstraint = constraintTag.IsStruct;
+
+      //    if (constraintTag.IsTypeName)
+      //    {
+      //      newEntity.AddTypeReferenceConstraint(new TypeNodeToTypeEntityResolver(constraintTag.Type));
+      //    }
+      //  }
+      //}
+
+      //InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -488,18 +532,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(LocalVariableTagNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<IHasLocalVariables>(node);
-
       var localVariableNode = node.ParentNode as LocalVariableNode;
       var typeResolver = new TypeNodeToTypeEntityResolver(localVariableNode.Type);
       var initializer = CreateInitializer(node.Initializer);
+      var newEntity = new LocalVariableEntity(node.Identifier, typeResolver, initializer);
 
-      var localVariableEntity = new LocalVariableEntity(node.Identifier, typeResolver, initializer);
-      parentEntity.AddLocalVariable(localVariableEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, localVariableEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode.Parent);
       return true;
     }
 
@@ -512,24 +550,32 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ConstTagNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<IHasLocalConstants>(node);
+      // A ConstTagNode can be the child of a ConstDeclarationNode or a ConstStatementNode too,
+      // so we have to handle both cases.
 
-      // ConstTagNode can appear as a child of a ConstDeclarionNode as well,
-      // so if we don't find an IHasLocalConstants parent, that's not a problem.
-      if (parentEntity == null)
+      if (node.ParentNode is ConstDeclarationNode)
       {
-        return true;
+        var constantDeclarationNode = node.ParentNode as ConstDeclarationNode;
+        var typeReference = new TypeNodeToTypeEntityResolver(constantDeclarationNode.Type);
+        var newEntity = new ConstantMemberEntity(true, GetAccessibility(node.Modifiers), typeReference, node.Identifier) 
+          { IsNew = IsNew(constantDeclarationNode.Modifiers) };
+
+        InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode.Parent);
       }
+      else if (node.ParentNode is ConstStatementNode)
+      {
+        var localConstantNode = node.ParentNode as ConstStatementNode;
+        var typeResolver = new TypeNodeToTypeEntityResolver(localConstantNode.Type);
+        var newEntity = new LocalConstantEntity(node.Identifier, typeResolver);
+        var initializer = new ScalarInitializerEntity();
+        newEntity.AddChild(initializer);
 
-      var localConstantNode = node.ParentNode as ConstStatementNode;
-      var typeResolver = new TypeNodeToTypeEntityResolver(localConstantNode.Type);
-      var initializer = new ScalarInitializerEntity();
-
-      var localVariableEntity = new LocalConstantEntity(node.Identifier, typeResolver, initializer);
-      parentEntity.AddLocalConstant(localVariableEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, localVariableEntity);
+        InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      }
+      else
+      {
+        throw new ApplicationException("Unexpected parent node type");
+      }
 
       return true;
     }
@@ -543,70 +589,64 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(LiteralNode node)
     {
-      // Get the parent entity of the to-be created entity
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
-
-      LiteralExpressionEntity literal = null;
+      LiteralExpressionEntity newEntity = null;
 
       if (node is NullLiteralNode)
       {
-        literal  = new NullLiteralExpressionEntity();
+        newEntity = new NullLiteralExpressionEntity();
       }
       else if (node is BooleanLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(bool)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(bool)),
           (node as BooleanLiteralNode).Value);
       }
       else if (node is DecimalLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(decimal)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(decimal)),
           (node as DecimalLiteralNode).Value);
       }
       else if (node is Int32LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(int)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(int)),
           (node as Int32LiteralNode).Value);
       }
       else if (node is UInt32LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(uint)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(uint)),
           (node as UInt32LiteralNode).Value);
       }
       else if (node is Int64LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(long)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(long)),
           (node as Int64LiteralNode).Value);
       }
       else if (node is UInt64LiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(ulong)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(ulong)),
           (node as UInt64LiteralNode).Value);
       }
       else if (node is CharLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(char)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(char)),
           (node as CharLiteralNode).Value);
       }
       else if (node is SingleLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(float)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(float)),
           (node as SingleLiteralNode).Value);
       }
       else if (node is DoubleLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(double)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(double)),
           (node as DoubleLiteralNode).Value);
       }
       else if (node is StringLiteralNode)
       {
-        literal = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(string)),
+        newEntity = new TypedLiteralExpressionEntity(new ReflectedTypeToTypeEntityResolver(typeof(string)),
           (node as StringLiteralNode).Value);
       }
 
-      parentEntity.AddExpression(literal);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, literal);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -619,14 +659,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(SimpleNameNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
+      var newEntity = new SimpleNameExpressionEntity(new SimpleNameNodeResolver(node));
 
-      var simpleNameEntity = new SimpleNameExpressionEntity(new SimpleNameNodeResolver(node));
-      
-      parentEntity.AddExpression(simpleNameEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, simpleNameEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -639,14 +674,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(PrimaryExpressionMemberAccessNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
+      var newEntity = new PrimaryMemberAccessExpressionEntity(new MemberAccessNodeResolver(node));
 
-      var expressionEntity = new PrimaryMemberAccessExpressionEntity(new MemberAccessNodeResolver(node));
-
-      parentEntity.AddExpression(expressionEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -659,16 +689,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(QualifiedAliasMemberAccessNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
-
-      var expressionEntity = new QualifiedAliasMemberAccessExpressionEntity(
+      var newEntity = new QualifiedAliasMemberAccessExpressionEntity(
         new QualifiedAliasMemberNodeResolver(node.QualifiedAliasMember),
         new MemberAccessNodeResolver(node));
 
-      parentEntity.AddExpression(expressionEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -681,16 +706,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(PredefinedTypeMemberAccessNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
-
-      var expressionEntity = new PredefinedTypeMemberAccessExpressionEntity(
+      var newEntity = new PredefinedTypeMemberAccessExpressionEntity(
         node.TypeName.TypeTags[0].Identifier,
         new MemberAccessNodeResolver(node));
 
-      parentEntity.AddExpression(expressionEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, expressionEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -703,14 +723,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(DefaultValueExpressionNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
+      var newEntity = new DefaultValueExpressionEntity(new TypeNodeToTypeEntityResolver(node.Type));
 
-      var defaultValueEntity = new DefaultValueExpressionEntity(new TypeNodeToTypeEntityResolver(node.Type));
-
-      parentEntity.AddExpression(defaultValueEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, defaultValueEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -723,14 +738,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(InvocationExpressionNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
+      var newEntity = new InvocationExpressionEntity();
 
-      var entity = new InvocationExpressionEntity();
-
-      parentEntity.AddExpression(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -743,14 +753,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(AssignmentExpressionNode node)
     {
-      var parentEntity = GetParentEntity<IHasExpressions>(node);
+      var newEntity = new AssignmentExpressionEntity();
 
-      var entity = new AssignmentExpressionEntity();
-
-      parentEntity.AddExpression(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -763,20 +768,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ArgumentNode node)
     {
-      var parentEntity = GetParentEntity<IHasArguments>(node);
-
       var parameterKind = node.IsRef
                             ? ParameterKind.Reference
                             : node.IsOut
                                 ? ParameterKind.Output
                                 : ParameterKind.Value;
 
-      var entity = new ArgumentEntity(parameterKind);
+      var newEntity = new ArgumentEntity(parameterKind);
 
-      parentEntity.AddArgument(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -789,14 +789,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(BlockStatementNode node)
     {
-      var parentEntity = GetParentEntity<IHasBody>(node);
+      var newEntity = new BlockStatementEntity();
 
-      var blockEntity = new BlockStatementEntity();
-
-      parentEntity.Body = blockEntity;
-
-      AssociateSyntaxNodeWithSemanticEntity(node, blockEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -809,14 +804,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ExpressionStatementNode node)
     {
-      var parentEntity = GetParentEntity<IHasStatements>(node);
+      var newEntity = new ExpressionStatementEntity();
 
-      var entity = new ExpressionStatementEntity();
-
-      parentEntity.AddStatement(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -829,14 +819,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ReturnStatementNode node)
     {
-      var parentEntity = GetParentEntity<IHasStatements>(node);
+      var newEntity = new ReturnStatementEntity();
 
-      var entity = new ReturnStatementEntity();
-
-      parentEntity.AddStatement(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -849,14 +834,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(VariableDeclarationStatementNode node)
     {
-      var parentEntity = GetParentEntity<IHasStatements>(node);
+      var newEntity = new LocalVariableDeclarationStatementEntity();
 
-      var entity = new LocalVariableDeclarationStatementEntity();
-      
-      parentEntity.AddStatement(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -869,81 +849,78 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ConstStatementNode node)
     {
-      var parentEntity = GetParentEntity<IHasStatements>(node);
+      var newEntity = new LocalConstantDeclarationStatementEntity();
 
-      var entity = new LocalConstantDeclarationStatementEntity();
-      parentEntity.AddStatement(entity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, entity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
     #region Private methods
-    
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Gets the entity that belongs to the parent of a syntax node.
+    /// Inserts a semantic entity into the semantic graph.
+    /// </summary>
+    /// <param name="newEntity">The entity to be inserted.</param>
+    /// <param name="node">The syntax node that generated to entity.</param>
+    /// <param name="parentNode">The syntax node whose corresponding semantic entity 
+    /// will be the parent of the new entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    private void InsertEntityIntoSemanticGraph(ISemanticEntity newEntity, ISyntaxNode node, ISyntaxNode parentNode)
+    {
+      var parentEntity = GetSemanticEntity(parentNode);
+      parentEntity.AddChild(newEntity);
+
+      AssociateSyntaxNodeWithSemanticEntity(node, newEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets a single semantic entity associated with a syntax node.
     /// </summary>
     /// <param name="node">A syntax node.</param>
-    /// <returns>The parent entity</returns>
+    /// <returns>A single semantic entity.</returns>
+    /// <remarks>Throws an exception if can't find any entity or what was found is ambiguous.</remarks>
     // ----------------------------------------------------------------------------------------------
-    private TExpectedEntityType GetParentEntity<TExpectedEntityType>(ISyntaxNode node)
-      where TExpectedEntityType : class, ISemanticEntity
+    private ISemanticEntity GetSemanticEntity(ISyntaxNode node)
     {
       if (node == null)
       {
         throw new ArgumentNullException("node");
       }
 
-      var currentNode = node.Parent;
-      ISemanticEntity candidateEntity = null;
-      TExpectedEntityType foundEntity = null;
-
-      while (foundEntity == null && currentNode != null)
+      // If we are at the compilation unit level, then the corresponding semantic entity is the "global" namespace.
+      if (node is CompilationUnitNode)
       {
-        if (currentNode.SemanticEntities != null)
-        {
-          var semanticEntityCount = currentNode.SemanticEntities.Count;
-
-          // If we are at the compilation unit level, then the entity will be created under the "global" namespace.
-          if (currentNode is CompilationUnitNode)
-          {
-            candidateEntity = _SemanticGraph.GlobalNamespace;
-          }
-
-          // If the parent node is a NamespaceDeclarationNode, then it can have several entities associated with it
-          // (eg. namespace A.B.C where A, B, C are all distinct semantic entities), 
-          // then the parent entity is the last in the list.
-          else if (currentNode is NamespaceDeclarationNode && semanticEntityCount >= 1)
-          {
-            candidateEntity = currentNode.SemanticEntities[semanticEntityCount - 1];
-          }
-
-          // If the parent node has only 1 semantic entity associated, then this will be the parent entity.
-          else if (semanticEntityCount == 1)
-          {
-            candidateEntity = currentNode.SemanticEntities[0];
-          }
-
-          // If the parent node has more than 1 semantic entites, that's an unexpected ambiguity. 
-          else if (semanticEntityCount > 1)
-          {
-            throw new ApplicationException(
-              string.Format("Unexpected number of semantic entities ('{0}') on node of type: '{1}'",
-                            semanticEntityCount, currentNode.GetType()));
-          }
-
-          if (candidateEntity is TExpectedEntityType)
-          {
-            foundEntity = candidateEntity as TExpectedEntityType;
-          }
-        }
-
-        currentNode = currentNode.Parent;
+        return _SemanticGraph.GlobalNamespace;
       }
 
-      return foundEntity;
+      var semanticEntityCount = node.SemanticEntities.Count;
+
+      // If the node is a NamespaceDeclarationNode, then it can have several entities associated with it
+      // (eg. namespace A.B.C where A, B, C are all distinct semantic entities), 
+      // and the corresponding entity is the last in the list.
+      if (node is NamespaceDeclarationNode && semanticEntityCount >= 1)
+      {
+        return node.SemanticEntities[semanticEntityCount - 1];
+      }
+
+      // If the node has only 1 semantic entity associated, then this has to be returned.
+      if (semanticEntityCount == 1)
+      {
+        return node.SemanticEntities[0];
+      }
+
+      // If the parent node has more than 1 semantic entites, that's an unexpected ambiguity. 
+      if (semanticEntityCount > 1)
+      {
+        throw new ApplicationException(
+          string.Format("Unexpected number of semantic entities ('{0}') on node of type: '{1}'",
+                        semanticEntityCount, node.GetType()));
+      }
+
+      // Otherwise there's no semantic entity, which is an error.
+      throw new ApplicationException("No associated semantic entity found.");
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -953,7 +930,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="syntaxNode">A syntax tree node.</param>
     /// <param name="semanticEntity">A semantic entity node.</param>
     // ----------------------------------------------------------------------------------------------
-    private static void AssociateSyntaxNodeWithSemanticEntity(ISyntaxNode syntaxNode, SemanticEntity semanticEntity)
+    private static void AssociateSyntaxNodeWithSemanticEntity(ISyntaxNode syntaxNode, ISemanticEntity semanticEntity)
     {
       semanticEntity.AddSyntaxNode(syntaxNode);
       syntaxNode.SemanticEntities.Add(semanticEntity);

@@ -2081,17 +2081,33 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
 
       int i = 0;
 
-      // const int a = 0;
+      // const int a = 0, b = 1;
       {
-        var constantEntity = classEntity.OwnMembers.ToList()[i] as ConstantMemberEntity;
-        constantEntity.IsInvocable.ShouldBeFalse();
+        {
+          var constantEntity = classEntity.OwnMembers.ToList()[i] as ConstantMemberEntity;
+          constantEntity.ToString().ShouldEqual("global::A_a");
+          constantEntity.IsInvocable.ShouldBeFalse();
 
-        // Check member type resolution
-        constantEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
-        constantEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+          // Check member type resolution
+          constantEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+          constantEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
 
-        // Check that the member can be retrieved by name.
-        classEntity.GetOwnMember<ConstantMemberEntity>(constantEntity.Name).ShouldEqual(constantEntity);
+          // Check that the member can be retrieved by name.
+          classEntity.GetOwnMember<ConstantMemberEntity>(constantEntity.Name).ShouldEqual(constantEntity);
+        }
+        i++;
+        {
+          var constantEntity = classEntity.OwnMembers.ToList()[i] as ConstantMemberEntity;
+          constantEntity.ToString().ShouldEqual("global::A_b");
+          constantEntity.IsInvocable.ShouldBeFalse();
+
+          // Check member type resolution
+          constantEntity.TypeReference.ResolutionState.ShouldEqual(ResolutionState.Resolved);
+          constantEntity.Type.FullyQualifiedName.ShouldEqual("System.Int32");
+
+          // Check that the member can be retrieved by name.
+          classEntity.GetOwnMember<ConstantMemberEntity>(constantEntity.Name).ShouldEqual(constantEntity);
+        }
       }
 
       i++;
@@ -2670,7 +2686,6 @@ namespace CSharpTreeBuilderTest.CSharpSemanticGraphBuilder
     /// </summary>
     // ----------------------------------------------------------------------------------------------
     [TestMethod]
-    [Ignore] // Problem with EntityBuilderSyntaxNodeVisitor
     public void LocalConstant()
     {
       var project = new CSharpProject(WorkingFolder);

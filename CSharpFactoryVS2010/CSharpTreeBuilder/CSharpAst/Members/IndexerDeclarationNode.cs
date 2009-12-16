@@ -23,7 +23,7 @@ namespace CSharpTreeBuilder.Ast
     public IndexerDeclarationNode(Token start)
       : base(start)
     {
-      FormalParameters = new FormalParameterNodeCollection();
+      FormalParameters = new FormalParameterNodeCollection() { ParentNode = this };
     }
 
     // ----------------------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// </summary>
   // ================================================================================================
   public abstract class SyntaxNodeToExpressionResultResolver<TSyntaxNodeType> : SyntaxNodeResolver<ExpressionResult, TSyntaxNodeType>
-    where TSyntaxNodeType : ISyntaxNode
+    where TSyntaxNodeType : class, ISyntaxNode
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>

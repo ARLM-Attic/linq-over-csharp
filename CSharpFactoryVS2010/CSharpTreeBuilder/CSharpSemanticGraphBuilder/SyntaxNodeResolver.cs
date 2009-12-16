@@ -1,4 +1,5 @@
-﻿using CSharpTreeBuilder.Ast;
+﻿using System;
+using CSharpTreeBuilder.Ast;
 using CSharpTreeBuilder.CSharpSemanticGraph;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
@@ -12,7 +13,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   // ================================================================================================
   public abstract class SyntaxNodeResolver<TTargetType, TSyntaxNodeType> : Resolver<TTargetType>
     where TTargetType : class
-    where TSyntaxNodeType : ISyntaxNode
+    where TSyntaxNodeType : class, ISyntaxNode
   {
     #region State
 
@@ -29,6 +30,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     protected SyntaxNodeResolver(TSyntaxNodeType syntaxNode)
     {
+      if (syntaxNode == null)
+      {
+        throw new ArgumentNullException("syntaxNode");
+      }
+
       SyntaxNode = syntaxNode;
     }
 

@@ -168,7 +168,7 @@ namespace CSharpTreeBuilder.Ast
     /// Gets the collection of semantic entities created from this syntax node.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    List<SemanticEntity> SemanticEntities { get; }
+    List<ISemanticEntity> SemanticEntities { get; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
