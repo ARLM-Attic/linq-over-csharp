@@ -23,18 +23,22 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public bool Equals(TypeParameterMap x, TypeParameterMap y)
     {
-      if (x.TypeParameters.Count() != y.TypeParameters.Count())
+      if (x.Count != y.Count)
       {
         return false;
       }
 
-      var xKeysOrdered = x.TypeParameters.OrderBy(typeParameter => typeParameter.ToString()).ToList();
-      var yKeysOrdered = y.TypeParameters.OrderBy(typeParameter => typeParameter.ToString()).ToList();
+      //// We compare all the key+value pairs in both type parameter maps.
+      //// This should be done after ordering the key value pairs by key, but we can assume that equal maps
+      //// will always have the keys in the same order, so we can skip the ordering to improve performance.
 
-      for (int i = 0; i < xKeysOrdered.Count; i++)
+      var xKeyValuePairs = x.ToList();
+      var yKeyValuePairs = y.ToList();
+
+      for (int i = 0; i < xKeyValuePairs.Count; i++)
       {
-        var key = xKeysOrdered[i];
-        if ((key != yKeysOrdered[i]) || (x[key] != y[key]))
+        if (xKeyValuePairs[i].Key != yKeyValuePairs[i].Key 
+          || xKeyValuePairs[i].Value != yKeyValuePairs[i].Value) 
         {
           return false;
         }
@@ -52,7 +56,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public int GetHashCode(TypeParameterMap obj)
     {
-      return obj.TypeParameters.Count();
+      int hash = 0;
+
+      foreach (var keyValuePair in obj)
+      {
+        unchecked
+        {
+          hash += keyValuePair.Key.GetHashCode() + keyValuePair.Value.GetHashCode();
+        }
+      }
+
+      return hash;
     }
   }
 }

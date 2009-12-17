@@ -344,9 +344,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       foreach (var typeParameterEntity in TypeParameterConstraints)
       {
-        if (typeParameterEntity.BaseClass != null)
+        var baseClass = typeParameterEntity.BaseClass;
+
+        if (baseClass != null)
         {
-          baseClassesOfTypeParameters.Add(typeParameterEntity.BaseClass);
+          baseClassesOfTypeParameters.Add(baseClass);
         }
       }
 

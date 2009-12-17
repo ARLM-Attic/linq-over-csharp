@@ -11,7 +11,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This class represents a set of type parameters, optionally mapped to type arguments.
   /// </summary>
   // ================================================================================================
-  public sealed class TypeParameterMap
+  public sealed class TypeParameterMap : IEnumerable<KeyValuePair<TypeParameterEntity, TypeEntity>>
   {
     /// <summary>
     /// A dictionary holding all type parameters as keys and type arguments as values.
@@ -77,7 +77,29 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         _Map.Add(keyValuePair.Key, keyValuePair.Value);
       }
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an enumerator for the underlying dictionary.
+    /// </summary>
+    /// <returns>An enumerator for the underlying dictionary.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public IEnumerator<KeyValuePair<TypeParameterEntity, TypeEntity>> GetEnumerator()
+    {
+      return _Map.GetEnumerator();
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets an enumerator for the underlying dictionary.
+    /// </summary>
+    /// <returns>An enumerator for the underlying dictionary.</returns>
+    // ----------------------------------------------------------------------------------------------
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return _Map.GetEnumerator();
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets an empty type parameter map (a new instance).
