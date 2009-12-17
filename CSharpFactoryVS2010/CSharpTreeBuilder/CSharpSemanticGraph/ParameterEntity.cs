@@ -25,7 +25,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="kind">The parameter kind (eg. ref, out).</param>
     // ----------------------------------------------------------------------------------------------
     public ParameterEntity(string name, Resolver<TypeEntity> type, ParameterKind kind)
-      : base (name, type, null)
+      : base (name, type)
     {
       Kind = kind;
     }

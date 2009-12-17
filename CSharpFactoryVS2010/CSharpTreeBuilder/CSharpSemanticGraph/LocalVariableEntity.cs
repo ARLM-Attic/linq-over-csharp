@@ -15,10 +15,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the variable.</param>
     /// <param name="type">The type of the variable (a type entity reference).</param>
-    /// <param name="initializer">The initializer of the variable. Can be null.</param>
     // ----------------------------------------------------------------------------------------------
-    public LocalVariableEntity(string name, Resolver<TypeEntity> type, VariableInitializer initializer)
-      : base (name, type, initializer)
+    public LocalVariableEntity(string name, Resolver<TypeEntity> type)
+      : base (name, type)
     {
     }
 

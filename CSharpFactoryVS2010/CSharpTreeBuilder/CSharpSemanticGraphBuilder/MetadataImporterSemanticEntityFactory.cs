@@ -605,7 +605,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         else
         {
           memberEntity = new FieldEntity(isDeclaredInSource, accessibility, fieldInfo.IsStatic,
-                                         fieldInfo.IsInitOnly, typeReference, name, null);
+                                         fieldInfo.IsInitOnly, typeReference, name);
         }
       }
 

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
 using CSharpTreeBuilder.Ast;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 using CSharpTreeBuilder.ProjectContent;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
@@ -310,6 +311,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       get { return _GenericClones.Values; }
     }
+
+    #region Protected helpers
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Registers this entity in the parent's declaration space
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    protected void RegisterInParentDeclarationSpace()
+    {
+      if (!IsGenericClone && Parent != null && Parent is IDefinesDeclarationSpace)
+      {
+        (Parent as IDefinesDeclarationSpace).AddDeclaration(this as INamedEntity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Unregisters this entity in the parent's declaration space
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    protected void UnregisterInParentDeclarationSpace()
+    {
+      if (!IsGenericClone && Parent != null && Parent is IDefinesDeclarationSpace)
+      {
+        (Parent as IDefinesDeclarationSpace).RemoveDeclaration(this as INamedEntity);
+      }
+    }
+
+    #endregion
 
     #region Visitor methods
 

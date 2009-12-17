@@ -18,7 +18,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="type">The type of the constant (a type entity reference).</param>
     // ----------------------------------------------------------------------------------------------
     public LocalConstantEntity(string name, Resolver<TypeEntity> type)
-      : base (name, type, null)
+      : base (name, type)
     {
     }
 

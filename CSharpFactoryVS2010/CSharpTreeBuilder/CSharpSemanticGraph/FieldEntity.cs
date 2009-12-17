@@ -18,8 +18,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <summary>Gets or sets the reference to the type of the field.</summary>
     public Resolver<TypeEntity> TypeReference { get; private set; }
 
-    /// <summary>Gets the initializer of the variable.</summary>
-    public VariableInitializer Initializer { get; private set; }
+    /// <summary>Backing field for Initializer property.</summary>
+    private VariableInitializer _Initializer;
+
+
     
     #endregion
 
@@ -33,7 +35,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// <param name="isReadOnly">True, if the field is readonly, false otherwise.</param>
     /// <param name="type">The type of the field (a type entity reference).</param>
     /// <param name="name">The name of the member.</param>
-    /// <param name="initializer">The initializer of the field.</param>
     // ----------------------------------------------------------------------------------------------
     public FieldEntity(
       bool isDeclaredInSource,
@@ -41,20 +42,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       bool isStatic,
       bool isReadOnly,
       Resolver<TypeEntity> type,
-      string name, 
-      VariableInitializer initializer)
+      string name)
       : 
       base(isDeclaredInSource, accessibility, name)
     {
       _IsStatic = isStatic;
       IsReadOnly = isReadOnly;
       TypeReference = type;
-      Initializer = initializer;
-
-      if (Initializer != null)
-      {
-        Initializer.Parent = this;
-      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -110,6 +104,28 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       else
       {
         base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets the initializer of the variable.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public VariableInitializer Initializer
+    {
+      get
+      {
+        return _Initializer;
+      }
+
+      private set
+      {
+        _Initializer = value;
+        if (_Initializer != null)
+        {
+          _Initializer.Parent = this;
+        }
       }
     }
 

@@ -106,6 +106,7 @@
     <Compile Include="CSharpAst\Comments\LineCommentNode.cs" />
     <Compile Include="CSharpAst\Initializers\BaseMemberAccessMemberDeclaratorNode.cs" />
     <Compile Include="CSharpAst\Initializers\VariableInitializerNodeCollection.cs" />
+    <Compile Include="CSharpAst\Members\AccessorKind.cs" />
     <Compile Include="CSharpAst\Types\ArraySizeSpecifierNode.cs" />
     <Compile Include="CSharpAst\Expressions\Query\JoinIntoClauseNode.cs" />
     <Compile Include="CSharpAst\Types\NamespaceOrTypeNameNode.cs" />
@@ -227,6 +228,7 @@
     <Compile Include="CSharpSemanticGraphBuilder\AliasNameConflictException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbigousReferenceException.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\AmbiguousDeclarationsException.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\IDefinesDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SyntaxNodeToExpressionResultResolver.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\IDefinesLocalVariableDeclarationSpace.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\NamespaceOrTypeNameResolutionAlgorithm.cs" />

@@ -64,7 +64,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// Gets or sets the program that this entity belongs to.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    Program Program { get; }
+    Program Program { get; set; }
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>

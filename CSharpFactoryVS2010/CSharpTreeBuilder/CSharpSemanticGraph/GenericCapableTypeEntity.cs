@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CSharpTreeBuilder.CSharpSemanticGraphBuilder;
 
 namespace CSharpTreeBuilder.CSharpSemanticGraph
 {
@@ -170,9 +171,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
 
+      UnregisterInParentDeclarationSpace();
+
       _OwnTypeParameters.Add(typeParameterEntity);
       typeParameterEntity.Parent = this;
       _DeclarationSpace.Register(typeParameterEntity);
+
+      RegisterInParentDeclarationSpace();
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -188,11 +193,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new InvalidOperationException("Constructed types don't have type parameters.");
       }
 
-      if (typeParameterEntity != null)
-      {
-        _OwnTypeParameters.Remove(typeParameterEntity);
-        _DeclarationSpace.Unregister(typeParameterEntity);
-      }
+      UnregisterInParentDeclarationSpace();
+
+      _OwnTypeParameters.Remove(typeParameterEntity);
+      _DeclarationSpace.Unregister(typeParameterEntity);
+
+      RegisterInParentDeclarationSpace();
     }
 
     // ----------------------------------------------------------------------------------------------

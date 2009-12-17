@@ -20,9 +20,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </remarks>
     protected bool _IsStatic;
     
-
-    /// <summary>Gets or sets the name of the member.</summary>
-    public string Name { get; private set; }
+    /// <summary>Backing field for Name property.</summary>
+    private string _Name;
 
     /// <summary>
     /// Gets or sets a value indicating whether the member is explicitly declared in source code.
@@ -74,7 +73,35 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       DeclaredAccessibility = template.DeclaredAccessibility;
       IsNew = template.IsNew;
     }
-    
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Name
+    {
+      get
+      {
+        return _Name;
+      }
+
+      protected set
+      {
+        if (_Name != null)
+        {
+          UnregisterInParentDeclarationSpace();
+        }
+
+        _Name = value;
+
+        if (_Name != null)
+        {
+          RegisterInParentDeclarationSpace();
+        }
+      }
+    }
+
     // ----------------------------------------------------------------------------------------------
     /// <summary>
     /// Gets the fully qualified name of the member.

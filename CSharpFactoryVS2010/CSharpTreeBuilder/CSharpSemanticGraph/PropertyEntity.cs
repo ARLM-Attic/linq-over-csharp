@@ -59,7 +59,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         // because the uniqueness of the field name gets tricky with explicitly implemented interface members.
         // We just use a good old GUID, because it's unique, and its name has no significance at all.
         var fieldName = System.Guid.NewGuid().ToString();
-        AutoImplementedField = new FieldEntity(false, AccessibilityKind.Private, isStatic, false, typeReference, fieldName, null);
+        AutoImplementedField = new FieldEntity(false, AccessibilityKind.Private, isStatic, false, typeReference, fieldName);
       }
     }
 
@@ -130,17 +130,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     // ----------------------------------------------------------------------------------------------
     public void AddAccessor(AccessorEntity accessor)
     {
-      if (GetAccessor == null)
+      switch (accessor.AccessorKind)
       {
-        GetAccessor = accessor;
-      }
-      else if (SetAccessor == null)
-      {
-        SetAccessor = accessor;
-      }
-      else
-      {
-        throw new ApplicationException("Can't add accessor. Both accessors are already set.");
+        case (AccessorKind.Get):
+          GetAccessor = accessor;
+          break;
+
+        case (AccessorKind.Set):
+          SetAccessor = accessor;
+          break;
+        
+        default:
+          throw new ApplicationException("Unexpected accessor kind.");
       }
     }
 

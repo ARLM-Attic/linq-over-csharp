@@ -12,8 +12,8 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   {
     #region State
 
-    /// <summary>Gets the name of the variable.</summary>
-    public string Name { get; private set; }
+    /// <summary>Backing field for Name property.</summary>
+    private string _Name;
 
     /// <summary>Gets the type reference of the variable.</summary>
     public Resolver<TypeEntity> TypeReference { get; private set; }
@@ -29,12 +29,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     /// </summary>
     /// <param name="name">The name of the variable.</param>
     /// <param name="typeReference">A reference to the type of the variable.</param>
-    /// <param name="initializer">The initializer of the variable.</param>
     // ----------------------------------------------------------------------------------------------
     protected NonFieldVariableEntity(
       string name, 
-      Resolver<TypeEntity> typeReference, 
-      VariableInitializer initializer)
+      Resolver<TypeEntity> typeReference)
     {
       if (name == null)
       {
@@ -47,7 +45,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
       Name = name;
       TypeReference = typeReference;
-      Initializer = initializer;
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -89,6 +86,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
       else
       {
         base.AddChild(entity);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the name of this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Name
+    {
+      get
+      {
+        return _Name;
+      }
+
+      protected set
+      {
+        if (_Name != null)
+        {
+          UnregisterInParentDeclarationSpace();
+        }
+
+        _Name = value;
+
+        if (_Name != null)
+        {
+          RegisterInParentDeclarationSpace();
+        }
       }
     }
 

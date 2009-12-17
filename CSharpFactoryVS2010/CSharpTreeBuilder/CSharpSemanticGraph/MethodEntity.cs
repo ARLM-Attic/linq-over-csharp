@@ -174,9 +174,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       if (parameterEntity != null)
       {
+        if (!IsExplicitlyImplemented)
+        {
+          UnregisterInParentDeclarationSpace();
+        }
+
         parameterEntity.Parent = this;
         _Parameters.Add(parameterEntity);
         _DeclarationSpace.Register(parameterEntity);
+
+        if (!IsExplicitlyImplemented)
+        {
+          RegisterInParentDeclarationSpace();
+        }
       }
     }
 
@@ -190,8 +200,18 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
     {
       if (parameter != null)
       {
+        if (!IsExplicitlyImplemented)
+        {
+          UnregisterInParentDeclarationSpace();
+        }
+
         _Parameters.Remove(parameter);
         _DeclarationSpace.Unregister(parameter);
+
+        if (!IsExplicitlyImplemented)
+        {
+          RegisterInParentDeclarationSpace();
+        }
       }
     }
     
@@ -319,9 +339,19 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
 
+      if (!IsExplicitlyImplemented)
+      {
+        UnregisterInParentDeclarationSpace();
+      }
+
       _OwnTypeParameters.Add(typeParameterEntity);
       typeParameterEntity.Parent = this;
       _DeclarationSpace.Register(typeParameterEntity);
+
+      if (!IsExplicitlyImplemented)
+      {
+        RegisterInParentDeclarationSpace();
+      }
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -337,10 +367,17 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         throw new InvalidOperationException("Constructed methods don't have type parameters.");
       }
 
-      if (typeParameterEntity != null)
+      if (!IsExplicitlyImplemented)
       {
-        _OwnTypeParameters.Remove(typeParameterEntity);
-        _DeclarationSpace.Unregister(typeParameterEntity);
+        UnregisterInParentDeclarationSpace();
+      }
+
+      _OwnTypeParameters.Remove(typeParameterEntity);
+      _DeclarationSpace.Unregister(typeParameterEntity);
+
+      if (!IsExplicitlyImplemented)
+      {
+        RegisterInParentDeclarationSpace();
       }
     }
 

@@ -3,6 +3,7 @@
 //
 // Created: 2009.05.16, by Istvan Novak (DeepDiver)
 // ================================================================================================
+using System;
 using CSharpTreeBuilder.CSharpAstBuilder;
 
 namespace CSharpTreeBuilder.Ast
@@ -24,7 +25,32 @@ namespace CSharpTreeBuilder.Ast
       : base(start)
     {
       IdentifierToken = start;
+
+      switch (start.Value)
+      {
+        case "get":
+          AccessorKind = AccessorKind.Get;
+          break;
+        case "set":
+          AccessorKind = AccessorKind.Set;
+          break;
+        case "add":
+          AccessorKind = AccessorKind.Add;
+          break;
+        case "remove":
+          AccessorKind = AccessorKind.Remove;
+          break;
+        default:
+          throw new ApplicationException("Unrecognized accessor kind");
+      }
     }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Gets or sets the accessor kind.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public AccessorKind AccessorKind { get; private set; }
 
     #region Visitor methods
 

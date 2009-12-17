@@ -53,13 +53,24 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds a declaration of an entity.
+    /// Adds the declaration of an entity.
     /// </summary>
     /// <param name="namedEntity">A named entity.</param>
     // ----------------------------------------------------------------------------------------------
     public void AddDeclaration(INamedEntity namedEntity)
     {
       _DeclarationSpace.Register(namedEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes the declaration of an entity.
+    /// </summary>
+    /// <param name="namedEntity">A named entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveDeclaration(INamedEntity namedEntity)
+    {
+      _DeclarationSpace.Unregister(namedEntity);
     }
 
     #region Visitor methods

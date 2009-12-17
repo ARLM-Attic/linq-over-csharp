@@ -63,6 +63,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         if (namespaceEntity == null)
         {
           namespaceEntity = new NamespaceEntity(nameTag.Identifier);
+          namespaceEntity.Program = _Program;
           parentEntity.AddChild(namespaceEntity);
         }
 
@@ -86,8 +87,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(ExternAliasNode node)
     {
       var parentEntity = GetSemanticEntity(node.ParentNode);
-
-      // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
       // Check error CS1537: The using alias 'alias' appeared previously in this namespace
@@ -98,14 +97,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return false;
       }
 
-      // Create the extern alias entity and add it to the parent namespace (which can be a root namespace as well).
-      var externAliasEntity = new ExternAliasEntity(lexicalScope, node);
-      externAliasEntity.Program = _Program;
-      parentEntity.AddChild(externAliasEntity);
+      var newEntity = new ExternAliasEntity(lexicalScope, node);
 
-      // Establish to two-way mapping between the AST node and the new semantic entity
-      AssociateSyntaxNodeWithSemanticEntity(node, externAliasEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -119,8 +113,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(UsingNamespaceNode node)
     {
       var parentEntity = GetSemanticEntity(node.ParentNode);
-
-      // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
       // Check warning CS0105: The using directive for 'namespace' appeared previously in this namespace
@@ -131,14 +123,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return false;
       }
 
-      // Create the using namespace entity and add it to the parent namespace (which can be a root namespace as well).
-      var usingNamespaceEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
-      usingNamespaceEntity.Program = _Program;
-      parentEntity.AddChild(usingNamespaceEntity);
-      
-      // Establish to two-way mapping between the AST node and the new semantic entity
-      AssociateSyntaxNodeWithSemanticEntity(node, usingNamespaceEntity);
+      var newEntity = new UsingNamespaceEntity(lexicalScope, node.NamespaceOrTypeName);
 
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -152,8 +139,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(UsingAliasNode node)
     {
       var parentEntity = GetSemanticEntity(node.ParentNode);
-
-      // Determine the scope of the node
       var lexicalScope = GetParentSourceRegion(node);
 
       // Check error CS1537: The using alias 'alias' appeared previously in this namespace
@@ -164,14 +149,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         return false;
       }
 
-      // Create the using alias entity and add it to the parent namespace (which can be a root namespace as well).
-      var usingAliasEntity = new UsingAliasEntity(lexicalScope, node.Alias, node.NamespaceOrTypeName);
-      usingAliasEntity.Program = _Program;
-      parentEntity.AddChild(usingAliasEntity);
+      var newEntity = new UsingAliasEntity(lexicalScope, node.Alias, node.NamespaceOrTypeName);
 
-      // Establish to two-way mapping between the AST node and the new semantic entity
-      AssociateSyntaxNodeWithSemanticEntity(node, usingAliasEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -184,23 +164,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ClassDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
+      var newEntity = new ClassEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+      (newEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
+      newEntity.IsStatic = IsStatic(node.Modifiers);
+      newEntity.IsAbstract = IsAbstract(node.Modifiers);
+      newEntity.IsSealed = IsSealed(node.Modifiers);
+      AddBaseTypesToTypeEntity(newEntity, node);
 
-      var classEntity = new ClassEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
-
-      (classEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
-      classEntity.IsStatic = IsStatic(node.Modifiers);
-      classEntity.IsAbstract = IsAbstract(node.Modifiers);
-      classEntity.IsSealed = IsSealed(node.Modifiers);
-      classEntity.Program = _Program;
-
-      AddBaseTypesToTypeEntity(classEntity, node);
-      AddTypeParametersToEntity(classEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      
-      parentEntity.AddChild(classEntity);
-      
-      AssociateSyntaxNodeWithSemanticEntity(node, classEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -213,20 +184,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(StructDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
+      var newEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+      (newEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
+      AddBaseTypesToTypeEntity(newEntity, node);
 
-      var structEntity = new StructEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
-
-      (structEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
-      structEntity.Program = _Program;
-      
-      AddBaseTypesToTypeEntity(structEntity, node);
-      AddTypeParametersToEntity(structEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      
-      parentEntity.AddChild(structEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, structEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -239,20 +201,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(InterfaceDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
+      var newEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
+      (newEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
+      AddBaseTypesToTypeEntity(newEntity, node);
 
-      var interfaceEntity = new InterfaceEntity(GetAccessibility(node.Modifiers), node.Name, node.IsPartial);
-
-      (interfaceEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
-      interfaceEntity.Program = _Program;
-      
-      AddBaseTypesToTypeEntity(interfaceEntity, node);
-      AddTypeParametersToEntity(interfaceEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      
-      parentEntity.AddChild(interfaceEntity);
-
-      AssociateSyntaxNodeWithSemanticEntity(node, interfaceEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -265,28 +218,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(EnumDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
+      var newEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
+      (newEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
+      newEntity.UnderlyingTypeReference = node.EnumBase == null
+                                            ? new ReflectedTypeToTypeEntityResolver(typeof (int)) as Resolver<TypeEntity>
+                                            : new TypeNodeToTypeEntityResolver(node.EnumBase);
 
-      var enumEntity = new EnumEntity(GetAccessibility(node.Modifiers), node.Name);
-
-      (enumEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
-      enumEntity.Program = _Program;
-      
-      parentEntity.AddChild(enumEntity);
-      
-      AssociateSyntaxNodeWithSemanticEntity(node, enumEntity);
-
-      // Set the underlying type reference.
-      if (node.EnumBase != null)
-      {
-        enumEntity.UnderlyingTypeReference = new TypeNodeToTypeEntityResolver(node.EnumBase);
-      }
-      else
-      {
-        // If no explicit enum-base then int is assumed.
-        enumEntity.UnderlyingTypeReference = new ReflectedTypeToTypeEntityResolver(typeof (int));
-      }
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -299,29 +237,11 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(DelegateDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
+      var newEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
+      (newEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
+      newEntity.ReturnTypeReference = new TypeNodeToTypeEntityResolver(node.Type);
 
-      var delegateEntity = new DelegateEntity(GetAccessibility(node.Modifiers), node.Name);
-
-      (delegateEntity as IMemberEntity).IsNew = IsNew(node.Modifiers);
-      delegateEntity.Program = _Program;
-      
-      AddTypeParametersToEntity(delegateEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-      
-      parentEntity.AddChild(delegateEntity);
-      
-      AssociateSyntaxNodeWithSemanticEntity(node, delegateEntity);
-
-      // Set the return type.
-      if (node.Type != null)
-      {
-        delegateEntity.ReturnTypeReference = new TypeNodeToTypeEntityResolver(node.Type);
-      }
-      else
-      {
-        throw new ApplicationException("DelegateDeclarationNode.Type should not be null!");
-      }
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -334,20 +254,14 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(FieldDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
-
-      // Looping through every tag in the field declaration
       foreach (var fieldTag in node.FieldTags)
       {
-        // Create a semantic entity and add to its parent.
         var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
-        var initializer = CreateInitializer(fieldTag.Initializer);
-        var fieldEntity = new FieldEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
-                                          IsReadOnly(node.Modifiers), typeReference, fieldTag.Identifier, initializer);
-        fieldEntity.IsNew = IsNew(node.Modifiers);
-        parentEntity.AddChild(fieldEntity);
+        var newEntity = new FieldEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
+                                          IsReadOnly(node.Modifiers), typeReference, fieldTag.Identifier);
+        newEntity.IsNew = IsNew(node.Modifiers);
 
-        AssociateSyntaxNodeWithSemanticEntity(fieldTag, fieldEntity);
+        InsertEntityIntoSemanticGraph(newEntity, fieldTag, node.ParentNode);
       }
 
       return true;
@@ -362,6 +276,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(ConstDeclarationNode node)
     {
+      // Constant member are created in Visit(ConstTagNode node).
       return true;
     }
 
@@ -375,13 +290,9 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     public override bool Visit(EnumValueNode node)
     {
       var parentEntity = GetSemanticEntity(node.ParentNode);
+      var newEntity = new EnumMemberEntity(true, node.Identifier, (parentEntity as EnumEntity).UnderlyingTypeReference);
 
-      // Create a semantic entity and add to its parent.
-      var enumMemberEntity = new EnumMemberEntity(true, node.Identifier, (parentEntity as EnumEntity).UnderlyingTypeReference);
-      parentEntity.AddChild(enumMemberEntity);
-      
-      AssociateSyntaxNodeWithSemanticEntity(node, enumMemberEntity);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -394,34 +305,56 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(PropertyDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
-
       // The property is auto-implemented it's not an interface member
       // and if both get and set accessors are abstract 
-      var isAutoImplemented = !(parentEntity is InterfaceEntity)
+      var isAutoImplemented = !(node.ParentNode is InterfaceDeclarationNode)
         && node.GetAccessor != null && !node.GetAccessor.HasBody
         && node.SetAccessor != null && !node.SetAccessor.HasBody;
 
-      // Create a semantic entity and add to its parent.
       var interfaceReference = node.InterfaceType != null
                                  ? new NamespaceOrTypeNameNodeToTypeEntityResolver(node.InterfaceType)
                                  : null;
       var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
-      var propertyEntity = new PropertyEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
+      var newEntity = new PropertyEntity(true, GetAccessibility(node.Modifiers), IsStatic(node.Modifiers),
                                               typeReference, interfaceReference, node.Name, isAutoImplemented);
-      propertyEntity.IsNew = IsNew(node.Modifiers);
-      propertyEntity.IsOverride = IsOverride(node.Modifiers);
-      propertyEntity.IsVirtual = IsVirtual(node.Modifiers);
-      propertyEntity.IsSealed = IsSealed(node.Modifiers);
+      newEntity.IsNew = IsNew(node.Modifiers);
+      newEntity.IsOverride = IsOverride(node.Modifiers);
+      newEntity.IsVirtual = IsVirtual(node.Modifiers);
+      newEntity.IsSealed = IsSealed(node.Modifiers);
 
-      parentEntity.AddChild(propertyEntity);
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      return true;
+    }
 
-      AssociateSyntaxNodeWithSemanticEntity(node, propertyEntity);
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from a syntax node.
+    /// </summary>
+    /// <param name="node">A syntax node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(AccessorNode node)
+    {
+      var accessorKind = CSharpSemanticGraph.AccessorKind.Get;
+      switch (node.AccessorKind)
+      {
+        case (Ast.AccessorKind.Get):
+          accessorKind = CSharpSemanticGraph.AccessorKind.Get;
+          break;
+        case (Ast.AccessorKind.Set):
+          accessorKind = CSharpSemanticGraph.AccessorKind.Set;
+          break;
+        case (Ast.AccessorKind.Add):
+          accessorKind = CSharpSemanticGraph.AccessorKind.Add;
+          break;
+        case (Ast.AccessorKind.Remove):
+          accessorKind = CSharpSemanticGraph.AccessorKind.Remove;
+          break;
+      }
+      var accessibility = GetAccessibility(node.Modifiers);
+      var newEntity = new AccessorEntity(accessorKind, accessibility, !node.HasBody);
 
-      // Create the accessors and add to the entity
-      propertyEntity.GetAccessor = CreateAccessor(AccessorKind.Get, node.GetAccessor);
-      propertyEntity.SetAccessor = CreateAccessor(AccessorKind.Set, node.SetAccessor);
-
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -434,8 +367,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(MethodDeclarationNode node)
     {
-      var parentEntity = GetSemanticEntity(node.ParentNode);
-
       var interfaceReference = node.InterfaceType != null
                                  ? new NamespaceOrTypeNameNodeToTypeEntityResolver(node.InterfaceType)
                                  : null;
@@ -450,9 +381,6 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       newEntity.IsVirtual = IsVirtual(node.Modifiers);
       newEntity.IsSealed = IsSealed(node.Modifiers);
 
-      AddParametersToOverloadableEntity(newEntity, node.FormalParameters);
-      AddTypeParametersToEntity(newEntity, parentEntity, node.TypeParameters, node.TypeParameterConstraints);
-
       InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
@@ -466,23 +394,23 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(FormalParameterNode node)
     {
-      //var parameterKind = ParameterKind.Value;
-      //switch (node.Modifier)
-      //{
-      //  case (FormalParameterModifier.In):
-      //    parameterKind = ParameterKind.Value;
-      //    break;
-      //  case (FormalParameterModifier.Out):
-      //    parameterKind = ParameterKind.Output;
-      //    break;
-      //  case (FormalParameterModifier.Ref):
-      //    parameterKind = ParameterKind.Reference;
-      //    break;
-      //}
-      //var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
-      //var newEntity = new ParameterEntity(node.Identifier, typeReference, parameterKind);
+      var parameterKind = ParameterKind.Value;
+      switch (node.Modifier)
+      {
+        case (FormalParameterModifier.In):
+          parameterKind = ParameterKind.Value;
+          break;
+        case (FormalParameterModifier.Out):
+          parameterKind = ParameterKind.Output;
+          break;
+        case (FormalParameterModifier.Ref):
+          parameterKind = ParameterKind.Reference;
+          break;
+      }
+      var typeReference = new TypeNodeToTypeEntityResolver(node.Type);
+      var newEntity = new ParameterEntity(node.Identifier, typeReference, parameterKind);
 
-      //InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -495,31 +423,31 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     public override bool Visit(TypeParameterNode node)
     {
-      //var typeParameterName = node.Identifier;
-      //var newEntity = new TypeParameterEntity(typeParameterName);
+      var typeParameterName = node.Identifier;
+      var newEntity = new TypeParameterEntity(typeParameterName);
 
-      //// Find the constraints of the type parameter
-      //var constraints = from typeParameterConstraint in (node.ParentNode as TypeOrMemberDeclarationNode).TypeParameterConstraints
-      //                  where typeParameterConstraint.Identifier == typeParameterName
-      //                  select typeParameterConstraint;
+      // Find the constraints of the type parameter
+      var constraints = from typeParameterConstraint in (node.ParentNode as TypeOrMemberDeclarationNode).TypeParameterConstraints
+                        where typeParameterConstraint.Identifier == typeParameterName
+                        select typeParameterConstraint;
 
-      //// Add the constraints to the type parameter entity
-      //foreach (var constraint in constraints)
-      //{
-      //  foreach (var constraintTag in constraint.ConstraintTags)
-      //  {
-      //    newEntity.HasDefaultConstructorConstraint = constraintTag.IsNew || constraintTag.IsStruct;
-      //    newEntity.HasReferenceTypeConstraint = constraintTag.IsClass;
-      //    newEntity.HasNonNullableValueTypeConstraint = constraintTag.IsStruct;
+      // Add the constraints to the type parameter entity
+      foreach (var constraint in constraints)
+      {
+        foreach (var constraintTag in constraint.ConstraintTags)
+        {
+          newEntity.HasDefaultConstructorConstraint = constraintTag.IsNew || constraintTag.IsStruct;
+          newEntity.HasReferenceTypeConstraint = constraintTag.IsClass;
+          newEntity.HasNonNullableValueTypeConstraint = constraintTag.IsStruct;
 
-      //    if (constraintTag.IsTypeName)
-      //    {
-      //      newEntity.AddTypeReferenceConstraint(new TypeNodeToTypeEntityResolver(constraintTag.Type));
-      //    }
-      //  }
-      //}
+          if (constraintTag.IsTypeName)
+          {
+            newEntity.AddTypeReferenceConstraint(new TypeNodeToTypeEntityResolver(constraintTag.Type));
+          }
+        }
+      }
 
-      //InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
       return true;
     }
 
@@ -534,8 +462,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     {
       var localVariableNode = node.ParentNode as LocalVariableNode;
       var typeResolver = new TypeNodeToTypeEntityResolver(localVariableNode.Type);
-      var initializer = CreateInitializer(node.Initializer);
-      var newEntity = new LocalVariableEntity(node.Identifier, typeResolver, initializer);
+      var newEntity = new LocalVariableEntity(node.Identifier, typeResolver);
 
       InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode.Parent);
       return true;
@@ -855,6 +782,36 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
       return true;
     }
 
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ExpressionInitializerNode node)
+    {
+      var newEntity = new ScalarInitializerEntity();
+
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Creates an entity from an AST node.
+    /// </summary>
+    /// <param name="node">An AST node.</param>
+    /// <returns>True if the visitor should continue traversing, false if it should stop.</returns>
+    // ----------------------------------------------------------------------------------------------
+    public override bool Visit(ArrayInitializerNode node)
+    {
+      var newEntity = new ArrayInitializerEntity();
+
+      InsertEntityIntoSemanticGraph(newEntity, node, node.ParentNode);
+      return true;
+    }
+
     #region Private methods
 
     // ----------------------------------------------------------------------------------------------
@@ -868,9 +825,10 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     // ----------------------------------------------------------------------------------------------
     private void InsertEntityIntoSemanticGraph(ISemanticEntity newEntity, ISyntaxNode node, ISyntaxNode parentNode)
     {
-      var parentEntity = GetSemanticEntity(parentNode);
-      parentEntity.AddChild(newEntity);
+      newEntity.Program = _Program;
 
+      GetSemanticEntity(parentNode).AddChild(newEntity);
+      
       AssociateSyntaxNodeWithSemanticEntity(node, newEntity);
     }
 
@@ -976,160 +934,12 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
-    /// Adds type parameters to an entity from its parent and its AST declaration node.
-    /// </summary>
-    /// <param name="typeParameterHolder">An entity that will receive the type parameters.</param>
-    /// <param name="parentEntity">The (to-be) parent of entity.</param>
-    /// <param name="typeParameterNodes">A collection of type parameter AST nodes.</param>
-    /// <param name="typeParameterConstraints">A collection of type parameter constraint AST nodes.</param>
-    // ----------------------------------------------------------------------------------------------
-    private static void AddTypeParametersToEntity(
-      ICanHaveTypeParameters typeParameterHolder, 
-      ISemanticEntity parentEntity, 
-      TypeParameterNodeCollection typeParameterNodes,
-      TypeParameterConstraintNodeCollection typeParameterConstraints)
-    {
-      // Add the "own" type parameters
-      foreach (var typeParameter in typeParameterNodes)
-      {
-        var typeParameterName = typeParameter.Identifier;
-        var typeParameterEntity = new TypeParameterEntity(typeParameterName);
-        typeParameterHolder.AddTypeParameter(typeParameterEntity);
-        AssociateSyntaxNodeWithSemanticEntity(typeParameter, typeParameterEntity);
-
-        // Find the constraints of the type parameter
-        var constraints = from typeParameterConstraint in typeParameterConstraints
-                          where typeParameterConstraint.Identifier == typeParameterName
-                          select typeParameterConstraint;
-
-        // Add the constraints to the type parameter entity
-        foreach (var constraint in constraints)
-        {
-          foreach(var constraintTag in constraint.ConstraintTags)
-          {
-            typeParameterEntity.HasDefaultConstructorConstraint = constraintTag.IsNew || constraintTag.IsStruct;
-            typeParameterEntity.HasReferenceTypeConstraint = constraintTag.IsClass;
-            typeParameterEntity.HasNonNullableValueTypeConstraint = constraintTag.IsStruct;
-
-            if (constraintTag.IsTypeName)
-            {
-              typeParameterEntity.AddTypeReferenceConstraint(new TypeNodeToTypeEntityResolver(constraintTag.Type));
-            }
-          }
-        }
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Adds parameters to an entity.
-    /// </summary>
-    /// <param name="overloadableEntity">An overloadable entity that will receive the parameter.</param>
-    /// <param name="parameterNodes">A collection of parameter AST nodes.</param>
-    // ----------------------------------------------------------------------------------------------
-    private static void AddParametersToOverloadableEntity(
-      IOverloadableEntity overloadableEntity, FormalParameterNodeCollection parameterNodes)
-    {
-      foreach (var parameter in parameterNodes)
-      {
-        var typeReference = new TypeNodeToTypeEntityResolver(parameter.Type);
-
-        var parameterKind = ParameterKind.Value;
-        switch (parameter.Modifier)
-        {
-          case (FormalParameterModifier.In):
-            parameterKind = ParameterKind.Value;
-            break;
-          case (FormalParameterModifier.Out):
-            parameterKind = ParameterKind.Output;
-            break;
-          case (FormalParameterModifier.Ref):
-            parameterKind = ParameterKind.Reference;
-            break;
-        }
-
-        var parameterEntity = new ParameterEntity(parameter.Identifier, typeReference, parameterKind);
-        overloadableEntity.AddParameter(parameterEntity);
-        AssociateSyntaxNodeWithSemanticEntity(parameter, parameterEntity);
-      }
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates an accessor entity from an accessor AST node.
-    /// </summary>
-    /// <param name="accessorKind">The kind of the accessor.</param>
-    /// <param name="node">An accessor AST node.</param>
-    /// <returns>An accessor entity, or null if the AST node was null.</returns>
-    // ----------------------------------------------------------------------------------------------
-    private AccessorEntity CreateAccessor(AccessorKind accessorKind, AccessorNode node)
-    {
-      if (node == null)
-      {
-        return null;
-      }
-      var accessibility = GetAccessibility(node.Modifiers);
-
-      var accessor = new AccessorEntity(accessorKind, accessibility, !node.HasBody);
-      AssociateSyntaxNodeWithSemanticEntity(node, accessor);
-
-      return accessor;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
-    /// Creates a variable initializer entity from an AST node.
-    /// </summary>
-    /// <param name="node">A variable initializer AST node.</param>
-    /// <returns>A variable initializer entity.</returns>
-    // ----------------------------------------------------------------------------------------------
-    private static VariableInitializer CreateInitializer(VariableInitializerNode node)
-    {
-      if (node == null)
-      {
-        return null;
-      }
-
-      SemanticEntity result = null;
-
-      if (node is ArrayInitializerNode)
-      {
-        var arrayInitializer = new ArrayInitializerEntity();
-
-        foreach (var variableInitializer in (node as ArrayInitializerNode).VariableInitializers)
-        {
-          arrayInitializer.AddVariableInitializer(CreateInitializer(variableInitializer));
-        }
-
-        result = arrayInitializer;
-      }
-      else if (node is ExpressionInitializerNode)
-      {
-        result = new ScalarInitializerEntity();
-      }
-      else if (node is StackAllocInitializerNode)
-      {
-        throw new NotImplementedException("StackAllocInitializerNode-to-entity not yet implemented.");
-      }
-      else
-      {
-        throw new ArgumentException(
-          string.Format("Unexpected VariableInitializerNode type: '{0}'.", node.GetType()), "node");
-      }
-
-      AssociateSyntaxNodeWithSemanticEntity(node, result);
-
-      return result as VariableInitializer;
-    }
-
-    // ----------------------------------------------------------------------------------------------
-    /// <summary>
     /// Gets a value indicating whether the "abstract" modifier appears in the modifier list.
     /// </summary>
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "abstract" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsAbstract(ModifierNodeCollection modifiers)
+    private static bool IsAbstract(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Abstract));
     }
@@ -1141,7 +951,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "sealed" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsSealed(ModifierNodeCollection modifiers)
+    private static bool IsSealed(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Sealed));
     }
@@ -1153,7 +963,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "static" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsStatic(ModifierNodeCollection modifiers)
+    private static bool IsStatic(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Static));
     }
@@ -1165,7 +975,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "readonly" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsReadOnly(ModifierNodeCollection modifiers)
+    private static bool IsReadOnly(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Readonly));
     }
@@ -1177,7 +987,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "new" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsNew(ModifierNodeCollection modifiers)
+    private static bool IsNew(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.New));
     }
@@ -1189,7 +999,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "override" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsOverride(ModifierNodeCollection modifiers)
+    private static bool IsOverride(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Override));
     }
@@ -1201,7 +1011,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="modifiers">A collection of modifier AST nodes.</param>
     /// <returns>True if the "virtual" modifier appears in the modifier list, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool IsVirtual(ModifierNodeCollection modifiers)
+    private static bool IsVirtual(ModifierNodeCollection modifiers)
     {
       return (modifiers != null && modifiers.Contains(ModifierType.Virtual));
     }
@@ -1215,7 +1025,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// Null if not defined or ambiguous.</returns>
     /// <remarks>Signals error CS0107 for ambiguous accessibility specifiers.</remarks>
     // ----------------------------------------------------------------------------------------------
-    public AccessibilityKind? GetAccessibility(ModifierNodeCollection modifiers)
+    private AccessibilityKind? GetAccessibility(ModifierNodeCollection modifiers)
     {
       AccessibilityKind? accessibility = null;
 

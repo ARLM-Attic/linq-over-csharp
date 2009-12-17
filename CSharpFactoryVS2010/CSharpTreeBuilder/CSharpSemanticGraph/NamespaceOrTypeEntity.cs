@@ -8,15 +8,15 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
   /// This is the abstract base class of namespace and type entities.
   /// </summary>
   // ================================================================================================
-  public abstract class NamespaceOrTypeEntity : SemanticEntity, INamedEntity
+  public abstract class NamespaceOrTypeEntity : SemanticEntity, INamedEntity, IDefinesDeclarationSpace
   {
     #region State
 
     /// <summary>The declaration space of this entity.</summary>
     protected DeclarationSpace _DeclarationSpace = new DeclarationSpace();
 
-    /// <summary>Gets or sets the name of this entity.</summary>
-    public string Name { get; protected set; }
+    /// <summary>Backing field for Name property.</summary>
+    private string _Name;
     
     #endregion 
 
@@ -54,6 +54,34 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
+    /// Gets or sets the name of this entity.
+    /// </summary>
+    // ----------------------------------------------------------------------------------------------
+    public string Name
+    {
+      get
+      {
+        return _Name;
+      }
+
+      protected set
+      {
+        if (_Name != null)
+        {
+          UnregisterInParentDeclarationSpace();
+        }
+
+        _Name = value;
+
+        if (_Name != null)
+        {
+          RegisterInParentDeclarationSpace();
+        }
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
     /// Gets the fully qualified name of the namespace or type, 
     /// that uniquely identifies the namespace or type amongst all others.
     /// </summary>
@@ -74,6 +102,28 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
         }
         return Name;
       }
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Adds the declaration of an entity.
+    /// </summary>
+    /// <param name="namedEntity">A named entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void AddDeclaration(INamedEntity namedEntity)
+    {
+      _DeclarationSpace.Register(namedEntity);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Removes the declaration of an entity.
+    /// </summary>
+    /// <param name="namedEntity">A named entity.</param>
+    // ----------------------------------------------------------------------------------------------
+    public void RemoveDeclaration(INamedEntity namedEntity)
+    {
+      _DeclarationSpace.Unregister(namedEntity);
     }
 
     // ----------------------------------------------------------------------------------------------
