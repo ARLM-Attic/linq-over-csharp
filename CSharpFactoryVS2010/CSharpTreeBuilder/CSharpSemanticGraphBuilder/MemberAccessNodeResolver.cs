@@ -313,7 +313,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               if ((memberLookupResult.SingleMember as FieldEntity).IsReadOnly)
               {
                 // then the result is a value, namely the value of the static field I in E.
-                return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type);
+                return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type, memberLookupResult.SingleMember);
               }
               else
               {
@@ -331,7 +331,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             if (memberLookupResult.SingleMember is ConstantMemberEntity)
             {
               // then the result is a value, namely the value of that constant. 
-              return new ValueExpressionResult((memberLookupResult.SingleMember as ConstantMemberEntity).Type);
+              return new ValueExpressionResult((memberLookupResult.SingleMember as ConstantMemberEntity).Type, memberLookupResult.SingleMember);
             }
 
             // If I identifies an enumeration member then the result is a value, namely the value of that enumeration member.
@@ -377,7 +377,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
         || E is ValueExpressionResult) // TODO: || E is IndexerAccessExpressionResult
       {
         // the type of which is T, 
-        // (The ExpressionResults in the if condition are all TypedExpressionResult subclasses.)
+        // (The ExpressionResults in the if condition are all subclasses of TypedExpressionResult.)
         var T = (E as TypedExpressionResult).Type;
 
         // and a member lookup (§7.3) of I in T with K type arguments produces a match, 
@@ -391,7 +391,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           if (E is PropertyAccessExpressionResult) // TODO: || E is IndexerAccessExpressionResult)
           {
             // then the value of the property or indexer access is obtained (§7.1.1) and E is reclassified as a value.
-            E = new ValueExpressionResult(T);
+            E = new ValueExpressionResult(T, (E as PropertyAccessExpressionResult).PropertyEntity);
           }
 
           // If I identifies one or more methods, 
@@ -425,7 +425,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             if ((memberLookupResult.SingleMember as FieldEntity).IsReadOnly)
             {
               // then the result is a value, namely the value of the field I in the object referenced by E.
-              return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type);
+              return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type, memberLookupResult.SingleMember);
             }
             else
             {
@@ -447,7 +447,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
               || (memberLookupResult.SingleMember as FieldEntity).IsReadOnly)
             {
               // then the result is a value, namely the value of the field I in the struct instance given by E.
-              return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type);
+              return new ValueExpressionResult((memberLookupResult.SingleMember as FieldEntity).Type, memberLookupResult.SingleMember);
             }
             else
             {

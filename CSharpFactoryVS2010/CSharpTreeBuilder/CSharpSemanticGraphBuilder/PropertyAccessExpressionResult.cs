@@ -7,7 +7,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// This class represents an expression result classified as a property access.
   /// </summary>
   // ================================================================================================
-  public sealed class PropertyAccessExpressionResult : ExpressionResult, IHasInstanceExpression
+  public sealed class PropertyAccessExpressionResult : TypedExpressionResult, IHasInstanceExpression
   {
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -17,6 +17,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="instanceExpression">The instance expression associated with this entity.</param>
     // ----------------------------------------------------------------------------------------------
     public PropertyAccessExpressionResult(PropertyEntity propertyEntity, ExpressionResult instanceExpression)
+      : base(propertyEntity.Type)
     {
       PropertyEntity = propertyEntity;
       InstanceExpression = instanceExpression;

@@ -198,7 +198,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
             // and is classified as a variable or value.
             if (namedEntity is LocalConstantEntity)
             {
-              return new ValueExpressionResult((namedEntity as IVariableEntity).Type);
+              return new ValueExpressionResult((namedEntity as IVariableEntity).Type, namedEntity);
             }
 
             return new VariableExpressionResult(namedEntity as IVariableEntity);
@@ -303,10 +303,16 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
           if (T == immediatelyEnclosingType
             && memberLookupResult.IsSingleMember && memberLookupResult.SingleMember.IsInstanceMember)
           {
-            // ... and if the reference occurs within the block of an instance constructor, 
-            // an instance method, or an instance accessor, ...
+            // ... and if the reference occurs within the block 
+            // of an instance constructor, an instance method, or an instance accessor, ...
             var enclosingMember = context.GetEnclosing<NonTypeMemberEntity>();
-            if (enclosingMember != null && enclosingMember.IsInstanceMember)
+
+            if (enclosingMember != null && enclosingMember.IsInstanceMember
+              && (enclosingMember is MethodEntity 
+                  || enclosingMember is FunctionMemberWithAccessorsEntity
+                  // || enclosingMember is InstanceConstructorEntity
+                 )
+              )
             {
               // ... the result is the same as a member access (§7.5.4) of the form this.I. 
               // This can only happen when K is zero.
