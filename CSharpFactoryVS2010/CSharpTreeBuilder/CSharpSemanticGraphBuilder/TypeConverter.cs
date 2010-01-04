@@ -16,13 +16,13 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
   /// or it may cause an expression without a type to get a type.
   /// </remarks>
   // ================================================================================================
-  public sealed class TypeConverter
+  public static class TypeConverter
   {
     /// <summary>
     /// A lookup table containing a bool value for every pair of BuiltInTypes, indicating whether 
     /// an implicit numeric conversion exists from a type to another.
     /// </summary>
-    private static bool[,] _ImplicitNumericConversionTable = InitializeImplicitNumericConversionTable();
+    private static readonly bool[,] _ImplicitNumericConversionTable = InitializeImplicitNumericConversionTable();
 
     // ----------------------------------------------------------------------------------------------
     /// <summary>
@@ -33,7 +33,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>True if the expression can be implicitly converted to the target type, 
     /// false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool ImplicitConversionExists(ExpressionEntity expression, TypeEntity targetType)
+    public static bool ImplicitConversionExists(ExpressionEntity expression, TypeEntity targetType)
     {
       if (expression == null || targetType == null)
       {
@@ -58,7 +58,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <returns>True if the source type can be implicitly converted to the target type, 
     /// false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    public bool ImplicitConversionExists(TypeEntity sourceType, TypeEntity targetType)
+    public static bool ImplicitConversionExists(TypeEntity sourceType, TypeEntity targetType)
     {
       if (sourceType == null || targetType == null)
       {
@@ -86,7 +86,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// — the one type that can be implicitly converted to each of the other types.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    public TypeEntity GetMostEncompassedType(IEnumerable<TypeEntity> typeEntities)
+    public static TypeEntity GetMostEncompassedType(IEnumerable<TypeEntity> typeEntities)
     {
       if (typeEntities == null || typeEntities.Count() == 0)
       {
@@ -112,7 +112,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="targetType">The target type.</param>
     /// <returns>True if the conversion exists, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    private bool ImplicitEnumerationConversionExists(ExpressionEntity expression, TypeEntity targetType)
+    private static bool ImplicitEnumerationConversionExists(ExpressionEntity expression, TypeEntity targetType)
     {
       // An implicit enumeration conversion permits the decimal-integer-literal 0 to be converted
       // to any enum-type and to any nullable-type whose underlying type is an enum-type.
@@ -133,7 +133,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="targetType">The target type.</param>
     /// <returns>True if the conversion exists, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    private bool NullLiteralConversionExists(ExpressionEntity expression, TypeEntity targetType)
+    private static bool NullLiteralConversionExists(ExpressionEntity expression, TypeEntity targetType)
     {
       // An implicit conversion exists from the null literal 
       // to any nullable type and to any reference type.
@@ -163,7 +163,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="targetType">The target type.</param>
     /// <returns>True if the conversion exists, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    private bool ImplicitNumericConversionExists(TypeEntity sourceType, TypeEntity targetType)
+    private static bool ImplicitNumericConversionExists(TypeEntity sourceType, TypeEntity targetType)
     {
       if (sourceType.IsBuiltInType && targetType.IsBuiltInType)
       {
@@ -182,7 +182,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="targetType">The target type.</param>
     /// <returns>True if the conversion exists, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    private bool ImplicitNullableConversionExists(TypeEntity sourceType, TypeEntity targetType)
+    private static bool ImplicitNullableConversionExists(TypeEntity sourceType, TypeEntity targetType)
     {
       // Predefined implicit conversions that operate on non-nullable value types 
       // can also be used with nullable forms of those types. 
@@ -216,7 +216,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// <param name="targetType">The target type.</param>
     /// <returns>True if the conversion exists, false otherwise.</returns>
     // ----------------------------------------------------------------------------------------------
-    private bool ImplicitReferenceConversionExists(TypeEntity sourceType, TypeEntity targetType)
+    private static bool ImplicitReferenceConversionExists(TypeEntity sourceType, TypeEntity targetType)
     {
       // The implicit reference conversions are:
       if (sourceType.IsReferenceType)
@@ -267,31 +267,37 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
 
         // - From a single-dimensional array type S[] to System.Collections.Generic.IList<T> and its base interfaces, 
         //   provided that there is an implicit identity or reference conversion from S to T.
-        //if (sourceType.IsArrayType && (sourceType as ArrayTypeEntity).Rank == 1)
-        //{
-        //  if (targetType is ConstructedGenericTypeEntity)
-        //  {
-        //    var targetConstructedGeneric = targetType as ConstructedGenericTypeEntity;
-        //    var ilistEntity = targetType.SemanticGraph.GetEntityByMetadataObject(typeof(IList<>)) as TypeEntity;
+        if (sourceType.IsArrayType && (sourceType as ArrayTypeEntity).Rank == 1)
+        {
+          var sourceElement = (sourceType as ArrayTypeEntity).UnderlyingType;
 
-        //    if (targetConstructedGeneric.UnderlyingType == ilistEntity
-        //      && targetConstructedGeneric.TypeArguments.Count == 1)
-        //    {
-        //      var sourceElement = (sourceType as ArrayTypeEntity).UnderlyingType;
-        //      var targetElement = targetConstructedGeneric.TypeArguments[0];
+          var ilistEntity = targetType.SemanticGraph.GetEntityByMetadataObject(typeof(IList<>)) as InterfaceEntity;
 
-        //      return ((targetType == ilistEntity) || ilistEntity.Implements(targetType))
-        //        && (IdentityConversionExists(sourceElement, targetElement)
-        //           || ImplicitReferenceConversionExists(sourceElement, targetElement));
-        //    }
-        //  }
-        //}
+          // Return true if the target type is a non-generic base interface of IList<T>
+          if (!targetType.IsGenericClone && ilistEntity.Implements(targetType as InterfaceEntity))
+          {
+            return true;
+          }
 
+          // The target type is a generic, so determine its element type
+          var targetElement = targetType.TypeParameterMap.TypeArguments.ToList()[0];
+          var targetTypeTemplate = targetType.OriginalGenericTemplate;
 
+          // Return true if the target type is IList<T>, or a generic base interface of IList<T>
+          // and there's an implicit identity or reference conversion from S to T.
+          return
+            (targetTypeTemplate == ilistEntity
+             || (ilistEntity.BaseInterfaces.Any(baseInterface => baseInterface.OriginalGenericTemplate == targetTypeTemplate)))
+            &&
+            (IdentityConversionExists(sourceElement, targetElement)
+             || ImplicitReferenceConversionExists(sourceElement, targetElement));
+        }
+        
+        // TODO: - From any delegate-type to System.Delegate and the interfaces it implements.
 
-        // - From any delegate-type to System.Delegate and the interfaces it implements.
         // - From the null literal to any reference-type --> This is implemented in NullLiteralConversionExists method.
-        // - Implicit conversions involving type parameters that are known to be reference types. See §6.1.9 for more details on implicit conversions involving type parameters.
+        // TODO: - Implicit conversions involving type parameters that are known to be reference types. 
+        //   See §6.1.9 for more details on implicit conversions involving type parameters.
       }
 
       return false;
@@ -313,7 +319,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraphBuilder
     /// even if it was in hexadecimal format in the source.
     /// </remarks>
     // ----------------------------------------------------------------------------------------------
-    private bool IsDecimalIntegerLiteralZero(ExpressionEntity expression)
+    private static bool IsDecimalIntegerLiteralZero(ExpressionEntity expression)
     {
       var literal = expression as TypedLiteralExpressionEntity;
       if (literal != null)

@@ -69,6 +69,7 @@
     <Compile Include="Ast\UsingsAndNamespaces.cs" />
     <Compile Include="Ast\SyntaxNodeVisitorTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\ConstructedGenericTypeTest.cs" />
+    <Compile Include="CSharpSemanticGraphBuilder\OverloadResolverTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberAccessResolutionTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\MemberLookupTest.cs" />
     <Compile Include="CSharpSemanticGraphBuilder\SimpleNameResolutionTest.cs" />
@@ -410,8 +411,9 @@
     <None Include="TestFiles\MemberAccessResolution\QualifiedAliasMemberAccess_WithTypeParameter.cs" />
     <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_InstanceMethod.cs" />
     <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_InstanceProperty.cs" />
-    <Compile Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_InstanceField_ReadOnly.cs" />
+    <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_InstanceField_ReadOnly.cs" />
     <None Include="TestFiles\MemberAccessResolution\PrimaryMemberAccess_InstancePropertyDereference.cs" />
+    <None Include="TestFiles\OverloadResolver\IsApplicable.cs" />
     <Compile Include="TestFiles\PartialMethodDeclaration\PartialMethods.cs" />
     <Compile Include="TestFiles\Pragmas\RegionOk.cs" />
     <None Include="TestFiles\SimpleNameResolution\CS0120_InstanceMember_InStaticMethod.cs" />

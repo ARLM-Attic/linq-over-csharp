@@ -200,8 +200,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
           // in the set of effective base classes of its type-parameter constraints. 
           // The consistency rules ensure that such a most encompassed type exists.
 
-          var typeConverter = new TypeConverter();
-          return typeConverter.GetMostEncompassedType(GetBaseClassesOfTypeParameters().Cast<TypeEntity>()) as ClassEntity;
+          return TypeConverter.GetMostEncompassedType(GetBaseClassesOfTypeParameters().Cast<TypeEntity>()) as ClassEntity;
         }
 
         // If T has both a class-type constraint and one or more type-parameter constraints, 
@@ -218,8 +217,7 @@ namespace CSharpTreeBuilder.CSharpSemanticGraph
             baseClasses.Add(ClassTypeConstraint);
           }
 
-          var typeConverter = new TypeConverter();
-          return typeConverter.GetMostEncompassedType(baseClasses.Cast<TypeEntity>()) as ClassEntity;
+          return TypeConverter.GetMostEncompassedType(baseClasses.Cast<TypeEntity>()) as ClassEntity;
         }
 
         // If T has the reference type constraint but no class-type constraints, its effective base class is object.

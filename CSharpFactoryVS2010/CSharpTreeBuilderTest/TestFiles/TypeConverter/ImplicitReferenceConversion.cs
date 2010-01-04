@@ -18,8 +18,17 @@
   static Base1[] arr4 = arr1;       // Success
   static Base2[] arr5 = arr1;       // Success
   static A[] arr6 = arr2;           // Fails, rank mismatch
-  static System.Array arr7 = arr2;  // Success
-  static System.ICloneable arr8 = arr2; // Success
+  static System.Array arr7 = arr2;  // From any array-type to System.Array and the interfaces it implements.
+  static System.ICloneable arr8 = arr2; // From any array-type to System.Array and the interfaces it implements.
+
+  // - From a single-dimensional array type S[] to System.Collections.Generic.IList<T> and its base interfaces, 
+  //   provided that there is an implicit identity or reference conversion from S to T.
+  static System.Collections.Generic.IList<A> arr9 = arr1;
+  static System.Collections.Generic.IList<Base1> arr10 = arr1;
+  static System.Collections.Generic.IEnumerable<A> arr11 = arr1;
+  static System.Collections.IEnumerable arr12 = arr1;
+  static System.Collections.Generic.IEnumerable<Base1> arr13 = arr1;
+  static System.Collections.Generic.IEnumerable<NonBase> arr14 = arr1; // error CS0029: Cannot implicitly convert type 'A[]' to 'System.Collections.Generic.IEnumerable<NonBase>'
 }
 
 class Base1 : Base2
