@@ -17,7 +17,7 @@ namespace CSharpTreeBuilderTest
     /// Error CS0101: The namespace 'A' already contains a definition for 'B' (namespace and class)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0101_ClassAndNamespaceSameName() 
     {
       var project = new CSharpProject(WorkingFolder);
@@ -35,7 +35,7 @@ namespace CSharpTreeBuilderTest
     /// Error CS0101: The namespace 'A' already contains a definition for 'B' (class and struct)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0101_ClassAndStructSameName()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -53,7 +53,7 @@ namespace CSharpTreeBuilderTest
     /// Error CS0101: The namespace 'A' already contains a definition for 'B' (class and class - no partial)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0101_ClassAndClassSameName()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -71,7 +71,7 @@ namespace CSharpTreeBuilderTest
     /// Error CS0102: The type 'A' already contains a definition for 'a1'
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0102_TypeAlreadyContainsADefinition()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -89,7 +89,7 @@ namespace CSharpTreeBuilderTest
     /// Error CS0260: Missing partial modifier on declaration (missing partial on 1st declaration)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0260_MissingPartialOnClass1()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -107,7 +107,7 @@ namespace CSharpTreeBuilderTest
     /// Error CS0260: Missing partial modifier on declaration (missing partial on 2nd declaration)
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0260_MissingPartialOnClass2()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -125,7 +125,7 @@ namespace CSharpTreeBuilderTest
     /// error CS0542: 'A': member names cannot be the same as their enclosing type
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0542_ClassOrStructAndMemberName()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -146,7 +146,7 @@ namespace CSharpTreeBuilderTest
     /// error CS0752: A partial method cannot have out parameters
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0752_PartialMethodCannotHaveOutParameter()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -164,7 +164,7 @@ namespace CSharpTreeBuilderTest
     /// Tests the building of partial methods
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void PartialMethod()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -212,7 +212,7 @@ namespace CSharpTreeBuilderTest
     /// Partial class: if the base type is specified multiple times then only one instance is kept.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void PartialClassDuplicateBaseTypes()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -230,7 +230,7 @@ namespace CSharpTreeBuilderTest
     /// Partial class: if a base interface is specified multiple times then only one instance is kept.
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void PartialClassDuplicateBaseInterfaces()
     {
       var project = new CSharpProject(WorkingFolder);
@@ -249,7 +249,7 @@ namespace CSharpTreeBuilderTest
     /// error CS0263: Partial declarations of 'A' must not specify different base classes
     /// </summary>
     // ----------------------------------------------------------------------------------------------
-    [TestMethod]
+    //[TestMethod]
     public void CS0263_PartialClassConflictingBaseTypes()
     {
       var project = new CSharpProject(WorkingFolder);

@@ -1,53 +1,33 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleCompilation", "SampleCompilation\SampleCompilation.csproj", "{FA572407-8674-40C5-BD44-2B8D478787C7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeExplorer", "CodeExplorer\CodeExplorer.csproj", "{B6CE447F-577A-476F-9CF8-6266B360EE3A}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{41EA02CF-A4DB-4D20-AD2C-CBE02A5E5C25}"
 	ProjectSection(SolutionItems) = preProject
 		CSharpFactory.vsmdi = CSharpFactory.vsmdi
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpFactory", "CSharpFactory\CSharpFactory.csproj", "{DAC84C34-6834-4398-AE6B-24559581D0E4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpFactoryTest", "CSharpFactoryTest\CSharpFactoryTest.csproj", "{19B1E0F0-EEEE-43F0-B72A-37F9ABFFC5D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetadataImportTestSubject", "MetadataImportTestSubject\MetadataImportTestSubject.csproj", "{E74A7D6D-CCF2-4015-B400-A5D63524D99B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTreeBuilder", "CSharpTreeBuilder\CSharpTreeBuilder.csproj", "{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpTreeBuilderTest", "CSharpTreeBuilderTest\CSharpTreeBuilderTest.csproj", "{769D51D9-B4FB-49FB-945D-D0D1255E98E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetadataImportTestSubject", "MetadataImportTestSubject\MetadataImportTestSubject.csproj", "{E74A7D6D-CCF2-4015-B400-A5D63524D99B}"
-EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 8
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs03.codeplex.com/
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs03
 		SccLocalPath0 = .
-		SccProjectUniqueName1 = CodeExplorer\\CodeExplorer.csproj
-		SccProjectName1 = CodeExplorer
-		SccLocalPath1 = CodeExplorer
-		SccProjectUniqueName2 = CSharpFactory\\CSharpFactory.csproj
-		SccProjectName2 = CSharpFactory
-		SccLocalPath2 = CSharpFactory
-		SccProjectUniqueName3 = CSharpFactoryTest\\CSharpFactoryTest.csproj
-		SccProjectName3 = CSharpFactoryTest
-		SccLocalPath3 = CSharpFactoryTest
-		SccProjectUniqueName4 = SampleCompilation\\SampleCompilation.csproj
-		SccProjectName4 = SampleCompilation
-		SccLocalPath4 = SampleCompilation
-		SccProjectUniqueName5 = CSharpTreeBuilder\\CSharpTreeBuilder.csproj
-		SccProjectName5 = CSharpTreeBuilder
-		SccLocalPath5 = CSharpTreeBuilder
-		SccProjectUniqueName6 = CSharpTreeBuilderTest\\CSharpTreeBuilderTest.csproj
-		SccProjectName6 = CSharpTreeBuilderTest
-		SccLocalPath6 = CSharpTreeBuilderTest
-		SccProjectUniqueName7 = MetadataImportTestSubject\\MetadataImportTestSubject.csproj
-		SccProjectName7 = MetadataImportTestSubject
-		SccLocalPath7 = MetadataImportTestSubject
+		SccProjectUniqueName1 = MetadataImportTestSubject\\MetadataImportTestSubject.csproj
+		SccProjectName1 = MetadataImportTestSubject
+		SccLocalPath1 = MetadataImportTestSubject
+		SccProjectUniqueName2 = CSharpTreeBuilder\\CSharpTreeBuilder.csproj
+		SccProjectName2 = CSharpTreeBuilder
+		SccLocalPath2 = CSharpTreeBuilder
+		SccProjectUniqueName3 = CSharpTreeBuilderTest\\CSharpTreeBuilderTest.csproj
+		SccProjectName3 = CSharpTreeBuilderTest
+		SccLocalPath3 = CSharpTreeBuilderTest
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = CSharpFactory.vsmdi
@@ -57,22 +37,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FA572407-8674-40C5-BD44-2B8D478787C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA572407-8674-40C5-BD44-2B8D478787C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA572407-8674-40C5-BD44-2B8D478787C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA572407-8674-40C5-BD44-2B8D478787C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6CE447F-577A-476F-9CF8-6266B360EE3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6CE447F-577A-476F-9CF8-6266B360EE3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6CE447F-577A-476F-9CF8-6266B360EE3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6CE447F-577A-476F-9CF8-6266B360EE3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DAC84C34-6834-4398-AE6B-24559581D0E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{19B1E0F0-EEEE-43F0-B72A-37F9ABFFC5D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{19B1E0F0-EEEE-43F0-B72A-37F9ABFFC5D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{19B1E0F0-EEEE-43F0-B72A-37F9ABFFC5D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{19B1E0F0-EEEE-43F0-B72A-37F9ABFFC5D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EB8F858-6FA1-41D3-9FBB-74F20ADEAA6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -81,10 +49,6 @@ Global
 		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{769D51D9-B4FB-49FB-945D-D0D1255E98E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E74A7D6D-CCF2-4015-B400-A5D63524D99B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
