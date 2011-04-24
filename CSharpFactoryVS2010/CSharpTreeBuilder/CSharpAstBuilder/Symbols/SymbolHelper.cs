@@ -1,7 +1,7 @@
 //
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2011. 01. 07. 12:29:59
+// Generated on: 2011. 04. 24. 13:56:57
 //
 // The template file is BlankSyntaxNodeVisitor.tt 
 //

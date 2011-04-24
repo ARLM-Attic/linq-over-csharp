@@ -1,7 +1,7 @@
 //
 // WARNING! This file is generated, do not modify it manually!
 //
-// Generated on: 2011. 01. 07. 12:17:20
+// Generated on: 2011. 04. 24. 13:57:19
 //
 // The template file is SemanticGraphVisitor.tt 
 //
